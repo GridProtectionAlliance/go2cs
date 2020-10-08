@@ -1,7 +1,6 @@
 theme: jekyll-theme-cayman
 title: go2cs
 description: Golang to C# Converter
-baseurl: https://go2cs.net
 github:
   repository_name: GridProtectionAlliance/go2cs
   owner_url: https://www.gridprotectionalliance.org
