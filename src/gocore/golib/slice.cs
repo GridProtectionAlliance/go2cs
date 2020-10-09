@@ -149,7 +149,7 @@ namespace go
 
         // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
         // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
-        public ref T this[nint index]
+        public ref T this[int index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
