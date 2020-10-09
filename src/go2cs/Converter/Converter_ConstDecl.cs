@@ -91,7 +91,7 @@ namespace go2cs
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
                 string castAs = $"({typeName})";
 
-                if (type?.Equals(expressions?[i].Type.TypeName) ?? false)
+                if (typeName.Equals("var") || (type?.Equals(expressions?[i].Type.TypeName) ?? false))
                     castAs = "";
 
                 if (InFunction)
