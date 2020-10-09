@@ -57,22 +57,22 @@ namespace go
 
         private static void Main()
         {
-            var m = make_map<I, long>();
+            var m = make_map<I, nint>();
             I i1 = I.As(new T1("foo"))!;
             I i2 = I.As(new T2("bar"))!;
-            m[i1] = 1L;
-            m[i2] = 2L;
+            m[i1] = 1;
+            m[i2] = 2;
             fmt.Println(m);
 
-            var n = make_map<V, long>();
+            var n = make_map<V, nint>();
             V v1 = V.As(new T1("foo"))!;
             V v2 = V.As(new T2("bar"))!;
             v1.N();
             v2.M();
             fmt.Print(v1.String());
             fmt.Print(v2.Error());
-            n[v1] = 3L;
-            n[v2] = 4L;
+            n[v1] = 3;
+            n[v2] = 4;
             fmt.Println(n);
         }
     }

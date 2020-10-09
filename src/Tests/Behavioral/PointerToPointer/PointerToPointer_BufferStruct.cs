@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 02:57:16 UTC
+//     Generated on 2020 October 09 07:38:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace go
                 this.lastRead = default;
             }
 
-            public Buffer(slice<byte> buf = default, long off = default, sbyte lastRead = default)
+            public Buffer(slice<byte> buf = default, nint off = default, sbyte lastRead = default)
             {
                 this.buf = buf;
                 this.off = off;

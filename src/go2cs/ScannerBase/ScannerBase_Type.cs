@@ -195,8 +195,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        TypeName = "long",
-                        FullTypeName = "System.Int64",
+                        TypeName = "nint",
+                        FullTypeName = "nint",
                         IsConst = true
                     }
                 };
@@ -209,8 +209,8 @@ namespace go2cs
                     Type = new TypeInfo
                     {
                         TypeClass = TypeClass.Simple,
-                        TypeName = "long",
-                        FullTypeName = "System.Int64",
+                        TypeName = "nint",
+                        FullTypeName = "nint",
                         IsConst = true
                     }
                 };
@@ -401,11 +401,13 @@ namespace go2cs
                 case "uint32":
                     return "uint";
                 case "int64":
-                case "int":
                     return "long";
+                case "int":
+                    return "nint";
                 case "uint64":
-                case "uint":
                     return "ulong";
+                case "uint":
+                    return "nuint";
                 case "float32":
                     return "float";
                 case "float64":

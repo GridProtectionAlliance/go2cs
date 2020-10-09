@@ -19,6 +19,9 @@ namespace go
                     case bool t:
                         fmt.Println("I'm a bool");
                         break;
+                    case nint t:
+                        fmt.Printf("I'm an int, specifically type %T\n", t);
+                        break;
                     case long t:
                         fmt.Printf("I'm an int, specifically type %T\n", t);
                         break;
@@ -34,9 +37,9 @@ namespace go
                 }
             };
             whatAmI(true);
-            whatAmI(1L);
-            whatAmI(int64(2L));
-            whatAmI(uint64(2L));
+            whatAmI(1);
+            whatAmI(int64(2));
+            whatAmI(uint64(2));
             whatAmI("hey");
         }
     }

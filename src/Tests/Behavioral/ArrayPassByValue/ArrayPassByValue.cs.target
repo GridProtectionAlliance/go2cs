@@ -7,26 +7,26 @@ namespace go
     {
         private static void Main()
         {
-            ref array<@string> a = ref heap(new array<@string>(2L), out ptr<array<@string>> _addr_a);
+            ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> _addr_a);
 
-            a[0L] = "Hello";
-            a[1L] = "World";
+            a[0] = "Hello";
+            a[1] = "World";
 
             test(a);
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
             fmt.Println();
 
-            a[0L] = "Hello";
+            a[0] = "Hello";
             test2(_addr_a);
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
             fmt.Println();
 
-            a[0L] = "Hello";
+            a[0] = "Hello";
             test3(a[..]);
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
             fmt.Println();
 
-            array<long> primes = new array<long>(new long[] { 2, 3, 5, 7, 11, 13 });
+            array<nint> primes = new array<nint>(new nint[] { 2, 3, 5, 7, 11, 13 });
             fmt.Println(primes);
         }
 
@@ -36,25 +36,25 @@ namespace go
             a = a.Clone();
  
             // Update to array will be local
-            fmt.Println(a[0L], a[1L]);
-            a[0L] = "Goodbye";
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
+            fmt.Println(a[0], a[1]);
         }
 
         private static void test2(ptr<array<@string>> _addr_a)
         {
             ref array<@string> a = ref _addr_a.val;
 
-            fmt.Println(a[0L], a[1L]);
-            a[0L] = "Goodbye";
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
+            fmt.Println(a[0], a[1]);
         }
 
         private static void test3(slice<@string> a)
         {
-            fmt.Println(a[0L], a[1L]);
-            a[0L] = "Goodbye";
-            fmt.Println(a[0L], a[1L]);
+            fmt.Println(a[0], a[1]);
+            a[0] = "Goodbye";
+            fmt.Println(a[0], a[1]);
         }
     }
 }

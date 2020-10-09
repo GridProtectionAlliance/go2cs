@@ -13,7 +13,7 @@ namespace go
         private static void Main() => func((defer, _, __) =>
         {
             fmt.Println(Int());
-            var w = @implicit.NewWriter(os.Stdout, 1L, 1L, 1L, ' ', 0L);
+            var w = @implicit.NewWriter(os.Stdout, 1, 1, 1, ' ', 0);
             defer(w.Flush());
         });
     }

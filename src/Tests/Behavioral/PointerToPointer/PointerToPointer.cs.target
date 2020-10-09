@@ -8,21 +8,21 @@ namespace go
         public partial struct Buffer
         {
             public slice<byte> buf;
-            public long off;
+            public nint off;
             public sbyte lastRead;
         }
 
-        private static readonly sbyte opRead = (sbyte)-1L;
-        private static readonly sbyte opInvalid = (sbyte)0L;
+        private static readonly sbyte opRead = -1;
+        private static readonly sbyte opInvalid = 0;
 
         private static void Main()
         {
-            ref long a = ref heap(out ptr<long> _addr_a);
-            ptr<long> ptr;
-            ptr<ptr<long>> pptr;
-            ptr<ptr<ptr<long>>> ppptr;
+            ref nint a = ref heap(out ptr<nint> _addr_a);
+            ptr<nint> ptr;
+            ptr<ptr<nint>> pptr;
+            ptr<ptr<ptr<nint>>> ppptr;
 
-            a = 3000L; 
+            a = 3000; 
 
             /* take the address of var */
             ptr = _addr_a; 
@@ -39,7 +39,7 @@ namespace go
             PrintValPtr2Ptr(pptr);
             PrintValPtr2Ptr2Ptr(ppptr);
 
-            a = 1900L;
+            a = 1900;
 
             fmt.Printf("Value of a = %d\n", a);
             PrintValPtr(ptr);
@@ -49,15 +49,15 @@ namespace go
             PrintValPtr2Ptr2Ptr(ppptr);
         }
 
-        private static (long, error) Read(this ptr<Buffer> _addr_b, slice<byte> p)
+        private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p)
         {
-            long n = default;
+            nint n = default;
             error err = default!;
             ref Buffer b = ref _addr_b.val;
 
             b.lastRead = opInvalid;
             b.off += n;
-            if (n > 0L)
+            if (n > 0)
             {
                 b.lastRead = opRead;
             }
@@ -73,20 +73,20 @@ namespace go
             return addr(new Buffer(buf:buf));
         }
 
-        public static void PrintValPtr(ptr<long> _addr_ptr)
+        public static void PrintValPtr(ptr<nint> _addr_ptr)
         {
-            ref long ptr = ref _addr_ptr.val;
+            ref nint ptr = ref _addr_ptr.val;
 
             fmt.Printf("Value available at *ptr = %d\n", ptr);
             ptr++;
         }
 
-        public static ptr<long> EscapePrintValPtr(ptr<long> _addr_ptr)
+        public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr)
         {
-            ref long ptr = ref _addr_ptr.val;
+            ref nint ptr = ref _addr_ptr.val;
 
             fmt.Printf("Value available at *ptr = %d\n", ptr);
-            ref long i = ref heap(99L, out ptr<long> _addr_i);
+            ref nint i = ref heap(99, out ptr<nint> _addr_i);
             _addr_ptr = _addr_i;
             ptr = ref _addr_ptr.val;
             fmt.Printf("Intra-function updated value available at *ptr = %d\n", ptr);
@@ -94,16 +94,16 @@ namespace go
             return _addr_ptr!;
         }
 
-        public static void PrintValPtr2Ptr(ptr<ptr<long>> _addr_pptr)
+        public static void PrintValPtr2Ptr(ptr<ptr<nint>> _addr_pptr)
         {
-            ref ptr<long> pptr = ref _addr_pptr.val;
+            ref ptr<nint> pptr = ref _addr_pptr.val;
 
             fmt.Printf("Value available at **pptr = %d\n", pptr.val);
         }
 
-        public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<long>>> _addr_ppptr)
+        public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<nint>>> _addr_ppptr)
         {
-            ref ptr<ptr<long>> ppptr = ref _addr_ppptr.val;
+            ref ptr<ptr<nint>> ppptr = ref _addr_ppptr.val;
 
             fmt.Printf("Value available at ***pptr = %d\n", ppptr.val.val);
         }

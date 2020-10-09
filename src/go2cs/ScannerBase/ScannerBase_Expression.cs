@@ -378,7 +378,7 @@ namespace go2cs
                     {
                         PrimaryExpressions[context] = new ExpressionInfo
                         {
-                            Text = $"{primaryExpression}[{(expressionIsLeft ? $"{expression}..": $"..{expression}")}]",
+                            Text = $"{primaryExpression}[{(expressionIsLeft ? $"{(expression.Type?.TypeName == "int" ? "" : "(int)")}{expression}..": $"..{(expression.Type?.TypeName == "int" ? "" : "(int)")}{expression}")}]",
                             Type = primaryExpression.Type
                         };
                     }
@@ -396,7 +396,7 @@ namespace go2cs
                         {
                             PrimaryExpressions[context] = new ExpressionInfo
                             {
-                                Text = $"{primaryExpression}[{lowExpression}..{highExpression}]",
+                                Text = $"{primaryExpression}[{(lowExpression.Type?.TypeName == "int" ? "" : "(int)")}{lowExpression}..{(highExpression.Type?.TypeName == "int" ? "" : "(int)")}{highExpression}]",
                                 Type = primaryExpression.Type
                             };
                         }
@@ -767,28 +767,30 @@ namespace go2cs
                 }
                 else
                 {
-                    if (long.TryParse(basicLiteral, out _))
+                    if (nint.TryParse(basicLiteral, out nint val))
                     {
-                        basicLiteral += "L";
+                        if (val > int.MaxValue)
+                            basicLiteral = $"(nint){basicLiteral}L";
 
                         typeInfo = new TypeInfo
                         {
-                            Name = "long",
-                            TypeName = "long",
-                            FullTypeName = "System.Int64",
+                            Name = "nint",
+                            TypeName = "nint",
+                            FullTypeName = "nint",
                             TypeClass = TypeClass.Simple,
                             IsConst = true
                         };
                     }
                     else
                     {
-                        basicLiteral += "UL";
+                        if (nuint.TryParse(basicLiteral, out nuint uval) && uval > uint.MaxValue)
+                            basicLiteral = $"(nuint){basicLiteral}UL";
 
                         typeInfo = new TypeInfo
                         {
-                            Name = "ulong",
-                            TypeName = "ulong",
-                            FullTypeName = "System.UInt64",
+                            Name = "nuint",
+                            TypeName = "nuint",
+                            FullTypeName = "nuint",
                             TypeClass = TypeClass.Simple,
                             IsConst = true
                         };
@@ -922,9 +924,9 @@ namespace go2cs
                             Text = arrayLength,
                             Type = new TypeInfo
                             {
-                                Name = "long",
-                                TypeName = "long",
-                                FullTypeName = "System.Int64",
+                                Name = "nint",
+                                TypeName = "nint",
+                                FullTypeName = "nint",
                                 TypeClass = TypeClass.Simple,
                                 IsConst = true
                             }

@@ -89,10 +89,11 @@ namespace go2cs
                 string identifier = identifiers[i];
                 string expression = expressions?[i].Text ?? $"{m_iota++}";
                 string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
-                string castAs = $"({typeName})";
+                string castAs = "";
 
-                if (typeName.Equals("var") || (type?.Equals(expressions?[i].Type.TypeName) ?? false))
-                    castAs = "";
+                // TODO: Check if constant needs cast
+                //if (!typeName.Equals("var") && !(type?.Equals(expressions?[i].Type.TypeName) ?? false))
+                //    castAs = $"({typeName})";
 
                 if (InFunction)
                     m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {castAs}{expression};");

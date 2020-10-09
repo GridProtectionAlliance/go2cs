@@ -7,9 +7,9 @@ namespace go
     {
         private static void Main()
         {
-            long i = 0L;
+            nint i = 0;
 
-            while (i < 10L)
+            while (i < 10)
             { 
                 // Inner comment
                 f(i); // Call function
@@ -21,11 +21,11 @@ namespace go
             fmt.Println("i =", i);
             fmt.Println();
 
-            for (i = 0L; i < 10L; i++)
+            for (i = 0; i < 10; i++)
             {
                 f(i);
 
-                for (long j = 0L; j < 3L; j++)
+                for (nint j = 0; j < 3; j++)
                 {
                     f(i + j);
                 }
@@ -36,17 +36,17 @@ namespace go
             fmt.Println();
 
             {
-                long i__prev1 = i;
+                nint i__prev1 = i;
 
-                for (i = 0L; i < 5L; i++)
+                for (i = 0; i < 5; i++)
                 { 
                     // a
                     f(i); // b
 
                     {
-                        long i__prev2 = i;
+                        nint i__prev2 = i;
 
-                        for (i = 12L; i < 15L; i++)
+                        for (i = 12; i < 15; i++)
                         {
                             f(i);
                         }
@@ -68,7 +68,7 @@ namespace go
                 i++;
                 f(i);
 
-                if (i > 12L)
+                if (i > 12)
                 {
                     break;
                 }
@@ -78,7 +78,7 @@ namespace go
             fmt.Println("i =", i);
         }
 
-        private static void f(long y)
+        private static void f(nint y)
         {
             fmt.Print(y);
         }

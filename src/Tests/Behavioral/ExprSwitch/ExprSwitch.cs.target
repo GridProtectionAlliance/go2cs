@@ -9,9 +9,9 @@ namespace go
 {
     public static partial class main_package
     {
-        private static long x = 1L;
+        private static nint x = 1;
 
-        private static long getNext()
+        private static nint getNext()
         {
             x++;
             return x;
@@ -20,26 +20,26 @@ namespace go
         private static void Main()
         {
             // Here's a basic `switch`.
-            long i = 2L;
+            nint i = 2;
             fmt.Print("Write ", i, " as ");
             switch (i)
             { // Intra-switch comment
-                case 1L: // Case 1 comment
+                case 1: // Case 1 comment
                     fmt.Println("one"); /* Case 1 eol comment */
                     break;
-                case 2L: // Case 2 comment
+                case 2: // Case 2 comment
                     // Comment before
                     fmt.Println("two"); // Case 2 eol comment
                     // Comment after
                     break;
-                case 3L: 
+                case 3: 
                     { // Start of block comment
                         // Before statement comment
                         fmt.Println("three"); // eol comment
                         // After statement comment
                     } // End of block comment
                     break;
-                case 4L: 
+                case 4: 
                     // Comment before
                     fmt.Println("four"); // Case 2 eol comment
                     // Comment after
@@ -73,7 +73,7 @@ namespace go
             // `case` expressions can be non-constants.
             var t = time.Now();
             // Intra-switch comment
-            if (t.Hour() < 12L) // Before noon
+            if (t.Hour() < 12) // Before noon
                 fmt.Println("It's before noon");
             else // After noon
                 fmt.Println("It's after noon");
@@ -84,31 +84,31 @@ namespace go
 
             // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
             {
-                long i__prev1 = i;
+                nint i__prev1 = i;
 
-                i = 1L;
+                i = 1;
 
                 // Intra-switch comment
-                if (getNext() == -1L)
+                if (getNext() == -1)
                 {
                     fmt.Println("negative");
                     goto __switch_break0;
                 }
-                if (getNext() == 0L) // Single-value comment
+                if (getNext() == 0) // Single-value comment
                 {
                     // Before zero comment
                     fmt.Println("zero"); 
                     // After zero comment
                     goto __switch_break0;
                 }
-                if (getNext() == 1L || getNext() == 2L) // Multi-value comment
+                if (getNext() == 1 || getNext() == 2) // Multi-value comment
                 {
                     // Before one-or-two comment
                     fmt.Println("one or two"); // eol comment
                     // After one-or-two comment
                     fallthrough = true; // fallthrough comment
                 }
-                if (fallthrough || getNext() == 3L)
+                if (fallthrough || getNext() == 3)
                 {
                     fmt.Printf("three, but x=%d and i now = %d\n", x, i);
                 }
