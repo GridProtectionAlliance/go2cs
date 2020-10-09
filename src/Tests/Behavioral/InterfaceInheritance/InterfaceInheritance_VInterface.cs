@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 23:51:46 UTC
+//     Generated on 2020 October 09 02:57:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -113,6 +113,26 @@ namespace go
                 
             }
 
+            private delegate @string StringByPtr(ptr<T> value);
+            private delegate @string StringByVal(T value);
+
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public @string String()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && !(m_target_ptr is null))
+                    target = m_target_ptr.val;
+
+                if (s_StringByPtr is null || !m_target_is_ptr)
+                    return s_StringByVal!(target);
+
+                return s_StringByPtr(m_target_ptr);
+            }
+
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
@@ -167,6 +187,19 @@ namespace go
 
                 if (s_MByPtr is null && s_MByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement V.M method", new Exception("M"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
+
+                if (!(extensionMethod is null))
+                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("String");
+
+                if (!(extensionMethod is null))
+                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
+
+                if (s_StringByPtr is null && s_StringByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement V.String method", new Exception("String"));
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 

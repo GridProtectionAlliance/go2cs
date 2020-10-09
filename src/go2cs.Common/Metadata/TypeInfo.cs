@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using Dahomey.Json.Attributes;
 
 namespace go2cs.Metadata
 {
@@ -36,6 +37,13 @@ namespace go2cs.Metadata
         Struct,
         Function,   // Func<..., T> / Action<...>
         Interface
+    }
+
+    public enum DerivedTypeInfo
+    {
+        Pointer,
+        Array,
+        Map
     }
 
     [Serializable]
@@ -105,6 +113,7 @@ namespace go2cs.Metadata
     }
 
     [Serializable]
+    [JsonDiscriminator(DerivedTypeInfo.Pointer)]
     public class PointerTypeInfo : TypeInfo
     {
         public TypeInfo TargetTypeInfo;
@@ -126,6 +135,7 @@ namespace go2cs.Metadata
     }
 
     [Serializable]
+    [JsonDiscriminator(DerivedTypeInfo.Array)]
     public class ArrayTypeInfo : TypeInfo
     {
         public TypeInfo TargetTypeInfo;
@@ -149,6 +159,7 @@ namespace go2cs.Metadata
     }
 
     [Serializable]
+    [JsonDiscriminator(DerivedTypeInfo.Map)]
     public class MapTypeInfo : TypeInfo
     {
         public TypeInfo KeyTypeInfo;

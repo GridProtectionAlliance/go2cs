@@ -24,6 +24,8 @@
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using Dahomey.Json;
+using Dahomey.Json.Serialization.Conventions;
 using go2cs.Metadata;
 using System;
 using System.Collections.Generic;
@@ -488,7 +490,7 @@ namespace go2cs
             {
         #endif
                 string serializedData = File.ReadAllText(folderMetadataFileName);
-                folderMetadata = JsonSerializer.Deserialize<FolderMetadata>(serializedData);
+                folderMetadata = JsonSerializer.Deserialize<FolderMetadata>(serializedData, GetSerializationOptions());
         #if !DEBUG
             }
             catch (Exception ex)
@@ -504,6 +506,26 @@ namespace go2cs
             s_currentFolderMetadata = folderMetadata;
 
             return folderMetadata;
+        }
+
+        protected static JsonSerializerOptions GetSerializationOptions()
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions { IncludeFields = true };
+
+            options.SetupExtensions();            
+            DiscriminatorConventionRegistry registry = options.GetDiscriminatorConventionRegistry();
+            
+            registry.ClearConventions();
+
+            registry.RegisterConvention(new DefaultDiscriminatorConvention<DerivedTypeInfo>(options, "DerivedTypeInfo"));
+            registry.RegisterType<PointerTypeInfo>();
+            registry.RegisterType<ArrayTypeInfo>();
+            registry.RegisterType<MapTypeInfo>();
+
+            registry.RegisterConvention(new DefaultDiscriminatorConvention<DerivedFunctionSignature>(options, "DerivedFunctionSignature"));
+            registry.RegisterType<MethodSignature>();
+
+            return options;
         }
 
         protected static FolderMetadata LoadImportMetadata(Options options, string targetImport, out string warning)

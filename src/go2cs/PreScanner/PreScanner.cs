@@ -81,7 +81,7 @@ namespace go2cs
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                string serializedData = JsonSerializer.Serialize(folderMetadata);
+                string serializedData = JsonSerializer.Serialize(folderMetadata, GetSerializationOptions());
                 File.WriteAllText(FolderMetadataFileName, serializedData);
         #if !DEBUG
             }

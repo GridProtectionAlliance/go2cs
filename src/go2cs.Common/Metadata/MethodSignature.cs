@@ -24,10 +24,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dahomey.Json.Attributes;
 
 namespace go2cs.Metadata
 {
     [Serializable]
+    [JsonDiscriminator(DerivedFunctionSignature.Method)]
     public class MethodSignature : FunctionSignature
     {
         public ParameterInfo[] ReceiverParameters;

@@ -27,6 +27,11 @@ using System.Linq;
 
 namespace go2cs.Metadata
 {
+    public enum DerivedFunctionSignature
+    {
+        Method
+    }
+
     [Serializable]
     public class FunctionSignature
     {
