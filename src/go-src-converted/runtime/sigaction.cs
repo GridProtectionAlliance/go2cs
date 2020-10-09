@@ -4,7 +4,7 @@
 
 // +build linux,!amd64,!arm64 freebsd,!amd64
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:58 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sigaction.go
 

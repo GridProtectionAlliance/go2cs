@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:47 UTC
+//     Generated on 2020 October 09 06:01:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,6 +33,8 @@ using packagesdriver = go.golang.org.x.tools.go.@internal.packagesdriver_package
 using gocommand = go.golang.org.x.tools.@internal.gocommand_package;
 using xerrors = go.golang.org.x.xerrors_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

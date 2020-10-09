@@ -5,7 +5,7 @@
 // +build linux
 // +build mips mipsle
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:33 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:51 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_linux_mipsx.go
 using @unsafe = go.@unsafe_package;
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var _SYS_setgroups = (var)SYS_SETGROUPS;
+        private static readonly var _SYS_setgroups = SYS_SETGROUPS;
 
 
 
@@ -197,9 +197,9 @@ namespace go
 
         }
 
-        private static readonly var rlimInf32 = (var)~uint32(0L);
+        private static readonly var rlimInf32 = ~uint32(0L);
 
-        private static readonly var rlimInf64 = (var)~uint64(0L);
+        private static readonly var rlimInf64 = ~uint64(0L);
 
 
 

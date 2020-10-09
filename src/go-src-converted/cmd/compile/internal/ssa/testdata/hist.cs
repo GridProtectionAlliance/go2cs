@@ -8,7 +8,7 @@
 // step is time-consuming, the tests for different bugs are all accumulated here
 // so that their cost is only the time to "n" through the additional code.
 
-// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
+// package main -- go2cs converted at 2020 October 09 05:39:56 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\hist.go
 using bufio = go.bufio_package;
 using fmt = go.fmt_package;

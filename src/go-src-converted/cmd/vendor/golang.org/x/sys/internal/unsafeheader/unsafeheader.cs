@@ -8,7 +8,7 @@
 // This package allows x/sys to use types equivalent to
 // reflect.SliceHeader and reflect.StringHeader without introducing
 // a dependency on the (relatively heavy) "reflect" package.
-// package unsafeheader -- go2cs converted at 2020 October 08 04:46:07 UTC
+// package unsafeheader -- go2cs converted at 2020 October 09 05:56:10 UTC
 // import "cmd/vendor/golang.org/x/sys/internal/unsafeheader" ==> using unsafeheader = go.cmd.vendor.golang.org.x.sys.@internal.unsafeheader_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\internal\unsafeheader\unsafeheader.go
 using @unsafe = go.@unsafe_package;

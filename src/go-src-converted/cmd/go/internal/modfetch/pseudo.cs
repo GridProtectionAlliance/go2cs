@@ -32,7 +32,7 @@
 // If the most recent tagged version before the target commit is vX.Y.Z-pre or vX.Y.Z-pre+incompatible,
 // then the pseudo-version uses form (4) or (5), making it a slightly later prerelease.
 
-// package modfetch -- go2cs converted at 2020 October 08 04:36:11 UTC
+// package modfetch -- go2cs converted at 2020 October 09 05:47:22 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\pseudo.go
 using errors = go.errors_package;

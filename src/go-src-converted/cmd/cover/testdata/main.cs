@@ -6,7 +6,7 @@
 // It knows the coverage counter is called
 // "thisNameMustBeVeryLongToCauseOverflowOfCounterIncrementStatementOntoNextLineForTest".
 
-// package main -- go2cs converted at 2020 October 08 04:32:37 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:25 UTC
 // Original source: C:\Go\src\cmd\cover\testdata\main.go
 using fmt = go.fmt_package;
 using os = go.os_package;

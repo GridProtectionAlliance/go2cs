@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:31 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:35 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\signal_unix.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -79,7 +79,7 @@ namespace go
         // useless), and even if it is, the application has to be ready for
         // spurious SIGURG. SIGIO wouldn't be a bad choice either, but is more
         // likely to be used for real.
-        private static readonly var sigPreempt = (var)_SIGURG;
+        private static readonly var sigPreempt = _SIGURG;
 
         // Stores the signal handlers registered before Go installed its own.
         // These signal handlers will be invoked in cases where Go doesn't want to
@@ -439,7 +439,7 @@ namespace go
 
         }
 
-        private static readonly var preemptMSupported = (var)true;
+        private static readonly var preemptMSupported = true;
 
         // preemptM sends a preemption request to mp. This request may be
         // handled asynchronously and may be coalesced with other requests to
@@ -546,7 +546,7 @@ namespace go
             }
 
             ptr<sigctxt> c = addr(new sigctxt(info,ctx));
-            var g = sigFetchG(_addr_c);
+            var g = sigFetchG(c);
             setg(g);
             if (g == null)
             {
@@ -570,7 +570,7 @@ namespace go
                 }
 
                 c.fixsigcode(sig);
-                badsignal(uintptr(sig), _addr_c);
+                badsignal(uintptr(sig), c);
                 return ;
 
             }
@@ -705,7 +705,7 @@ namespace go
             if (sig == sigPreempt && debug.asyncpreemptoff == 0L)
             { 
                 // Might be a preemption signal.
-                doSigPreempt(_addr_gp, _addr_c); 
+                doSigPreempt(_addr_gp, c); 
                 // Even if this was definitely a preemption signal, it
                 // may have been coalesced with another signal, so we
                 // still let it through to the application.
@@ -1270,7 +1270,7 @@ namespace go
             //   (1) we weren't in VDSO page,
             //   (2) we were in a goroutine (i.e., m.curg != nil), and
             //   (3) we weren't in CGO.
-            var g = sigFetchG(_addr_c);
+            var g = sigFetchG(c);
             if (g != null && g.m != null && g.m.curg != null && !g.m.incgo)
             {
                 return false;

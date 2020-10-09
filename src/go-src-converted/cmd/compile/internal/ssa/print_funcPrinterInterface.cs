@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:11:30 UTC
+//     Generated on 2020 October 09 05:25:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using fmt = go.fmt_package;
 using io = go.io_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class funcPrinter<T> : funcPrinter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate void headerByPtr(ptr<T> value, ptr<Func> f);
             private delegate void headerByVal(T value, ptr<Func> f);
 
-            private static readonly headerByPtr s_headerByPtr;
-            private static readonly headerByVal s_headerByVal;
+            private static readonly headerByPtr? s_headerByPtr;
+            private static readonly headerByVal? s_headerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void header(ptr<Func> f)
@@ -97,8 +98,8 @@ namespace @internal
             private delegate void startBlockByPtr(ptr<T> value, ptr<Block> b, bool reachable);
             private delegate void startBlockByVal(T value, ptr<Block> b, bool reachable);
 
-            private static readonly startBlockByPtr s_startBlockByPtr;
-            private static readonly startBlockByVal s_startBlockByVal;
+            private static readonly startBlockByPtr? s_startBlockByPtr;
+            private static readonly startBlockByVal? s_startBlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void startBlock(ptr<Block> b, bool reachable)
@@ -122,8 +123,8 @@ namespace @internal
             private delegate void endBlockByPtr(ptr<T> value, ptr<Block> b);
             private delegate void endBlockByVal(T value, ptr<Block> b);
 
-            private static readonly endBlockByPtr s_endBlockByPtr;
-            private static readonly endBlockByVal s_endBlockByVal;
+            private static readonly endBlockByPtr? s_endBlockByPtr;
+            private static readonly endBlockByVal? s_endBlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void endBlock(ptr<Block> b)
@@ -147,8 +148,8 @@ namespace @internal
             private delegate void valueByPtr(ptr<T> value, ptr<Value> v, bool live);
             private delegate void valueByVal(T value, ptr<Value> v, bool live);
 
-            private static readonly valueByPtr s_valueByPtr;
-            private static readonly valueByVal s_valueByVal;
+            private static readonly valueByPtr? s_valueByPtr;
+            private static readonly valueByVal? s_valueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void value(ptr<Value> v, bool live)
@@ -172,8 +173,8 @@ namespace @internal
             private delegate void startDepCycleByPtr(ptr<T> value);
             private delegate void startDepCycleByVal(T value);
 
-            private static readonly startDepCycleByPtr s_startDepCycleByPtr;
-            private static readonly startDepCycleByVal s_startDepCycleByVal;
+            private static readonly startDepCycleByPtr? s_startDepCycleByPtr;
+            private static readonly startDepCycleByVal? s_startDepCycleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void startDepCycle()
@@ -197,8 +198,8 @@ namespace @internal
             private delegate void endDepCycleByPtr(ptr<T> value);
             private delegate void endDepCycleByVal(T value);
 
-            private static readonly endDepCycleByPtr s_endDepCycleByPtr;
-            private static readonly endDepCycleByVal s_endDepCycleByVal;
+            private static readonly endDepCycleByPtr? s_endDepCycleByPtr;
+            private static readonly endDepCycleByVal? s_endDepCycleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void endDepCycle()
@@ -222,8 +223,8 @@ namespace @internal
             private delegate void namedByPtr(ptr<T> value, LocalSlot n, slice<ptr<Value>> vals);
             private delegate void namedByVal(T value, LocalSlot n, slice<ptr<Value>> vals);
 
-            private static readonly namedByPtr s_namedByPtr;
-            private static readonly namedByVal s_namedByVal;
+            private static readonly namedByPtr? s_namedByPtr;
+            private static readonly namedByVal? s_namedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void named(LocalSlot n, slice<ptr<Value>> vals)
@@ -244,7 +245,7 @@ namespace @internal
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static funcPrinter()

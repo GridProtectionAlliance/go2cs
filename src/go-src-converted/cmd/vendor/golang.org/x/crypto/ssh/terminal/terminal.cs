@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package terminal -- go2cs converted at 2020 October 08 04:45:42 UTC
+// package terminal -- go2cs converted at 2020 October 09 05:55:48 UTC
 // import "cmd/vendor/golang.org/x/crypto/ssh/terminal" ==> using terminal = go.cmd.vendor.golang.org.x.crypto.ssh.terminal_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\crypto\ssh\terminal\terminal.go
 using bytes = go.bytes_package;
@@ -94,19 +94,19 @@ namespace ssh
         private static readonly long keyEscape = (long)27L;
         private static readonly long keyBackspace = (long)127L;
         private static readonly ulong keyUnknown = (ulong)0xd800UL + iota;
-        private static readonly var keyUp = (var)0;
-        private static readonly var keyDown = (var)1;
-        private static readonly var keyLeft = (var)2;
-        private static readonly var keyRight = (var)3;
-        private static readonly var keyAltLeft = (var)4;
-        private static readonly var keyAltRight = (var)5;
-        private static readonly var keyHome = (var)6;
-        private static readonly var keyEnd = (var)7;
-        private static readonly var keyDeleteWord = (var)8;
-        private static readonly var keyDeleteLine = (var)9;
-        private static readonly var keyClearScreen = (var)10;
-        private static readonly var keyPasteStart = (var)11;
-        private static readonly var keyPasteEnd = (var)12;
+        private static readonly var keyUp = 0;
+        private static readonly var keyDown = 1;
+        private static readonly var keyLeft = 2;
+        private static readonly var keyRight = 3;
+        private static readonly var keyAltLeft = 4;
+        private static readonly var keyAltRight = 5;
+        private static readonly var keyHome = 6;
+        private static readonly var keyEnd = 7;
+        private static readonly var keyDeleteWord = 8;
+        private static readonly var keyDeleteLine = 9;
+        private static readonly var keyClearScreen = 10;
+        private static readonly var keyPasteStart = 11;
+        private static readonly var keyPasteEnd = 12;
 
 
         private static byte crlf = new slice<byte>(new byte[] { '\r', '\n' });        private static byte pasteStart = new slice<byte>(new byte[] { keyEscape, '[', '2', '0', '0', '~' });        private static byte pasteEnd = new slice<byte>(new byte[] { keyEscape, '[', '2', '0', '1', '~' });

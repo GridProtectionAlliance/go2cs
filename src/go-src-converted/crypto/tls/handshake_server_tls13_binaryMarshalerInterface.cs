@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:19 UTC
+//     Generated on 2020 October 09 04:55:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class binaryMarshaler<T> : binaryMarshaler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace crypto
             private delegate error MarshalBinaryByPtr(ptr<T> value);
             private delegate error MarshalBinaryByVal(T value);
 
-            private static readonly MarshalBinaryByPtr s_MarshalBinaryByPtr;
-            private static readonly MarshalBinaryByVal s_MarshalBinaryByVal;
+            private static readonly MarshalBinaryByPtr? s_MarshalBinaryByPtr;
+            private static readonly MarshalBinaryByVal? s_MarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error MarshalBinary()
@@ -95,8 +96,8 @@ namespace crypto
             private delegate error UnmarshalBinaryByPtr(ptr<T> value, slice<byte> data);
             private delegate error UnmarshalBinaryByVal(T value, slice<byte> data);
 
-            private static readonly UnmarshalBinaryByPtr s_UnmarshalBinaryByPtr;
-            private static readonly UnmarshalBinaryByVal s_UnmarshalBinaryByVal;
+            private static readonly UnmarshalBinaryByPtr? s_UnmarshalBinaryByPtr;
+            private static readonly UnmarshalBinaryByVal? s_UnmarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error UnmarshalBinary(slice<byte> data)
@@ -112,7 +113,7 @@ namespace crypto
                 return s_UnmarshalBinaryByPtr(m_target_ptr, data);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static binaryMarshaler()

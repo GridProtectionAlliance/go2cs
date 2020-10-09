@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:57:01 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:22 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\lift.go
 // This file defines the lifting pass which tries to "lift" Alloc
@@ -56,7 +56,7 @@ namespace go
     {
         // If true, show diagnostic information at each step of lifting.
         // Very verbose.
-        private static readonly var debugLifting = (var)false;
+        private static readonly var debugLifting = false;
 
         // domFrontier maps each block to the set of blocks in its dominance
         // frontier.  The outer slice is conceptually a map keyed by

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:42 UTC
+//     Generated on 2020 October 09 06:02:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,6 +26,7 @@ using trace = go.runtime.trace_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -53,7 +54,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Application<T> : Application
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -79,8 +80,8 @@ namespace @internal
             private delegate error NameByPtr(ptr<T> value);
             private delegate error NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Name()
@@ -99,8 +100,8 @@ namespace @internal
             private delegate error UsageByPtr(ptr<T> value);
             private delegate error UsageByVal(T value);
 
-            private static readonly UsageByPtr s_UsageByPtr;
-            private static readonly UsageByVal s_UsageByVal;
+            private static readonly UsageByPtr? s_UsageByPtr;
+            private static readonly UsageByVal? s_UsageByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Usage()
@@ -119,8 +120,8 @@ namespace @internal
             private delegate error ShortHelpByPtr(ptr<T> value);
             private delegate error ShortHelpByVal(T value);
 
-            private static readonly ShortHelpByPtr s_ShortHelpByPtr;
-            private static readonly ShortHelpByVal s_ShortHelpByVal;
+            private static readonly ShortHelpByPtr? s_ShortHelpByPtr;
+            private static readonly ShortHelpByVal? s_ShortHelpByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ShortHelp()
@@ -139,8 +140,8 @@ namespace @internal
             private delegate error DetailedHelpByPtr(ptr<T> value, ptr<flag.FlagSet> _p0);
             private delegate error DetailedHelpByVal(T value, ptr<flag.FlagSet> _p0);
 
-            private static readonly DetailedHelpByPtr s_DetailedHelpByPtr;
-            private static readonly DetailedHelpByVal s_DetailedHelpByVal;
+            private static readonly DetailedHelpByPtr? s_DetailedHelpByPtr;
+            private static readonly DetailedHelpByVal? s_DetailedHelpByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error DetailedHelp(ptr<flag.FlagSet> _p0)
@@ -159,8 +160,8 @@ namespace @internal
             private delegate error RunByPtr(ptr<T> value, context.Context ctx, params @string[] args);
             private delegate error RunByVal(T value, context.Context ctx, params @string[] args);
 
-            private static readonly RunByPtr s_RunByPtr;
-            private static readonly RunByVal s_RunByVal;
+            private static readonly RunByPtr? s_RunByPtr;
+            private static readonly RunByVal? s_RunByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Run(context.Context ctx, params @string[] args)
@@ -176,7 +177,7 @@ namespace @internal
                 return s_RunByPtr(m_target_ptr, ctx, args);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Application()

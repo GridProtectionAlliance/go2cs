@@ -5,7 +5,7 @@
 // Simple file i/o and string manipulation, to avoid
 // depending on strconv and bufio and strings.
 
-// package net -- go2cs converted at 2020 October 08 03:34:07 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:10 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\parse.go
 using bytealg = go.@internal.bytealg_package;

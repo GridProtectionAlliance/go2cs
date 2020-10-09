@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:15 UTC
+//     Generated on 2020 October 09 05:45:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace x
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Printer<T> : Printer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace x
             private delegate bool PrintByPtr(ptr<T> value, params object[] args);
             private delegate bool PrintByVal(T value, params object[] args);
 
-            private static readonly PrintByPtr s_PrintByPtr;
-            private static readonly PrintByVal s_PrintByVal;
+            private static readonly PrintByPtr? s_PrintByPtr;
+            private static readonly PrintByVal? s_PrintByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Print(params object[] args)
@@ -87,8 +88,8 @@ namespace x
             private delegate bool PrintfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate bool PrintfByVal(T value, @string format, params object[] args);
 
-            private static readonly PrintfByPtr s_PrintfByPtr;
-            private static readonly PrintfByVal s_PrintfByVal;
+            private static readonly PrintfByPtr? s_PrintfByPtr;
+            private static readonly PrintfByVal? s_PrintfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Printf(@string format, params object[] args)
@@ -107,8 +108,8 @@ namespace x
             private delegate bool DetailByPtr(ptr<T> value);
             private delegate bool DetailByVal(T value);
 
-            private static readonly DetailByPtr s_DetailByPtr;
-            private static readonly DetailByVal s_DetailByVal;
+            private static readonly DetailByPtr? s_DetailByPtr;
+            private static readonly DetailByVal? s_DetailByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Detail()
@@ -124,7 +125,7 @@ namespace x
                 return s_DetailByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Printer()

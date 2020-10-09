@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 October 08 03:37:11 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:55:00 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\verify.go
 using bytes = go.bytes_package;
@@ -37,20 +37,20 @@ namespace crypto
         public static readonly InvalidReason NotAuthorizedToSign = (InvalidReason)iota; 
         // Expired results when a certificate has expired, based on the time
         // given in the VerifyOptions.
-        public static readonly var Expired = (var)0; 
+        public static readonly var Expired = 0; 
         // CANotAuthorizedForThisName results when an intermediate or root
         // certificate has a name constraint which doesn't permit a DNS or
         // other name (including IP address) in the leaf certificate.
-        public static readonly var CANotAuthorizedForThisName = (var)1; 
+        public static readonly var CANotAuthorizedForThisName = 1; 
         // TooManyIntermediates results when a path length constraint is
         // violated.
-        public static readonly var TooManyIntermediates = (var)2; 
+        public static readonly var TooManyIntermediates = 2; 
         // IncompatibleUsage results when the certificate's key usage indicates
         // that it may only be used for a different purpose.
-        public static readonly var IncompatibleUsage = (var)3; 
+        public static readonly var IncompatibleUsage = 3; 
         // NameMismatch results when the subject name of a parent certificate
         // does not match the issuer name in the child.
-        public static readonly var NameMismatch = (var)4; 
+        public static readonly var NameMismatch = 4; 
         // NameConstraintsWithoutSANs results when a leaf certificate doesn't
         // contain a Subject Alternative Name extension, but a CA certificate
         // contains name constraints, and the Common Name can be interpreted as
@@ -59,20 +59,20 @@ namespace crypto
         // This error is only returned when legacy Common Name matching is enabled
         // by setting the GODEBUG environment variable to "x509ignoreCN=1". This
         // setting might be removed in the future.
-        public static readonly var NameConstraintsWithoutSANs = (var)5; 
+        public static readonly var NameConstraintsWithoutSANs = 5; 
         // UnconstrainedName results when a CA certificate contains permitted
         // name constraints, but leaf certificate contains a name of an
         // unsupported or unconstrained type.
-        public static readonly var UnconstrainedName = (var)6; 
+        public static readonly var UnconstrainedName = 6; 
         // TooManyConstraints results when the number of comparison operations
         // needed to check a certificate exceeds the limit set by
         // VerifyOptions.MaxConstraintComparisions. This limit exists to
         // prevent pathological certificates can consuming excessive amounts of
         // CPU time to verify.
-        public static readonly var TooManyConstraints = (var)7; 
+        public static readonly var TooManyConstraints = 7; 
         // CANotAuthorizedForExtKeyUsage results when an intermediate or root
         // certificate does not permit a requested extended key usage.
-        public static readonly var CANotAuthorizedForExtKeyUsage = (var)8;
+        public static readonly var CANotAuthorizedForExtKeyUsage = 8;
 
 
         // CertificateInvalidError results when an odd error occurs. Users of this
@@ -266,9 +266,9 @@ namespace crypto
             public long MaxConstraintComparisions;
         }
 
-        private static readonly var leafCertificate = (var)iota;
-        private static readonly var intermediateCertificate = (var)0;
-        private static readonly var rootCertificate = (var)1;
+        private static readonly var leafCertificate = iota;
+        private static readonly var intermediateCertificate = 0;
+        private static readonly var rootCertificate = 1;
 
 
         // rfc2821Mailbox represents a “mailbox” (which is an email address to most

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package io -- go2cs converted at 2020 October 08 01:30:43 UTC
+// package io -- go2cs converted at 2020 October 09 04:49:26 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Go\src\io\multi.go
 

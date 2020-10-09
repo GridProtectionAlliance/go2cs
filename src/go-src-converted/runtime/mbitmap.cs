@@ -72,7 +72,7 @@
 // finished.
 //
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:29 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:28 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mbitmap.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -91,8 +91,8 @@ namespace go
         private static readonly long wordsPerBitmapByte = (long)8L / 2L; // heap words described by one bitmap byte
 
         // all scan/pointer bits in a byte
-        private static readonly var bitScanAll = (var)bitScan | bitScan << (int)(heapBitsShift) | bitScan << (int)((2L * heapBitsShift)) | bitScan << (int)((3L * heapBitsShift));
-        private static readonly var bitPointerAll = (var)bitPointer | bitPointer << (int)(heapBitsShift) | bitPointer << (int)((2L * heapBitsShift)) | bitPointer << (int)((3L * heapBitsShift));
+        private static readonly var bitScanAll = bitScan | bitScan << (int)(heapBitsShift) | bitScan << (int)((2L * heapBitsShift)) | bitScan << (int)((3L * heapBitsShift));
+        private static readonly var bitPointerAll = bitPointer | bitPointer << (int)(heapBitsShift) | bitPointer << (int)((2L * heapBitsShift)) | bitPointer << (int)((3L * heapBitsShift));
 
 
         // addb returns the byte pointer p+n.
@@ -1301,7 +1301,7 @@ namespace go
         {
             ref _type typ = ref _addr_typ.val;
 
-            const var doubleCheck = (var)false; // slow but helpful; enable to test modifications to this code
+            const var doubleCheck = false; // slow but helpful; enable to test modifications to this code
 
             // dataSize is always size rounded up to the next malloc size class,
             // except in the case of allocating a defer block, in which case
@@ -1502,7 +1502,7 @@ namespace go
                 // Filling in bits for an array of typ.
                 // Set up for repetition of ptrmask during main loop.
                 // Note that ptrmask describes only a prefix of
-                const var maxBits = (var)sys.PtrSize * 8L - 7L;
+                const var maxBits = sys.PtrSize * 8L - 7L;
 
                 if (typ.ptrdata / sys.PtrSize <= maxBits)
                 { 
@@ -2366,7 +2366,7 @@ Run:
                 // the pattern to a bit buffer holding at most 7 bits (a partial byte)
                 // it will not overflow.
                 var src = dst;
-                const var maxBits = (var)sys.PtrSize * 8L - 7L;
+                const var maxBits = sys.PtrSize * 8L - 7L;
 
                 if (n <= maxBits)
                 { 

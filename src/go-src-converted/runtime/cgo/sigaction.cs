@@ -4,7 +4,7 @@
 
 // +build linux,amd64 freebsd,amd64 linux,arm64
 
-// package cgo -- go2cs converted at 2020 October 08 03:24:26 UTC
+// package cgo -- go2cs converted at 2020 October 09 04:49:13 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Go\src\runtime\cgo\sigaction.go
 // Import "unsafe" because we use go:linkname.

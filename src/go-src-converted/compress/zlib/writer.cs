@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zlib -- go2cs converted at 2020 October 08 03:49:52 UTC
+// package zlib -- go2cs converted at 2020 October 09 05:08:33 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Go\src\compress\zlib\writer.go
 using flate = go.compress.flate_package;
@@ -20,11 +20,11 @@ namespace compress
     {
         // These constants are copied from the flate package, so that code that imports
         // "compress/zlib" does not also have to import "compress/flate".
-        public static readonly var NoCompression = (var)flate.NoCompression;
-        public static readonly var BestSpeed = (var)flate.BestSpeed;
-        public static readonly var BestCompression = (var)flate.BestCompression;
-        public static readonly var DefaultCompression = (var)flate.DefaultCompression;
-        public static readonly var HuffmanOnly = (var)flate.HuffmanOnly;
+        public static readonly var NoCompression = flate.NoCompression;
+        public static readonly var BestSpeed = flate.BestSpeed;
+        public static readonly var BestCompression = flate.BestCompression;
+        public static readonly var DefaultCompression = flate.DefaultCompression;
+        public static readonly var HuffmanOnly = flate.HuffmanOnly;
 
 
         // A Writer takes data written to it and writes the compressed

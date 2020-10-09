@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2020 October 08 04:34:16 UTC
+// package xerrors -- go2cs converted at 2020 October 09 05:45:45 UTC
 // import "golang.org/x/xerrors" ==> using xerrors = go.golang.org.x.xerrors_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\xerrors\wrap.go
 using reflect = go.reflect_package;

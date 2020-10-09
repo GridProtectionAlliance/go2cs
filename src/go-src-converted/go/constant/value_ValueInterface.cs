@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:02:40 UTC
+//     Generated on 2020 October 09 05:19:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Value<T> : Value
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace go
             private delegate @string KindByPtr(ptr<T> value);
             private delegate @string KindByVal(T value);
 
-            private static readonly KindByPtr s_KindByPtr;
-            private static readonly KindByVal s_KindByVal;
+            private static readonly KindByPtr? s_KindByPtr;
+            private static readonly KindByVal? s_KindByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Kind()
@@ -94,8 +95,8 @@ namespace go
             private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string String()
@@ -114,8 +115,8 @@ namespace go
             private delegate @string ExactStringByPtr(ptr<T> value);
             private delegate @string ExactStringByVal(T value);
 
-            private static readonly ExactStringByPtr s_ExactStringByPtr;
-            private static readonly ExactStringByVal s_ExactStringByVal;
+            private static readonly ExactStringByPtr? s_ExactStringByPtr;
+            private static readonly ExactStringByVal? s_ExactStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ExactString()
@@ -134,8 +135,8 @@ namespace go
             private delegate @string implementsValueByPtr(ptr<T> value);
             private delegate @string implementsValueByVal(T value);
 
-            private static readonly implementsValueByPtr s_implementsValueByPtr;
-            private static readonly implementsValueByVal s_implementsValueByVal;
+            private static readonly implementsValueByPtr? s_implementsValueByPtr;
+            private static readonly implementsValueByVal? s_implementsValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string implementsValue()
@@ -151,7 +152,7 @@ namespace go
                 return s_implementsValueByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Value()

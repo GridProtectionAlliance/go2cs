@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:56:56 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:18 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\emit.go
 // Helpers for emitting SSA instructions.
@@ -337,7 +337,7 @@ namespace go
 
             // Conversion of a compile-time constant value?
             {
-                ChangeType c__prev1 = c;
+                ptr<ChangeType> c__prev1 = c;
 
                 ptr<Const> (c, ok) = val._<ptr<Const>>();
 

@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package s390x -- go2cs converted at 2020 October 08 04:37:35 UTC
+// package s390x -- go2cs converted at 2020 October 09 05:48:36 UTC
 // import "cmd/link/internal/s390x" ==> using s390x = go.cmd.link.@internal.s390x_package
 // Original source: C:\Go\src\cmd\link\internal\s390x\asm.go
 using objabi = go.cmd.@internal.objabi_package;

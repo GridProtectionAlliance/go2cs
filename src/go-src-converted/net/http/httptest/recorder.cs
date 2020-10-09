@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httptest -- go2cs converted at 2020 October 08 03:41:25 UTC
+// package httptest -- go2cs converted at 2020 October 09 04:58:49 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Go\src\net\http\httptest\recorder.go
 using bytes = go.bytes_package;

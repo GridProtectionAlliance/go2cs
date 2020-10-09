@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package packages -- go2cs converted at 2020 October 08 04:55:12 UTC
+// package packages -- go2cs converted at 2020 October 09 06:01:57 UTC
 // import "golang.org/x/tools/go/packages" ==> using packages = go.golang.org.x.tools.go.packages_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\packages\packages.go
 // See doc.go for package documentation and implementation notes.
@@ -59,61 +59,61 @@ namespace go
         public static readonly LoadMode NeedName = (LoadMode)1L << (int)(iota); 
 
         // NeedFiles adds GoFiles and OtherFiles.
-        public static readonly var NeedFiles = (var)0; 
+        public static readonly var NeedFiles = 0; 
 
         // NeedCompiledGoFiles adds CompiledGoFiles.
-        public static readonly var NeedCompiledGoFiles = (var)1; 
+        public static readonly var NeedCompiledGoFiles = 1; 
 
         // NeedImports adds Imports. If NeedDeps is not set, the Imports field will contain
         // "placeholder" Packages with only the ID set.
-        public static readonly var NeedImports = (var)2; 
+        public static readonly var NeedImports = 2; 
 
         // NeedDeps adds the fields requested by the LoadMode in the packages in Imports.
-        public static readonly var NeedDeps = (var)3; 
+        public static readonly var NeedDeps = 3; 
 
         // NeedExportsFile adds ExportFile.
-        public static readonly var NeedExportsFile = (var)4; 
+        public static readonly var NeedExportsFile = 4; 
 
         // NeedTypes adds Types, Fset, and IllTyped.
-        public static readonly var NeedTypes = (var)5; 
+        public static readonly var NeedTypes = 5; 
 
         // NeedSyntax adds Syntax.
-        public static readonly var NeedSyntax = (var)6; 
+        public static readonly var NeedSyntax = 6; 
 
         // NeedTypesInfo adds TypesInfo.
-        public static readonly var NeedTypesInfo = (var)7; 
+        public static readonly var NeedTypesInfo = 7; 
 
         // NeedTypesSizes adds TypesSizes.
-        public static readonly var NeedTypesSizes = (var)8; 
+        public static readonly var NeedTypesSizes = 8; 
 
         // typecheckCgo enables full support for type checking cgo. Requires Go 1.15+.
         // Modifies CompiledGoFiles and Types, and has no effect on its own.
-        private static readonly var typecheckCgo = (var)9; 
+        private static readonly var typecheckCgo = 9; 
 
         // NeedModule adds Module.
-        public static readonly var NeedModule = (var)10;
+        public static readonly var NeedModule = 10;
 
 
  
         // Deprecated: LoadFiles exists for historical compatibility
         // and should not be used. Please directly specify the needed fields using the Need values.
-        public static readonly var LoadFiles = (var)NeedName | NeedFiles | NeedCompiledGoFiles; 
+        public static readonly var LoadFiles = NeedName | NeedFiles | NeedCompiledGoFiles; 
 
         // Deprecated: LoadImports exists for historical compatibility
         // and should not be used. Please directly specify the needed fields using the Need values.
-        public static readonly var LoadImports = (var)LoadFiles | NeedImports; 
+        public static readonly var LoadImports = LoadFiles | NeedImports; 
 
         // Deprecated: LoadTypes exists for historical compatibility
         // and should not be used. Please directly specify the needed fields using the Need values.
-        public static readonly var LoadTypes = (var)LoadImports | NeedTypes | NeedTypesSizes; 
+        public static readonly var LoadTypes = LoadImports | NeedTypes | NeedTypesSizes; 
 
         // Deprecated: LoadSyntax exists for historical compatibility
         // and should not be used. Please directly specify the needed fields using the Need values.
-        public static readonly var LoadSyntax = (var)LoadTypes | NeedSyntax | NeedTypesInfo; 
+        public static readonly var LoadSyntax = LoadTypes | NeedSyntax | NeedTypesInfo; 
 
         // Deprecated: LoadAllSyntax exists for historical compatibility
         // and should not be used. Please directly specify the needed fields using the Need values.
-        public static readonly var LoadAllSyntax = (var)LoadSyntax | NeedDeps;
+        public static readonly var LoadAllSyntax = LoadSyntax | NeedDeps;
 
 
         // A Config specifies details about how packages should be loaded.
@@ -359,9 +359,9 @@ namespace go
         }
 
         public static readonly ErrorKind UnknownError = (ErrorKind)iota;
-        public static readonly var ListError = (var)0;
-        public static readonly var ParseError = (var)1;
-        public static readonly var TypeError = (var)2;
+        public static readonly var ListError = 0;
+        public static readonly var ParseError = 1;
+        public static readonly var TypeError = 2;
 
 
         public static @string Error(this Error err)
@@ -592,7 +592,7 @@ namespace go
                 {
                     ld.ParseFile = (fset, filename, src) =>
                     {
-                        const var mode = (var)parser.AllErrors | parser.ParseComments;
+                        const var mode = parser.AllErrors | parser.ParseComments;
 
                         return _addr_parser.ParseFile(fset, filename, src, mode)!;
                     }
@@ -792,7 +792,7 @@ namespace go
             { 
                 // We do this to drop the stub import packages that we are not even going to try to resolve.
                 {
-                    loaderPackage lpkg__prev1 = lpkg;
+                    ptr<loaderPackage> lpkg__prev1 = lpkg;
 
                     foreach (var (_, __lpkg) in initial)
                     {
@@ -806,7 +806,7 @@ namespace go
             }            { 
                 // For each initial package, create its import DAG.
                 {
-                    loaderPackage lpkg__prev1 = lpkg;
+                    ptr<loaderPackage> lpkg__prev1 = lpkg;
 
                     foreach (var (_, __lpkg) in initial)
                     {
@@ -821,7 +821,7 @@ namespace go
             if (ld.Mode & NeedImports != 0L && ld.Mode & NeedTypes != 0L)
             {
                 {
-                    loaderPackage lpkg__prev1 = lpkg;
+                    ptr<loaderPackage> lpkg__prev1 = lpkg;
 
                     foreach (var (_, __lpkg) in srcPkgs)
                     {
@@ -851,7 +851,7 @@ namespace go
             {
                 sync.WaitGroup wg = default;
                 {
-                    loaderPackage lpkg__prev1 = lpkg;
+                    ptr<loaderPackage> lpkg__prev1 = lpkg;
 
                     foreach (var (_, __lpkg) in initial)
                     {
@@ -875,7 +875,7 @@ namespace go
             var result = make_slice<ptr<Package>>(len(initial));
             {
                 var i__prev1 = i;
-                loaderPackage lpkg__prev1 = lpkg;
+                ptr<loaderPackage> lpkg__prev1 = lpkg;
 
                 foreach (var (__i, __lpkg) in initial)
                 {

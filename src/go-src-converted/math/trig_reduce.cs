@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 08 03:25:23 UTC
+// package math -- go2cs converted at 2020 October 09 05:07:47 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\trig_reduce.go
 using bits = go.math.bits_package;
@@ -44,7 +44,7 @@ namespace go
             ulong j = default;
             double z = default;
 
-            const var PI4 = (var)Pi / 4L;
+            const var PI4 = Pi / 4L;
 
             if (x < PI4)
             {

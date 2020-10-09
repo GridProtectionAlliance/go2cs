@@ -4,7 +4,7 @@
 
 // This file contains printing support for ASTs.
 
-// package ast -- go2cs converted at 2020 October 08 04:04:23 UTC
+// package ast -- go2cs converted at 2020 October 09 05:20:05 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\print.go
 using fmt = go.fmt_package;

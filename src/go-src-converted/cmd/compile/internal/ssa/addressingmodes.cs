@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:09:44 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:10 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\addressingmodes.go
 

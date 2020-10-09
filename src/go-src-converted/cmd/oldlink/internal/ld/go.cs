@@ -4,7 +4,7 @@
 
 // go-specific code shared across loaders (5l, 6l, 8l).
 
-// package ld -- go2cs converted at 2020 October 08 04:41:11 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:51 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\go.go
 using bytes = go.bytes_package;

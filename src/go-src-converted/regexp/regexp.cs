@@ -63,7 +63,7 @@
 //
 // (There are a few other methods that do not match this pattern.)
 //
-// package regexp -- go2cs converted at 2020 October 08 03:41:17 UTC
+// package regexp -- go2cs converted at 2020 October 09 04:58:42 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Go\src\regexp\regexp.go
 using bytes = go.bytes_package;

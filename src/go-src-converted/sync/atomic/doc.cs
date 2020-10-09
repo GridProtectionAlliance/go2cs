@@ -37,7 +37,7 @@
 // functions, are the atomic equivalents of "return *addr" and
 // "*addr = val".
 //
-// package atomic -- go2cs converted at 2020 October 08 00:34:01 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:25 UTC
 // import "sync/atomic" ==> using atomic = go.sync.atomic_package
 // Original source: C:\Go\src\sync\atomic\doc.go
 using @unsafe = go.@unsafe_package;

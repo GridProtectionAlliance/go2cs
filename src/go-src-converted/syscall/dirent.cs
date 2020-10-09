@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 October 08 00:33:57 UTC
+// package syscall -- go2cs converted at 2020 October 09 04:45:22 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\dirent.go
 using @unsafe = go.@unsafe_package;
@@ -118,7 +118,7 @@ namespace go
 
                 }
 
-                const var namoff = (var)uint64(@unsafe.Offsetof(new Dirent().Name));
+                const var namoff = uint64(@unsafe.Offsetof(new Dirent().Name));
 
                 var (namlen, ok) = direntNamlen(rec);
                 if (!ok || namoff + namlen > uint64(len(rec)))

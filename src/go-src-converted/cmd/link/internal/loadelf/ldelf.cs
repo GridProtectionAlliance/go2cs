@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package loadelf implements an ELF file reader.
-// package loadelf -- go2cs converted at 2020 October 08 04:39:02 UTC
+// package loadelf -- go2cs converted at 2020 October 09 05:49:55 UTC
 // import "cmd/link/internal/loadelf" ==> using loadelf = go.cmd.link.@internal.loadelf_package
 // Original source: C:\Go\src\cmd\link\internal\loadelf\ldelf.go
 using bytes = go.bytes_package;
@@ -1395,14 +1395,14 @@ namespace @internal
             // once golang.org/issue/15164 is fixed or found to not impair cmd/link
             // performance.
 
-            const var AMD64 = (var)uint32(sys.AMD64);
-            const var ARM = (var)uint32(sys.ARM);
-            const var ARM64 = (var)uint32(sys.ARM64);
-            const var I386 = (var)uint32(sys.I386);
-            const var PPC64 = (var)uint32(sys.PPC64);
-            const var S390X = (var)uint32(sys.S390X);
-            const var MIPS = (var)uint32(sys.MIPS);
-            const var MIPS64 = (var)uint32(sys.MIPS64);
+            const var AMD64 = uint32(sys.AMD64);
+            const var ARM = uint32(sys.ARM);
+            const var ARM64 = uint32(sys.ARM64);
+            const var I386 = uint32(sys.I386);
+            const var PPC64 = uint32(sys.PPC64);
+            const var S390X = uint32(sys.S390X);
+            const var MIPS = uint32(sys.MIPS);
+            const var MIPS64 = uint32(sys.MIPS64);
 
 
 

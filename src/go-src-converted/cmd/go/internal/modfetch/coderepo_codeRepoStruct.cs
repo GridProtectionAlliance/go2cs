@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:01 UTC
+//     Generated on 2020 October 09 05:47:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,8 @@ using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
 using modzip = go.golang.org.x.mod.zip_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

@@ -4,7 +4,7 @@
 
 // +build go1.11
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:37 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:20 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\newInterface11.go
 using types = go.go.types_package;

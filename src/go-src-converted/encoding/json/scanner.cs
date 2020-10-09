@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 October 08 03:42:54 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:08 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\scanner.go
 // JSON value parser state machine.
@@ -128,28 +128,28 @@ namespace encoding
         // every subsequent call will return scanError too.
  
         // Continue.
-        private static readonly var scanContinue = (var)iota; // uninteresting byte
-        private static readonly var scanBeginLiteral = (var)0; // end implied by next result != scanContinue
-        private static readonly var scanBeginObject = (var)1; // begin object
-        private static readonly var scanObjectKey = (var)2; // just finished object key (string)
-        private static readonly var scanObjectValue = (var)3; // just finished non-last object value
-        private static readonly var scanEndObject = (var)4; // end object (implies scanObjectValue if possible)
-        private static readonly var scanBeginArray = (var)5; // begin array
-        private static readonly var scanArrayValue = (var)6; // just finished array value
-        private static readonly var scanEndArray = (var)7; // end array (implies scanArrayValue if possible)
-        private static readonly var scanSkipSpace = (var)8; // space byte; can skip; known to be last "continue" result
+        private static readonly var scanContinue = iota; // uninteresting byte
+        private static readonly var scanBeginLiteral = 0; // end implied by next result != scanContinue
+        private static readonly var scanBeginObject = 1; // begin object
+        private static readonly var scanObjectKey = 2; // just finished object key (string)
+        private static readonly var scanObjectValue = 3; // just finished non-last object value
+        private static readonly var scanEndObject = 4; // end object (implies scanObjectValue if possible)
+        private static readonly var scanBeginArray = 5; // begin array
+        private static readonly var scanArrayValue = 6; // just finished array value
+        private static readonly var scanEndArray = 7; // end array (implies scanArrayValue if possible)
+        private static readonly var scanSkipSpace = 8; // space byte; can skip; known to be last "continue" result
 
         // Stop.
-        private static readonly var scanEnd = (var)9; // top-level value ended *before* this byte; known to be first "stop" result
-        private static readonly var scanError = (var)10; // hit an error, scanner.err.
+        private static readonly var scanEnd = 9; // top-level value ended *before* this byte; known to be first "stop" result
+        private static readonly var scanError = 10; // hit an error, scanner.err.
 
         // These values are stored in the parseState stack.
         // They give the current state of a composite value
         // being scanned. If the parser is inside a nested value
         // the parseState describes the nested state, outermost at entry 0.
-        private static readonly var parseObjectKey = (var)iota; // parsing object key (before colon)
-        private static readonly var parseObjectValue = (var)0; // parsing object value (after colon)
-        private static readonly var parseArrayValue = (var)1; // parsing array value
+        private static readonly var parseObjectKey = iota; // parsing object key (before colon)
+        private static readonly var parseObjectValue = 0; // parsing object value (after colon)
+        private static readonly var parseArrayValue = 1; // parsing array value
 
         // This limits the max nesting depth to prevent stack overflow.
         // This is permitted by https://tools.ietf.org/html/rfc7159#section-9

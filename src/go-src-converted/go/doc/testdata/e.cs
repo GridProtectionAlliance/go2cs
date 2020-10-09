@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // The package e is a go/doc test for embedded methods.
-// package e -- go2cs converted at 2020 October 08 04:02:53 UTC
+// package e -- go2cs converted at 2020 October 09 05:19:10 UTC
 // import "go/doc.e" ==> using e = go.go.doc.e_package
 // Original source: C:\Go\src\go\doc\testdata\e.go
 

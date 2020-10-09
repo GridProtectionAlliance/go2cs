@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:25:39 UTC
+//     Generated on 2020 October 09 04:50:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace math
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Source<T> : Source
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace math
             private delegate long Int63ByPtr(ptr<T> value);
             private delegate long Int63ByVal(T value);
 
-            private static readonly Int63ByPtr s_Int63ByPtr;
-            private static readonly Int63ByVal s_Int63ByVal;
+            private static readonly Int63ByPtr? s_Int63ByPtr;
+            private static readonly Int63ByVal? s_Int63ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Int63()
@@ -87,8 +88,8 @@ namespace math
             private delegate long SeedByPtr(ptr<T> value, long seed);
             private delegate long SeedByVal(T value, long seed);
 
-            private static readonly SeedByPtr s_SeedByPtr;
-            private static readonly SeedByVal s_SeedByVal;
+            private static readonly SeedByPtr? s_SeedByPtr;
+            private static readonly SeedByVal? s_SeedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Seed(long seed)
@@ -104,7 +105,7 @@ namespace math
                 return s_SeedByPtr(m_target_ptr, seed);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Source()

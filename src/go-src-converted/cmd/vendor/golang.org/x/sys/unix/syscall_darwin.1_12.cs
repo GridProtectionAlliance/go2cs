@@ -4,7 +4,7 @@
 
 // +build darwin,go1.12,!go1.13
 
-// package unix -- go2cs converted at 2020 October 08 04:46:46 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:26 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_darwin.1_12.go
 using @unsafe = go.@unsafe_package;

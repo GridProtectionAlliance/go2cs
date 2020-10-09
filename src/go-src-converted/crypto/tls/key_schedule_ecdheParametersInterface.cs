@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:22 UTC
+//     Generated on 2020 October 09 04:56:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using curve25519 = go.golang.org.x.crypto.curve25519_package;
 using hkdf = go.golang.org.x.crypto.hkdf_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class ecdheParameters<T> : ecdheParameters
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace crypto
             private delegate slice<byte> CurveIDByPtr(ptr<T> value);
             private delegate slice<byte> CurveIDByVal(T value);
 
-            private static readonly CurveIDByPtr s_CurveIDByPtr;
-            private static readonly CurveIDByVal s_CurveIDByVal;
+            private static readonly CurveIDByPtr? s_CurveIDByPtr;
+            private static readonly CurveIDByVal? s_CurveIDByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> CurveID()
@@ -95,8 +96,8 @@ namespace crypto
             private delegate slice<byte> PublicKeyByPtr(ptr<T> value);
             private delegate slice<byte> PublicKeyByVal(T value);
 
-            private static readonly PublicKeyByPtr s_PublicKeyByPtr;
-            private static readonly PublicKeyByVal s_PublicKeyByVal;
+            private static readonly PublicKeyByPtr? s_PublicKeyByPtr;
+            private static readonly PublicKeyByVal? s_PublicKeyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> PublicKey()
@@ -115,8 +116,8 @@ namespace crypto
             private delegate slice<byte> SharedKeyByPtr(ptr<T> value, slice<byte> peerPublicKey);
             private delegate slice<byte> SharedKeyByVal(T value, slice<byte> peerPublicKey);
 
-            private static readonly SharedKeyByPtr s_SharedKeyByPtr;
-            private static readonly SharedKeyByVal s_SharedKeyByVal;
+            private static readonly SharedKeyByPtr? s_SharedKeyByPtr;
+            private static readonly SharedKeyByVal? s_SharedKeyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> SharedKey(slice<byte> peerPublicKey)
@@ -132,7 +133,7 @@ namespace crypto
                 return s_SharedKeyByPtr(m_target_ptr, peerPublicKey);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ecdheParameters()

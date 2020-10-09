@@ -4,7 +4,7 @@
 
 // TCP socket options for plan9
 
-// package net -- go2cs converted at 2020 October 08 03:34:45 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:27 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\tcpsockopt_plan9.go
 using syscall = go.syscall_package;

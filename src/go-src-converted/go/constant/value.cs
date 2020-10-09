@@ -10,7 +10,7 @@
 // values produce unknown values unless specified
 // otherwise.
 //
-// package constant -- go2cs converted at 2020 October 08 04:02:39 UTC
+// package constant -- go2cs converted at 2020 October 09 05:19:02 UTC
 // import "go/constant" ==> using constant = go.go.constant_package
 // Original source: C:\Go\src\go\constant\value.go
 using fmt = go.fmt_package;
@@ -38,13 +38,13 @@ namespace go
         public static readonly Kind Unknown = (Kind)iota; 
 
         // non-numeric values
-        public static readonly var Bool = (var)0;
-        public static readonly var String = (var)1; 
+        public static readonly var Bool = 0;
+        public static readonly var String = 1; 
 
         // numeric values
-        public static readonly var Int = (var)2;
-        public static readonly var Float = (var)3;
-        public static readonly var Complex = (var)4;
+        public static readonly var Int = 2;
+        public static readonly var Float = 3;
+        public static readonly var Complex = 4;
 
 
         // A Value represents the value of a Go constant.
@@ -1096,8 +1096,8 @@ namespace go
 
  
         // Compute the size of a Word in bytes.
-        private static readonly var _m = (var)~big.Word(0L);
-        private static readonly var _log = (var)_m >> (int)(8L) & 1L + _m >> (int)(16L) & 1L + _m >> (int)(32L) & 1L;
+        private static readonly var _m = ~big.Word(0L);
+        private static readonly var _log = _m >> (int)(8L) & 1L + _m >> (int)(16L) & 1L + _m >> (int)(32L) & 1L;
         private static readonly long wordSize = (long)1L << (int)(_log);
 
 

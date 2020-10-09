@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package b -- go2cs converted at 2020 October 08 04:02:50 UTC
+// package b -- go2cs converted at 2020 October 09 05:19:09 UTC
 // import "go/doc.b" ==> using b = go.go.doc.b_package
 // Original source: C:\Go\src\go\doc\testdata\b.go
 using a = go.a_package;
@@ -65,10 +65,10 @@ namespace go
 
 
         public static readonly notExported C1 = (notExported)iota;
-        public static readonly var C2 = (var)0;
-        private static readonly var c3 = (var)1;
-        public static readonly var C4 = (var)2;
-        public static readonly var C5 = (var)3;
+        public static readonly var C2 = 0;
+        private static readonly var c3 = 1;
+        public static readonly var C4 = 2;
+        public static readonly var C5 = 3;
 
 
         public static notExported V = default;

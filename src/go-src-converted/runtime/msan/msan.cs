@@ -5,7 +5,7 @@
 // +build msan,linux
 // +build amd64 arm64
 
-// package msan -- go2cs converted at 2020 October 08 03:24:28 UTC
+// package msan -- go2cs converted at 2020 October 09 04:49:21 UTC
 // import "runtime/msan" ==> using msan = go.runtime.msan_package
 // Original source: C:\Go\src\runtime\msan\msan.go
 /*

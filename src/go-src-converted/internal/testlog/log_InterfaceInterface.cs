@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:44:20 UTC
+//     Generated on 2020 October 09 05:07:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using atomic = go.sync.atomic_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Interface<T> : Interface
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace @internal
             private delegate void GetenvByPtr(ptr<T> value, @string key);
             private delegate void GetenvByVal(T value, @string key);
 
-            private static readonly GetenvByPtr s_GetenvByPtr;
-            private static readonly GetenvByVal s_GetenvByVal;
+            private static readonly GetenvByPtr? s_GetenvByPtr;
+            private static readonly GetenvByVal? s_GetenvByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Getenv(@string key)
@@ -92,8 +93,8 @@ namespace @internal
             private delegate void StatByPtr(ptr<T> value, @string file);
             private delegate void StatByVal(T value, @string file);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Stat(@string file)
@@ -117,8 +118,8 @@ namespace @internal
             private delegate void OpenByPtr(ptr<T> value, @string file);
             private delegate void OpenByVal(T value, @string file);
 
-            private static readonly OpenByPtr s_OpenByPtr;
-            private static readonly OpenByVal s_OpenByVal;
+            private static readonly OpenByPtr? s_OpenByPtr;
+            private static readonly OpenByVal? s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Open(@string file)
@@ -142,8 +143,8 @@ namespace @internal
             private delegate void ChdirByPtr(ptr<T> value, @string dir);
             private delegate void ChdirByVal(T value, @string dir);
 
-            private static readonly ChdirByPtr s_ChdirByPtr;
-            private static readonly ChdirByVal s_ChdirByVal;
+            private static readonly ChdirByPtr? s_ChdirByPtr;
+            private static readonly ChdirByVal? s_ChdirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Chdir(@string dir)
@@ -164,7 +165,7 @@ namespace @internal
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Interface()

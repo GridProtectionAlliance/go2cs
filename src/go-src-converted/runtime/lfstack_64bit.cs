@@ -4,7 +4,7 @@
 
 // +build amd64 arm64 mips64 mips64le ppc64 ppc64le riscv64 s390x wasm
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:55 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\lfstack_64bit.go
 using @unsafe = go.@unsafe_package;

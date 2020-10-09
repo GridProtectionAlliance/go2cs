@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:23 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:11 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\errors_plan9.go
 
@@ -36,12 +36,12 @@ namespace go
         public static var EINVAL = NewError("bad arg in system call");        public static var ENOTDIR = NewError("not a directory");        public static var EISDIR = NewError("file is a directory");        public static var ENOENT = NewError("file does not exist");        public static var EEXIST = NewError("file already exists");        public static var EMFILE = NewError("no free file descriptors");        public static var EIO = NewError("i/o error");        public static var ENAMETOOLONG = NewError("file name too long");        public static var EINTR = NewError("interrupted");        public static var EPERM = NewError("permission denied");        public static var EBUSY = NewError("no free devices");        public static var ETIMEDOUT = NewError("connection timed out");        public static var EPLAN9 = NewError("not supported by plan 9");        public static var EACCES = NewError("access permission denied");        public static var EAFNOSUPPORT = NewError("address family not supported by protocol");        public static var ESPIPE = NewError("illegal seek");
 
         // Notes
-        public static readonly var SIGABRT = (var)Note("abort");
-        public static readonly var SIGALRM = (var)Note("alarm");
-        public static readonly var SIGHUP = (var)Note("hangup");
-        public static readonly var SIGINT = (var)Note("interrupt");
-        public static readonly var SIGKILL = (var)Note("kill");
-        public static readonly var SIGTERM = (var)Note("interrupt");
+        public static readonly var SIGABRT = Note("abort");
+        public static readonly var SIGALRM = Note("alarm");
+        public static readonly var SIGHUP = Note("hangup");
+        public static readonly var SIGINT = Note("interrupt");
+        public static readonly var SIGKILL = Note("kill");
+        public static readonly var SIGTERM = Note("interrupt");
 
     }
 }

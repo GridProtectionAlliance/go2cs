@@ -4,7 +4,7 @@
 
 // +build !darwin,!linux
 
-// package pprof -- go2cs converted at 2020 October 08 03:26:20 UTC
+// package pprof -- go2cs converted at 2020 October 09 04:49:59 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\pprof_norusage.go
 using io = go.io_package;

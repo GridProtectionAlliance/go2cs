@@ -4,7 +4,7 @@
 
 // +build windows
 
-// package windows -- go2cs converted at 2020 October 08 04:53:49 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:52 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\service.go
 
@@ -36,10 +36,10 @@ namespace sys
         public static readonly long SERVICE_RECOGNIZER_DRIVER = (long)8L;
         public static readonly long SERVICE_WIN32_OWN_PROCESS = (long)16L;
         public static readonly long SERVICE_WIN32_SHARE_PROCESS = (long)32L;
-        public static readonly var SERVICE_WIN32 = (var)SERVICE_WIN32_OWN_PROCESS | SERVICE_WIN32_SHARE_PROCESS;
+        public static readonly var SERVICE_WIN32 = SERVICE_WIN32_OWN_PROCESS | SERVICE_WIN32_SHARE_PROCESS;
         public static readonly long SERVICE_INTERACTIVE_PROCESS = (long)256L;
-        public static readonly var SERVICE_DRIVER = (var)SERVICE_KERNEL_DRIVER | SERVICE_FILE_SYSTEM_DRIVER | SERVICE_RECOGNIZER_DRIVER;
-        public static readonly var SERVICE_TYPE_ALL = (var)SERVICE_WIN32 | SERVICE_ADAPTER | SERVICE_DRIVER | SERVICE_INTERACTIVE_PROCESS;
+        public static readonly var SERVICE_DRIVER = SERVICE_KERNEL_DRIVER | SERVICE_FILE_SYSTEM_DRIVER | SERVICE_RECOGNIZER_DRIVER;
+        public static readonly var SERVICE_TYPE_ALL = SERVICE_WIN32 | SERVICE_ADAPTER | SERVICE_DRIVER | SERVICE_INTERACTIVE_PROCESS;
 
         public static readonly long SERVICE_BOOT_START = (long)0L;
         public static readonly long SERVICE_SYSTEM_START = (long)1L;
@@ -105,7 +105,7 @@ namespace sys
         public static readonly long SERVICE_PAUSE_CONTINUE = (long)64L;
         public static readonly long SERVICE_INTERROGATE = (long)128L;
         public static readonly long SERVICE_USER_DEFINED_CONTROL = (long)256L;
-        public static readonly var SERVICE_ALL_ACCESS = (var)STANDARD_RIGHTS_REQUIRED | SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS | SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_INTERROGATE | SERVICE_USER_DEFINED_CONTROL;
+        public static readonly var SERVICE_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SERVICE_QUERY_CONFIG | SERVICE_CHANGE_CONFIG | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS | SERVICE_START | SERVICE_STOP | SERVICE_PAUSE_CONTINUE | SERVICE_INTERROGATE | SERVICE_USER_DEFINED_CONTROL;
 
         public static readonly long SERVICE_RUNS_IN_SYSTEM_PROCESS = (long)1L;
 

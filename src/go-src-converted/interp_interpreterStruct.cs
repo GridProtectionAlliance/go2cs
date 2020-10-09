@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:18 UTC
+//     Generated on 2020 October 09 06:03:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,8 @@ using runtime = go.runtime_package;
 using atomic = go.sync.atomic_package;
 using ssa = go.golang.org.x.tools.go.ssa_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

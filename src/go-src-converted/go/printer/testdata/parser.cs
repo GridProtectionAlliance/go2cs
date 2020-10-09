@@ -7,7 +7,7 @@
 // output is an abstract syntax tree (AST) representing the Go source. The
 // parser is invoked through one of the Parse* functions.
 
-// package parser -- go2cs converted at 2020 October 08 04:09:10 UTC
+// package parser -- go2cs converted at 2020 October 09 05:23:44 UTC
 // import "go/printer.parser" ==> using parser = go.go.printer.parser_package
 // Original source: C:\Go\src\go\printer\testdata\parser.go
 using fmt = go.fmt_package;
@@ -26,10 +26,10 @@ namespace go
         // parser functionality.
         //
         public static readonly ulong PackageClauseOnly = (ulong)1L << (int)(iota); // parsing stops after package clause
-        public static readonly var ImportsOnly = (var)0; // parsing stops after import declarations
-        public static readonly var ParseComments = (var)1; // parse comments and add them to AST
-        public static readonly var Trace = (var)2; // print a trace of parsed productions
-        public static readonly var DeclarationErrors = (var)3; // report declaration errors
+        public static readonly var ImportsOnly = 0; // parsing stops after import declarations
+        public static readonly var ParseComments = 1; // parse comments and add them to AST
+        public static readonly var Trace = 2; // print a trace of parsed productions
+        public static readonly var DeclarationErrors = 3; // report declaration errors
 
         // The parser structure holds the parser's internal state.
         private partial struct parser
@@ -297,7 +297,7 @@ namespace go
 
             const @string dots = (@string)". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . " + ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ";
 
-            const var n = (var)uint(len(dots));
+            const var n = uint(len(dots));
 
             var pos = p.file.Position(p.pos);
             fmt.Printf("%5d:%3d: ", pos.Line, pos.Column);

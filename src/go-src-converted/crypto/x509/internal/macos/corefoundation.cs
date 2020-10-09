@@ -7,7 +7,7 @@
 // Package macOS provides cgo-less wrappers for Core Foundation and
 // Security.framework, similarly to how package syscall provides access to
 // libSystem.dylib.
-// package macOS -- go2cs converted at 2020 October 08 03:36:57 UTC
+// package macOS -- go2cs converted at 2020 October 09 04:54:54 UTC
 // import "crypto/x509/internal.macOS" ==> using macOS = go.crypto.x509.internal.macOS_package
 // Original source: C:\Go\src\crypto\x509\internal\macos\corefoundation.go
 using errors = go.errors_package;

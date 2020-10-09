@@ -4,7 +4,7 @@
 
 // Type conversions for Scan.
 
-// package sql -- go2cs converted at 2020 October 08 04:58:46 UTC
+// package sql -- go2cs converted at 2020 October 09 06:05:18 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Go\src\database\sql\convert.go
 using driver = go.database.sql.driver_package;

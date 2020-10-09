@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2020 October 08 04:33:47 UTC
+// package modload -- go2cs converted at 2020 October 09 05:45:20 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Go\src\cmd\go\internal\modload\build.go
 using bytes = go.bytes_package;
@@ -192,7 +192,7 @@ namespace @internal
                     if (err == null)
                     {
                         {
-                            modinfo.ModulePublic info__prev3 = info;
+                            ptr<modinfo.ModulePublic> info__prev3 = info;
 
                             var (info, err) = os.Stat(gomod);
 

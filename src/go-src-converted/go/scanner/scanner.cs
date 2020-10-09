@@ -6,7 +6,7 @@
 // It takes a []byte as source which can then be tokenized
 // through repeated calls to the Scan method.
 //
-// package scanner -- go2cs converted at 2020 October 08 04:04:15 UTC
+// package scanner -- go2cs converted at 2020 October 09 05:20:00 UTC
 // import "go/scanner" ==> using scanner = go.go.scanner_package
 // Original source: C:\Go\src\go\scanner\scanner.go
 using bytes = go.bytes_package;
@@ -135,7 +135,7 @@ namespace go
         }
 
         public static readonly Mode ScanComments = (Mode)1L << (int)(iota); // return comments as COMMENT tokens
-        private static readonly var dontInsertSemis = (var)0; // do not automatically insert semicolons - for testing only
+        private static readonly var dontInsertSemis = 0; // do not automatically insert semicolons - for testing only
 
         // Init prepares the scanner s to tokenize the text src by setting the
         // scanner at the beginning of src. The scanner uses the file set file

@@ -1,4 +1,4 @@
-// package syscall -- go2cs converted at 2020 October 08 00:33:56 UTC
+// package syscall -- go2cs converted at 2020 October 09 04:45:21 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\const_plan9.go
 

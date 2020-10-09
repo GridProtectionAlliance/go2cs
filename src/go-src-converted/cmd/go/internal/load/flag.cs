@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package load -- go2cs converted at 2020 October 08 04:33:59 UTC
+// package load -- go2cs converted at 2020 October 09 05:45:31 UTC
 // import "cmd/go/internal/load" ==> using load = go.cmd.go.@internal.load_package
 // Original source: C:\Go\src\cmd\go\internal\load\flag.go
 using @base = go.cmd.go.@internal.@base_package;

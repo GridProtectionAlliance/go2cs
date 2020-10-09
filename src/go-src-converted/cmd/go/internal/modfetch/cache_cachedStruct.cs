@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:51 UTC
+//     Generated on 2020 October 09 05:47:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,8 @@ using renameio = go.cmd.go.@internal.renameio_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

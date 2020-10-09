@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:26:33 UTC
+//     Generated on 2020 October 09 05:39:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using types = go.cmd.compile.@internal.types_package;
 using heap = go.container.heap_package;
 using sort = go.sort_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

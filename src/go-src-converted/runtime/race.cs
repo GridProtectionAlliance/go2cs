@@ -4,7 +4,7 @@
 
 // +build race
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:47 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\race.go
 using @unsafe = go.@unsafe_package;
@@ -104,7 +104,7 @@ namespace go
 
         // Private interface for the runtime.
 
-        private static readonly var raceenabled = (var)true;
+        private static readonly var raceenabled = true;
 
         // For all functions accepting callerpc and pc,
         // callerpc is a return PC of the function that calls this function,
@@ -179,9 +179,9 @@ namespace go
         private static array<byte> qq = new array<byte>(new byte[] { '?', '?', 0 });
         private static array<byte> dash = new array<byte>(new byte[] { '-', 0 });
 
-        private static readonly var raceGetProcCmd = (var)iota;
-        private static readonly var raceSymbolizeCodeCmd = (var)0;
-        private static readonly var raceSymbolizeDataCmd = (var)1;
+        private static readonly var raceGetProcCmd = iota;
+        private static readonly var raceSymbolizeCodeCmd = 0;
+        private static readonly var raceSymbolizeDataCmd = 1;
 
 
         // Callback from C into Go, runs on g0.

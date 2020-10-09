@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package ring implements operations on circular lists.
-// package ring -- go2cs converted at 2020 October 08 04:58:44 UTC
+// package ring -- go2cs converted at 2020 October 09 06:05:16 UTC
 // import "container/ring" ==> using ring = go.container.ring_package
 // Original source: C:\Go\src\container\ring\ring.go
 

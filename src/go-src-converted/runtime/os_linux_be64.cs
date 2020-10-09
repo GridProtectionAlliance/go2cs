@@ -7,7 +7,7 @@
 // +build linux
 // +build ppc64 s390x
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:58 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:29 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_linux_be64.go
 

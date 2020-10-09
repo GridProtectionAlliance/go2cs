@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:10 UTC
+//     Generated on 2020 October 09 06:03:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Node<T> : Node
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace go
             private delegate ptr<slice<Instruction>> StringByPtr(ptr<T> value);
             private delegate ptr<slice<Instruction>> StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<slice<Instruction>> String()
@@ -96,8 +97,8 @@ namespace go
             private delegate ptr<slice<Instruction>> PosByPtr(ptr<T> value);
             private delegate ptr<slice<Instruction>> PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<slice<Instruction>> Pos()
@@ -116,8 +117,8 @@ namespace go
             private delegate ptr<slice<Instruction>> ParentByPtr(ptr<T> value);
             private delegate ptr<slice<Instruction>> ParentByVal(T value);
 
-            private static readonly ParentByPtr s_ParentByPtr;
-            private static readonly ParentByVal s_ParentByVal;
+            private static readonly ParentByPtr? s_ParentByPtr;
+            private static readonly ParentByVal? s_ParentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<slice<Instruction>> Parent()
@@ -136,8 +137,8 @@ namespace go
             private delegate ptr<slice<Instruction>> OperandsByPtr(ptr<T> value, slice<ptr<Value>> rands);
             private delegate ptr<slice<Instruction>> OperandsByVal(T value, slice<ptr<Value>> rands);
 
-            private static readonly OperandsByPtr s_OperandsByPtr;
-            private static readonly OperandsByVal s_OperandsByVal;
+            private static readonly OperandsByPtr? s_OperandsByPtr;
+            private static readonly OperandsByVal? s_OperandsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<slice<Instruction>> Operands(slice<ptr<Value>> rands)
@@ -156,8 +157,8 @@ namespace go
             private delegate ptr<slice<Instruction>> ReferrersByPtr(ptr<T> value);
             private delegate ptr<slice<Instruction>> ReferrersByVal(T value);
 
-            private static readonly ReferrersByPtr s_ReferrersByPtr;
-            private static readonly ReferrersByVal s_ReferrersByVal;
+            private static readonly ReferrersByPtr? s_ReferrersByPtr;
+            private static readonly ReferrersByVal? s_ReferrersByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<slice<Instruction>> Referrers()
@@ -173,7 +174,7 @@ namespace go
                 return s_ReferrersByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Node()

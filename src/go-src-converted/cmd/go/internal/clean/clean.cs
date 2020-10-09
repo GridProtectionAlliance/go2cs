@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package clean implements the ``go clean'' command.
-// package clean -- go2cs converted at 2020 October 08 04:33:33 UTC
+// package clean -- go2cs converted at 2020 October 09 05:45:09 UTC
 // import "cmd/go/internal/clean" ==> using clean = go.cmd.go.@internal.clean_package
 // Original source: C:\Go\src\cmd\go\internal\clean\clean.go
 using fmt = go.fmt_package;

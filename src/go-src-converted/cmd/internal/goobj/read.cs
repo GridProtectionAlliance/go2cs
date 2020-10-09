@@ -6,7 +6,7 @@
 //
 // TODO(rsc): Decide where this package should live. (golang.org/issue/6932)
 // TODO(rsc): Decide the appropriate integer types for various fields.
-// package goobj -- go2cs converted at 2020 October 08 03:50:07 UTC
+// package goobj -- go2cs converted at 2020 October 09 05:08:46 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Go\src\cmd\internal\goobj\read.go
 using bufio = go.bufio_package;

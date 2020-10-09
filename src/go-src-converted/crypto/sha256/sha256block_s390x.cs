@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sha256 -- go2cs converted at 2020 October 08 03:36:43 UTC
+// package sha256 -- go2cs converted at 2020 October 09 04:54:40 UTC
 // import "crypto/sha256" ==> using sha256 = go.crypto.sha256_package
 // Original source: C:\Go\src\crypto\sha256\sha256block_s390x.go
 using cpu = go.@internal.cpu_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:25 UTC
+//     Generated on 2020 October 09 06:03:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using reflect = go.reflect_package;
 using @unsafe = go.@unsafe_package;
 using ssa = go.golang.org.x.tools.go.ssa_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

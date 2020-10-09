@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:42 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:52 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\loopreschedchecks.go
 using types = go.cmd.compile.@internal.types_package;
@@ -737,9 +737,9 @@ outer:
         }
 
         private static readonly markKind notFound = (markKind)iota; // block has not been discovered yet
-        private static readonly var notExplored = (var)0; // discovered and in queue, outedges not processed yet
-        private static readonly var explored = (var)1; // discovered and in queue, outedges processed
-        private static readonly var done = (var)2; // all done, in output ordering
+        private static readonly var notExplored = 0; // discovered and in queue, outedges not processed yet
+        private static readonly var explored = 1; // discovered and in queue, outedges processed
+        private static readonly var done = 2; // all done, in output ordering
 
         private partial struct backedgesState
         {

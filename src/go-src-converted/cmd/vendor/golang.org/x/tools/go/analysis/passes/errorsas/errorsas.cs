@@ -4,7 +4,7 @@
 
 // The errorsas package defines an Analyzer that checks that the second argument to
 // errors.As is a pointer to a type implementing error.
-// package errorsas -- go2cs converted at 2020 October 08 04:57:55 UTC
+// package errorsas -- go2cs converted at 2020 October 09 06:04:33 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/errorsas" ==> using errorsas = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.errorsas_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\errorsas\errorsas.go
 using ast = go.go.ast_package;

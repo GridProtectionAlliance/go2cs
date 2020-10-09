@@ -4,7 +4,7 @@
 
 // Go new object file format, reading and writing.
 
-// package goobj2 -- go2cs converted at 2020 October 08 03:50:11 UTC
+// package goobj2 -- go2cs converted at 2020 October 09 05:08:50 UTC
 // import "cmd/internal/goobj2" ==> using goobj2 = go.cmd.@internal.goobj2_package
 // Original source: C:\Go\src\cmd\internal\goobj2\objfile.go
 // TODO: replace the goobj package?
@@ -152,27 +152,27 @@ namespace @internal
 
         // Package Index.
         public static readonly long PkgIdxNone = (long)(1L << (int)(31L) - 1L) - iota; // Non-package symbols
-        public static readonly var PkgIdxBuiltin = (var)0; // Predefined symbols // TODO: not used for now, we could use it for compiler-generated symbols like runtime.newobject
+        public static readonly var PkgIdxBuiltin = 0; // Predefined symbols // TODO: not used for now, we could use it for compiler-generated symbols like runtime.newobject
         public static readonly PkgIdxInvalid PkgIdxSelf = (PkgIdxInvalid)0L; 
         // The index of other referenced packages starts from 1.
 
         // Blocks
-        public static readonly var BlkAutolib = (var)iota;
-        public static readonly var BlkPkgIdx = (var)0;
-        public static readonly var BlkDwarfFile = (var)1;
-        public static readonly var BlkSymdef = (var)2;
-        public static readonly var BlkNonpkgdef = (var)3;
-        public static readonly var BlkNonpkgref = (var)4;
-        public static readonly var BlkRelocIdx = (var)5;
-        public static readonly var BlkAuxIdx = (var)6;
-        public static readonly var BlkDataIdx = (var)7;
-        public static readonly var BlkReloc = (var)8;
-        public static readonly var BlkAux = (var)9;
-        public static readonly var BlkData = (var)10;
-        public static readonly var BlkPcdata = (var)11;
-        public static readonly var BlkRefName = (var)12;
-        public static readonly var BlkEnd = (var)13;
-        public static readonly var NBlk = (var)14;
+        public static readonly var BlkAutolib = iota;
+        public static readonly var BlkPkgIdx = 0;
+        public static readonly var BlkDwarfFile = 1;
+        public static readonly var BlkSymdef = 2;
+        public static readonly var BlkNonpkgdef = 3;
+        public static readonly var BlkNonpkgref = 4;
+        public static readonly var BlkRelocIdx = 5;
+        public static readonly var BlkAuxIdx = 6;
+        public static readonly var BlkDataIdx = 7;
+        public static readonly var BlkReloc = 8;
+        public static readonly var BlkAux = 9;
+        public static readonly var BlkData = 10;
+        public static readonly var BlkPcdata = 11;
+        public static readonly var BlkRefName = 12;
+        public static readonly var BlkEnd = 13;
+        public static readonly var NBlk = 14;
 
 
         // File header.
@@ -244,7 +244,7 @@ namespace @internal
             public FingerprintType Fingerprint;
         }
 
-        private static readonly var importedPkgSize = (var)stringRefSize + 8L;
+        private static readonly var importedPkgSize = stringRefSize + 8L;
 
 
 
@@ -272,11 +272,11 @@ namespace @internal
         {
         }
 
-        public static readonly var SymSize = (var)stringRefSize + 2L + 1L + 1L + 4L + 4L;
+        public static readonly var SymSize = stringRefSize + 2L + 1L + 1L + 4L + 4L;
 
 
 
-        public static readonly var SymABIstatic = (var)~uint16(0L);
+        public static readonly var SymABIstatic = ~uint16(0L);
 
 
 
@@ -284,13 +284,13 @@ namespace @internal
 
 
         public static readonly long SymFlagDupok = (long)1L << (int)(iota);
-        public static readonly var SymFlagLocal = (var)0;
-        public static readonly var SymFlagTypelink = (var)1;
-        public static readonly var SymFlagLeaf = (var)2;
-        public static readonly var SymFlagNoSplit = (var)3;
-        public static readonly var SymFlagReflectMethod = (var)4;
-        public static readonly var SymFlagGoType = (var)5;
-        public static readonly var SymFlagTopFrame = (var)6;
+        public static readonly var SymFlagLocal = 0;
+        public static readonly var SymFlagTypelink = 1;
+        public static readonly var SymFlagLeaf = 2;
+        public static readonly var SymFlagNoSplit = 3;
+        public static readonly var SymFlagReflectMethod = 4;
+        public static readonly var SymFlagGoType = 5;
+        public static readonly var SymFlagTopFrame = 6;
 
 
         private static @string Name(this ptr<Sym> _addr_s, ptr<Reader> _addr_r)
@@ -571,13 +571,13 @@ namespace @internal
 
 
         // Aux Type
-        public static readonly var AuxGotype = (var)iota;
-        public static readonly var AuxFuncInfo = (var)0;
-        public static readonly var AuxFuncdata = (var)1;
-        public static readonly var AuxDwarfInfo = (var)2;
-        public static readonly var AuxDwarfLoc = (var)3;
-        public static readonly var AuxDwarfRanges = (var)4;
-        public static readonly var AuxDwarfLines = (var)5; 
+        public static readonly var AuxGotype = iota;
+        public static readonly var AuxFuncInfo = 0;
+        public static readonly var AuxFuncdata = 1;
+        public static readonly var AuxDwarfInfo = 2;
+        public static readonly var AuxDwarfLoc = 3;
+        public static readonly var AuxDwarfRanges = 4;
+        public static readonly var AuxDwarfLines = 5; 
 
         // TODO: more. Pcdata?
 

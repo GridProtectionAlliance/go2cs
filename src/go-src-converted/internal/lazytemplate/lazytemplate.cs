@@ -4,7 +4,7 @@
 
 // Package lazytemplate is a thin wrapper over text/template, allowing the use
 // of global template variables without forcing them to be parsed at init.
-// package lazytemplate -- go2cs converted at 2020 October 08 04:34:34 UTC
+// package lazytemplate -- go2cs converted at 2020 October 09 05:46:00 UTC
 // import "internal/lazytemplate" ==> using lazytemplate = go.@internal.lazytemplate_package
 // Original source: C:\Go\src\internal\lazytemplate\lazytemplate.go
 using io = go.io_package;

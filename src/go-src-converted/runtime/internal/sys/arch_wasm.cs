@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 08 03:19:07 UTC
+// package sys -- go2cs converted at 2020 October 09 04:45:29 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\arch_wasm.go
 
@@ -14,8 +14,8 @@ namespace @internal
 {
     public static partial class sys_package
     {
-        public static readonly var ArchFamily = (var)WASM;
-        public static readonly var BigEndian = (var)false;
+        public static readonly var ArchFamily = WASM;
+        public static readonly var BigEndian = false;
         public static readonly long DefaultPhysPageSize = (long)65536L;
         public static readonly long PCQuantum = (long)1L;
         public static readonly long Int64Align = (long)8L;

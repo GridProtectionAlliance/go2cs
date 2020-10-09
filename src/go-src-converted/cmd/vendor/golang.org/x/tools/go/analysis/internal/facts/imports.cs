@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package facts -- go2cs converted at 2020 October 08 04:57:45 UTC
+// package facts -- go2cs converted at 2020 October 09 06:04:25 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/facts" ==> using facts = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.facts_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\facts\imports.go
 using types = go.go.types_package;

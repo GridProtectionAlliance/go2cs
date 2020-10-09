@@ -8,7 +8,7 @@
 // listGroup stub because all the other Solaris calls work.  Otherwise,
 // this stub will conflict with the lookup_stubs.go fallback.
 
-// package user -- go2cs converted at 2020 October 08 03:45:31 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:34 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\listgroups_solaris.go
 using fmt = go.fmt_package;

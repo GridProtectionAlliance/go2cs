@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 00:34:03 UTC
+//     Generated on 2020 October 09 04:45:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using race = go.@internal.race_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = go.@unsafe_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -41,7 +42,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Locker<T> : Locker
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace go
             private delegate void LockByPtr(ptr<T> value);
             private delegate void LockByVal(T value);
 
-            private static readonly LockByPtr s_LockByPtr;
-            private static readonly LockByVal s_LockByVal;
+            private static readonly LockByPtr? s_LockByPtr;
+            private static readonly LockByVal? s_LockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Lock()
@@ -92,8 +93,8 @@ namespace go
             private delegate void UnlockByPtr(ptr<T> value);
             private delegate void UnlockByVal(T value);
 
-            private static readonly UnlockByPtr s_UnlockByPtr;
-            private static readonly UnlockByVal s_UnlockByVal;
+            private static readonly UnlockByPtr? s_UnlockByPtr;
+            private static readonly UnlockByVal? s_UnlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Unlock()
@@ -114,7 +115,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Locker()

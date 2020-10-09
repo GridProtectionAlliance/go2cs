@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:49 UTC
+//     Generated on 2020 October 09 05:53:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package os -- go2cs converted at 2020 October 08 03:44:26 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:04 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable_plan9.go
 using syscall = go.syscall_package;

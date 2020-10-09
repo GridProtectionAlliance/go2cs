@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package objfile implements portable access to OS-specific executable files.
-// package objfile -- go2cs converted at 2020 October 08 03:50:22 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:08:59 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\objfile.go
 using dwarf = go.debug.dwarf_package;

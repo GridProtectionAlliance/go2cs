@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2020 October 08 04:36:12 UTC
+// package modfetch -- go2cs converted at 2020 October 09 05:47:23 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\repo.go
 using fmt = go.fmt_package;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class modfetch_package
     {
-        private static readonly var traceRepo = (var)false; // trace all repo actions, for debugging
+        private static readonly var traceRepo = false; // trace all repo actions, for debugging
 
         // A Repo represents a repository storing all versions of a single module.
         // It must be safe for simultaneous use by multiple goroutines.

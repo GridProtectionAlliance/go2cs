@@ -5,7 +5,7 @@
 // Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer
 // object, creating another object (Reader or Writer) that also implements
 // the interface but provides buffering and some help for textual I/O.
-// package bufio -- go2cs converted at 2020 October 08 03:26:17 UTC
+// package bufio -- go2cs converted at 2020 October 09 04:49:57 UTC
 // import "bufio" ==> using bufio = go.bufio_package
 // Original source: C:\Go\src\bufio\bufio.go
 using bytes = go.bytes_package;

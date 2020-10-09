@@ -5,7 +5,7 @@
 // Package gif implements a GIF image decoder and encoder.
 //
 // The GIF specification is at https://www.w3.org/Graphics/GIF/spec-gif89a.txt.
-// package gif -- go2cs converted at 2020 October 08 04:59:21 UTC
+// package gif -- go2cs converted at 2020 October 09 06:05:48 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Go\src\image\gif\reader.go
 using bufio = go.bufio_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:30 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:55 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\mpfloat.go
 using fmt = go.fmt_package;
@@ -23,7 +23,7 @@ namespace @internal
         // overflow and also mantissa precision for Mpflts.
         public static readonly long Mpprec = (long)512L; 
         // Turn on for constant arithmetic debugging output.
-        public static readonly var Mpdebug = (var)false;
+        public static readonly var Mpdebug = false;
 
 
         // Mpflt represents a floating-point constant.

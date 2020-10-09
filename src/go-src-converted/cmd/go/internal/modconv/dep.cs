@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modconv -- go2cs converted at 2020 October 08 04:35:29 UTC
+// package modconv -- go2cs converted at 2020 October 09 05:46:47 UTC
 // import "cmd/go/internal/modconv" ==> using modconv = go.cmd.go.@internal.modconv_package
 // Original source: C:\Go\src\cmd\go\internal\modconv\dep.go
 using fmt = go.fmt_package;

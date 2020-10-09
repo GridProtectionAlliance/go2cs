@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package arm64 -- go2cs converted at 2020 October 08 04:42:06 UTC
+// package arm64 -- go2cs converted at 2020 October 09 05:52:43 UTC
 // import "cmd/oldlink/internal/arm64" ==> using arm64 = go.cmd.oldlink.@internal.arm64_package
 // Original source: C:\Go\src\cmd\oldlink\internal\arm64\obj.go
 using objabi = go.cmd.@internal.objabi_package;

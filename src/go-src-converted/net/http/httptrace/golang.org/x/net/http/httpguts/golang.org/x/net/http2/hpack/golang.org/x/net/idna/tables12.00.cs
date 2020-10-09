@@ -2,7 +2,7 @@
 
 // +build go1.14
 
-// package idna -- go2cs converted at 2020 October 08 03:39:57 UTC
+// package idna -- go2cs converted at 2020 October 09 04:57:31 UTC
 // import "golang.org/x/net/idna" ==> using idna = go.golang.org.x.net.idna_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\idna\tables12.00.go
 

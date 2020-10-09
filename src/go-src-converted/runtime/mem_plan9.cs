@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:38 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mem_plan9.go
 using @unsafe = go.@unsafe_package;
@@ -12,7 +12,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var memDebug = (var)false;
+        private static readonly var memDebug = false;
 
 
 

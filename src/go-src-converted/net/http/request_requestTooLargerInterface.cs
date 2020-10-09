@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:16 UTC
+//     Generated on 2020 October 09 04:57:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,6 +35,7 @@ using sync = go.sync_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -59,7 +60,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class requestTooLarger<T> : requestTooLarger
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -85,8 +86,8 @@ namespace net
             private delegate void requestTooLargeByPtr(ptr<T> value);
             private delegate void requestTooLargeByVal(T value);
 
-            private static readonly requestTooLargeByPtr s_requestTooLargeByPtr;
-            private static readonly requestTooLargeByVal s_requestTooLargeByVal;
+            private static readonly requestTooLargeByPtr? s_requestTooLargeByPtr;
+            private static readonly requestTooLargeByVal? s_requestTooLargeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void requestTooLarge()
@@ -107,7 +108,7 @@ namespace net
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static requestTooLarger()

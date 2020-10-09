@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package doc -- go2cs converted at 2020 October 08 04:02:50 UTC
+// package doc -- go2cs converted at 2020 October 09 05:19:09 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\synopsis.go
 using strings = go.strings_package;

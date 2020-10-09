@@ -4,7 +4,7 @@
 
 // Package asmdecl defines an Analyzer that reports mismatches between
 // assembly files and Go declarations.
-// package asmdecl -- go2cs converted at 2020 October 08 04:56:25 UTC
+// package asmdecl -- go2cs converted at 2020 October 09 06:02:57 UTC
 // import "golang.org/x/tools/go/analysis/passes/asmdecl" ==> using asmdecl = go.golang.org.x.tools.go.analysis.passes.asmdecl_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\passes\asmdecl\asmdecl.go
 using bytes = go.bytes_package;
@@ -47,12 +47,12 @@ namespace passes
 
         // These special kinds are not valid sizes.
         private static readonly asmKind asmString = (asmKind)100L + iota;
-        private static readonly var asmSlice = (var)0;
-        private static readonly var asmArray = (var)1;
-        private static readonly var asmInterface = (var)2;
-        private static readonly var asmEmptyInterface = (var)3;
-        private static readonly var asmStruct = (var)4;
-        private static readonly var asmComplex = (var)5;
+        private static readonly var asmSlice = 0;
+        private static readonly var asmArray = 1;
+        private static readonly var asmInterface = 2;
+        private static readonly var asmEmptyInterface = 3;
+        private static readonly var asmStruct = 4;
+        private static readonly var asmComplex = 5;
 
 
         // An asmArch describes assembly parameters for an architecture

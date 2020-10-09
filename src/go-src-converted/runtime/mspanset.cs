@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:30 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:10 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mspanset.go
 using cpu = go.@internal.cpu_package;

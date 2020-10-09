@@ -4,7 +4,7 @@
 
 // This file defines operands and associated operations.
 
-// package types -- go2cs converted at 2020 October 08 04:03:36 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:33 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\operand.go
 using bytes = go.bytes_package;
@@ -25,16 +25,16 @@ namespace go
         }
 
         private static readonly operandMode invalid = (operandMode)iota; // operand is invalid
-        private static readonly var novalue = (var)0; // operand represents no value (result of a function call w/o result)
-        private static readonly var builtin = (var)1; // operand is a built-in function
-        private static readonly var typexpr = (var)2; // operand is a type
-        private static readonly var constant_ = (var)3; // operand is a constant; the operand's typ is a Basic type
-        private static readonly var variable = (var)4; // operand is an addressable variable
-        private static readonly var mapindex = (var)5; // operand is a map index expression (acts like a variable on lhs, commaok on rhs of an assignment)
-        private static readonly var value = (var)6; // operand is a computed value
-        private static readonly var commaok = (var)7; // like value, but operand may be used in a comma,ok expression
-        private static readonly var commaerr = (var)8; // like commaok, but second value is error, not boolean
-        private static readonly var cgofunc = (var)9; // operand is a cgo function
+        private static readonly var novalue = 0; // operand represents no value (result of a function call w/o result)
+        private static readonly var builtin = 1; // operand is a built-in function
+        private static readonly var typexpr = 2; // operand is a type
+        private static readonly var constant_ = 3; // operand is a constant; the operand's typ is a Basic type
+        private static readonly var variable = 4; // operand is an addressable variable
+        private static readonly var mapindex = 5; // operand is a map index expression (acts like a variable on lhs, commaok on rhs of an assignment)
+        private static readonly var value = 6; // operand is a computed value
+        private static readonly var commaok = 7; // like value, but operand may be used in a comma,ok expression
+        private static readonly var commaerr = 8; // like commaok, but second value is error, not boolean
+        private static readonly var cgofunc = 9; // operand is a cgo function
 
         private static array<@string> operandModeString = new array<@string>(InitKeyedValues<@string>((invalid, "invalid operand"), (novalue, "no value"), (builtin, "built-in"), (typexpr, "type"), (constant_, "constant"), (variable, "variable"), (mapindex, "map index expression"), (value, "value"), (commaok, "comma, ok expression"), (commaerr, "comma, error expression"), (cgofunc, "cgo function")));
 

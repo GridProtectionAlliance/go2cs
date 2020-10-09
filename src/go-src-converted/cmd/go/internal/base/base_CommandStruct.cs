@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:30 UTC
+//     Generated on 2020 October 09 05:45:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using sync = go.sync_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

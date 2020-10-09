@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 October 08 03:18:57 UTC
+// package sync -- go2cs converted at 2020 October 09 05:01:09 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\runtime.go
 using @unsafe = go.@unsafe_package;

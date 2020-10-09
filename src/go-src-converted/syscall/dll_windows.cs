@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 October 08 00:34:01 UTC
+// package syscall -- go2cs converted at 2020 October 09 04:45:24 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\dll_windows.go
 using sysdll = go.@internal.syscall.windows.sysdll_package;

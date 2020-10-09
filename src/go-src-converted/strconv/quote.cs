@@ -4,7 +4,7 @@
 
 //go:generate go run makeisprint.go -output isprint.go
 
-// package strconv -- go2cs converted at 2020 October 08 03:49:00 UTC
+// package strconv -- go2cs converted at 2020 October 09 05:06:35 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\quote.go
 using bytealg = go.@internal.bytealg_package;

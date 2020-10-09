@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objfile -- go2cs converted at 2020 October 08 03:49:34 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:08:16 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\disasm.go
 using bufio = go.bufio_package;

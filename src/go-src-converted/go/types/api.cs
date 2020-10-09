@@ -24,7 +24,7 @@
 //
 // For a tutorial, see https://golang.org/s/types-tutorial.
 //
-// package types -- go2cs converted at 2020 October 08 04:02:31 UTC
+// package types -- go2cs converted at 2020 October 09 05:18:56 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\api.go
 using bytes = go.bytes_package;

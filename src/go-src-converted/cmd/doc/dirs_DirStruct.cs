@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:02 UTC
+//     Generated on 2020 October 09 05:44:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using regexp = go.regexp_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using semver = go.golang.org.x.mod.semver_package;
+
+#nullable enable
 
 namespace go
 {

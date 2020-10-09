@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 08 03:19:07 UTC
+// package sys -- go2cs converted at 2020 October 09 04:45:29 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\arch.go
 
@@ -19,15 +19,15 @@ namespace @internal
         }
 
         public static readonly ArchFamilyType AMD64 = (ArchFamilyType)iota;
-        public static readonly var ARM = (var)0;
-        public static readonly var ARM64 = (var)1;
-        public static readonly var I386 = (var)2;
-        public static readonly var MIPS = (var)3;
-        public static readonly var MIPS64 = (var)4;
-        public static readonly var PPC64 = (var)5;
-        public static readonly var RISCV64 = (var)6;
-        public static readonly var S390X = (var)7;
-        public static readonly var WASM = (var)8;
+        public static readonly var ARM = 0;
+        public static readonly var ARM64 = 1;
+        public static readonly var I386 = 2;
+        public static readonly var MIPS = 3;
+        public static readonly var MIPS64 = 4;
+        public static readonly var PPC64 = 5;
+        public static readonly var RISCV64 = 6;
+        public static readonly var S390X = 7;
+        public static readonly var WASM = 8;
 
     }
 }}}

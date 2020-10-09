@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package s390x -- go2cs converted at 2020 October 08 04:40:32 UTC
+// package s390x -- go2cs converted at 2020 October 09 05:51:15 UTC
 // import "cmd/oldlink/internal/s390x" ==> using s390x = go.cmd.oldlink.@internal.s390x_package
 // Original source: C:\Go\src\cmd\oldlink\internal\s390x\l.go
 

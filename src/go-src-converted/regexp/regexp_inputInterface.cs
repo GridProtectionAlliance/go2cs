@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:17 UTC
+//     Generated on 2020 October 09 04:58:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -46,7 +47,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class input<T> : input
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace go
             private delegate lazyFlag stepByPtr(ptr<T> value, long pos);
             private delegate lazyFlag stepByVal(T value, long pos);
 
-            private static readonly stepByPtr s_stepByPtr;
-            private static readonly stepByVal s_stepByVal;
+            private static readonly stepByPtr? s_stepByPtr;
+            private static readonly stepByVal? s_stepByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public lazyFlag step(long pos)
@@ -92,8 +93,8 @@ namespace go
             private delegate lazyFlag canCheckPrefixByPtr(ptr<T> value);
             private delegate lazyFlag canCheckPrefixByVal(T value);
 
-            private static readonly canCheckPrefixByPtr s_canCheckPrefixByPtr;
-            private static readonly canCheckPrefixByVal s_canCheckPrefixByVal;
+            private static readonly canCheckPrefixByPtr? s_canCheckPrefixByPtr;
+            private static readonly canCheckPrefixByVal? s_canCheckPrefixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public lazyFlag canCheckPrefix()
@@ -112,8 +113,8 @@ namespace go
             private delegate lazyFlag hasPrefixByPtr(ptr<T> value, ptr<Regexp> re);
             private delegate lazyFlag hasPrefixByVal(T value, ptr<Regexp> re);
 
-            private static readonly hasPrefixByPtr s_hasPrefixByPtr;
-            private static readonly hasPrefixByVal s_hasPrefixByVal;
+            private static readonly hasPrefixByPtr? s_hasPrefixByPtr;
+            private static readonly hasPrefixByVal? s_hasPrefixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public lazyFlag hasPrefix(ptr<Regexp> re)
@@ -132,8 +133,8 @@ namespace go
             private delegate lazyFlag indexByPtr(ptr<T> value, ptr<Regexp> re, long pos);
             private delegate lazyFlag indexByVal(T value, ptr<Regexp> re, long pos);
 
-            private static readonly indexByPtr s_indexByPtr;
-            private static readonly indexByVal s_indexByVal;
+            private static readonly indexByPtr? s_indexByPtr;
+            private static readonly indexByVal? s_indexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public lazyFlag index(ptr<Regexp> re, long pos)
@@ -152,8 +153,8 @@ namespace go
             private delegate lazyFlag contextByPtr(ptr<T> value, long pos);
             private delegate lazyFlag contextByVal(T value, long pos);
 
-            private static readonly contextByPtr s_contextByPtr;
-            private static readonly contextByVal s_contextByVal;
+            private static readonly contextByPtr? s_contextByPtr;
+            private static readonly contextByVal? s_contextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public lazyFlag context(long pos)
@@ -169,7 +170,7 @@ namespace go
                 return s_contextByPtr(m_target_ptr, pos);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static input()

@@ -8,7 +8,7 @@
 // code but require careful thought to use correctly.
 //
 // This is a mirror of golang.org/x/crypto/internal/subtle.
-// package subtle -- go2cs converted at 2020 October 08 03:35:31 UTC
+// package subtle -- go2cs converted at 2020 October 09 04:53:02 UTC
 // import "crypto/internal/subtle" ==> using subtle = go.crypto.@internal.subtle_package
 // Original source: C:\Go\src\crypto\internal\subtle\aliasing_appengine.go
 // import "crypto/internal/subtle"

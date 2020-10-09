@@ -4,7 +4,7 @@
 
 // +build android
 
-// package user -- go2cs converted at 2020 October 08 03:45:32 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:35 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup_android.go
 using errors = go.errors_package;

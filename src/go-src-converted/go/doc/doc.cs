@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package doc extracts source code documentation from a Go AST.
-// package doc -- go2cs converted at 2020 October 08 04:02:41 UTC
+// package doc -- go2cs converted at 2020 October 09 05:19:03 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\doc.go
 using fmt = go.fmt_package;
@@ -104,12 +104,12 @@ namespace go
 
         // AllMethods says to show all embedded methods, not just the ones of
         // invisible (unexported) anonymous fields.
-        public static readonly var AllMethods = (var)0; 
+        public static readonly var AllMethods = 0; 
 
         // PreserveAST says to leave the AST unmodified. Originally, pieces of
         // the AST such as function bodies were nil-ed out to save memory in
         // godoc, but not all programs want that behavior.
-        public static readonly var PreserveAST = (var)1;
+        public static readonly var PreserveAST = 1;
 
 
         // New computes the package documentation for the given package AST.

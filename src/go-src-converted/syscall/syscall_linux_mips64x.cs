@@ -5,7 +5,7 @@
 // +build linux
 // +build mips64 mips64le
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:32 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:50 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_linux_mips64x.go
 
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var _SYS_setgroups = (var)SYS_SETGROUPS;
+        private static readonly var _SYS_setgroups = SYS_SETGROUPS;
 
         //sys    Dup2(oldfd int, newfd int) (err error)
         //sysnb    EpollCreate(size int) (fd int, err error)
@@ -271,7 +271,7 @@ namespace go
 
             ptr<stat_t> st = addr(new stat_t());
             err = fstat(fd, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 
@@ -282,7 +282,7 @@ namespace go
 
             ptr<stat_t> st = addr(new stat_t());
             err = lstat(path, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 
@@ -293,7 +293,7 @@ namespace go
 
             ptr<stat_t> st = addr(new stat_t());
             err = stat(path, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 

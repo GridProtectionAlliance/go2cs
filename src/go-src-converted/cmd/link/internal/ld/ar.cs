@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:37:21 UTC
+// package ld -- go2cs converted at 2020 October 09 05:48:24 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\ar.go
 using bio = go.cmd.@internal.bio_package;

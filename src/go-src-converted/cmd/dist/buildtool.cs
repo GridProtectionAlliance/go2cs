@@ -9,7 +9,7 @@
 // invoke the Go 1.4 go command to build those sources,
 // and then copy the binaries back.
 
-// package main -- go2cs converted at 2020 October 08 04:32:45 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:33 UTC
 // Original source: C:\Go\src\cmd\dist\buildtool.go
 using fmt = go.fmt_package;
 using os = go.os_package;

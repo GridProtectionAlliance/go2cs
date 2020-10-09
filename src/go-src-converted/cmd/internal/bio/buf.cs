@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package bio implements common I/O abstractions used within the Go toolchain.
-// package bio -- go2cs converted at 2020 October 08 03:50:12 UTC
+// package bio -- go2cs converted at 2020 October 09 05:08:50 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Go\src\cmd\internal\bio\buf.go
 using bufio = go.bufio_package;

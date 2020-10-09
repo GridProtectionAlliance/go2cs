@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package x509 parses X.509-encoded keys and certificates.
-// package x509 -- go2cs converted at 2020 October 08 03:37:22 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:55:08 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\x509.go
 using bytes = go.bytes_package;
@@ -253,22 +253,22 @@ namespace crypto
         }
 
         public static readonly SignatureAlgorithm UnknownSignatureAlgorithm = (SignatureAlgorithm)iota;
-        public static readonly var MD2WithRSA = (var)0;
-        public static readonly var MD5WithRSA = (var)1;
-        public static readonly var SHA1WithRSA = (var)2;
-        public static readonly var SHA256WithRSA = (var)3;
-        public static readonly var SHA384WithRSA = (var)4;
-        public static readonly var SHA512WithRSA = (var)5;
-        public static readonly var DSAWithSHA1 = (var)6;
-        public static readonly var DSAWithSHA256 = (var)7;
-        public static readonly var ECDSAWithSHA1 = (var)8;
-        public static readonly var ECDSAWithSHA256 = (var)9;
-        public static readonly var ECDSAWithSHA384 = (var)10;
-        public static readonly var ECDSAWithSHA512 = (var)11;
-        public static readonly var SHA256WithRSAPSS = (var)12;
-        public static readonly var SHA384WithRSAPSS = (var)13;
-        public static readonly var SHA512WithRSAPSS = (var)14;
-        public static readonly var PureEd25519 = (var)15;
+        public static readonly var MD2WithRSA = 0;
+        public static readonly var MD5WithRSA = 1;
+        public static readonly var SHA1WithRSA = 2;
+        public static readonly var SHA256WithRSA = 3;
+        public static readonly var SHA384WithRSA = 4;
+        public static readonly var SHA512WithRSA = 5;
+        public static readonly var DSAWithSHA1 = 6;
+        public static readonly var DSAWithSHA256 = 7;
+        public static readonly var ECDSAWithSHA1 = 8;
+        public static readonly var ECDSAWithSHA256 = 9;
+        public static readonly var ECDSAWithSHA384 = 10;
+        public static readonly var ECDSAWithSHA512 = 11;
+        public static readonly var SHA256WithRSAPSS = 12;
+        public static readonly var SHA384WithRSAPSS = 13;
+        public static readonly var SHA512WithRSAPSS = 14;
+        public static readonly var PureEd25519 = 15;
 
 
         public static bool isRSAPSS(this SignatureAlgorithm algo)
@@ -300,10 +300,10 @@ namespace crypto
         }
 
         public static readonly PublicKeyAlgorithm UnknownPublicKeyAlgorithm = (PublicKeyAlgorithm)iota;
-        public static readonly var RSA = (var)0;
-        public static readonly var DSA = (var)1;
-        public static readonly var ECDSA = (var)2;
-        public static readonly var Ed25519 = (var)3;
+        public static readonly var RSA = 0;
+        public static readonly var DSA = 1;
+        public static readonly var ECDSA = 2;
+        public static readonly var Ed25519 = 3;
 
 
         private static array<@string> publicKeyAlgoName = new array<@string>(InitKeyedValues<@string>((RSA, "RSA"), (DSA, "DSA"), (ECDSA, "ECDSA"), (Ed25519, "Ed25519")));
@@ -594,14 +594,14 @@ namespace crypto
         }
 
         public static readonly KeyUsage KeyUsageDigitalSignature = (KeyUsage)1L << (int)(iota);
-        public static readonly var KeyUsageContentCommitment = (var)0;
-        public static readonly var KeyUsageKeyEncipherment = (var)1;
-        public static readonly var KeyUsageDataEncipherment = (var)2;
-        public static readonly var KeyUsageKeyAgreement = (var)3;
-        public static readonly var KeyUsageCertSign = (var)4;
-        public static readonly var KeyUsageCRLSign = (var)5;
-        public static readonly var KeyUsageEncipherOnly = (var)6;
-        public static readonly var KeyUsageDecipherOnly = (var)7;
+        public static readonly var KeyUsageContentCommitment = 0;
+        public static readonly var KeyUsageKeyEncipherment = 1;
+        public static readonly var KeyUsageDataEncipherment = 2;
+        public static readonly var KeyUsageKeyAgreement = 3;
+        public static readonly var KeyUsageCertSign = 4;
+        public static readonly var KeyUsageCRLSign = 5;
+        public static readonly var KeyUsageEncipherOnly = 6;
+        public static readonly var KeyUsageDecipherOnly = 7;
 
 
         // RFC 5280, 4.2.1.12  Extended Key Usage
@@ -625,19 +625,19 @@ namespace crypto
         }
 
         public static readonly ExtKeyUsage ExtKeyUsageAny = (ExtKeyUsage)iota;
-        public static readonly var ExtKeyUsageServerAuth = (var)0;
-        public static readonly var ExtKeyUsageClientAuth = (var)1;
-        public static readonly var ExtKeyUsageCodeSigning = (var)2;
-        public static readonly var ExtKeyUsageEmailProtection = (var)3;
-        public static readonly var ExtKeyUsageIPSECEndSystem = (var)4;
-        public static readonly var ExtKeyUsageIPSECTunnel = (var)5;
-        public static readonly var ExtKeyUsageIPSECUser = (var)6;
-        public static readonly var ExtKeyUsageTimeStamping = (var)7;
-        public static readonly var ExtKeyUsageOCSPSigning = (var)8;
-        public static readonly var ExtKeyUsageMicrosoftServerGatedCrypto = (var)9;
-        public static readonly var ExtKeyUsageNetscapeServerGatedCrypto = (var)10;
-        public static readonly var ExtKeyUsageMicrosoftCommercialCodeSigning = (var)11;
-        public static readonly var ExtKeyUsageMicrosoftKernelCodeSigning = (var)12;
+        public static readonly var ExtKeyUsageServerAuth = 0;
+        public static readonly var ExtKeyUsageClientAuth = 1;
+        public static readonly var ExtKeyUsageCodeSigning = 2;
+        public static readonly var ExtKeyUsageEmailProtection = 3;
+        public static readonly var ExtKeyUsageIPSECEndSystem = 4;
+        public static readonly var ExtKeyUsageIPSECTunnel = 5;
+        public static readonly var ExtKeyUsageIPSECUser = 6;
+        public static readonly var ExtKeyUsageTimeStamping = 7;
+        public static readonly var ExtKeyUsageOCSPSigning = 8;
+        public static readonly var ExtKeyUsageMicrosoftServerGatedCrypto = 9;
+        public static readonly var ExtKeyUsageNetscapeServerGatedCrypto = 10;
+        public static readonly var ExtKeyUsageMicrosoftCommercialCodeSigning = 11;
+        public static readonly var ExtKeyUsageMicrosoftKernelCodeSigning = 12;
 
 
         // extKeyUsageOIDs contains the mapping between an ExtKeyUsage and its OID.

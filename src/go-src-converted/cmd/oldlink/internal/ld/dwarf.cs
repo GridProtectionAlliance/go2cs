@@ -11,7 +11,7 @@
 //   - file:line info for variables
 //   - make strings a typedef so prettyprinters can see the underlying string type
 
-// package ld -- go2cs converted at 2020 October 08 04:40:59 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:40 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\dwarf.go
 using dwarf = go.cmd.@internal.dwarf_package;

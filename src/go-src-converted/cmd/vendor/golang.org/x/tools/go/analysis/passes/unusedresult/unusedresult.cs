@@ -4,7 +4,7 @@
 
 // Package unusedresult defines an analyzer that checks for unused
 // results of calls to certain pure functions.
-// package unusedresult -- go2cs converted at 2020 October 08 04:58:18 UTC
+// package unusedresult -- go2cs converted at 2020 October 09 06:04:50 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unusedresult" ==> using unusedresult = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unusedresult_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unusedresult\unusedresult.go
 using ast = go.go.ast_package;

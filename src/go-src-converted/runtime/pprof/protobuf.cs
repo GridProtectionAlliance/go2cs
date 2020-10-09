@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 October 08 03:31:04 UTC
+// package pprof -- go2cs converted at 2020 October 09 04:50:21 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\protobuf.go
 

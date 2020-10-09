@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package iotest implements Readers and Writers useful mainly for testing.
-// package iotest -- go2cs converted at 2020 October 08 04:36:39 UTC
+// package iotest -- go2cs converted at 2020 October 09 05:47:48 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Go\src\testing\iotest\reader.go
 using errors = go.errors_package;

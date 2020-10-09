@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 October 08 03:18:57 UTC
+// package sync -- go2cs converted at 2020 October 09 05:01:09 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\poolqueue.go
 using atomic = go.sync.atomic_package;
@@ -309,7 +309,7 @@ namespace go
             ptr<poolChainElt> d2 = addr(new poolChainElt(prev:d));
             d2.vals = make_slice<eface>(newSize);
             c.head = d2;
-            storePoolChainElt(_addr_d.next, _addr_d2);
+            storePoolChainElt(_addr_d.next, d2);
             d2.pushHead(val);
 
         }

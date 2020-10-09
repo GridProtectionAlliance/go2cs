@@ -92,7 +92,7 @@
 // dead (meaning that foo() never accesses B again after it calls
 // bar()), then B's pointers into the heap are not considered live.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:00 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:49 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgcstack.go
 using sys = go.runtime.@internal.sys_package;
@@ -103,7 +103,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var stackTraceDebug = (var)false;
+        private static readonly var stackTraceDebug = false;
 
         // Buffer for pointers found during stack tracing.
         // Must be smaller than or equal to workbuf.

@@ -4,7 +4,7 @@
 
 // Package cpu implements processor feature detection
 // used by the Go standard library.
-// package cpu -- go2cs converted at 2020 October 08 03:19:09 UTC
+// package cpu -- go2cs converted at 2020 October 09 04:45:29 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Go\src\internal\cpu\cpu.go
 

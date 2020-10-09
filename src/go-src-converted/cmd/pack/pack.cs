@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:42:09 UTC
+// package main -- go2cs converted at 2020 October 09 05:52:46 UTC
 // Original source: C:\Go\src\cmd\pack\pack.go
 using fmt = go.fmt_package;
 using io = go.io_package;

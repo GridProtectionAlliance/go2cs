@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:15 UTC
+//     Generated on 2020 October 09 05:47:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using utf8 = go.unicode.utf8_package;
 using ed25519 = go.golang.org.x.crypto.ed25519_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -55,7 +56,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Verifier<T> : Verifier
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -81,8 +82,8 @@ namespace sumdb
             private delegate bool NameByPtr(ptr<T> value);
             private delegate bool NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Name()
@@ -101,8 +102,8 @@ namespace sumdb
             private delegate bool KeyHashByPtr(ptr<T> value);
             private delegate bool KeyHashByVal(T value);
 
-            private static readonly KeyHashByPtr s_KeyHashByPtr;
-            private static readonly KeyHashByVal s_KeyHashByVal;
+            private static readonly KeyHashByPtr? s_KeyHashByPtr;
+            private static readonly KeyHashByVal? s_KeyHashByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool KeyHash()
@@ -121,8 +122,8 @@ namespace sumdb
             private delegate bool VerifyByPtr(ptr<T> value, slice<byte> msg, slice<byte> sig);
             private delegate bool VerifyByVal(T value, slice<byte> msg, slice<byte> sig);
 
-            private static readonly VerifyByPtr s_VerifyByPtr;
-            private static readonly VerifyByVal s_VerifyByVal;
+            private static readonly VerifyByPtr? s_VerifyByPtr;
+            private static readonly VerifyByVal? s_VerifyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Verify(slice<byte> msg, slice<byte> sig)
@@ -138,7 +139,7 @@ namespace sumdb
                 return s_VerifyByPtr(m_target_ptr, msg, sig);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Verifier()

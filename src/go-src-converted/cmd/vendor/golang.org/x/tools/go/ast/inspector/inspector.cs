@@ -16,7 +16,7 @@
 // benefit to amortize the inspector's construction cost.
 // If efficiency is the primary concern, do not use Inspector for
 // one-off traversals.
-// package inspector -- go2cs converted at 2020 October 08 04:58:26 UTC
+// package inspector -- go2cs converted at 2020 October 09 06:04:59 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/inspector" ==> using inspector = go.cmd.vendor.golang.org.x.tools.go.ast.inspector_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\ast\inspector\inspector.go
 // There are four orthogonal features in a traversal:

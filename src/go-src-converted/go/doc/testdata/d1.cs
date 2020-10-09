@@ -4,7 +4,7 @@
 
 // Test cases for sort order of declarations.
 
-// package d -- go2cs converted at 2020 October 08 04:02:53 UTC
+// package d -- go2cs converted at 2020 October 09 05:19:10 UTC
 // import "go/doc.d" ==> using d = go.go.doc.d_package
 // Original source: C:\Go\src\go\doc\testdata\d1.go
 
@@ -25,9 +25,9 @@ namespace go
         public static long V2 = default;
 
         // CBx constants should appear before CAx constants.
-        public static readonly var CB2 = (var)iota; // before CB1
-        public static readonly var CB1 = (var)0; // before CB0
-        public static readonly var CB0 = (var)1; // at end
+        public static readonly var CB2 = iota; // before CB1
+        public static readonly var CB1 = 0; // before CB0
+        public static readonly var CB0 = 1; // at end
 
         // VBx variables should appear before VAx variables.
         public static long VB2 = default;        public static long VB1 = default;        public static long VB0 = default;

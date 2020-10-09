@@ -4,7 +4,7 @@
 
 // +build !wasm
 
-// package atomic -- go2cs converted at 2020 October 08 03:19:11 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:34 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\stubs.go
 using @unsafe = go.@unsafe_package;

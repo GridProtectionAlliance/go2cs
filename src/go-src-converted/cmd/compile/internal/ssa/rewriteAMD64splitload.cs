@@ -1,7 +1,7 @@
 // Code generated from gen/AMD64splitload.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2020 October 08 04:15:40 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:29:13 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\rewriteAMD64splitload.go
 

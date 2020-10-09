@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:08:09 UTC
+//     Generated on 2020 October 09 05:23:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using strings = go.strings_package;
 using scanner = go.text.scanner_package;
 using src = go.cmd.@internal.src_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2020 October 08 01:30:41 UTC
+// package tar -- go2cs converted at 2020 October 09 05:08:01 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\format.go
 using strings = go.strings_package;
@@ -60,10 +60,10 @@ namespace archive
         private static readonly Format _ = (Format)(1L << (int)(iota)) / 4L; // Sequence of 0, 0, 1, 2, 4, 8, etc...
 
         // FormatUnknown indicates that the format is unknown.
-        public static readonly var FormatUnknown = (var)0; 
+        public static readonly var FormatUnknown = 0; 
 
         // The format of the original Unix V7 tar tool prior to standardization.
-        private static readonly var formatV7 = (var)1; 
+        private static readonly var formatV7 = 1; 
 
         // FormatUSTAR represents the USTAR header format defined in POSIX.1-1988.
         //
@@ -74,7 +74,7 @@ namespace archive
         //
         // Reference:
         //    http://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_06
-        public static readonly var FormatUSTAR = (var)2; 
+        public static readonly var FormatUSTAR = 2; 
 
         // FormatPAX represents the PAX header format defined in POSIX.1-2001.
         //
@@ -90,7 +90,7 @@ namespace archive
         //
         // Reference:
         //    http://pubs.opengroup.org/onlinepubs/009695399/utilities/pax.html
-        public static readonly var FormatPAX = (var)3; 
+        public static readonly var FormatPAX = 3; 
 
         // FormatGNU represents the GNU header format.
         //
@@ -104,14 +104,14 @@ namespace archive
         //
         // Reference:
         //    https://www.gnu.org/software/tar/manual/html_node/Standard.html
-        public static readonly var FormatGNU = (var)4; 
+        public static readonly var FormatGNU = 4; 
 
         // Schily's tar format, which is incompatible with USTAR.
         // This does not cover STAR extensions to the PAX format; these fall under
         // the PAX format.
-        private static readonly var formatSTAR = (var)5;
+        private static readonly var formatSTAR = 5;
 
-        private static readonly var formatMax = (var)6;
+        private static readonly var formatMax = 6;
 
 
         public static bool has(this Format f, Format f2)

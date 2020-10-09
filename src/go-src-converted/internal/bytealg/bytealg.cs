@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bytealg -- go2cs converted at 2020 October 08 03:19:42 UTC
+// package bytealg -- go2cs converted at 2020 October 09 04:45:56 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Go\src\internal\bytealg\bytealg.go
 using cpu = go.@internal.cpu_package;
@@ -15,12 +15,12 @@ namespace @internal
     public static partial class bytealg_package
     {
         // Offsets into internal/cpu records for use in assembly.
-        private static readonly var offsetX86HasSSE2 = (var)@unsafe.Offsetof(cpu.X86.HasSSE2);
-        private static readonly var offsetX86HasSSE42 = (var)@unsafe.Offsetof(cpu.X86.HasSSE42);
-        private static readonly var offsetX86HasAVX2 = (var)@unsafe.Offsetof(cpu.X86.HasAVX2);
-        private static readonly var offsetX86HasPOPCNT = (var)@unsafe.Offsetof(cpu.X86.HasPOPCNT);
+        private static readonly var offsetX86HasSSE2 = @unsafe.Offsetof(cpu.X86.HasSSE2);
+        private static readonly var offsetX86HasSSE42 = @unsafe.Offsetof(cpu.X86.HasSSE42);
+        private static readonly var offsetX86HasAVX2 = @unsafe.Offsetof(cpu.X86.HasAVX2);
+        private static readonly var offsetX86HasPOPCNT = @unsafe.Offsetof(cpu.X86.HasPOPCNT);
 
-        private static readonly var offsetS390xHasVX = (var)@unsafe.Offsetof(cpu.S390X.HasVX);
+        private static readonly var offsetS390xHasVX = @unsafe.Offsetof(cpu.S390X.HasVX);
 
 
         // MaxLen is the maximum length of the string to be searched for (argument b) in Index.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 October 08 03:32:25 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:12 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd_windows.go
 using errors = go.errors_package;
@@ -310,10 +310,10 @@ namespace @internal
         }
 
         private static readonly fileKind kindNet = (fileKind)iota;
-        private static readonly var kindFile = (var)0;
-        private static readonly var kindConsole = (var)1;
-        private static readonly var kindDir = (var)2;
-        private static readonly var kindPipe = (var)3;
+        private static readonly var kindFile = 0;
+        private static readonly var kindConsole = 1;
+        private static readonly var kindDir = 2;
+        private static readonly var kindPipe = 3;
 
 
         // logInitFD is set by tests to enable file descriptor initialization logging.

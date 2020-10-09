@@ -5,7 +5,7 @@
 // +build linux
 // +build ppc64 ppc64le
 
-// package cpu -- go2cs converted at 2020 October 08 05:01:49 UTC
+// package cpu -- go2cs converted at 2020 October 09 06:07:54 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_linux_ppc64x.go
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:15 UTC
+//     Generated on 2020 October 09 06:01:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using reflect = go.reflect_package;
 using analysisinternal = go.golang.org.x.tools.@internal.analysisinternal_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Fact<T> : Fact
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace go
             private delegate void AFactByPtr(ptr<T> value);
             private delegate void AFactByVal(T value);
 
-            private static readonly AFactByPtr s_AFactByPtr;
-            private static readonly AFactByVal s_AFactByVal;
+            private static readonly AFactByPtr? s_AFactByPtr;
+            private static readonly AFactByVal? s_AFactByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AFact()
@@ -100,7 +101,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Fact()

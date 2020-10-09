@@ -22,7 +22,7 @@
 // These calls return err == nil to indicate success; otherwise
 // err represents an operating system error describing the failure and
 // holds a value of type syscall.Errno.
-// package unix -- go2cs converted at 2020 October 08 04:46:37 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:21 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall.go
 // import "golang.org/x/sys/unix"

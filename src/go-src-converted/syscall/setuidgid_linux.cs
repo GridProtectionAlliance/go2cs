@@ -5,7 +5,7 @@
 // +build linux
 // +build !386,!arm
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:02 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\setuidgid_linux.go
 
@@ -15,10 +15,10 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var sys_GETEUID = (var)SYS_GETEUID;
+        private static readonly var sys_GETEUID = SYS_GETEUID;
 
-        private static readonly var sys_SETGID = (var)SYS_SETGID;
-        private static readonly var sys_SETUID = (var)SYS_SETUID;
+        private static readonly var sys_SETGID = SYS_SETGID;
+        private static readonly var sys_SETUID = SYS_SETUID;
 
     }
 }

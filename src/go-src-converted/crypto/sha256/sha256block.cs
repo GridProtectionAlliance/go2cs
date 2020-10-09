@@ -6,7 +6,7 @@
 // In its own file so that a faster assembly or C version
 // can be substituted easily.
 
-// package sha256 -- go2cs converted at 2020 October 08 03:36:43 UTC
+// package sha256 -- go2cs converted at 2020 October 09 04:54:40 UTC
 // import "crypto/sha256" ==> using sha256 = go.crypto.sha256_package
 // Original source: C:\Go\src\crypto\sha256\sha256block.go
 using bits = go.math.bits_package;

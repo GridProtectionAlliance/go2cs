@@ -7,7 +7,7 @@
 // This file contains an implementation of a data structure which
 // manages ordered address ranges.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:28 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:08 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mranges.go
 using sys = go.runtime.@internal.sys_package;

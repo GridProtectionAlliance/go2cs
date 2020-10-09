@@ -4,7 +4,7 @@
 
 // +build generate
 
-// package windows -- go2cs converted at 2020 October 08 03:32:26 UTC
+// package windows -- go2cs converted at 2020 October 09 04:51:12 UTC
 // import "internal/syscall/windows" ==> using windows = go.@internal.syscall.windows_package
 // Original source: C:\Go\src\internal\syscall\windows\mksyscall.go
     }

@@ -27,7 +27,7 @@
 // So out of paranoia, we reject @ at the beginning of every
 // flag argument that might be split into its own argument.
 
-// package work -- go2cs converted at 2020 October 08 04:35:04 UTC
+// package work -- go2cs converted at 2020 October 09 05:46:25 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\security.go
 using fmt = go.fmt_package;

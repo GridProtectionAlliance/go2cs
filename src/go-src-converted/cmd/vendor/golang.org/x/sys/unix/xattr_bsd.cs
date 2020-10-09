@@ -4,7 +4,7 @@
 
 // +build freebsd netbsd
 
-// package unix -- go2cs converted at 2020 October 08 04:48:06 UTC
+// package unix -- go2cs converted at 2020 October 09 05:57:03 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\xattr_bsd.go
 using strings = go.strings_package;

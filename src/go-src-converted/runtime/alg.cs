@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 00:34:07 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:29 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\alg.go
 using cpu = go.@internal.cpu_package;
@@ -14,26 +14,26 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var c0 = (var)uintptr((8L - sys.PtrSize) / 4L * 2860486313L + (sys.PtrSize - 4L) / 4L * 33054211828000289L);
-        private static readonly var c1 = (var)uintptr((8L - sys.PtrSize) / 4L * 3267000013L + (sys.PtrSize - 4L) / 4L * 23344194077549503L);
+        private static readonly var c0 = uintptr((8L - sys.PtrSize) / 4L * 2860486313L + (sys.PtrSize - 4L) / 4L * 33054211828000289L);
+        private static readonly var c1 = uintptr((8L - sys.PtrSize) / 4L * 3267000013L + (sys.PtrSize - 4L) / 4L * 23344194077549503L);
 
 
         // type algorithms - known to compiler
-        private static readonly var alg_NOEQ = (var)iota;
-        private static readonly var alg_MEM0 = (var)0;
-        private static readonly var alg_MEM8 = (var)1;
-        private static readonly var alg_MEM16 = (var)2;
-        private static readonly var alg_MEM32 = (var)3;
-        private static readonly var alg_MEM64 = (var)4;
-        private static readonly var alg_MEM128 = (var)5;
-        private static readonly var alg_STRING = (var)6;
-        private static readonly var alg_INTER = (var)7;
-        private static readonly var alg_NILINTER = (var)8;
-        private static readonly var alg_FLOAT32 = (var)9;
-        private static readonly var alg_FLOAT64 = (var)10;
-        private static readonly var alg_CPLX64 = (var)11;
-        private static readonly var alg_CPLX128 = (var)12;
-        private static readonly var alg_max = (var)13;
+        private static readonly var alg_NOEQ = iota;
+        private static readonly var alg_MEM0 = 0;
+        private static readonly var alg_MEM8 = 1;
+        private static readonly var alg_MEM16 = 2;
+        private static readonly var alg_MEM32 = 3;
+        private static readonly var alg_MEM64 = 4;
+        private static readonly var alg_MEM128 = 5;
+        private static readonly var alg_STRING = 6;
+        private static readonly var alg_INTER = 7;
+        private static readonly var alg_NILINTER = 8;
+        private static readonly var alg_FLOAT32 = 9;
+        private static readonly var alg_FLOAT64 = 10;
+        private static readonly var alg_CPLX64 = 11;
+        private static readonly var alg_CPLX128 = 12;
+        private static readonly var alg_max = 13;
 
 
         private static System.UIntPtr memhash0(unsafe.Pointer p, System.UIntPtr h)
@@ -447,7 +447,7 @@ namespace go
             return interhash(noescape(@unsafe.Pointer(_addr_i)), seed);
         }
 
-        private static readonly var hashRandomBytes = (var)sys.PtrSize / 4L * 64L;
+        private static readonly var hashRandomBytes = sys.PtrSize / 4L * 64L;
 
         // used in asm_{386,amd64,arm64}.s to seed the hash function
 

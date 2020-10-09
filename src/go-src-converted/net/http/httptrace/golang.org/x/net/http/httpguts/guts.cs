@@ -7,7 +7,7 @@
 //
 // This package is shared by the standard library (which vendors it)
 // and x/net/http2. It comes with no API stability promise.
-// package httpguts -- go2cs converted at 2020 October 08 03:39:22 UTC
+// package httpguts -- go2cs converted at 2020 October 09 04:56:56 UTC
 // import "golang.org/x/net/http/httpguts" ==> using httpguts = go.golang.org.x.net.http.httpguts_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\http\httpguts\guts.go
 using textproto = go.net.textproto_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:33:18 UTC
+//     Generated on 2020 October 09 04:51:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Message<T> : Message
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace net
             private delegate slice<Sys> SysByPtr(ptr<T> value);
             private delegate slice<Sys> SysByVal(T value);
 
-            private static readonly SysByPtr s_SysByPtr;
-            private static readonly SysByVal s_SysByVal;
+            private static readonly SysByPtr? s_SysByPtr;
+            private static readonly SysByVal? s_SysByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<Sys> Sys()
@@ -85,7 +86,7 @@ namespace net
                 return s_SysByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Message()

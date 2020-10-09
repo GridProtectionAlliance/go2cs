@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:58 UTC
+//     Generated on 2020 October 09 04:59:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace template
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Node<T> : Node
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace template
             private delegate ptr<Tree> TypeByPtr(ptr<T> value);
             private delegate ptr<Tree> TypeByVal(T value);
 
-            private static readonly TypeByPtr s_TypeByPtr;
-            private static readonly TypeByVal s_TypeByVal;
+            private static readonly TypeByPtr? s_TypeByPtr;
+            private static readonly TypeByVal? s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> Type()
@@ -90,8 +91,8 @@ namespace template
             private delegate ptr<Tree> StringByPtr(ptr<T> value);
             private delegate ptr<Tree> StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> String()
@@ -110,8 +111,8 @@ namespace template
             private delegate ptr<Tree> CopyByPtr(ptr<T> value);
             private delegate ptr<Tree> CopyByVal(T value);
 
-            private static readonly CopyByPtr s_CopyByPtr;
-            private static readonly CopyByVal s_CopyByVal;
+            private static readonly CopyByPtr? s_CopyByPtr;
+            private static readonly CopyByVal? s_CopyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> Copy()
@@ -130,8 +131,8 @@ namespace template
             private delegate ptr<Tree> PositionByPtr(ptr<T> value);
             private delegate ptr<Tree> PositionByVal(T value);
 
-            private static readonly PositionByPtr s_PositionByPtr;
-            private static readonly PositionByVal s_PositionByVal;
+            private static readonly PositionByPtr? s_PositionByPtr;
+            private static readonly PositionByVal? s_PositionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> Position()
@@ -150,8 +151,8 @@ namespace template
             private delegate ptr<Tree> treeByPtr(ptr<T> value);
             private delegate ptr<Tree> treeByVal(T value);
 
-            private static readonly treeByPtr s_treeByPtr;
-            private static readonly treeByVal s_treeByVal;
+            private static readonly treeByPtr? s_treeByPtr;
+            private static readonly treeByVal? s_treeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> tree()
@@ -170,8 +171,8 @@ namespace template
             private delegate ptr<Tree> writeToByPtr(ptr<T> value, ptr<strings.Builder> _p0);
             private delegate ptr<Tree> writeToByVal(T value, ptr<strings.Builder> _p0);
 
-            private static readonly writeToByPtr s_writeToByPtr;
-            private static readonly writeToByVal s_writeToByVal;
+            private static readonly writeToByPtr? s_writeToByPtr;
+            private static readonly writeToByVal? s_writeToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Tree> writeTo(ptr<strings.Builder> _p0)
@@ -187,7 +188,7 @@ namespace template
                 return s_writeToByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Node()

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package report -- go2cs converted at 2020 October 08 04:43:25 UTC
+// package report -- go2cs converted at 2020 October 09 05:53:47 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source_html.go
 using template = go.html.template_package;

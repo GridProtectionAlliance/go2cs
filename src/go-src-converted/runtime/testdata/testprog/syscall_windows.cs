@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 03:43:46 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:51 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\syscall_windows.go
 using windows = go.@internal.syscall.windows_package;
 using runtime = go.runtime_package;

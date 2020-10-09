@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:44:23 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:02 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\exec.go
 using testlog = go.@internal.testlog_package;

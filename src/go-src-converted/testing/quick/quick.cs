@@ -5,7 +5,7 @@
 // Package quick implements utility functions to help with black box testing.
 //
 // The testing/quick package is frozen and is not accepting new features.
-// package quick -- go2cs converted at 2020 October 08 04:36:41 UTC
+// package quick -- go2cs converted at 2020 October 09 05:47:49 UTC
 // import "testing/quick" ==> using quick = go.testing.quick_package
 // Original source: C:\Go\src\testing\quick\quick.go
 using flag = go.flag_package;

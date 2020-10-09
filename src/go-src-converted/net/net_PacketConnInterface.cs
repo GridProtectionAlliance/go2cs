@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:34:02 UTC
+//     Generated on 2020 October 09 04:52:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -45,7 +46,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class PacketConn<T> : PacketConn
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace go
             private delegate error ReadFromByPtr(ptr<T> value, slice<byte> p);
             private delegate error ReadFromByVal(T value, slice<byte> p);
 
-            private static readonly ReadFromByPtr s_ReadFromByPtr;
-            private static readonly ReadFromByVal s_ReadFromByVal;
+            private static readonly ReadFromByPtr? s_ReadFromByPtr;
+            private static readonly ReadFromByVal? s_ReadFromByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadFrom(slice<byte> p)
@@ -91,8 +92,8 @@ namespace go
             private delegate error WriteToByPtr(ptr<T> value, slice<byte> p, Addr addr);
             private delegate error WriteToByVal(T value, slice<byte> p, Addr addr);
 
-            private static readonly WriteToByPtr s_WriteToByPtr;
-            private static readonly WriteToByVal s_WriteToByVal;
+            private static readonly WriteToByPtr? s_WriteToByPtr;
+            private static readonly WriteToByVal? s_WriteToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteTo(slice<byte> p, Addr addr)
@@ -111,8 +112,8 @@ namespace go
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -131,8 +132,8 @@ namespace go
             private delegate error LocalAddrByPtr(ptr<T> value);
             private delegate error LocalAddrByVal(T value);
 
-            private static readonly LocalAddrByPtr s_LocalAddrByPtr;
-            private static readonly LocalAddrByVal s_LocalAddrByVal;
+            private static readonly LocalAddrByPtr? s_LocalAddrByPtr;
+            private static readonly LocalAddrByVal? s_LocalAddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error LocalAddr()
@@ -151,8 +152,8 @@ namespace go
             private delegate error SetDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetDeadlineByPtr s_SetDeadlineByPtr;
-            private static readonly SetDeadlineByVal s_SetDeadlineByVal;
+            private static readonly SetDeadlineByPtr? s_SetDeadlineByPtr;
+            private static readonly SetDeadlineByVal? s_SetDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error SetDeadline(time.Time t)
@@ -171,8 +172,8 @@ namespace go
             private delegate error SetReadDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetReadDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetReadDeadlineByPtr s_SetReadDeadlineByPtr;
-            private static readonly SetReadDeadlineByVal s_SetReadDeadlineByVal;
+            private static readonly SetReadDeadlineByPtr? s_SetReadDeadlineByPtr;
+            private static readonly SetReadDeadlineByVal? s_SetReadDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error SetReadDeadline(time.Time t)
@@ -191,8 +192,8 @@ namespace go
             private delegate error SetWriteDeadlineByPtr(ptr<T> value, time.Time t);
             private delegate error SetWriteDeadlineByVal(T value, time.Time t);
 
-            private static readonly SetWriteDeadlineByPtr s_SetWriteDeadlineByPtr;
-            private static readonly SetWriteDeadlineByVal s_SetWriteDeadlineByVal;
+            private static readonly SetWriteDeadlineByPtr? s_SetWriteDeadlineByPtr;
+            private static readonly SetWriteDeadlineByVal? s_SetWriteDeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error SetWriteDeadline(time.Time t)
@@ -208,7 +209,7 @@ namespace go
                 return s_SetWriteDeadlineByPtr(m_target_ptr, t);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static PacketConn()

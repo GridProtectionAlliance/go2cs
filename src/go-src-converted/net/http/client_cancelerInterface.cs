@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:08 UTC
+//     Generated on 2020 October 09 04:52:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -54,7 +55,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class canceler<T> : canceler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace net
             private delegate void CancelRequestByPtr(ptr<T> value, ptr<Request> _p0);
             private delegate void CancelRequestByVal(T value, ptr<Request> _p0);
 
-            private static readonly CancelRequestByPtr s_CancelRequestByPtr;
-            private static readonly CancelRequestByVal s_CancelRequestByVal;
+            private static readonly CancelRequestByPtr? s_CancelRequestByPtr;
+            private static readonly CancelRequestByVal? s_CancelRequestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CancelRequest(ptr<Request> _p0)
@@ -102,7 +103,7 @@ namespace net
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static canceler()

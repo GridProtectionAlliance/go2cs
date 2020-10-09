@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:57:04 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:24 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\mode.go
 // This file defines the BuilderMode type and its command-line flag.
@@ -31,13 +31,13 @@ namespace go
         }
 
         public static readonly BuilderMode PrintPackages = (BuilderMode)1L << (int)(iota); // Print package inventory to stdout
-        public static readonly var PrintFunctions = (var)0; // Print function SSA code to stdout
-        public static readonly var LogSource = (var)1; // Log source locations as SSA builder progresses
-        public static readonly var SanityCheckFunctions = (var)2; // Perform sanity checking of function bodies
-        public static readonly var NaiveForm = (var)3; // Build naïve SSA form: don't replace local loads/stores with registers
-        public static readonly var BuildSerially = (var)4; // Build packages serially, not in parallel.
-        public static readonly var GlobalDebug = (var)5; // Enable debug info for all packages
-        public static readonly var BareInits = (var)6; // Build init functions without guards or calls to dependent inits
+        public static readonly var PrintFunctions = 0; // Print function SSA code to stdout
+        public static readonly var LogSource = 1; // Log source locations as SSA builder progresses
+        public static readonly var SanityCheckFunctions = 2; // Perform sanity checking of function bodies
+        public static readonly var NaiveForm = 3; // Build naïve SSA form: don't replace local loads/stores with registers
+        public static readonly var BuildSerially = 4; // Build packages serially, not in parallel.
+        public static readonly var GlobalDebug = 5; // Enable debug info for all packages
+        public static readonly var BareInits = 6; // Build init functions without guards or calls to dependent inits
 
         public static readonly @string BuilderModeDoc = (@string)@"Options controlling the SSA builder.
 The value is a sequence of zero or more of these letters:

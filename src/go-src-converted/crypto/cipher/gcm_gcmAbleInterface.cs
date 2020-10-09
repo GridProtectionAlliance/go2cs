@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:45 UTC
+//     Generated on 2020 October 09 04:53:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class gcmAble<T> : gcmAble
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace crypto
             private delegate (AEAD, error) NewGCMByPtr(ptr<T> value, long nonceSize, long tagSize);
             private delegate (AEAD, error) NewGCMByVal(T value, long nonceSize, long tagSize);
 
-            private static readonly NewGCMByPtr s_NewGCMByPtr;
-            private static readonly NewGCMByVal s_NewGCMByVal;
+            private static readonly NewGCMByPtr? s_NewGCMByPtr;
+            private static readonly NewGCMByVal? s_NewGCMByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (AEAD, error) NewGCM(long nonceSize, long tagSize)
@@ -87,7 +88,7 @@ namespace crypto
                 return s_NewGCMByPtr(m_target_ptr, nonceSize, tagSize);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static gcmAble()

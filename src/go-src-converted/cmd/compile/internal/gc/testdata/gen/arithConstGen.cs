@@ -8,7 +8,7 @@
 // launch with `go run arithConstGen.go` a file called arithConst.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2020 October 08 04:32:00 UTC
+// package main -- go2cs converted at 2020 October 09 05:43:54 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\arithConstGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;

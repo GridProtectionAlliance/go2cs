@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:56:12 UTC
+//     Generated on 2020 October 09 06:02:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using ast = go.go.ast_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class T14<T> : T14
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace @internal
             private delegate slice<T9> m3ByPtr(ptr<T> value, params object[] x);
             private delegate slice<T9> m3ByVal(T value, params object[] x);
 
-            private static readonly m3ByPtr s_m3ByPtr;
-            private static readonly m3ByVal s_m3ByVal;
+            private static readonly m3ByPtr? s_m3ByPtr;
+            private static readonly m3ByVal? s_m3ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<T9> m3(params object[] x)
@@ -88,8 +89,8 @@ namespace @internal
             private delegate float m1ByPtr(ptr<T> value);
             private delegate float m1ByVal(T value);
 
-            private static readonly m1ByPtr s_m1ByPtr;
-            private static readonly m1ByVal s_m1ByVal;
+            private static readonly m1ByPtr? s_m1ByPtr;
+            private static readonly m1ByVal? s_m1ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public float m1()
@@ -108,8 +109,8 @@ namespace @internal
             private delegate float m2ByPtr(ptr<T> value, long _p0);
             private delegate float m2ByVal(T value, long _p0);
 
-            private static readonly m2ByPtr s_m2ByPtr;
-            private static readonly m2ByVal s_m2ByVal;
+            private static readonly m2ByPtr? s_m2ByPtr;
+            private static readonly m2ByVal? s_m2ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public float m2(long _p0)
@@ -125,7 +126,7 @@ namespace @internal
                 return s_m2ByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static T14()

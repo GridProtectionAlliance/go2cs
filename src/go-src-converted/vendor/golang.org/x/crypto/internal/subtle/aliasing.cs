@@ -6,7 +6,7 @@
 
 // Package subtle implements functions that are often useful in cryptographic
 // code but require careful thought to use correctly.
-// package subtle -- go2cs converted at 2020 October 08 05:00:14 UTC
+// package subtle -- go2cs converted at 2020 October 09 06:06:32 UTC
 // import "vendor/golang.org/x/crypto/internal/subtle" ==> using subtle = go.vendor.golang.org.x.crypto.@internal.subtle_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\internal\subtle\aliasing.go
 // import "golang.org/x/crypto/internal/subtle"

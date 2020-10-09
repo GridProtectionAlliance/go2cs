@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Binary api computes the exported API of a set of Go packages.
-// package main -- go2cs converted at 2020 October 08 04:02:20 UTC
+// package main -- go2cs converted at 2020 October 09 05:18:46 UTC
 // Original source: C:\Go\src\cmd\api\goapi.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
@@ -552,7 +552,7 @@ namespace go
         }
 
         // Disable before debugging non-obvious errors from the type-checker.
-        private static readonly var usePkgCache = (var)true;
+        private static readonly var usePkgCache = true;
 
 
 

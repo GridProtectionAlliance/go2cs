@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:18 UTC
+//     Generated on 2020 October 09 05:45:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using errors = go.errors_package;
 using os = go.os_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class File<T> : File
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate (os.FileInfo, error) NameByPtr(ptr<T> value);
             private delegate (os.FileInfo, error) NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (os.FileInfo, error) Name()
@@ -92,8 +93,8 @@ namespace @internal
             private delegate (os.FileInfo, error) FdByPtr(ptr<T> value);
             private delegate (os.FileInfo, error) FdByVal(T value);
 
-            private static readonly FdByPtr s_FdByPtr;
-            private static readonly FdByVal s_FdByVal;
+            private static readonly FdByPtr? s_FdByPtr;
+            private static readonly FdByVal? s_FdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (os.FileInfo, error) Fd()
@@ -112,8 +113,8 @@ namespace @internal
             private delegate (os.FileInfo, error) StatByPtr(ptr<T> value);
             private delegate (os.FileInfo, error) StatByVal(T value);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (os.FileInfo, error) Stat()
@@ -129,7 +130,7 @@ namespace @internal
                 return s_StatByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static File()

@@ -3,7 +3,7 @@
 
 // +build openbsd,arm
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:11 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:05 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsyscall_openbsd_arm.go
 using @unsafe = go.@unsafe_package;

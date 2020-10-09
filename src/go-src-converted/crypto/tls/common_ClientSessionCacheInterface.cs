@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:37:25 UTC
+//     Generated on 2020 October 09 04:55:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,6 +34,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -58,7 +59,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ClientSessionCache<T> : ClientSessionCache
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -84,8 +85,8 @@ namespace crypto
             private delegate (ptr<ClientSessionState>, bool) GetByPtr(ptr<T> value, @string sessionKey);
             private delegate (ptr<ClientSessionState>, bool) GetByVal(T value, @string sessionKey);
 
-            private static readonly GetByPtr s_GetByPtr;
-            private static readonly GetByVal s_GetByVal;
+            private static readonly GetByPtr? s_GetByPtr;
+            private static readonly GetByVal? s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<ClientSessionState>, bool) Get(@string sessionKey)
@@ -104,8 +105,8 @@ namespace crypto
             private delegate (ptr<ClientSessionState>, bool) PutByPtr(ptr<T> value, @string sessionKey, ptr<ClientSessionState> cs);
             private delegate (ptr<ClientSessionState>, bool) PutByVal(T value, @string sessionKey, ptr<ClientSessionState> cs);
 
-            private static readonly PutByPtr s_PutByPtr;
-            private static readonly PutByVal s_PutByVal;
+            private static readonly PutByPtr? s_PutByPtr;
+            private static readonly PutByVal? s_PutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<ClientSessionState>, bool) Put(@string sessionKey, ptr<ClientSessionState> cs)
@@ -121,7 +122,7 @@ namespace crypto
                 return s_PutByPtr(m_target_ptr, sessionKey, cs);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ClientSessionCache()

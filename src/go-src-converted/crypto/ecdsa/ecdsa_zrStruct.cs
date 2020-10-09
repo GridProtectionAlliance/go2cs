@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:16 UTC
+//     Generated on 2020 October 09 04:52:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using big = go.math.big_package;
 using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

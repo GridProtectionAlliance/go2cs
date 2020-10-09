@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:18 UTC
+//     Generated on 2020 October 09 06:05:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -43,7 +44,7 @@ namespace image
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Image<T> : Image
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace image
             private delegate void SetByPtr(ptr<T> value, long x, long y, color.Color c);
             private delegate void SetByVal(T value, long x, long y, color.Color c);
 
-            private static readonly SetByPtr s_SetByPtr;
-            private static readonly SetByVal s_SetByVal;
+            private static readonly SetByPtr? s_SetByPtr;
+            private static readonly SetByVal? s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Set(long x, long y, color.Color c)
@@ -94,8 +95,8 @@ namespace image
             private delegate color.Color ColorModelByPtr(ptr<T> value);
             private delegate color.Color ColorModelByVal(T value);
 
-            private static readonly ColorModelByPtr s_ColorModelByPtr;
-            private static readonly ColorModelByVal s_ColorModelByVal;
+            private static readonly ColorModelByPtr? s_ColorModelByPtr;
+            private static readonly ColorModelByVal? s_ColorModelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public color.Color ColorModel()
@@ -114,8 +115,8 @@ namespace image
             private delegate color.Color BoundsByPtr(ptr<T> value);
             private delegate color.Color BoundsByVal(T value);
 
-            private static readonly BoundsByPtr s_BoundsByPtr;
-            private static readonly BoundsByVal s_BoundsByVal;
+            private static readonly BoundsByPtr? s_BoundsByPtr;
+            private static readonly BoundsByVal? s_BoundsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public color.Color Bounds()
@@ -134,8 +135,8 @@ namespace image
             private delegate color.Color AtByPtr(ptr<T> value, long x, long y);
             private delegate color.Color AtByVal(T value, long x, long y);
 
-            private static readonly AtByPtr s_AtByPtr;
-            private static readonly AtByVal s_AtByVal;
+            private static readonly AtByPtr? s_AtByPtr;
+            private static readonly AtByVal? s_AtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public color.Color At(long x, long y)
@@ -151,7 +152,7 @@ namespace image
                 return s_AtByPtr(m_target_ptr, x, y);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Image()

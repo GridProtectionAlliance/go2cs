@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips -- go2cs converted at 2020 October 08 04:40:33 UTC
+// package mips -- go2cs converted at 2020 October 09 05:51:16 UTC
 // import "cmd/oldlink/internal/mips" ==> using mips = go.cmd.oldlink.@internal.mips_package
 // Original source: C:\Go\src\cmd\oldlink\internal\mips\l.go
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httputil -- go2cs converted at 2020 October 08 03:41:32 UTC
+// package httputil -- go2cs converted at 2020 October 09 04:58:55 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Go\src\net\http\httputil\dump.go
 using bufio = go.bufio_package;

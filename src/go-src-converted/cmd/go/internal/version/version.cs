@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package version implements the ``go version'' command.
-// package version -- go2cs converted at 2020 October 08 04:35:06 UTC
+// package version -- go2cs converted at 2020 October 09 05:46:27 UTC
 // import "cmd/go/internal/version" ==> using version = go.cmd.go.@internal.version_package
 // Original source: C:\Go\src\cmd\go\internal\version\version.go
 using bytes = go.bytes_package;

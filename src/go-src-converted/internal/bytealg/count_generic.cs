@@ -4,7 +4,7 @@
 
 // +build !amd64,!arm,!arm64,!ppc64le,!ppc64,!s390x
 
-// package bytealg -- go2cs converted at 2020 October 08 03:19:42 UTC
+// package bytealg -- go2cs converted at 2020 October 09 04:45:56 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Go\src\internal\bytealg\count_generic.go
 

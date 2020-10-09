@@ -4,7 +4,7 @@
 
 // +build faketime
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:52 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:02:03 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\time_fake.go
 using @unsafe = go.@unsafe_package;
@@ -14,7 +14,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var faketime = (var)true;
+        private static readonly var faketime = true;
 
         // When faketime is enabled, we redirect writes to FDs 1 and 2 through
         // the runtime's write function, since that adds the framing that

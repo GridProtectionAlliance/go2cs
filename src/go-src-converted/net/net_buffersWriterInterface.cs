@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:34:02 UTC
+//     Generated on 2020 October 09 04:52:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -45,7 +46,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class buffersWriter<T> : buffersWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace go
             private delegate (long, error) writeBuffersByPtr(ptr<T> value, ptr<Buffers> _p0);
             private delegate (long, error) writeBuffersByVal(T value, ptr<Buffers> _p0);
 
-            private static readonly writeBuffersByPtr s_writeBuffersByPtr;
-            private static readonly writeBuffersByVal s_writeBuffersByVal;
+            private static readonly writeBuffersByPtr? s_writeBuffersByPtr;
+            private static readonly writeBuffersByVal? s_writeBuffersByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) writeBuffers(ptr<Buffers> _p0)
@@ -88,7 +89,7 @@ namespace go
                 return s_writeBuffersByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static buffersWriter()

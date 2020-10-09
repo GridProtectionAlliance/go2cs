@@ -8,7 +8,7 @@
 // +build !plan9,!windows
 // +build threadprof
 
-// package main -- go2cs converted at 2020 October 08 03:44:07 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:05 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\threadprof.go
 /*
 #include <stdint.h>

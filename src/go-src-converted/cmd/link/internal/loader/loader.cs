@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package loader -- go2cs converted at 2020 October 08 04:37:52 UTC
+// package loader -- go2cs converted at 2020 October 09 05:48:51 UTC
 // import "cmd/link/internal/loader" ==> using loader = go.cmd.link.@internal.loader_package
 // Original source: C:\Go\src\cmd\link\internal\loader\loader.go
 using bytes = go.bytes_package;
@@ -347,9 +347,9 @@ namespace @internal
             public Func<@string, long, ptr<sym.Symbol>> SymLookup;
         }
 
-        private static readonly var pkgDef = (var)iota;
-        private static readonly var nonPkgDef = (var)0;
-        private static readonly var nonPkgRef = (var)1;
+        private static readonly var pkgDef = iota;
+        private static readonly var nonPkgDef = 0;
+        private static readonly var nonPkgRef = 1;
 
 
         public delegate void elfsetstringFunc(ptr<sym.Symbol>, @string, long);

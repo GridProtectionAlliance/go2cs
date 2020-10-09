@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:03 UTC
+//     Generated on 2020 October 09 05:07:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using reflect = go.reflect_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -44,7 +45,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Formatter<T> : Formatter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace go
             private delegate void FormatByPtr(ptr<T> value, State f, int c);
             private delegate void FormatByVal(T value, State f, int c);
 
-            private static readonly FormatByPtr s_FormatByPtr;
-            private static readonly FormatByVal s_FormatByVal;
+            private static readonly FormatByPtr? s_FormatByPtr;
+            private static readonly FormatByVal? s_FormatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Format(State f, int c)
@@ -92,7 +93,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Formatter()

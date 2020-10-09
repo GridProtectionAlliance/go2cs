@@ -4,7 +4,7 @@
 
 // Package srcimporter implements importing directly
 // from source files rather than installed packages.
-// package srcimporter -- go2cs converted at 2020 October 08 04:56:08 UTC
+// package srcimporter -- go2cs converted at 2020 October 09 06:02:41 UTC
 // import "go/internal/srcimporter" ==> using srcimporter = go.go.@internal.srcimporter_package
 // Original source: C:\Go\src\go\internal\srcimporter\srcimporter.go
 // import "go/internal/srcimporter"

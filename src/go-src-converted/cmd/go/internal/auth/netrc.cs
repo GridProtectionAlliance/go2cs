@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package auth -- go2cs converted at 2020 October 08 04:34:38 UTC
+// package auth -- go2cs converted at 2020 October 09 05:46:03 UTC
 // import "cmd/go/internal/auth" ==> using auth = go.cmd.go.@internal.auth_package
 // Original source: C:\Go\src\cmd\go\internal\auth\netrc.go
 using ioutil = go.io.ioutil_package;

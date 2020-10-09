@@ -18,7 +18,7 @@
 //     https://cs.nyu.edu/~dodis/ps/merkle.pdf
 //   [Larsson]
 //     https://www.nada.kth.se/kurser/kth/2D1441/semteo03/lecturenotes/assump.pdf
-// package ecdsa -- go2cs converted at 2020 October 08 03:35:16 UTC
+// package ecdsa -- go2cs converted at 2020 October 09 04:52:47 UTC
 // import "crypto/ecdsa" ==> using ecdsa = go.crypto.ecdsa_package
 // Original source: C:\Go\src\crypto\ecdsa\ecdsa.go
 // Further references:

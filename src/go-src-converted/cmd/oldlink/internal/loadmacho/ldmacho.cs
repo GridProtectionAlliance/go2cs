@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package loadmacho implements a Mach-O file reader.
-// package loadmacho -- go2cs converted at 2020 October 08 04:41:29 UTC
+// package loadmacho -- go2cs converted at 2020 October 09 05:52:07 UTC
 // import "cmd/oldlink/internal/loadmacho" ==> using loadmacho = go.cmd.oldlink.@internal.loadmacho_package
 // Original source: C:\Go\src\cmd\oldlink\internal\loadmacho\ldmacho.go
 using bytes = go.bytes_package;
@@ -655,7 +655,7 @@ namespace @internal
                     var ty = e.Uint32(cmdp);
                     var sz = e.Uint32(cmdp[4L..]);
                     m.cmd[i].off = off;
-                    unpackcmd(cmdp, _addr_m, _addr_m.cmd[i], uint(ty), uint(sz));
+                    unpackcmd(cmdp, m, _addr_m.cmd[i], uint(ty), uint(sz));
                     cmdp = cmdp[sz..];
                     off += sz;
                     if (ty == LdMachoCmdSymtab)
@@ -666,14 +666,14 @@ namespace @internal
                         }
 
                         symtab = _addr_m.cmd[i].sym;
-                        macholoadsym(_addr_m, symtab);
+                        macholoadsym(m, symtab);
 
                     }
 
                     if (ty == LdMachoCmdDysymtab)
                     {
                         dsymtab = _addr_m.cmd[i].dsym;
-                        macholoaddsym(_addr_m, dsymtab);
+                        macholoaddsym(m, dsymtab);
                     }
 
                     if ((is64 && ty == LdMachoCmdSegment64) || (!is64 && ty == LdMachoCmdSegment))
@@ -1003,7 +1003,7 @@ namespace @internal
                         continue;
                     }
 
-                    macholoadrel(_addr_m, _addr_sect);
+                    macholoadrel(m, _addr_sect);
                     if (sect.rel == null)
                     {
                         continue;

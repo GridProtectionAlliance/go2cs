@@ -2,7 +2,7 @@
 
 // +build arm64
 
-// package sys -- go2cs converted at 2020 October 08 03:19:08 UTC
+// package sys -- go2cs converted at 2020 October 09 04:45:30 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\zgoarch_arm64.go
 

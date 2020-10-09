@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd netbsd
 
-// package route -- go2cs converted at 2020 October 08 05:01:36 UTC
+// package route -- go2cs converted at 2020 October 09 06:07:46 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\route\interface_announce.go
 

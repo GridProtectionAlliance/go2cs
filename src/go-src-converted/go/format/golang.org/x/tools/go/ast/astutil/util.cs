@@ -1,4 +1,4 @@
-// package astutil -- go2cs converted at 2020 October 08 04:27:08 UTC
+// package astutil -- go2cs converted at 2020 October 09 05:39:55 UTC
 // import "golang.org/x/tools/go/ast/astutil" ==> using astutil = go.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ast\astutil\util.go
 using ast = go.go.ast_package;

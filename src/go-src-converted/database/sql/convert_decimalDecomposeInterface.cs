@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:46 UTC
+//     Generated on 2020 October 09 06:05:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class decimalDecompose<T> : decimalDecompose
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace database
             private delegate (byte, bool, slice<byte>, int) DecomposeByPtr(ptr<T> value, slice<byte> buf);
             private delegate (byte, bool, slice<byte>, int) DecomposeByVal(T value, slice<byte> buf);
 
-            private static readonly DecomposeByPtr s_DecomposeByPtr;
-            private static readonly DecomposeByVal s_DecomposeByVal;
+            private static readonly DecomposeByPtr? s_DecomposeByPtr;
+            private static readonly DecomposeByVal? s_DecomposeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (byte, bool, slice<byte>, int) Decompose(slice<byte> buf)
@@ -91,7 +92,7 @@ namespace database
                 return s_DecomposeByPtr(m_target_ptr, buf);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static decimalDecompose()

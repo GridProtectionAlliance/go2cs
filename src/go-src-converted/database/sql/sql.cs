@@ -13,7 +13,7 @@
 //
 // For usage examples, see the wiki page at
 // https://golang.org/s/sqlwiki.
-// package sql -- go2cs converted at 2020 October 08 04:58:57 UTC
+// package sql -- go2cs converted at 2020 October 09 06:05:28 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Go\src\database\sql\sql.go
 using context = go.context_package;
@@ -137,13 +137,13 @@ namespace database
         //
         // See https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels.
         public static readonly IsolationLevel LevelDefault = (IsolationLevel)iota;
-        public static readonly var LevelReadUncommitted = (var)0;
-        public static readonly var LevelReadCommitted = (var)1;
-        public static readonly var LevelWriteCommitted = (var)2;
-        public static readonly var LevelRepeatableRead = (var)3;
-        public static readonly var LevelSnapshot = (var)4;
-        public static readonly var LevelSerializable = (var)5;
-        public static readonly var LevelLinearizable = (var)6;
+        public static readonly var LevelReadUncommitted = 0;
+        public static readonly var LevelReadCommitted = 1;
+        public static readonly var LevelWriteCommitted = 2;
+        public static readonly var LevelRepeatableRead = 3;
+        public static readonly var LevelSnapshot = 4;
+        public static readonly var LevelSerializable = 5;
+        public static readonly var LevelLinearizable = 6;
 
 
         // String returns the name of the transaction isolation level.
@@ -531,7 +531,7 @@ namespace database
         // cachedOrNewConn returns a cached connection, if available, else waits
         // for one to become available (if MaxOpenConns has been reached) or
         // creates a new database connection.
-        private static readonly var cachedOrNewConn = (var)0;
+        private static readonly var cachedOrNewConn = 0;
 
 
         // driverConn wraps a driver.Conn with a mutex, to
@@ -1282,7 +1282,7 @@ namespace database
         {
             ref DB db = ref _addr_db.val;
 
-            const var minInterval = (var)time.Second;
+            const var minInterval = time.Second;
 
 
 
@@ -1725,7 +1725,7 @@ namespace database
 
         // debugGetPut determines whether getConn & putConn calls' stack traces
         // are returned for more verbose crashes.
-        private static readonly var debugGetPut = (var)false;
+        private static readonly var debugGetPut = false;
 
         // putConn adds a connection to the db's free pool.
         // err is optionally the last error that occurred on this connection.
@@ -2120,7 +2120,7 @@ namespace database
 
             ptr<driverStmt> ds = addr(new driverStmt(Locker:dc,si:si));
             defer(ds.Close());
-            return resultFromStatement(ctx, dc.ci, _addr_ds, args);
+            return resultFromStatement(ctx, dc.ci, ds, args);
 
         });
 
@@ -2246,7 +2246,7 @@ namespace database
             }
 
             ptr<driverStmt> ds = addr(new driverStmt(Locker:dc,si:si));
-            var (rowsi, err) = rowsiFromStatement(ctx, dc.ci, _addr_ds, args);
+            var (rowsi, err) = rowsiFromStatement(ctx, dc.ci, ds, args);
             if (err != null)
             {
                 ds.Close();

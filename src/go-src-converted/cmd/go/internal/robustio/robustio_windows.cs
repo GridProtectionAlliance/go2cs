@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package robustio -- go2cs converted at 2020 October 08 04:34:13 UTC
+// package robustio -- go2cs converted at 2020 October 09 05:45:43 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Go\src\cmd\go\internal\robustio\robustio_windows.go
 using errors = go.errors_package;
@@ -17,7 +17,7 @@ namespace @internal
 {
     public static partial class robustio_package
     {
-        private static readonly var errFileNotFound = (var)syscall.ERROR_FILE_NOT_FOUND;
+        private static readonly var errFileNotFound = syscall.ERROR_FILE_NOT_FOUND;
 
         // isEphemeralError returns true if err may be resolved by waiting.
 

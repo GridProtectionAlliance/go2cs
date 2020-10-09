@@ -8,7 +8,7 @@
 //   2) shift decimal by exponent
 //   3) read digits out & format
 
-// package strconv -- go2cs converted at 2020 October 08 03:48:57 UTC
+// package strconv -- go2cs converted at 2020 October 09 05:06:33 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\ftoa.go
 using math = go.math_package;

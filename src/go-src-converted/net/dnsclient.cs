@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:31:20 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:31 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\dnsclient.go
 using rand = go.math.rand_package;

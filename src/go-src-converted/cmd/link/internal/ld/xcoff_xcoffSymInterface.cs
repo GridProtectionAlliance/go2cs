@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:39:51 UTC
+//     Generated on 2020 October 09 05:50:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,6 +26,7 @@ using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class xcoffSym<T> : xcoffSym
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,7 +76,7 @@ namespace @internal
                 m_target_is_ptr = true;
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static xcoffSym()

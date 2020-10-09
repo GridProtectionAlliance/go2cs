@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:08:22 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:11 UTC
 // Original source: C:\Go\src\cmd\buildid\buildid.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;

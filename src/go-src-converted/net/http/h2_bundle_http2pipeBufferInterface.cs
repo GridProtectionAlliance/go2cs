@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:14 UTC
+//     Generated on 2020 October 09 04:56:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2pipeBuffer<T> : http2pipeBuffer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate long LenByPtr(ptr<T> value);
             private delegate long LenByVal(T value);
 
-            private static readonly LenByPtr s_LenByPtr;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LenByPtr? s_LenByPtr;
+            private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Len()
@@ -116,8 +117,8 @@ namespace net
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -136,8 +137,8 @@ namespace net
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -153,7 +154,7 @@ namespace net
                 return s_ReadByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2pipeBuffer()

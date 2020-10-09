@@ -5,7 +5,7 @@
 //go:generate go run gen.go -output palette.go
 
 // Package palette provides standard color palettes.
-// package palette -- go2cs converted at 2020 October 08 04:59:07 UTC
+// package palette -- go2cs converted at 2020 October 09 06:05:38 UTC
 // import "image/color/palette" ==> using palette = go.image.color.palette_package
 // Original source: C:\Go\src\image\color\palette\generate.go
     }

@@ -4,7 +4,7 @@
 
 // Package rand implements a cryptographically secure
 // random number generator.
-// package rand -- go2cs converted at 2020 October 08 03:35:31 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:02 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\rand.go
 using io = go.io_package;

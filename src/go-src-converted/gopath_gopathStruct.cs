@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:54 UTC
+//     Generated on 2020 October 09 06:02:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using path = go.path_package;
 using filepath = go.path.filepath_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

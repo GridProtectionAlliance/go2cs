@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bidi -- go2cs converted at 2020 October 08 05:01:56 UTC
+// package bidi -- go2cs converted at 2020 October 09 06:08:00 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\bidi\core.go
 using log = go.log_package;

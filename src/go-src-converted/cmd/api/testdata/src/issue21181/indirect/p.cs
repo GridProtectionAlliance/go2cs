@@ -1,4 +1,4 @@
-// package indirect -- go2cs converted at 2020 October 08 04:04:25 UTC
+// package indirect -- go2cs converted at 2020 October 09 05:20:07 UTC
 // import "cmd/api/testdata/src/issue21181/indirect" ==> using indirect = go.cmd.api.testdata.src.issue21181.indirect_package
 // Original source: C:\Go\src\cmd\api\testdata\src\issue21181\indirect\p.go
 using dep = go.dep_package;

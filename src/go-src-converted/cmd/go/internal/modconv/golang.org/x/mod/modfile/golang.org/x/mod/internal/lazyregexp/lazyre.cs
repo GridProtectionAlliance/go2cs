@@ -4,7 +4,7 @@
 
 // Package lazyregexp is a thin wrapper over regexp, allowing the use of global
 // regexp variables without forcing them to be compiled at init.
-// package lazyregexp -- go2cs converted at 2020 October 08 04:35:28 UTC
+// package lazyregexp -- go2cs converted at 2020 October 09 05:46:46 UTC
 // import "golang.org/x/mod/internal/lazyregexp" ==> using lazyregexp = go.golang.org.x.mod.@internal.lazyregexp_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\internal\lazyregexp\lazyre.go
 using os = go.os_package;

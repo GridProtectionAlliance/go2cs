@@ -6,7 +6,7 @@
 
 // See mpagealloc_32bit.go for why darwin/arm64 is excluded here.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:19 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:03 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mpagealloc_64bit.go
 using @unsafe = go.@unsafe_package;

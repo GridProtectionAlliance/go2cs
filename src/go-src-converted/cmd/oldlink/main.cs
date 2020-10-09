@@ -4,7 +4,7 @@
 
 // TODO(go115newobj): delete.
 
-// package main -- go2cs converted at 2020 October 08 04:39:56 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:40 UTC
 // Original source: C:\Go\src\cmd\oldlink\main.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;

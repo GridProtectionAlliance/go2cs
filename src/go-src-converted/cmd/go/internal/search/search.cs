@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package search -- go2cs converted at 2020 October 08 04:34:09 UTC
+// package search -- go2cs converted at 2020 October 09 05:45:40 UTC
 // import "cmd/go/internal/search" ==> using search = go.cmd.go.@internal.search_package
 // Original source: C:\Go\src\cmd\go\internal\search\search.go
 using @base = go.cmd.go.@internal.@base_package;

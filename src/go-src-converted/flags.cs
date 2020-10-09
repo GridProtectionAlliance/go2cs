@@ -4,7 +4,7 @@
 
 // Package analysisflags defines helpers for processing flags of
 // analysis driver tools.
-// package analysisflags -- go2cs converted at 2020 October 08 04:54:35 UTC
+// package analysisflags -- go2cs converted at 2020 October 09 06:01:29 UTC
 // import "golang.org/x/tools/go/analysis/internal/analysisflags" ==> using analysisflags = go.golang.org.x.tools.go.analysis.@internal.analysisflags_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\internal\analysisflags\flags.go
 using sha256 = go.crypto.sha256_package;
@@ -364,8 +364,8 @@ namespace @internal
         }
 
         private static readonly triState unset = (triState)iota;
-        private static readonly var setTrue = (var)0;
-        private static readonly var setFalse = (var)1;
+        private static readonly var setTrue = 0;
+        private static readonly var setFalse = 1;
 
 
         private static ptr<triState> triStateFlag(@string name, triState value, @string usage)

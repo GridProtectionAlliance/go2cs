@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:32:48 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:35 UTC
 // Original source: C:\Go\src\cmd\dist\sys_windows.go
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;

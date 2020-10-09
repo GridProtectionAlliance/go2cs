@@ -8,7 +8,7 @@
     Packages that import unsafe may be non-portable and are not protected by the
     Go 1 compatibility guidelines.
 */
-// package @unsafe -- go2cs converted at 2020 October 08 00:33:52 UTC
+// package @unsafe -- go2cs converted at 2020 October 09 04:45:19 UTC
 // import "unsafe" ==> using @unsafe = go.@unsafe_package
 // Original source: C:\Go\src\unsafe\unsafe.go
 

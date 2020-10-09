@@ -10,7 +10,7 @@
 // This library accepts either size of byte slice but always
 // returns 16-byte addresses.
 
-// package net -- go2cs converted at 2020 October 08 03:33:41 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:52 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\ip.go
 using bytealg = go.@internal.bytealg_package;
@@ -384,7 +384,7 @@ namespace go
 
                 if (len(p4) == IPv4len)
                 {
-                    const var maxIPv4StringLen = (var)len("255.255.255.255");
+                    const var maxIPv4StringLen = len("255.255.255.255");
 
                     var b = make_slice<byte>(maxIPv4StringLen);
 
@@ -448,7 +448,7 @@ namespace go
                 e1 = -1L;
             }
 
-            const var maxLen = (var)len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
+            const var maxLen = len("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");
 
             b = make_slice<byte>(0L, maxLen); 
 

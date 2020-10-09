@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package help implements the ``go help'' command.
-// package help -- go2cs converted at 2020 October 08 04:33:40 UTC
+// package help -- go2cs converted at 2020 October 09 05:45:15 UTC
 // import "cmd/go/internal/help" ==> using help = go.cmd.go.@internal.help_package
 // Original source: C:\Go\src\cmd\go\internal\help\help.go
 using bufio = go.bufio_package;

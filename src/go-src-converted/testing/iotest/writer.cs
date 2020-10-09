@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package iotest -- go2cs converted at 2020 October 08 04:36:40 UTC
+// package iotest -- go2cs converted at 2020 October 09 05:47:48 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Go\src\testing\iotest\writer.go
 using io = go.io_package;

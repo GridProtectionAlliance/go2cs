@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:52 UTC
+//     Generated on 2020 October 09 05:47:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,7 @@ using lockedfile = go.cmd.go.@internal.lockedfile_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -57,7 +58,7 @@ namespace modfetch
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Repo<T> : Repo
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -83,8 +84,8 @@ namespace modfetch
             private delegate (bool, error) TagsByPtr(ptr<T> value, @string prefix);
             private delegate (bool, error) TagsByVal(T value, @string prefix);
 
-            private static readonly TagsByPtr s_TagsByPtr;
-            private static readonly TagsByVal s_TagsByVal;
+            private static readonly TagsByPtr? s_TagsByPtr;
+            private static readonly TagsByVal? s_TagsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) Tags(@string prefix)
@@ -103,8 +104,8 @@ namespace modfetch
             private delegate (bool, error) StatByPtr(ptr<T> value, @string rev);
             private delegate (bool, error) StatByVal(T value, @string rev);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) Stat(@string rev)
@@ -123,8 +124,8 @@ namespace modfetch
             private delegate (bool, error) LatestByPtr(ptr<T> value);
             private delegate (bool, error) LatestByVal(T value);
 
-            private static readonly LatestByPtr s_LatestByPtr;
-            private static readonly LatestByVal s_LatestByVal;
+            private static readonly LatestByPtr? s_LatestByPtr;
+            private static readonly LatestByVal? s_LatestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) Latest()
@@ -143,8 +144,8 @@ namespace modfetch
             private delegate (bool, error) ReadFileByPtr(ptr<T> value, @string rev, @string file, long maxSize);
             private delegate (bool, error) ReadFileByVal(T value, @string rev, @string file, long maxSize);
 
-            private static readonly ReadFileByPtr s_ReadFileByPtr;
-            private static readonly ReadFileByVal s_ReadFileByVal;
+            private static readonly ReadFileByPtr? s_ReadFileByPtr;
+            private static readonly ReadFileByVal? s_ReadFileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) ReadFile(@string rev, @string file, long maxSize)
@@ -163,8 +164,8 @@ namespace modfetch
             private delegate (bool, error) ReadFileRevsByPtr(ptr<T> value, slice<@string> revs, @string file, long maxSize);
             private delegate (bool, error) ReadFileRevsByVal(T value, slice<@string> revs, @string file, long maxSize);
 
-            private static readonly ReadFileRevsByPtr s_ReadFileRevsByPtr;
-            private static readonly ReadFileRevsByVal s_ReadFileRevsByVal;
+            private static readonly ReadFileRevsByPtr? s_ReadFileRevsByPtr;
+            private static readonly ReadFileRevsByVal? s_ReadFileRevsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) ReadFileRevs(slice<@string> revs, @string file, long maxSize)
@@ -183,8 +184,8 @@ namespace modfetch
             private delegate (bool, error) ReadZipByPtr(ptr<T> value, @string rev, @string subdir, long maxSize);
             private delegate (bool, error) ReadZipByVal(T value, @string rev, @string subdir, long maxSize);
 
-            private static readonly ReadZipByPtr s_ReadZipByPtr;
-            private static readonly ReadZipByVal s_ReadZipByVal;
+            private static readonly ReadZipByPtr? s_ReadZipByPtr;
+            private static readonly ReadZipByVal? s_ReadZipByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) ReadZip(@string rev, @string subdir, long maxSize)
@@ -203,8 +204,8 @@ namespace modfetch
             private delegate (bool, error) RecentTagByPtr(ptr<T> value, @string rev, @string prefix, @string major);
             private delegate (bool, error) RecentTagByVal(T value, @string rev, @string prefix, @string major);
 
-            private static readonly RecentTagByPtr s_RecentTagByPtr;
-            private static readonly RecentTagByVal s_RecentTagByVal;
+            private static readonly RecentTagByPtr? s_RecentTagByPtr;
+            private static readonly RecentTagByVal? s_RecentTagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) RecentTag(@string rev, @string prefix, @string major)
@@ -223,8 +224,8 @@ namespace modfetch
             private delegate (bool, error) DescendsFromByPtr(ptr<T> value, @string rev, @string tag);
             private delegate (bool, error) DescendsFromByVal(T value, @string rev, @string tag);
 
-            private static readonly DescendsFromByPtr s_DescendsFromByPtr;
-            private static readonly DescendsFromByVal s_DescendsFromByVal;
+            private static readonly DescendsFromByPtr? s_DescendsFromByPtr;
+            private static readonly DescendsFromByVal? s_DescendsFromByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (bool, error) DescendsFrom(@string rev, @string tag)
@@ -240,7 +241,7 @@ namespace modfetch
                 return s_DescendsFromByPtr(m_target_ptr, rev, tag);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Repo()

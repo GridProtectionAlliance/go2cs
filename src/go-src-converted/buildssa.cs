@@ -8,7 +8,7 @@
 // may be used as an input to other analyzers.
 //
 // THIS INTERFACE IS EXPERIMENTAL AND MAY BE SUBJECT TO INCOMPATIBLE CHANGE.
-// package buildssa -- go2cs converted at 2020 October 08 04:56:34 UTC
+// package buildssa -- go2cs converted at 2020 October 09 06:03:03 UTC
 // import "golang.org/x/tools/go/analysis/passes/buildssa" ==> using buildssa = go.golang.org.x.tools.go.analysis.passes.buildssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\passes\buildssa\buildssa.go
 using ast = go.go.ast_package;

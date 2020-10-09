@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:48 UTC
+//     Generated on 2020 October 09 04:58:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,8 @@ using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

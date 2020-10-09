@@ -3,7 +3,7 @@
 
 // +build linux,mipsle
 
-// package unix -- go2cs converted at 2020 October 08 04:52:03 UTC
+// package unix -- go2cs converted at 2020 October 09 05:59:26 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_linux_mipsle.go
 using syscall = go.syscall_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:28:07 UTC
+//     Generated on 2020 October 09 05:40:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Node<T> : Node
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace @internal
             private delegate Pos PosByPtr(ptr<T> value);
             private delegate Pos PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Pos Pos()
@@ -88,8 +89,8 @@ namespace @internal
             private delegate Pos aNodeByPtr(ptr<T> value);
             private delegate Pos aNodeByVal(T value);
 
-            private static readonly aNodeByPtr s_aNodeByPtr;
-            private static readonly aNodeByVal s_aNodeByVal;
+            private static readonly aNodeByPtr? s_aNodeByPtr;
+            private static readonly aNodeByVal? s_aNodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Pos aNode()
@@ -105,7 +106,7 @@ namespace @internal
                 return s_aNodeByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Node()

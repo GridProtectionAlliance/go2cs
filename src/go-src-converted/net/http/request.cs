@@ -4,7 +4,7 @@
 
 // HTTP Request reading and parsing.
 
-// package http -- go2cs converted at 2020 October 08 03:40:16 UTC
+// package http -- go2cs converted at 2020 October 09 04:57:49 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\request.go
 using bufio = go.bufio_package;
@@ -1266,8 +1266,8 @@ namespace net
         }
 
         // Constants for readRequest's deleteHostHeader parameter.
-        private static readonly var deleteHostHeader = (var)true;
-        private static readonly var keepHostHeader = (var)false;
+        private static readonly var deleteHostHeader = true;
+        private static readonly var keepHostHeader = false;
 
 
         private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b, bool deleteHostHeader) => func((defer, _, __) =>

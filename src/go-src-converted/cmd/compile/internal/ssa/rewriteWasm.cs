@@ -1,7 +1,7 @@
 // Code generated from gen/Wasm.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2020 October 08 04:26:31 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:39:28 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\rewriteWasm.go
 using math = go.math_package;

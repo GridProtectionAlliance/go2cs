@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package hex implements hexadecimal encoding and decoding.
-// package hex -- go2cs converted at 2020 October 08 03:36:48 UTC
+// package hex -- go2cs converted at 2020 October 09 04:54:45 UTC
 // import "encoding/hex" ==> using hex = go.encoding.hex_package
 // Original source: C:\Go\src\encoding\hex\hex.go
 using errors = go.errors_package;

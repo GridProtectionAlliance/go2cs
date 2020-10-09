@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package edit implements buffered position-based editing of byte slices.
-// package edit -- go2cs converted at 2020 October 08 04:09:12 UTC
+// package edit -- go2cs converted at 2020 October 09 05:23:46 UTC
 // import "cmd/internal/edit" ==> using edit = go.cmd.@internal.edit_package
 // Original source: C:\Go\src\cmd\internal\edit\edit.go
 using fmt = go.fmt_package;

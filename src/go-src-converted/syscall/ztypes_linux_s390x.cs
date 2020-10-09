@@ -1,7 +1,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_linux.go | go run mkpost.go
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:39 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_linux_s390x.go
 

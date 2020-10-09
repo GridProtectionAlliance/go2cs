@@ -4,7 +4,7 @@
 
 //go:generate go run encgen.go -output enc_helpers.go
 
-// package gob -- go2cs converted at 2020 October 08 03:42:40 UTC
+// package gob -- go2cs converted at 2020 October 09 04:59:55 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\encode.go
 using encoding = go.encoding_package;

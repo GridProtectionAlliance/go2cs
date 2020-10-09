@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:09:51 UTC
+// package types -- go2cs converted at 2020 October 09 05:24:16 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Go\src\cmd\compile\internal\types\type.go
 using obj = go.cmd.@internal.obj_package;
@@ -35,53 +35,53 @@ namespace @internal
 
         public static readonly EType Txxx = (EType)iota;
 
-        public static readonly var TINT8 = (var)0;
-        public static readonly var TUINT8 = (var)1;
-        public static readonly var TINT16 = (var)2;
-        public static readonly var TUINT16 = (var)3;
-        public static readonly var TINT32 = (var)4;
-        public static readonly var TUINT32 = (var)5;
-        public static readonly var TINT64 = (var)6;
-        public static readonly var TUINT64 = (var)7;
-        public static readonly var TINT = (var)8;
-        public static readonly var TUINT = (var)9;
-        public static readonly var TUINTPTR = (var)10;
+        public static readonly var TINT8 = 0;
+        public static readonly var TUINT8 = 1;
+        public static readonly var TINT16 = 2;
+        public static readonly var TUINT16 = 3;
+        public static readonly var TINT32 = 4;
+        public static readonly var TUINT32 = 5;
+        public static readonly var TINT64 = 6;
+        public static readonly var TUINT64 = 7;
+        public static readonly var TINT = 8;
+        public static readonly var TUINT = 9;
+        public static readonly var TUINTPTR = 10;
 
-        public static readonly var TCOMPLEX64 = (var)11;
-        public static readonly var TCOMPLEX128 = (var)12;
+        public static readonly var TCOMPLEX64 = 11;
+        public static readonly var TCOMPLEX128 = 12;
 
-        public static readonly var TFLOAT32 = (var)13;
-        public static readonly var TFLOAT64 = (var)14;
+        public static readonly var TFLOAT32 = 13;
+        public static readonly var TFLOAT64 = 14;
 
-        public static readonly var TBOOL = (var)15;
+        public static readonly var TBOOL = 15;
 
-        public static readonly var TPTR = (var)16;
-        public static readonly var TFUNC = (var)17;
-        public static readonly var TSLICE = (var)18;
-        public static readonly var TARRAY = (var)19;
-        public static readonly var TSTRUCT = (var)20;
-        public static readonly var TCHAN = (var)21;
-        public static readonly var TMAP = (var)22;
-        public static readonly var TINTER = (var)23;
-        public static readonly var TFORW = (var)24;
-        public static readonly var TANY = (var)25;
-        public static readonly var TSTRING = (var)26;
-        public static readonly var TUNSAFEPTR = (var)27; 
+        public static readonly var TPTR = 16;
+        public static readonly var TFUNC = 17;
+        public static readonly var TSLICE = 18;
+        public static readonly var TARRAY = 19;
+        public static readonly var TSTRUCT = 20;
+        public static readonly var TCHAN = 21;
+        public static readonly var TMAP = 22;
+        public static readonly var TINTER = 23;
+        public static readonly var TFORW = 24;
+        public static readonly var TANY = 25;
+        public static readonly var TSTRING = 26;
+        public static readonly var TUNSAFEPTR = 27; 
 
         // pseudo-types for literals
-        public static readonly var TIDEAL = (var)28; // untyped numeric constants
-        public static readonly var TNIL = (var)29;
-        public static readonly var TBLANK = (var)30; 
+        public static readonly var TIDEAL = 28; // untyped numeric constants
+        public static readonly var TNIL = 29;
+        public static readonly var TBLANK = 30; 
 
         // pseudo-types for frame layout
-        public static readonly var TFUNCARGS = (var)31;
-        public static readonly var TCHANARGS = (var)32; 
+        public static readonly var TFUNCARGS = 31;
+        public static readonly var TCHANARGS = 32; 
 
         // SSA backend types
-        public static readonly var TSSA = (var)33; // internal types used by SSA backend (flags, memory, etc.)
-        public static readonly var TTUPLE = (var)34; // a pair of types, used by SSA backend
+        public static readonly var TSSA = 33; // internal types used by SSA backend (flags, memory, etc.)
+        public static readonly var TTUPLE = 34; // a pair of types, used by SSA backend
 
-        public static readonly var NTYPE = (var)35;
+        public static readonly var NTYPE = 35;
 
 
         // ChanDir is whether a channel can send, receive, or both.
@@ -140,10 +140,10 @@ namespace @internal
         }
 
         private static readonly long typeNotInHeap = (long)1L << (int)(iota); // type cannot be heap allocated
-        private static readonly var typeBroke = (var)0; // broken type definition
-        private static readonly var typeNoalg = (var)1; // suppress hash and eq algorithm generation
-        private static readonly var typeDeferwidth = (var)2; // width computation has been deferred and type is on deferredTypeStack
-        private static readonly var typeRecur = (var)3;
+        private static readonly var typeBroke = 0; // broken type definition
+        private static readonly var typeNoalg = 1; // suppress hash and eq algorithm generation
+        private static readonly var typeDeferwidth = 2; // width computation has been deferred and type is on deferredTypeStack
+        private static readonly var typeRecur = 3;
 
 
         private static bool NotInHeap(this ptr<Type> _addr_t)
@@ -325,9 +325,9 @@ namespace @internal
         }
 
         public static readonly Funarg FunargNone = (Funarg)iota;
-        public static readonly var FunargRcvr = (var)0; // receiver
-        public static readonly var FunargParams = (var)1; // input parameters
-        public static readonly var FunargResults = (var)2; // output results
+        public static readonly var FunargRcvr = 0; // receiver
+        public static readonly var FunargParams = 1; // input parameters
+        public static readonly var FunargResults = 2; // output results
 
         // StructType returns t's extra struct-specific fields.
         private static ptr<Struct> StructType(this ptr<Type> _addr_t)
@@ -418,8 +418,8 @@ namespace @internal
         }
 
         private static readonly long fieldIsDDD = (long)1L << (int)(iota); // field is ... argument
-        private static readonly var fieldBroke = (var)0; // broken field definition
-        private static readonly var fieldNointerface = (var)1;
+        private static readonly var fieldBroke = 0; // broken field definition
+        private static readonly var fieldNointerface = 1;
 
 
         private static bool IsDDD(this ptr<Field> _addr_f)
@@ -1228,9 +1228,9 @@ namespace @internal
         {
         }
 
-        public static readonly var CMPlt = (var)Cmp(-1L);
-        public static readonly var CMPeq = (var)Cmp(0L);
-        public static readonly var CMPgt = (var)Cmp(1L);
+        public static readonly var CMPlt = Cmp(-1L);
+        public static readonly var CMPeq = Cmp(0L);
+        public static readonly var CMPgt = Cmp(1L);
 
 
         // Compare compares types for purposes of the SSA back

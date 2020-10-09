@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:31:45 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:53 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\fd_plan9.go
 using poll = go.@internal.poll_package;

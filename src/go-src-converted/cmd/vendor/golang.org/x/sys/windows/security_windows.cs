@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package windows -- go2cs converted at 2020 October 08 04:53:48 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:52 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\security_windows.go
 using syscall = go.syscall_package;
@@ -75,10 +75,10 @@ namespace sys
 
  
         // do not reorder
-        public static readonly var NetSetupUnknownStatus = (var)iota;
-        public static readonly var NetSetupUnjoined = (var)0;
-        public static readonly var NetSetupWorkgroupName = (var)1;
-        public static readonly var NetSetupDomainName = (var)2;
+        public static readonly var NetSetupUnknownStatus = iota;
+        public static readonly var NetSetupUnjoined = 0;
+        public static readonly var NetSetupWorkgroupName = 1;
+        public static readonly var NetSetupDomainName = 2;
 
 
         public partial struct UserInfo10
@@ -96,15 +96,15 @@ namespace sys
  
         // do not reorder
         public static readonly long SidTypeUser = (long)1L + iota;
-        public static readonly var SidTypeGroup = (var)0;
-        public static readonly var SidTypeDomain = (var)1;
-        public static readonly var SidTypeAlias = (var)2;
-        public static readonly var SidTypeWellKnownGroup = (var)3;
-        public static readonly var SidTypeDeletedAccount = (var)4;
-        public static readonly var SidTypeInvalid = (var)5;
-        public static readonly var SidTypeUnknown = (var)6;
-        public static readonly var SidTypeComputer = (var)7;
-        public static readonly var SidTypeLabel = (var)8;
+        public static readonly var SidTypeGroup = 0;
+        public static readonly var SidTypeDomain = 1;
+        public static readonly var SidTypeAlias = 2;
+        public static readonly var SidTypeWellKnownGroup = 3;
+        public static readonly var SidTypeDeletedAccount = 4;
+        public static readonly var SidTypeInvalid = 5;
+        public static readonly var SidTypeUnknown = 6;
+        public static readonly var SidTypeComputer = 7;
+        public static readonly var SidTypeLabel = 8;
 
 
         public partial struct SidIdentifierAuthority
@@ -134,7 +134,7 @@ namespace sys
         public static readonly ulong SECURITY_ANONYMOUS_LOGON_RID = (ulong)0x7UL;
         public static readonly ulong SECURITY_PROXY_RID = (ulong)0x8UL;
         public static readonly ulong SECURITY_ENTERPRISE_CONTROLLERS_RID = (ulong)0x9UL;
-        public static readonly var SECURITY_SERVER_LOGON_RID = (var)SECURITY_ENTERPRISE_CONTROLLERS_RID;
+        public static readonly var SECURITY_SERVER_LOGON_RID = SECURITY_ENTERPRISE_CONTROLLERS_RID;
         public static readonly ulong SECURITY_AUTHENTICATED_USER_RID = (ulong)0xbUL;
         public static readonly ulong SECURITY_RESTRICTED_CODE_RID = (ulong)0xcUL;
         public static readonly ulong SECURITY_NT_NON_UNIQUE_RID = (ulong)0x15UL;
@@ -599,50 +599,50 @@ namespace sys
  
         // do not reorder
         public static readonly long TOKEN_ASSIGN_PRIMARY = (long)1L << (int)(iota);
-        public static readonly var TOKEN_DUPLICATE = (var)0;
-        public static readonly var TOKEN_IMPERSONATE = (var)1;
-        public static readonly var TOKEN_QUERY = (var)2;
-        public static readonly var TOKEN_QUERY_SOURCE = (var)3;
-        public static readonly var TOKEN_ADJUST_PRIVILEGES = (var)4;
-        public static readonly var TOKEN_ADJUST_GROUPS = (var)5;
-        public static readonly var TOKEN_ADJUST_DEFAULT = (var)6;
+        public static readonly var TOKEN_DUPLICATE = 0;
+        public static readonly var TOKEN_IMPERSONATE = 1;
+        public static readonly var TOKEN_QUERY = 2;
+        public static readonly var TOKEN_QUERY_SOURCE = 3;
+        public static readonly var TOKEN_ADJUST_PRIVILEGES = 4;
+        public static readonly var TOKEN_ADJUST_GROUPS = 5;
+        public static readonly var TOKEN_ADJUST_DEFAULT = 6;
         public static readonly TOKEN_ALL_ACCESS TOKEN_ADJUST_SESSIONID = (TOKEN_ALL_ACCESS)STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT | TOKEN_ADJUST_SESSIONID;
-        public static readonly var TOKEN_READ = (var)STANDARD_RIGHTS_READ | TOKEN_QUERY;
-        public static readonly var TOKEN_WRITE = (var)STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
-        public static readonly var TOKEN_EXECUTE = (var)STANDARD_RIGHTS_EXECUTE;
+        public static readonly var TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
+        public static readonly var TOKEN_WRITE = STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
+        public static readonly var TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE;
 
 
  
         // do not reorder
         public static readonly long TokenUser = (long)1L + iota;
-        public static readonly var TokenGroups = (var)0;
-        public static readonly var TokenPrivileges = (var)1;
-        public static readonly var TokenOwner = (var)2;
-        public static readonly var TokenPrimaryGroup = (var)3;
-        public static readonly var TokenDefaultDacl = (var)4;
-        public static readonly var TokenSource = (var)5;
-        public static readonly var TokenType = (var)6;
-        public static readonly var TokenImpersonationLevel = (var)7;
-        public static readonly var TokenStatistics = (var)8;
-        public static readonly var TokenRestrictedSids = (var)9;
-        public static readonly var TokenSessionId = (var)10;
-        public static readonly var TokenGroupsAndPrivileges = (var)11;
-        public static readonly var TokenSessionReference = (var)12;
-        public static readonly var TokenSandBoxInert = (var)13;
-        public static readonly var TokenAuditPolicy = (var)14;
-        public static readonly var TokenOrigin = (var)15;
-        public static readonly var TokenElevationType = (var)16;
-        public static readonly var TokenLinkedToken = (var)17;
-        public static readonly var TokenElevation = (var)18;
-        public static readonly var TokenHasRestrictions = (var)19;
-        public static readonly var TokenAccessInformation = (var)20;
-        public static readonly var TokenVirtualizationAllowed = (var)21;
-        public static readonly var TokenVirtualizationEnabled = (var)22;
-        public static readonly var TokenIntegrityLevel = (var)23;
-        public static readonly var TokenUIAccess = (var)24;
-        public static readonly var TokenMandatoryPolicy = (var)25;
-        public static readonly var TokenLogonSid = (var)26;
-        public static readonly var MaxTokenInfoClass = (var)27;
+        public static readonly var TokenGroups = 0;
+        public static readonly var TokenPrivileges = 1;
+        public static readonly var TokenOwner = 2;
+        public static readonly var TokenPrimaryGroup = 3;
+        public static readonly var TokenDefaultDacl = 4;
+        public static readonly var TokenSource = 5;
+        public static readonly var TokenType = 6;
+        public static readonly var TokenImpersonationLevel = 7;
+        public static readonly var TokenStatistics = 8;
+        public static readonly var TokenRestrictedSids = 9;
+        public static readonly var TokenSessionId = 10;
+        public static readonly var TokenGroupsAndPrivileges = 11;
+        public static readonly var TokenSessionReference = 12;
+        public static readonly var TokenSandBoxInert = 13;
+        public static readonly var TokenAuditPolicy = 14;
+        public static readonly var TokenOrigin = 15;
+        public static readonly var TokenElevationType = 16;
+        public static readonly var TokenLinkedToken = 17;
+        public static readonly var TokenElevation = 18;
+        public static readonly var TokenHasRestrictions = 19;
+        public static readonly var TokenAccessInformation = 20;
+        public static readonly var TokenVirtualizationAllowed = 21;
+        public static readonly var TokenVirtualizationEnabled = 22;
+        public static readonly var TokenIntegrityLevel = 23;
+        public static readonly var TokenUIAccess = 24;
+        public static readonly var TokenMandatoryPolicy = 25;
+        public static readonly var TokenLogonSid = 26;
+        public static readonly var MaxTokenInfoClass = 27;
 
 
         // Group attributes inside of Tokengroups.Groups[i].Attributes
@@ -655,7 +655,7 @@ namespace sys
         public static readonly ulong SE_GROUP_INTEGRITY_ENABLED = (ulong)0x00000040UL;
         public static readonly ulong SE_GROUP_LOGON_ID = (ulong)0xC0000000UL;
         public static readonly ulong SE_GROUP_RESOURCE = (ulong)0x20000000UL;
-        public static readonly var SE_GROUP_VALID_ATTRIBUTES = (var)SE_GROUP_MANDATORY | SE_GROUP_ENABLED_BY_DEFAULT | SE_GROUP_ENABLED | SE_GROUP_OWNER | SE_GROUP_USE_FOR_DENY_ONLY | SE_GROUP_LOGON_ID | SE_GROUP_RESOURCE | SE_GROUP_INTEGRITY | SE_GROUP_INTEGRITY_ENABLED;
+        public static readonly var SE_GROUP_VALID_ATTRIBUTES = SE_GROUP_MANDATORY | SE_GROUP_ENABLED_BY_DEFAULT | SE_GROUP_ENABLED | SE_GROUP_OWNER | SE_GROUP_USE_FOR_DENY_ONLY | SE_GROUP_LOGON_ID | SE_GROUP_RESOURCE | SE_GROUP_INTEGRITY | SE_GROUP_INTEGRITY_ENABLED;
 
 
         // Privilege attributes
@@ -663,7 +663,7 @@ namespace sys
         public static readonly ulong SE_PRIVILEGE_ENABLED = (ulong)0x00000002UL;
         public static readonly ulong SE_PRIVILEGE_REMOVED = (ulong)0x00000004UL;
         public static readonly ulong SE_PRIVILEGE_USED_FOR_ACCESS = (ulong)0x80000000UL;
-        public static readonly var SE_PRIVILEGE_VALID_ATTRIBUTES = (var)SE_PRIVILEGE_ENABLED_BY_DEFAULT | SE_PRIVILEGE_ENABLED | SE_PRIVILEGE_REMOVED | SE_PRIVILEGE_USED_FOR_ACCESS;
+        public static readonly var SE_PRIVILEGE_VALID_ATTRIBUTES = SE_PRIVILEGE_ENABLED_BY_DEFAULT | SE_PRIVILEGE_ENABLED | SE_PRIVILEGE_REMOVED | SE_PRIVILEGE_USED_FOR_ACCESS;
 
 
         // Token types
@@ -1219,9 +1219,9 @@ namespace sys
         public static readonly ulong WRITE_OWNER = (ulong)0x00080000UL;
         public static readonly ulong SYNCHRONIZE = (ulong)0x00100000UL;
         public static readonly ulong STANDARD_RIGHTS_REQUIRED = (ulong)0x000F0000UL;
-        public static readonly var STANDARD_RIGHTS_READ = (var)READ_CONTROL;
-        public static readonly var STANDARD_RIGHTS_WRITE = (var)READ_CONTROL;
-        public static readonly var STANDARD_RIGHTS_EXECUTE = (var)READ_CONTROL;
+        public static readonly var STANDARD_RIGHTS_READ = READ_CONTROL;
+        public static readonly var STANDARD_RIGHTS_WRITE = READ_CONTROL;
+        public static readonly var STANDARD_RIGHTS_EXECUTE = READ_CONTROL;
         public static readonly ulong STANDARD_RIGHTS_ALL = (ulong)0x001F0000UL;
         public static readonly ulong SPECIFIC_RIGHTS_ALL = (ulong)0x0000FFFFUL;
         public static readonly ulong ACCESS_SYSTEM_SECURITY = (ulong)0x01000000UL;

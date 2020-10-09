@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package astutil contains common utilities for working with the Go AST.
-// package astutil -- go2cs converted at 2020 October 08 04:27:06 UTC
+// package astutil -- go2cs converted at 2020 October 09 05:39:53 UTC
 // import "golang.org/x/tools/go/ast/astutil" ==> using astutil = go.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ast\astutil\imports.go
 // import "golang.org/x/tools/go/ast/astutil"

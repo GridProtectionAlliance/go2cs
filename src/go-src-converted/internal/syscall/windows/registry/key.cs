@@ -23,7 +23,7 @@
 // NOTE: This package is a copy of golang.org/x/sys/windows/registry
 // with KeyInfo.ModTime removed to prevent dependency cycles.
 //
-// package registry -- go2cs converted at 2020 October 08 03:32:33 UTC
+// package registry -- go2cs converted at 2020 October 09 04:51:16 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Go\src\internal\syscall\windows\registry\key.go
 using io = go.io_package;
@@ -68,11 +68,11 @@ namespace windows
         // An application can use these keys as entry points to the registry.
         // Normally these keys are used in OpenKey to open new keys,
         // but they can also be used anywhere a Key is required.
-        public static readonly var CLASSES_ROOT = (var)Key(syscall.HKEY_CLASSES_ROOT);
-        public static readonly var CURRENT_USER = (var)Key(syscall.HKEY_CURRENT_USER);
-        public static readonly var LOCAL_MACHINE = (var)Key(syscall.HKEY_LOCAL_MACHINE);
-        public static readonly var USERS = (var)Key(syscall.HKEY_USERS);
-        public static readonly var CURRENT_CONFIG = (var)Key(syscall.HKEY_CURRENT_CONFIG);
+        public static readonly var CLASSES_ROOT = Key(syscall.HKEY_CLASSES_ROOT);
+        public static readonly var CURRENT_USER = Key(syscall.HKEY_CURRENT_USER);
+        public static readonly var LOCAL_MACHINE = Key(syscall.HKEY_LOCAL_MACHINE);
+        public static readonly var USERS = Key(syscall.HKEY_USERS);
+        public static readonly var CURRENT_CONFIG = Key(syscall.HKEY_CURRENT_CONFIG);
 
 
         // Close closes open key k.

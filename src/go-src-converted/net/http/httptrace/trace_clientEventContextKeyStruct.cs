@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:22 UTC
+//     Generated on 2020 October 09 04:56:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using textproto = go.net.textproto_package;
 using reflect = go.reflect_package;
 using time = go.time_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net {

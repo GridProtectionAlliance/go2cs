@@ -9,7 +9,7 @@
 // http://nickgravgaard.com/elastictabstops/index.html.
 //
 // The text/tabwriter package is frozen and is not accepting new features.
-// package tabwriter -- go2cs converted at 2020 October 08 03:26:18 UTC
+// package tabwriter -- go2cs converted at 2020 October 09 04:49:59 UTC
 // import "text/tabwriter" ==> using tabwriter = go.text.tabwriter_package
 // Original source: C:\Go\src\text\tabwriter\tabwriter.go
 using io = go.io_package;
@@ -218,23 +218,23 @@ namespace text
 
         // Strip Escape characters bracketing escaped text segments
         // instead of passing them through unchanged with the text.
-        public static readonly var StripEscape = (var)0; 
+        public static readonly var StripEscape = 0; 
 
         // Force right-alignment of cell content.
         // Default is left-alignment.
-        public static readonly var AlignRight = (var)1; 
+        public static readonly var AlignRight = 1; 
 
         // Handle empty columns as if they were not present in
         // the input in the first place.
-        public static readonly var DiscardEmptyColumns = (var)2; 
+        public static readonly var DiscardEmptyColumns = 2; 
 
         // Always use tabs for indentation columns (i.e., padding of
         // leading empty cells on the left) independent of padchar.
-        public static readonly var TabIndent = (var)3; 
+        public static readonly var TabIndent = 3; 
 
         // Print a vertical bar ('|') between columns (after formatting).
         // Discarded columns appear as zero-width columns ("||").
-        public static readonly var Debug = (var)4;
+        public static readonly var Debug = 4;
 
 
         // A Writer must be initialized with a call to Init. The first parameter (output)

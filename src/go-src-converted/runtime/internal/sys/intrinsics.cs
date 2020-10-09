@@ -7,7 +7,7 @@
 // TODO finish intrinsifying 386, deadcode the assembly, remove build tags, merge w/ intrinsics_common
 // TODO replace all uses of CtzXX with TrailingZerosXX; they are the same.
 
-// package sys -- go2cs converted at 2020 October 08 03:19:07 UTC
+// package sys -- go2cs converted at 2020 October 09 04:45:29 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Go\src\runtime\internal\sys\intrinsics.go
 

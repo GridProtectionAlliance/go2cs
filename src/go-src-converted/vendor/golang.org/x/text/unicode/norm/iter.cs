@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2020 October 08 05:02:21 UTC
+// package norm -- go2cs converted at 2020 October 09 06:08:23 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\norm\iter.go
 using fmt = go.fmt_package;
@@ -20,7 +20,7 @@ namespace unicode
     {
         // MaxSegmentSize is the maximum size of a byte buffer needed to consider any
         // sequence of starter and non-starter runes for the purpose of normalization.
-        public static readonly var MaxSegmentSize = (var)maxByteBufferSize;
+        public static readonly var MaxSegmentSize = maxByteBufferSize;
 
         // An Iter iterates over a string or byte slice, while normalizing it
         // to a given Form.

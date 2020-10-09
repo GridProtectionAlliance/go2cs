@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package vet implements the ``go vet'' command.
-// package vet -- go2cs converted at 2020 October 08 04:33:49 UTC
+// package vet -- go2cs converted at 2020 October 09 05:45:23 UTC
 // import "cmd/go/internal/vet" ==> using vet = go.cmd.go.@internal.vet_package
 // Original source: C:\Go\src\cmd\go\internal\vet\vet.go
 using @base = go.cmd.go.@internal.@base_package;

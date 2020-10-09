@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:45:21 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:29 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\types.go
 using syscall = go.syscall_package;
@@ -54,17 +54,17 @@ namespace go
         // The single letters are the abbreviations
         // used by the String method's formatting.
         public static readonly FileMode ModeDir = (FileMode)1L << (int)((32L - 1L - iota)); // d: is a directory
-        public static readonly var ModeAppend = (var)0; // a: append-only
-        public static readonly var ModeExclusive = (var)1; // l: exclusive use
-        public static readonly var ModeTemporary = (var)2; // T: temporary file; Plan 9 only
-        public static readonly var ModeSymlink = (var)3; // L: symbolic link
-        public static readonly var ModeDevice = (var)4; // D: device file
-        public static readonly var ModeNamedPipe = (var)5; // p: named pipe (FIFO)
-        public static readonly var ModeSocket = (var)6; // S: Unix domain socket
-        public static readonly var ModeSetuid = (var)7; // u: setuid
-        public static readonly var ModeSetgid = (var)8; // g: setgid
-        public static readonly var ModeCharDevice = (var)9; // c: Unix character device, when ModeDevice is set
-        public static readonly var ModeSticky = (var)10; // t: sticky
+        public static readonly var ModeAppend = 0; // a: append-only
+        public static readonly var ModeExclusive = 1; // l: exclusive use
+        public static readonly var ModeTemporary = 2; // T: temporary file; Plan 9 only
+        public static readonly var ModeSymlink = 3; // L: symbolic link
+        public static readonly var ModeDevice = 4; // D: device file
+        public static readonly var ModeNamedPipe = 5; // p: named pipe (FIFO)
+        public static readonly var ModeSocket = 6; // S: Unix domain socket
+        public static readonly var ModeSetuid = 7; // u: setuid
+        public static readonly var ModeSetgid = 8; // g: setgid
+        public static readonly var ModeCharDevice = 9; // c: Unix character device, when ModeDevice is set
+        public static readonly var ModeSticky = 10; // t: sticky
         public static readonly ModeType ModeIrregular = (ModeType)ModeDir | ModeSymlink | ModeNamedPipe | ModeSocket | ModeDevice | ModeCharDevice | ModeIrregular;
 
         public static readonly FileMode ModePerm = (FileMode)0777L; // Unix permission bits

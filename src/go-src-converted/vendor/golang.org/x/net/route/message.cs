@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2020 October 08 05:01:38 UTC
+// package route -- go2cs converted at 2020 October 09 06:07:48 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\route\message.go
 
@@ -37,7 +37,7 @@ namespace net
         }
 
         public static readonly SysType SysMetrics = (SysType)iota;
-        public static readonly var SysStats = (var)0;
+        public static readonly var SysStats = 0;
 
 
         // ParseRIB parses b as a routing information base and returns a list

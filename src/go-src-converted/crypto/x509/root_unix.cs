@@ -4,7 +4,7 @@
 
 // +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:59 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:55 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root_unix.go
 using ioutil = go.io.ioutil_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:44 UTC
+//     Generated on 2020 October 09 04:53:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -40,7 +41,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Stream<T> : Stream
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace crypto
             private delegate void XORKeyStreamByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
             private delegate void XORKeyStreamByVal(T value, slice<byte> dst, slice<byte> src);
 
-            private static readonly XORKeyStreamByPtr s_XORKeyStreamByPtr;
-            private static readonly XORKeyStreamByVal s_XORKeyStreamByVal;
+            private static readonly XORKeyStreamByPtr? s_XORKeyStreamByPtr;
+            private static readonly XORKeyStreamByVal? s_XORKeyStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void XORKeyStream(slice<byte> dst, slice<byte> src)
@@ -88,7 +89,7 @@ namespace crypto
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Stream()

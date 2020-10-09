@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:02:23 UTC
+//     Generated on 2020 October 09 05:18:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using token = go.go.token_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Expr<T> : Expr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace go
             private delegate void exprNodeByPtr(ptr<T> value);
             private delegate void exprNodeByVal(T value);
 
-            private static readonly exprNodeByPtr s_exprNodeByPtr;
-            private static readonly exprNodeByVal s_exprNodeByVal;
+            private static readonly exprNodeByPtr? s_exprNodeByPtr;
+            private static readonly exprNodeByVal? s_exprNodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void exprNode()
@@ -93,8 +94,8 @@ namespace go
             private delegate token.Pos PosByPtr(ptr<T> value);
             private delegate token.Pos PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Pos()
@@ -113,8 +114,8 @@ namespace go
             private delegate token.Pos EndByPtr(ptr<T> value);
             private delegate token.Pos EndByVal(T value);
 
-            private static readonly EndByPtr s_EndByPtr;
-            private static readonly EndByVal s_EndByVal;
+            private static readonly EndByPtr? s_EndByPtr;
+            private static readonly EndByVal? s_EndByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos End()
@@ -130,7 +131,7 @@ namespace go
                 return s_EndByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Expr()

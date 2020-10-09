@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:42:01 UTC
+// package ld -- go2cs converted at 2020 October 09 05:52:37 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\util.go
 using sym = go.cmd.oldlink.@internal.sym_package;

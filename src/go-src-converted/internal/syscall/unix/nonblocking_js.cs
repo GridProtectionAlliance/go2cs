@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package unix -- go2cs converted at 2020 October 08 03:32:04 UTC
+// package unix -- go2cs converted at 2020 October 09 04:50:59 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Go\src\internal\syscall\unix\nonblocking_js.go
 

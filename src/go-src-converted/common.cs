@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package wire -- go2cs converted at 2020 October 08 04:55:01 UTC
+// package wire -- go2cs converted at 2020 October 09 06:01:50 UTC
 // import "golang.org/x/tools/internal/event/export/ocagent/wire" ==> using wire = go.golang.org.x.tools.@internal.@event.export.ocagent.wire_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\export\ocagent\wire\common.go
 

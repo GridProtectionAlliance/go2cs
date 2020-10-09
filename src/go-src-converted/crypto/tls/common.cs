@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 October 08 03:37:24 UTC
+// package tls -- go2cs converted at 2020 October 09 04:55:10 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\common.go
 using bytes = go.bytes_package;
@@ -157,9 +157,9 @@ namespace crypto
         // Signature algorithms (for internal signaling use). Starting at 225 to avoid overlap with
         // TLS 1.2 codepoints (RFC 5246, Appendix A.4.1), with which these have nothing to do.
         private static readonly byte signaturePKCS1v15 = (byte)iota + 225L;
-        private static readonly var signatureRSAPSS = (var)0;
-        private static readonly var signatureECDSA = (var)1;
-        private static readonly var signatureEd25519 = (var)2;
+        private static readonly var signatureRSAPSS = 0;
+        private static readonly var signatureECDSA = 1;
+        private static readonly var signatureEd25519 = 2;
 
 
         // directSigning is a standard Hash value that signals that no pre-hashing
@@ -255,10 +255,10 @@ namespace crypto
         }
 
         public static readonly ClientAuthType NoClientCert = (ClientAuthType)iota;
-        public static readonly var RequestClientCert = (var)0;
-        public static readonly var RequireAnyClientCert = (var)1;
-        public static readonly var VerifyClientCertIfGiven = (var)2;
-        public static readonly var RequireAndVerifyClientCert = (var)3;
+        public static readonly var RequestClientCert = 0;
+        public static readonly var RequireAnyClientCert = 1;
+        public static readonly var VerifyClientCertIfGiven = 2;
+        public static readonly var RequireAndVerifyClientCert = 3;
 
 
         // requiresClientCert reports whether the ClientAuthType requires a client
@@ -409,11 +409,11 @@ namespace crypto
 
         // RenegotiateOnceAsClient allows a remote server to request
         // renegotiation once per connection.
-        public static readonly var RenegotiateOnceAsClient = (var)0; 
+        public static readonly var RenegotiateOnceAsClient = 0; 
 
         // RenegotiateFreelyAsClient allows a remote server to repeatedly
         // request renegotiation.
-        public static readonly var RenegotiateFreelyAsClient = (var)1;
+        public static readonly var RenegotiateFreelyAsClient = 1;
 
 
         // A Config structure is used to configure a TLS client or server.

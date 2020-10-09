@@ -124,7 +124,7 @@
 
     The net/rpc package is frozen and is not accepting new features.
 */
-// package rpc -- go2cs converted at 2020 October 08 03:43:25 UTC
+// package rpc -- go2cs converted at 2020 October 09 05:00:36 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Go\src\net\rpc\server.go
 using bufio = go.bufio_package;

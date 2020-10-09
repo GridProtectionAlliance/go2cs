@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:31 UTC
+//     Generated on 2020 October 09 05:45:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,6 +37,8 @@ using par = go.cmd.go.@internal.par_package;
 using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

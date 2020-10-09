@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2020 October 08 03:25:56 UTC
+// package fmt -- go2cs converted at 2020 October 09 05:07:50 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Go\src\fmt\errors.go
 using errors = go.errors_package;

@@ -6,7 +6,7 @@
 // instruction set, to minimize its interaction with the core of the
 // assembler.
 
-// package arch -- go2cs converted at 2020 October 08 04:08:18 UTC
+// package arch -- go2cs converted at 2020 October 09 05:23:09 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Go\src\cmd\asm\internal\arch\arm.go
 using strings = go.strings_package;
@@ -58,7 +58,7 @@ namespace @internal
         // MCR is not defined by the obj/arm; instead we define it privately here.
         // It is encoded as an MRC with a bit inside the instruction word,
         // passed to arch.ARMMRCOffset.
-        private static readonly var aMCR = (var)arm.ALAST + 1L;
+        private static readonly var aMCR = arm.ALAST + 1L;
 
         // IsARMMRC reports whether the op (as defined by an arm.A* constant) is
         // MRC or MCR

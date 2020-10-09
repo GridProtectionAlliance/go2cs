@@ -6,7 +6,7 @@
 // expressions, statements, declarations, and files. It uses
 // the print functionality implemented in printer.go.
 
-// package printer -- go2cs converted at 2020 October 08 04:08:55 UTC
+// package printer -- go2cs converted at 2020 October 09 05:23:33 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Go\src\go\printer\nodes.go
 using bytes = go.bytes_package;
@@ -132,7 +132,7 @@ namespace go
         }
 
         private static readonly exprListMode commaTerm = (exprListMode)1L << (int)(iota); // list is optionally terminated by a comma
-        private static readonly var noIndent = (var)0; // no extra indentation in multi-line lists
+        private static readonly var noIndent = 0; // no extra indentation in multi-line lists
 
         // If indent is set, a multi-line identifier list is indented after the
         // first linebreak encountered.
@@ -1164,7 +1164,7 @@ namespace go
                     p.expr(x.Value);
                     break;
                 case ptr<ast.StarExpr> x:
-                    const var prec = (var)token.UnaryPrec;
+                    const var prec = token.UnaryPrec;
 
                     if (prec < prec1)
                     { 
@@ -1185,7 +1185,7 @@ namespace go
 
                     break;
                 case ptr<ast.UnaryExpr> x:
-                    const var prec = (var)token.UnaryPrec;
+                    const var prec = token.UnaryPrec;
 
                     if (prec < prec1)
                     { 

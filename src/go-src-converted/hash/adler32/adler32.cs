@@ -10,7 +10,7 @@
 //    are done modulo 65521. s1 is initialized to 1, s2 to zero.  The
 //    Adler-32 checksum is stored as s2*65536 + s1 in most-
 //    significant-byte first (network) order.
-// package adler32 -- go2cs converted at 2020 October 08 03:30:49 UTC
+// package adler32 -- go2cs converted at 2020 October 09 04:50:06 UTC
 // import "hash/adler32" ==> using adler32 = go.hash.adler32_package
 // Original source: C:\Go\src\hash\adler32\adler32.go
 using errors = go.errors_package;
@@ -78,7 +78,7 @@ namespace hash
         }
 
         private static readonly @string magic = (@string)"adl\x01";
-        private static readonly var marshaledSize = (var)len(magic) + 4L;
+        private static readonly var marshaledSize = len(magic) + 4L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

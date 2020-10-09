@@ -4,7 +4,7 @@
 
 // +build aix linux darwin dragonfly freebsd openbsd netbsd solaris
 
-// package tar -- go2cs converted at 2020 October 08 03:49:16 UTC
+// package tar -- go2cs converted at 2020 October 09 05:08:04 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\stat_unix.go
 using os = go.os_package;

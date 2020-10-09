@@ -10,7 +10,7 @@
 // it in our own nicer implementation, either here or in
 // syscall_bsd.go or syscall_unix.go.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:38 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:54 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_openbsd.go
 using @unsafe = go.@unsafe_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:43 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\stack.go
 using cpu = go.@internal.cpu_package;
@@ -69,21 +69,21 @@ namespace go
         // to each stack below the usual guard area for OS-specific
         // purposes like signal handling. Used on Windows, Plan 9,
         // and iOS because they do not use a separate stack.
-        private static readonly var _StackSystem = (var)sys.GoosWindows * 512L * sys.PtrSize + sys.GoosPlan9 * 512L + sys.GoosDarwin * sys.GoarchArm * 1024L + sys.GoosDarwin * sys.GoarchArm64 * 1024L; 
+        private static readonly var _StackSystem = sys.GoosWindows * 512L * sys.PtrSize + sys.GoosPlan9 * 512L + sys.GoosDarwin * sys.GoarchArm * 1024L + sys.GoosDarwin * sys.GoarchArm64 * 1024L; 
 
         // The minimum size of stack used by Go code
         private static readonly long _StackMin = (long)2048L; 
 
         // The minimum stack size to allocate.
         // The hackery here rounds FixedStack0 up to a power of 2.
-        private static readonly var _FixedStack0 = (var)_StackMin + _StackSystem;
-        private static readonly var _FixedStack1 = (var)_FixedStack0 - 1L;
-        private static readonly var _FixedStack2 = (var)_FixedStack1 | (_FixedStack1 >> (int)(1L));
-        private static readonly var _FixedStack3 = (var)_FixedStack2 | (_FixedStack2 >> (int)(2L));
-        private static readonly var _FixedStack4 = (var)_FixedStack3 | (_FixedStack3 >> (int)(4L));
-        private static readonly var _FixedStack5 = (var)_FixedStack4 | (_FixedStack4 >> (int)(8L));
-        private static readonly var _FixedStack6 = (var)_FixedStack5 | (_FixedStack5 >> (int)(16L));
-        private static readonly var _FixedStack = (var)_FixedStack6 + 1L; 
+        private static readonly var _FixedStack0 = _StackMin + _StackSystem;
+        private static readonly var _FixedStack1 = _FixedStack0 - 1L;
+        private static readonly var _FixedStack2 = _FixedStack1 | (_FixedStack1 >> (int)(1L));
+        private static readonly var _FixedStack3 = _FixedStack2 | (_FixedStack2 >> (int)(2L));
+        private static readonly var _FixedStack4 = _FixedStack3 | (_FixedStack3 >> (int)(4L));
+        private static readonly var _FixedStack5 = _FixedStack4 | (_FixedStack4 >> (int)(8L));
+        private static readonly var _FixedStack6 = _FixedStack5 | (_FixedStack5 >> (int)(16L));
+        private static readonly var _FixedStack = _FixedStack6 + 1L; 
 
         // Functions that need frames bigger than this use an extra
         // instruction to do the stack split check, to avoid overflow
@@ -103,7 +103,7 @@ namespace go
 
         // The maximum number of bytes that a chain of NOSPLIT
         // functions can use.
-        private static readonly var _StackLimit = (var)_StackGuard - _StackSystem - _StackSmall;
+        private static readonly var _StackLimit = _StackGuard - _StackSystem - _StackSmall;
 
 
  
@@ -119,7 +119,7 @@ namespace go
         private static readonly long stackNoCache = (long)0L; // disable per-P small stack caches
 
         // check the BP links during traceback.
-        private static readonly var debugCheckBP = (var)false;
+        private static readonly var debugCheckBP = false;
 
 
         private static readonly long uintptrMask = (long)1L << (int)((8L * sys.PtrSize)) - 1L; 
@@ -128,12 +128,12 @@ namespace go
         // Stored into g->stackguard0 to cause split stack check failure.
         // Must be greater than any real sp.
         // 0xfffffade in hex.
-        private static readonly var stackPreempt = (var)uintptrMask & -1314L; 
+        private static readonly var stackPreempt = uintptrMask & -1314L; 
 
         // Thread is forking.
         // Stored into g->stackguard0 to cause split stack check failure.
         // Must be greater than any real sp.
-        private static readonly var stackFork = (var)uintptrMask & -1234L;
+        private static readonly var stackFork = uintptrMask & -1234L;
 
 
         // Global pool of spans that have free stacks.

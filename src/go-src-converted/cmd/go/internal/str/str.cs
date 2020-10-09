@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package str provides string manipulation utilities.
-// package str -- go2cs converted at 2020 October 08 04:34:39 UTC
+// package str -- go2cs converted at 2020 October 09 05:46:04 UTC
 // import "cmd/go/internal/str" ==> using str = go.cmd.go.@internal.str_package
 // Original source: C:\Go\src\cmd\go\internal\str\str.go
 using bytes = go.bytes_package;

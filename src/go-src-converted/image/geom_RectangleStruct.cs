@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:05 UTC
+//     Generated on 2020 October 09 06:05:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using color = go.image.color_package;
 using bits = go.math.bits_package;
 using strconv = go.strconv_package;
+
+#nullable enable
 
 namespace go
 {

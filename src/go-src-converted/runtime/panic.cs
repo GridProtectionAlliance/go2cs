@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:22 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\panic.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -359,9 +359,9 @@ namespace go
         // Each P holds a pool for defers with small arg sizes.
         // Assign defer allocations to pools by rounding to 16, to match malloc size classes.
 
-        private static readonly var deferHeaderSize = (var)@unsafe.Sizeof(new _defer());
-        private static readonly var minDeferAlloc = (var)(deferHeaderSize + 15L) & ~15L;
-        private static readonly var minDeferArgs = (var)minDeferAlloc - deferHeaderSize;
+        private static readonly var deferHeaderSize = @unsafe.Sizeof(new _defer());
+        private static readonly var minDeferAlloc = (deferHeaderSize + 15L) & ~15L;
+        private static readonly var minDeferArgs = minDeferAlloc - deferHeaderSize;
 
 
         // defer size class for arg size sz

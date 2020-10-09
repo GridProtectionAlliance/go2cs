@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:33:31 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:45 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_linux.go
 using os = go.os_package;

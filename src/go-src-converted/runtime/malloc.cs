@@ -98,7 +98,7 @@
 // attempts to keep arenas contiguous so that large spans (and hence
 // large objects) can cross arenas.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:07 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\malloc.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -112,30 +112,30 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var debugMalloc = (var)false;
+        private static readonly var debugMalloc = false;
 
-        private static readonly var maxTinySize = (var)_TinySize;
-        private static readonly var tinySizeClass = (var)_TinySizeClass;
-        private static readonly var maxSmallSize = (var)_MaxSmallSize;
+        private static readonly var maxTinySize = _TinySize;
+        private static readonly var tinySizeClass = _TinySizeClass;
+        private static readonly var maxSmallSize = _MaxSmallSize;
 
-        private static readonly var pageShift = (var)_PageShift;
-        private static readonly var pageSize = (var)_PageSize;
-        private static readonly var pageMask = (var)_PageMask; 
+        private static readonly var pageShift = _PageShift;
+        private static readonly var pageSize = _PageSize;
+        private static readonly var pageMask = _PageMask; 
         // By construction, single page spans of the smallest object class
         // have the most objects per span.
-        private static readonly var maxObjsPerSpan = (var)pageSize / 8L;
+        private static readonly var maxObjsPerSpan = pageSize / 8L;
 
-        private static readonly var concurrentSweep = (var)_ConcurrentSweep;
+        private static readonly var concurrentSweep = _ConcurrentSweep;
 
         private static readonly long _PageSize = (long)1L << (int)(_PageShift);
-        private static readonly var _PageMask = (var)_PageSize - 1L; 
+        private static readonly var _PageMask = _PageSize - 1L; 
 
         // _64bit = 1 on 64-bit systems, 0 on 32-bit systems
         private static readonly long _64bit = (long)1L << (int)((~uintptr(0L) >> (int)(63L))) / 2L; 
 
         // Tiny allocator parameters, see "Tiny allocator" comment in malloc.go.
         private static readonly long _TinySize = (long)16L;
-        private static readonly var _TinySizeClass = (var)int8(2L);
+        private static readonly var _TinySizeClass = int8(2L);
 
         private static readonly long _FixAllocChunk = (long)16L << (int)(10L); // Chunk size for FixAlloc
 
@@ -211,7 +211,7 @@ namespace go
         // arenaBaseOffset to offset into the top 4 GiB.
         //
         // WebAssembly currently has a limit of 4GB linear memory.
-        private static readonly var heapAddrBits = (var)(_64bit * (1L - sys.GoarchWasm) * (1L - sys.GoosDarwin * sys.GoarchArm64)) * 48L + (1L - _64bit + sys.GoarchWasm) * (32L - (sys.GoarchMips + sys.GoarchMipsle)) + 33L * sys.GoosDarwin * sys.GoarchArm64; 
+        private static readonly var heapAddrBits = (_64bit * (1L - sys.GoarchWasm) * (1L - sys.GoosDarwin * sys.GoarchArm64)) * 48L + (1L - _64bit + sys.GoarchWasm) * (32L - (sys.GoarchMips + sys.GoarchMipsle)) + 33L * sys.GoosDarwin * sys.GoarchArm64; 
 
         // maxAlloc is the maximum size of an allocation. On 64-bit,
         // it's theoretically possible to allocate 1<<heapAddrBits bytes. On
@@ -254,9 +254,9 @@ namespace go
         private static readonly long logHeapArenaBytes = (long)(6L + 20L) * (_64bit * (1L - sys.GoosWindows) * (1L - sys.GoarchWasm)) + (2L + 20L) * (_64bit * sys.GoosWindows) + (2L + 20L) * (1L - _64bit) + (2L + 20L) * sys.GoarchWasm; 
 
         // heapArenaBitmapBytes is the size of each heap arena's bitmap.
-        private static readonly var heapArenaBitmapBytes = (var)heapArenaBytes / (sys.PtrSize * 8L / 2L);
+        private static readonly var heapArenaBitmapBytes = heapArenaBytes / (sys.PtrSize * 8L / 2L);
 
-        private static readonly var pagesPerArena = (var)heapArenaBytes / pageSize; 
+        private static readonly var pagesPerArena = heapArenaBytes / pageSize; 
 
         // arenaL1Bits is the number of bits of the arena number
         // covered by the first level arena map.
@@ -280,16 +280,16 @@ namespace go
         // 1<<arenaL2Bits, so it's important that this not be too
         // large. 48 bits leads to 32MB arena index allocations, which
         // is about the practical threshold.
-        private static readonly var arenaL2Bits = (var)heapAddrBits - logHeapArenaBytes - arenaL1Bits; 
+        private static readonly var arenaL2Bits = heapAddrBits - logHeapArenaBytes - arenaL1Bits; 
 
         // arenaL1Shift is the number of bits to shift an arena frame
         // number by to compute an index into the first level arena map.
-        private static readonly var arenaL1Shift = (var)arenaL2Bits; 
+        private static readonly var arenaL1Shift = arenaL2Bits; 
 
         // arenaBits is the total bits in a combined arena map index.
         // This is split between the index into the L1 arena map and
         // the L2 arena map.
-        private static readonly var arenaBits = (var)arenaL1Bits + arenaL2Bits; 
+        private static readonly var arenaBits = arenaL1Bits + arenaL2Bits; 
 
         // arenaBaseOffset is the pointer value that corresponds to
         // index 0 in the heap arena map.
@@ -308,7 +308,7 @@ namespace go
         // and starts at 0, so no offset is necessary.
         private static readonly ulong arenaBaseOffset = (ulong)0xffff800000000000UL * sys.GoarchAmd64 + 0x0a00000000000000UL * sys.GoosAix; 
         // A typed version of this constant that will make it into DWARF (for viewcore).
-        private static readonly var arenaBaseOffsetUintptr = (var)uintptr(arenaBaseOffset); 
+        private static readonly var arenaBaseOffsetUintptr = uintptr(arenaBaseOffset); 
 
         // Max number of threads to run garbage collection.
         // 2, 3, and 4 are all plausible maximums depending

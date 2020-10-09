@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 October 08 04:04:19 UTC
+// package ast -- go2cs converted at 2020 October 09 05:20:02 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\commentmap.go
 using bytes = go.bytes_package;

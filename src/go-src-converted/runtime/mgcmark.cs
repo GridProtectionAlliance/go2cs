@@ -4,7 +4,7 @@
 
 // Garbage collector: marking and scanning
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:56 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgcmark.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -17,8 +17,8 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var fixedRootFinalizers = (var)iota;
-        private static readonly var fixedRootFreeGStacks = (var)0;
+        private static readonly var fixedRootFinalizers = iota;
+        private static readonly var fixedRootFreeGStacks = 0;
         private static readonly rootBlockBytes fixedRootCount = (rootBlockBytes)256L << (int)(10L); 
 
         // maxObletBytes is the maximum bytes of an object to scan at
@@ -50,7 +50,7 @@ namespace go
 
         // go115NewMarkrootSpans is a feature flag that indicates whether
         // to use the new bitmap-based markrootSpans implementation.
-        private static readonly var go115NewMarkrootSpans = (var)true;
+        private static readonly var go115NewMarkrootSpans = true;
 
 
         // gcMarkRootPrepare queues root scanning jobs (stacks, globals, and
@@ -1351,9 +1351,9 @@ retry:
         }
 
         private static readonly gcDrainFlags gcDrainUntilPreempt = (gcDrainFlags)1L << (int)(iota);
-        private static readonly var gcDrainFlushBgCredit = (var)0;
-        private static readonly var gcDrainIdle = (var)1;
-        private static readonly var gcDrainFractional = (var)2;
+        private static readonly var gcDrainFlushBgCredit = 0;
+        private static readonly var gcDrainIdle = 1;
+        private static readonly var gcDrainFractional = 2;
 
 
         // gcDrain scans roots and objects in work buffers, blackening grey

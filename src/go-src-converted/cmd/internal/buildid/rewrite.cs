@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2020 October 08 04:08:25 UTC
+// package buildid -- go2cs converted at 2020 October 09 05:23:13 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
 // Original source: C:\Go\src\cmd\internal\buildid\rewrite.go
 using bytes = go.bytes_package;

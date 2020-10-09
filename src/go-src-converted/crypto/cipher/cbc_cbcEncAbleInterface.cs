@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:22 UTC
+//     Generated on 2020 October 09 04:52:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using subtle = go.crypto.@internal.subtle_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class cbcEncAble<T> : cbcEncAble
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace crypto
             private delegate BlockMode NewCBCEncrypterByPtr(ptr<T> value, slice<byte> iv);
             private delegate BlockMode NewCBCEncrypterByVal(T value, slice<byte> iv);
 
-            private static readonly NewCBCEncrypterByPtr s_NewCBCEncrypterByPtr;
-            private static readonly NewCBCEncrypterByVal s_NewCBCEncrypterByVal;
+            private static readonly NewCBCEncrypterByPtr? s_NewCBCEncrypterByPtr;
+            private static readonly NewCBCEncrypterByVal? s_NewCBCEncrypterByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public BlockMode NewCBCEncrypter(slice<byte> iv)
@@ -84,7 +85,7 @@ namespace crypto
                 return s_NewCBCEncrypterByPtr(m_target_ptr, iv);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static cbcEncAble()

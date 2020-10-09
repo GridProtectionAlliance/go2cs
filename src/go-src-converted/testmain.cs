@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:57:11 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:31 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\testmain.go
 // CreateTestMainPackage synthesizes a main package that runs all the

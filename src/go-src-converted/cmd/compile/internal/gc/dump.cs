@@ -6,7 +6,7 @@
 // for debugging purposes. The code is customized for Node graphs
 // and may be used for an alternative view of the node structure.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:40 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:15 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\dump.go
 using types = go.cmd.compile.@internal.types_package;

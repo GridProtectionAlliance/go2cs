@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:27:49 UTC
+//     Generated on 2020 October 09 05:02:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using utf16 = go.unicode.utf16_package;
 using @unsafe = go.@unsafe_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -46,7 +47,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Sockaddr<T> : Sockaddr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace go
             private delegate (unsafe.Pointer, int, error) sockaddrByPtr(ptr<T> value);
             private delegate (unsafe.Pointer, int, error) sockaddrByVal(T value);
 
-            private static readonly sockaddrByPtr s_sockaddrByPtr;
-            private static readonly sockaddrByVal s_sockaddrByVal;
+            private static readonly sockaddrByPtr? s_sockaddrByPtr;
+            private static readonly sockaddrByVal? s_sockaddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (unsafe.Pointer, int, error) sockaddr()
@@ -89,7 +90,7 @@ namespace go
                 return s_sockaddrByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Sockaddr()

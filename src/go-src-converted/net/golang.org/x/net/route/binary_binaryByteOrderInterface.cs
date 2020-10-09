@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:33:16 UTC
+//     Generated on 2020 October 09 04:51:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class binaryByteOrder<T> : binaryByteOrder
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace net
             private delegate ulong Uint16ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate ulong Uint16ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint16ByPtr s_Uint16ByPtr;
-            private static readonly Uint16ByVal s_Uint16ByVal;
+            private static readonly Uint16ByPtr? s_Uint16ByPtr;
+            private static readonly Uint16ByVal? s_Uint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Uint16(slice<byte> _p0)
@@ -88,8 +89,8 @@ namespace net
             private delegate ulong Uint32ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate ulong Uint32ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint32ByPtr s_Uint32ByPtr;
-            private static readonly Uint32ByVal s_Uint32ByVal;
+            private static readonly Uint32ByPtr? s_Uint32ByPtr;
+            private static readonly Uint32ByVal? s_Uint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Uint32(slice<byte> _p0)
@@ -108,8 +109,8 @@ namespace net
             private delegate ulong PutUint16ByPtr(ptr<T> value, slice<byte> _p0, ushort _p0);
             private delegate ulong PutUint16ByVal(T value, slice<byte> _p0, ushort _p0);
 
-            private static readonly PutUint16ByPtr s_PutUint16ByPtr;
-            private static readonly PutUint16ByVal s_PutUint16ByVal;
+            private static readonly PutUint16ByPtr? s_PutUint16ByPtr;
+            private static readonly PutUint16ByVal? s_PutUint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong PutUint16(slice<byte> _p0, ushort _p0)
@@ -128,8 +129,8 @@ namespace net
             private delegate ulong PutUint32ByPtr(ptr<T> value, slice<byte> _p0, uint _p0);
             private delegate ulong PutUint32ByVal(T value, slice<byte> _p0, uint _p0);
 
-            private static readonly PutUint32ByPtr s_PutUint32ByPtr;
-            private static readonly PutUint32ByVal s_PutUint32ByVal;
+            private static readonly PutUint32ByPtr? s_PutUint32ByPtr;
+            private static readonly PutUint32ByVal? s_PutUint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong PutUint32(slice<byte> _p0, uint _p0)
@@ -148,8 +149,8 @@ namespace net
             private delegate ulong Uint64ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate ulong Uint64ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint64ByPtr s_Uint64ByPtr;
-            private static readonly Uint64ByVal s_Uint64ByVal;
+            private static readonly Uint64ByPtr? s_Uint64ByPtr;
+            private static readonly Uint64ByVal? s_Uint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Uint64(slice<byte> _p0)
@@ -165,7 +166,7 @@ namespace net
                 return s_Uint64ByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static binaryByteOrder()

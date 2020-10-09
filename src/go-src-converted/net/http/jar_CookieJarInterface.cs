@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:13 UTC
+//     Generated on 2020 October 09 04:57:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using url = go.net.url_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class CookieJar<T> : CookieJar
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace net
             private delegate slice<ptr<Cookie>> SetCookiesByPtr(ptr<T> value, ptr<url.URL> u, slice<ptr<Cookie>> cookies);
             private delegate slice<ptr<Cookie>> SetCookiesByVal(T value, ptr<url.URL> u, slice<ptr<Cookie>> cookies);
 
-            private static readonly SetCookiesByPtr s_SetCookiesByPtr;
-            private static readonly SetCookiesByVal s_SetCookiesByVal;
+            private static readonly SetCookiesByPtr? s_SetCookiesByPtr;
+            private static readonly SetCookiesByVal? s_SetCookiesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<ptr<Cookie>> SetCookies(ptr<url.URL> u, slice<ptr<Cookie>> cookies)
@@ -87,8 +88,8 @@ namespace net
             private delegate slice<ptr<Cookie>> CookiesByPtr(ptr<T> value, ptr<url.URL> u);
             private delegate slice<ptr<Cookie>> CookiesByVal(T value, ptr<url.URL> u);
 
-            private static readonly CookiesByPtr s_CookiesByPtr;
-            private static readonly CookiesByVal s_CookiesByVal;
+            private static readonly CookiesByPtr? s_CookiesByPtr;
+            private static readonly CookiesByVal? s_CookiesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<ptr<Cookie>> Cookies(ptr<url.URL> u)
@@ -104,7 +105,7 @@ namespace net
                 return s_CookiesByPtr(m_target_ptr, u);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static CookieJar()

@@ -4,7 +4,7 @@
 
 // Netlink sockets and messages
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:49 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:25 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\netlink_linux.go
 using @unsafe = go.@unsafe_package;

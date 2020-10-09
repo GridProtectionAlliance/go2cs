@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:10 UTC
+//     Generated on 2020 October 09 06:03:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using types = go.go.types_package;
 using sync = go.sync_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

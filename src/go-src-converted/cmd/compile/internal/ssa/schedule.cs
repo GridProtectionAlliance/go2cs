@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:26:33 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:39:30 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\schedule.go
 using types = go.cmd.compile.@internal.types_package;
@@ -17,16 +17,16 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        public static readonly var ScorePhi = (var)iota; // towards top of block
-        public static readonly var ScoreArg = (var)0;
-        public static readonly var ScoreNilCheck = (var)1;
-        public static readonly var ScoreReadTuple = (var)2;
-        public static readonly var ScoreVarDef = (var)3;
-        public static readonly var ScoreMemory = (var)4;
-        public static readonly var ScoreReadFlags = (var)5;
-        public static readonly var ScoreDefault = (var)6;
-        public static readonly var ScoreFlags = (var)7;
-        public static readonly var ScoreControl = (var)8; // towards bottom of block
+        public static readonly var ScorePhi = iota; // towards top of block
+        public static readonly var ScoreArg = 0;
+        public static readonly var ScoreNilCheck = 1;
+        public static readonly var ScoreReadTuple = 2;
+        public static readonly var ScoreVarDef = 3;
+        public static readonly var ScoreMemory = 4;
+        public static readonly var ScoreReadFlags = 5;
+        public static readonly var ScoreDefault = 6;
+        public static readonly var ScoreFlags = 7;
+        public static readonly var ScoreControl = 8; // towards bottom of block
 
         public partial struct ValHeap
         {

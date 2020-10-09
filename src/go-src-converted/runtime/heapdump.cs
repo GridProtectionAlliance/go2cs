@@ -9,7 +9,7 @@
 // The format of the dumped file is described at
 // https://golang.org/s/go15heapdump.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:51 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\heapdump.go
 using sys = go.runtime.@internal.sys_package;

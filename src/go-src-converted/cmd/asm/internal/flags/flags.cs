@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package flags implements top-level flags and the usage message for the assembler.
-// package flags -- go2cs converted at 2020 October 08 04:04:36 UTC
+// package flags -- go2cs converted at 2020 October 09 05:20:16 UTC
 // import "cmd/asm/internal/flags" ==> using flags = go.cmd.asm.@internal.flags_package
 // Original source: C:\Go\src\cmd\asm\internal\flags\flags.go
 using objabi = go.cmd.@internal.objabi_package;

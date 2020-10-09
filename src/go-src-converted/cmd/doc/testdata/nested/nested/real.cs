@@ -1,4 +1,4 @@
-// package nested -- go2cs converted at 2020 October 08 04:33:09 UTC
+// package nested -- go2cs converted at 2020 October 09 05:44:52 UTC
 // import "cmd/doc/testdata/nested/nested" ==> using nested = go.cmd.doc.testdata.nested.nested_package
 // Original source: C:\Go\src\cmd\doc\testdata\nested\nested\real.go
 

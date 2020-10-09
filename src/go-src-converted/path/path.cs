@@ -9,7 +9,7 @@
 // slashes, such as the paths in URLs. This package does not deal with
 // Windows paths with drive letters or backslashes; to manipulate
 // operating system paths, use the path/filepath package.
-// package path -- go2cs converted at 2020 October 08 03:38:41 UTC
+// package path -- go2cs converted at 2020 October 09 05:06:57 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Go\src\path\path.go
 using strings = go.strings_package;

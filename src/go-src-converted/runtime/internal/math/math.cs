@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 08 03:19:16 UTC
+// package math -- go2cs converted at 2020 October 09 04:45:39 UTC
 // import "runtime/internal/math" ==> using math = go.runtime.@internal.math_package
 // Original source: C:\Go\src\runtime\internal\math\math.go
 using sys = go.runtime.@internal.sys_package;
@@ -14,7 +14,7 @@ namespace @internal
 {
     public static partial class math_package
     {
-        public static readonly var MaxUintptr = (var)~uintptr(0L);
+        public static readonly var MaxUintptr = ~uintptr(0L);
 
         // MulUintptr returns a * b and whether the multiplication overflowed.
         // On supported platforms this is an intrinsic lowered by the compiler.

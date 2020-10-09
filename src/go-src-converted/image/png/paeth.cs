@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package png -- go2cs converted at 2020 October 08 04:59:33 UTC
+// package png -- go2cs converted at 2020 October 09 06:05:59 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Go\src\image\png\paeth.go
 

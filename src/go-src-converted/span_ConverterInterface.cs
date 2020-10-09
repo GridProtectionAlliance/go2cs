@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:37 UTC
+//     Generated on 2020 October 09 06:01:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using path = go.path_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Converter<T> : Converter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate (long, error) ToPositionByPtr(ptr<T> value, long offset);
             private delegate (long, error) ToPositionByVal(T value, long offset);
 
-            private static readonly ToPositionByPtr s_ToPositionByPtr;
-            private static readonly ToPositionByVal s_ToPositionByVal;
+            private static readonly ToPositionByPtr? s_ToPositionByPtr;
+            private static readonly ToPositionByVal? s_ToPositionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) ToPosition(long offset)
@@ -92,8 +93,8 @@ namespace @internal
             private delegate (long, error) ToOffsetByPtr(ptr<T> value, long line, long col);
             private delegate (long, error) ToOffsetByVal(T value, long line, long col);
 
-            private static readonly ToOffsetByPtr s_ToOffsetByPtr;
-            private static readonly ToOffsetByVal s_ToOffsetByVal;
+            private static readonly ToOffsetByPtr? s_ToOffsetByPtr;
+            private static readonly ToOffsetByVal? s_ToOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) ToOffset(long line, long col)
@@ -109,7 +110,7 @@ namespace @internal
                 return s_ToOffsetByPtr(m_target_ptr, line, col);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Converter()

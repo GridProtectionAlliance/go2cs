@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:10:07 UTC
+//     Generated on 2020 October 09 05:24:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class GCNode<T> : GCNode
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate StorageClass TypByPtr(ptr<T> value);
             private delegate StorageClass TypByVal(T value);
 
-            private static readonly TypByPtr s_TypByPtr;
-            private static readonly TypByVal s_TypByVal;
+            private static readonly TypByPtr? s_TypByPtr;
+            private static readonly TypByVal? s_TypByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public StorageClass Typ()
@@ -92,8 +93,8 @@ namespace @internal
             private delegate StorageClass StringByPtr(ptr<T> value);
             private delegate StorageClass StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public StorageClass String()
@@ -112,8 +113,8 @@ namespace @internal
             private delegate StorageClass IsSyntheticByPtr(ptr<T> value);
             private delegate StorageClass IsSyntheticByVal(T value);
 
-            private static readonly IsSyntheticByPtr s_IsSyntheticByPtr;
-            private static readonly IsSyntheticByVal s_IsSyntheticByVal;
+            private static readonly IsSyntheticByPtr? s_IsSyntheticByPtr;
+            private static readonly IsSyntheticByVal? s_IsSyntheticByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public StorageClass IsSynthetic()
@@ -132,8 +133,8 @@ namespace @internal
             private delegate StorageClass IsAutoTmpByPtr(ptr<T> value);
             private delegate StorageClass IsAutoTmpByVal(T value);
 
-            private static readonly IsAutoTmpByPtr s_IsAutoTmpByPtr;
-            private static readonly IsAutoTmpByVal s_IsAutoTmpByVal;
+            private static readonly IsAutoTmpByPtr? s_IsAutoTmpByPtr;
+            private static readonly IsAutoTmpByVal? s_IsAutoTmpByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public StorageClass IsAutoTmp()
@@ -152,8 +153,8 @@ namespace @internal
             private delegate StorageClass StorageClassByPtr(ptr<T> value);
             private delegate StorageClass StorageClassByVal(T value);
 
-            private static readonly StorageClassByPtr s_StorageClassByPtr;
-            private static readonly StorageClassByVal s_StorageClassByVal;
+            private static readonly StorageClassByPtr? s_StorageClassByPtr;
+            private static readonly StorageClassByVal? s_StorageClassByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public StorageClass StorageClass()
@@ -169,7 +170,7 @@ namespace @internal
                 return s_StorageClassByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static GCNode()

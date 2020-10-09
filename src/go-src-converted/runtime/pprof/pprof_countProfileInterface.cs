@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:15 UTC
+//     Generated on 2020 October 09 04:49:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,7 @@ using time = go.time_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace runtime
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class countProfile<T> : countProfile
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace runtime
             private delegate ptr<labelMap> LenByPtr(ptr<T> value);
             private delegate ptr<labelMap> LenByVal(T value);
 
-            private static readonly LenByPtr s_LenByPtr;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LenByPtr? s_LenByPtr;
+            private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<labelMap> Len()
@@ -97,8 +98,8 @@ namespace runtime
             private delegate ptr<labelMap> StackByPtr(ptr<T> value, long i);
             private delegate ptr<labelMap> StackByVal(T value, long i);
 
-            private static readonly StackByPtr s_StackByPtr;
-            private static readonly StackByVal s_StackByVal;
+            private static readonly StackByPtr? s_StackByPtr;
+            private static readonly StackByVal? s_StackByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<labelMap> Stack(long i)
@@ -117,8 +118,8 @@ namespace runtime
             private delegate ptr<labelMap> LabelByPtr(ptr<T> value, long i);
             private delegate ptr<labelMap> LabelByVal(T value, long i);
 
-            private static readonly LabelByPtr s_LabelByPtr;
-            private static readonly LabelByVal s_LabelByVal;
+            private static readonly LabelByPtr? s_LabelByPtr;
+            private static readonly LabelByVal? s_LabelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<labelMap> Label(long i)
@@ -134,7 +135,7 @@ namespace runtime
                 return s_LabelByPtr(m_target_ptr, i);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static countProfile()

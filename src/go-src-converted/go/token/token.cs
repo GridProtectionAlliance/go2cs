@@ -5,7 +5,7 @@
 // Package token defines constants representing the lexical tokens of the Go
 // programming language and basic operations on tokens (printing, predicates).
 //
-// package token -- go2cs converted at 2020 October 08 03:43:28 UTC
+// package token -- go2cs converted at 2020 October 09 05:00:39 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Go\src\go\token\token.go
 using strconv = go.strconv_package;
@@ -27,111 +27,111 @@ namespace go
  
         // Special tokens
         public static readonly Token ILLEGAL = (Token)iota;
-        public static readonly var EOF = (var)0;
-        public static readonly var COMMENT = (var)1;
+        public static readonly var EOF = 0;
+        public static readonly var COMMENT = 1;
 
-        private static readonly var literal_beg = (var)2; 
+        private static readonly var literal_beg = 2; 
         // Identifiers and basic type literals
         // (these tokens stand for classes of literals)
-        public static readonly var IDENT = (var)3; // main
-        public static readonly var INT = (var)4; // 12345
-        public static readonly var FLOAT = (var)5; // 123.45
-        public static readonly var IMAG = (var)6; // 123.45i
-        public static readonly var CHAR = (var)7; // 'a'
-        public static readonly var STRING = (var)8; // "abc"
-        private static readonly var literal_end = (var)9;
+        public static readonly var IDENT = 3; // main
+        public static readonly var INT = 4; // 12345
+        public static readonly var FLOAT = 5; // 123.45
+        public static readonly var IMAG = 6; // 123.45i
+        public static readonly var CHAR = 7; // 'a'
+        public static readonly var STRING = 8; // "abc"
+        private static readonly var literal_end = 9;
 
-        private static readonly var operator_beg = (var)10; 
+        private static readonly var operator_beg = 10; 
         // Operators and delimiters
-        public static readonly var ADD = (var)11; // +
-        public static readonly var SUB = (var)12; // -
-        public static readonly var MUL = (var)13; // *
-        public static readonly var QUO = (var)14; // /
-        public static readonly var REM = (var)15; // %
+        public static readonly var ADD = 11; // +
+        public static readonly var SUB = 12; // -
+        public static readonly var MUL = 13; // *
+        public static readonly var QUO = 14; // /
+        public static readonly var REM = 15; // %
 
-        public static readonly var AND = (var)16; // &
-        public static readonly var OR = (var)17; // |
-        public static readonly var XOR = (var)18; // ^
-        public static readonly var SHL = (var)19; // <<
-        public static readonly var SHR = (var)20; // >>
-        public static readonly var AND_NOT = (var)21; // &^
+        public static readonly var AND = 16; // &
+        public static readonly var OR = 17; // |
+        public static readonly var XOR = 18; // ^
+        public static readonly var SHL = 19; // <<
+        public static readonly var SHR = 20; // >>
+        public static readonly var AND_NOT = 21; // &^
 
-        public static readonly var ADD_ASSIGN = (var)22; // +=
-        public static readonly var SUB_ASSIGN = (var)23; // -=
-        public static readonly var MUL_ASSIGN = (var)24; // *=
-        public static readonly var QUO_ASSIGN = (var)25; // /=
-        public static readonly var REM_ASSIGN = (var)26; // %=
+        public static readonly var ADD_ASSIGN = 22; // +=
+        public static readonly var SUB_ASSIGN = 23; // -=
+        public static readonly var MUL_ASSIGN = 24; // *=
+        public static readonly var QUO_ASSIGN = 25; // /=
+        public static readonly var REM_ASSIGN = 26; // %=
 
-        public static readonly var AND_ASSIGN = (var)27; // &=
-        public static readonly var OR_ASSIGN = (var)28; // |=
-        public static readonly var XOR_ASSIGN = (var)29; // ^=
-        public static readonly var SHL_ASSIGN = (var)30; // <<=
-        public static readonly var SHR_ASSIGN = (var)31; // >>=
-        public static readonly var AND_NOT_ASSIGN = (var)32; // &^=
+        public static readonly var AND_ASSIGN = 27; // &=
+        public static readonly var OR_ASSIGN = 28; // |=
+        public static readonly var XOR_ASSIGN = 29; // ^=
+        public static readonly var SHL_ASSIGN = 30; // <<=
+        public static readonly var SHR_ASSIGN = 31; // >>=
+        public static readonly var AND_NOT_ASSIGN = 32; // &^=
 
-        public static readonly var LAND = (var)33; // &&
-        public static readonly var LOR = (var)34; // ||
-        public static readonly var ARROW = (var)35; // <-
-        public static readonly var INC = (var)36; // ++
-        public static readonly var DEC = (var)37; // --
+        public static readonly var LAND = 33; // &&
+        public static readonly var LOR = 34; // ||
+        public static readonly var ARROW = 35; // <-
+        public static readonly var INC = 36; // ++
+        public static readonly var DEC = 37; // --
 
-        public static readonly var EQL = (var)38; // ==
-        public static readonly var LSS = (var)39; // <
-        public static readonly var GTR = (var)40; // >
-        public static readonly var ASSIGN = (var)41; // =
-        public static readonly var NOT = (var)42; // !
+        public static readonly var EQL = 38; // ==
+        public static readonly var LSS = 39; // <
+        public static readonly var GTR = 40; // >
+        public static readonly var ASSIGN = 41; // =
+        public static readonly var NOT = 42; // !
 
-        public static readonly var NEQ = (var)43; // !=
-        public static readonly var LEQ = (var)44; // <=
-        public static readonly var GEQ = (var)45; // >=
-        public static readonly var DEFINE = (var)46; // :=
-        public static readonly var ELLIPSIS = (var)47; // ...
+        public static readonly var NEQ = 43; // !=
+        public static readonly var LEQ = 44; // <=
+        public static readonly var GEQ = 45; // >=
+        public static readonly var DEFINE = 46; // :=
+        public static readonly var ELLIPSIS = 47; // ...
 
-        public static readonly var LPAREN = (var)48; // (
-        public static readonly var LBRACK = (var)49; // [
-        public static readonly var LBRACE = (var)50; // {
-        public static readonly var COMMA = (var)51; // ,
-        public static readonly var PERIOD = (var)52; // .
+        public static readonly var LPAREN = 48; // (
+        public static readonly var LBRACK = 49; // [
+        public static readonly var LBRACE = 50; // {
+        public static readonly var COMMA = 51; // ,
+        public static readonly var PERIOD = 52; // .
 
-        public static readonly var RPAREN = (var)53; // )
-        public static readonly var RBRACK = (var)54; // ]
-        public static readonly var RBRACE = (var)55; // }
-        public static readonly var SEMICOLON = (var)56; // ;
-        public static readonly var COLON = (var)57; // :
-        private static readonly var operator_end = (var)58;
+        public static readonly var RPAREN = 53; // )
+        public static readonly var RBRACK = 54; // ]
+        public static readonly var RBRACE = 55; // }
+        public static readonly var SEMICOLON = 56; // ;
+        public static readonly var COLON = 57; // :
+        private static readonly var operator_end = 58;
 
-        private static readonly var keyword_beg = (var)59; 
+        private static readonly var keyword_beg = 59; 
         // Keywords
-        public static readonly var BREAK = (var)60;
-        public static readonly var CASE = (var)61;
-        public static readonly var CHAN = (var)62;
-        public static readonly var CONST = (var)63;
-        public static readonly var CONTINUE = (var)64;
+        public static readonly var BREAK = 60;
+        public static readonly var CASE = 61;
+        public static readonly var CHAN = 62;
+        public static readonly var CONST = 63;
+        public static readonly var CONTINUE = 64;
 
-        public static readonly var DEFAULT = (var)65;
-        public static readonly var DEFER = (var)66;
-        public static readonly var ELSE = (var)67;
-        public static readonly var FALLTHROUGH = (var)68;
-        public static readonly var FOR = (var)69;
+        public static readonly var DEFAULT = 65;
+        public static readonly var DEFER = 66;
+        public static readonly var ELSE = 67;
+        public static readonly var FALLTHROUGH = 68;
+        public static readonly var FOR = 69;
 
-        public static readonly var FUNC = (var)70;
-        public static readonly var GO = (var)71;
-        public static readonly var GOTO = (var)72;
-        public static readonly var IF = (var)73;
-        public static readonly var IMPORT = (var)74;
+        public static readonly var FUNC = 70;
+        public static readonly var GO = 71;
+        public static readonly var GOTO = 72;
+        public static readonly var IF = 73;
+        public static readonly var IMPORT = 74;
 
-        public static readonly var INTERFACE = (var)75;
-        public static readonly var MAP = (var)76;
-        public static readonly var PACKAGE = (var)77;
-        public static readonly var RANGE = (var)78;
-        public static readonly var RETURN = (var)79;
+        public static readonly var INTERFACE = 75;
+        public static readonly var MAP = 76;
+        public static readonly var PACKAGE = 77;
+        public static readonly var RANGE = 78;
+        public static readonly var RETURN = 79;
 
-        public static readonly var SELECT = (var)80;
-        public static readonly var STRUCT = (var)81;
-        public static readonly var SWITCH = (var)82;
-        public static readonly var TYPE = (var)83;
-        public static readonly var VAR = (var)84;
-        private static readonly var keyword_end = (var)85;
+        public static readonly var SELECT = 80;
+        public static readonly var STRUCT = 81;
+        public static readonly var SWITCH = 82;
+        public static readonly var TYPE = 83;
+        public static readonly var VAR = 84;
+        private static readonly var keyword_end = 85;
 
 
         private static array<@string> tokens = new array<@string>(InitKeyedValues<@string>((ILLEGAL, "ILLEGAL"), (EOF, "EOF"), (COMMENT, "COMMENT"), (IDENT, "IDENT"), (INT, "INT"), (FLOAT, "FLOAT"), (IMAG, "IMAG"), (CHAR, "CHAR"), (STRING, "STRING"), (ADD, "+"), (SUB, "-"), (MUL, "*"), (QUO, "/"), (REM, "%"), (AND, "&"), (OR, "|"), (XOR, "^"), (SHL, "<<"), (SHR, ">>"), (AND_NOT, "&^"), (ADD_ASSIGN, "+="), (SUB_ASSIGN, "-="), (MUL_ASSIGN, "*="), (QUO_ASSIGN, "/="), (REM_ASSIGN, "%="), (AND_ASSIGN, "&="), (OR_ASSIGN, "|="), (XOR_ASSIGN, "^="), (SHL_ASSIGN, "<<="), (SHR_ASSIGN, ">>="), (AND_NOT_ASSIGN, "&^="), (LAND, "&&"), (LOR, "||"), (ARROW, "<-"), (INC, "++"), (DEC, "--"), (EQL, "=="), (LSS, "<"), (GTR, ">"), (ASSIGN, "="), (NOT, "!"), (NEQ, "!="), (LEQ, "<="), (GEQ, ">="), (DEFINE, ":="), (ELLIPSIS, "..."), (LPAREN, "("), (LBRACK, "["), (LBRACE, "{"), (COMMA, ","), (PERIOD, "."), (RPAREN, ")"), (RBRACK, "]"), (RBRACE, "}"), (SEMICOLON, ";"), (COLON, ":"), (BREAK, "break"), (CASE, "case"), (CHAN, "chan"), (CONST, "const"), (CONTINUE, "continue"), (DEFAULT, "default"), (DEFER, "defer"), (ELSE, "else"), (FALLTHROUGH, "fallthrough"), (FOR, "for"), (FUNC, "func"), (GO, "go"), (GOTO, "goto"), (IF, "if"), (IMPORT, "import"), (INTERFACE, "interface"), (MAP, "map"), (PACKAGE, "package"), (RANGE, "range"), (RETURN, "return"), (SELECT, "select"), (STRUCT, "struct"), (SWITCH, "switch"), (TYPE, "type"), (VAR, "var")));

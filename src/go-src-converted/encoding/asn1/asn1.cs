@@ -7,7 +7,7 @@
 //
 // See also ``A Layman's Guide to a Subset of ASN.1, BER, and DER,''
 // http://luca.ntop.org/Teaching/Appunti/asn1.html.
-// package asn1 -- go2cs converted at 2020 October 08 03:36:51 UTC
+// package asn1 -- go2cs converted at 2020 October 09 04:54:48 UTC
 // import "encoding/asn1" ==> using asn1 = go.encoding.asn1_package
 // Original source: C:\Go\src\encoding\asn1\asn1.go
 // ASN.1 is a syntax for specifying abstract objects and BER, DER, PER, XER etc

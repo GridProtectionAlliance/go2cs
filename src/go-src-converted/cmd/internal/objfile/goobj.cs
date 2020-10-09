@@ -4,7 +4,7 @@
 
 // Parsing of Go intermediate object files and archives.
 
-// package objfile -- go2cs converted at 2020 October 08 03:50:04 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:08:43 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\goobj.go
 using goobj = go.cmd.@internal.goobj_package;

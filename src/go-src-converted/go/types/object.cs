@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:03:34 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:33 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\object.go
 using bytes = go.bytes_package;
@@ -93,8 +93,8 @@ namespace go
         // An object may be painted in one of three colors.
         // Color values other than white or black are considered grey.
         private static readonly color white = (color)iota;
-        private static readonly var black = (var)0;
-        private static readonly var grey = (var)1; // must be > white and black
+        private static readonly var black = 0;
+        private static readonly var grey = 1; // must be > white and black
 
         private static @string String(this color c)
         {

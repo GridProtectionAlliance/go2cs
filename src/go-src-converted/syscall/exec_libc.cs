@@ -6,7 +6,7 @@
 
 // This file handles forkAndExecInChild function for OS using libc syscall like AIX or Solaris.
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:26 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:14 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\exec_libc.go
 using @unsafe = go.@unsafe_package;

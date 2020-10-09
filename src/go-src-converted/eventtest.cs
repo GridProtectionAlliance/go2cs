@@ -13,7 +13,7 @@
 // exporter that understands the special contexts returned by NewContext.
 // This means you should not import this package if you are not going to call
 // NewContext.
-// package eventtest -- go2cs converted at 2020 October 08 04:54:57 UTC
+// package eventtest -- go2cs converted at 2020 October 09 06:01:46 UTC
 // import "golang.org/x/tools/internal/event/export/eventtest" ==> using eventtest = go.golang.org.x.tools.@internal.@event.export.eventtest_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\export\eventtest\eventtest.go
 using bytes = go.bytes_package;
@@ -49,7 +49,7 @@ namespace export
         {
         }
 
-        private static readonly var testingKey = (var)testingKeyType(0L);
+        private static readonly var testingKey = testingKeyType(0L);
 
         // NewContext returns a context you should use for the active test.
 

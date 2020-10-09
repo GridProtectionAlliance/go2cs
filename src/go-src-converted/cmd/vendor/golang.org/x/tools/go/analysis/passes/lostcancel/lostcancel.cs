@@ -4,7 +4,7 @@
 
 // Package lostcancel defines an Analyzer that checks for failure to
 // call a context cancellation function.
-// package lostcancel -- go2cs converted at 2020 October 08 04:58:02 UTC
+// package lostcancel -- go2cs converted at 2020 October 09 06:04:39 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/lostcancel" ==> using lostcancel = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.lostcancel_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\lostcancel\lostcancel.go
 using fmt = go.fmt_package;
@@ -42,7 +42,7 @@ until its parent context is cancelled.
 
         public static ptr<analysis.Analyzer> Analyzer = addr(new analysis.Analyzer(Name:"lostcancel",Doc:Doc,Run:run,Requires:[]*analysis.Analyzer{inspect.Analyzer,ctrlflow.Analyzer,},));
 
-        private static readonly var debug = (var)false;
+        private static readonly var debug = false;
 
 
 

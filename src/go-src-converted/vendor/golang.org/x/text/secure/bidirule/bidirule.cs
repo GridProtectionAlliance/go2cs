@@ -6,7 +6,7 @@
 //
 // This package is under development. The API may change without notice and
 // without preserving backward compatibility.
-// package bidirule -- go2cs converted at 2020 October 08 05:01:52 UTC
+// package bidirule -- go2cs converted at 2020 October 09 06:07:56 UTC
 // import "vendor/golang.org/x/text/secure/bidirule" ==> using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\secure\bidirule\bidirule.go
 using errors = go.errors_package;
@@ -59,11 +59,11 @@ namespace secure
         }
 
         private static readonly ruleState ruleInitial = (ruleState)iota;
-        private static readonly var ruleLTR = (var)0;
-        private static readonly var ruleLTRFinal = (var)1;
-        private static readonly var ruleRTL = (var)2;
-        private static readonly var ruleRTLFinal = (var)3;
-        private static readonly var ruleInvalid = (var)4;
+        private static readonly var ruleLTR = 0;
+        private static readonly var ruleLTRFinal = 1;
+        private static readonly var ruleRTL = 2;
+        private static readonly var ruleRTLFinal = 3;
+        private static readonly var ruleInvalid = 4;
 
 
         private partial struct ruleTransition
@@ -76,7 +76,7 @@ namespace secure
 
         // [2.4] In an RTL label, if an EN is present, no AN may be present, and
         // vice versa.
-        private static readonly var exclusiveRTL = (var)uint16(1L << (int)(bidi.EN) | 1L << (int)(bidi.AN));
+        private static readonly var exclusiveRTL = uint16(1L << (int)(bidi.EN) | 1L << (int)(bidi.AN));
 
         // From RFC 5893
         // An RTL label is a label that contains at least one character of type

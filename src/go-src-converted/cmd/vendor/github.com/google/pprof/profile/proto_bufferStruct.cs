@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:41 UTC
+//     Generated on 2020 October 09 05:54:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

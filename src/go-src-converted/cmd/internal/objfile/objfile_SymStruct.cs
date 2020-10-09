@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:50:22 UTC
+//     Generated on 2020 October 09 05:09:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using io = go.io_package;
 using os = go.os_package;
 using sort = go.sort_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

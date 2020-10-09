@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 08 03:43:55 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:58 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\exec.go
 /*
 #include <stddef.h>

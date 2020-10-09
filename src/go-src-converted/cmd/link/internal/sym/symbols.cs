@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2020 October 08 04:37:54 UTC
+// package sym -- go2cs converted at 2020 October 09 05:48:55 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\symbols.go
 

@@ -4,7 +4,7 @@
 
 // Package printf defines an Analyzer that checks consistency
 // of Printf format strings and arguments.
-// package printf -- go2cs converted at 2020 October 08 04:58:06 UTC
+// package printf -- go2cs converted at 2020 October 09 06:04:42 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/printf" ==> using printf = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.printf_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\printf\printf.go
 using bytes = go.bytes_package;
@@ -84,9 +84,9 @@ of arguments with no format string.
         }
 
         public static readonly Kind KindNone = (Kind)iota; // not a fmt wrapper function
-        public static readonly var KindPrint = (var)0; // function behaves like fmt.Print
-        public static readonly var KindPrintf = (var)1; // function behaves like fmt.Printf
-        public static readonly var KindErrorf = (var)2; // function behaves like fmt.Errorf
+        public static readonly var KindPrint = 0; // function behaves like fmt.Print
+        public static readonly var KindPrintf = 1; // function behaves like fmt.Printf
+        public static readonly var KindErrorf = 2; // function behaves like fmt.Errorf
 
         public static @string String(this Kind kind)
         {
@@ -174,7 +174,7 @@ of arguments with no format string.
             ref analysis.Pass pass = ref _addr_pass.val;
 
             ptr<Result> res = addr(new Result(funcs:make(map[*types.Func]Kind),));
-            findPrintfLike(_addr_pass, _addr_res);
+            findPrintfLike(_addr_pass, res);
             checkCall(_addr_pass);
             return (res, error.As(null!)!);
         }
@@ -1047,13 +1047,13 @@ of arguments with no format string.
         }
 
         private static readonly printfArgType argBool = (printfArgType)1L << (int)(iota);
-        private static readonly var argInt = (var)0;
-        private static readonly var argRune = (var)1;
-        private static readonly var argString = (var)2;
-        private static readonly var argFloat = (var)3;
-        private static readonly var argComplex = (var)4;
-        private static readonly var argPointer = (var)5;
-        private static readonly var argError = (var)6;
+        private static readonly var argInt = 0;
+        private static readonly var argRune = 1;
+        private static readonly var argString = 2;
+        private static readonly var argFloat = 3;
+        private static readonly var argComplex = 4;
+        private static readonly var argPointer = 5;
+        private static readonly var argError = 6;
         private static readonly printfArgType anyType = (printfArgType)~0L;
 
 

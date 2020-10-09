@@ -6,7 +6,7 @@
 
 // For Unix, get the pagesize from the runtime.
 
-// package unix -- go2cs converted at 2020 October 08 04:46:25 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:17 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\pagesize_unix.go
 using syscall = go.syscall_package;

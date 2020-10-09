@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:11 UTC
+//     Generated on 2020 October 09 05:52:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,8 @@ using time = go.time_package;
 using objfile = go.cmd.@internal.objfile_package;
 using driver = go.github.com.google.pprof.driver_package;
 using profile = go.github.com.google.pprof.profile_package;
+
+#nullable enable
 
 namespace go
 {

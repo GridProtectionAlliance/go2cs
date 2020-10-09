@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:32 UTC
+//     Generated on 2020 October 09 06:03:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -38,7 +39,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class I2<T> : I2
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,8 +65,8 @@ namespace go
             private delegate void fByPtr(ptr<T> value);
             private delegate void fByVal(T value);
 
-            private static readonly fByPtr s_fByPtr;
-            private static readonly fByVal s_fByVal;
+            private static readonly fByPtr? s_fByPtr;
+            private static readonly fByVal? s_fByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void f()
@@ -89,8 +90,8 @@ namespace go
             private delegate void gByPtr(ptr<T> value);
             private delegate void gByVal(T value);
 
-            private static readonly gByPtr s_gByPtr;
-            private static readonly gByVal s_gByVal;
+            private static readonly gByPtr? s_gByPtr;
+            private static readonly gByVal? s_gByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void g()
@@ -111,7 +112,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static I2()

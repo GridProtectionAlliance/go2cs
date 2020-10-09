@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package socktest -- go2cs converted at 2020 October 08 03:43:14 UTC
+// package socktest -- go2cs converted at 2020 October 09 05:00:25 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\sys_cloexec.go
 using syscall = go.syscall_package;

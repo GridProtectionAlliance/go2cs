@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:43:29 UTC
+//     Generated on 2020 October 09 05:00:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Auth<T> : Auth
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace net
             private delegate (slice<byte>, error) StartByPtr(ptr<T> value, ptr<ServerInfo> server);
             private delegate (slice<byte>, error) StartByVal(T value, ptr<ServerInfo> server);
 
-            private static readonly StartByPtr s_StartByPtr;
-            private static readonly StartByVal s_StartByVal;
+            private static readonly StartByPtr? s_StartByPtr;
+            private static readonly StartByVal? s_StartByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Start(ptr<ServerInfo> server)
@@ -90,8 +91,8 @@ namespace net
             private delegate (slice<byte>, error) NextByPtr(ptr<T> value, slice<byte> fromServer, bool more);
             private delegate (slice<byte>, error) NextByVal(T value, slice<byte> fromServer, bool more);
 
-            private static readonly NextByPtr s_NextByPtr;
-            private static readonly NextByVal s_NextByVal;
+            private static readonly NextByPtr? s_NextByPtr;
+            private static readonly NextByVal? s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Next(slice<byte> fromServer, bool more)
@@ -107,7 +108,7 @@ namespace net
                 return s_NextByPtr(m_target_ptr, fromServer, more);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Auth()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:26 UTC
+//     Generated on 2020 October 09 04:58:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,8 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net {

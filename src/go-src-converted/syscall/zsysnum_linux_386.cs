@@ -3,7 +3,7 @@
 
 // +build 386,linux
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:31 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:20 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsysnum_linux_386.go
 

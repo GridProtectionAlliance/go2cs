@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package mime implements parts of the MIME spec.
-// package mime -- go2cs converted at 2020 October 08 03:38:34 UTC
+// package mime -- go2cs converted at 2020 October 09 04:56:14 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\type.go
 using fmt = go.fmt_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2020 October 08 04:32:12 UTC
+// package arm64 -- go2cs converted at 2020 October 09 05:44:05 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Go\src\cmd\compile\internal\arm64\ssa.go
 using math = go.math_package;

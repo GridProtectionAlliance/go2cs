@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:10:07 UTC
+//     Generated on 2020 October 09 05:24:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Frontend<T> : Frontend
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate bool CanSSAByPtr(ptr<T> value, ptr<types.Type> t);
             private delegate bool CanSSAByVal(T value, ptr<types.Type> t);
 
-            private static readonly CanSSAByPtr s_CanSSAByPtr;
-            private static readonly CanSSAByVal s_CanSSAByVal;
+            private static readonly CanSSAByPtr? s_CanSSAByPtr;
+            private static readonly CanSSAByVal? s_CanSSAByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool CanSSA(ptr<types.Type> t)
@@ -92,8 +93,8 @@ namespace @internal
             private delegate bool StringDataByPtr(ptr<T> value, @string _p0);
             private delegate bool StringDataByVal(T value, @string _p0);
 
-            private static readonly StringDataByPtr s_StringDataByPtr;
-            private static readonly StringDataByVal s_StringDataByVal;
+            private static readonly StringDataByPtr? s_StringDataByPtr;
+            private static readonly StringDataByVal? s_StringDataByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool StringData(@string _p0)
@@ -112,8 +113,8 @@ namespace @internal
             private delegate bool AutoByPtr(ptr<T> value, src.XPos _p0, ptr<types.Type> _p0);
             private delegate bool AutoByVal(T value, src.XPos _p0, ptr<types.Type> _p0);
 
-            private static readonly AutoByPtr s_AutoByPtr;
-            private static readonly AutoByVal s_AutoByVal;
+            private static readonly AutoByPtr? s_AutoByPtr;
+            private static readonly AutoByVal? s_AutoByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Auto(src.XPos _p0, ptr<types.Type> _p0)
@@ -132,8 +133,8 @@ namespace @internal
             private delegate bool SplitStringByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitStringByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitStringByPtr s_SplitStringByPtr;
-            private static readonly SplitStringByVal s_SplitStringByVal;
+            private static readonly SplitStringByPtr? s_SplitStringByPtr;
+            private static readonly SplitStringByVal? s_SplitStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitString(LocalSlot _p0)
@@ -152,8 +153,8 @@ namespace @internal
             private delegate bool SplitInterfaceByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitInterfaceByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitInterfaceByPtr s_SplitInterfaceByPtr;
-            private static readonly SplitInterfaceByVal s_SplitInterfaceByVal;
+            private static readonly SplitInterfaceByPtr? s_SplitInterfaceByPtr;
+            private static readonly SplitInterfaceByVal? s_SplitInterfaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitInterface(LocalSlot _p0)
@@ -172,8 +173,8 @@ namespace @internal
             private delegate bool SplitSliceByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitSliceByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitSliceByPtr s_SplitSliceByPtr;
-            private static readonly SplitSliceByVal s_SplitSliceByVal;
+            private static readonly SplitSliceByPtr? s_SplitSliceByPtr;
+            private static readonly SplitSliceByVal? s_SplitSliceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitSlice(LocalSlot _p0)
@@ -192,8 +193,8 @@ namespace @internal
             private delegate bool SplitComplexByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitComplexByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitComplexByPtr s_SplitComplexByPtr;
-            private static readonly SplitComplexByVal s_SplitComplexByVal;
+            private static readonly SplitComplexByPtr? s_SplitComplexByPtr;
+            private static readonly SplitComplexByVal? s_SplitComplexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitComplex(LocalSlot _p0)
@@ -212,8 +213,8 @@ namespace @internal
             private delegate bool SplitStructByPtr(ptr<T> value, LocalSlot _p0, long _p0);
             private delegate bool SplitStructByVal(T value, LocalSlot _p0, long _p0);
 
-            private static readonly SplitStructByPtr s_SplitStructByPtr;
-            private static readonly SplitStructByVal s_SplitStructByVal;
+            private static readonly SplitStructByPtr? s_SplitStructByPtr;
+            private static readonly SplitStructByVal? s_SplitStructByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitStruct(LocalSlot _p0, long _p0)
@@ -232,8 +233,8 @@ namespace @internal
             private delegate bool SplitArrayByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitArrayByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitArrayByPtr s_SplitArrayByPtr;
-            private static readonly SplitArrayByVal s_SplitArrayByVal;
+            private static readonly SplitArrayByPtr? s_SplitArrayByPtr;
+            private static readonly SplitArrayByVal? s_SplitArrayByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitArray(LocalSlot _p0)
@@ -252,8 +253,8 @@ namespace @internal
             private delegate bool SplitInt64ByPtr(ptr<T> value, LocalSlot _p0);
             private delegate bool SplitInt64ByVal(T value, LocalSlot _p0);
 
-            private static readonly SplitInt64ByPtr s_SplitInt64ByPtr;
-            private static readonly SplitInt64ByVal s_SplitInt64ByVal;
+            private static readonly SplitInt64ByPtr? s_SplitInt64ByPtr;
+            private static readonly SplitInt64ByVal? s_SplitInt64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SplitInt64(LocalSlot _p0)
@@ -272,8 +273,8 @@ namespace @internal
             private delegate bool DerefItabByPtr(ptr<T> value, ptr<obj.LSym> sym, long offset);
             private delegate bool DerefItabByVal(T value, ptr<obj.LSym> sym, long offset);
 
-            private static readonly DerefItabByPtr s_DerefItabByPtr;
-            private static readonly DerefItabByVal s_DerefItabByVal;
+            private static readonly DerefItabByPtr? s_DerefItabByPtr;
+            private static readonly DerefItabByVal? s_DerefItabByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool DerefItab(ptr<obj.LSym> sym, long offset)
@@ -292,8 +293,8 @@ namespace @internal
             private delegate bool LineByPtr(ptr<T> value, src.XPos _p0);
             private delegate bool LineByVal(T value, src.XPos _p0);
 
-            private static readonly LineByPtr s_LineByPtr;
-            private static readonly LineByVal s_LineByVal;
+            private static readonly LineByPtr? s_LineByPtr;
+            private static readonly LineByVal? s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Line(src.XPos _p0)
@@ -312,8 +313,8 @@ namespace @internal
             private delegate bool AllocFrameByPtr(ptr<T> value, ptr<Func> f);
             private delegate bool AllocFrameByVal(T value, ptr<Func> f);
 
-            private static readonly AllocFrameByPtr s_AllocFrameByPtr;
-            private static readonly AllocFrameByVal s_AllocFrameByVal;
+            private static readonly AllocFrameByPtr? s_AllocFrameByPtr;
+            private static readonly AllocFrameByVal? s_AllocFrameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool AllocFrame(ptr<Func> f)
@@ -332,8 +333,8 @@ namespace @internal
             private delegate bool SyslookByPtr(ptr<T> value, @string _p0);
             private delegate bool SyslookByVal(T value, @string _p0);
 
-            private static readonly SyslookByPtr s_SyslookByPtr;
-            private static readonly SyslookByVal s_SyslookByVal;
+            private static readonly SyslookByPtr? s_SyslookByPtr;
+            private static readonly SyslookByVal? s_SyslookByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Syslook(@string _p0)
@@ -352,8 +353,8 @@ namespace @internal
             private delegate bool UseWriteBarrierByPtr(ptr<T> value);
             private delegate bool UseWriteBarrierByVal(T value);
 
-            private static readonly UseWriteBarrierByPtr s_UseWriteBarrierByPtr;
-            private static readonly UseWriteBarrierByVal s_UseWriteBarrierByVal;
+            private static readonly UseWriteBarrierByPtr? s_UseWriteBarrierByPtr;
+            private static readonly UseWriteBarrierByVal? s_UseWriteBarrierByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool UseWriteBarrier()
@@ -372,8 +373,8 @@ namespace @internal
             private delegate bool SetWBPosByPtr(ptr<T> value, src.XPos pos);
             private delegate bool SetWBPosByVal(T value, src.XPos pos);
 
-            private static readonly SetWBPosByPtr s_SetWBPosByPtr;
-            private static readonly SetWBPosByVal s_SetWBPosByVal;
+            private static readonly SetWBPosByPtr? s_SetWBPosByPtr;
+            private static readonly SetWBPosByVal? s_SetWBPosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool SetWBPos(src.XPos pos)
@@ -392,8 +393,8 @@ namespace @internal
             private delegate bool LogfByPtr(ptr<T> value, @string _p0, params object _p0);
             private delegate bool LogfByVal(T value, @string _p0, params object _p0);
 
-            private static readonly LogfByPtr s_LogfByPtr;
-            private static readonly LogfByVal s_LogfByVal;
+            private static readonly LogfByPtr? s_LogfByPtr;
+            private static readonly LogfByVal? s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Logf(@string _p0, params object _p0)
@@ -412,8 +413,8 @@ namespace @internal
             private delegate bool LogByPtr(ptr<T> value);
             private delegate bool LogByVal(T value);
 
-            private static readonly LogByPtr s_LogByPtr;
-            private static readonly LogByVal s_LogByVal;
+            private static readonly LogByPtr? s_LogByPtr;
+            private static readonly LogByVal? s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Log()
@@ -432,8 +433,8 @@ namespace @internal
             private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
             private delegate bool FatalfByVal(T value, src.XPos pos, @string msg, params object[] args);
 
-            private static readonly FatalfByPtr s_FatalfByPtr;
-            private static readonly FatalfByVal s_FatalfByVal;
+            private static readonly FatalfByPtr? s_FatalfByPtr;
+            private static readonly FatalfByVal? s_FatalfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Fatalf(src.XPos pos, @string msg, params object[] args)
@@ -452,8 +453,8 @@ namespace @internal
             private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
             private delegate bool WarnlByVal(T value, src.XPos pos, @string fmt_, params object[] args);
 
-            private static readonly WarnlByPtr s_WarnlByPtr;
-            private static readonly WarnlByVal s_WarnlByVal;
+            private static readonly WarnlByPtr? s_WarnlByPtr;
+            private static readonly WarnlByVal? s_WarnlByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Warnl(src.XPos pos, @string fmt_, params object[] args)
@@ -472,8 +473,8 @@ namespace @internal
             private delegate bool Debug_checknilByPtr(ptr<T> value);
             private delegate bool Debug_checknilByVal(T value);
 
-            private static readonly Debug_checknilByPtr s_Debug_checknilByPtr;
-            private static readonly Debug_checknilByVal s_Debug_checknilByVal;
+            private static readonly Debug_checknilByPtr? s_Debug_checknilByPtr;
+            private static readonly Debug_checknilByVal? s_Debug_checknilByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Debug_checknil()
@@ -489,7 +490,7 @@ namespace @internal
                 return s_Debug_checknilByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Frontend()

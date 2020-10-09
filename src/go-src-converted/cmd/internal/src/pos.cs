@@ -4,7 +4,7 @@
 
 // This file implements the encoding of source positions.
 
-// package src -- go2cs converted at 2020 October 08 03:49:35 UTC
+// package src -- go2cs converted at 2020 October 09 05:08:17 UTC
 // import "cmd/internal/src" ==> using src = go.cmd.@internal.src_package
 // Original source: C:\Go\src\cmd\internal\src\pos.go
 using bytes = go.bytes_package;
@@ -290,7 +290,7 @@ namespace @internal
         public static ptr<PosBase> NewFileBase(@string filename, @string absFilename)
         {
             ptr<PosBase> @base = addr(new PosBase(filename:filename,absFilename:absFilename,symFilename:FileSymPrefix+absFilename,line:1,col:1,inl:-1,));
-            @base.pos = MakePos(_addr_base, 1L, 1L);
+            @base.pos = MakePos(base, 1L, 1L);
             return _addr_base!;
         }
 
@@ -312,7 +312,7 @@ namespace @internal
             if (old == null)
             {
                 ptr<PosBase> @base = addr(new PosBase(line:1,col:1,inl:inlTreeIndex));
-                @base.pos = MakePos(_addr_base, 1L, 1L);
+                @base.pos = MakePos(base, 1L, 1L);
                 return _addr_base!;
             }
 
@@ -473,11 +473,11 @@ namespace @internal
         private static readonly long colMax = (long)1L << (int)(colBits) - 1L;
 
         private static readonly long isStmtShift = (long)0L;
-        private static readonly var isStmtMask = (var)isStmtMax << (int)(isStmtShift);
-        private static readonly var xlogueShift = (var)isStmtBits + isStmtShift;
-        private static readonly var xlogueMask = (var)xlogueMax << (int)(xlogueShift);
-        private static readonly var colShift = (var)xlogueBits + xlogueShift;
-        private static readonly var lineShift = (var)colBits + colShift;
+        private static readonly var isStmtMask = isStmtMax << (int)(isStmtShift);
+        private static readonly var xlogueShift = isStmtBits + isStmtShift;
+        private static readonly var xlogueMask = xlogueMax << (int)(xlogueShift);
+        private static readonly var colShift = xlogueBits + xlogueShift;
+        private static readonly var lineShift = colBits + colShift;
 
  
         // It is expected that the front end or a phase in SSA will usually generate positions tagged with
@@ -508,16 +508,16 @@ namespace @internal
         // positions.
         //
         public static readonly ulong PosDefaultStmt = (ulong)iota; // Default; position is not a statement boundary, but might be if optimization removes the designated statement boundary
-        public static readonly var PosIsStmt = (var)0; // Position is a statement boundary; if optimization removes the corresponding instruction, it should attempt to find a new instruction to be the boundary.
-        public static readonly var PosNotStmt = (var)1; // Position should not be a statement boundary, but line should be preserved for profiling and low-level debugging purposes.
+        public static readonly var PosIsStmt = 0; // Position is a statement boundary; if optimization removes the corresponding instruction, it should attempt to find a new instruction to be the boundary.
+        public static readonly var PosNotStmt = 1; // Position should not be a statement boundary, but line should be preserved for profiling and low-level debugging purposes.
 
         public partial struct PosXlogue // : ulong
         {
         }
 
         public static readonly PosXlogue PosDefaultLogue = (PosXlogue)iota;
-        public static readonly var PosPrologueEnd = (var)0;
-        public static readonly var PosEpilogueBegin = (var)1;
+        public static readonly var PosPrologueEnd = 0;
+        public static readonly var PosEpilogueBegin = 1;
 
 
         private static lico makeLicoRaw(ulong line, ulong col)

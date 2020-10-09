@@ -4,7 +4,7 @@
 
 // Package elliptic implements several standard elliptic curves over prime
 // fields.
-// package elliptic -- go2cs converted at 2020 October 08 03:35:20 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:52:51 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\elliptic.go
 // This package operates, internally, on Jacobian coordinates. For a given

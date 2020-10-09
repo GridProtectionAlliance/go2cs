@@ -10,7 +10,7 @@
 // Because these interfaces and primitives wrap lower-level operations with
 // various implementations, unless otherwise informed clients should not
 // assume they are safe for parallel execution.
-// package io -- go2cs converted at 2020 October 08 01:30:43 UTC
+// package io -- go2cs converted at 2020 October 09 04:49:25 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Go\src\io\io.go
 using errors = go.errors_package;

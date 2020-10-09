@@ -4,7 +4,7 @@
 
 // +build arm64,openbsd
 
-// package unix -- go2cs converted at 2020 October 08 04:47:51 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:56 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_openbsd_arm64.go
 
@@ -68,7 +68,7 @@ namespace sys
 
         // SYS___SYSCTL is used by syscall_bsd.go for all BSDs, but in modern versions
         // of openbsd/amd64 the syscall is called sysctl instead of __sysctl.
-        public static readonly var SYS___SYSCTL = (var)SYS_SYSCTL;
+        public static readonly var SYS___SYSCTL = SYS_SYSCTL;
 
     }
 }}}}}}

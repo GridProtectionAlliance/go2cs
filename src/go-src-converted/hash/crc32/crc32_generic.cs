@@ -10,7 +10,7 @@
 // The slicing-by-8 algorithm is a faster implementation that uses a bigger
 // table (8*256*4 bytes).
 
-// package crc32 -- go2cs converted at 2020 October 08 03:30:51 UTC
+// package crc32 -- go2cs converted at 2020 October 09 04:50:07 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Go\src\hash\crc32\crc32_generic.go
 

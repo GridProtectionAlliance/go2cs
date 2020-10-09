@@ -76,7 +76,7 @@ On Plan 9, the resolver always accesses /net/cs and /net/dns.
 On Windows, the resolver always uses C library functions, such as GetAddrInfo and DnsQuery.
 
 */
-// package net -- go2cs converted at 2020 October 08 03:34:01 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\net.go
 using context = go.context_package;

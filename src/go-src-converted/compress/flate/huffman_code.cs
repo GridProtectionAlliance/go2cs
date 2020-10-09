@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 October 08 03:31:00 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:17 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\huffman_code.go
 using math = go.math_package;

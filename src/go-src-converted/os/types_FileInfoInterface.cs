@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:45:21 UTC
+//     Generated on 2020 October 09 05:07:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using syscall = go.syscall_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -40,7 +41,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class FileInfo<T> : FileInfo
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace go
             private delegate void NameByPtr(ptr<T> value);
             private delegate void NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Name()
@@ -91,8 +92,8 @@ namespace go
             private delegate void SizeByPtr(ptr<T> value);
             private delegate void SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Size()
@@ -116,8 +117,8 @@ namespace go
             private delegate void ModeByPtr(ptr<T> value);
             private delegate void ModeByVal(T value);
 
-            private static readonly ModeByPtr s_ModeByPtr;
-            private static readonly ModeByVal s_ModeByVal;
+            private static readonly ModeByPtr? s_ModeByPtr;
+            private static readonly ModeByVal? s_ModeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Mode()
@@ -141,8 +142,8 @@ namespace go
             private delegate void ModTimeByPtr(ptr<T> value);
             private delegate void ModTimeByVal(T value);
 
-            private static readonly ModTimeByPtr s_ModTimeByPtr;
-            private static readonly ModTimeByVal s_ModTimeByVal;
+            private static readonly ModTimeByPtr? s_ModTimeByPtr;
+            private static readonly ModTimeByVal? s_ModTimeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void ModTime()
@@ -166,8 +167,8 @@ namespace go
             private delegate void IsDirByPtr(ptr<T> value);
             private delegate void IsDirByVal(T value);
 
-            private static readonly IsDirByPtr s_IsDirByPtr;
-            private static readonly IsDirByVal s_IsDirByVal;
+            private static readonly IsDirByPtr? s_IsDirByPtr;
+            private static readonly IsDirByVal? s_IsDirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void IsDir()
@@ -191,8 +192,8 @@ namespace go
             private delegate void SysByPtr(ptr<T> value);
             private delegate void SysByVal(T value);
 
-            private static readonly SysByPtr s_SysByPtr;
-            private static readonly SysByVal s_SysByVal;
+            private static readonly SysByPtr? s_SysByPtr;
+            private static readonly SysByVal? s_SysByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Sys()
@@ -213,7 +214,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static FileInfo()

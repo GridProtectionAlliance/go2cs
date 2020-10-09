@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:23 UTC
+//     Generated on 2020 October 09 06:05:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using draw = go.image.draw_package;
 using io = go.io_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace image
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class writer<T> : writer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace image
             private delegate error FlushByPtr(ptr<T> value);
             private delegate error FlushByVal(T value);
 
-            private static readonly FlushByPtr s_FlushByPtr;
-            private static readonly FlushByVal s_FlushByVal;
+            private static readonly FlushByPtr? s_FlushByPtr;
+            private static readonly FlushByVal? s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Flush()
@@ -95,8 +96,8 @@ namespace image
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -115,8 +116,8 @@ namespace image
             private delegate error WriteByteByPtr(ptr<T> value, byte c);
             private delegate error WriteByteByVal(T value, byte c);
 
-            private static readonly WriteByteByPtr s_WriteByteByPtr;
-            private static readonly WriteByteByVal s_WriteByteByVal;
+            private static readonly WriteByteByPtr? s_WriteByteByPtr;
+            private static readonly WriteByteByVal? s_WriteByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteByte(byte c)
@@ -132,7 +133,7 @@ namespace image
                 return s_WriteByteByPtr(m_target_ptr, c);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static writer()

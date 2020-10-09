@@ -18,7 +18,7 @@
 //
 // This package will be automatically imported if you build with
 // -tags timetzdata.
-// package tzdata -- go2cs converted at 2020 October 08 00:33:52 UTC
+// package tzdata -- go2cs converted at 2020 October 09 04:45:20 UTC
 // import "time/tzdata" ==> using tzdata = go.time.tzdata_package
 // Original source: C:\Go\src\time\tzdata\tzdata.go
 // The test for this package is time/tzdata_test.go.

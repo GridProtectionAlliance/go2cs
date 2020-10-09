@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 October 08 03:31:15 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:28 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\conf.go
 using bytealg = go.@internal.bytealg_package;

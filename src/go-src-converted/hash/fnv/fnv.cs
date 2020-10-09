@@ -10,7 +10,7 @@
 // All the hash.Hash implementations returned by this package also
 // implement encoding.BinaryMarshaler and encoding.BinaryUnmarshaler to
 // marshal and unmarshal the internal state of the hash.
-// package fnv -- go2cs converted at 2020 October 08 03:30:54 UTC
+// package fnv -- go2cs converted at 2020 October 09 04:50:10 UTC
 // import "hash/fnv" ==> using fnv = go.hash.fnv_package
 // Original source: C:\Go\src\hash\fnv\fnv.go
 using errors = go.errors_package;
@@ -405,9 +405,9 @@ namespace hash
         private static readonly @string magic64a = (@string)"fnv\x04";
         private static readonly @string magic128 = (@string)"fnv\x05";
         private static readonly @string magic128a = (@string)"fnv\x06";
-        private static readonly var marshaledSize32 = (var)len(magic32) + 4L;
-        private static readonly var marshaledSize64 = (var)len(magic64) + 8L;
-        private static readonly var marshaledSize128 = (var)len(magic128) + 8L * 2L;
+        private static readonly var marshaledSize32 = len(magic32) + 4L;
+        private static readonly var marshaledSize64 = len(magic64) + 8L;
+        private static readonly var marshaledSize128 = len(magic128) + 8L * 2L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<sum32> _addr_s)

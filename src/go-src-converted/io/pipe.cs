@@ -5,7 +5,7 @@
 // Pipe adapter to connect code expecting an io.Reader
 // with code expecting an io.Writer.
 
-// package io -- go2cs converted at 2020 October 08 01:30:44 UTC
+// package io -- go2cs converted at 2020 October 09 04:49:26 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Go\src\io\pipe.go
 using errors = go.errors_package;

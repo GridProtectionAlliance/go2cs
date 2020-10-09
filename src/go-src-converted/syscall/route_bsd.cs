@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:51 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:26 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\route_bsd.go
 using runtime = go.runtime_package;
@@ -155,8 +155,8 @@ namespace go
             
         }
 
-        private static readonly var offsetofInet4 = (var)int(@unsafe.Offsetof(new RawSockaddrInet4().Addr));
-        private static readonly var offsetofInet6 = (var)int(@unsafe.Offsetof(new RawSockaddrInet6().Addr));
+        private static readonly var offsetofInet4 = int(@unsafe.Offsetof(new RawSockaddrInet4().Addr));
+        private static readonly var offsetofInet6 = int(@unsafe.Offsetof(new RawSockaddrInet6().Addr));
 
 
         // parseNetworkLayerAddr parses b as an internet socket address in
@@ -287,7 +287,7 @@ namespace go
             (slice<Sockaddr>, error) sockaddr();
         }
 
-        private static readonly var anyMessageLen = (var)int(@unsafe.Sizeof(new anyMessage()));
+        private static readonly var anyMessageLen = int(@unsafe.Sizeof(new anyMessage()));
 
 
 

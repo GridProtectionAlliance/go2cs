@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:32:32 UTC
+//     Generated on 2020 October 09 05:44:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,6 +26,8 @@ using os = go.os_package;
 using sort = go.sort_package;
 using edit = go.cmd.@internal.edit_package;
 using objabi = go.cmd.@internal.objabi_package;
+
+#nullable enable
 
 namespace go
 {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 October 08 03:25:56 UTC
+// package cmplx -- go2cs converted at 2020 October 09 05:07:50 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Go\src\math\cmplx\tan.go
 using math = go.math_package;

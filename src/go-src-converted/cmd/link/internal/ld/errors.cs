@@ -1,7 +1,7 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-// package ld -- go2cs converted at 2020 October 08 04:38:42 UTC
+// package ld -- go2cs converted at 2020 October 09 05:49:38 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\errors.go
 using obj = go.cmd.@internal.obj_package;

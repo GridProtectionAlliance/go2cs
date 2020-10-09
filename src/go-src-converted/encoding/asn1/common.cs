@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package asn1 -- go2cs converted at 2020 October 08 03:36:52 UTC
+// package asn1 -- go2cs converted at 2020 October 09 04:54:49 UTC
 // import "encoding/asn1" ==> using asn1 = go.encoding.asn1_package
 // Original source: C:\Go\src\encoding\asn1\common.go
 using reflect = go.reflect_package;

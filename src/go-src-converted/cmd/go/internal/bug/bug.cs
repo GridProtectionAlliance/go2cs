@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package bug implements the ``go bug'' command.
-// package bug -- go2cs converted at 2020 October 08 04:33:30 UTC
+// package bug -- go2cs converted at 2020 October 09 05:45:07 UTC
 // import "cmd/go/internal/bug" ==> using bug = go.cmd.go.@internal.bug_package
 // Original source: C:\Go\src\cmd\go\internal\bug\bug.go
 using bytes = go.bytes_package;

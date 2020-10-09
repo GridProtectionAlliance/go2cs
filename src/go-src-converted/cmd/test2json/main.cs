@@ -77,7 +77,7 @@
 // by a final event with Action == "bench" or "fail".
 // Benchmarks have no events with Action == "run", "pause", or "cont".
 //
-// package main -- go2cs converted at 2020 October 08 04:42:12 UTC
+// package main -- go2cs converted at 2020 October 09 05:52:48 UTC
 // Original source: C:\Go\src\cmd\test2json\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;

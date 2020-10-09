@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2020 October 08 04:27:23 UTC
+// package s390x -- go2cs converted at 2020 October 09 05:40:09 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Go\src\cmd\compile\internal\s390x\ssa.go
 using math = go.math_package;

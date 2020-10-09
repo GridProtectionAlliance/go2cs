@@ -4,7 +4,7 @@
 
 // Package tests defines an Analyzer that checks for common mistaken
 // usages of tests and examples.
-// package tests -- go2cs converted at 2020 October 08 04:58:12 UTC
+// package tests -- go2cs converted at 2020 October 09 06:04:47 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/tests" ==> using tests = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.tests_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\tests\tests.go
 using ast = go.go.ast_package;

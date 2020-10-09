@@ -7,7 +7,7 @@
 //go:generate go test -tags test
 
 // Package norm contains types and functions for normalizing Unicode strings.
-// package norm -- go2cs converted at 2020 October 08 05:02:23 UTC
+// package norm -- go2cs converted at 2020 October 09 06:08:25 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\norm\normalize.go
 // import "golang.org/x/text/unicode/norm"
@@ -48,9 +48,9 @@ namespace unicode
         }
 
         public static readonly Form NFC = (Form)iota;
-        public static readonly var NFD = (var)0;
-        public static readonly var NFKC = (var)1;
-        public static readonly var NFKD = (var)2;
+        public static readonly var NFD = 0;
+        public static readonly var NFKC = 1;
+        public static readonly var NFKD = 2;
 
 
         // Bytes returns f(b). May return b if f(b) = b.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:12 UTC
+//     Generated on 2020 October 09 05:52:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using os = go.os_package;
 using strings = go.strings_package;
 using driver = go.github.com.google.pprof.driver_package;
 using terminal = go.golang.org.x.crypto.ssh.terminal_package;
+
+#nullable enable
 
 namespace go
 {

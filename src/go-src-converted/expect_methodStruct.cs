@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:52 UTC
+//     Generated on 2020 October 09 06:02:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using expect = go.golang.org.x.tools.go.expect_package;
 using packages = go.golang.org.x.tools.go.packages_package;
 using span = go.golang.org.x.tools.@internal.span_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

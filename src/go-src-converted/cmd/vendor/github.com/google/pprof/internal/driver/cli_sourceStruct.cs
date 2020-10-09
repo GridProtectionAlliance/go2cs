@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:54 UTC
+//     Generated on 2020 October 09 05:53:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using strings = go.strings_package;
 using binutils = go.github.com.google.pprof.@internal.binutils_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

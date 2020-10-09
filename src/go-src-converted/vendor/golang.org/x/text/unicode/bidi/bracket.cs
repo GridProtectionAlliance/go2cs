@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bidi -- go2cs converted at 2020 October 08 05:01:54 UTC
+// package bidi -- go2cs converted at 2020 October 09 06:07:58 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\bidi\bracket.go
 using list = go.container.list_package;
@@ -52,8 +52,8 @@ namespace unicode
         }
 
         private static readonly bracketType bpNone = (bracketType)iota;
-        private static readonly var bpOpen = (var)0;
-        private static readonly var bpClose = (var)1;
+        private static readonly var bpOpen = 0;
+        private static readonly var bpClose = 1;
 
 
         // bracketPair holds a pair of index values for opening and closing bracket

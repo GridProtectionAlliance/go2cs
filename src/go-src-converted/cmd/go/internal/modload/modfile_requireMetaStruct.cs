@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:36 UTC
+//     Generated on 2020 October 09 05:46:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using cfg = go.cmd.go.@internal.cfg_package;
 using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

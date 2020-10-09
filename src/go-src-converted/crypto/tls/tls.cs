@@ -4,7 +4,7 @@
 
 // Package tls partially implements TLS 1.2, as specified in RFC 5246,
 // and TLS 1.3, as specified in RFC 8446.
-// package tls -- go2cs converted at 2020 October 08 03:38:25 UTC
+// package tls -- go2cs converted at 2020 October 09 04:56:04 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\tls.go
 // BUG(agl): The crypto/tls package only implements some countermeasures

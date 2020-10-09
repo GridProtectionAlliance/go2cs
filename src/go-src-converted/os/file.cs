@@ -38,7 +38,7 @@
 // the OS or the system. The number should be high, but exceeding it may degrade
 // performance or cause other issues.
 //
-// package os -- go2cs converted at 2020 October 08 03:44:38 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:10 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\file.go
 using errors = go.errors_package;

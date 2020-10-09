@@ -13,7 +13,7 @@
 // Some external packages provide more functionality. See:
 //
 //   https://godoc.org/?q=smtp
-// package smtp -- go2cs converted at 2020 October 08 03:43:30 UTC
+// package smtp -- go2cs converted at 2020 October 09 05:00:41 UTC
 // import "net/smtp" ==> using smtp = go.net.smtp_package
 // Original source: C:\Go\src\net\smtp\smtp.go
 using tls = go.crypto.tls_package;

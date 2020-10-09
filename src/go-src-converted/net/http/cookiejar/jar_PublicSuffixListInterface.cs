@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:22 UTC
+//     Generated on 2020 October 09 04:58:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class PublicSuffixList<T> : PublicSuffixList
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace http
             private delegate @string PublicSuffixByPtr(ptr<T> value, @string domain);
             private delegate @string PublicSuffixByVal(T value, @string domain);
 
-            private static readonly PublicSuffixByPtr s_PublicSuffixByPtr;
-            private static readonly PublicSuffixByVal s_PublicSuffixByVal;
+            private static readonly PublicSuffixByPtr? s_PublicSuffixByPtr;
+            private static readonly PublicSuffixByVal? s_PublicSuffixByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string PublicSuffix(@string domain)
@@ -96,8 +97,8 @@ namespace http
             private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string String()
@@ -113,7 +114,7 @@ namespace http
                 return s_StringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static PublicSuffixList()

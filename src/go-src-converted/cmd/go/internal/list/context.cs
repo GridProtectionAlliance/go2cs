@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package list -- go2cs converted at 2020 October 08 04:33:40 UTC
+// package list -- go2cs converted at 2020 October 09 05:45:15 UTC
 // import "cmd/go/internal/list" ==> using list = go.cmd.go.@internal.list_package
 // Original source: C:\Go\src\cmd\go\internal\list\context.go
 using build = go.go.build_package;

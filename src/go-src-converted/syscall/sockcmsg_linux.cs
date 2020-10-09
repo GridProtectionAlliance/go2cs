@@ -4,7 +4,7 @@
 
 // Socket control messages
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:02 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\sockcmsg_linux.go
 using @unsafe = go.@unsafe_package;

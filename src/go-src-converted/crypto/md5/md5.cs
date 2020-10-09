@@ -8,7 +8,7 @@
 //
 // MD5 is cryptographically broken and should not be used for secure
 // applications.
-// package md5 -- go2cs converted at 2020 October 08 03:36:38 UTC
+// package md5 -- go2cs converted at 2020 October 09 04:54:34 UTC
 // import "crypto/md5" ==> using md5 = go.crypto.md5_package
 // Original source: C:\Go\src\crypto\md5\md5.go
 using crypto = go.crypto_package;
@@ -66,7 +66,7 @@ namespace crypto
         }
 
         private static readonly @string magic = (@string)"md5\x01";
-        private static readonly var marshaledSize = (var)len(magic) + 4L * 4L + BlockSize + 8L;
+        private static readonly var marshaledSize = len(magic) + 4L * 4L + BlockSize + 8L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

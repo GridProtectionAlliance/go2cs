@@ -5,7 +5,7 @@
 // This file is used to generate an object file which
 // serves as test file for gcimporter_test.go.
 
-// package exports -- go2cs converted at 2020 October 08 04:55:37 UTC
+// package exports -- go2cs converted at 2020 October 09 06:02:20 UTC
 // import "golang.org/x/tools/go/internal/gcimporter.exports" ==> using exports = go.golang.org.x.tools.go.@internal.gcimporter.exports_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\testdata\exports.go
 using ast = go.go.ast_package;

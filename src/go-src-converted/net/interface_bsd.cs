@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2020 October 08 03:33:13 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:34 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_bsd.go
 using syscall = go.syscall_package;

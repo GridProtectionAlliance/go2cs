@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:37:37 UTC
+//     Generated on 2020 October 09 05:48:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using sym = go.cmd.link.@internal.sym_package;
 using io = go.io_package;
 using regexp = go.regexp_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

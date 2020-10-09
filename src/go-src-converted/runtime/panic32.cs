@@ -4,7 +4,7 @@
 
 // +build 386 arm mips mipsle
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:23 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:45 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\panic32.go
 

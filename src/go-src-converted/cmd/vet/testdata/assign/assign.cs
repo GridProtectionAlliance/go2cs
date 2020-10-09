@@ -4,7 +4,7 @@
 
 // This file contains tests for the useless-assignment checker.
 
-// package assign -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package assign -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/assign" ==> using assign = go.cmd.vet.testdata.assign_package
 // Original source: C:\Go\src\cmd\vet\testdata\assign\assign.go
 using rand = go.math.rand_package;

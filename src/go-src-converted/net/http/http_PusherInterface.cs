@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:13 UTC
+//     Generated on 2020 October 09 04:57:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using utf8 = go.unicode.utf8_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Pusher<T> : Pusher
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace net
             private delegate error PushByPtr(ptr<T> value, @string target, ptr<PushOptions> opts);
             private delegate error PushByVal(T value, @string target, ptr<PushOptions> opts);
 
-            private static readonly PushByPtr s_PushByPtr;
-            private static readonly PushByVal s_PushByVal;
+            private static readonly PushByPtr? s_PushByPtr;
+            private static readonly PushByVal? s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Push(@string target, ptr<PushOptions> opts)
@@ -89,7 +90,7 @@ namespace net
                 return s_PushByPtr(m_target_ptr, target, opts);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Pusher()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:32:34 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:23 UTC
 // Original source: C:\Go\src\cmd\cover\html.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;

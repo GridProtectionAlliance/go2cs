@@ -5,7 +5,7 @@
 // Package obscuretestdata contains functionality used by tests to more easily
 // work with testdata that must be obscured primarily due to
 // golang.org/issue/34986.
-// package obscuretestdata -- go2cs converted at 2020 October 08 04:59:47 UTC
+// package obscuretestdata -- go2cs converted at 2020 October 09 06:06:10 UTC
 // import "internal/obscuretestdata" ==> using obscuretestdata = go.@internal.obscuretestdata_package
 // Original source: C:\Go\src\internal\obscuretestdata\obscuretestdata.go
 using base64 = go.encoding.base64_package;

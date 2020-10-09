@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:33:12 UTC
+//     Generated on 2020 October 09 04:51:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using poll = go.@internal.poll_package;
 using unix = go.@internal.syscall.unix_package;
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
+
+#nullable enable
 
 namespace go
 {

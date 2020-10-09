@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:22 UTC
+//     Generated on 2020 October 09 05:20:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using token = go.go.token_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace go

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:40 UTC
+//     Generated on 2020 October 09 06:02:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,8 @@ using strings = go.strings_package;
 using packages = go.golang.org.x.tools.go.packages_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using tool = go.golang.org.x.tools.@internal.tool_package;
+
+#nullable enable
 
 namespace go
 {

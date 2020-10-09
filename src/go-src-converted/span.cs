@@ -4,7 +4,7 @@
 
 // Package span contains support for representing with positions and ranges in
 // text files.
-// package span -- go2cs converted at 2020 October 08 04:54:37 UTC
+// package span -- go2cs converted at 2020 October 09 06:01:31 UTC
 // import "golang.org/x/tools/internal/span" ==> using span = go.golang.org.x.tools.@internal.span_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\span\span.go
 using json = go.encoding.json_package;

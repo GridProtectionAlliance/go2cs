@@ -4,7 +4,7 @@
 
 // +build !linux
 
-// package os -- go2cs converted at 2020 October 08 03:44:58 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:20 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\readfrom_stub.go
 using io = go.io_package;

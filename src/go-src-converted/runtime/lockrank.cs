@@ -22,7 +22,7 @@
 // (the lock ranking) is violated, but also if there is a missing entry in the
 // partial order.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:57 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\lockrank.go
 
@@ -42,59 +42,59 @@ namespace go
         private static readonly lockRank lockRankDummy = (lockRank)iota; 
 
         // Locks held above sched
-        private static readonly var lockRankSysmon = (var)0;
-        private static readonly var lockRankScavenge = (var)1;
-        private static readonly var lockRankForcegc = (var)2;
-        private static readonly var lockRankSweepWaiters = (var)3;
-        private static readonly var lockRankAssistQueue = (var)4;
-        private static readonly var lockRankCpuprof = (var)5;
-        private static readonly var lockRankSweep = (var)6;
+        private static readonly var lockRankSysmon = 0;
+        private static readonly var lockRankScavenge = 1;
+        private static readonly var lockRankForcegc = 2;
+        private static readonly var lockRankSweepWaiters = 3;
+        private static readonly var lockRankAssistQueue = 4;
+        private static readonly var lockRankCpuprof = 5;
+        private static readonly var lockRankSweep = 6;
 
-        private static readonly var lockRankSched = (var)7;
-        private static readonly var lockRankDeadlock = (var)8;
-        private static readonly var lockRankPanic = (var)9;
-        private static readonly var lockRankAllg = (var)10;
-        private static readonly var lockRankAllp = (var)11;
-        private static readonly var lockRankPollDesc = (var)12;
+        private static readonly var lockRankSched = 7;
+        private static readonly var lockRankDeadlock = 8;
+        private static readonly var lockRankPanic = 9;
+        private static readonly var lockRankAllg = 10;
+        private static readonly var lockRankAllp = 11;
+        private static readonly var lockRankPollDesc = 12;
 
-        private static readonly var lockRankTimers = (var)13; // Multiple timers locked simultaneously in destroy()
-        private static readonly var lockRankItab = (var)14;
-        private static readonly var lockRankReflectOffs = (var)15;
-        private static readonly var lockRankHchan = (var)16; // Multiple hchans acquired in lock order in syncadjustsudogs()
-        private static readonly var lockRankFin = (var)17;
-        private static readonly var lockRankNotifyList = (var)18;
-        private static readonly var lockRankTraceBuf = (var)19;
-        private static readonly var lockRankTraceStrings = (var)20;
-        private static readonly var lockRankMspanSpecial = (var)21;
-        private static readonly var lockRankProf = (var)22;
-        private static readonly var lockRankGcBitsArenas = (var)23;
-        private static readonly var lockRankRoot = (var)24;
-        private static readonly var lockRankTrace = (var)25;
-        private static readonly var lockRankTraceStackTab = (var)26;
-        private static readonly var lockRankNetpollInit = (var)27;
+        private static readonly var lockRankTimers = 13; // Multiple timers locked simultaneously in destroy()
+        private static readonly var lockRankItab = 14;
+        private static readonly var lockRankReflectOffs = 15;
+        private static readonly var lockRankHchan = 16; // Multiple hchans acquired in lock order in syncadjustsudogs()
+        private static readonly var lockRankFin = 17;
+        private static readonly var lockRankNotifyList = 18;
+        private static readonly var lockRankTraceBuf = 19;
+        private static readonly var lockRankTraceStrings = 20;
+        private static readonly var lockRankMspanSpecial = 21;
+        private static readonly var lockRankProf = 22;
+        private static readonly var lockRankGcBitsArenas = 23;
+        private static readonly var lockRankRoot = 24;
+        private static readonly var lockRankTrace = 25;
+        private static readonly var lockRankTraceStackTab = 26;
+        private static readonly var lockRankNetpollInit = 27;
 
-        private static readonly var lockRankRwmutexW = (var)28;
-        private static readonly var lockRankRwmutexR = (var)29;
+        private static readonly var lockRankRwmutexW = 28;
+        private static readonly var lockRankRwmutexR = 29;
 
-        private static readonly var lockRankMcentral = (var)30; // For !go115NewMCentralImpl
-        private static readonly var lockRankSpine = (var)31; // For !go115NewMCentralImpl
-        private static readonly var lockRankSpanSetSpine = (var)32;
-        private static readonly var lockRankGscan = (var)33;
-        private static readonly var lockRankStackpool = (var)34;
-        private static readonly var lockRankStackLarge = (var)35;
-        private static readonly var lockRankDefer = (var)36;
-        private static readonly var lockRankSudog = (var)37; 
+        private static readonly var lockRankMcentral = 30; // For !go115NewMCentralImpl
+        private static readonly var lockRankSpine = 31; // For !go115NewMCentralImpl
+        private static readonly var lockRankSpanSetSpine = 32;
+        private static readonly var lockRankGscan = 33;
+        private static readonly var lockRankStackpool = 34;
+        private static readonly var lockRankStackLarge = 35;
+        private static readonly var lockRankDefer = 36;
+        private static readonly var lockRankSudog = 37; 
 
         // Memory-related non-leaf locks
-        private static readonly var lockRankWbufSpans = (var)38;
-        private static readonly var lockRankMheap = (var)39;
-        private static readonly var lockRankMheapSpecial = (var)40; 
+        private static readonly var lockRankWbufSpans = 38;
+        private static readonly var lockRankMheap = 39;
+        private static readonly var lockRankMheapSpecial = 40; 
 
         // Memory-related leaf locks
-        private static readonly var lockRankGlobalAlloc = (var)41; 
+        private static readonly var lockRankGlobalAlloc = 41; 
 
         // Other leaf locks
-        private static readonly var lockRankGFree = (var)42; 
+        private static readonly var lockRankGFree = 42; 
         // Generally, hchan must be acquired before gscan. But in one specific
         // case (in syncadjustsudogs from markroot after the g has been suspended
         // by suspendG), we allow gscan to be acquired, and then an hchan lock. To
@@ -102,17 +102,17 @@ namespace go
         // syncadjustsudogs(), rather than lockRankHchan. By using this special
         // rank, we don't allow any further locks to be acquired other than more
         // hchan locks.
-        private static readonly var lockRankHchanLeaf = (var)43; 
+        private static readonly var lockRankHchanLeaf = 43; 
 
         // Leaf locks with no dependencies, so these constants are not actually used anywhere.
         // There are other architecture-dependent leaf locks as well.
-        private static readonly var lockRankNewmHandoff = (var)44;
-        private static readonly var lockRankDebugPtrmask = (var)45;
-        private static readonly var lockRankFaketimeState = (var)46;
-        private static readonly var lockRankTicks = (var)47;
-        private static readonly var lockRankRaceFini = (var)48;
-        private static readonly var lockRankPollCache = (var)49;
-        private static readonly var lockRankDebug = (var)50;
+        private static readonly var lockRankNewmHandoff = 44;
+        private static readonly var lockRankDebugPtrmask = 45;
+        private static readonly var lockRankFaketimeState = 46;
+        private static readonly var lockRankTicks = 47;
+        private static readonly var lockRankRaceFini = 48;
+        private static readonly var lockRankPollCache = 49;
+        private static readonly var lockRankDebug = 50;
 
 
         // lockRankLeafRank is the rank of lock that does not have a declared rank, and hence is

@@ -4,7 +4,7 @@
 
 // +build amd64
 
-// package math -- go2cs converted at 2020 October 08 03:25:12 UTC
+// package math -- go2cs converted at 2020 October 09 05:07:41 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\exp_asm.go
 using cpu = go.@internal.cpu_package;

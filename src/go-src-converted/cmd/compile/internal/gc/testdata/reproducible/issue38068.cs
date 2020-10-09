@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue38068 -- go2cs converted at 2020 October 08 04:32:05 UTC
+// package issue38068 -- go2cs converted at 2020 October 09 05:43:59 UTC
 // import "cmd/compile/internal/gc/testdata.issue38068" ==> using issue38068 = go.cmd.compile.@internal.gc.testdata.issue38068_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\reproducible\issue38068.go
 

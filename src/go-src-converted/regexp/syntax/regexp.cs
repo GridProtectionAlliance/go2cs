@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 03:41:06 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:33 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\regexp.go
 // Note to implementers:
@@ -45,24 +45,24 @@ namespace regexp
         // (OpLiteral, OpCharClass, OpAnyCharNotNL, OpAnyChar).
 
         public static readonly Op OpNoMatch = (Op)1L + iota; // matches no strings
-        public static readonly var OpEmptyMatch = (var)0; // matches empty string
-        public static readonly var OpLiteral = (var)1; // matches Runes sequence
-        public static readonly var OpCharClass = (var)2; // matches Runes interpreted as range pair list
-        public static readonly var OpAnyCharNotNL = (var)3; // matches any character except newline
-        public static readonly var OpAnyChar = (var)4; // matches any character
-        public static readonly var OpBeginLine = (var)5; // matches empty string at beginning of line
-        public static readonly var OpEndLine = (var)6; // matches empty string at end of line
-        public static readonly var OpBeginText = (var)7; // matches empty string at beginning of text
-        public static readonly var OpEndText = (var)8; // matches empty string at end of text
-        public static readonly var OpWordBoundary = (var)9; // matches word boundary `\b`
-        public static readonly var OpNoWordBoundary = (var)10; // matches word non-boundary `\B`
-        public static readonly var OpCapture = (var)11; // capturing subexpression with index Cap, optional name Name
-        public static readonly var OpStar = (var)12; // matches Sub[0] zero or more times
-        public static readonly var OpPlus = (var)13; // matches Sub[0] one or more times
-        public static readonly var OpQuest = (var)14; // matches Sub[0] zero or one times
-        public static readonly var OpRepeat = (var)15; // matches Sub[0] at least Min times, at most Max (Max == -1 is no limit)
-        public static readonly var OpConcat = (var)16; // matches concatenation of Subs
-        public static readonly var OpAlternate = (var)17; // matches alternation of Subs
+        public static readonly var OpEmptyMatch = 0; // matches empty string
+        public static readonly var OpLiteral = 1; // matches Runes sequence
+        public static readonly var OpCharClass = 2; // matches Runes interpreted as range pair list
+        public static readonly var OpAnyCharNotNL = 3; // matches any character except newline
+        public static readonly var OpAnyChar = 4; // matches any character
+        public static readonly var OpBeginLine = 5; // matches empty string at beginning of line
+        public static readonly var OpEndLine = 6; // matches empty string at end of line
+        public static readonly var OpBeginText = 7; // matches empty string at beginning of text
+        public static readonly var OpEndText = 8; // matches empty string at end of text
+        public static readonly var OpWordBoundary = 9; // matches word boundary `\b`
+        public static readonly var OpNoWordBoundary = 10; // matches word non-boundary `\B`
+        public static readonly var OpCapture = 11; // capturing subexpression with index Cap, optional name Name
+        public static readonly var OpStar = 12; // matches Sub[0] zero or more times
+        public static readonly var OpPlus = 13; // matches Sub[0] one or more times
+        public static readonly var OpQuest = 14; // matches Sub[0] zero or one times
+        public static readonly var OpRepeat = 15; // matches Sub[0] at least Min times, at most Max (Max == -1 is no limit)
+        public static readonly var OpConcat = 16; // matches concatenation of Subs
+        public static readonly var OpAlternate = 17; // matches alternation of Subs
 
         private static readonly Op opPseudo = (Op)128L; // where pseudo-ops start
 

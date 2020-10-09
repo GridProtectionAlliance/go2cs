@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package get -- go2cs converted at 2020 October 08 04:36:56 UTC
+// package get -- go2cs converted at 2020 October 09 05:48:03 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Go\src\cmd\go\internal\get\vcs.go
 using json = go.encoding.json_package;
@@ -875,7 +875,7 @@ namespace @internal
         }
 
         public static readonly ModuleMode IgnoreMod = (ModuleMode)iota;
-        public static readonly var PreferMod = (var)0;
+        public static readonly var PreferMod = 0;
 
 
         // RepoRootForImportPath analyzes importPath to determine the

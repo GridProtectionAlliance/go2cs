@@ -5,7 +5,7 @@
 // Annotate Ref in Prog with C types by parsing gcc debug output.
 // Conversion of debug output to Go types.
 
-// package main -- go2cs converted at 2020 October 08 04:08:43 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:24 UTC
 // Original source: C:\Go\src\cmd\cgo\gcc.go
 using bytes = go.bytes_package;
 using dwarf = go.debug.dwarf_package;
@@ -502,10 +502,10 @@ namespace go
             var completed = false;
             var sniff = make_slice<long>(len(names));
             const long notType = (long)1L << (int)(iota);
-            const var notIntConst = (var)0;
-            const var notNumConst = (var)1;
-            const var notStrLiteral = (var)2;
-            const var notDeclared = (var)3;
+            const var notIntConst = 0;
+            const var notNumConst = 1;
+            const var notStrLiteral = 2;
+            const var notDeclared = 3;
 
             var sawUnmatchedErrors = false;
             foreach (var (_, line) in strings.Split(stderr, "\n"))

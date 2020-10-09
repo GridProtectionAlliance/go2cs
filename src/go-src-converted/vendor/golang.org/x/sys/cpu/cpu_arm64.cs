@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cpu -- go2cs converted at 2020 October 08 05:01:48 UTC
+// package cpu -- go2cs converted at 2020 October 09 06:07:53 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_arm64.go
 using runtime = go.runtime_package;

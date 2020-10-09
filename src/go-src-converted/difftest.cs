@@ -5,7 +5,7 @@
 // Package difftest supplies a set of tests that will operate on any
 // implementation of a diff algorithm as exposed by
 // "golang.org/x/tools/internal/lsp/diff"
-// package difftest -- go2cs converted at 2020 October 08 04:54:43 UTC
+// package difftest -- go2cs converted at 2020 October 09 06:01:35 UTC
 // import "golang.org/x/tools/internal/lsp/diff/difftest" ==> using difftest = go.golang.org.x.tools.@internal.lsp.diff.difftest_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\lsp\diff\difftest\difftest.go
 using fmt = go.fmt_package;

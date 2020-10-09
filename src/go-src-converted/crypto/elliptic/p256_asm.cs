@@ -12,7 +12,7 @@
 
 // +build amd64 arm64
 
-// package elliptic -- go2cs converted at 2020 October 08 03:36:29 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:54:26 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256_asm.go
 using big = go.math.big_package;

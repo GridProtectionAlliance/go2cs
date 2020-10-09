@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package crc32 -- go2cs converted at 2020 October 08 03:30:52 UTC
+// package crc32 -- go2cs converted at 2020 October 09 04:50:08 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Go\src\hash\crc32\crc32_s390x.go
 using cpu = go.@internal.cpu_package;

@@ -21,7 +21,7 @@
 // Make sure this source is extended such that it exercises
 // whatever export format change has taken place.
 
-// package test -- go2cs converted at 2020 October 08 04:55:38 UTC
+// package test -- go2cs converted at 2020 October 09 06:02:21 UTC
 // import "golang.org/x/tools/go/internal/gcimporter/testdata.test" ==> using test = go.golang.org.x.tools.go.@internal.gcimporter.testdata.test_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\testdata\versions\test.go
 

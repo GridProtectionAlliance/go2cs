@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:11:28 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:25:29 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\poset.go
 using fmt = go.fmt_package;
@@ -64,16 +64,16 @@ namespace @internal
         }
 
         private static readonly undoType undoInvalid = (undoType)iota;
-        private static readonly var undoCheckpoint = (var)0; // a checkpoint to group undo passes
-        private static readonly var undoSetChl = (var)1; // change back left child of undo.idx to undo.edge
-        private static readonly var undoSetChr = (var)2; // change back right child of undo.idx to undo.edge
-        private static readonly var undoNonEqual = (var)3; // forget that SSA value undo.ID is non-equal to undo.idx (another ID)
-        private static readonly var undoNewNode = (var)4; // remove new node created for SSA value undo.ID
-        private static readonly var undoNewConstant = (var)5; // remove the constant node idx from the constants map
-        private static readonly var undoAliasNode = (var)6; // unalias SSA value undo.ID so that it points back to node index undo.idx
-        private static readonly var undoNewRoot = (var)7; // remove node undo.idx from root list
-        private static readonly var undoChangeRoot = (var)8; // remove node undo.idx from root list, and put back undo.edge.Target instead
-        private static readonly var undoMergeRoot = (var)9; // remove node undo.idx from root list, and put back its children instead
+        private static readonly var undoCheckpoint = 0; // a checkpoint to group undo passes
+        private static readonly var undoSetChl = 1; // change back left child of undo.idx to undo.edge
+        private static readonly var undoSetChr = 2; // change back right child of undo.idx to undo.edge
+        private static readonly var undoNonEqual = 3; // forget that SSA value undo.ID is non-equal to undo.idx (another ID)
+        private static readonly var undoNewNode = 4; // remove new node created for SSA value undo.ID
+        private static readonly var undoNewConstant = 5; // remove the constant node idx from the constants map
+        private static readonly var undoAliasNode = 6; // unalias SSA value undo.ID so that it points back to node index undo.idx
+        private static readonly var undoNewRoot = 7; // remove node undo.idx from root list
+        private static readonly var undoChangeRoot = 8; // remove node undo.idx from root list, and put back undo.edge.Target instead
+        private static readonly var undoMergeRoot = 9; // remove node undo.idx from root list, and put back its children instead
 
         // posetUndo represents an undo pass to be performed.
         // It's an union of fields that can be used to store information,

@@ -3,7 +3,7 @@
 
 // +build plan9,arm
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:20 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:11 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsyscall_plan9_arm.go
 using @unsafe = go.@unsafe_package;

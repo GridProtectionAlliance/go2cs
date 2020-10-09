@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package filelock -- go2cs converted at 2020 October 08 04:34:19 UTC
+// package filelock -- go2cs converted at 2020 October 09 05:45:48 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock_unix.go
 using os = go.os_package;

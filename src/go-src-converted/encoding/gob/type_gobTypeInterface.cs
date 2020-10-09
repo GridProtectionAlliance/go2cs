@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:45 UTC
+//     Generated on 2020 October 09 05:00:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class gobType<T> : gobType
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace encoding
             private delegate @string idByPtr(ptr<T> value);
             private delegate @string idByVal(T value);
 
-            private static readonly idByPtr s_idByPtr;
-            private static readonly idByVal s_idByVal;
+            private static readonly idByPtr? s_idByPtr;
+            private static readonly idByVal? s_idByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string id()
@@ -95,8 +96,8 @@ namespace encoding
             private delegate @string setIdByPtr(ptr<T> value, typeId id);
             private delegate @string setIdByVal(T value, typeId id);
 
-            private static readonly setIdByPtr s_setIdByPtr;
-            private static readonly setIdByVal s_setIdByVal;
+            private static readonly setIdByPtr? s_setIdByPtr;
+            private static readonly setIdByVal? s_setIdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string setId(typeId id)
@@ -115,8 +116,8 @@ namespace encoding
             private delegate @string nameByPtr(ptr<T> value);
             private delegate @string nameByVal(T value);
 
-            private static readonly nameByPtr s_nameByPtr;
-            private static readonly nameByVal s_nameByVal;
+            private static readonly nameByPtr? s_nameByPtr;
+            private static readonly nameByVal? s_nameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string name()
@@ -135,8 +136,8 @@ namespace encoding
             private delegate @string stringByPtr(ptr<T> value);
             private delegate @string stringByVal(T value);
 
-            private static readonly stringByPtr s_stringByPtr;
-            private static readonly stringByVal s_stringByVal;
+            private static readonly stringByPtr? s_stringByPtr;
+            private static readonly stringByVal? s_stringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string string()
@@ -155,8 +156,8 @@ namespace encoding
             private delegate @string safeStringByPtr(ptr<T> value, map<typeId, bool> seen);
             private delegate @string safeStringByVal(T value, map<typeId, bool> seen);
 
-            private static readonly safeStringByPtr s_safeStringByPtr;
-            private static readonly safeStringByVal s_safeStringByVal;
+            private static readonly safeStringByPtr? s_safeStringByPtr;
+            private static readonly safeStringByVal? s_safeStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string safeString(map<typeId, bool> seen)
@@ -172,7 +173,7 @@ namespace encoding
                 return s_safeStringByPtr(m_target_ptr, seen);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static gobType()

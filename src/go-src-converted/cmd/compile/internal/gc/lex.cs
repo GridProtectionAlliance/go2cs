@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:20 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:48 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\lex.go
 using syntax = go.cmd.compile.@internal.syntax_package;
@@ -47,27 +47,27 @@ namespace @internal
  
         // Func pragmas.
         public static readonly PragmaFlag Nointerface = (PragmaFlag)1L << (int)(iota);
-        public static readonly var Noescape = (var)0; // func parameters don't escape
-        public static readonly var Norace = (var)1; // func must not have race detector annotations
-        public static readonly var Nosplit = (var)2; // func should not execute on separate stack
-        public static readonly var Noinline = (var)3; // func should not be inlined
-        public static readonly var NoCheckPtr = (var)4; // func should not be instrumented by checkptr
-        public static readonly var CgoUnsafeArgs = (var)5; // treat a pointer to one arg as a pointer to them all
-        public static readonly var UintptrEscapes = (var)6; // pointers converted to uintptr escape
+        public static readonly var Noescape = 0; // func parameters don't escape
+        public static readonly var Norace = 1; // func must not have race detector annotations
+        public static readonly var Nosplit = 2; // func should not execute on separate stack
+        public static readonly var Noinline = 3; // func should not be inlined
+        public static readonly var NoCheckPtr = 4; // func should not be instrumented by checkptr
+        public static readonly var CgoUnsafeArgs = 5; // treat a pointer to one arg as a pointer to them all
+        public static readonly var UintptrEscapes = 6; // pointers converted to uintptr escape
 
         // Runtime-only func pragmas.
         // See ../../../../runtime/README.md for detailed descriptions.
-        public static readonly var Systemstack = (var)7; // func must run on system stack
-        public static readonly var Nowritebarrier = (var)8; // emit compiler error instead of write barrier
-        public static readonly var Nowritebarrierrec = (var)9; // error on write barrier in this or recursive callees
-        public static readonly var Yeswritebarrierrec = (var)10; // cancels Nowritebarrierrec in this function and callees
+        public static readonly var Systemstack = 7; // func must run on system stack
+        public static readonly var Nowritebarrier = 8; // emit compiler error instead of write barrier
+        public static readonly var Nowritebarrierrec = 9; // error on write barrier in this or recursive callees
+        public static readonly var Yeswritebarrierrec = 10; // cancels Nowritebarrierrec in this function and callees
 
         // Runtime-only type pragmas
-        public static readonly var NotInHeap = (var)11; // values of this type must not be heap allocated
+        public static readonly var NotInHeap = 11; // values of this type must not be heap allocated
 
-        public static readonly var FuncPragmas = (var)Nointerface | Noescape | Norace | Nosplit | Noinline | NoCheckPtr | CgoUnsafeArgs | UintptrEscapes | Systemstack | Nowritebarrier | Nowritebarrierrec | Yeswritebarrierrec;
+        public static readonly var FuncPragmas = Nointerface | Noescape | Norace | Nosplit | Noinline | NoCheckPtr | CgoUnsafeArgs | UintptrEscapes | Systemstack | Nowritebarrier | Nowritebarrierrec | Yeswritebarrierrec;
 
-        public static readonly var TypePragmas = (var)NotInHeap;
+        public static readonly var TypePragmas = NotInHeap;
 
 
         private static PragmaFlag pragmaFlag(@string verb)

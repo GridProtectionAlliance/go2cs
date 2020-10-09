@@ -12,7 +12,7 @@
 // backtrack is a fast replacement for the NFA code on small
 // regexps when onepass cannot be used.
 
-// package regexp -- go2cs converted at 2020 October 08 03:40:57 UTC
+// package regexp -- go2cs converted at 2020 October 09 04:58:24 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Go\src\regexp\backtrack.go
 using syntax = go.regexp.syntax_package;

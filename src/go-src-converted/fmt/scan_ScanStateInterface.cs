@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:08 UTC
+//     Generated on 2020 October 09 05:08:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using strconv = go.strconv_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -46,7 +47,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ScanState<T> : ScanState
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace go
             private delegate (long, error) ReadRuneByPtr(ptr<T> value);
             private delegate (long, error) ReadRuneByVal(T value);
 
-            private static readonly ReadRuneByPtr s_ReadRuneByPtr;
-            private static readonly ReadRuneByVal s_ReadRuneByVal;
+            private static readonly ReadRuneByPtr? s_ReadRuneByPtr;
+            private static readonly ReadRuneByVal? s_ReadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) ReadRune()
@@ -92,8 +93,8 @@ namespace go
             private delegate (long, error) UnreadRuneByPtr(ptr<T> value);
             private delegate (long, error) UnreadRuneByVal(T value);
 
-            private static readonly UnreadRuneByPtr s_UnreadRuneByPtr;
-            private static readonly UnreadRuneByVal s_UnreadRuneByVal;
+            private static readonly UnreadRuneByPtr? s_UnreadRuneByPtr;
+            private static readonly UnreadRuneByVal? s_UnreadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) UnreadRune()
@@ -112,8 +113,8 @@ namespace go
             private delegate (long, error) SkipSpaceByPtr(ptr<T> value);
             private delegate (long, error) SkipSpaceByVal(T value);
 
-            private static readonly SkipSpaceByPtr s_SkipSpaceByPtr;
-            private static readonly SkipSpaceByVal s_SkipSpaceByVal;
+            private static readonly SkipSpaceByPtr? s_SkipSpaceByPtr;
+            private static readonly SkipSpaceByVal? s_SkipSpaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) SkipSpace()
@@ -132,8 +133,8 @@ namespace go
             private delegate (long, error) TokenByPtr(ptr<T> value, bool skipSpace, Func<int, bool> f);
             private delegate (long, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
 
-            private static readonly TokenByPtr s_TokenByPtr;
-            private static readonly TokenByVal s_TokenByVal;
+            private static readonly TokenByPtr? s_TokenByPtr;
+            private static readonly TokenByVal? s_TokenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Token(bool skipSpace, Func<int, bool> f)
@@ -152,8 +153,8 @@ namespace go
             private delegate (long, error) WidthByPtr(ptr<T> value);
             private delegate (long, error) WidthByVal(T value);
 
-            private static readonly WidthByPtr s_WidthByPtr;
-            private static readonly WidthByVal s_WidthByVal;
+            private static readonly WidthByPtr? s_WidthByPtr;
+            private static readonly WidthByVal? s_WidthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Width()
@@ -172,8 +173,8 @@ namespace go
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> buf);
             private delegate (long, error) ReadByVal(T value, slice<byte> buf);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> buf)
@@ -189,7 +190,7 @@ namespace go
                 return s_ReadByPtr(m_target_ptr, buf);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ScanState()

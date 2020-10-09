@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:24 UTC
+//     Generated on 2020 October 09 04:56:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using errors = go.errors_package;
 using io = go.io_package;
 using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

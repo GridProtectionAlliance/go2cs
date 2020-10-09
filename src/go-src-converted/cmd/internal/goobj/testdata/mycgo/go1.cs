@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mycgo -- go2cs converted at 2020 October 08 03:50:17 UTC
+// package mycgo -- go2cs converted at 2020 October 09 05:08:55 UTC
 // import "cmd/internal/goobj/testdata/mycgo" ==> using mycgo = go.cmd.@internal.goobj.testdata.mycgo_package
 // Original source: C:\Go\src\cmd\internal\goobj\testdata\mycgo\go1.go
 using fmt = go.fmt_package;

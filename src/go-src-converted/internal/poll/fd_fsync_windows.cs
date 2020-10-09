@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 October 08 03:32:10 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:02 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd_fsync_windows.go
 using syscall = go.syscall_package;

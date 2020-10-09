@@ -4,7 +4,7 @@
 
 // Action graph execution.
 
-// package work -- go2cs converted at 2020 October 08 04:34:54 UTC
+// package work -- go2cs converted at 2020 October 09 05:46:17 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\exec.go
 using bytes = go.bytes_package;
@@ -566,10 +566,10 @@ namespace @internal
         }
 
         private static readonly uint needBuild = (uint)1L << (int)(iota);
-        private static readonly var needCgoHdr = (var)0;
-        private static readonly var needVet = (var)1;
-        private static readonly var needCompiledGoFiles = (var)2;
-        private static readonly var needStale = (var)3;
+        private static readonly var needCgoHdr = 0;
+        private static readonly var needVet = 1;
+        private static readonly var needCompiledGoFiles = 2;
+        private static readonly var needStale = 3;
 
 
         // build is the action for building a single package.

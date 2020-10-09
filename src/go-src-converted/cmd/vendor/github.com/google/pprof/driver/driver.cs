@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package driver provides an external entry point to the pprof driver.
-// package driver -- go2cs converted at 2020 October 08 04:42:48 UTC
+// package driver -- go2cs converted at 2020 October 09 05:53:18 UTC
 // import "cmd/vendor/github.com/google/pprof/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\driver\driver.go
 using io = go.io_package;

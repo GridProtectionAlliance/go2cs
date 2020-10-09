@@ -5,7 +5,7 @@
 // +build windows
 // +build go1.9
 
-// package windows -- go2cs converted at 2020 October 08 04:53:42 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:48 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\aliases.go
 using syscall = go.syscall_package;

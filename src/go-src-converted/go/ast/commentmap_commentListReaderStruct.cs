@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:19 UTC
+//     Generated on 2020 October 09 05:20:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using fmt = go.fmt_package;
 using token = go.go.token_package;
 using sort = go.sort_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace go

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:27 UTC
+//     Generated on 2020 October 09 05:45:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,8 @@ using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
+
+#nullable enable
 
 namespace go
 {

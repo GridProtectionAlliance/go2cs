@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 October 08 03:30:59 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:16 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\huffman_bit_writer.go
 using io = go.io_package;
@@ -36,7 +36,7 @@ namespace compress
         // bufferSize is the actual output byte buffer size.
         // It must have additional headroom for a flush
         // which can contain up to 8 bytes.
-        private static readonly var bufferSize = (var)bufferFlushSize + 8L;
+        private static readonly var bufferSize = bufferFlushSize + 8L;
 
 
         // The number of extra bits needed by length code X - LENGTH_CODES_START.
@@ -860,7 +860,7 @@ namespace compress
 
             w.literalFreq[endBlockMarker] = 1L;
 
-            const var numLiterals = (var)endBlockMarker + 1L;
+            const var numLiterals = endBlockMarker + 1L;
 
             w.offsetFreq[0L] = 1L;
             const long numOffsets = (long)1L;

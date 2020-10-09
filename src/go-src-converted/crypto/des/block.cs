@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package des -- go2cs converted at 2020 October 08 03:36:35 UTC
+// package des -- go2cs converted at 2020 October 09 04:54:31 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Go\src\crypto\des\block.go
 using binary = go.encoding.binary_package;

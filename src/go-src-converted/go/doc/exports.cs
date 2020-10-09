@@ -4,7 +4,7 @@
 
 // This file implements export filtering of an AST.
 
-// package doc -- go2cs converted at 2020 October 08 04:02:46 UTC
+// package doc -- go2cs converted at 2020 October 09 05:19:06 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\exports.go
 using ast = go.go.ast_package;

@@ -4,7 +4,7 @@
 
 // +build !go1.8
 
-// package gc -- go2cs converted at 2020 October 08 04:27:59 UTC
+// package gc -- go2cs converted at 2020 October 09 05:40:37 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\bootstrap.go
 using runtime = go.runtime_package;

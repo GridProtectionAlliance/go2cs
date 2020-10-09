@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:08 UTC
+//     Generated on 2020 October 09 04:52:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -54,7 +55,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class RoundTripper<T> : RoundTripper
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace net
             private delegate (ptr<Response>, error) RoundTripByPtr(ptr<T> value, ptr<Request> _p0);
             private delegate (ptr<Response>, error) RoundTripByVal(T value, ptr<Request> _p0);
 
-            private static readonly RoundTripByPtr s_RoundTripByPtr;
-            private static readonly RoundTripByVal s_RoundTripByVal;
+            private static readonly RoundTripByPtr? s_RoundTripByPtr;
+            private static readonly RoundTripByVal? s_RoundTripByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<Response>, error) RoundTrip(ptr<Request> _p0)
@@ -97,7 +98,7 @@ namespace net
                 return s_RoundTripByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static RoundTripper()

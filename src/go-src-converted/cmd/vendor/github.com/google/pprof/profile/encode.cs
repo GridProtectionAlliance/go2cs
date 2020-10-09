@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2020 October 08 04:43:31 UTC
+// package profile -- go2cs converted at 2020 October 09 05:53:52 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\encode.go
 using errors = go.errors_package;

@@ -13,7 +13,7 @@
 // This facility can be enabled by passing -tags debuglog when
 // building. Without this tag, dlog calls compile to nothing.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:27 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\debuglog.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -35,7 +35,7 @@ namespace go
 
         // debugLogStringLimit is the maximum number of bytes in a string.
         // Above this, the string will be truncated with "..(n more bytes).."
-        private static readonly var debugLogStringLimit = (var)debugLogBytes / 8L;
+        private static readonly var debugLogStringLimit = debugLogBytes / 8L;
 
         // dlog returns a debug logger. The caller can use methods on the
         // returned logger to add values, which will be space-separated in the
@@ -221,18 +221,18 @@ namespace go
         }
 
         private static readonly long debugLogUnknown = (long)1L + iota;
-        private static readonly var debugLogBoolTrue = (var)0;
-        private static readonly var debugLogBoolFalse = (var)1;
-        private static readonly var debugLogInt = (var)2;
-        private static readonly var debugLogUint = (var)3;
-        private static readonly var debugLogHex = (var)4;
-        private static readonly var debugLogPtr = (var)5;
-        private static readonly var debugLogString = (var)6;
-        private static readonly var debugLogConstString = (var)7;
-        private static readonly var debugLogStringOverflow = (var)8;
+        private static readonly var debugLogBoolTrue = 0;
+        private static readonly var debugLogBoolFalse = 1;
+        private static readonly var debugLogInt = 2;
+        private static readonly var debugLogUint = 3;
+        private static readonly var debugLogHex = 4;
+        private static readonly var debugLogPtr = 5;
+        private static readonly var debugLogString = 6;
+        private static readonly var debugLogConstString = 7;
+        private static readonly var debugLogStringOverflow = 8;
 
-        private static readonly var debugLogPC = (var)9;
-        private static readonly var debugLogTraceback = (var)10;
+        private static readonly var debugLogPC = 9;
+        private static readonly var debugLogTraceback = 10;
 
 
         //go:nosplit
@@ -535,7 +535,7 @@ namespace go
         private static readonly long debugLogHeaderSize = (long)2L; 
 
         // debugLogSyncSize is the number of bytes in a sync record.
-        private static readonly var debugLogSyncSize = (var)debugLogHeaderSize + 2L * 8L;
+        private static readonly var debugLogSyncSize = debugLogHeaderSize + 2L * 8L;
 
 
         //go:nosplit

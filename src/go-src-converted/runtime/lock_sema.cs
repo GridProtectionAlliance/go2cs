@@ -4,7 +4,7 @@
 
 // +build aix darwin netbsd openbsd plan9 solaris windows
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:02 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\lock_sema.go
 using atomic = go.runtime.@internal.atomic_package;

@@ -5,7 +5,7 @@
 // +build aix darwin dragonfly freebsd !android,linux netbsd openbsd solaris
 // +build cgo,!osusergo
 
-// package user -- go2cs converted at 2020 October 08 03:45:30 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:33 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\cgo_lookup_unix.go
 using fmt = go.fmt_package;
@@ -226,8 +226,8 @@ namespace os
         {
         }
 
-        private static readonly var userBuffer = (var)bufferKind(C._SC_GETPW_R_SIZE_MAX);
-        private static readonly var groupBuffer = (var)bufferKind(C._SC_GETGR_R_SIZE_MAX);
+        private static readonly var userBuffer = bufferKind(C._SC_GETPW_R_SIZE_MAX);
+        private static readonly var groupBuffer = bufferKind(C._SC_GETGR_R_SIZE_MAX);
 
 
         private static C.size_t initialSize(this bufferKind k)

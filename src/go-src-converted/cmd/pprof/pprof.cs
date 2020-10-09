@@ -7,7 +7,7 @@
 // modifications specific to the Go distribution. Please consider
 // upstreaming any modifications to these packages.
 
-// package main -- go2cs converted at 2020 October 08 04:42:11 UTC
+// package main -- go2cs converted at 2020 October 09 05:52:47 UTC
 // Original source: C:\Go\src\cmd\pprof\pprof.go
 using tls = go.crypto.tls_package;
 using dwarf = go.debug.dwarf_package;

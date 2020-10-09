@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 October 08 03:31:46 UTC
+// package poll -- go2cs converted at 2020 October 09 04:50:53 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\copy_file_range_linux.go
 using unix = go.@internal.syscall.unix_package;

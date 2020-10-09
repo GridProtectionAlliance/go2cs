@@ -4,7 +4,7 @@
 
 // Package stdmethods defines an Analyzer that checks for misspellings
 // in the signatures of methods similar to well-known interfaces.
-// package stdmethods -- go2cs converted at 2020 October 08 04:58:09 UTC
+// package stdmethods -- go2cs converted at 2020 October 09 06:04:45 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/stdmethods" ==> using stdmethods = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.stdmethods_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\stdmethods\stdmethods.go
 using ast = go.go.ast_package;

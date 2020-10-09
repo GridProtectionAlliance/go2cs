@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typeutil -- go2cs converted at 2020 October 08 04:55:43 UTC
+// package typeutil -- go2cs converted at 2020 October 09 06:02:24 UTC
 // import "golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\types\typeutil\imports.go
 using types = go.go.types_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:28:07 UTC
+//     Generated on 2020 October 09 05:40:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class SimpleStmt<T> : SimpleStmt
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace @internal
             private delegate void aSimpleStmtByPtr(ptr<T> value);
             private delegate void aSimpleStmtByVal(T value);
 
-            private static readonly aSimpleStmtByPtr s_aSimpleStmtByPtr;
-            private static readonly aSimpleStmtByVal s_aSimpleStmtByVal;
+            private static readonly aSimpleStmtByPtr? s_aSimpleStmtByPtr;
+            private static readonly aSimpleStmtByVal? s_aSimpleStmtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void aSimpleStmt()
@@ -93,8 +94,8 @@ namespace @internal
             private delegate void aStmtByPtr(ptr<T> value);
             private delegate void aStmtByVal(T value);
 
-            private static readonly aStmtByPtr s_aStmtByPtr;
-            private static readonly aStmtByVal s_aStmtByVal;
+            private static readonly aStmtByPtr? s_aStmtByPtr;
+            private static readonly aStmtByVal? s_aStmtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void aStmt()
@@ -118,8 +119,8 @@ namespace @internal
             private delegate Pos PosByPtr(ptr<T> value);
             private delegate Pos PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Pos Pos()
@@ -138,8 +139,8 @@ namespace @internal
             private delegate Pos aNodeByPtr(ptr<T> value);
             private delegate Pos aNodeByVal(T value);
 
-            private static readonly aNodeByPtr s_aNodeByPtr;
-            private static readonly aNodeByVal s_aNodeByVal;
+            private static readonly aNodeByPtr? s_aNodeByPtr;
+            private static readonly aNodeByVal? s_aNodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Pos aNode()
@@ -155,7 +156,7 @@ namespace @internal
                 return s_aNodeByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static SimpleStmt()

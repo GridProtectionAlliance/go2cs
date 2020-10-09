@@ -8,7 +8,7 @@
 // HKDF is a cryptographic key derivation function (KDF) with the goal of
 // expanding limited input keying material into one or more cryptographically
 // strong secret keys.
-// package hkdf -- go2cs converted at 2020 October 08 05:00:14 UTC
+// package hkdf -- go2cs converted at 2020 October 09 06:06:32 UTC
 // import "vendor/golang.org/x/crypto/hkdf" ==> using hkdf = go.vendor.golang.org.x.crypto.hkdf_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\hkdf\hkdf.go
 // import "golang.org/x/crypto/hkdf"

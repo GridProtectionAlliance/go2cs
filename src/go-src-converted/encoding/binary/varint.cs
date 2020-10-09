@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package binary -- go2cs converted at 2020 October 08 03:26:08 UTC
+// package binary -- go2cs converted at 2020 October 09 04:49:48 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Go\src\encoding\binary\varint.go
 // This file implements "varint" encoding of 64-bit integers.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modinfo -- go2cs converted at 2020 October 08 04:34:09 UTC
+// package modinfo -- go2cs converted at 2020 October 09 05:45:41 UTC
 // import "cmd/go/internal/modinfo" ==> using modinfo = go.cmd.go.@internal.modinfo_package
 // Original source: C:\Go\src\cmd\go\internal\modinfo\info.go
 using time = go.time_package;

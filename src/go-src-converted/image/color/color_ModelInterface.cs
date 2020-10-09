@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:06 UTC
+//     Generated on 2020 October 09 06:05:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -40,7 +41,7 @@ namespace image
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Model<T> : Model
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace image
             private delegate Color ConvertByPtr(ptr<T> value, Color c);
             private delegate Color ConvertByVal(T value, Color c);
 
-            private static readonly ConvertByPtr s_ConvertByPtr;
-            private static readonly ConvertByVal s_ConvertByVal;
+            private static readonly ConvertByPtr? s_ConvertByPtr;
+            private static readonly ConvertByVal? s_ConvertByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Color Convert(Color c)
@@ -83,7 +84,7 @@ namespace image
                 return s_ConvertByPtr(m_target_ptr, c);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Model()

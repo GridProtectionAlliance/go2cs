@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package version -- go2cs converted at 2020 October 08 04:33:49 UTC
+// package version -- go2cs converted at 2020 October 09 05:45:23 UTC
 // import "cmd/go/internal/version" ==> using version = go.cmd.go.@internal.version_package
 // Original source: C:\Go\src\cmd\go\internal\version\exe.go
 using bytes = go.bytes_package;

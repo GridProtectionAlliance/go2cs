@@ -4,7 +4,7 @@
 
 // Package unicode provides data and functions to test some properties of
 // Unicode code points.
-// package unicode -- go2cs converted at 2020 October 08 03:24:47 UTC
+// package unicode -- go2cs converted at 2020 October 09 04:49:32 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Go\src\unicode\letter.go
 
@@ -77,10 +77,10 @@ namespace go
         // characters that involve multiple runes in the input or output.
 
         // Indices into the Delta arrays inside CaseRanges for case mapping.
-        public static readonly var UpperCase = (var)iota;
-        public static readonly var LowerCase = (var)0;
-        public static readonly var TitleCase = (var)1;
-        public static readonly var MaxCase = (var)2;
+        public static readonly var UpperCase = iota;
+        public static readonly var LowerCase = 0;
+        public static readonly var TitleCase = 1;
+        public static readonly var MaxCase = 2;
 
 
         private partial struct d // : array<int>
@@ -90,7 +90,7 @@ namespace go
         // If the Delta field of a CaseRange is UpperLower, it means
         // this CaseRange represents a sequence of the form (say)
         // Upper Lower Upper Lower.
-        public static readonly var UpperLower = (var)MaxRune + 1L; // (Cannot be a valid delta.)
+        public static readonly var UpperLower = MaxRune + 1L; // (Cannot be a valid delta.)
 
         // linearMax is the maximum size table for linear search for non-Latin1 rune.
         // Derived by running 'go test -calibrate'.

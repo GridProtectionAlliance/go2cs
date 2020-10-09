@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:41 UTC
+//     Generated on 2020 October 09 05:46:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,8 @@ using str = go.cmd.go.@internal.str_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

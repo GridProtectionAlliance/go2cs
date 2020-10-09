@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package unsafeptr -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package unsafeptr -- go2cs converted at 2020 October 09 06:05:12 UTC
 // import "cmd/vet/testdata/unsafeptr" ==> using unsafeptr = go.cmd.vet.testdata.unsafeptr_package
 // Original source: C:\Go\src\cmd\vet\testdata\unsafeptr\unsafeptr.go
 using @unsafe = go.@unsafe_package;

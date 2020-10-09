@@ -4,7 +4,7 @@
 
 // +build !cgo,!windows,!plan9 android osusergo,!windows,!plan9
 
-// package user -- go2cs converted at 2020 October 08 03:45:33 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:36 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup_stubs.go
 using errors = go.errors_package;

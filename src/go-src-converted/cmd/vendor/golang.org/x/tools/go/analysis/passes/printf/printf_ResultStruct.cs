@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:06 UTC
+//     Generated on 2020 October 09 06:04:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,8 @@ using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysis
 using inspector = go.golang.org.x.tools.go.ast.inspector_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

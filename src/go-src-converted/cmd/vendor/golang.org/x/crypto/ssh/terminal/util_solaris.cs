@@ -4,7 +4,7 @@
 
 // +build solaris
 
-// package terminal -- go2cs converted at 2020 October 08 04:45:44 UTC
+// package terminal -- go2cs converted at 2020 October 09 05:55:49 UTC
 // import "cmd/vendor/golang.org/x/crypto/ssh/terminal" ==> using terminal = go.cmd.vendor.golang.org.x.crypto.ssh.terminal_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\crypto\ssh\terminal\util_solaris.go
 // import "golang.org/x/crypto/ssh/terminal"

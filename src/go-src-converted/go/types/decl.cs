@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:03:10 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:21 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\decl.go
 using ast = go.go.ast_package;
@@ -390,9 +390,9 @@ namespace go
             ref Checker check = ref _addr_check.val;
 
             const typeInfo unknown = (typeInfo)iota;
-            const var marked = (var)0;
-            const var valid = (var)1;
-            const var invalid = (var)2;
+            const var marked = 0;
+            const var valid = 1;
+            const var invalid = 2;
 
             switch (typ.type())
             {

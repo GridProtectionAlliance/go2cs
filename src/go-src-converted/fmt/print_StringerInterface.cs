@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:03 UTC
+//     Generated on 2020 October 09 05:07:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using reflect = go.reflect_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -44,7 +45,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Stringer<T> : Stringer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace go
             private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string String()
@@ -87,7 +88,7 @@ namespace go
                 return s_StringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Stringer()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:44 UTC
+//     Generated on 2020 October 09 04:53:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace syscall
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Wrapper<T> : Wrapper
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace syscall
             private delegate Value JSValueByPtr(ptr<T> value);
             private delegate Value JSValueByVal(T value);
 
-            private static readonly JSValueByPtr s_JSValueByPtr;
-            private static readonly JSValueByVal s_JSValueByVal;
+            private static readonly JSValueByPtr? s_JSValueByPtr;
+            private static readonly JSValueByVal? s_JSValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Value JSValue()
@@ -85,7 +86,7 @@ namespace syscall
                 return s_JSValueByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Wrapper()

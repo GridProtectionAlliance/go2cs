@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package regexp -- go2cs converted at 2020 October 08 03:41:10 UTC
+// package regexp -- go2cs converted at 2020 October 09 04:58:36 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Go\src\regexp\exec.go
 using io = go.io_package;

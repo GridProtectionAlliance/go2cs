@@ -5,7 +5,7 @@
 // +build linux
 // +build mips64 mips64le
 
-// package unix -- go2cs converted at 2020 October 08 04:47:38 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:50 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_mips64x.go
 
@@ -212,7 +212,7 @@ namespace sys
 
             ptr<stat_t> st = addr(new stat_t());
             err = fstat(fd, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 
@@ -223,7 +223,7 @@ namespace sys
 
             ptr<stat_t> st = addr(new stat_t());
             err = fstatat(dirfd, path, st, flags);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 
@@ -234,7 +234,7 @@ namespace sys
 
             ptr<stat_t> st = addr(new stat_t());
             err = lstat(path, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 
@@ -245,7 +245,7 @@ namespace sys
 
             ptr<stat_t> st = addr(new stat_t());
             err = stat(path, st);
-            fillStat_t(_addr_s, _addr_st);
+            fillStat_t(_addr_s, st);
             return ;
         }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sumdb -- go2cs converted at 2020 October 08 04:36:22 UTC
+// package sumdb -- go2cs converted at 2020 October 09 05:47:34 UTC
 // import "golang.org/x/mod/sumdb" ==> using sumdb = go.golang.org.x.mod.sumdb_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\sumdb\test.go
 using context = go.context_package;

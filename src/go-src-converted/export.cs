@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package core -- go2cs converted at 2020 October 08 04:54:53 UTC
+// package core -- go2cs converted at 2020 October 09 06:01:44 UTC
 // import "golang.org/x/tools/internal/event/core" ==> using core = go.golang.org.x.tools.@internal.@event.core_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\core\export.go
 using context = go.context_package;

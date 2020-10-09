@@ -9,7 +9,7 @@
 // Package gcimporter provides various functions for reading
 // gc-generated object files that can be used to implement the
 // Importer interface defined by the Go 1.5 standard library package.
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:28 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:12 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\gcimporter.go
 // import "golang.org/x/tools/go/internal/gcimporter"
@@ -42,7 +42,7 @@ namespace @internal
     public static partial class gcimporter_package
     {
         // debugging/development support
-        private static readonly var debug = (var)false;
+        private static readonly var debug = false;
 
 
 

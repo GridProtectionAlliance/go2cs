@@ -1,4 +1,4 @@
-// package p1 -- go2cs converted at 2020 October 08 04:37:00 UTC
+// package p1 -- go2cs converted at 2020 October 09 05:48:06 UTC
 // import "cmd/go/testdata/modlegacy/src/new/p1" ==> using p1 = go.cmd.go.testdata.modlegacy.src.@new.p1_package
 // Original source: C:\Go\src\cmd\go\testdata\modlegacy\src\new\p1\p1.go
 //using go.old.p2_package; // ?? metadata not found

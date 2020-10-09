@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 October 08 04:02:53 UTC
+// package testing -- go2cs converted at 2020 October 09 05:19:11 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Go\src\go\doc\testdata\example.go
 using bytes = go.bytes_package;

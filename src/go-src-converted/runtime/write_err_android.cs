@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:26 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\write_err_android.go
 using @unsafe = go.@unsafe_package;
@@ -24,8 +24,8 @@ namespace go
         }
 
         private static readonly loggerType unknown = (loggerType)iota;
-        private static readonly var legacy = (var)0;
-        private static readonly var logd = (var)1; 
+        private static readonly var legacy = 0;
+        private static readonly var logd = 1; 
         // TODO(hakim): logging for emulator?
 
         private static loggerType logger = default;

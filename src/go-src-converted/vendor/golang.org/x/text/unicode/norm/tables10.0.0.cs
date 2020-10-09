@@ -2,7 +2,7 @@
 
 // +build go1.10,!go1.13
 
-// package norm -- go2cs converted at 2020 October 08 05:02:40 UTC
+// package norm -- go2cs converted at 2020 October 09 06:08:40 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\norm\tables10.0.0.go
 using sync = go.sync_package;

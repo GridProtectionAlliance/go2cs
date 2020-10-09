@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typeutil -- go2cs converted at 2020 October 08 04:58:32 UTC
+// package typeutil -- go2cs converted at 2020 October 09 06:05:05 UTC
 // import "cmd/vendor/golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.cmd.vendor.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\types\typeutil\ui.go
 // This file defines utilities for user interfaces that display types.

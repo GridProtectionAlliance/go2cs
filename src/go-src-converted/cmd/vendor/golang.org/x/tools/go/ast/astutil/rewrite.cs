@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package astutil -- go2cs converted at 2020 October 08 04:58:25 UTC
+// package astutil -- go2cs converted at 2020 October 09 06:04:58 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/astutil" ==> using astutil = go.cmd.vendor.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\ast\astutil\rewrite.go
 using fmt = go.fmt_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:33:10 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:33 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface.go
 using errors = go.errors_package;
@@ -38,10 +38,10 @@ namespace go
         }
 
         public static readonly Flags FlagUp = (Flags)1L << (int)(iota); // interface is up
-        public static readonly var FlagBroadcast = (var)0; // interface supports broadcast access capability
-        public static readonly var FlagLoopback = (var)1; // interface is a loopback interface
-        public static readonly var FlagPointToPoint = (var)2; // interface belongs to a point-to-point link
-        public static readonly var FlagMulticast = (var)3; // interface supports multicast access capability
+        public static readonly var FlagBroadcast = 0; // interface supports broadcast access capability
+        public static readonly var FlagLoopback = 1; // interface is a loopback interface
+        public static readonly var FlagPointToPoint = 2; // interface belongs to a point-to-point link
+        public static readonly var FlagMulticast = 3; // interface supports multicast access capability
 
         private static @string flagNames = new slice<@string>(new @string[] { "up", "broadcast", "loopback", "pointtopoint", "multicast" });
 

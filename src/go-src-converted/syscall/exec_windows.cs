@@ -4,7 +4,7 @@
 
 // Fork, exec, wait, etc.
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:36 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:19 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\exec_windows.go
 using sync = go.sync_package;

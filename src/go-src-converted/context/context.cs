@@ -45,7 +45,7 @@
 //
 // See https://blog.golang.org/context for example code for a server that uses
 // Contexts.
-// package context -- go2cs converted at 2020 October 08 03:26:10 UTC
+// package context -- go2cs converted at 2020 October 09 04:49:50 UTC
 // import "context" ==> using context = go.context_package
 // Original source: C:\Go\src\context\context.go
 using errors = go.errors_package;

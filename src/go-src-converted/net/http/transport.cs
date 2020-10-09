@@ -7,7 +7,7 @@
 // This is the low-level Transport implementation of RoundTripper.
 // The high-level interface is in client.go.
 
-// package http -- go2cs converted at 2020 October 08 03:40:47 UTC
+// package http -- go2cs converted at 2020 October 09 04:58:16 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\transport.go
 using bufio = go.bufio_package;
@@ -3472,7 +3472,7 @@ namespace net
 
             }());
 
-            const var debugRoundTrip = (var)false; 
+            const var debugRoundTrip = false; 
 
             // Write the request concurrently with waiting for a response,
             // in case the server decides to reply before reading our full

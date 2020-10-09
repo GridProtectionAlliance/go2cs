@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package arm -- go2cs converted at 2020 October 08 04:42:07 UTC
+// package arm -- go2cs converted at 2020 October 09 05:52:43 UTC
 // import "cmd/oldlink/internal/arm" ==> using arm = go.cmd.oldlink.@internal.arm_package
 // Original source: C:\Go\src\cmd\oldlink\internal\arm\l.go
 

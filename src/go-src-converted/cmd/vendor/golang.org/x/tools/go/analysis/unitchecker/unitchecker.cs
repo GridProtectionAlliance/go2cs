@@ -18,7 +18,7 @@
 // If you need a standalone tool, use multichecker,
 // which supports this mode but can also load packages
 // from source using go/packages.
-// package unitchecker -- go2cs converted at 2020 October 08 04:58:20 UTC
+// package unitchecker -- go2cs converted at 2020 October 09 06:04:53 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/unitchecker" ==> using unitchecker = go.cmd.vendor.golang.org.x.tools.go.analysis.unitchecker_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\unitchecker\unitchecker.go
 // TODO(adonovan):

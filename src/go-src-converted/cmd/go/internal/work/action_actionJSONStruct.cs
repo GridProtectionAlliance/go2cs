@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:56 UTC
+//     Generated on 2020 October 09 05:45:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,8 @@ using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
 using buildid = go.cmd.@internal.buildid_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

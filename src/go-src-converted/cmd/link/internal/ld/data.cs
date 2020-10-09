@@ -29,7 +29,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:38:13 UTC
+// package ld -- go2cs converted at 2020 October 09 05:49:11 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\data.go
 using bytes = go.bytes_package;
@@ -1502,7 +1502,7 @@ namespace @internal
 
             var buf = make_slice<byte>(size);
             ptr<OutBuf> @out = addr(new OutBuf(heap:buf));
-            writeDatblkToOutBuf(_addr_ctxt, _addr_out, addr, size);
+            writeDatblkToOutBuf(_addr_ctxt, out, addr, size);
             return buf;
         }
 
@@ -1746,7 +1746,7 @@ namespace @internal
             return Rnd(datsize, int64(state.symalign2(s)));
         }
 
-        private static readonly var debugGCProg = (var)false;
+        private static readonly var debugGCProg = false;
 
 
 

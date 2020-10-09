@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package codehost -- go2cs converted at 2020 October 08 04:35:55 UTC
+// package codehost -- go2cs converted at 2020 October 09 05:47:07 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\codehost\git.go
 using bytes = go.bytes_package;
@@ -217,9 +217,9 @@ namespace modfetch
 
  
         // How much have we fetched into the git repo (in this process)?
-        private static readonly var fetchNone = (var)iota; // nothing yet
-        private static readonly var fetchSome = (var)0; // shallow fetches of individual hashes
-        private static readonly var fetchAll = (var)1; // "fetch -t origin": get all remote branches and tags
+        private static readonly var fetchNone = iota; // nothing yet
+        private static readonly var fetchSome = 0; // shallow fetches of individual hashes
+        private static readonly var fetchAll = 1; // "fetch -t origin": get all remote branches and tags
 
         // loadLocalTags loads tag references from the local git cache
         // into the map r.localTags.

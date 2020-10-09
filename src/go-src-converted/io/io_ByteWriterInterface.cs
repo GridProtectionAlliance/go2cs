@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 01:30:43 UTC
+//     Generated on 2020 October 09 04:49:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using errors = go.errors_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -39,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ByteWriter<T> : ByteWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -65,8 +66,8 @@ namespace go
             private delegate error WriteByteByPtr(ptr<T> value, byte c);
             private delegate error WriteByteByVal(T value, byte c);
 
-            private static readonly WriteByteByPtr s_WriteByteByPtr;
-            private static readonly WriteByteByVal s_WriteByteByVal;
+            private static readonly WriteByteByPtr? s_WriteByteByPtr;
+            private static readonly WriteByteByVal? s_WriteByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteByte(byte c)
@@ -82,7 +83,7 @@ namespace go
                 return s_WriteByteByPtr(m_target_ptr, c);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ByteWriter()

@@ -14,7 +14,7 @@ When cgo is available, cgo-based (libc-backed) code is used by default.
 This can be overridden by using osusergo build tag, which enforces
 the pure Go implementation.
 */
-// package user -- go2cs converted at 2020 October 08 03:45:36 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:38 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\user.go
 using strconv = go.strconv_package;

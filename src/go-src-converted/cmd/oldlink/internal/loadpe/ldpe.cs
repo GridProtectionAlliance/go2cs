@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package loadpe implements a PE/COFF file reader.
-// package loadpe -- go2cs converted at 2020 October 08 04:41:31 UTC
+// package loadpe -- go2cs converted at 2020 October 09 05:52:09 UTC
 // import "cmd/oldlink/internal/loadpe" ==> using loadpe = go.cmd.oldlink.@internal.loadpe_package
 // Original source: C:\Go\src\cmd\oldlink\internal\loadpe\ldpe.go
 using bio = go.cmd.@internal.bio_package;

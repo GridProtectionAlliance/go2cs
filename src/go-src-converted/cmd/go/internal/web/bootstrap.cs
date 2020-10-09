@@ -9,7 +9,7 @@
 // trees that potentially require C linking,
 // like the use of "net/http" in vcs.go.
 
-// package web -- go2cs converted at 2020 October 08 04:34:36 UTC
+// package web -- go2cs converted at 2020 October 09 05:46:01 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Go\src\cmd\go\internal\web\bootstrap.go
 using errors = go.errors_package;

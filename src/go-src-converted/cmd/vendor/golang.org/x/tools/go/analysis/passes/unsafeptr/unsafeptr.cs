@@ -4,7 +4,7 @@
 
 // Package unsafeptr defines an Analyzer that checks for invalid
 // conversions of uintptr to unsafe.Pointer.
-// package unsafeptr -- go2cs converted at 2020 October 08 04:58:16 UTC
+// package unsafeptr -- go2cs converted at 2020 October 09 06:04:49 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unsafeptr" ==> using unsafeptr = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unsafeptr_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unsafeptr\unsafeptr.go
 using ast = go.go.ast_package;

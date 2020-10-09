@@ -4,7 +4,7 @@
 
 // This file implements typechecking of statements.
 
-// package types -- go2cs converted at 2020 October 08 04:03:49 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:41 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\stmt.go
 using ast = go.go.ast_package;
@@ -125,11 +125,11 @@ namespace go
  
         // permissible control-flow statements
         private static readonly stmtContext breakOk = (stmtContext)1L << (int)(iota);
-        private static readonly var continueOk = (var)0;
-        private static readonly var fallthroughOk = (var)1; 
+        private static readonly var continueOk = 0;
+        private static readonly var fallthroughOk = 1; 
 
         // additional context information
-        private static readonly var finalSwitchCase = (var)2;
+        private static readonly var finalSwitchCase = 2;
 
 
         private static void simpleStmt(this ptr<Checker> _addr_check, ast.Stmt s)

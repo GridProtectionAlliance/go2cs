@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2020 October 08 04:40:29 UTC
+// package sym -- go2cs converted at 2020 October 09 05:51:12 UTC
 // import "cmd/oldlink/internal/sym" ==> using sym = go.cmd.oldlink.@internal.sym_package
 // Original source: C:\Go\src\cmd\oldlink\internal\sym\reloc.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -65,15 +65,15 @@ namespace @internal
         }
 
         public static readonly RelocVariant RV_NONE = (RelocVariant)iota;
-        public static readonly var RV_POWER_LO = (var)0;
-        public static readonly var RV_POWER_HI = (var)1;
-        public static readonly var RV_POWER_HA = (var)2;
-        public static readonly var RV_POWER_DS = (var)3; 
+        public static readonly var RV_POWER_LO = 0;
+        public static readonly var RV_POWER_HI = 1;
+        public static readonly var RV_POWER_HA = 2;
+        public static readonly var RV_POWER_DS = 3; 
 
         // RV_390_DBL is a s390x-specific relocation variant that indicates that
         // the value to be placed into the relocatable field should first be
         // divided by 2.
-        public static readonly var RV_390_DBL = (var)4;
+        public static readonly var RV_390_DBL = 4;
 
         public static readonly RelocVariant RV_CHECK_OVERFLOW = (RelocVariant)1L << (int)(7L);
         public static readonly RelocVariant RV_TYPE_MASK = (RelocVariant)RV_CHECK_OVERFLOW - 1L;

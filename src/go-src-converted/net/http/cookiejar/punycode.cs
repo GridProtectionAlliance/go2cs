@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cookiejar -- go2cs converted at 2020 October 08 03:41:22 UTC
+// package cookiejar -- go2cs converted at 2020 October 09 04:58:45 UTC
 // import "net/http/cookiejar" ==> using cookiejar = go.net.http.cookiejar_package
 // Original source: C:\Go\src\net\http\cookiejar\punycode.go
 // This file implements the Punycode algorithm from RFC 3492.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:26 UTC
+// package trace -- go2cs converted at 2020 October 09 05:52:59 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\mud.go
 using math = go.math_package;

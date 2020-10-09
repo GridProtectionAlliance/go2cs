@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:33:48 UTC
+//     Generated on 2020 October 09 04:51:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using context = go.context_package;
 using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using syscall = go.syscall_package;
+
+#nullable enable
 
 namespace go
 {

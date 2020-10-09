@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:10:27 UTC
+//     Generated on 2020 October 09 05:24:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using os = go.os_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class writeSyncer<T> : writeSyncer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate error SyncByPtr(ptr<T> value);
             private delegate error SyncByVal(T value);
 
-            private static readonly SyncByPtr s_SyncByPtr;
-            private static readonly SyncByVal s_SyncByVal;
+            private static readonly SyncByPtr? s_SyncByPtr;
+            private static readonly SyncByVal? s_SyncByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Sync()
@@ -96,8 +97,8 @@ namespace @internal
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -113,7 +114,7 @@ namespace @internal
                 return s_WriteByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static writeSyncer()

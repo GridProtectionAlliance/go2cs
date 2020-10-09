@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package js -- go2cs converted at 2020 October 08 03:26:42 UTC
+// package js -- go2cs converted at 2020 October 09 04:53:03 UTC
 // import "syscall/js" ==> using js = go.syscall.js_package
 // Original source: C:\Go\src\syscall\js\func.go
 using sync = go.sync_package;

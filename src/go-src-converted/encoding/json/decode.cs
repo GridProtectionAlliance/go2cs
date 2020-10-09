@@ -5,7 +5,7 @@
 // Represents JSON data structure using native Go types: booleans, floats,
 // strings, arrays, and maps.
 
-// package json -- go2cs converted at 2020 October 08 03:42:25 UTC
+// package json -- go2cs converted at 2020 October 09 04:59:41 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\decode.go
 using encoding = go.encoding_package;

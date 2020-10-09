@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:33:26 UTC
+// package main -- go2cs converted at 2020 October 09 05:45:03 UTC
 // Original source: C:\Go\src\cmd\fix\typecheck.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -471,7 +471,7 @@ namespace go
                 decl = decl__prev1;
             }
 
-            typecheck1(_addr_cfg1, f, typeof, assign);
+            typecheck1(cfg1, f, typeof, assign);
             return (typeof, assign);
 
         });

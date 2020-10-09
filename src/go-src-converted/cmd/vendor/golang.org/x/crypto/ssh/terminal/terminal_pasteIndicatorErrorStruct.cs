@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:45:43 UTC
+//     Generated on 2020 October 09 05:55:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using strconv = go.strconv_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

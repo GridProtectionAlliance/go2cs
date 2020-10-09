@@ -4,7 +4,7 @@
 
 // Invoke signal hander in the VDSO context (see issue 32912).
 
-// package main -- go2cs converted at 2020 October 08 03:43:48 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:54 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\vdso.go
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;

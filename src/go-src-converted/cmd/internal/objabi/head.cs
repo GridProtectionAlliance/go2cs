@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 October 08 03:50:14 UTC
+// package objabi -- go2cs converted at 2020 October 09 05:08:52 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\head.go
 using fmt = go.fmt_package;
@@ -46,17 +46,17 @@ namespace @internal
         }
 
         public static readonly HeadType Hunknown = (HeadType)iota;
-        public static readonly var Hdarwin = (var)0;
-        public static readonly var Hdragonfly = (var)1;
-        public static readonly var Hfreebsd = (var)2;
-        public static readonly var Hjs = (var)3;
-        public static readonly var Hlinux = (var)4;
-        public static readonly var Hnetbsd = (var)5;
-        public static readonly var Hopenbsd = (var)6;
-        public static readonly var Hplan9 = (var)7;
-        public static readonly var Hsolaris = (var)8;
-        public static readonly var Hwindows = (var)9;
-        public static readonly var Haix = (var)10;
+        public static readonly var Hdarwin = 0;
+        public static readonly var Hdragonfly = 1;
+        public static readonly var Hfreebsd = 2;
+        public static readonly var Hjs = 3;
+        public static readonly var Hlinux = 4;
+        public static readonly var Hnetbsd = 5;
+        public static readonly var Hopenbsd = 6;
+        public static readonly var Hplan9 = 7;
+        public static readonly var Hsolaris = 8;
+        public static readonly var Hwindows = 9;
+        public static readonly var Haix = 10;
 
 
         private static error Set(this ptr<HeadType> _addr_h, @string s)

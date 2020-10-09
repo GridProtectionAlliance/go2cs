@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:29 UTC
+//     Generated on 2020 October 09 06:01:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using sort = go.sort_package;
 using strings = go.strings_package;
 using span = go.golang.org.x.tools.@internal.span_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

@@ -6,7 +6,7 @@
 
 // Package internal contains HTTP internals shared by net/http and
 // net/http/httputil.
-// package @internal -- go2cs converted at 2020 October 08 03:40:39 UTC
+// package @internal -- go2cs converted at 2020 October 09 04:58:09 UTC
 // import "net/http/internal" ==> using @internal = go.net.http.@internal_package
 // Original source: C:\Go\src\net\http\internal\chunked.go
 using bufio = go.bufio_package;

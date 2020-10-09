@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:15 UTC
+//     Generated on 2020 October 09 05:46:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using cfg = go.cmd.go.@internal.cfg_package;
 using cmdflag = go.cmd.go.@internal.cmdflag_package;
 using work = go.cmd.go.@internal.work_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

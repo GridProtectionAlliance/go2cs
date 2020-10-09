@@ -1,4 +1,4 @@
-// package aliases -- go2cs converted at 2020 October 08 04:56:21 UTC
+// package aliases -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.aliases" ==> using aliases = go.go.@internal.gccgoimporter.aliases_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\aliases.go
 

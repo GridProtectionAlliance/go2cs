@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package storage defines storage interfaces for and a basic implementation of a checksum database.
-// package storage -- go2cs converted at 2020 October 08 04:36:23 UTC
+// package storage -- go2cs converted at 2020 October 09 05:47:34 UTC
 // import "golang.org/x/mod/sumdb/storage" ==> using storage = go.golang.org.x.mod.sumdb.storage_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\sumdb\storage\storage.go
 using context = go.context_package;

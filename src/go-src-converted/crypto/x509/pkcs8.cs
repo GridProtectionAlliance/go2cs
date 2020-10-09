@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:55 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:51 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\pkcs8.go
 using ecdsa = go.crypto.ecdsa_package;

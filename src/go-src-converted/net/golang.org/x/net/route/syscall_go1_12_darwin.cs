@@ -4,7 +4,7 @@
 
 // +build go1.12
 
-// package route -- go2cs converted at 2020 October 08 03:33:23 UTC
+// package route -- go2cs converted at 2020 October 09 04:51:41 UTC
 // import "golang.org/x/net/route" ==> using route = go.golang.org.x.net.route_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\route\syscall_go1_12_darwin.go
 using _@unsafe_ = go.@unsafe_package;

@@ -4,7 +4,7 @@
 
 // +build windows
 
-// package filelock -- go2cs converted at 2020 October 08 04:34:20 UTC
+// package filelock -- go2cs converted at 2020 October 09 05:45:48 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock_windows.go
 using windows = go.@internal.syscall.windows_package;
@@ -30,7 +30,7 @@ namespace @internal
 
 
         private static readonly long reserved = (long)0L;
-        private static readonly var allBytes = (var)~uint32(0L);
+        private static readonly var allBytes = ~uint32(0L);
 
 
         private static error @lock(File f, lockType lt)

@@ -35,7 +35,7 @@
 // ResetSession is called if implemented. If a connection is never returned to the
 // connection pool but immediately reused, then ResetSession is called prior to
 // reuse but IsValid is not called.
-// package driver -- go2cs converted at 2020 October 08 04:58:46 UTC
+// package driver -- go2cs converted at 2020 October 09 06:05:18 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Go\src\database\sql\driver\driver.go
 using context = go.context_package;

@@ -10,7 +10,7 @@
 // it in our own nicer implementation, either here or in
 // syscall_bsd.go or syscall_unix.go.
 
-// package unix -- go2cs converted at 2020 October 08 04:47:05 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:34 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_freebsd.go
 using sync = go.sync_package;
@@ -73,7 +73,7 @@ namespace sys
             slice<_C_int> mib = default;
             error err = default!;
 
-            const var siz = (var)@unsafe.Sizeof(mib[0L]); 
+            const var siz = @unsafe.Sizeof(mib[0L]); 
 
             // NOTE(rsc): It seems strange to set the buffer to have
             // size CTL_MAXNAME+2 but use only CTL_MAXNAME
@@ -211,7 +211,7 @@ namespace sys
 
         });
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
         //sys    Getcwd(buf []byte) (n int, err error) = SYS___GETCWD
 
@@ -669,8 +669,8 @@ namespace sys
 
         private static long convertFromDirents11(slice<byte> buf, slice<byte> old)
         {
-            const var fixedSize = (var)int(@unsafe.Offsetof(new Dirent().Name));
-            const var oldFixedSize = (var)int(@unsafe.Offsetof(new dirent_freebsd11().Name));
+            const var fixedSize = int(@unsafe.Offsetof(new Dirent().Name));
+            const var oldFixedSize = int(@unsafe.Offsetof(new dirent_freebsd11().Name));
 
             long dstPos = 0L;
             long srcPos = 0L;

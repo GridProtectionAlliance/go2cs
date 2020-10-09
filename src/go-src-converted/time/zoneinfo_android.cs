@@ -6,7 +6,7 @@
 // The format is lifted from ZoneInfoDB.java and ZoneInfo.java in
 // java/libcore/util in the AOSP.
 
-// package time -- go2cs converted at 2020 October 08 03:45:50 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:12 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_android.go
 using errors = go.errors_package;
@@ -39,7 +39,7 @@ namespace go
 
             const long headersize = (long)12L + 3L * 4L;
             const long namesize = (long)40L;
-            const var entrysize = (var)namesize + 3L * 4L;
+            const var entrysize = namesize + 3L * 4L;
             if (len(name) > namesize)
             {
                 return (null, error.As(errors.New(name + " is longer than the maximum zone name length (40 bytes)"))!);

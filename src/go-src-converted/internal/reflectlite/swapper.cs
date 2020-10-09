@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflectlite -- go2cs converted at 2020 October 08 03:18:59 UTC
+// package reflectlite -- go2cs converted at 2020 October 09 04:49:15 UTC
 // import "internal/reflectlite" ==> using reflectlite = go.@internal.reflectlite_package
 // Original source: C:\Go\src\internal\reflectlite\swapper.go
 using unsafeheader = go.@internal.unsafeheader_package;

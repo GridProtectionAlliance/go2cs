@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 October 08 03:38:38 UTC
+// package http -- go2cs converted at 2020 October 09 04:56:17 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\filetransport.go
 using fmt = go.fmt_package;

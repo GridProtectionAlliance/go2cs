@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package ioutil implements some I/O utility functions.
-// package ioutil -- go2cs converted at 2020 October 08 03:18:56 UTC
+// package ioutil -- go2cs converted at 2020 October 09 04:49:27 UTC
 // import "io/ioutil" ==> using ioutil = go.io.ioutil_package
 // Original source: C:\Go\src\io\ioutil\ioutil.go
 using bytes = go.bytes_package;

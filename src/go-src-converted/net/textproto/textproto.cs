@@ -23,7 +23,7 @@
 // Conn, a convenient packaging of Reader, Writer, and Pipeline for use
 // with a single network connection.
 //
-// package textproto -- go2cs converted at 2020 October 08 03:38:29 UTC
+// package textproto -- go2cs converted at 2020 October 09 04:56:07 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\textproto.go
 using bufio = go.bufio_package;

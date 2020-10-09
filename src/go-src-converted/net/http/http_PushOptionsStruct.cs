@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:13 UTC
+//     Generated on 2020 October 09 04:57:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net

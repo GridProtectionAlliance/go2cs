@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tlog -- go2cs converted at 2020 October 08 04:36:20 UTC
+// package tlog -- go2cs converted at 2020 October 09 05:47:31 UTC
 // import "golang.org/x/mod/sumdb/tlog" ==> using tlog = go.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\sumdb\tlog\tile.go
 using fmt = go.fmt_package;

@@ -4,7 +4,7 @@
 
 // +build !goexperiment.staticlockranking
 
-// package sync -- go2cs converted at 2020 October 08 03:18:57 UTC
+// package sync -- go2cs converted at 2020 October 09 05:01:09 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\runtime2.go
 using @unsafe = go.@unsafe_package;

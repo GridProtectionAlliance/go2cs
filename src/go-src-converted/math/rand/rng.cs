@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 October 08 03:25:40 UTC
+// package rand -- go2cs converted at 2020 October 09 04:50:47 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\rng.go
 
@@ -22,7 +22,7 @@ namespace math
         private static readonly long rngLen = (long)607L;
         private static readonly long rngTap = (long)273L;
         private static readonly long rngMax = (long)1L << (int)(63L);
-        private static readonly var rngMask = (var)rngMax - 1L;
+        private static readonly var rngMask = rngMax - 1L;
         private static readonly long int32max = (long)(1L << (int)(31L)) - 1L;
 
 

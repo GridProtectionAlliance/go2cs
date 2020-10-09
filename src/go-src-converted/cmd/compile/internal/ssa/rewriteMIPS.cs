@@ -1,7 +1,7 @@
 // Code generated from gen/MIPS.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2020 October 08 04:22:02 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:35:15 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\rewriteMIPS.go
 using types = go.cmd.compile.@internal.types_package;

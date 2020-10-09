@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:48 UTC
+//     Generated on 2020 October 09 05:53:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class FlagSet<T> : FlagSet
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace pprof
             private delegate slice<@string> BoolByPtr(ptr<T> value, @string name, bool def, @string usage);
             private delegate slice<@string> BoolByVal(T value, @string name, bool def, @string usage);
 
-            private static readonly BoolByPtr s_BoolByPtr;
-            private static readonly BoolByVal s_BoolByVal;
+            private static readonly BoolByPtr? s_BoolByPtr;
+            private static readonly BoolByVal? s_BoolByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> Bool(@string name, bool def, @string usage)
@@ -97,8 +98,8 @@ namespace pprof
             private delegate slice<@string> IntByPtr(ptr<T> value, @string name, long def, @string usage);
             private delegate slice<@string> IntByVal(T value, @string name, long def, @string usage);
 
-            private static readonly IntByPtr s_IntByPtr;
-            private static readonly IntByVal s_IntByVal;
+            private static readonly IntByPtr? s_IntByPtr;
+            private static readonly IntByVal? s_IntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> Int(@string name, long def, @string usage)
@@ -117,8 +118,8 @@ namespace pprof
             private delegate slice<@string> Float64ByPtr(ptr<T> value, @string name, double def, @string usage);
             private delegate slice<@string> Float64ByVal(T value, @string name, double def, @string usage);
 
-            private static readonly Float64ByPtr s_Float64ByPtr;
-            private static readonly Float64ByVal s_Float64ByVal;
+            private static readonly Float64ByPtr? s_Float64ByPtr;
+            private static readonly Float64ByVal? s_Float64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> Float64(@string name, double def, @string usage)
@@ -137,8 +138,8 @@ namespace pprof
             private delegate slice<@string> StringByPtr(ptr<T> value, @string name, @string def, @string usage);
             private delegate slice<@string> StringByVal(T value, @string name, @string def, @string usage);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> String(@string name, @string def, @string usage)
@@ -157,8 +158,8 @@ namespace pprof
             private delegate slice<@string> StringListByPtr(ptr<T> value, @string name, @string def, @string usage);
             private delegate slice<@string> StringListByVal(T value, @string name, @string def, @string usage);
 
-            private static readonly StringListByPtr s_StringListByPtr;
-            private static readonly StringListByVal s_StringListByVal;
+            private static readonly StringListByPtr? s_StringListByPtr;
+            private static readonly StringListByVal? s_StringListByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> StringList(@string name, @string def, @string usage)
@@ -177,8 +178,8 @@ namespace pprof
             private delegate slice<@string> ExtraUsageByPtr(ptr<T> value);
             private delegate slice<@string> ExtraUsageByVal(T value);
 
-            private static readonly ExtraUsageByPtr s_ExtraUsageByPtr;
-            private static readonly ExtraUsageByVal s_ExtraUsageByVal;
+            private static readonly ExtraUsageByPtr? s_ExtraUsageByPtr;
+            private static readonly ExtraUsageByVal? s_ExtraUsageByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> ExtraUsage()
@@ -197,8 +198,8 @@ namespace pprof
             private delegate slice<@string> AddExtraUsageByPtr(ptr<T> value, @string eu);
             private delegate slice<@string> AddExtraUsageByVal(T value, @string eu);
 
-            private static readonly AddExtraUsageByPtr s_AddExtraUsageByPtr;
-            private static readonly AddExtraUsageByVal s_AddExtraUsageByVal;
+            private static readonly AddExtraUsageByPtr? s_AddExtraUsageByPtr;
+            private static readonly AddExtraUsageByVal? s_AddExtraUsageByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> AddExtraUsage(@string eu)
@@ -217,8 +218,8 @@ namespace pprof
             private delegate slice<@string> ParseByPtr(ptr<T> value, Action usage);
             private delegate slice<@string> ParseByVal(T value, Action usage);
 
-            private static readonly ParseByPtr s_ParseByPtr;
-            private static readonly ParseByVal s_ParseByVal;
+            private static readonly ParseByPtr? s_ParseByPtr;
+            private static readonly ParseByVal? s_ParseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<@string> Parse(Action usage)
@@ -234,7 +235,7 @@ namespace pprof
                 return s_ParseByPtr(m_target_ptr, usage);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static FlagSet()

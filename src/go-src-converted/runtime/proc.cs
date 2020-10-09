@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:43 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\proc.go
 using cpu = go.@internal.cpu_package;
@@ -6945,7 +6945,7 @@ retry:
         // With the randomness here, as long as the tests pass
         // consistently with -race, they shouldn't have latent scheduling
         // assumptions.
-        private static readonly var randomizeScheduler = (var)raceenabled;
+        private static readonly var randomizeScheduler = raceenabled;
 
         // runqput tries to put g on the local runnable queue.
         // If next is false, runqput adds g to the tail of the runnable queue.

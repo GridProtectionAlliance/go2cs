@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package base64 implements base64 encoding as specified by RFC 4648.
-// package base64 -- go2cs converted at 2020 October 08 03:35:10 UTC
+// package base64 -- go2cs converted at 2020 October 09 04:52:42 UTC
 // import "encoding/base64" ==> using base64 = go.encoding.base64_package
 // Original source: C:\Go\src\encoding\base64\base64.go
 using binary = go.encoding.binary_package;

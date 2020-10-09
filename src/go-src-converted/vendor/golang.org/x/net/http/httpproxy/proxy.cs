@@ -8,7 +8,7 @@
 //
 // The API is not subject to the Go 1 compatibility promise and may change at
 // any time.
-// package httpproxy -- go2cs converted at 2020 October 08 05:00:32 UTC
+// package httpproxy -- go2cs converted at 2020 October 09 06:06:49 UTC
 // import "vendor/golang.org/x/net/http/httpproxy" ==> using httpproxy = go.vendor.golang.org.x.net.http.httpproxy_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\http\httpproxy\proxy.go
 using errors = go.errors_package;

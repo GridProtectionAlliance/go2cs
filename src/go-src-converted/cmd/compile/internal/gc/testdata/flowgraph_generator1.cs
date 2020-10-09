@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:31:58 UTC
+// package main -- go2cs converted at 2020 October 09 05:43:51 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\flowgraph_generator1.go
 using fmt = go.fmt_package;
 using strings = go.strings_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:34:13 UTC
+//     Generated on 2020 October 09 04:52:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using syscall = go.syscall_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -39,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class sockaddr<T> : sockaddr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -65,8 +66,8 @@ namespace go
             private delegate sockaddr familyByPtr(ptr<T> value);
             private delegate sockaddr familyByVal(T value);
 
-            private static readonly familyByPtr s_familyByPtr;
-            private static readonly familyByVal s_familyByVal;
+            private static readonly familyByPtr? s_familyByPtr;
+            private static readonly familyByVal? s_familyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public sockaddr family()
@@ -85,8 +86,8 @@ namespace go
             private delegate sockaddr isWildcardByPtr(ptr<T> value);
             private delegate sockaddr isWildcardByVal(T value);
 
-            private static readonly isWildcardByPtr s_isWildcardByPtr;
-            private static readonly isWildcardByVal s_isWildcardByVal;
+            private static readonly isWildcardByPtr? s_isWildcardByPtr;
+            private static readonly isWildcardByVal? s_isWildcardByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public sockaddr isWildcard()
@@ -105,8 +106,8 @@ namespace go
             private delegate sockaddr sockaddrByPtr(ptr<T> value, long family);
             private delegate sockaddr sockaddrByVal(T value, long family);
 
-            private static readonly sockaddrByPtr s_sockaddrByPtr;
-            private static readonly sockaddrByVal s_sockaddrByVal;
+            private static readonly sockaddrByPtr? s_sockaddrByPtr;
+            private static readonly sockaddrByVal? s_sockaddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public sockaddr sockaddr(long family)
@@ -125,8 +126,8 @@ namespace go
             private delegate sockaddr toLocalByPtr(ptr<T> value, @string net);
             private delegate sockaddr toLocalByVal(T value, @string net);
 
-            private static readonly toLocalByPtr s_toLocalByPtr;
-            private static readonly toLocalByVal s_toLocalByVal;
+            private static readonly toLocalByPtr? s_toLocalByPtr;
+            private static readonly toLocalByVal? s_toLocalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public sockaddr toLocal(@string net)
@@ -142,7 +143,7 @@ namespace go
                 return s_toLocalByPtr(m_target_ptr, net);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static sockaddr()

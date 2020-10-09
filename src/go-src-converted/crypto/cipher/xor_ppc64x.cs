@@ -4,7 +4,7 @@
 
 // +build ppc64 ppc64le
 
-// package cipher -- go2cs converted at 2020 October 08 03:35:46 UTC
+// package cipher -- go2cs converted at 2020 October 09 04:53:44 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\xor_ppc64x.go
 

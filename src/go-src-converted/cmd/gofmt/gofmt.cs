@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:37:01 UTC
+// package main -- go2cs converted at 2020 October 09 05:48:07 UTC
 // Original source: C:\Go\src\cmd\gofmt\gofmt.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -34,7 +34,7 @@ namespace go
 
         // Keep these in sync with go/format/format.go.
         private static readonly long tabWidth = (long)8L;
-        private static readonly var printerMode = (var)printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
+        private static readonly var printerMode = printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
 
         // printerNormalizeNumbers means to canonicalize number literal prefixes
         // and exponents while printing. See https://golang.org/doc/go1.13#gofmt.
@@ -387,7 +387,7 @@ namespace go
 
         }
 
-        private static readonly var chmodSupported = (var)runtime.GOOS != "windows";
+        private static readonly var chmodSupported = runtime.GOOS != "windows";
 
         // backupFile writes data to a new file named filename<number> with permissions perm,
         // with <number randomly chosen such that the file name is unique. backupFile returns

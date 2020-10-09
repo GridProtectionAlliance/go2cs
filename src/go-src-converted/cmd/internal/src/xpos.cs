@@ -5,7 +5,7 @@
 // This file implements the compressed encoding of source
 // positions using a lookup table.
 
-// package src -- go2cs converted at 2020 October 08 03:49:41 UTC
+// package src -- go2cs converted at 2020 October 09 05:08:22 UTC
 // import "cmd/internal/src" ==> using src = go.cmd.@internal.src_package
 // Original source: C:\Go\src\cmd\internal\src\xpos.go
 

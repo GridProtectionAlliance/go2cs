@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:23 UTC
+//     Generated on 2020 October 09 06:01:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,6 +38,7 @@ using testenv = go.golang.org.x.tools.@internal.testenv_package;
 using txtar = go.golang.org.x.tools.txtar_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -66,7 +67,7 @@ namespace analysis
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Testing<T> : Testing
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -92,8 +93,8 @@ namespace analysis
             private delegate void ErrorfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate void ErrorfByVal(T value, @string format, params object[] args);
 
-            private static readonly ErrorfByPtr s_ErrorfByPtr;
-            private static readonly ErrorfByVal s_ErrorfByVal;
+            private static readonly ErrorfByPtr? s_ErrorfByPtr;
+            private static readonly ErrorfByVal? s_ErrorfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Errorf(@string format, params object[] args)
@@ -114,7 +115,7 @@ namespace analysis
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Testing()

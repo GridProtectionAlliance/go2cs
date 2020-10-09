@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:03:51 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:42 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\type.go
 using sort = go.sort_package;
@@ -30,34 +30,34 @@ namespace go
         public static readonly BasicKind Invalid = (BasicKind)iota; // type is invalid
 
         // predeclared types
-        public static readonly var Bool = (var)0;
-        public static readonly var Int = (var)1;
-        public static readonly var Int8 = (var)2;
-        public static readonly var Int16 = (var)3;
-        public static readonly var Int32 = (var)4;
-        public static readonly var Int64 = (var)5;
-        public static readonly var Uint = (var)6;
-        public static readonly var Uint8 = (var)7;
-        public static readonly var Uint16 = (var)8;
-        public static readonly var Uint32 = (var)9;
-        public static readonly var Uint64 = (var)10;
-        public static readonly var Uintptr = (var)11;
-        public static readonly var Float32 = (var)12;
-        public static readonly var Float64 = (var)13;
-        public static readonly var Complex64 = (var)14;
-        public static readonly var Complex128 = (var)15;
-        public static readonly var String = (var)16;
-        public static readonly var UnsafePointer = (var)17; 
+        public static readonly var Bool = 0;
+        public static readonly var Int = 1;
+        public static readonly var Int8 = 2;
+        public static readonly var Int16 = 3;
+        public static readonly var Int32 = 4;
+        public static readonly var Int64 = 5;
+        public static readonly var Uint = 6;
+        public static readonly var Uint8 = 7;
+        public static readonly var Uint16 = 8;
+        public static readonly var Uint32 = 9;
+        public static readonly var Uint64 = 10;
+        public static readonly var Uintptr = 11;
+        public static readonly var Float32 = 12;
+        public static readonly var Float64 = 13;
+        public static readonly var Complex64 = 14;
+        public static readonly var Complex128 = 15;
+        public static readonly var String = 16;
+        public static readonly var UnsafePointer = 17; 
 
         // types for untyped values
-        public static readonly var UntypedBool = (var)18;
-        public static readonly var UntypedInt = (var)19;
-        public static readonly var UntypedRune = (var)20;
-        public static readonly var UntypedFloat = (var)21;
-        public static readonly var UntypedComplex = (var)22;
-        public static readonly var UntypedString = (var)23;
+        public static readonly var UntypedBool = 18;
+        public static readonly var UntypedInt = 19;
+        public static readonly var UntypedRune = 20;
+        public static readonly var UntypedFloat = 21;
+        public static readonly var UntypedComplex = 22;
+        public static readonly var UntypedString = 23;
         public static readonly Byte UntypedNil = (Byte)Uint8;
-        public static readonly var Rune = (var)Int32;
+        public static readonly var Rune = Int32;
 
 
         // BasicInfo is a set of flags describing properties of a basic type.
@@ -67,14 +67,14 @@ namespace go
 
         // Properties of basic types.
         public static readonly BasicInfo IsBoolean = (BasicInfo)1L << (int)(iota);
-        public static readonly var IsInteger = (var)0;
-        public static readonly var IsUnsigned = (var)1;
-        public static readonly var IsFloat = (var)2;
-        public static readonly var IsComplex = (var)3;
-        public static readonly var IsString = (var)4;
+        public static readonly var IsInteger = 0;
+        public static readonly var IsUnsigned = 1;
+        public static readonly var IsFloat = 2;
+        public static readonly var IsComplex = 3;
+        public static readonly var IsString = 4;
         public static readonly IsOrdered IsUntyped = (IsOrdered)IsInteger | IsFloat | IsString;
-        public static readonly var IsNumeric = (var)IsInteger | IsFloat | IsComplex;
-        public static readonly var IsConstType = (var)IsBoolean | IsNumeric | IsString;
+        public static readonly var IsNumeric = IsInteger | IsFloat | IsComplex;
+        public static readonly var IsConstType = IsBoolean | IsNumeric | IsString;
 
 
         // A Basic represents a basic type.
@@ -700,8 +700,8 @@ namespace go
 
         // The direction of a channel is indicated by one of these constants.
         public static readonly ChanDir SendRecv = (ChanDir)iota;
-        public static readonly var SendOnly = (var)0;
-        public static readonly var RecvOnly = (var)1;
+        public static readonly var SendOnly = 0;
+        public static readonly var RecvOnly = 1;
 
 
         // NewChan returns a new channel type for the given direction and element type.

@@ -1,4 +1,4 @@
-// package analysis -- go2cs converted at 2020 October 08 04:54:20 UTC
+// package analysis -- go2cs converted at 2020 October 09 06:01:18 UTC
 // import "golang.org/x/tools/go/analysis" ==> using analysis = go.golang.org.x.tools.go.analysis_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\validate.go
 using fmt = go.fmt_package;
@@ -27,10 +27,10 @@ namespace go
             var factTypes = make_map<reflect.Type, ptr<Analyzer>>(); 
 
             // Traverse the Requires graph, depth first.
-            const var white = (var)iota;
-            const var grey = (var)0;
-            const var black = (var)1;
-            const var finished = (var)2;
+            const var white = iota;
+            const var grey = 0;
+            const var black = 1;
+            const var finished = 2;
 
             var color = make_map<ptr<Analyzer>, byte>();
             Func<ptr<Analyzer>, error> visit = default;

@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:59 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\signal_386.go
 using sys = go.runtime.@internal.sys_package;

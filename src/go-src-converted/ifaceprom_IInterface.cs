@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:32 UTC
+//     Generated on 2020 October 09 06:03:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -38,7 +39,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class I<T> : I
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,8 +65,8 @@ namespace go
             private delegate @string oneByPtr(ptr<T> value);
             private delegate @string oneByVal(T value);
 
-            private static readonly oneByPtr s_oneByPtr;
-            private static readonly oneByVal s_oneByVal;
+            private static readonly oneByPtr? s_oneByPtr;
+            private static readonly oneByVal? s_oneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string one()
@@ -84,8 +85,8 @@ namespace go
             private delegate @string twoByPtr(ptr<T> value);
             private delegate @string twoByVal(T value);
 
-            private static readonly twoByPtr s_twoByPtr;
-            private static readonly twoByVal s_twoByVal;
+            private static readonly twoByPtr? s_twoByPtr;
+            private static readonly twoByVal? s_twoByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string two()
@@ -101,7 +102,7 @@ namespace go
                 return s_twoByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static I()

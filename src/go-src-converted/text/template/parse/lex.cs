@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package parse -- go2cs converted at 2020 October 08 03:41:55 UTC
+// package parse -- go2cs converted at 2020 October 09 04:59:17 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Go\src\text\template\parse\lex.go
 using fmt = go.fmt_package;
@@ -48,38 +48,38 @@ namespace template
         }
 
         private static readonly itemType itemError = (itemType)iota; // error occurred; value is text of error
-        private static readonly var itemBool = (var)0; // boolean constant
-        private static readonly var itemChar = (var)1; // printable ASCII character; grab bag for comma etc.
-        private static readonly var itemCharConstant = (var)2; // character constant
-        private static readonly var itemComplex = (var)3; // complex constant (1+2i); imaginary is just a number
-        private static readonly var itemAssign = (var)4; // equals ('=') introducing an assignment
-        private static readonly var itemDeclare = (var)5; // colon-equals (':=') introducing a declaration
-        private static readonly var itemEOF = (var)6;
-        private static readonly var itemField = (var)7; // alphanumeric identifier starting with '.'
-        private static readonly var itemIdentifier = (var)8; // alphanumeric identifier not starting with '.'
-        private static readonly var itemLeftDelim = (var)9; // left action delimiter
-        private static readonly var itemLeftParen = (var)10; // '(' inside action
-        private static readonly var itemNumber = (var)11; // simple number, including imaginary
-        private static readonly var itemPipe = (var)12; // pipe symbol
-        private static readonly var itemRawString = (var)13; // raw quoted string (includes quotes)
-        private static readonly var itemRightDelim = (var)14; // right action delimiter
-        private static readonly var itemRightParen = (var)15; // ')' inside action
-        private static readonly var itemSpace = (var)16; // run of spaces separating arguments
-        private static readonly var itemString = (var)17; // quoted string (includes quotes)
-        private static readonly var itemText = (var)18; // plain text
-        private static readonly var itemVariable = (var)19; // variable starting with '$', such as '$' or  '$1' or '$hello'
+        private static readonly var itemBool = 0; // boolean constant
+        private static readonly var itemChar = 1; // printable ASCII character; grab bag for comma etc.
+        private static readonly var itemCharConstant = 2; // character constant
+        private static readonly var itemComplex = 3; // complex constant (1+2i); imaginary is just a number
+        private static readonly var itemAssign = 4; // equals ('=') introducing an assignment
+        private static readonly var itemDeclare = 5; // colon-equals (':=') introducing a declaration
+        private static readonly var itemEOF = 6;
+        private static readonly var itemField = 7; // alphanumeric identifier starting with '.'
+        private static readonly var itemIdentifier = 8; // alphanumeric identifier not starting with '.'
+        private static readonly var itemLeftDelim = 9; // left action delimiter
+        private static readonly var itemLeftParen = 10; // '(' inside action
+        private static readonly var itemNumber = 11; // simple number, including imaginary
+        private static readonly var itemPipe = 12; // pipe symbol
+        private static readonly var itemRawString = 13; // raw quoted string (includes quotes)
+        private static readonly var itemRightDelim = 14; // right action delimiter
+        private static readonly var itemRightParen = 15; // ')' inside action
+        private static readonly var itemSpace = 16; // run of spaces separating arguments
+        private static readonly var itemString = 17; // quoted string (includes quotes)
+        private static readonly var itemText = 18; // plain text
+        private static readonly var itemVariable = 19; // variable starting with '$', such as '$' or  '$1' or '$hello'
         // Keywords appear after all the rest.
-        private static readonly var itemKeyword = (var)20; // used only to delimit the keywords
-        private static readonly var itemBlock = (var)21; // block keyword
-        private static readonly var itemDot = (var)22; // the cursor, spelled '.'
-        private static readonly var itemDefine = (var)23; // define keyword
-        private static readonly var itemElse = (var)24; // else keyword
-        private static readonly var itemEnd = (var)25; // end keyword
-        private static readonly var itemIf = (var)26; // if keyword
-        private static readonly var itemNil = (var)27; // the untyped nil constant, easiest to treat as a keyword
-        private static readonly var itemRange = (var)28; // range keyword
-        private static readonly var itemTemplate = (var)29; // template keyword
-        private static readonly var itemWith = (var)30; // with keyword
+        private static readonly var itemKeyword = 20; // used only to delimit the keywords
+        private static readonly var itemBlock = 21; // block keyword
+        private static readonly var itemDot = 22; // the cursor, spelled '.'
+        private static readonly var itemDefine = 23; // define keyword
+        private static readonly var itemElse = 24; // else keyword
+        private static readonly var itemEnd = 25; // end keyword
+        private static readonly var itemIf = 26; // if keyword
+        private static readonly var itemNil = 27; // the untyped nil constant, easiest to treat as a keyword
+        private static readonly var itemRange = 28; // range keyword
+        private static readonly var itemTemplate = 29; // template keyword
+        private static readonly var itemWith = 30; // with keyword
 
         private static map key = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, itemType>{".":itemDot,"block":itemBlock,"define":itemDefine,"else":itemElse,"end":itemEnd,"if":itemIf,"range":itemRange,"nil":itemNil,"template":itemTemplate,"with":itemWith,};
 
@@ -106,7 +106,7 @@ namespace template
         private static readonly @string spaceChars = (@string)" \t\r\n"; // These are the space characters defined by Go itself.
         private static readonly @string leftTrimMarker = (@string)"- "; // Attached to left delimiter, trims trailing spaces from preceding text.
         private static readonly @string rightTrimMarker = (@string)" -"; // Attached to right delimiter, trims leading spaces from following text.
-        private static readonly var trimMarkerLen = (var)Pos(len(leftTrimMarker));
+        private static readonly var trimMarkerLen = Pos(len(leftTrimMarker));
 
 
         // stateFn represents the state of the scanner as a function that returns the next state.

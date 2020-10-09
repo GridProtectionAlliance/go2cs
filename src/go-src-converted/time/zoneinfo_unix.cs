@@ -9,7 +9,7 @@
 // See tzfile(5), https://en.wikipedia.org/wiki/Zoneinfo,
 // and ftp://munnari.oz.au/pub/oldtz/
 
-// package time -- go2cs converted at 2020 October 08 03:45:58 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:16 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_unix.go
 using runtime = go.runtime_package;

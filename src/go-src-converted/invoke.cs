@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package gocommand is a helper for calling the go command.
-// package gocommand -- go2cs converted at 2020 October 08 04:54:49 UTC
+// package gocommand -- go2cs converted at 2020 October 09 06:01:41 UTC
 // import "golang.org/x/tools/internal/gocommand" ==> using gocommand = go.golang.org.x.tools.@internal.gocommand_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\gocommand\invoke.go
 using bytes = go.bytes_package;

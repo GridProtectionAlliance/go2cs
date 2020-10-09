@@ -9,7 +9,7 @@
 // Instead, track a Go process-wide intent of the current working directory,
 // and switch to it at important points.
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:50 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:25 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\pwd_plan9.go
 using sync = go.sync_package;

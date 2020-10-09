@@ -14,7 +14,7 @@
 
 // Package report summarizes a performance profile into a
 // human-readable report.
-// package report -- go2cs converted at 2020 October 08 04:43:22 UTC
+// package report -- go2cs converted at 2020 October 09 05:53:45 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\report\report.go
 using fmt = go.fmt_package;
@@ -45,19 +45,19 @@ namespace @internal
     public static partial class report_package
     {
         // Output formats.
-        public static readonly var Callgrind = (var)iota;
-        public static readonly var Comments = (var)0;
-        public static readonly var Dis = (var)1;
-        public static readonly var Dot = (var)2;
-        public static readonly var List = (var)3;
-        public static readonly var Proto = (var)4;
-        public static readonly var Raw = (var)5;
-        public static readonly var Tags = (var)6;
-        public static readonly var Text = (var)7;
-        public static readonly var TopProto = (var)8;
-        public static readonly var Traces = (var)9;
-        public static readonly var Tree = (var)10;
-        public static readonly var WebList = (var)11;
+        public static readonly var Callgrind = iota;
+        public static readonly var Comments = 0;
+        public static readonly var Dis = 1;
+        public static readonly var Dot = 2;
+        public static readonly var List = 3;
+        public static readonly var Proto = 4;
+        public static readonly var Raw = 5;
+        public static readonly var Tags = 6;
+        public static readonly var Text = 7;
+        public static readonly var TopProto = 8;
+        public static readonly var Traces = 9;
+        public static readonly var Tree = 10;
+        public static readonly var WebList = 11;
 
 
         // Options are the formatting and filtering options used to generate a

@@ -4,7 +4,7 @@
 
 // This file implements encoding/decoding of Floats.
 
-// package big -- go2cs converted at 2020 October 08 03:25:31 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:23 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\floatmarsh.go
 using binary = go.encoding.binary_package;

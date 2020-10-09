@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:19 UTC
+//     Generated on 2020 October 09 04:56:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2writeContext<T> : http2writeContext
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FramerByPtr(ptr<T> value);
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FramerByVal(T value);
 
-            private static readonly FramerByPtr s_FramerByPtr;
-            private static readonly FramerByVal s_FramerByVal;
+            private static readonly FramerByPtr? s_FramerByPtr;
+            private static readonly FramerByVal? s_FramerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) Framer()
@@ -116,8 +117,8 @@ namespace net
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FlushByPtr(ptr<T> value);
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FlushByVal(T value);
 
-            private static readonly FlushByPtr s_FlushByPtr;
-            private static readonly FlushByVal s_FlushByVal;
+            private static readonly FlushByPtr? s_FlushByPtr;
+            private static readonly FlushByVal? s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) Flush()
@@ -136,8 +137,8 @@ namespace net
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConnByPtr(ptr<T> value);
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConnByVal(T value);
 
-            private static readonly CloseConnByPtr s_CloseConnByPtr;
-            private static readonly CloseConnByVal s_CloseConnByVal;
+            private static readonly CloseConnByPtr? s_CloseConnByPtr;
+            private static readonly CloseConnByVal? s_CloseConnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConn()
@@ -156,8 +157,8 @@ namespace net
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoderByPtr(ptr<T> value);
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoderByVal(T value);
 
-            private static readonly HeaderEncoderByPtr s_HeaderEncoderByPtr;
-            private static readonly HeaderEncoderByVal s_HeaderEncoderByVal;
+            private static readonly HeaderEncoderByPtr? s_HeaderEncoderByPtr;
+            private static readonly HeaderEncoderByVal? s_HeaderEncoderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoder()
@@ -173,7 +174,7 @@ namespace net
                 return s_HeaderEncoderByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2writeContext()

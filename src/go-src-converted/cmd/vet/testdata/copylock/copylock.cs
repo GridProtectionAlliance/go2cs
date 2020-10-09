@@ -1,4 +1,4 @@
-// package copylock -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package copylock -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/copylock" ==> using copylock = go.cmd.vet.testdata.copylock_package
 // Original source: C:\Go\src\cmd\vet\testdata\copylock\copylock.go
 using sync = go.sync_package;

@@ -12,7 +12,7 @@
 //
 // The hash value of a given byte sequence is consistent within a
 // single process, but will be different in different processes.
-// package maphash -- go2cs converted at 2020 October 08 03:30:55 UTC
+// package maphash -- go2cs converted at 2020 October 09 04:50:12 UTC
 // import "hash/maphash" ==> using maphash = go.hash.maphash_package
 // Original source: C:\Go\src\hash\maphash\maphash.go
 using @unsafe = go.@unsafe_package;

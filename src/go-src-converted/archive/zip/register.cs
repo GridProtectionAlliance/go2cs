@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2020 October 08 03:49:27 UTC
+// package zip -- go2cs converted at 2020 October 09 05:08:10 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\register.go
 using flate = go.compress.flate_package;

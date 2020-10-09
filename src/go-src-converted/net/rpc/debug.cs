@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rpc -- go2cs converted at 2020 October 08 03:43:23 UTC
+// package rpc -- go2cs converted at 2020 October 09 05:00:33 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Go\src\net\rpc\debug.go
 /*

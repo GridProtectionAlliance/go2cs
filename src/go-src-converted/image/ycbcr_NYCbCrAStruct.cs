@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:14 UTC
+//     Generated on 2020 October 09 06:05:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using color = go.image.color_package;
+
+#nullable enable
 
 namespace go
 {

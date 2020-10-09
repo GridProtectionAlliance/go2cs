@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package fix implements the ``go fix'' command.
-// package fix -- go2cs converted at 2020 October 08 04:33:37 UTC
+// package fix -- go2cs converted at 2020 October 09 05:45:12 UTC
 // import "cmd/go/internal/fix" ==> using fix = go.cmd.go.@internal.fix_package
 // Original source: C:\Go\src\cmd\go\internal\fix\fix.go
 using @base = go.cmd.go.@internal.@base_package;

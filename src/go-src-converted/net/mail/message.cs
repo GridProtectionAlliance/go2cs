@@ -15,7 +15,7 @@ Notable divergences:
     * No unicode normalization is performed.
     * The special characters ()[]:;@\, are allowed to appear unquoted in names.
 */
-// package mail -- go2cs converted at 2020 October 08 03:43:21 UTC
+// package mail -- go2cs converted at 2020 October 09 05:00:30 UTC
 // import "net/mail" ==> using mail = go.net.mail_package
 // Original source: C:\Go\src\net\mail\message.go
 using bufio = go.bufio_package;

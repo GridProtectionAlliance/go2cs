@@ -10,7 +10,7 @@
 // used as input to mksyscall which parses the //sys
 // lines and generates system call stubs.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:10 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:36 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_bsd.go
 using runtime = go.runtime_package;

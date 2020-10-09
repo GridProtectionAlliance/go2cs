@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lib -- go2cs converted at 2020 October 08 04:39:53 UTC
+// package lib -- go2cs converted at 2020 October 09 05:50:37 UTC
 // import "cmd/link/internal/ld/testdata/issue32233/lib" ==> using lib = go.cmd.link.@internal.ld.testdata.issue32233.lib_package
 // Original source: C:\Go\src\cmd\link\internal\ld\testdata\issue32233\lib\lib.go
 /*

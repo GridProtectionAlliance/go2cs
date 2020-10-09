@@ -6,7 +6,7 @@
 // (cmd/dist must not import go/build because we do not want it to be
 // sensitive to the specific version of go/build present in $GOROOT_BOOTSTRAP.)
 
-// package main -- go2cs converted at 2020 October 08 04:32:47 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:34 UTC
 // Original source: C:\Go\src\cmd\dist\imports.go
 using bufio = go.bufio_package;
 using errors = go.errors_package;

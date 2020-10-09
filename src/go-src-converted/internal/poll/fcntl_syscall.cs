@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package poll -- go2cs converted at 2020 October 08 03:32:08 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:01 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fcntl_syscall.go
 using unix = go.@internal.syscall.unix_package;

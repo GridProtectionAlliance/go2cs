@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:53 UTC
+//     Generated on 2020 October 09 06:01:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using reflect = go.reflect_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace @event
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Key<T> : Key
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace @event
             private delegate @string NameByPtr(ptr<T> value);
             private delegate @string NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Name()
@@ -94,8 +95,8 @@ namespace @event
             private delegate @string DescriptionByPtr(ptr<T> value);
             private delegate @string DescriptionByVal(T value);
 
-            private static readonly DescriptionByPtr s_DescriptionByPtr;
-            private static readonly DescriptionByVal s_DescriptionByVal;
+            private static readonly DescriptionByPtr? s_DescriptionByPtr;
+            private static readonly DescriptionByVal? s_DescriptionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Description()
@@ -114,8 +115,8 @@ namespace @event
             private delegate @string FormatByPtr(ptr<T> value, io.Writer w, slice<byte> buf, Label l);
             private delegate @string FormatByVal(T value, io.Writer w, slice<byte> buf, Label l);
 
-            private static readonly FormatByPtr s_FormatByPtr;
-            private static readonly FormatByVal s_FormatByVal;
+            private static readonly FormatByPtr? s_FormatByPtr;
+            private static readonly FormatByVal? s_FormatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Format(io.Writer w, slice<byte> buf, Label l)
@@ -131,7 +132,7 @@ namespace @event
                 return s_FormatByPtr(m_target_ptr, w, buf, l);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Key()

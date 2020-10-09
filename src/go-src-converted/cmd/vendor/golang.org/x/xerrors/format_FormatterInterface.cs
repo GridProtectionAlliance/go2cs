@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:34 UTC
+//     Generated on 2020 October 09 06:05:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -43,7 +44,7 @@ namespace x
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Formatter<T> : Formatter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace x
             private delegate error FormatErrorByPtr(ptr<T> value, Printer p);
             private delegate error FormatErrorByVal(T value, Printer p);
 
-            private static readonly FormatErrorByPtr s_FormatErrorByPtr;
-            private static readonly FormatErrorByVal s_FormatErrorByVal;
+            private static readonly FormatErrorByPtr? s_FormatErrorByPtr;
+            private static readonly FormatErrorByVal? s_FormatErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error FormatError(Printer p)
@@ -89,8 +90,8 @@ namespace x
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -106,7 +107,7 @@ namespace x
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Formatter()

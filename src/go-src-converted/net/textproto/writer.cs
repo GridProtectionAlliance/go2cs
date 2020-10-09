@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2020 October 08 03:38:29 UTC
+// package textproto -- go2cs converted at 2020 October 09 04:56:08 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\writer.go
 using bufio = go.bufio_package;
@@ -79,10 +79,10 @@ namespace net
             public long state;
         }
 
-        private static readonly var wstateBegin = (var)iota; // initial state; must be zero
-        private static readonly var wstateBeginLine = (var)0; // beginning of line
-        private static readonly var wstateCR = (var)1; // wrote \r (possibly at end of line)
-        private static readonly var wstateData = (var)2; // writing data in middle of line
+        private static readonly var wstateBegin = iota; // initial state; must be zero
+        private static readonly var wstateBeginLine = 0; // beginning of line
+        private static readonly var wstateCR = 1; // wrote \r (possibly at end of line)
+        private static readonly var wstateData = 2; // writing data in middle of line
 
         private static (long, error) Write(this ptr<dotWriter> _addr_d, slice<byte> b)
         {

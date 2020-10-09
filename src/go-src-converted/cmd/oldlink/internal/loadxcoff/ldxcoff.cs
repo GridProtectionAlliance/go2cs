@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package loadxcoff implements a XCOFF file reader.
-// package loadxcoff -- go2cs converted at 2020 October 08 04:41:32 UTC
+// package loadxcoff -- go2cs converted at 2020 October 09 05:52:10 UTC
 // import "cmd/oldlink/internal/loadxcoff" ==> using loadxcoff = go.cmd.oldlink.@internal.loadxcoff_package
 // Original source: C:\Go\src\cmd\oldlink\internal\loadxcoff\ldxcoff.go
 using bio = go.cmd.@internal.bio_package;

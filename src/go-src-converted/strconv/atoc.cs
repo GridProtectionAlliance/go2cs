@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 October 08 03:48:42 UTC
+// package strconv -- go2cs converted at 2020 October 09 05:06:26 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\atoc.go
 

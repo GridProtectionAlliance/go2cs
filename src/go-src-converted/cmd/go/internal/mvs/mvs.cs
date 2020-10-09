@@ -4,7 +4,7 @@
 
 // Package mvs implements Minimal Version Selection.
 // See https://research.swtch.com/vgo-mvs.
-// package mvs -- go2cs converted at 2020 October 08 04:34:06 UTC
+// package mvs -- go2cs converted at 2020 October 09 05:45:36 UTC
 // import "cmd/go/internal/mvs" ==> using mvs = go.cmd.go.@internal.mvs_package
 // Original source: C:\Go\src\cmd\go\internal\mvs\mvs.go
 using fmt = go.fmt_package;

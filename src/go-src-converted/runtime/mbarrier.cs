@@ -11,7 +11,7 @@
 // assembly. This file contains write barrier entry points for bulk
 // operations. See also mwbbuf.go.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:22 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:22 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mbarrier.go
 using sys = go.runtime.@internal.sys_package;

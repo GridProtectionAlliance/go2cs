@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package base32 implements base32 encoding as specified by RFC 4648.
-// package base32 -- go2cs converted at 2020 October 08 03:42:28 UTC
+// package base32 -- go2cs converted at 2020 October 09 04:59:44 UTC
 // import "encoding/base32" ==> using base32 = go.encoding.base32_package
 // Original source: C:\Go\src\encoding\base32\base32.go
 using io = go.io_package;

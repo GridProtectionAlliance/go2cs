@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 October 08 03:30:56 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:14 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\dict_decoder.go
 

@@ -7,7 +7,7 @@
 // This is used by the net and os packages.
 // It uses a poller built into the runtime, with support from the
 // runtime scheduler.
-// package poll -- go2cs converted at 2020 October 08 03:32:08 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:01 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd.go
 using errors = go.errors_package;

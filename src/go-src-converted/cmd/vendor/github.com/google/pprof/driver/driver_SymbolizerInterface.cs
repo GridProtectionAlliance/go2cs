@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:48 UTC
+//     Generated on 2020 October 09 05:53:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Symbolizer<T> : Symbolizer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace pprof
             private delegate error SymbolizeByPtr(ptr<T> value, @string mode, MappingSources srcs, ptr<profile.Profile> prof);
             private delegate error SymbolizeByVal(T value, @string mode, MappingSources srcs, ptr<profile.Profile> prof);
 
-            private static readonly SymbolizeByPtr s_SymbolizeByPtr;
-            private static readonly SymbolizeByVal s_SymbolizeByVal;
+            private static readonly SymbolizeByPtr? s_SymbolizeByPtr;
+            private static readonly SymbolizeByVal? s_SymbolizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Symbolize(@string mode, MappingSources srcs, ptr<profile.Profile> prof)
@@ -94,7 +95,7 @@ namespace pprof
                 return s_SymbolizeByPtr(m_target_ptr, mode, srcs, prof);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Symbolizer()

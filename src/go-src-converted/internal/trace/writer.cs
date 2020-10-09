@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:32 UTC
+// package trace -- go2cs converted at 2020 October 09 05:53:04 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\writer.go
 using bytes = go.bytes_package;

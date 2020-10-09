@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:03:26 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:29 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\initorder.go
 using heap = go.container.heap_package;
@@ -28,7 +28,7 @@ namespace go
             ref var pq = ref heap(nodeQueue(dependencyGraph(check.objMap)), out ptr<var> _addr_pq);
             heap.Init(_addr_pq);
 
-            const var debug = (var)false;
+            const var debug = false;
 
             if (debug)
             {
@@ -163,7 +163,7 @@ namespace go
                 fmt.Println();
                 fmt.Println("Initialization order:");
                 {
-                    Initializer init__prev1 = init;
+                    ptr<Initializer> init__prev1 = init;
 
                     foreach (var (_, __init) in check.Info.InitOrder)
                     {

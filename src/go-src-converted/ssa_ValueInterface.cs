@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:10 UTC
+//     Generated on 2020 October 09 06:03:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Value<T> : Value
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace go
             private delegate token.Pos NameByPtr(ptr<T> value);
             private delegate token.Pos NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Name()
@@ -96,8 +97,8 @@ namespace go
             private delegate token.Pos StringByPtr(ptr<T> value);
             private delegate token.Pos StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos String()
@@ -116,8 +117,8 @@ namespace go
             private delegate token.Pos TypeByPtr(ptr<T> value);
             private delegate token.Pos TypeByVal(T value);
 
-            private static readonly TypeByPtr s_TypeByPtr;
-            private static readonly TypeByVal s_TypeByVal;
+            private static readonly TypeByPtr? s_TypeByPtr;
+            private static readonly TypeByVal? s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Type()
@@ -136,8 +137,8 @@ namespace go
             private delegate token.Pos ParentByPtr(ptr<T> value);
             private delegate token.Pos ParentByVal(T value);
 
-            private static readonly ParentByPtr s_ParentByPtr;
-            private static readonly ParentByVal s_ParentByVal;
+            private static readonly ParentByPtr? s_ParentByPtr;
+            private static readonly ParentByVal? s_ParentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Parent()
@@ -156,8 +157,8 @@ namespace go
             private delegate token.Pos ReferrersByPtr(ptr<T> value);
             private delegate token.Pos ReferrersByVal(T value);
 
-            private static readonly ReferrersByPtr s_ReferrersByPtr;
-            private static readonly ReferrersByVal s_ReferrersByVal;
+            private static readonly ReferrersByPtr? s_ReferrersByPtr;
+            private static readonly ReferrersByVal? s_ReferrersByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Referrers()
@@ -176,8 +177,8 @@ namespace go
             private delegate token.Pos PosByPtr(ptr<T> value);
             private delegate token.Pos PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Pos()
@@ -193,7 +194,7 @@ namespace go
                 return s_PosByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Value()

@@ -4,7 +4,7 @@
 
 // Plan 9 directory marshaling. See intro(5).
 
-// package syscall -- go2cs converted at 2020 October 08 00:33:59 UTC
+// package syscall -- go2cs converted at 2020 October 09 04:45:23 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\dir_plan9.go
 using errors = go.errors_package;

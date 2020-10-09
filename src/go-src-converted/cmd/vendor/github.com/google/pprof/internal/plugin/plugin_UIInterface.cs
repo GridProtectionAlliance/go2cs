@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:17 UTC
+//     Generated on 2020 October 09 05:53:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using time = go.time_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class UI<T> : UI
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate @string ReadLineByPtr(ptr<T> value, @string prompt);
             private delegate @string ReadLineByVal(T value, @string prompt);
 
-            private static readonly ReadLineByPtr s_ReadLineByPtr;
-            private static readonly ReadLineByVal s_ReadLineByVal;
+            private static readonly ReadLineByPtr? s_ReadLineByPtr;
+            private static readonly ReadLineByVal? s_ReadLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ReadLine(@string prompt)
@@ -96,8 +97,8 @@ namespace @internal
             private delegate @string PrintByPtr(ptr<T> value, params object _p0);
             private delegate @string PrintByVal(T value, params object _p0);
 
-            private static readonly PrintByPtr s_PrintByPtr;
-            private static readonly PrintByVal s_PrintByVal;
+            private static readonly PrintByPtr? s_PrintByPtr;
+            private static readonly PrintByVal? s_PrintByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Print(params object _p0)
@@ -116,8 +117,8 @@ namespace @internal
             private delegate @string PrintErrByPtr(ptr<T> value, params object _p0);
             private delegate @string PrintErrByVal(T value, params object _p0);
 
-            private static readonly PrintErrByPtr s_PrintErrByPtr;
-            private static readonly PrintErrByVal s_PrintErrByVal;
+            private static readonly PrintErrByPtr? s_PrintErrByPtr;
+            private static readonly PrintErrByVal? s_PrintErrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string PrintErr(params object _p0)
@@ -136,8 +137,8 @@ namespace @internal
             private delegate @string IsTerminalByPtr(ptr<T> value);
             private delegate @string IsTerminalByVal(T value);
 
-            private static readonly IsTerminalByPtr s_IsTerminalByPtr;
-            private static readonly IsTerminalByVal s_IsTerminalByVal;
+            private static readonly IsTerminalByPtr? s_IsTerminalByPtr;
+            private static readonly IsTerminalByVal? s_IsTerminalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string IsTerminal()
@@ -156,8 +157,8 @@ namespace @internal
             private delegate @string WantBrowserByPtr(ptr<T> value);
             private delegate @string WantBrowserByVal(T value);
 
-            private static readonly WantBrowserByPtr s_WantBrowserByPtr;
-            private static readonly WantBrowserByVal s_WantBrowserByVal;
+            private static readonly WantBrowserByPtr? s_WantBrowserByPtr;
+            private static readonly WantBrowserByVal? s_WantBrowserByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string WantBrowser()
@@ -176,8 +177,8 @@ namespace @internal
             private delegate @string SetAutoCompleteByPtr(ptr<T> value, Func<@string, @string> complete);
             private delegate @string SetAutoCompleteByVal(T value, Func<@string, @string> complete);
 
-            private static readonly SetAutoCompleteByPtr s_SetAutoCompleteByPtr;
-            private static readonly SetAutoCompleteByVal s_SetAutoCompleteByVal;
+            private static readonly SetAutoCompleteByPtr? s_SetAutoCompleteByPtr;
+            private static readonly SetAutoCompleteByVal? s_SetAutoCompleteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string SetAutoComplete(Func<@string, @string> complete)
@@ -193,7 +194,7 @@ namespace @internal
                 return s_SetAutoCompleteByPtr(m_target_ptr, complete);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static UI()

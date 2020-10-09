@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:10:07 UTC
+//     Generated on 2020 October 09 05:24:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Logger<T> : Logger
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate bool LogfByPtr(ptr<T> value, @string _p0, params object _p0);
             private delegate bool LogfByVal(T value, @string _p0, params object _p0);
 
-            private static readonly LogfByPtr s_LogfByPtr;
-            private static readonly LogfByVal s_LogfByVal;
+            private static readonly LogfByPtr? s_LogfByPtr;
+            private static readonly LogfByVal? s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Logf(@string _p0, params object _p0)
@@ -92,8 +93,8 @@ namespace @internal
             private delegate bool LogByPtr(ptr<T> value);
             private delegate bool LogByVal(T value);
 
-            private static readonly LogByPtr s_LogByPtr;
-            private static readonly LogByVal s_LogByVal;
+            private static readonly LogByPtr? s_LogByPtr;
+            private static readonly LogByVal? s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Log()
@@ -112,8 +113,8 @@ namespace @internal
             private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
             private delegate bool FatalfByVal(T value, src.XPos pos, @string msg, params object[] args);
 
-            private static readonly FatalfByPtr s_FatalfByPtr;
-            private static readonly FatalfByVal s_FatalfByVal;
+            private static readonly FatalfByPtr? s_FatalfByPtr;
+            private static readonly FatalfByVal? s_FatalfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Fatalf(src.XPos pos, @string msg, params object[] args)
@@ -132,8 +133,8 @@ namespace @internal
             private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
             private delegate bool WarnlByVal(T value, src.XPos pos, @string fmt_, params object[] args);
 
-            private static readonly WarnlByPtr s_WarnlByPtr;
-            private static readonly WarnlByVal s_WarnlByVal;
+            private static readonly WarnlByPtr? s_WarnlByPtr;
+            private static readonly WarnlByVal? s_WarnlByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Warnl(src.XPos pos, @string fmt_, params object[] args)
@@ -152,8 +153,8 @@ namespace @internal
             private delegate bool Debug_checknilByPtr(ptr<T> value);
             private delegate bool Debug_checknilByVal(T value);
 
-            private static readonly Debug_checknilByPtr s_Debug_checknilByPtr;
-            private static readonly Debug_checknilByVal s_Debug_checknilByVal;
+            private static readonly Debug_checknilByPtr? s_Debug_checknilByPtr;
+            private static readonly Debug_checknilByVal? s_Debug_checknilByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Debug_checknil()
@@ -169,7 +170,7 @@ namespace @internal
                 return s_Debug_checknilByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Logger()

@@ -8,7 +8,7 @@
 // must not import anything (like net, but also like os/signal)
 // that kicks off background goroutines during init.
 
-// package main -- go2cs converted at 2020 October 08 03:44:10 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:07 UTC
 // Original source: C:\Go\src\runtime\testdata\testprognet\signalexec.go
 using fmt = go.fmt_package;
 using os = go.os_package;

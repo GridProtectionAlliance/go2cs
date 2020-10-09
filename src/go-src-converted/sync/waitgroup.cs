@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 October 08 03:18:58 UTC
+// package sync -- go2cs converted at 2020 October 09 05:01:10 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\waitgroup.go
 using race = go.@internal.race_package;

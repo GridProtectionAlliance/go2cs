@@ -10,7 +10,7 @@
 
 // See NIST SP 800-38A, pp 13-15
 
-// package cipher -- go2cs converted at 2020 October 08 03:35:44 UTC
+// package cipher -- go2cs converted at 2020 October 09 04:53:42 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\ctr.go
 using subtle = go.crypto.@internal.subtle_package;

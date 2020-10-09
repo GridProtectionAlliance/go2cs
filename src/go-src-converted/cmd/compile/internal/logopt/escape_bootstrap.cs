@@ -4,7 +4,7 @@
 
 // +build !go1.8
 
-// package logopt -- go2cs converted at 2020 October 08 04:09:45 UTC
+// package logopt -- go2cs converted at 2020 October 09 05:24:10 UTC
 // import "cmd/compile/internal/logopt" ==> using logopt = go.cmd.compile.@internal.logopt_package
 // Original source: C:\Go\src\cmd\compile\internal\logopt\escape_bootstrap.go
 

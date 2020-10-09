@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:04 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_openbsd.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -101,7 +101,7 @@ namespace go
 ;
 
         private static readonly long _ESRCH = (long)3L;
-        private static readonly var _EWOULDBLOCK = (var)_EAGAIN;
+        private static readonly var _EWOULDBLOCK = _EAGAIN;
         private static readonly long _ENOTSUP = (long)91L; 
 
         // From OpenBSD's sys/time.h

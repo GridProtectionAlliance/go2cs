@@ -6,7 +6,7 @@
 // and html/template. Clients should use those packages to construct templates
 // rather than this one, which provides shared internal data structures not
 // intended for general use.
-// package parse -- go2cs converted at 2020 October 08 03:42:02 UTC
+// package parse -- go2cs converted at 2020 October 09 04:59:22 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Go\src\text\template\parse\parse.go
 using bytes = go.bytes_package;

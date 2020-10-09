@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package packages -- go2cs converted at 2020 October 08 04:54:47 UTC
+// package packages -- go2cs converted at 2020 October 09 06:01:39 UTC
 // import "golang.org/x/tools/go/packages" ==> using packages = go.golang.org.x.tools.go.packages_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\packages\golist.go
 using bytes = go.bytes_package;
@@ -952,7 +952,7 @@ extractQueries:
             }
 
             {
-                Package pkg__prev1 = pkg;
+                ptr<Package> pkg__prev1 = pkg;
 
                 foreach (var (_, __pkg) in pkgs)
                 {
@@ -1051,7 +1051,7 @@ extractQueries:
         {
             ref Config cfg = ref _addr_cfg.val;
 
-            const var findFlags = (var)NeedImports | NeedTypes | NeedSyntax | NeedTypesInfo;
+            const var findFlags = NeedImports | NeedTypes | NeedSyntax | NeedTypesInfo;
 
             @string fullargs = new slice<@string>(new @string[] { "-e", "-json", fmt.Sprintf("-compiled=%t",cfg.Mode&(NeedCompiledGoFiles|NeedSyntax|NeedTypes|NeedTypesInfo|NeedTypesSizes)!=0), fmt.Sprintf("-test=%t",cfg.Tests), fmt.Sprintf("-export=%t",usesExportData(cfg)), fmt.Sprintf("-deps=%t",cfg.Mode&NeedImports!=0), fmt.Sprintf("-find=%t",!cfg.Tests&&cfg.Mode&findFlags==0) });
             fullargs = append(fullargs, cfg.BuildFlags);

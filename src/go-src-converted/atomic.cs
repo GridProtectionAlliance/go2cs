@@ -4,7 +4,7 @@
 
 // Package atomic defines an Analyzer that checks for common mistakes
 // using the sync/atomic package.
-// package atomic -- go2cs converted at 2020 October 08 04:56:31 UTC
+// package atomic -- go2cs converted at 2020 October 09 06:03:01 UTC
 // import "golang.org/x/tools/go/analysis/passes/atomic" ==> using atomic = go.golang.org.x.tools.go.analysis.passes.atomic_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\passes\atomic\atomic.go
 using ast = go.go.ast_package;

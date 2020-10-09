@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:32 UTC
+//     Generated on 2020 October 09 06:01:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class helperer<T> : helperer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace @internal
             private delegate void HelperByPtr(ptr<T> value);
             private delegate void HelperByVal(T value);
 
-            private static readonly HelperByPtr s_HelperByPtr;
-            private static readonly HelperByVal s_HelperByVal;
+            private static readonly HelperByPtr? s_HelperByPtr;
+            private static readonly HelperByVal? s_HelperByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Helper()
@@ -100,7 +101,7 @@ namespace @internal
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static helperer()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:02:31 UTC
+//     Generated on 2020 October 09 05:18:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using constant = go.go.constant_package;
 using token = go.go.token_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Importer<T> : Importer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace go
             private delegate (ptr<Package>, error) ImportByPtr(ptr<T> value, @string path);
             private delegate (ptr<Package>, error) ImportByVal(T value, @string path);
 
-            private static readonly ImportByPtr s_ImportByPtr;
-            private static readonly ImportByVal s_ImportByVal;
+            private static readonly ImportByPtr? s_ImportByPtr;
+            private static readonly ImportByVal? s_ImportByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<Package>, error) Import(@string path)
@@ -88,7 +89,7 @@ namespace go
                 return s_ImportByPtr(m_target_ptr, path);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Importer()

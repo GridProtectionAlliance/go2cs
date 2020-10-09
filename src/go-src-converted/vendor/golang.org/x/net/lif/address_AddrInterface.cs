@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:01:23 UTC
+//     Generated on 2020 October 09 06:07:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using errors = go.errors_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Addr<T> : Addr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace net
             private delegate long FamilyByPtr(ptr<T> value);
             private delegate long FamilyByVal(T value);
 
-            private static readonly FamilyByPtr s_FamilyByPtr;
-            private static readonly FamilyByVal s_FamilyByVal;
+            private static readonly FamilyByPtr? s_FamilyByPtr;
+            private static readonly FamilyByVal? s_FamilyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Family()
@@ -88,7 +89,7 @@ namespace net
                 return s_FamilyByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Addr()

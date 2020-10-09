@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:38 UTC
+//     Generated on 2020 October 09 05:47:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,7 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -54,7 +55,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class testDeps<T> : testDeps
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace go
             private delegate error ImportPathByPtr(ptr<T> value);
             private delegate error ImportPathByVal(T value);
 
-            private static readonly ImportPathByPtr s_ImportPathByPtr;
-            private static readonly ImportPathByVal s_ImportPathByVal;
+            private static readonly ImportPathByPtr? s_ImportPathByPtr;
+            private static readonly ImportPathByVal? s_ImportPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ImportPath()
@@ -100,8 +101,8 @@ namespace go
             private delegate error MatchStringByPtr(ptr<T> value, @string pat, @string str);
             private delegate error MatchStringByVal(T value, @string pat, @string str);
 
-            private static readonly MatchStringByPtr s_MatchStringByPtr;
-            private static readonly MatchStringByVal s_MatchStringByVal;
+            private static readonly MatchStringByPtr? s_MatchStringByPtr;
+            private static readonly MatchStringByVal? s_MatchStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error MatchString(@string pat, @string str)
@@ -120,8 +121,8 @@ namespace go
             private delegate error StartCPUProfileByPtr(ptr<T> value, io.Writer _p0);
             private delegate error StartCPUProfileByVal(T value, io.Writer _p0);
 
-            private static readonly StartCPUProfileByPtr s_StartCPUProfileByPtr;
-            private static readonly StartCPUProfileByVal s_StartCPUProfileByVal;
+            private static readonly StartCPUProfileByPtr? s_StartCPUProfileByPtr;
+            private static readonly StartCPUProfileByVal? s_StartCPUProfileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error StartCPUProfile(io.Writer _p0)
@@ -140,8 +141,8 @@ namespace go
             private delegate error StopCPUProfileByPtr(ptr<T> value);
             private delegate error StopCPUProfileByVal(T value);
 
-            private static readonly StopCPUProfileByPtr s_StopCPUProfileByPtr;
-            private static readonly StopCPUProfileByVal s_StopCPUProfileByVal;
+            private static readonly StopCPUProfileByPtr? s_StopCPUProfileByPtr;
+            private static readonly StopCPUProfileByVal? s_StopCPUProfileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error StopCPUProfile()
@@ -160,8 +161,8 @@ namespace go
             private delegate error StartTestLogByPtr(ptr<T> value, io.Writer _p0);
             private delegate error StartTestLogByVal(T value, io.Writer _p0);
 
-            private static readonly StartTestLogByPtr s_StartTestLogByPtr;
-            private static readonly StartTestLogByVal s_StartTestLogByVal;
+            private static readonly StartTestLogByPtr? s_StartTestLogByPtr;
+            private static readonly StartTestLogByVal? s_StartTestLogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error StartTestLog(io.Writer _p0)
@@ -180,8 +181,8 @@ namespace go
             private delegate error StopTestLogByPtr(ptr<T> value);
             private delegate error StopTestLogByVal(T value);
 
-            private static readonly StopTestLogByPtr s_StopTestLogByPtr;
-            private static readonly StopTestLogByVal s_StopTestLogByVal;
+            private static readonly StopTestLogByPtr? s_StopTestLogByPtr;
+            private static readonly StopTestLogByVal? s_StopTestLogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error StopTestLog()
@@ -200,8 +201,8 @@ namespace go
             private delegate error WriteProfileToByPtr(ptr<T> value, @string _p0, io.Writer _p0, long _p0);
             private delegate error WriteProfileToByVal(T value, @string _p0, io.Writer _p0, long _p0);
 
-            private static readonly WriteProfileToByPtr s_WriteProfileToByPtr;
-            private static readonly WriteProfileToByVal s_WriteProfileToByVal;
+            private static readonly WriteProfileToByPtr? s_WriteProfileToByPtr;
+            private static readonly WriteProfileToByVal? s_WriteProfileToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteProfileTo(@string _p0, io.Writer _p0, long _p0)
@@ -217,7 +218,7 @@ namespace go
                 return s_WriteProfileToByPtr(m_target_ptr, _p0, _p0, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static testDeps()

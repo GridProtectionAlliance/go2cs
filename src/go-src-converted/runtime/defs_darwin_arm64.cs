@@ -1,7 +1,7 @@
 // created by cgo -cdefs and then converted to Go
 // cgo -cdefs defs_darwin.go
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:29 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_darwin_arm64.go
 using @unsafe = go.@unsafe_package;

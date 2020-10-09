@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:30 UTC
+// package trace -- go2cs converted at 2020 October 09 05:53:03 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\parser.go
 using bufio = go.bufio_package;
@@ -88,10 +88,10 @@ namespace @internal
  
         // Special P identifiers:
         public static readonly long FakeP = (long)1000000L + iota;
-        public static readonly var TimerP = (var)0; // depicts timer unblocks
-        public static readonly var NetpollP = (var)1; // depicts network unblocks
-        public static readonly var SyscallP = (var)2; // depicts returns from syscalls
-        public static readonly var GCP = (var)3; // depicts GC state
+        public static readonly var TimerP = 0; // depicts timer unblocks
+        public static readonly var NetpollP = 1; // depicts network unblocks
+        public static readonly var SyscallP = 2; // depicts returns from syscalls
+        public static readonly var GCP = 3; // depicts GC state
 
         // ParseResult is the result of Parse.
         public partial struct ParseResult
@@ -830,10 +830,10 @@ namespace @internal
         // blocked before an unblock event).
         private static error postProcessTrace(long ver, slice<ptr<Event>> events)
         {
-            const var gDead = (var)iota;
-            const var gRunnable = (var)0;
-            const var gRunning = (var)1;
-            const var gWaiting = (var)2;
+            const var gDead = iota;
+            const var gRunnable = 0;
+            const var gRunning = 1;
+            const var gWaiting = 2;
             private partial struct gdesc
             {
                 public long state;

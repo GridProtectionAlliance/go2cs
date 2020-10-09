@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:45:25 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:31 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\types_windows.go
 using windows = go.@internal.syscall.windows_package;

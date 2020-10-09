@@ -12,7 +12,7 @@
 // If so, the error will likely wrap one of:
 // The functions in this package do not completely eliminate spurious errors,
 // but substantially reduce their rate of occurrence in practice.
-// package robustio -- go2cs converted at 2020 October 08 04:34:10 UTC
+// package robustio -- go2cs converted at 2020 October 09 05:45:42 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Go\src\cmd\go\internal\robustio\robustio.go
 

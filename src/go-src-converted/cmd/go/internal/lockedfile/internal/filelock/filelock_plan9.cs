@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package filelock -- go2cs converted at 2020 October 08 04:34:19 UTC
+// package filelock -- go2cs converted at 2020 October 09 05:45:48 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock_plan9.go
 using os = go.os_package;
@@ -23,8 +23,8 @@ namespace @internal
         {
         }
 
-        private static readonly var readLock = (var)iota + 1L;
-        private static readonly var writeLock = (var)0;
+        private static readonly var readLock = iota + 1L;
+        private static readonly var writeLock = 0;
 
 
         private static error @lock(File f, lockType lt)

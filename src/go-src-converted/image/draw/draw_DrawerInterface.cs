@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:18 UTC
+//     Generated on 2020 October 09 06:05:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -43,7 +44,7 @@ namespace image
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Drawer<T> : Drawer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace image
             private delegate void DrawByPtr(ptr<T> value, Image dst, image.Rectangle r, image.Image src, image.Point sp);
             private delegate void DrawByVal(T value, Image dst, image.Rectangle r, image.Image src, image.Point sp);
 
-            private static readonly DrawByPtr s_DrawByPtr;
-            private static readonly DrawByVal s_DrawByVal;
+            private static readonly DrawByPtr? s_DrawByPtr;
+            private static readonly DrawByVal? s_DrawByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Draw(Image dst, image.Rectangle r, image.Image src, image.Point sp)
@@ -91,7 +92,7 @@ namespace image
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Drawer()

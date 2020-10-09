@@ -4,7 +4,7 @@
 
 // This file contains the exported entry points for invoking the parser.
 
-// package parser -- go2cs converted at 2020 October 08 04:02:30 UTC
+// package parser -- go2cs converted at 2020 October 09 05:18:56 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Go\src\go\parser\interface.go
 using bytes = go.bytes_package;
@@ -69,10 +69,10 @@ namespace go
         }
 
         public static readonly Mode PackageClauseOnly = (Mode)1L << (int)(iota); // stop parsing after package clause
-        public static readonly var ImportsOnly = (var)0; // stop parsing after import declarations
-        public static readonly var ParseComments = (var)1; // parse comments and add them to AST
-        public static readonly var Trace = (var)2; // print a trace of parsed productions
-        public static readonly var DeclarationErrors = (var)3; // report declaration errors
+        public static readonly var ImportsOnly = 0; // stop parsing after import declarations
+        public static readonly var ParseComments = 1; // parse comments and add them to AST
+        public static readonly var Trace = 2; // print a trace of parsed productions
+        public static readonly var DeclarationErrors = 3; // report declaration errors
         public static readonly AllErrors SpuriousErrors = (AllErrors)SpuriousErrors; // report all errors (not just the first 10 on different lines)
 
         // ParseFile parses the source code of a single Go source file and returns

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:42:36 UTC
+// package main -- go2cs converted at 2020 October 09 05:53:07 UTC
 // Original source: C:\Go\src\cmd\trace\main.go
 using bufio = go.bufio_package;
 using browser = go.cmd.@internal.browser_package;

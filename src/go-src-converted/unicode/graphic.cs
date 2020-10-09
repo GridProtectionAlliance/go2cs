@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package unicode -- go2cs converted at 2020 October 08 03:24:46 UTC
+// package unicode -- go2cs converted at 2020 October 09 04:49:31 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Go\src\unicode\graphic.go
 
@@ -14,15 +14,15 @@ namespace go
     {
         // Bit masks for each code point under U+0100, for fast lookup.
         private static readonly long pC = (long)1L << (int)(iota); // a control character.
-        private static readonly var pP = (var)0; // a punctuation character.
-        private static readonly var pN = (var)1; // a numeral.
-        private static readonly var pS = (var)2; // a symbolic character.
-        private static readonly var pZ = (var)3; // a spacing character.
-        private static readonly var pLu = (var)4; // an upper-case letter.
-        private static readonly var pLl = (var)5; // a lower-case letter.
+        private static readonly var pP = 0; // a punctuation character.
+        private static readonly var pN = 1; // a numeral.
+        private static readonly var pS = 2; // a symbolic character.
+        private static readonly var pZ = 3; // a spacing character.
+        private static readonly var pLu = 4; // an upper-case letter.
+        private static readonly var pLl = 5; // a lower-case letter.
         private static readonly pg pp = (pg)pp | pZ; // a graphical character according to the Unicode definition.
-        private static readonly var pLo = (var)pLl | pLu; // a letter that is neither upper nor lower case.
-        private static readonly var pLmask = (var)pLo;
+        private static readonly var pLo = pLl | pLu; // a letter that is neither upper nor lower case.
+        private static readonly var pLmask = pLo;
 
 
         // GraphicRanges defines the set of graphic characters according to Unicode.

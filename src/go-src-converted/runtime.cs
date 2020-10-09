@@ -1,4 +1,4 @@
-// package runtime -- go2cs converted at 2020 October 08 04:57:34 UTC
+// package runtime -- go2cs converted at 2020 October 09 06:03:48 UTC
 // import "golang.org/x/tools/go/ssa/interp/testdata/src/runtime" ==> using runtime = go.golang.org.x.tools.go.ssa.interp.testdata.src.runtime_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\testdata\src\runtime\runtime.go
 

@@ -8,7 +8,7 @@
 //
 // See "JSON and Go" for an introduction to this package:
 // https://golang.org/doc/articles/json_and_go.html
-// package json -- go2cs converted at 2020 October 08 03:42:51 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:05 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\encode.go
 using bytes = go.bytes_package;

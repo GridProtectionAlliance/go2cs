@@ -4,7 +4,7 @@
 
 // +build dragonfly freebsd netbsd openbsd
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:56 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:52 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root_bsd.go
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httpguts -- go2cs converted at 2020 October 08 05:00:31 UTC
+// package httpguts -- go2cs converted at 2020 October 09 06:06:48 UTC
 // import "vendor/golang.org/x/net/http/httpguts" ==> using httpguts = go.vendor.golang.org.x.net.http.httpguts_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\http\httpguts\httplex.go
 using net = go.net_package;

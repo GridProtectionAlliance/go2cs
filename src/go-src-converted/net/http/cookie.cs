@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 October 08 03:38:37 UTC
+// package http -- go2cs converted at 2020 October 09 04:56:17 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\cookie.go
 using log = go.log_package;
@@ -54,9 +54,9 @@ namespace net
         }
 
         public static readonly SameSite SameSiteDefaultMode = (SameSite)iota + 1L;
-        public static readonly var SameSiteLaxMode = (var)0;
-        public static readonly var SameSiteStrictMode = (var)1;
-        public static readonly var SameSiteNoneMode = (var)2;
+        public static readonly var SameSiteLaxMode = 0;
+        public static readonly var SameSiteStrictMode = 1;
+        public static readonly var SameSiteNoneMode = 2;
 
 
         // readSetCookies parses all "Set-Cookie" values from

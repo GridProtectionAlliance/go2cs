@@ -34,7 +34,7 @@
 // defined as interface{f()}. Exported thus means "described in export
 // data".
 //
-// package facts -- go2cs converted at 2020 October 08 04:55:57 UTC
+// package facts -- go2cs converted at 2020 October 09 06:02:34 UTC
 // import "golang.org/x/tools/go/analysis/internal/facts" ==> using facts = go.golang.org.x.tools.go.analysis.@internal.facts_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\internal\facts\facts.go
 using bytes = go.bytes_package;
@@ -62,7 +62,7 @@ namespace @internal
 {
     public static partial class facts_package
     {
-        private static readonly var debug = (var)false;
+        private static readonly var debug = false;
 
         // A Set is a set of analysis.Facts.
         //

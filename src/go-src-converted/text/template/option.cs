@@ -4,7 +4,7 @@
 
 // This file contains the code to handle template options.
 
-// package template -- go2cs converted at 2020 October 08 03:42:16 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:34 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\option.go
 using strings = go.strings_package;
@@ -21,8 +21,8 @@ namespace text
         }
 
         private static readonly missingKeyAction mapInvalid = (missingKeyAction)iota; // Return an invalid reflect.Value.
-        private static readonly var mapZeroValue = (var)0; // Return the zero value for the map element.
-        private static readonly var mapError = (var)1; // Error out
+        private static readonly var mapZeroValue = 0; // Return the zero value for the map element.
+        private static readonly var mapError = 1; // Error out
 
         private partial struct option
         {

@@ -3,7 +3,7 @@
 
 // +build openbsd,arm64
 
-// package unix -- go2cs converted at 2020 October 08 04:53:14 UTC
+// package unix -- go2cs converted at 2020 October 09 06:00:17 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_openbsd_arm64.go
 using syscall = go.syscall_package;

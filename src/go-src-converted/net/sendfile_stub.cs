@@ -4,7 +4,7 @@
 
 // +build aix darwin js,wasm netbsd openbsd
 
-// package net -- go2cs converted at 2020 October 08 03:34:11 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:13 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sendfile_stub.go
 using io = go.io_package;

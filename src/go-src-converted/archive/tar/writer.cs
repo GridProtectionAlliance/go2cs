@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2020 October 08 03:49:23 UTC
+// package tar -- go2cs converted at 2020 October 09 05:08:07 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\writer.go
 using fmt = go.fmt_package;

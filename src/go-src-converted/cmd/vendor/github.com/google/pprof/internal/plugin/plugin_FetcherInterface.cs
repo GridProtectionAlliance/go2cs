@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:17 UTC
+//     Generated on 2020 October 09 05:53:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using time = go.time_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Fetcher<T> : Fetcher
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate (ptr<profile.Profile>, @string, error) FetchByPtr(ptr<T> value, @string src, time.Duration duration, time.Duration timeout);
             private delegate (ptr<profile.Profile>, @string, error) FetchByVal(T value, @string src, time.Duration duration, time.Duration timeout);
 
-            private static readonly FetchByPtr s_FetchByPtr;
-            private static readonly FetchByVal s_FetchByVal;
+            private static readonly FetchByPtr? s_FetchByPtr;
+            private static readonly FetchByVal? s_FetchByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<profile.Profile>, @string, error) Fetch(@string src, time.Duration duration, time.Duration timeout)
@@ -93,7 +94,7 @@ namespace @internal
                 return s_FetchByPtr(m_target_ptr, src, duration, timeout);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Fetcher()

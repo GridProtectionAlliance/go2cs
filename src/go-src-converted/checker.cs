@@ -6,7 +6,7 @@
 // The same code drives the multi-analysis driver, the single-analysis
 // driver that is conventionally provided for convenience along with
 // each analysis package, and the test driver.
-// package checker -- go2cs converted at 2020 October 08 04:54:28 UTC
+// package checker -- go2cs converted at 2020 October 09 06:01:24 UTC
 // import "golang.org/x/tools/go/analysis/internal/checker" ==> using checker = go.golang.org.x.tools.go.analysis.@internal.checker_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\internal\checker\checker.go
 using bytes = go.bytes_package;

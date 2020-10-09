@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:42 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:55 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\error.go
 using bytealg = go.@internal.bytealg_package;
@@ -142,14 +142,14 @@ namespace go
 
         private static readonly boundsErrorCode boundsIndex = (boundsErrorCode)iota; // s[x], 0 <= x < len(s) failed
 
-        private static readonly var boundsSliceAlen = (var)0; // s[?:x], 0 <= x <= len(s) failed
-        private static readonly var boundsSliceAcap = (var)1; // s[?:x], 0 <= x <= cap(s) failed
-        private static readonly var boundsSliceB = (var)2; // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
+        private static readonly var boundsSliceAlen = 0; // s[?:x], 0 <= x <= len(s) failed
+        private static readonly var boundsSliceAcap = 1; // s[?:x], 0 <= x <= cap(s) failed
+        private static readonly var boundsSliceB = 2; // s[x:y], 0 <= x <= y failed (but boundsSliceA didn't happen)
 
-        private static readonly var boundsSlice3Alen = (var)3; // s[?:?:x], 0 <= x <= len(s) failed
-        private static readonly var boundsSlice3Acap = (var)4; // s[?:?:x], 0 <= x <= cap(s) failed
-        private static readonly var boundsSlice3B = (var)5; // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
-        private static readonly var boundsSlice3C = (var)6; // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
+        private static readonly var boundsSlice3Alen = 3; // s[?:?:x], 0 <= x <= len(s) failed
+        private static readonly var boundsSlice3Acap = 4; // s[?:?:x], 0 <= x <= cap(s) failed
+        private static readonly var boundsSlice3B = 5; // s[?:x:y], 0 <= x <= y failed (but boundsSlice3A didn't happen)
+        private static readonly var boundsSlice3C = 6; // s[x:y:?], 0 <= x <= y failed (but boundsSlice3A/B didn't happen)
 
         // Note: in the above, len(s) and cap(s) are stored in y
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package unix -- go2cs converted at 2020 October 08 04:46:28 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\pledge_openbsd.go
 using errors = go.errors_package;

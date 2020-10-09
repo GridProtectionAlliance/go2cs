@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package logopt -- go2cs converted at 2020 October 08 04:09:46 UTC
+// package logopt -- go2cs converted at 2020 October 09 05:24:11 UTC
 // import "cmd/compile/internal/logopt" ==> using logopt = go.cmd.compile.@internal.logopt_package
 // Original source: C:\Go\src\cmd\compile\internal\logopt\log_opts.go
 using obj = go.cmd.@internal.obj_package;
@@ -255,7 +255,7 @@ namespace @internal
         }
 
         public static readonly logFormat None = (logFormat)iota;
-        public static readonly var Json0 = (var)0; // version 0 for LSP 3.14, 3.15; future versions of LSP may change the format and the compiler may need to support both as clients are updated.
+        public static readonly var Json0 = 0; // version 0 for LSP 3.14, 3.15; future versions of LSP may change the format and the compiler may need to support both as clients are updated.
 
         public static var Format = None;
         private static @string dest = default;

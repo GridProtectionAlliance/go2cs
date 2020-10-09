@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package renameio writes files atomically by renaming temporary files.
-// package renameio -- go2cs converted at 2020 October 08 04:34:09 UTC
+// package renameio -- go2cs converted at 2020 October 09 05:45:41 UTC
 // import "cmd/go/internal/renameio" ==> using renameio = go.cmd.go.@internal.renameio_package
 // Original source: C:\Go\src\cmd\go\internal\renameio\renameio.go
 using bytes = go.bytes_package;

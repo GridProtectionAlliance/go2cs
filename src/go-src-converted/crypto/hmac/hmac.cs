@@ -19,7 +19,7 @@ timing side-channels:
         return hmac.Equal(messageMAC, expectedMAC)
     }
 */
-// package hmac -- go2cs converted at 2020 October 08 03:36:37 UTC
+// package hmac -- go2cs converted at 2020 October 09 04:54:34 UTC
 // import "crypto/hmac" ==> using hmac = go.crypto.hmac_package
 // Original source: C:\Go\src\crypto\hmac\hmac.go
 using subtle = go.crypto.subtle_package;

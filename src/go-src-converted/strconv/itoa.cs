@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 October 08 03:48:59 UTC
+// package strconv -- go2cs converted at 2020 October 09 05:06:34 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\itoa.go
 using bits = go.math.bits_package;
@@ -12,7 +12,7 @@ namespace go
 {
     public static partial class strconv_package
     {
-        private static readonly var fastSmalls = (var)true; // enable fast path for small integers
+        private static readonly var fastSmalls = true; // enable fast path for small integers
 
         // FormatUint returns the string representation of i in the given base,
         // for 2 <= base <= 36. The result uses the lower-case letters 'a' to 'z'
@@ -103,7 +103,7 @@ namespace go
 
 
 
-        private static readonly var host32bit = (var)~uint(0L) >> (int)(32L) == 0L;
+        private static readonly var host32bit = ~uint(0L) >> (int)(32L) == 0L;
 
 
 

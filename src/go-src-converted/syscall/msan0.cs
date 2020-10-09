@@ -4,7 +4,7 @@
 
 // +build !msan
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:47 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:24 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\msan0.go
 using @unsafe = go.@unsafe_package;
@@ -14,7 +14,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var msanenabled = (var)false;
+        private static readonly var msanenabled = false;
 
 
 

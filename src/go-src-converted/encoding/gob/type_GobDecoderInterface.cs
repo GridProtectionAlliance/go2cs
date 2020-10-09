@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:45 UTC
+//     Generated on 2020 October 09 05:00:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class GobDecoder<T> : GobDecoder
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace encoding
             private delegate error GobDecodeByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error GobDecodeByVal(T value, slice<byte> _p0);
 
-            private static readonly GobDecodeByPtr s_GobDecodeByPtr;
-            private static readonly GobDecodeByVal s_GobDecodeByVal;
+            private static readonly GobDecodeByPtr? s_GobDecodeByPtr;
+            private static readonly GobDecodeByVal? s_GobDecodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error GobDecode(slice<byte> _p0)
@@ -92,7 +93,7 @@ namespace encoding
                 return s_GobDecodeByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static GobDecoder()

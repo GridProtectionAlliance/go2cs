@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:42 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:16 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\dwinl.go
 using dwarf = go.cmd.@internal.dwarf_package;

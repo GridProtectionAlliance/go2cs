@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 October 08 03:34:17 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:15 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sockoptip_posix.go
 using runtime = go.runtime_package;

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package printer implements printing of AST nodes.
-// package printer -- go2cs converted at 2020 October 08 04:08:59 UTC
+// package printer -- go2cs converted at 2020 October 09 05:23:35 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Go\src\go\printer\printer.go
 using fmt = go.fmt_package;
@@ -23,7 +23,7 @@ namespace go
     public static partial class printer_package
     {
         private static readonly long maxNewlines = (long)2L; // max. number of newlines between source text
-        private static readonly var debug = (var)false; // enable for debugging
+        private static readonly var debug = false; // enable for debugging
         private static readonly long infinity = (long)1L << (int)(30L);
 
 
@@ -31,13 +31,13 @@ namespace go
         {
         }
 
-        private static readonly var ignore = (var)whiteSpace(0L);
-        private static readonly var blank = (var)whiteSpace(' ');
-        private static readonly var vtab = (var)whiteSpace('\v');
-        private static readonly var newline = (var)whiteSpace('\n');
-        private static readonly var formfeed = (var)whiteSpace('\f');
-        private static readonly var indent = (var)whiteSpace('>');
-        private static readonly var unindent = (var)whiteSpace('<');
+        private static readonly var ignore = whiteSpace(0L);
+        private static readonly var blank = whiteSpace(' ');
+        private static readonly var vtab = whiteSpace('\v');
+        private static readonly var newline = whiteSpace('\n');
+        private static readonly var formfeed = whiteSpace('\f');
+        private static readonly var indent = whiteSpace('>');
+        private static readonly var unindent = whiteSpace('<');
 
 
         // A pmode value represents the current printer mode.
@@ -46,7 +46,7 @@ namespace go
         }
 
         private static readonly pmode noExtraBlank = (pmode)1L << (int)(iota); // disables extra blank after /*-style comment
-        private static readonly var noExtraLinebreak = (var)0; // disables extra line break after /*-style comment
+        private static readonly var noExtraLinebreak = 0; // disables extra line break after /*-style comment
 
         private partial struct commentInfo
         {
@@ -1714,9 +1714,9 @@ unsupported:
 
         // trimmer is implemented as a state machine.
         // It can be in one of the following states:
-        private static readonly var inSpace = (var)iota; // inside space
-        private static readonly var inEscape = (var)0; // inside text bracketed by tabwriter.Escapes
-        private static readonly var inText = (var)1; // inside text
+        private static readonly var inSpace = iota; // inside space
+        private static readonly var inEscape = 0; // inside text bracketed by tabwriter.Escapes
+        private static readonly var inText = 1; // inside text
 
         private static void resetSpace(this ptr<trimmer> _addr_p)
         {
@@ -1825,9 +1825,9 @@ unsupported:
         }
 
         public static readonly Mode RawFormat = (Mode)1L << (int)(iota); // do not use a tabwriter; if set, UseSpaces is ignored
-        public static readonly var TabIndent = (var)0; // use tabs for indentation independent of UseSpaces
-        public static readonly var UseSpaces = (var)1; // use spaces instead of tabs for alignment
-        public static readonly var SourcePos = (var)2; // emit //line directives to preserve original source positions
+        public static readonly var TabIndent = 0; // use tabs for indentation independent of UseSpaces
+        public static readonly var UseSpaces = 1; // use spaces instead of tabs for alignment
+        public static readonly var SourcePos = 2; // emit //line directives to preserve original source positions
 
         // The mode below is not included in printer's public API because
         // editing code text is deemed out of scope. Because this mode is

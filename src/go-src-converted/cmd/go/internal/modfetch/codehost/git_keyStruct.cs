@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:55 UTC
+//     Generated on 2020 October 09 05:47:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,8 @@ using par = go.cmd.go.@internal.par_package;
 using web = go.cmd.go.@internal.web_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

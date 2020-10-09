@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package bzip2 implements bzip2 decompression.
-// package bzip2 -- go2cs converted at 2020 October 08 04:58:41 UTC
+// package bzip2 -- go2cs converted at 2020 October 09 06:05:14 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Go\src\compress\bzip2\bzip2.go
 using io = go.io_package;

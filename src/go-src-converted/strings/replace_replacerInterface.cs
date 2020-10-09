@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:48:24 UTC
+//     Generated on 2020 October 09 05:06:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using io = go.io_package;
 using sync = go.sync_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -40,7 +41,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class replacer<T> : replacer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace go
             private delegate (long, error) ReplaceByPtr(ptr<T> value, @string s);
             private delegate (long, error) ReplaceByVal(T value, @string s);
 
-            private static readonly ReplaceByPtr s_ReplaceByPtr;
-            private static readonly ReplaceByVal s_ReplaceByVal;
+            private static readonly ReplaceByPtr? s_ReplaceByPtr;
+            private static readonly ReplaceByVal? s_ReplaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Replace(@string s)
@@ -86,8 +87,8 @@ namespace go
             private delegate (long, error) WriteStringByPtr(ptr<T> value, io.Writer w, @string s);
             private delegate (long, error) WriteStringByVal(T value, io.Writer w, @string s);
 
-            private static readonly WriteStringByPtr s_WriteStringByPtr;
-            private static readonly WriteStringByVal s_WriteStringByVal;
+            private static readonly WriteStringByPtr? s_WriteStringByPtr;
+            private static readonly WriteStringByVal? s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) WriteString(io.Writer w, @string s)
@@ -103,7 +104,7 @@ namespace go
                 return s_WriteStringByPtr(m_target_ptr, w, s);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static replacer()

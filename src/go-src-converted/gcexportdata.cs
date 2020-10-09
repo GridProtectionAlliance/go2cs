@@ -18,7 +18,7 @@
 // Go 1.8 export data files, so they will work before and after the
 // Go update. (See discussion at https://golang.org/issue/15651.)
 //
-// package gcexportdata -- go2cs converted at 2020 October 08 04:55:13 UTC
+// package gcexportdata -- go2cs converted at 2020 October 09 06:01:58 UTC
 // import "golang.org/x/tools/go/gcexportdata" ==> using gcexportdata = go.golang.org.x.tools.go.gcexportdata_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\gcexportdata\gcexportdata.go
 // import "golang.org/x/tools/go/gcexportdata"

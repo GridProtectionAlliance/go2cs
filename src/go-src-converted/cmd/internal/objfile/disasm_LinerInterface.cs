@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:49:34 UTC
+//     Generated on 2020 October 09 05:08:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,6 +35,7 @@ using ppc64asm = go.golang.org.x.arch.ppc64.ppc64asm_package;
 using x86asm = go.golang.org.x.arch.x86.x86asm_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -60,7 +61,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Liner<T> : Liner
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -86,8 +87,8 @@ namespace @internal
             private delegate (@string, long, ptr<gosym.Func>) PCToLineByPtr(ptr<T> value, ulong _p0);
             private delegate (@string, long, ptr<gosym.Func>) PCToLineByVal(T value, ulong _p0);
 
-            private static readonly PCToLineByPtr s_PCToLineByPtr;
-            private static readonly PCToLineByVal s_PCToLineByVal;
+            private static readonly PCToLineByPtr? s_PCToLineByPtr;
+            private static readonly PCToLineByVal? s_PCToLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (@string, long, ptr<gosym.Func>) PCToLine(ulong _p0)
@@ -103,7 +104,7 @@ namespace @internal
                 return s_PCToLineByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Liner()

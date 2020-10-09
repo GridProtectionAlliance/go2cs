@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2020 October 08 04:33:41 UTC
+// package modcmd -- go2cs converted at 2020 October 09 05:45:16 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Go\src\cmd\go\internal\modcmd\download.go
 using json = go.encoding.json_package;
@@ -206,7 +206,7 @@ See 'go help modules' for more about module queries.
             if (downloadJSON.val)
             {
                 {
-                    moduleJSON m__prev1 = m;
+                    ptr<moduleJSON> m__prev1 = m;
 
                     foreach (var (_, __m) in mods)
                     {
@@ -230,7 +230,7 @@ See 'go help modules' for more about module queries.
                 }
             }            {
                 {
-                    moduleJSON m__prev1 = m;
+                    ptr<moduleJSON> m__prev1 = m;
 
                     foreach (var (_, __m) in mods)
                     {

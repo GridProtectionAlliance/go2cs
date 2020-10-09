@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package par implements parallel execution helpers.
-// package par -- go2cs converted at 2020 October 08 04:34:00 UTC
+// package par -- go2cs converted at 2020 October 09 05:45:32 UTC
 // import "cmd/go/internal/par" ==> using par = go.cmd.go.@internal.par_package
 // Original source: C:\Go\src\cmd\go\internal\par\work.go
 using rand = go.math.rand_package;

@@ -8,7 +8,7 @@
 // are identified by their unique id, instead of their
 // object name.
 
-// package types -- go2cs converted at 2020 October 08 04:03:35 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:33 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\objset.go
 

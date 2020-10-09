@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package os -- go2cs converted at 2020 October 08 03:45:17 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:28 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sys_js.go
 
@@ -16,7 +16,7 @@ namespace go
     {
         // supportsCloseOnExec reports whether the platform supports the
         // O_CLOEXEC flag.
-        private static readonly var supportsCloseOnExec = (var)false;
+        private static readonly var supportsCloseOnExec = false;
 
     }
 }

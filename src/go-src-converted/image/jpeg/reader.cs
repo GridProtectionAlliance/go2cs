@@ -5,7 +5,7 @@
 // Package jpeg implements a JPEG image decoder and encoder.
 //
 // JPEG is defined in ITU-T T.81: https://www.w3.org/Graphics/JPEG/itu-t81.pdf.
-// package jpeg -- go2cs converted at 2020 October 08 04:59:28 UTC
+// package jpeg -- go2cs converted at 2020 October 09 06:05:54 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\reader.go
 using image = go.image_package;

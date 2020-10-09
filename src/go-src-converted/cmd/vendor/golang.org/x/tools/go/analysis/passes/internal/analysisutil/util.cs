@@ -1,6 +1,6 @@
 // Package analysisutil defines various helper functions
 // used by two or more packages beneath go/analysis.
-// package analysisutil -- go2cs converted at 2020 October 08 04:57:58 UTC
+// package analysisutil -- go2cs converted at 2020 October 09 06:04:37 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/internal/analysisutil" ==> using analysisutil = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\internal\analysisutil\util.go
 using bytes = go.bytes_package;

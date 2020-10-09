@@ -5,7 +5,7 @@
 // Package dsa implements the Digital Signature Algorithm, as defined in FIPS 186-3.
 //
 // The DSA operations in this package are not implemented using constant-time algorithms.
-// package dsa -- go2cs converted at 2020 October 08 03:36:37 UTC
+// package dsa -- go2cs converted at 2020 October 09 04:54:33 UTC
 // import "crypto/dsa" ==> using dsa = go.crypto.dsa_package
 // Original source: C:\Go\src\crypto\dsa\dsa.go
 using errors = go.errors_package;
@@ -56,9 +56,9 @@ namespace crypto
         }
 
         public static readonly ParameterSizes L1024N160 = (ParameterSizes)iota;
-        public static readonly var L2048N224 = (var)0;
-        public static readonly var L2048N256 = (var)1;
-        public static readonly var L3072N256 = (var)2;
+        public static readonly var L2048N224 = 0;
+        public static readonly var L2048N256 = 1;
+        public static readonly var L3072N256 = 2;
 
 
         // numMRTests is the number of Miller-Rabin primality tests that we perform. We

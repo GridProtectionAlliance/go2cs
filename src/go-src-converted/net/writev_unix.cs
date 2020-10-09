@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package net -- go2cs converted at 2020 October 08 03:35:04 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:37 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\writev_unix.go
 using runtime = go.runtime_package;

@@ -12,7 +12,7 @@
 //
 // Each level includes the earlier output as well.
 
-// package gc -- go2cs converted at 2020 October 08 04:30:02 UTC
+// package gc -- go2cs converted at 2020 October 09 05:42:21 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\plive.go
 using ssa = go.cmd.compile.@internal.ssa_package;
@@ -40,7 +40,7 @@ namespace @internal
         // necessary.
         //
         // Keep in sync with runtime/preempt.go:go115ReduceLiveness.
-        private static readonly var go115ReduceLiveness = (var)true;
+        private static readonly var go115ReduceLiveness = true;
 
         // OpVarDef is an annotation for the liveness analysis, marking a place
         // where a complete initialization (definition) of a variable begins.
@@ -475,7 +475,7 @@ namespace @internal
         }
 
         private static readonly liveEffect uevar = (liveEffect)1L << (int)(iota);
-        private static readonly var varkill = (var)0;
+        private static readonly var varkill = 0;
 
 
         // valueEffects returns the index of a variable in lv.vars and the

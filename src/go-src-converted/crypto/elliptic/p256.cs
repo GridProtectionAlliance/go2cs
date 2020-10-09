@@ -4,7 +4,7 @@
 
 // +build !amd64,!arm64
 
-// package elliptic -- go2cs converted at 2020 October 08 03:36:27 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:54:23 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256.go
 // This file contains a constant-time, 32-bit implementation of P256.

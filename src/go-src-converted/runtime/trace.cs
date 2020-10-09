@@ -10,7 +10,7 @@
 // trace is captured for most events.
 // See https://golang.org/s/go15trace for more info.
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:11 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\trace.go
 using sys = go.runtime.@internal.sys_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package exec -- go2cs converted at 2020 October 08 03:41:19 UTC
+// package exec -- go2cs converted at 2020 October 09 04:58:43 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\lp_plan9.go
 using errors = go.errors_package;

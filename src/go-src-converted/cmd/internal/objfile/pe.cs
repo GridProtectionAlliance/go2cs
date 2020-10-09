@@ -4,7 +4,7 @@
 
 // Parsing of PE executables (Microsoft Windows).
 
-// package objfile -- go2cs converted at 2020 October 08 03:50:23 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:09:00 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\pe.go
 using dwarf = go.debug.dwarf_package;

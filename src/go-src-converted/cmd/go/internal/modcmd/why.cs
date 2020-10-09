@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2020 October 08 04:36:48 UTC
+// package modcmd -- go2cs converted at 2020 October 09 05:47:56 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Go\src\cmd\go\internal\modcmd\why.go
 using fmt = go.fmt_package;

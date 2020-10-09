@@ -9,7 +9,7 @@
 // Note that sometimes we use a lowercase //sys name and
 // wrap it in our own nicer implementation.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:07 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:34 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_aix.go
 using @unsafe = go.@unsafe_package;
@@ -26,15 +26,15 @@ namespace go
 ;
 
         // Constant expected by package but not supported
-        private static readonly var _ = (var)iota;
-        public static readonly var TIOCSCTTY = (var)0;
-        public static readonly var SYS_EXECVE = (var)1;
-        public static readonly var SYS_FCNTL = (var)2;
+        private static readonly var _ = iota;
+        public static readonly var TIOCSCTTY = 0;
+        public static readonly var SYS_EXECVE = 1;
+        public static readonly var SYS_FCNTL = 2;
 
 
         public static readonly long F_DUPFD_CLOEXEC = (long)0L; 
         // AF_LOCAL doesn't exist on AIX
-        public static readonly var AF_LOCAL = (var)AF_UNIX;
+        public static readonly var AF_LOCAL = AF_UNIX;
 
 
         private static (long, long) Unix(this ptr<StTimespec_t> _addr_ts)
@@ -127,7 +127,7 @@ namespace go
 
         //sys    getcwd(buf *byte, size uint64) (err error)
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
 
 

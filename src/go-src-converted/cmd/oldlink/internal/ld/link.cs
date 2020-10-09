@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:41:35 UTC
+// package ld -- go2cs converted at 2020 October 09 05:52:13 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\link.go
 using bufio = go.bufio_package;

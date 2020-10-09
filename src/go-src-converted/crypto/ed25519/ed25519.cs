@@ -10,7 +10,7 @@
 // representation includes a public key suffix to make multiple signing
 // operations with the same key more efficient. This package refers to the RFC
 // 8032 private key as the “seed”.
-// package ed25519 -- go2cs converted at 2020 October 08 03:35:17 UTC
+// package ed25519 -- go2cs converted at 2020 October 09 04:52:49 UTC
 // import "crypto/ed25519" ==> using ed25519 = go.crypto.ed25519_package
 // Original source: C:\Go\src\crypto\ed25519\ed25519.go
 // This code is a port of the public domain, “ref10” implementation of ed25519

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 00:33:47 UTC
+// package os -- go2cs converted at 2020 October 09 04:45:16 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\dir.go
 

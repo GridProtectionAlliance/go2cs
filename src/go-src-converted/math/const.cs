@@ -5,7 +5,7 @@
 // Package math provides basic constants and mathematical functions.
 //
 // This package does not guarantee bit-identical results across architectures.
-// package math -- go2cs converted at 2020 October 08 03:25:10 UTC
+// package math -- go2cs converted at 2020 October 09 05:07:39 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\const.go
 

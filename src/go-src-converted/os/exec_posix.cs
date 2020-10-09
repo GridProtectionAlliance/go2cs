@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package os -- go2cs converted at 2020 October 08 03:44:32 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:06 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\exec_posix.go
 using execenv = go.@internal.syscall.execenv_package;

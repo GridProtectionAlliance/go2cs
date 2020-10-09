@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 03:43:48 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:54 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\aprof.go
 // Test that SIGPROF received in C code does not crash the process
 // looking for the C code's func pointer.

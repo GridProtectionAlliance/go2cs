@@ -15,7 +15,7 @@
 // This file implements parsers to convert legacy profiles into the
 // profile.proto format.
 
-// package profile -- go2cs converted at 2020 October 08 04:43:36 UTC
+// package profile -- go2cs converted at 2020 October 09 05:53:57 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\legacy_profile.go
 using bufio = go.bufio_package;
@@ -151,7 +151,7 @@ namespace pprof
             {
                 var err__prev1 = err;
 
-                err = parseAdditionalSections(_addr_s, _addr_p);
+                err = parseAdditionalSections(_addr_s, p);
 
                 if (err != null)
                 {
@@ -479,7 +479,7 @@ nextLocation:
 
             ptr<Profile> p = addr(new Profile(Period:period*1000,PeriodType:&ValueType{Type:"cpu",Unit:"nanoseconds"},SampleType:[]*ValueType{{Type:"samples",Unit:"count"},{Type:"cpu",Unit:"nanoseconds"},},));
             error err = default!;
-            b, _, err = parseCPUSamples(b, parse, true, _addr_p);
+            b, _, err = parseCPUSamples(b, parse, true, p);
 
             if (err != null)
             {
@@ -565,7 +565,7 @@ nextLocation:
             }
 
 
-            cleanupDuplicateLocations(_addr_p);
+            cleanupDuplicateLocations(p);
             return (_addr_p!, error.As(null!)!);
 
         }
@@ -1240,7 +1240,7 @@ nextLocation:
             {
                 var err__prev1 = err;
 
-                err = parseAdditionalSections(_addr_s, _addr_p);
+                err = parseAdditionalSections(_addr_s, p);
 
                 if (err != null)
                 {
@@ -1438,7 +1438,7 @@ nextLocation:
             {
                 error err__prev1 = err;
 
-                err = parseAdditionalSections(_addr_s, _addr_p);
+                err = parseAdditionalSections(_addr_s, p);
 
                 if (err != null)
                 {
@@ -1450,7 +1450,7 @@ nextLocation:
             }
 
 
-            cleanupDuplicateLocations(_addr_p);
+            cleanupDuplicateLocations(p);
             return (_addr_p!, error.As(null!)!);
 
         }

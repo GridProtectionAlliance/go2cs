@@ -29,7 +29,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:41:12 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:51 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\ld.go
 using sym = go.cmd.oldlink.@internal.sym_package;

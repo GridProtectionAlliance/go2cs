@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 08 03:44:03 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:03 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\segv.go
 // static void nop() {}
 using C = go.C_package;// static void nop() {}

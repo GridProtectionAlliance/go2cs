@@ -4,7 +4,7 @@
 
 // Helper functions to make constructing templates easier.
 
-// package template -- go2cs converted at 2020 October 08 03:42:15 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:34 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\helper.go
 using fmt = go.fmt_package;

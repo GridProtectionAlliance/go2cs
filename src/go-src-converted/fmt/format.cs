@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2020 October 08 03:25:58 UTC
+// package fmt -- go2cs converted at 2020 October 09 05:07:52 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Go\src\fmt\format.go
 using strconv = go.strconv_package;
@@ -17,8 +17,8 @@ namespace go
         private static readonly @string udigits = (@string)"0123456789ABCDEFX";
 
 
-        private static readonly var signed = (var)true;
-        private static readonly var unsigned = (var)false;
+        private static readonly var signed = true;
+        private static readonly var unsigned = false;
 
 
         // flags placed in a separate struct for easy clearing.

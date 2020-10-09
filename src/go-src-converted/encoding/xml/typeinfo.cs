@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2020 October 08 03:43:04 UTC
+// package xml -- go2cs converted at 2020 October 09 05:00:16 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\typeinfo.go
 using fmt = go.fmt_package;
@@ -38,12 +38,12 @@ namespace encoding
         }
 
         private static readonly fieldFlags fElement = (fieldFlags)1L << (int)(iota);
-        private static readonly var fAttr = (var)0;
-        private static readonly var fCDATA = (var)1;
-        private static readonly var fCharData = (var)2;
-        private static readonly var fInnerXML = (var)3;
-        private static readonly var fComment = (var)4;
-        private static readonly var fAny = (var)5;
+        private static readonly var fAttr = 0;
+        private static readonly var fCDATA = 1;
+        private static readonly var fCharData = 2;
+        private static readonly var fInnerXML = 3;
+        private static readonly var fComment = 4;
+        private static readonly var fAny = 5;
 
         private static readonly fMode fOmitEmpty = (fMode)fElement | fAttr | fCDATA | fCharData | fInnerXML | fComment | fAny;
 
@@ -120,7 +120,7 @@ namespace encoding
                                     {
                                         var err__prev4 = err;
 
-                                        var err = addFieldInfo(typ, _addr_tinfo, _addr_finfo);
+                                        var err = addFieldInfo(typ, tinfo, _addr_finfo);
 
                                         if (err != null)
                                         {
@@ -158,7 +158,7 @@ namespace encoding
                     {
                         var err__prev2 = err;
 
-                        err = addFieldInfo(typ, _addr_tinfo, _addr_finfo);
+                        err = addFieldInfo(typ, tinfo, _addr_finfo);
 
                         if (err != null)
                         {
@@ -568,8 +568,8 @@ Loop:
             return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q", e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
         }
 
-        private static readonly var initNilPointers = (var)true;
-        private static readonly var dontInitNilPointers = (var)false;
+        private static readonly var initNilPointers = true;
+        private static readonly var dontInitNilPointers = false;
 
 
         // value returns v's field value corresponding to finfo.

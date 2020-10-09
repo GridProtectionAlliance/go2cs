@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:37 UTC
+//     Generated on 2020 October 09 04:59:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using time = go.time_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -53,7 +54,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class BufferPool<T> : BufferPool
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -79,8 +80,8 @@ namespace http
             private delegate slice<byte> GetByPtr(ptr<T> value);
             private delegate slice<byte> GetByVal(T value);
 
-            private static readonly GetByPtr s_GetByPtr;
-            private static readonly GetByVal s_GetByVal;
+            private static readonly GetByPtr? s_GetByPtr;
+            private static readonly GetByVal? s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> Get()
@@ -99,8 +100,8 @@ namespace http
             private delegate slice<byte> PutByPtr(ptr<T> value, slice<byte> _p0);
             private delegate slice<byte> PutByVal(T value, slice<byte> _p0);
 
-            private static readonly PutByPtr s_PutByPtr;
-            private static readonly PutByVal s_PutByVal;
+            private static readonly PutByPtr? s_PutByPtr;
+            private static readonly PutByVal? s_PutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> Put(slice<byte> _p0)
@@ -116,7 +117,7 @@ namespace http
                 return s_PutByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static BufferPool()

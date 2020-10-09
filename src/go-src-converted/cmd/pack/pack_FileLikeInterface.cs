@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:10 UTC
+//     Generated on 2020 October 09 05:52:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using strings = go.strings_package;
 using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -47,7 +48,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class FileLike<T> : FileLike
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace go
             private delegate error NameByPtr(ptr<T> value);
             private delegate error NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Name()
@@ -93,8 +94,8 @@ namespace go
             private delegate error StatByPtr(ptr<T> value);
             private delegate error StatByVal(T value);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Stat()
@@ -113,8 +114,8 @@ namespace go
             private delegate error ReadByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error ReadByVal(T value, slice<byte> _p0);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Read(slice<byte> _p0)
@@ -133,8 +134,8 @@ namespace go
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -150,7 +151,7 @@ namespace go
                 return s_CloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static FileLike()

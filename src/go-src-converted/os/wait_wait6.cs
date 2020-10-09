@@ -4,7 +4,7 @@
 
 // +build freebsd
 
-// package os -- go2cs converted at 2020 October 08 03:45:26 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:31 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\wait_wait6.go
 using runtime = go.runtime_package;

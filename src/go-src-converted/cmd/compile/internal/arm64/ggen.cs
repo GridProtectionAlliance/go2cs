@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2020 October 08 04:32:06 UTC
+// package arm64 -- go2cs converted at 2020 October 09 05:43:59 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Go\src\cmd\compile\internal\arm64\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -81,7 +81,7 @@ namespace @internal
                 // Not using REGTMP, so this is async preemptible (async preemption clobbers REGTMP).
                 // We are at the function entry, where no register is live, so it is okay to clobber
                 // other registers
-                const var rtmp = (var)arm64.REG_R20;
+                const var rtmp = arm64.REG_R20;
 
                 p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_CONST, 0L, 8L + off - 8L, obj.TYPE_REG, rtmp, 0L);
                 p = pp.Appendpp(p, arm64.AMOVD, obj.TYPE_REG, arm64.REGSP, 0L, obj.TYPE_REG, arm64.REGRT1, 0L);

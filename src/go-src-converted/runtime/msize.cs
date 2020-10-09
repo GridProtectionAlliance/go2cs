@@ -7,7 +7,7 @@
 // See malloc.go for overview.
 // See also mksizeclasses.go for how we decide what size classes to use.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:29 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\msize.go
 

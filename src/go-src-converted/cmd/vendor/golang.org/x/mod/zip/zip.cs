@@ -43,7 +43,7 @@
 //
 // Note that this package does not provide hashing functionality. See
 // golang.org/x/mod/sumdb/dirhash.
-// package zip -- go2cs converted at 2020 October 08 04:46:07 UTC
+// package zip -- go2cs converted at 2020 October 09 05:56:10 UTC
 // import "cmd/vendor/golang.org/x/mod/zip" ==> using zip = go.cmd.vendor.golang.org.x.mod.zip_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\zip\zip.go
 using zip = go.archive.zip_package;

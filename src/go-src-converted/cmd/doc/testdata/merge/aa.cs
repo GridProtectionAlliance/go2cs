@@ -1,5 +1,5 @@
 // Package comment A.
-// package merge -- go2cs converted at 2020 October 08 04:33:09 UTC
+// package merge -- go2cs converted at 2020 October 09 05:44:52 UTC
 // import "cmd/doc/testdata/merge" ==> using merge = go.cmd.doc.testdata.merge_package
 // Original source: C:\Go\src\cmd\doc\testdata\merge\aa.go
 

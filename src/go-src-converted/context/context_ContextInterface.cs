@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:10 UTC
+//     Generated on 2020 October 09 04:49:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -43,7 +44,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Context<T> : Context
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace go
             private delegate void DeadlineByPtr(ptr<T> value);
             private delegate void DeadlineByVal(T value);
 
-            private static readonly DeadlineByPtr s_DeadlineByPtr;
-            private static readonly DeadlineByVal s_DeadlineByVal;
+            private static readonly DeadlineByPtr? s_DeadlineByPtr;
+            private static readonly DeadlineByVal? s_DeadlineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Deadline()
@@ -94,8 +95,8 @@ namespace go
             private delegate void DoneByPtr(ptr<T> value);
             private delegate void DoneByVal(T value);
 
-            private static readonly DoneByPtr s_DoneByPtr;
-            private static readonly DoneByVal s_DoneByVal;
+            private static readonly DoneByPtr? s_DoneByPtr;
+            private static readonly DoneByVal? s_DoneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Done()
@@ -119,8 +120,8 @@ namespace go
             private delegate void ErrByPtr(ptr<T> value);
             private delegate void ErrByVal(T value);
 
-            private static readonly ErrByPtr s_ErrByPtr;
-            private static readonly ErrByVal s_ErrByVal;
+            private static readonly ErrByPtr? s_ErrByPtr;
+            private static readonly ErrByVal? s_ErrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Err()
@@ -144,8 +145,8 @@ namespace go
             private delegate void ValueByPtr(ptr<T> value, object key);
             private delegate void ValueByVal(T value, object key);
 
-            private static readonly ValueByPtr s_ValueByPtr;
-            private static readonly ValueByVal s_ValueByVal;
+            private static readonly ValueByPtr? s_ValueByPtr;
+            private static readonly ValueByVal? s_ValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Value(object key)
@@ -166,7 +167,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Context()

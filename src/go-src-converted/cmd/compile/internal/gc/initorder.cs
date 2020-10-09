@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:14 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:43 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\initorder.go
 using bytes = go.bytes_package;
@@ -59,9 +59,9 @@ namespace @internal
 
         // Static initialization phase.
         // These values are stored in two bits in Node.flags.
-        public static readonly var InitNotStarted = (var)iota;
-        public static readonly var InitDone = (var)0;
-        public static readonly var InitPending = (var)1;
+        public static readonly var InitNotStarted = iota;
+        public static readonly var InitDone = 0;
+        public static readonly var InitPending = 1;
 
 
         public partial struct InitOrder

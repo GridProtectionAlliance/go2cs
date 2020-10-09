@@ -20,7 +20,7 @@
 // with two exceptions. First, it requires the "v" prefix. Second, it recognizes
 // vMAJOR and vMAJOR.MINOR (with no prerelease or build suffixes)
 // as shorthands for vMAJOR.0.0 and vMAJOR.MINOR.0.
-// package semver -- go2cs converted at 2020 October 08 04:45:55 UTC
+// package semver -- go2cs converted at 2020 October 09 05:55:58 UTC
 // import "cmd/vendor/golang.org/x/mod/semver" ==> using semver = go.cmd.vendor.golang.org.x.mod.semver_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\semver\semver.go
 

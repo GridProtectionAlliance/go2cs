@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:32:32 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:21 UTC
 // Original source: C:\Go\src\cmd\cover\cover.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;

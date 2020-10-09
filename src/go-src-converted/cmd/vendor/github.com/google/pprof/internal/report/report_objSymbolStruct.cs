@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:22 UTC
+//     Generated on 2020 October 09 05:53:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,8 @@ using measurement = go.github.com.google.pprof.@internal.measurement_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

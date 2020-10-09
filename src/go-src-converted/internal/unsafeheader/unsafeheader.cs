@@ -7,7 +7,7 @@
 //
 // This package allows packages that cannot import "reflect" to use types that
 // are tested to be equivalent to reflect.SliceHeader and reflect.StringHeader.
-// package unsafeheader -- go2cs converted at 2020 October 08 03:18:59 UTC
+// package unsafeheader -- go2cs converted at 2020 October 09 04:49:15 UTC
 // import "internal/unsafeheader" ==> using unsafeheader = go.@internal.unsafeheader_package
 // Original source: C:\Go\src\internal\unsafeheader\unsafeheader.go
 using @unsafe = go.@unsafe_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bufio -- go2cs converted at 2020 October 08 03:26:19 UTC
+// package bufio -- go2cs converted at 2020 October 09 04:49:59 UTC
 // import "bufio" ==> using bufio = go.bufio_package
 // Original source: C:\Go\src\bufio\scan.go
 using bytes = go.bytes_package;
@@ -224,7 +224,7 @@ namespace go
                 if (s.end == len(s.buf))
                 { 
                     // Guarantee no overflow in the multiplication below.
-                    const var maxInt = (var)int(~uint(0L) >> (int)(1L));
+                    const var maxInt = int(~uint(0L) >> (int)(1L));
 
                     if (len(s.buf) >= s.maxTokenSize || len(s.buf) > maxInt / 2L)
                     {

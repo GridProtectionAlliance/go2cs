@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 October 08 03:42:53 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:07 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\indent.go
 using bytes = go.bytes_package;

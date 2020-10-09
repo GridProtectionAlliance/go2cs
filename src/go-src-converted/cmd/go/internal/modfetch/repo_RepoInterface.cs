@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:12 UTC
+//     Generated on 2020 October 09 05:47:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,6 +29,7 @@ using web = go.cmd.go.@internal.web_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -55,7 +56,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Repo<T> : Repo
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -81,8 +82,8 @@ namespace @internal
             private delegate error ModulePathByPtr(ptr<T> value);
             private delegate error ModulePathByVal(T value);
 
-            private static readonly ModulePathByPtr s_ModulePathByPtr;
-            private static readonly ModulePathByVal s_ModulePathByVal;
+            private static readonly ModulePathByPtr? s_ModulePathByPtr;
+            private static readonly ModulePathByVal? s_ModulePathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ModulePath()
@@ -101,8 +102,8 @@ namespace @internal
             private delegate error VersionsByPtr(ptr<T> value, @string prefix);
             private delegate error VersionsByVal(T value, @string prefix);
 
-            private static readonly VersionsByPtr s_VersionsByPtr;
-            private static readonly VersionsByVal s_VersionsByVal;
+            private static readonly VersionsByPtr? s_VersionsByPtr;
+            private static readonly VersionsByVal? s_VersionsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Versions(@string prefix)
@@ -121,8 +122,8 @@ namespace @internal
             private delegate error StatByPtr(ptr<T> value, @string rev);
             private delegate error StatByVal(T value, @string rev);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Stat(@string rev)
@@ -141,8 +142,8 @@ namespace @internal
             private delegate error LatestByPtr(ptr<T> value);
             private delegate error LatestByVal(T value);
 
-            private static readonly LatestByPtr s_LatestByPtr;
-            private static readonly LatestByVal s_LatestByVal;
+            private static readonly LatestByPtr? s_LatestByPtr;
+            private static readonly LatestByVal? s_LatestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Latest()
@@ -161,8 +162,8 @@ namespace @internal
             private delegate error GoModByPtr(ptr<T> value, @string version);
             private delegate error GoModByVal(T value, @string version);
 
-            private static readonly GoModByPtr s_GoModByPtr;
-            private static readonly GoModByVal s_GoModByVal;
+            private static readonly GoModByPtr? s_GoModByPtr;
+            private static readonly GoModByVal? s_GoModByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error GoMod(@string version)
@@ -181,8 +182,8 @@ namespace @internal
             private delegate error ZipByPtr(ptr<T> value, io.Writer dst, @string version);
             private delegate error ZipByVal(T value, io.Writer dst, @string version);
 
-            private static readonly ZipByPtr s_ZipByPtr;
-            private static readonly ZipByVal s_ZipByVal;
+            private static readonly ZipByPtr? s_ZipByPtr;
+            private static readonly ZipByVal? s_ZipByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Zip(io.Writer dst, @string version)
@@ -198,7 +199,7 @@ namespace @internal
                 return s_ZipByPtr(m_target_ptr, dst, version);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Repo()

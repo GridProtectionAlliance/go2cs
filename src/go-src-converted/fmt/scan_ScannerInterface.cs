@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:08 UTC
+//     Generated on 2020 October 09 05:08:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using strconv = go.strconv_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -46,7 +47,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Scanner<T> : Scanner
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace go
             private delegate error ScanByPtr(ptr<T> value, ScanState state, int verb);
             private delegate error ScanByVal(T value, ScanState state, int verb);
 
-            private static readonly ScanByPtr s_ScanByPtr;
-            private static readonly ScanByVal s_ScanByVal;
+            private static readonly ScanByPtr? s_ScanByPtr;
+            private static readonly ScanByVal? s_ScanByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Scan(ScanState state, int verb)
@@ -89,7 +90,7 @@ namespace go
                 return s_ScanByPtr(m_target_ptr, state, verb);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Scanner()

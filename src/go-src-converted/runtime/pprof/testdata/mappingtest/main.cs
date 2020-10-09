@@ -8,7 +8,7 @@
 //
 // If SETCGOTRACEBACK=1 is set, the CPU profile will includes
 // PCs from C side but they will not be symbolized.
-// package main -- go2cs converted at 2020 October 08 03:31:05 UTC
+// package main -- go2cs converted at 2020 October 09 04:50:22 UTC
 // Original source: C:\Go\src\runtime\pprof\testdata\mappingtest\main.go
 /*
 #include <stdint.h>

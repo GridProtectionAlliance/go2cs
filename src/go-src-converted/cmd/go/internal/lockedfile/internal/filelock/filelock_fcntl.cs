@@ -16,7 +16,7 @@
 // TODO(golang.org/issue/35618): add a syscall.Flock binding for Illumos and
 // switch it over to use filelock_unix.go.
 
-// package filelock -- go2cs converted at 2020 October 08 04:34:18 UTC
+// package filelock -- go2cs converted at 2020 October 09 05:45:47 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock_fcntl.go
 using errors = go.errors_package;

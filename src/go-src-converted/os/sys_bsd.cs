@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd js,wasm netbsd openbsd
 
-// package os -- go2cs converted at 2020 October 08 03:45:16 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:28 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sys_bsd.go
 using syscall = go.syscall_package;

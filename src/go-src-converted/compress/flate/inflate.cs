@@ -5,7 +5,7 @@
 // Package flate implements the DEFLATE compressed data format, described in
 // RFC 1951.  The gzip and zlib packages implement access to DEFLATE-based file
 // formats.
-// package flate -- go2cs converted at 2020 October 08 03:31:02 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:19 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\inflate.go
 using bufio = go.bufio_package;
@@ -139,7 +139,7 @@ namespace compress
             // Sanity enables additional runtime tests during Huffman
             // table construction. It's intended to be used during
             // development to supplement the currently ad-hoc unit tests.
-            const var sanity = (var)false;
+            const var sanity = false;
 
 
 
@@ -761,8 +761,8 @@ namespace compress
         {
             ref decompressor f = ref _addr_f.val;
 
-            const var stateInit = (var)iota; // Zero value must be stateInit
-            const var stateDict = (var)0;
+            const var stateInit = iota; // Zero value must be stateInit
+            const var stateDict = 0;
 
 
 

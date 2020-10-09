@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:09:33 UTC
+// package gc -- go2cs converted at 2020 October 09 05:24:02 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\alg.go
 using types = go.cmd.compile.@internal.types_package;
@@ -30,19 +30,19 @@ namespace @internal
  
         // These values are known by runtime.
         public static readonly AlgKind ANOEQ = (AlgKind)iota;
-        public static readonly var AMEM0 = (var)0;
-        public static readonly var AMEM8 = (var)1;
-        public static readonly var AMEM16 = (var)2;
-        public static readonly var AMEM32 = (var)3;
-        public static readonly var AMEM64 = (var)4;
-        public static readonly var AMEM128 = (var)5;
-        public static readonly var ASTRING = (var)6;
-        public static readonly var AINTER = (var)7;
-        public static readonly var ANILINTER = (var)8;
-        public static readonly var AFLOAT32 = (var)9;
-        public static readonly var AFLOAT64 = (var)10;
-        public static readonly var ACPLX64 = (var)11;
-        public static readonly var ACPLX128 = (var)12; 
+        public static readonly var AMEM0 = 0;
+        public static readonly var AMEM8 = 1;
+        public static readonly var AMEM16 = 2;
+        public static readonly var AMEM32 = 3;
+        public static readonly var AMEM64 = 4;
+        public static readonly var AMEM128 = 5;
+        public static readonly var ASTRING = 6;
+        public static readonly var AINTER = 7;
+        public static readonly var ANILINTER = 8;
+        public static readonly var AFLOAT32 = 9;
+        public static readonly var AFLOAT64 = 10;
+        public static readonly var ACPLX64 = 11;
+        public static readonly var ACPLX128 = 12; 
 
         // Type can be compared/hashed as regular memory.
         public static readonly AlgKind AMEM = (AlgKind)100L; 

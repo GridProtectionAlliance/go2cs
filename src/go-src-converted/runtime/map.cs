@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:13 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:16 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\map.go
 // This file contains the implementation of Go's map type.
@@ -84,7 +84,7 @@ namespace go
         // data offset should be the size of the bmap struct, but needs to be
         // aligned correctly. For amd64p32 this means 64-bit alignment
         // even though pointers are 32 bit.
-        private static readonly var dataOffset = (var)@unsafe.Offsetof(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{bbmapvint64}{}.v); 
+        private static readonly var dataOffset = @unsafe.Offsetof(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{bbmapvint64}{}.v); 
 
         // Possible tophash values. We reserve a few possibilities for special marks.
         // Each bucket (including its overflow buckets, if any) will have either all or none of its

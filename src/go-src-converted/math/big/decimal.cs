@@ -17,7 +17,7 @@
 // In contrast to strconv/decimal.go, only right shift is implemented in
 // decimal format - left shift can be done precisely in binary format.
 
-// package big -- go2cs converted at 2020 October 08 03:25:25 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:17 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\decimal.go
 
@@ -55,7 +55,7 @@ namespace math
 
         // Maximum shift amount that can be done in one pass without overflow.
         // A Word has _W bits and (1<<maxShift - 1)*10 + 9 must fit into Word.
-        private static readonly var maxShift = (var)_W - 4L;
+        private static readonly var maxShift = _W - 4L;
 
         // TODO(gri) Since we know the desired decimal precision when converting
         // a floating-point number, we may be able to limit the number of decimal

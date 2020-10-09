@@ -8,7 +8,7 @@
 // All the hash.Hash implementations returned by this package also
 // implement encoding.BinaryMarshaler and encoding.BinaryUnmarshaler to
 // marshal and unmarshal the internal state of the hash.
-// package sha512 -- go2cs converted at 2020 October 08 03:35:23 UTC
+// package sha512 -- go2cs converted at 2020 October 09 04:52:55 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Go\src\crypto\sha512\sha512.go
 using crypto = go.crypto_package;
@@ -143,7 +143,7 @@ namespace crypto
         private static readonly @string magic512_224 = (@string)"sha\x05";
         private static readonly @string magic512_256 = (@string)"sha\x06";
         private static readonly @string magic512 = (@string)"sha\x07";
-        private static readonly var marshaledSize = (var)len(magic512) + 8L * 8L + chunk + 8L;
+        private static readonly var marshaledSize = len(magic512) + 8L * 8L + chunk + 8L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

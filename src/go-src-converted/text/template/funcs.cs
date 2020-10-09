@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:42:15 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:34 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\funcs.go
 using bytes = go.bytes_package;
@@ -606,12 +606,12 @@ namespace text
         }
 
         private static readonly kind invalidKind = (kind)iota;
-        private static readonly var boolKind = (var)0;
-        private static readonly var complexKind = (var)1;
-        private static readonly var intKind = (var)2;
-        private static readonly var floatKind = (var)3;
-        private static readonly var stringKind = (var)4;
-        private static readonly var uintKind = (var)5;
+        private static readonly var boolKind = 0;
+        private static readonly var complexKind = 1;
+        private static readonly var intKind = 2;
+        private static readonly var floatKind = 3;
+        private static readonly var stringKind = 4;
+        private static readonly var uintKind = 5;
 
 
         private static (kind, error) basicKind(reflect.Value v)

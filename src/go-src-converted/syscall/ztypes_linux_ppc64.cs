@@ -3,7 +3,7 @@
 
 // +build ppc64,linux
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:38 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:30 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_linux_ppc64.go
 

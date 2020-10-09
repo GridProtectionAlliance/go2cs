@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package windows -- go2cs converted at 2020 October 08 04:53:56 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:58 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\types_windows.go
 using net = go.net_package;
@@ -37,19 +37,19 @@ namespace sys
 
  
         // More invented values for signals
-        public static readonly var SIGHUP = (var)Signal(0x1UL);
-        public static readonly var SIGINT = (var)Signal(0x2UL);
-        public static readonly var SIGQUIT = (var)Signal(0x3UL);
-        public static readonly var SIGILL = (var)Signal(0x4UL);
-        public static readonly var SIGTRAP = (var)Signal(0x5UL);
-        public static readonly var SIGABRT = (var)Signal(0x6UL);
-        public static readonly var SIGBUS = (var)Signal(0x7UL);
-        public static readonly var SIGFPE = (var)Signal(0x8UL);
-        public static readonly var SIGKILL = (var)Signal(0x9UL);
-        public static readonly var SIGSEGV = (var)Signal(0xbUL);
-        public static readonly var SIGPIPE = (var)Signal(0xdUL);
-        public static readonly var SIGALRM = (var)Signal(0xeUL);
-        public static readonly var SIGTERM = (var)Signal(0xfUL);
+        public static readonly var SIGHUP = Signal(0x1UL);
+        public static readonly var SIGINT = Signal(0x2UL);
+        public static readonly var SIGQUIT = Signal(0x3UL);
+        public static readonly var SIGILL = Signal(0x4UL);
+        public static readonly var SIGTRAP = Signal(0x5UL);
+        public static readonly var SIGABRT = Signal(0x6UL);
+        public static readonly var SIGBUS = Signal(0x7UL);
+        public static readonly var SIGFPE = Signal(0x8UL);
+        public static readonly var SIGKILL = Signal(0x9UL);
+        public static readonly var SIGSEGV = Signal(0xbUL);
+        public static readonly var SIGPIPE = Signal(0xdUL);
+        public static readonly var SIGALRM = Signal(0xeUL);
+        public static readonly var SIGTERM = Signal(0xfUL);
 
 
         private static array<@string> signals = new array<@string>(InitKeyedValues<@string>((1, "hangup"), (2, "interrupt"), (3, "quit"), (4, "illegal instruction"), (5, "trace/breakpoint trap"), (6, "aborted"), (7, "bus error"), (8, "floating point exception"), (9, "killed"), (10, "user defined signal 1"), (11, "segmentation fault"), (12, "user defined signal 2"), (13, "broken pipe"), (14, "alarm clock"), (15, "terminated")));
@@ -214,7 +214,7 @@ namespace sys
         public static readonly ulong TH32CS_SNAPTHREAD = (ulong)0x04UL;
         public static readonly ulong TH32CS_SNAPMODULE = (ulong)0x08UL;
         public static readonly ulong TH32CS_SNAPMODULE32 = (ulong)0x10UL;
-        public static readonly var TH32CS_SNAPALL = (var)TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD;
+        public static readonly var TH32CS_SNAPALL = TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD;
         public static readonly ulong TH32CS_INHERIT = (ulong)0x80000000UL;
 
 
@@ -232,11 +232,11 @@ namespace sys
 
  
         // do not reorder
-        public static readonly var FILE_ACTION_ADDED = (var)iota + 1L;
-        public static readonly var FILE_ACTION_REMOVED = (var)0;
-        public static readonly var FILE_ACTION_MODIFIED = (var)1;
-        public static readonly var FILE_ACTION_RENAMED_OLD_NAME = (var)2;
-        public static readonly var FILE_ACTION_RENAMED_NEW_NAME = (var)3;
+        public static readonly var FILE_ACTION_ADDED = iota + 1L;
+        public static readonly var FILE_ACTION_REMOVED = 0;
+        public static readonly var FILE_ACTION_MODIFIED = 1;
+        public static readonly var FILE_ACTION_RENAMED_OLD_NAME = 2;
+        public static readonly var FILE_ACTION_RENAMED_NEW_NAME = 3;
 
 
  
@@ -282,20 +282,20 @@ namespace sys
         public static readonly long CERT_STORE_PROV_SERIALIZED = (long)6L;
         public static readonly long CERT_STORE_PROV_FILENAME_A = (long)7L;
         public static readonly long CERT_STORE_PROV_FILENAME_W = (long)8L;
-        public static readonly var CERT_STORE_PROV_FILENAME = (var)CERT_STORE_PROV_FILENAME_W;
+        public static readonly var CERT_STORE_PROV_FILENAME = CERT_STORE_PROV_FILENAME_W;
         public static readonly long CERT_STORE_PROV_SYSTEM_A = (long)9L;
         public static readonly long CERT_STORE_PROV_SYSTEM_W = (long)10L;
-        public static readonly var CERT_STORE_PROV_SYSTEM = (var)CERT_STORE_PROV_SYSTEM_W;
+        public static readonly var CERT_STORE_PROV_SYSTEM = CERT_STORE_PROV_SYSTEM_W;
         public static readonly long CERT_STORE_PROV_COLLECTION = (long)11L;
         public static readonly long CERT_STORE_PROV_SYSTEM_REGISTRY_A = (long)12L;
         public static readonly long CERT_STORE_PROV_SYSTEM_REGISTRY_W = (long)13L;
-        public static readonly var CERT_STORE_PROV_SYSTEM_REGISTRY = (var)CERT_STORE_PROV_SYSTEM_REGISTRY_W;
+        public static readonly var CERT_STORE_PROV_SYSTEM_REGISTRY = CERT_STORE_PROV_SYSTEM_REGISTRY_W;
         public static readonly long CERT_STORE_PROV_PHYSICAL_W = (long)14L;
-        public static readonly var CERT_STORE_PROV_PHYSICAL = (var)CERT_STORE_PROV_PHYSICAL_W;
+        public static readonly var CERT_STORE_PROV_PHYSICAL = CERT_STORE_PROV_PHYSICAL_W;
         public static readonly long CERT_STORE_PROV_SMART_CARD_W = (long)15L;
-        public static readonly var CERT_STORE_PROV_SMART_CARD = (var)CERT_STORE_PROV_SMART_CARD_W;
+        public static readonly var CERT_STORE_PROV_SMART_CARD = CERT_STORE_PROV_SMART_CARD_W;
         public static readonly long CERT_STORE_PROV_LDAP_W = (long)16L;
-        public static readonly var CERT_STORE_PROV_LDAP = (var)CERT_STORE_PROV_LDAP_W;
+        public static readonly var CERT_STORE_PROV_LDAP = CERT_STORE_PROV_LDAP_W;
         public static readonly long CERT_STORE_PROV_PKCS12 = (long)17L; 
 
         /* store characteristics (low WORD of flag) for CertOpenStore function */
@@ -733,11 +733,11 @@ namespace sys
         public static readonly ulong IOC_OUT = (ulong)0x40000000UL;
         public static readonly ulong IOC_IN = (ulong)0x80000000UL;
         public static readonly ulong IOC_VENDOR = (ulong)0x18000000UL;
-        public static readonly var IOC_INOUT = (var)IOC_IN | IOC_OUT;
+        public static readonly var IOC_INOUT = IOC_IN | IOC_OUT;
         public static readonly ulong IOC_WS2 = (ulong)0x08000000UL;
-        public static readonly var SIO_GET_EXTENSION_FUNCTION_POINTER = (var)IOC_INOUT | IOC_WS2 | 6L;
-        public static readonly var SIO_KEEPALIVE_VALS = (var)IOC_IN | IOC_VENDOR | 4L;
-        public static readonly var SIO_UDP_CONNRESET = (var)IOC_IN | IOC_VENDOR | 12L; 
+        public static readonly var SIO_GET_EXTENSION_FUNCTION_POINTER = IOC_INOUT | IOC_WS2 | 6L;
+        public static readonly var SIO_KEEPALIVE_VALS = IOC_IN | IOC_VENDOR | 4L;
+        public static readonly var SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12L; 
 
         // cf. http://support.microsoft.com/default.aspx?scid=kb;en-us;257460
 
@@ -1197,11 +1197,11 @@ namespace sys
  
         // do not reorder
         public static readonly ulong HKEY_CLASSES_ROOT = (ulong)0x80000000UL + iota;
-        public static readonly var HKEY_CURRENT_USER = (var)0;
-        public static readonly var HKEY_LOCAL_MACHINE = (var)1;
-        public static readonly var HKEY_USERS = (var)2;
-        public static readonly var HKEY_PERFORMANCE_DATA = (var)3;
-        public static readonly var HKEY_CURRENT_CONFIG = (var)4;
+        public static readonly var HKEY_CURRENT_USER = 0;
+        public static readonly var HKEY_LOCAL_MACHINE = 1;
+        public static readonly var HKEY_USERS = 2;
+        public static readonly var HKEY_PERFORMANCE_DATA = 3;
+        public static readonly var HKEY_CURRENT_CONFIG = 4;
         public static readonly KEY_QUERY_VALUE HKEY_DYN_DATA = (KEY_QUERY_VALUE)1L;
         public static readonly long KEY_SET_VALUE = (long)2L;
         public static readonly long KEY_CREATE_SUB_KEY = (long)4L;
@@ -1218,36 +1218,36 @@ namespace sys
 
  
         // do not reorder
-        public static readonly var REG_NONE = (var)iota;
-        public static readonly var REG_SZ = (var)0;
-        public static readonly var REG_EXPAND_SZ = (var)1;
-        public static readonly var REG_BINARY = (var)2;
-        public static readonly var REG_DWORD_LITTLE_ENDIAN = (var)3;
-        public static readonly var REG_DWORD_BIG_ENDIAN = (var)4;
-        public static readonly var REG_LINK = (var)5;
-        public static readonly var REG_MULTI_SZ = (var)6;
-        public static readonly var REG_RESOURCE_LIST = (var)7;
-        public static readonly var REG_FULL_RESOURCE_DESCRIPTOR = (var)8;
-        public static readonly var REG_RESOURCE_REQUIREMENTS_LIST = (var)9;
+        public static readonly var REG_NONE = iota;
+        public static readonly var REG_SZ = 0;
+        public static readonly var REG_EXPAND_SZ = 1;
+        public static readonly var REG_BINARY = 2;
+        public static readonly var REG_DWORD_LITTLE_ENDIAN = 3;
+        public static readonly var REG_DWORD_BIG_ENDIAN = 4;
+        public static readonly var REG_LINK = 5;
+        public static readonly var REG_MULTI_SZ = 6;
+        public static readonly var REG_RESOURCE_LIST = 7;
+        public static readonly var REG_FULL_RESOURCE_DESCRIPTOR = 8;
+        public static readonly var REG_RESOURCE_REQUIREMENTS_LIST = 9;
         public static readonly REG_DWORD REG_QWORD_LITTLE_ENDIAN = (REG_DWORD)REG_DWORD_LITTLE_ENDIAN;
-        public static readonly var REG_QWORD = (var)REG_QWORD_LITTLE_ENDIAN;
+        public static readonly var REG_QWORD = REG_QWORD_LITTLE_ENDIAN;
 
 
         public static readonly ulong EVENT_MODIFY_STATE = (ulong)0x0002UL;
-        public static readonly var EVENT_ALL_ACCESS = (var)STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3UL;
+        public static readonly var EVENT_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3UL;
 
         public static readonly ulong MUTANT_QUERY_STATE = (ulong)0x0001UL;
-        public static readonly var MUTANT_ALL_ACCESS = (var)STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | MUTANT_QUERY_STATE;
+        public static readonly var MUTANT_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | MUTANT_QUERY_STATE;
 
         public static readonly ulong SEMAPHORE_MODIFY_STATE = (ulong)0x0002UL;
-        public static readonly var SEMAPHORE_ALL_ACCESS = (var)STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3UL;
+        public static readonly var SEMAPHORE_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0x3UL;
 
         public static readonly ulong TIMER_QUERY_STATE = (ulong)0x0001UL;
         public static readonly ulong TIMER_MODIFY_STATE = (ulong)0x0002UL;
-        public static readonly var TIMER_ALL_ACCESS = (var)STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | TIMER_QUERY_STATE | TIMER_MODIFY_STATE;
+        public static readonly var TIMER_ALL_ACCESS = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | TIMER_QUERY_STATE | TIMER_MODIFY_STATE;
 
-        public static readonly var MUTEX_MODIFY_STATE = (var)MUTANT_QUERY_STATE;
-        public static readonly var MUTEX_ALL_ACCESS = (var)MUTANT_ALL_ACCESS;
+        public static readonly var MUTEX_MODIFY_STATE = MUTANT_QUERY_STATE;
+        public static readonly var MUTEX_ALL_ACCESS = MUTANT_ALL_ACCESS;
 
         public static readonly ulong CREATE_EVENT_MANUAL_RESET = (ulong)0x1UL;
         public static readonly ulong CREATE_EVENT_INITIAL_SET = (ulong)0x2UL;
@@ -1416,10 +1416,10 @@ namespace sys
         public static readonly ulong MB_ICONEXCLAMATION = (ulong)0x00000030UL;
         public static readonly ulong MB_ICONASTERISK = (ulong)0x00000040UL;
         public static readonly ulong MB_USERICON = (ulong)0x00000080UL;
-        public static readonly var MB_ICONWARNING = (var)MB_ICONEXCLAMATION;
-        public static readonly var MB_ICONERROR = (var)MB_ICONHAND;
-        public static readonly var MB_ICONINFORMATION = (var)MB_ICONASTERISK;
-        public static readonly var MB_ICONSTOP = (var)MB_ICONHAND;
+        public static readonly var MB_ICONWARNING = MB_ICONEXCLAMATION;
+        public static readonly var MB_ICONERROR = MB_ICONHAND;
+        public static readonly var MB_ICONINFORMATION = MB_ICONASTERISK;
+        public static readonly var MB_ICONSTOP = MB_ICONHAND;
         public static readonly ulong MB_DEFBUTTON1 = (ulong)0x00000000UL;
         public static readonly ulong MB_DEFBUTTON2 = (ulong)0x00000100UL;
         public static readonly ulong MB_DEFBUTTON3 = (ulong)0x00000200UL;
@@ -1794,8 +1794,8 @@ namespace sys
         public static readonly ulong SHTDN_REASON_MINOR_TERMSRV = (ulong)0x00000020UL;
         public static readonly ulong SHTDN_REASON_MINOR_DC_PROMOTION = (ulong)0x00000021UL;
         public static readonly ulong SHTDN_REASON_MINOR_DC_DEMOTION = (ulong)0x00000022UL;
-        public static readonly var SHTDN_REASON_UNKNOWN = (var)SHTDN_REASON_MINOR_NONE;
-        public static readonly var SHTDN_REASON_LEGACY_API = (var)SHTDN_REASON_MAJOR_LEGACY_API | SHTDN_REASON_FLAG_PLANNED;
+        public static readonly var SHTDN_REASON_UNKNOWN = SHTDN_REASON_MINOR_NONE;
+        public static readonly var SHTDN_REASON_LEGACY_API = SHTDN_REASON_MAJOR_LEGACY_API | SHTDN_REASON_FLAG_PLANNED;
         public static readonly ulong SHTDN_REASON_VALID_BIT_MASK = (ulong)0xc0ffffffUL;
 
         public static readonly ulong SHUTDOWN_NORETRY = (ulong)0x1UL;
@@ -1812,7 +1812,7 @@ namespace sys
         public static readonly ulong MUI_LANGUAGE_NAME = (ulong)0x8UL;
         public static readonly ulong MUI_MERGE_SYSTEM_FALLBACK = (ulong)0x10UL;
         public static readonly ulong MUI_MERGE_USER_FALLBACK = (ulong)0x20UL;
-        public static readonly var MUI_UI_FALLBACK = (var)MUI_MERGE_SYSTEM_FALLBACK | MUI_MERGE_USER_FALLBACK;
+        public static readonly var MUI_UI_FALLBACK = MUI_MERGE_SYSTEM_FALLBACK | MUI_MERGE_USER_FALLBACK;
         public static readonly ulong MUI_THREAD_LANGUAGES = (ulong)0x40UL;
         public static readonly ulong MUI_CONSOLE_FILTER = (ulong)0x100UL;
         public static readonly ulong MUI_COMPLEX_SCRIPT_FILTER = (ulong)0x200UL;

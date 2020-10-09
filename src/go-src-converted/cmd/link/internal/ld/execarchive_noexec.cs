@@ -4,7 +4,7 @@
 
 // +build wasm windows
 
-// package ld -- go2cs converted at 2020 October 08 04:38:44 UTC
+// package ld -- go2cs converted at 2020 October 09 05:49:39 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\execarchive_noexec.go
 
@@ -17,7 +17,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        private static readonly var syscallExecSupported = (var)false;
+        private static readonly var syscallExecSupported = false;
 
 
 

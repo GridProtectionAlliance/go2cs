@@ -10,7 +10,7 @@
 // +build !mipsle
 // +build !wasm
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:20 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:42 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cputicks.go
 

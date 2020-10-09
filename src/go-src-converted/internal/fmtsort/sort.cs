@@ -6,7 +6,7 @@
 // for maps, on behalf of the fmt and text/template packages.
 // It is not guaranteed to be efficient and works only for types
 // that are valid map keys.
-// package fmtsort -- go2cs converted at 2020 October 08 03:26:03 UTC
+// package fmtsort -- go2cs converted at 2020 October 09 04:59:31 UTC
 // import "internal/fmtsort" ==> using fmtsort = go.@internal.fmtsort_package
 // Original source: C:\Go\src\internal\fmtsort\sort.go
 using reflect = go.reflect_package;

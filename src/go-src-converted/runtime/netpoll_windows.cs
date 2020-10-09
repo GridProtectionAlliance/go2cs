@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:41 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:18 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_windows.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -17,7 +17,7 @@ namespace go
 
 
 
-        private static readonly var _INVALID_HANDLE_VALUE = (var)~uintptr(0L);
+        private static readonly var _INVALID_HANDLE_VALUE = ~uintptr(0L);
 
         // net_op must be the same as beginning of internal/poll.operation.
         // Keep these in sync.

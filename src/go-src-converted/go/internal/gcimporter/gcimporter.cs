@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package gcimporter implements Import for gc-generated object files.
-// package gcimporter -- go2cs converted at 2020 October 08 04:56:09 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:42 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Go\src\go\internal\gcimporter\gcimporter.go
 // import "go/internal/gcimporter"
@@ -28,7 +28,7 @@ namespace @internal
     public static partial class gcimporter_package
     {
         // debugging/development support
-        private static readonly var debug = (var)false;
+        private static readonly var debug = false;
 
 
 

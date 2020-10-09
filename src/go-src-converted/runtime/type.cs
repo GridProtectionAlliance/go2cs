@@ -4,7 +4,7 @@
 
 // Runtime type representation.
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:19 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:08 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\type.go
 using @unsafe = go.@unsafe_package;

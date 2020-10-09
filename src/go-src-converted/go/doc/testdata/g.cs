@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // The package g is a go/doc test for mixed exported/unexported values.
-// package g -- go2cs converted at 2020 October 08 04:02:53 UTC
+// package g -- go2cs converted at 2020 October 09 05:19:11 UTC
 // import "go/doc.g" ==> using g = go.go.doc.g_package
 // Original source: C:\Go\src\go\doc\testdata\g.go
 
@@ -14,14 +14,14 @@ namespace go
 {
     public static partial class g_package
     {
-        public static readonly var A = (var)iota;
-        private static readonly var b = (var)iota;
-        private static readonly var c = (var)0;
-        public static readonly var D = (var)1;
-        public static readonly var E = (var)2;
-        private static readonly var f = (var)3;
-        public static readonly var G = (var)4;
-        public static readonly var H = (var)5;
+        public static readonly var A = iota;
+        private static readonly var b = iota;
+        private static readonly var c = 0;
+        public static readonly var D = 1;
+        public static readonly var E = 2;
+        private static readonly var f = 3;
+        public static readonly var G = 4;
+        public static readonly var H = 5;
 
 
         private static long c1 = 1L;        public static long C2 = 2L;        private static long c3 = 3L;

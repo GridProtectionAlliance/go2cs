@@ -4,7 +4,7 @@
 
 // +build !windows,!darwin
 
-// package robustio -- go2cs converted at 2020 October 08 04:34:13 UTC
+// package robustio -- go2cs converted at 2020 October 09 05:45:43 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Go\src\cmd\go\internal\robustio\robustio_other.go
 using ioutil = go.io.ioutil_package;

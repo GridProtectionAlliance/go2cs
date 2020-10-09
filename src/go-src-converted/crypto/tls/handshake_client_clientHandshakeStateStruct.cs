@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:37:36 UTC
+//     Generated on 2020 October 09 04:55:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,8 @@ using strings = go.strings_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

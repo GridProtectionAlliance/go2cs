@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:31:59 UTC
+//     Generated on 2020 October 09 05:43:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using format = go.go.format_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using template = go.text.template_package;
+
+#nullable enable
 
 namespace go
 {

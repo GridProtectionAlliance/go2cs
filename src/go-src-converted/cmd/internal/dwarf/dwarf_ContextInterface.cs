@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:07:48 UTC
+//     Generated on 2020 October 09 05:22:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Context<T> : Context
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace @internal
             private delegate void PtrSizeByPtr(ptr<T> value);
             private delegate void PtrSizeByVal(T value);
 
-            private static readonly PtrSizeByPtr s_PtrSizeByPtr;
-            private static readonly PtrSizeByVal s_PtrSizeByVal;
+            private static readonly PtrSizeByPtr? s_PtrSizeByPtr;
+            private static readonly PtrSizeByVal? s_PtrSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void PtrSize()
@@ -100,8 +101,8 @@ namespace @internal
             private delegate void AddIntByPtr(ptr<T> value, Sym s, long size, long i);
             private delegate void AddIntByVal(T value, Sym s, long size, long i);
 
-            private static readonly AddIntByPtr s_AddIntByPtr;
-            private static readonly AddIntByVal s_AddIntByVal;
+            private static readonly AddIntByPtr? s_AddIntByPtr;
+            private static readonly AddIntByVal? s_AddIntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddInt(Sym s, long size, long i)
@@ -125,8 +126,8 @@ namespace @internal
             private delegate void AddBytesByPtr(ptr<T> value, Sym s, slice<byte> b);
             private delegate void AddBytesByVal(T value, Sym s, slice<byte> b);
 
-            private static readonly AddBytesByPtr s_AddBytesByPtr;
-            private static readonly AddBytesByVal s_AddBytesByVal;
+            private static readonly AddBytesByPtr? s_AddBytesByPtr;
+            private static readonly AddBytesByVal? s_AddBytesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddBytes(Sym s, slice<byte> b)
@@ -150,8 +151,8 @@ namespace @internal
             private delegate void AddAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
             private delegate void AddAddressByVal(T value, Sym s, object t, long ofs);
 
-            private static readonly AddAddressByPtr s_AddAddressByPtr;
-            private static readonly AddAddressByVal s_AddAddressByVal;
+            private static readonly AddAddressByPtr? s_AddAddressByPtr;
+            private static readonly AddAddressByVal? s_AddAddressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddAddress(Sym s, object t, long ofs)
@@ -175,8 +176,8 @@ namespace @internal
             private delegate void AddCURelativeAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
             private delegate void AddCURelativeAddressByVal(T value, Sym s, object t, long ofs);
 
-            private static readonly AddCURelativeAddressByPtr s_AddCURelativeAddressByPtr;
-            private static readonly AddCURelativeAddressByVal s_AddCURelativeAddressByVal;
+            private static readonly AddCURelativeAddressByPtr? s_AddCURelativeAddressByPtr;
+            private static readonly AddCURelativeAddressByVal? s_AddCURelativeAddressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddCURelativeAddress(Sym s, object t, long ofs)
@@ -200,8 +201,8 @@ namespace @internal
             private delegate void AddSectionOffsetByPtr(ptr<T> value, Sym s, long size, object t, long ofs);
             private delegate void AddSectionOffsetByVal(T value, Sym s, long size, object t, long ofs);
 
-            private static readonly AddSectionOffsetByPtr s_AddSectionOffsetByPtr;
-            private static readonly AddSectionOffsetByVal s_AddSectionOffsetByVal;
+            private static readonly AddSectionOffsetByPtr? s_AddSectionOffsetByPtr;
+            private static readonly AddSectionOffsetByVal? s_AddSectionOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddSectionOffset(Sym s, long size, object t, long ofs)
@@ -225,8 +226,8 @@ namespace @internal
             private delegate void AddDWARFAddrSectionOffsetByPtr(ptr<T> value, Sym s, object t, long ofs);
             private delegate void AddDWARFAddrSectionOffsetByVal(T value, Sym s, object t, long ofs);
 
-            private static readonly AddDWARFAddrSectionOffsetByPtr s_AddDWARFAddrSectionOffsetByPtr;
-            private static readonly AddDWARFAddrSectionOffsetByVal s_AddDWARFAddrSectionOffsetByVal;
+            private static readonly AddDWARFAddrSectionOffsetByPtr? s_AddDWARFAddrSectionOffsetByPtr;
+            private static readonly AddDWARFAddrSectionOffsetByVal? s_AddDWARFAddrSectionOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddDWARFAddrSectionOffset(Sym s, object t, long ofs)
@@ -250,8 +251,8 @@ namespace @internal
             private delegate void CurrentOffsetByPtr(ptr<T> value, Sym s);
             private delegate void CurrentOffsetByVal(T value, Sym s);
 
-            private static readonly CurrentOffsetByPtr s_CurrentOffsetByPtr;
-            private static readonly CurrentOffsetByVal s_CurrentOffsetByVal;
+            private static readonly CurrentOffsetByPtr? s_CurrentOffsetByPtr;
+            private static readonly CurrentOffsetByVal? s_CurrentOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CurrentOffset(Sym s)
@@ -275,8 +276,8 @@ namespace @internal
             private delegate void RecordDclReferenceByPtr(ptr<T> value, Sym from, Sym to, long dclIdx, long inlIndex);
             private delegate void RecordDclReferenceByVal(T value, Sym from, Sym to, long dclIdx, long inlIndex);
 
-            private static readonly RecordDclReferenceByPtr s_RecordDclReferenceByPtr;
-            private static readonly RecordDclReferenceByVal s_RecordDclReferenceByVal;
+            private static readonly RecordDclReferenceByPtr? s_RecordDclReferenceByPtr;
+            private static readonly RecordDclReferenceByVal? s_RecordDclReferenceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RecordDclReference(Sym from, Sym to, long dclIdx, long inlIndex)
@@ -300,8 +301,8 @@ namespace @internal
             private delegate void RecordChildDieOffsetsByPtr(ptr<T> value, Sym s, slice<ptr<Var>> vars, slice<int> offsets);
             private delegate void RecordChildDieOffsetsByVal(T value, Sym s, slice<ptr<Var>> vars, slice<int> offsets);
 
-            private static readonly RecordChildDieOffsetsByPtr s_RecordChildDieOffsetsByPtr;
-            private static readonly RecordChildDieOffsetsByVal s_RecordChildDieOffsetsByVal;
+            private static readonly RecordChildDieOffsetsByPtr? s_RecordChildDieOffsetsByPtr;
+            private static readonly RecordChildDieOffsetsByVal? s_RecordChildDieOffsetsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void RecordChildDieOffsets(Sym s, slice<ptr<Var>> vars, slice<int> offsets)
@@ -325,8 +326,8 @@ namespace @internal
             private delegate void AddStringByPtr(ptr<T> value, Sym s, @string v);
             private delegate void AddStringByVal(T value, Sym s, @string v);
 
-            private static readonly AddStringByPtr s_AddStringByPtr;
-            private static readonly AddStringByVal s_AddStringByVal;
+            private static readonly AddStringByPtr? s_AddStringByPtr;
+            private static readonly AddStringByVal? s_AddStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddString(Sym s, @string v)
@@ -350,8 +351,8 @@ namespace @internal
             private delegate void AddFileRefByPtr(ptr<T> value, Sym s, object f);
             private delegate void AddFileRefByVal(T value, Sym s, object f);
 
-            private static readonly AddFileRefByPtr s_AddFileRefByPtr;
-            private static readonly AddFileRefByVal s_AddFileRefByVal;
+            private static readonly AddFileRefByPtr? s_AddFileRefByPtr;
+            private static readonly AddFileRefByVal? s_AddFileRefByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void AddFileRef(Sym s, object f)
@@ -375,8 +376,8 @@ namespace @internal
             private delegate void LogfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate void LogfByVal(T value, @string format, params object[] args);
 
-            private static readonly LogfByPtr s_LogfByPtr;
-            private static readonly LogfByVal s_LogfByVal;
+            private static readonly LogfByPtr? s_LogfByPtr;
+            private static readonly LogfByVal? s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Logf(@string format, params object[] args)
@@ -397,7 +398,7 @@ namespace @internal
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Context()

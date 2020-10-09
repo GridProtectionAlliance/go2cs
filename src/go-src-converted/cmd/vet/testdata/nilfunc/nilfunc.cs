@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package nilfunc -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package nilfunc -- go2cs converted at 2020 October 09 06:05:09 UTC
 // import "cmd/vet/testdata/nilfunc" ==> using nilfunc = go.cmd.vet.testdata.nilfunc_package
 // Original source: C:\Go\src\cmd\vet\testdata\nilfunc\nilfunc.go
 

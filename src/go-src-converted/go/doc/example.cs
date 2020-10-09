@@ -4,7 +4,7 @@
 
 // Extract example functions from file ASTs.
 
-// package doc -- go2cs converted at 2020 October 08 04:02:44 UTC
+// package doc -- go2cs converted at 2020 October 09 05:19:05 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\example.go
 using ast = go.go.ast_package;

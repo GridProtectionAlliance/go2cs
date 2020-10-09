@@ -6,7 +6,7 @@
 //
 // This package is similar to cmd/internal/objfile which also reads
 // Go object files.
-// package objfile -- go2cs converted at 2020 October 08 04:41:34 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:52:13 UTC
 // import "cmd/oldlink/internal/objfile" ==> using objfile = go.cmd.oldlink.@internal.objfile_package
 // Original source: C:\Go\src\cmd\oldlink\internal\objfile\objfile.go
 using bufio = go.bufio_package;
@@ -77,10 +77,10 @@ namespace @internal
 
         // Sanity-check duplicate symbol contents, issuing warning
         // when duplicates have different lengths or contents.
-        public static readonly var StrictDupsWarnFlag = (var)0; 
+        public static readonly var StrictDupsWarnFlag = 0; 
 
         // Similar to StrictDupsWarnFlag, but issue fatal error.
-        public static readonly var StrictDupsErrFlag = (var)1;
+        public static readonly var StrictDupsErrFlag = 1;
 
 
         // Load loads an object file f into library lib.

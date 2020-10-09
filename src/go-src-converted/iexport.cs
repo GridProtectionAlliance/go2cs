@@ -6,7 +6,7 @@
 // This file was derived from $GOROOT/src/cmd/compile/internal/gc/iexport.go;
 // see that file for specification of the format.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:32 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:17 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\iexport.go
 using bytes = go.bytes_package;

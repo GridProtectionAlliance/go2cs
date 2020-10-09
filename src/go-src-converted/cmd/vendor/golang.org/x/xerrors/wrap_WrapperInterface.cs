@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:35 UTC
+//     Generated on 2020 October 09 06:05:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using reflect = go.reflect_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace x
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Wrapper<T> : Wrapper
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace x
             private delegate error UnwrapByPtr(ptr<T> value);
             private delegate error UnwrapByVal(T value);
 
-            private static readonly UnwrapByPtr s_UnwrapByPtr;
-            private static readonly UnwrapByVal s_UnwrapByVal;
+            private static readonly UnwrapByPtr? s_UnwrapByPtr;
+            private static readonly UnwrapByVal? s_UnwrapByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Unwrap()
@@ -87,7 +88,7 @@ namespace x
                 return s_UnwrapByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Wrapper()

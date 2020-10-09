@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package idna -- go2cs converted at 2020 October 08 05:00:40 UTC
+// package idna -- go2cs converted at 2020 October 09 06:06:56 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\idna\punycode.go
 // This file implements the Punycode algorithm from RFC 3492.

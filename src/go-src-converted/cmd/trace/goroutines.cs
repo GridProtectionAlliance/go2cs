@@ -4,7 +4,7 @@
 
 // Goroutine-related profiles.
 
-// package main -- go2cs converted at 2020 October 08 04:42:35 UTC
+// package main -- go2cs converted at 2020 October 09 05:53:06 UTC
 // Original source: C:\Go\src\cmd\trace\goroutines.go
 using fmt = go.fmt_package;
 using template = go.html.template_package;

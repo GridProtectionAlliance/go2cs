@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:27 UTC
+//     Generated on 2020 October 09 04:56:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using ioutil = go.io.ioutil_package;
 using textproto = go.net.textproto_package;
 using os = go.os_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace mime

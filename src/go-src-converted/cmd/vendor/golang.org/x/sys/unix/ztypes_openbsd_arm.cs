@@ -3,7 +3,7 @@
 
 // +build arm,openbsd
 
-// package unix -- go2cs converted at 2020 October 08 04:53:40 UTC
+// package unix -- go2cs converted at 2020 October 09 06:00:46 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\ztypes_openbsd_arm.go
 

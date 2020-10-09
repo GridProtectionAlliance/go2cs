@@ -8,7 +8,7 @@
 // This failed to be true on arm and arm64, which was the root cause
 // of issue 13881.
 
-// package main -- go2cs converted at 2020 October 08 03:43:51 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:56 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\dropm.go
 /*
 #include <stddef.h>

@@ -4,7 +4,7 @@
 
 // Package pkix contains shared, low level structures used for ASN.1 parsing
 // and serialization of X.509 certificates, CRL and OCSP.
-// package pkix -- go2cs converted at 2020 October 08 03:36:56 UTC
+// package pkix -- go2cs converted at 2020 October 09 04:54:52 UTC
 // import "crypto/x509/pkix" ==> using pkix = go.crypto.x509.pkix_package
 // Original source: C:\Go\src\crypto\x509\pkix\pkix.go
 using asn1 = go.encoding.asn1_package;

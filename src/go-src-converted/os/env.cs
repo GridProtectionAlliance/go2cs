@@ -4,7 +4,7 @@
 
 // General environment variables.
 
-// package os -- go2cs converted at 2020 October 08 03:44:19 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:00 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\env.go
 using testlog = go.@internal.testlog_package;

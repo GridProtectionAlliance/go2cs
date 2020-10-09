@@ -5,7 +5,7 @@
 // Package crc64 implements the 64-bit cyclic redundancy check, or CRC-64,
 // checksum. See https://en.wikipedia.org/wiki/Cyclic_redundancy_check for
 // information.
-// package crc64 -- go2cs converted at 2020 October 08 03:30:53 UTC
+// package crc64 -- go2cs converted at 2020 October 09 04:50:09 UTC
 // import "hash/crc64" ==> using crc64 = go.hash.crc64_package
 // Original source: C:\Go\src\hash\crc64\crc64.go
 using errors = go.errors_package;
@@ -156,7 +156,7 @@ namespace hash
         }
 
         private static readonly @string magic = (@string)"crc\x02";
-        private static readonly var marshaledSize = (var)len(magic) + 8L + 8L;
+        private static readonly var marshaledSize = len(magic) + 8L + 8L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

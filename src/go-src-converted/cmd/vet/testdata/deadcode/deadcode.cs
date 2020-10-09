@@ -4,7 +4,7 @@
 
 // This file contains tests for the dead code checker.
 
-// package deadcode -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package deadcode -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/deadcode" ==> using deadcode = go.cmd.vet.testdata.deadcode_package
 // Original source: C:\Go\src\cmd\vet\testdata\deadcode\deadcode.go
 

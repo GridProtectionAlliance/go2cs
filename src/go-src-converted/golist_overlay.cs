@@ -1,4 +1,4 @@
-// package packages -- go2cs converted at 2020 October 08 04:55:08 UTC
+// package packages -- go2cs converted at 2020 October 09 06:01:54 UTC
 // import "golang.org/x/tools/go/packages" ==> using packages = go.golang.org.x.tools.go.packages_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\packages\golist_overlay.go
 using json = go.encoding.json_package;

@@ -1,4 +1,4 @@
-// package inspector -- go2cs converted at 2020 October 08 04:58:26 UTC
+// package inspector -- go2cs converted at 2020 October 09 06:04:59 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/inspector" ==> using inspector = go.cmd.vendor.golang.org.x.tools.go.ast.inspector_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\ast\inspector\typeof.go
 // This file defines func typeOf(ast.Node) uint64.
@@ -20,61 +20,61 @@ namespace ast
 {
     public static partial class inspector_package
     {
-        private static readonly var nArrayType = (var)iota;
-        private static readonly var nAssignStmt = (var)0;
-        private static readonly var nBadDecl = (var)1;
-        private static readonly var nBadExpr = (var)2;
-        private static readonly var nBadStmt = (var)3;
-        private static readonly var nBasicLit = (var)4;
-        private static readonly var nBinaryExpr = (var)5;
-        private static readonly var nBlockStmt = (var)6;
-        private static readonly var nBranchStmt = (var)7;
-        private static readonly var nCallExpr = (var)8;
-        private static readonly var nCaseClause = (var)9;
-        private static readonly var nChanType = (var)10;
-        private static readonly var nCommClause = (var)11;
-        private static readonly var nComment = (var)12;
-        private static readonly var nCommentGroup = (var)13;
-        private static readonly var nCompositeLit = (var)14;
-        private static readonly var nDeclStmt = (var)15;
-        private static readonly var nDeferStmt = (var)16;
-        private static readonly var nEllipsis = (var)17;
-        private static readonly var nEmptyStmt = (var)18;
-        private static readonly var nExprStmt = (var)19;
-        private static readonly var nField = (var)20;
-        private static readonly var nFieldList = (var)21;
-        private static readonly var nFile = (var)22;
-        private static readonly var nForStmt = (var)23;
-        private static readonly var nFuncDecl = (var)24;
-        private static readonly var nFuncLit = (var)25;
-        private static readonly var nFuncType = (var)26;
-        private static readonly var nGenDecl = (var)27;
-        private static readonly var nGoStmt = (var)28;
-        private static readonly var nIdent = (var)29;
-        private static readonly var nIfStmt = (var)30;
-        private static readonly var nImportSpec = (var)31;
-        private static readonly var nIncDecStmt = (var)32;
-        private static readonly var nIndexExpr = (var)33;
-        private static readonly var nInterfaceType = (var)34;
-        private static readonly var nKeyValueExpr = (var)35;
-        private static readonly var nLabeledStmt = (var)36;
-        private static readonly var nMapType = (var)37;
-        private static readonly var nPackage = (var)38;
-        private static readonly var nParenExpr = (var)39;
-        private static readonly var nRangeStmt = (var)40;
-        private static readonly var nReturnStmt = (var)41;
-        private static readonly var nSelectStmt = (var)42;
-        private static readonly var nSelectorExpr = (var)43;
-        private static readonly var nSendStmt = (var)44;
-        private static readonly var nSliceExpr = (var)45;
-        private static readonly var nStarExpr = (var)46;
-        private static readonly var nStructType = (var)47;
-        private static readonly var nSwitchStmt = (var)48;
-        private static readonly var nTypeAssertExpr = (var)49;
-        private static readonly var nTypeSpec = (var)50;
-        private static readonly var nTypeSwitchStmt = (var)51;
-        private static readonly var nUnaryExpr = (var)52;
-        private static readonly var nValueSpec = (var)53;
+        private static readonly var nArrayType = iota;
+        private static readonly var nAssignStmt = 0;
+        private static readonly var nBadDecl = 1;
+        private static readonly var nBadExpr = 2;
+        private static readonly var nBadStmt = 3;
+        private static readonly var nBasicLit = 4;
+        private static readonly var nBinaryExpr = 5;
+        private static readonly var nBlockStmt = 6;
+        private static readonly var nBranchStmt = 7;
+        private static readonly var nCallExpr = 8;
+        private static readonly var nCaseClause = 9;
+        private static readonly var nChanType = 10;
+        private static readonly var nCommClause = 11;
+        private static readonly var nComment = 12;
+        private static readonly var nCommentGroup = 13;
+        private static readonly var nCompositeLit = 14;
+        private static readonly var nDeclStmt = 15;
+        private static readonly var nDeferStmt = 16;
+        private static readonly var nEllipsis = 17;
+        private static readonly var nEmptyStmt = 18;
+        private static readonly var nExprStmt = 19;
+        private static readonly var nField = 20;
+        private static readonly var nFieldList = 21;
+        private static readonly var nFile = 22;
+        private static readonly var nForStmt = 23;
+        private static readonly var nFuncDecl = 24;
+        private static readonly var nFuncLit = 25;
+        private static readonly var nFuncType = 26;
+        private static readonly var nGenDecl = 27;
+        private static readonly var nGoStmt = 28;
+        private static readonly var nIdent = 29;
+        private static readonly var nIfStmt = 30;
+        private static readonly var nImportSpec = 31;
+        private static readonly var nIncDecStmt = 32;
+        private static readonly var nIndexExpr = 33;
+        private static readonly var nInterfaceType = 34;
+        private static readonly var nKeyValueExpr = 35;
+        private static readonly var nLabeledStmt = 36;
+        private static readonly var nMapType = 37;
+        private static readonly var nPackage = 38;
+        private static readonly var nParenExpr = 39;
+        private static readonly var nRangeStmt = 40;
+        private static readonly var nReturnStmt = 41;
+        private static readonly var nSelectStmt = 42;
+        private static readonly var nSelectorExpr = 43;
+        private static readonly var nSendStmt = 44;
+        private static readonly var nSliceExpr = 45;
+        private static readonly var nStarExpr = 46;
+        private static readonly var nStructType = 47;
+        private static readonly var nSwitchStmt = 48;
+        private static readonly var nTypeAssertExpr = 49;
+        private static readonly var nTypeSpec = 50;
+        private static readonly var nTypeSwitchStmt = 51;
+        private static readonly var nUnaryExpr = 52;
+        private static readonly var nValueSpec = 53;
 
 
         // typeOf returns a distinct single-bit value that represents the type of n.

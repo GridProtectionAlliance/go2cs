@@ -173,7 +173,7 @@ GOARCH, GOOS, and GOROOT are recorded at compile time and made available by
 constants or functions in this package, but they do not influence the execution
 of the run-time system.
 */
-// package runtime -- go2cs converted at 2020 October 08 03:19:43 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:57 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\extern.go
 using sys = go.runtime.@internal.sys_package;

@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package http -- go2cs converted at 2020 October 08 03:40:21 UTC
+// package http -- go2cs converted at 2020 October 09 04:57:53 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\roundtrip_js.go
 using errors = go.errors_package;

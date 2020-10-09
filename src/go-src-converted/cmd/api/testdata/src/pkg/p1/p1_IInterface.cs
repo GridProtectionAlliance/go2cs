@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:26 UTC
+//     Generated on 2020 October 09 05:20:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class I<T> : I
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace pkg
             private delegate long SetByPtr(ptr<T> value, @string name, long balance);
             private delegate long SetByVal(T value, @string name, long balance);
 
-            private static readonly SetByPtr s_SetByPtr;
-            private static readonly SetByVal s_SetByVal;
+            private static readonly SetByPtr? s_SetByPtr;
+            private static readonly SetByVal? s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Set(@string name, long balance)
@@ -91,8 +92,8 @@ namespace pkg
             private delegate long GetByPtr(ptr<T> value, @string _p0);
             private delegate long GetByVal(T value, @string _p0);
 
-            private static readonly GetByPtr s_GetByPtr;
-            private static readonly GetByVal s_GetByVal;
+            private static readonly GetByPtr? s_GetByPtr;
+            private static readonly GetByVal? s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Get(@string _p0)
@@ -111,8 +112,8 @@ namespace pkg
             private delegate long GetNamedByPtr(ptr<T> value, @string _p0);
             private delegate long GetNamedByVal(T value, @string _p0);
 
-            private static readonly GetNamedByPtr s_GetNamedByPtr;
-            private static readonly GetNamedByVal s_GetNamedByVal;
+            private static readonly GetNamedByPtr? s_GetNamedByPtr;
+            private static readonly GetNamedByVal? s_GetNamedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long GetNamed(@string _p0)
@@ -131,8 +132,8 @@ namespace pkg
             private delegate long privateByPtr(ptr<T> value);
             private delegate long privateByVal(T value);
 
-            private static readonly privateByPtr s_privateByPtr;
-            private static readonly privateByVal s_privateByVal;
+            private static readonly privateByPtr? s_privateByPtr;
+            private static readonly privateByVal? s_privateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long private()
@@ -151,8 +152,8 @@ namespace pkg
             private delegate @string NameByPtr(ptr<T> value);
             private delegate @string NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Name()
@@ -168,7 +169,7 @@ namespace pkg
                 return s_NameByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static I()

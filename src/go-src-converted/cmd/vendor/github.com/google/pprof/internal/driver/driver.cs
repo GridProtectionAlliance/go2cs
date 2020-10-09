@@ -15,7 +15,7 @@
 // Package driver implements the core pprof functionality. It can be
 // parameterized with a flag implementation, fetch and symbolize
 // mechanisms.
-// package driver -- go2cs converted at 2020 October 08 04:42:57 UTC
+// package driver -- go2cs converted at 2020 October 09 05:53:26 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\driver.go
 using bytes = go.bytes_package;

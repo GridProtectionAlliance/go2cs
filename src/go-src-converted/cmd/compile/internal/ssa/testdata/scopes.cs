@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
+// package main -- go2cs converted at 2020 October 09 05:39:57 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\scopes.go
 using fmt = go.fmt_package;
 using time = go.time_package;

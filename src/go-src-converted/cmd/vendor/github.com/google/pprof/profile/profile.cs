@@ -14,7 +14,7 @@
 
 // Package profile provides a representation of profile.proto and
 // methods to encode/decode profiles in this format.
-// package profile -- go2cs converted at 2020 October 08 04:43:39 UTC
+// package profile -- go2cs converted at 2020 October 09 05:54:00 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\profile.go
 using bytes = go.bytes_package;

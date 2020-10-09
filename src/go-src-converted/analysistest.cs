@@ -1,5 +1,5 @@
 // Package analysistest provides utilities for testing analyzers.
-// package analysistest -- go2cs converted at 2020 October 08 04:54:23 UTC
+// package analysistest -- go2cs converted at 2020 October 09 06:01:20 UTC
 // import "golang.org/x/tools/go/analysis/analysistest" ==> using analysistest = go.golang.org.x.tools.go.analysis.analysistest_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\analysistest\analysistest.go
 using bytes = go.bytes_package;

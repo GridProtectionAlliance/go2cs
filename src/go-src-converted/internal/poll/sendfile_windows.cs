@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 October 08 03:32:45 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:21 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\sendfile_windows.go
 using io = go.io_package;
@@ -63,7 +63,7 @@ namespace @internal
                     return ;
                 }
             }
-            const var maxChunkSizePerCall = (var)int64(0x7fffffffUL - 1L);
+            const var maxChunkSizePerCall = int64(0x7fffffffUL - 1L);
 
 
 

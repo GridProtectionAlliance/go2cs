@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cryptobyte -- go2cs converted at 2020 October 08 05:00:01 UTC
+// package cryptobyte -- go2cs converted at 2020 October 09 06:06:21 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte" ==> using cryptobyte = go.vendor.golang.org.x.crypto.cryptobyte_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\cryptobyte\builder.go
 using errors = go.errors_package;

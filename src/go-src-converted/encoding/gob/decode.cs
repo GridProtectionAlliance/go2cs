@@ -4,7 +4,7 @@
 
 //go:generate go run decgen.go -output dec_helpers.go
 
-// package gob -- go2cs converted at 2020 October 08 03:42:35 UTC
+// package gob -- go2cs converted at 2020 October 09 04:59:50 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\decode.go
 using encoding = go.encoding_package;
@@ -899,8 +899,8 @@ namespace encoding
             var elemZ = reflect.Zero(mtyp.Elem());
             for (long i = 0L; i < n; i++)
             {
-                var key = decodeIntoValue(_addr_state, keyOp, keyIsPtr, keyP.Elem(), _addr_keyInstr);
-                var elem = decodeIntoValue(_addr_state, elemOp, elemIsPtr, elemP.Elem(), _addr_elemInstr);
+                var key = decodeIntoValue(_addr_state, keyOp, keyIsPtr, keyP.Elem(), keyInstr);
+                var elem = decodeIntoValue(_addr_state, elemOp, elemIsPtr, elemP.Elem(), elemInstr);
                 value.SetMapIndex(key, elem);
                 keyP.Elem().Set(keyZ);
                 elemP.Elem().Set(elemZ);

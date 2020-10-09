@@ -5,7 +5,7 @@
 // +build linux
 // +build mips mipsle
 
-// package unix -- go2cs converted at 2020 October 08 04:47:39 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:50 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_mipsx.go
 using syscall = go.syscall_package;
@@ -199,9 +199,9 @@ namespace sys
 
         }
 
-        private static readonly var rlimInf32 = (var)~uint32(0L);
+        private static readonly var rlimInf32 = ~uint32(0L);
 
-        private static readonly var rlimInf64 = (var)~uint64(0L);
+        private static readonly var rlimInf64 = ~uint64(0L);
 
 
 

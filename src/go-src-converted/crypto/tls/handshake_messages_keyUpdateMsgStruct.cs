@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:09 UTC
+//     Generated on 2020 October 09 04:55:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using fmt = go.fmt_package;
 using strings = go.strings_package;
 using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

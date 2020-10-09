@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:31:57 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:50 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\walk.go
 using types = go.cmd.compile.@internal.types_package;
@@ -3328,13 +3328,13 @@ opswitch:
 
         }
 
-        private static readonly var mapslow = (var)iota;
-        private static readonly var mapfast32 = (var)0;
-        private static readonly var mapfast32ptr = (var)1;
-        private static readonly var mapfast64 = (var)2;
-        private static readonly var mapfast64ptr = (var)3;
-        private static readonly var mapfaststr = (var)4;
-        private static readonly var nmapfast = (var)5;
+        private static readonly var mapslow = iota;
+        private static readonly var mapfast32 = 0;
+        private static readonly var mapfast32ptr = 1;
+        private static readonly var mapfast64 = 2;
+        private static readonly var mapfast64ptr = 3;
+        private static readonly var mapfaststr = 4;
+        private static readonly var nmapfast = 5;
 
 
         private partial struct mapnames // : array<@string>

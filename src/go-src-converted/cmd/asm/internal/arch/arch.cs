@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package arch defines architecture-specific information and support functions.
-// package arch -- go2cs converted at 2020 October 08 04:04:30 UTC
+// package arch -- go2cs converted at 2020 October 09 05:20:12 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Go\src\cmd\asm\internal\arch\arch.go
 using obj = go.cmd.@internal.obj_package;
@@ -28,10 +28,10 @@ namespace @internal
     public static partial class arch_package
     {
         // Pseudo-registers whose names are the constant name without the leading R.
-        public static readonly var RFP = (var)-(iota + 1L);
-        public static readonly var RSB = (var)0;
-        public static readonly var RSP = (var)1;
-        public static readonly var RPC = (var)2;
+        public static readonly var RFP = -(iota + 1L);
+        public static readonly var RSB = 0;
+        public static readonly var RSP = 1;
+        public static readonly var RPC = 2;
 
 
         // Arch wraps the link architecture object with more architecture-specific information.

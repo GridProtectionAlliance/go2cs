@@ -4,7 +4,7 @@
 
 // +build aix darwin,!race linux,!race freebsd,!race netbsd openbsd solaris dragonfly
 
-// package unix -- go2cs converted at 2020 October 08 04:46:31 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:19 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\race0.go
 using @unsafe = go.@unsafe_package;
@@ -19,7 +19,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        private static readonly var raceenabled = (var)false;
+        private static readonly var raceenabled = false;
 
 
 

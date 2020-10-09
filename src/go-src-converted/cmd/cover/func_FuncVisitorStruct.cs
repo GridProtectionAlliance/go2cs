@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:32:34 UTC
+//     Generated on 2020 October 09 05:44:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,6 +29,8 @@ using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
 using tabwriter = go.text.tabwriter_package;
+
+#nullable enable
 
 namespace go
 {

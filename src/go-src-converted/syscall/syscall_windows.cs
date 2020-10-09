@@ -4,7 +4,7 @@
 
 // Windows system calls.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:48 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:02:01 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_windows.go
 using errorspkg = go.errors_package;
@@ -26,7 +26,7 @@ namespace go
         {
         }
 
-        public static readonly var InvalidHandle = (var)~Handle(0L);
+        public static readonly var InvalidHandle = ~Handle(0L);
 
         // StringToUTF16 returns the UTF-16 encoding of the UTF-8 string s,
         // with a terminating NUL added. If s contains a NUL byte this
@@ -210,7 +210,7 @@ namespace go
 
         }
 
-        private static readonly var _ERROR_BAD_NETPATH = (var)Errno(53L);
+        private static readonly var _ERROR_BAD_NETPATH = Errno(53L);
 
 
 
@@ -526,7 +526,7 @@ namespace go
 
         private static var procSetFilePointerEx = modkernel32.NewProc("SetFilePointerEx");
 
-        private static readonly var ptrSize = (var)@unsafe.Sizeof(uintptr(0L));
+        private static readonly var ptrSize = @unsafe.Sizeof(uintptr(0L));
 
         // setFilePointerEx calls SetFilePointerEx.
         // See https://msdn.microsoft.com/en-us/library/windows/desktop/aa365542(v=vs.85).aspx
@@ -615,7 +615,7 @@ namespace go
             return r;
         }
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
 
 
@@ -893,7 +893,7 @@ namespace go
 
         // net api calls
 
-        private static readonly var socket_error = (var)uintptr(~uint32(0L));
+        private static readonly var socket_error = uintptr(~uint32(0L));
 
         //sys    WSAStartup(verreq uint32, data *WSAData) (sockerr error) = ws2_32.WSAStartup
         //sys    WSACleanup() (err error) [failretval==socket_error] = ws2_32.WSACleanup

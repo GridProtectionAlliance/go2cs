@@ -18,7 +18,7 @@
 // Note that the examples in this package assume a Unix system.
 // They may not run on Windows, and they do not run in the Go Playground
 // used by golang.org and godoc.org.
-// package exec -- go2cs converted at 2020 October 08 03:40:54 UTC
+// package exec -- go2cs converted at 2020 October 09 04:58:23 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\exec.go
 using bytes = go.bytes_package;

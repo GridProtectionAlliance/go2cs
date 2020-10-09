@@ -7,7 +7,7 @@
 // See tzfile(5), https://en.wikipedia.org/wiki/Zoneinfo,
 // and ftp://munnari.oz.au/pub/oldtz/
 
-// package time -- go2cs converted at 2020 October 08 03:45:56 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:15 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_read.go
 using errors = go.errors_package;
@@ -222,12 +222,12 @@ namespace go
             //    number of transition times
             //    number of local time zones
             //    number of characters of time zone abbrev strings
-            const var NUTCLocal = (var)iota;
-            const var NStdWall = (var)0;
-            const var NLeap = (var)1;
-            const var NTime = (var)2;
-            const var NZone = (var)3;
-            const var NChar = (var)4;
+            const var NUTCLocal = iota;
+            const var NStdWall = 0;
+            const var NLeap = 1;
+            const var NTime = 2;
+            const var NZone = 3;
+            const var NChar = 4;
 
             array<long> n = new array<long>(6L);
             {

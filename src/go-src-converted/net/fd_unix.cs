@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 October 08 03:32:58 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:27 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\fd_unix.go
 using context = go.context_package;

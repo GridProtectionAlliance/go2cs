@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:42:47 UTC
+// package main -- go2cs converted at 2020 October 09 05:53:17 UTC
 // Original source: C:\Go\src\cmd\trace\trace.go
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
@@ -290,7 +290,7 @@ namespace go
 
             var c = viewerDataTraceConsumer(w, start, end);
             {
-                var err = generateTrace(_addr_params, c);
+                var err = generateTrace(params, c);
 
                 if (err != null)
                 {
@@ -324,7 +324,7 @@ namespace go
             ptr<traceParams> @params = addr(new traceParams(parsed:res,endTime:math.MaxInt64,));
             var (s, c) = splittingTraceConsumer(100L << (int)(20L)); // 100M
             {
-                var err = generateTrace(_addr_params, c);
+                var err = generateTrace(params, c);
 
                 if (err != null)
                 {
@@ -392,7 +392,7 @@ namespace go
         }
 
         private static readonly traceviewMode modeGoroutineOriented = (traceviewMode)1L << (int)(iota);
-        private static readonly var modeTaskOriented = (var)0;
+        private static readonly var modeTaskOriented = 0;
 
 
         private partial struct traceContext
@@ -436,12 +436,12 @@ namespace go
         }
 
         private static readonly gState gDead = (gState)iota;
-        private static readonly var gRunnable = (var)0;
-        private static readonly var gRunning = (var)1;
-        private static readonly var gWaiting = (var)2;
-        private static readonly var gWaitingGC = (var)3;
+        private static readonly var gRunnable = 0;
+        private static readonly var gRunning = 1;
+        private static readonly var gWaiting = 2;
+        private static readonly var gWaitingGC = 3;
 
-        private static readonly var gStateCount = (var)4;
+        private static readonly var gStateCount = 4;
 
 
         private partial struct gInfo

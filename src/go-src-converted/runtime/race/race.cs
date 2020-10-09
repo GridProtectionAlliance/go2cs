@@ -4,7 +4,7 @@
 
 // +build race,linux,amd64 race,freebsd,amd64 race,netbsd,amd64 race,darwin,amd64 race,windows,amd64 race,linux,ppc64le race,linux,arm64
 
-// package race -- go2cs converted at 2020 October 08 03:43:30 UTC
+// package race -- go2cs converted at 2020 October 09 05:00:41 UTC
 // import "runtime/race" ==> using race = go.runtime.race_package
 // Original source: C:\Go\src\runtime\race\race.go
 // This file merely ensures that we link in runtime/cgo in race build,

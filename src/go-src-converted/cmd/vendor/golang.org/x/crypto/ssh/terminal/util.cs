@@ -14,7 +14,7 @@
 //             panic(err)
 //     }
 //     defer terminal.Restore(0, oldState)
-// package terminal -- go2cs converted at 2020 October 08 04:45:43 UTC
+// package terminal -- go2cs converted at 2020 October 09 05:55:48 UTC
 // import "cmd/vendor/golang.org/x/crypto/ssh/terminal" ==> using terminal = go.cmd.vendor.golang.org.x.crypto.ssh.terminal_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\crypto\ssh\terminal\util.go
 // import "golang.org/x/crypto/ssh/terminal"

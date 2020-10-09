@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:46:07 UTC
+//     Generated on 2020 October 09 05:56:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using utf8 = go.unicode.utf8_package;
 using module = go.golang.org.x.mod.module_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -56,7 +57,7 @@ namespace mod
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class File<T> : File
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -82,8 +83,8 @@ namespace mod
             private delegate (io.ReadCloser, error) PathByPtr(ptr<T> value);
             private delegate (io.ReadCloser, error) PathByVal(T value);
 
-            private static readonly PathByPtr s_PathByPtr;
-            private static readonly PathByVal s_PathByVal;
+            private static readonly PathByPtr? s_PathByPtr;
+            private static readonly PathByVal? s_PathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (io.ReadCloser, error) Path()
@@ -102,8 +103,8 @@ namespace mod
             private delegate (io.ReadCloser, error) LstatByPtr(ptr<T> value);
             private delegate (io.ReadCloser, error) LstatByVal(T value);
 
-            private static readonly LstatByPtr s_LstatByPtr;
-            private static readonly LstatByVal s_LstatByVal;
+            private static readonly LstatByPtr? s_LstatByPtr;
+            private static readonly LstatByVal? s_LstatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (io.ReadCloser, error) Lstat()
@@ -122,8 +123,8 @@ namespace mod
             private delegate (io.ReadCloser, error) OpenByPtr(ptr<T> value);
             private delegate (io.ReadCloser, error) OpenByVal(T value);
 
-            private static readonly OpenByPtr s_OpenByPtr;
-            private static readonly OpenByVal s_OpenByVal;
+            private static readonly OpenByPtr? s_OpenByPtr;
+            private static readonly OpenByVal? s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (io.ReadCloser, error) Open()
@@ -139,7 +140,7 @@ namespace mod
                 return s_OpenByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static File()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @internal -- go2cs converted at 2020 October 08 04:34:15 UTC
+// package @internal -- go2cs converted at 2020 October 09 05:45:44 UTC
 // import "golang.org/x/xerrors/internal" ==> using @internal = go.golang.org.x.xerrors.@internal_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\xerrors\internal\internal.go
 

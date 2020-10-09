@@ -21,7 +21,7 @@
 // The numbers n and c, when they follow a code, are encoded as varints
 // using the same encoding as encoding/binary's Uvarint.
 //
-// package gcprog -- go2cs converted at 2020 October 08 04:30:15 UTC
+// package gcprog -- go2cs converted at 2020 October 09 05:42:31 UTC
 // import "cmd/internal/gcprog" ==> using gcprog = go.cmd.@internal.gcprog_package
 // Original source: C:\Go\src\cmd\internal\gcprog\gcprog.go
 using fmt = go.fmt_package;

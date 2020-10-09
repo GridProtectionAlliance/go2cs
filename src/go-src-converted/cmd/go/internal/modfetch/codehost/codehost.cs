@@ -4,7 +4,7 @@
 
 // Package codehost defines the interface implemented by a code hosting source,
 // along with support code for use by implementations.
-// package codehost -- go2cs converted at 2020 October 08 04:35:52 UTC
+// package codehost -- go2cs converted at 2020 October 09 05:47:04 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\codehost\codehost.go
 using bytes = go.bytes_package;

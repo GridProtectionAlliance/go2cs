@@ -4,7 +4,7 @@
 
 // Package typeutil defines various utilities for types, such as Map,
 // a mapping from types.Type to interface{} values.
-// package typeutil -- go2cs converted at 2020 October 08 04:55:46 UTC
+// package typeutil -- go2cs converted at 2020 October 09 06:02:25 UTC
 // import "golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\types\typeutil\map.go
 // import "golang.org/x/tools/go/types/typeutil"

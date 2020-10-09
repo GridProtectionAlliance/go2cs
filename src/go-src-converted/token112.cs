@@ -4,7 +4,7 @@
 
 // +build go1.12
 
-// package span -- go2cs converted at 2020 October 08 04:54:39 UTC
+// package span -- go2cs converted at 2020 October 09 06:01:32 UTC
 // import "golang.org/x/tools/internal/span" ==> using span = go.golang.org.x.tools.@internal.span_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\span\token112.go
 using token = go.go.token_package;

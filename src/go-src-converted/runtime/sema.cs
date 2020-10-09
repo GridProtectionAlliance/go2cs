@@ -17,7 +17,7 @@
 // See Mullender and Cox, ``Semaphores in Plan 9,''
 // https://swtch.com/semaphore.pdf
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:57 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sema.go
 using cpu = go.@internal.cpu_package;
@@ -113,7 +113,7 @@ namespace go
         }
 
         private static readonly semaProfileFlags semaBlockProfile = (semaProfileFlags)1L << (int)(iota);
-        private static readonly var semaMutexProfile = (var)0;
+        private static readonly var semaMutexProfile = 0;
 
 
         // Called from runtime.

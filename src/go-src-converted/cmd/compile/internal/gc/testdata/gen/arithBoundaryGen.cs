@@ -8,7 +8,7 @@
 // launch with `go run arithBoundaryGen.go` a file called arithBoundary.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2020 October 08 04:31:59 UTC
+// package main -- go2cs converted at 2020 October 09 05:43:52 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\arithBoundaryGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;

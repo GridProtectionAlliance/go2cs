@@ -4,7 +4,7 @@
 
 // +build dragonfly netbsd openbsd
 
-// package net -- go2cs converted at 2020 October 08 03:33:27 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:44 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\interface_bsdvar.go
 using syscall = go.syscall_package;

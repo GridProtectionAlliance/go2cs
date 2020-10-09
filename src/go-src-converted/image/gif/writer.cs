@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gif -- go2cs converted at 2020 October 08 04:59:23 UTC
+// package gif -- go2cs converted at 2020 October 09 06:05:51 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Go\src\image\gif\writer.go
 using bufio = go.bufio_package;

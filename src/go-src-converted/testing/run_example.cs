@@ -8,7 +8,7 @@
 // example.go when js/wasm gets an os.Pipe implementation
 // and no longer needs this separation.
 
-// package testing -- go2cs converted at 2020 October 08 04:36:30 UTC
+// package testing -- go2cs converted at 2020 October 09 05:47:40 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\run_example.go
 using fmt = go.fmt_package;

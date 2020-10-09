@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2020 October 08 04:37:52 UTC
+// package sym -- go2cs converted at 2020 October 09 05:48:53 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\attribute.go
 using atomic = go.sync.atomic_package;
@@ -25,51 +25,51 @@ namespace @internal
         // files.
         public static readonly Attribute AttrDuplicateOK = (Attribute)1L << (int)(iota); 
         // AttrExternal marks function symbols loaded from host object files.
-        public static readonly var AttrExternal = (var)0; 
+        public static readonly var AttrExternal = 0; 
         // AttrNoSplit marks functions that cannot split the stack; the linker
         // cares because it checks that there are no call chains of nosplit
         // functions that require more than StackLimit bytes (see
         // lib.go:dostkcheck)
-        public static readonly var AttrNoSplit = (var)1; 
+        public static readonly var AttrNoSplit = 1; 
         // AttrReachable marks symbols that are transitively referenced from the
         // entry points. Unreachable symbols are not written to the output.
-        public static readonly var AttrReachable = (var)2; 
+        public static readonly var AttrReachable = 2; 
         // AttrCgoExportDynamic and AttrCgoExportStatic mark symbols referenced
         // by directives written by cgo (in response to //export directives in
         // the source).
-        public static readonly var AttrCgoExportDynamic = (var)3;
-        public static readonly var AttrCgoExportStatic = (var)4; 
+        public static readonly var AttrCgoExportDynamic = 3;
+        public static readonly var AttrCgoExportStatic = 4; 
         // AttrSpecial marks symbols that do not have their address (i.e. Value)
         // computed by the usual mechanism of data.go:dodata() &
         // data.go:address().
-        public static readonly var AttrSpecial = (var)5; 
+        public static readonly var AttrSpecial = 5; 
         // AttrStackCheck is used by dostkcheck to only check each NoSplit
         // function's stack usage once.
-        public static readonly var AttrStackCheck = (var)6; 
+        public static readonly var AttrStackCheck = 6; 
         // AttrNotInSymbolTable marks symbols that are not written to the symbol table.
-        public static readonly var AttrNotInSymbolTable = (var)7; 
+        public static readonly var AttrNotInSymbolTable = 7; 
         // AttrOnList marks symbols that are on some list (such as the list of
         // all text symbols, or one of the lists of data symbols) and is
         // consulted to avoid bugs where a symbol is put on a list twice.
-        public static readonly var AttrOnList = (var)8; 
+        public static readonly var AttrOnList = 8; 
         // AttrLocal marks symbols that are only visible within the module
         // (executable or shared library) being linked. Only relevant when
         // dynamically linking Go code.
-        public static readonly var AttrLocal = (var)9; 
+        public static readonly var AttrLocal = 9; 
         // AttrReflectMethod marks certain methods from the reflect package that
         // can be used to call arbitrary methods. If no symbol with this bit set
         // is marked as reachable, more dead code elimination can be done.
-        public static readonly var AttrReflectMethod = (var)10; 
+        public static readonly var AttrReflectMethod = 10; 
         // AttrMakeTypelink Amarks types that should be added to the typelink
         // table. See typelinks.go:typelinks().
-        public static readonly var AttrMakeTypelink = (var)11; 
+        public static readonly var AttrMakeTypelink = 11; 
         // AttrShared marks symbols compiled with the -shared option.
-        public static readonly var AttrShared = (var)12; 
+        public static readonly var AttrShared = 12; 
         // AttrVisibilityHidden symbols are ELF symbols with
         // visibility set to STV_HIDDEN. They become local symbols in
         // the final executable. Only relevant when internally linking
         // on an ELF platform.
-        public static readonly var AttrVisibilityHidden = (var)13; 
+        public static readonly var AttrVisibilityHidden = 13; 
         // AttrSubSymbol mostly means that the symbol appears on the Sub list of some
         // other symbol.  Unfortunately, it's not 100% reliable; at least, it's not set
         // correctly for the .TOC. symbol in Link.dodata.  Usually the Outer field of the
@@ -84,16 +84,16 @@ namespace @internal
         // executable.
         //
         // TODO(mwhudson): perhaps a better name for this is AttrNonGoSymbol.
-        public static readonly var AttrSubSymbol = (var)14; 
+        public static readonly var AttrSubSymbol = 14; 
         // AttrContainer is set on text symbols that are present as the .Outer for some
         // other symbol.
-        public static readonly var AttrContainer = (var)15; 
+        public static readonly var AttrContainer = 15; 
         // AttrTopFrame means that the function is an entry point and unwinders
         // should stop when they hit this function.
-        public static readonly var AttrTopFrame = (var)16; 
+        public static readonly var AttrTopFrame = 16; 
         // AttrReadOnly indicates whether the symbol's content (Symbol.P) is backed by
         // read-only memory.
-        public static readonly var AttrReadOnly = (var)17; 
+        public static readonly var AttrReadOnly = 17; 
         // 19 attributes defined so far.
 
         private static Attribute load(this ptr<Attribute> _addr_a)

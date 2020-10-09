@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:49 UTC
+//     Generated on 2020 October 09 05:53:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using sync = go.sync_package;
 using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -53,7 +54,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class lineReaderWriter<T> : lineReaderWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -79,8 +80,8 @@ namespace @internal
             private delegate (@string, error) writeByPtr(ptr<T> value, @string _p0);
             private delegate (@string, error) writeByVal(T value, @string _p0);
 
-            private static readonly writeByPtr s_writeByPtr;
-            private static readonly writeByVal s_writeByVal;
+            private static readonly writeByPtr? s_writeByPtr;
+            private static readonly writeByVal? s_writeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (@string, error) write(@string _p0)
@@ -99,8 +100,8 @@ namespace @internal
             private delegate (@string, error) readLineByPtr(ptr<T> value);
             private delegate (@string, error) readLineByVal(T value);
 
-            private static readonly readLineByPtr s_readLineByPtr;
-            private static readonly readLineByVal s_readLineByVal;
+            private static readonly readLineByPtr? s_readLineByPtr;
+            private static readonly readLineByVal? s_readLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (@string, error) readLine()
@@ -119,8 +120,8 @@ namespace @internal
             private delegate (@string, error) closeByPtr(ptr<T> value);
             private delegate (@string, error) closeByVal(T value);
 
-            private static readonly closeByPtr s_closeByPtr;
-            private static readonly closeByVal s_closeByVal;
+            private static readonly closeByPtr? s_closeByPtr;
+            private static readonly closeByVal? s_closeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (@string, error) close()
@@ -136,7 +137,7 @@ namespace @internal
                 return s_closeByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static lineReaderWriter()

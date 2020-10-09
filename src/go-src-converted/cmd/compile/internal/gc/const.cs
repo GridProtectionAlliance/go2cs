@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:36 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:10 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\const.go
 using types = go.cmd.compile.@internal.types_package;
@@ -27,13 +27,13 @@ namespace @internal
 
         public static readonly Ctype CTxxx = (Ctype)iota;
 
-        public static readonly var CTINT = (var)0;
-        public static readonly var CTRUNE = (var)1;
-        public static readonly var CTFLT = (var)2;
-        public static readonly var CTCPLX = (var)3;
-        public static readonly var CTSTR = (var)4;
-        public static readonly var CTBOOL = (var)5;
-        public static readonly var CTNIL = (var)6;
+        public static readonly var CTINT = 0;
+        public static readonly var CTRUNE = 1;
+        public static readonly var CTFLT = 2;
+        public static readonly var CTCPLX = 3;
+        public static readonly var CTSTR = 4;
+        public static readonly var CTBOOL = 5;
+        public static readonly var CTNIL = 6;
 
 
         public partial struct Val

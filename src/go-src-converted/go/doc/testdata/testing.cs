@@ -36,7 +36,7 @@
 //             big.Len()
 //         }
 //     }
-// package testing -- go2cs converted at 2020 October 08 04:02:55 UTC
+// package testing -- go2cs converted at 2020 October 09 05:19:12 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Go\src\go\doc\testdata\testing.go
 using flag = go.flag_package;
@@ -400,7 +400,7 @@ namespace go
                         fmt.Printf("=== RUN %s\n", t.name);
                     }
 
-                    go_(() => tRunner(_addr_t, _addr_tests[i]));
+                    go_(() => tRunner(t, _addr_tests[i]));
                     ptr<T> @out = (t.signal.Receive())._<ptr<T>>();
                     if (out == null)
                     { // Parallel run.

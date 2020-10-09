@@ -4,12 +4,14 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:30:44 UTC
+//     Generated on 2020 October 09 04:50:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System.CodeDom.Compiler;
 using System.Runtime.CompilerServices;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace runtime

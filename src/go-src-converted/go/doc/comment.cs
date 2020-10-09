@@ -4,7 +4,7 @@
 
 // Godoc comment extraction and comment -> HTML formatting.
 
-// package doc -- go2cs converted at 2020 October 08 04:02:33 UTC
+// package doc -- go2cs converted at 2020 October 09 05:18:58 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Go\src\go\doc\comment.go
 using bytes = go.bytes_package;
@@ -75,7 +75,7 @@ namespace go
         // path+query+fragment (optional) e.g. /path/index.html?q=foo#bar
         private static readonly @string pathPart = (@string)"([.,:;?!]*[a-zA-Z0-9$\'()*+&#=@~_/\\-\\[\\]%])*";
 
-        private static readonly var urlRx = (var)protoPart + "://" + hostPart + pathPart;
+        private static readonly var urlRx = protoPart + "://" + hostPart + pathPart;
 
 
         private static var matchRx = lazyregexp.New("(" + urlRx + ")|(" + identRx + ")");
@@ -378,8 +378,8 @@ namespace go
         }
 
         private static readonly op opPara = (op)iota;
-        private static readonly var opHead = (var)0;
-        private static readonly var opPre = (var)1;
+        private static readonly var opHead = 0;
+        private static readonly var opPre = 1;
 
 
         private partial struct block

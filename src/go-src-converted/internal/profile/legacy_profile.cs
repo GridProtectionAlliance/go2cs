@@ -5,7 +5,7 @@
 // This file implements parsers to convert legacy profiles into the
 // profile.proto format.
 
-// package profile -- go2cs converted at 2020 October 08 03:41:47 UTC
+// package profile -- go2cs converted at 2020 October 09 04:59:08 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Go\src\internal\profile\legacy_profile.go
 using bufio = go.bufio_package;
@@ -133,7 +133,7 @@ namespace @internal
             }
 
 
-            err = error.As(parseAdditionalSections(strings.TrimSpace(line), _addr_r, _addr_p))!;
+            err = error.As(parseAdditionalSections(strings.TrimSpace(line), _addr_r, p))!;
 
             if (err != null)
             {
@@ -431,7 +431,7 @@ namespace @internal
                     }                    {
                         if (len(sources) > 0L || len(sloc) > 0L)
                         {
-                            addTracebackSample(sloc, sources, _addr_p);
+                            addTracebackSample(sloc, sources, p);
                             sloc = null;
                             sources = null;
 
@@ -449,7 +449,7 @@ namespace @internal
             // Add final sample to save any leftover data.
             if (len(sources) > 0L || len(sloc) > 0L)
             {
-                addTracebackSample(sloc, sources, _addr_p);
+                addTracebackSample(sloc, sources, p);
             }
 
             {
@@ -524,7 +524,7 @@ namespace @internal
 
             ptr<Profile> p = addr(new Profile(Period:period*1000,PeriodType:&ValueType{Type:"cpu",Unit:"nanoseconds"},SampleType:[]*ValueType{{Type:"samples",Unit:"count"},{Type:"cpu",Unit:"nanoseconds"},},));
             error err = default!;
-            b, _, err = parseCPUSamples(b, parse, true, _addr_p);
+            b, _, err = parseCPUSamples(b, parse, true, p);
 
             if (err != null)
             {
@@ -1213,7 +1213,7 @@ namespace @internal
             }
 
 
-            err = error.As(parseAdditionalSections(l, _addr_r, _addr_p))!;
+            err = error.As(parseAdditionalSections(l, _addr_r, p))!;
 
             if (err != null)
             {
@@ -1419,7 +1419,7 @@ namespace @internal
             }
 
 
-            err = error.As(parseAdditionalSections(line, _addr_r, _addr_p))!;
+            err = error.As(parseAdditionalSections(line, _addr_r, p))!;
 
             if (err != null)
             {
@@ -1736,7 +1736,7 @@ namespace @internal
         }
 
         private static readonly sectionType unrecognizedSection = (sectionType)iota;
-        private static readonly var memoryMapSection = (var)0;
+        private static readonly var memoryMapSection = 0;
 
 
         private static @string memoryMapTriggers = new slice<@string>(new @string[] { "--- Memory map: ---", "MAPPED_LIBRARIES:" });

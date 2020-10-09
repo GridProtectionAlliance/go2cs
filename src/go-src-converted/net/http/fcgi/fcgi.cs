@@ -8,7 +8,7 @@
 // original documentation.
 //
 // Currently only the responder role is supported.
-// package fcgi -- go2cs converted at 2020 October 08 03:41:24 UTC
+// package fcgi -- go2cs converted at 2020 October 09 04:58:48 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Go\src\net\http\fcgi\fcgi.go
 // This file defines the raw protocol and some utilities used by the child and
@@ -56,15 +56,15 @@ namespace http
         private static readonly long maxPad = (long)255L;
 
 
-        private static readonly var roleResponder = (var)iota + 1L; // only Responders are implemented.
-        private static readonly var roleAuthorizer = (var)0;
-        private static readonly var roleFilter = (var)1;
+        private static readonly var roleResponder = iota + 1L; // only Responders are implemented.
+        private static readonly var roleAuthorizer = 0;
+        private static readonly var roleFilter = 1;
 
 
-        private static readonly var statusRequestComplete = (var)iota;
-        private static readonly var statusCantMultiplex = (var)0;
-        private static readonly var statusOverloaded = (var)1;
-        private static readonly var statusUnknownRole = (var)2;
+        private static readonly var statusRequestComplete = iota;
+        private static readonly var statusCantMultiplex = 0;
+        private static readonly var statusOverloaded = 1;
+        private static readonly var statusUnknownRole = 2;
 
 
         private partial struct header

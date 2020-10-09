@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2020 October 08 04:27:28 UTC
+// package riscv64 -- go2cs converted at 2020 October 09 05:40:13 UTC
 // import "cmd/compile/internal/riscv64" ==> using riscv64 = go.cmd.compile.@internal.riscv64_package
 // Original source: C:\Go\src\cmd\compile\internal\riscv64\ssa.go
 using gc = go.cmd.compile.@internal.gc_package;

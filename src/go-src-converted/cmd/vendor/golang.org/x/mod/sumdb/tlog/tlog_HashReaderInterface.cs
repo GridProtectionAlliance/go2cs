@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:46:05 UTC
+//     Generated on 2020 October 09 05:56:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using fmt = go.fmt_package;
 using bits = go.math.bits_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class HashReader<T> : HashReader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace sumdb
             private delegate (slice<Hash>, error) ReadHashesByPtr(ptr<T> value, slice<long> indexes);
             private delegate (slice<Hash>, error) ReadHashesByVal(T value, slice<long> indexes);
 
-            private static readonly ReadHashesByPtr s_ReadHashesByPtr;
-            private static readonly ReadHashesByVal s_ReadHashesByVal;
+            private static readonly ReadHashesByPtr? s_ReadHashesByPtr;
+            private static readonly ReadHashesByVal? s_ReadHashesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<Hash>, error) ReadHashes(slice<long> indexes)
@@ -93,7 +94,7 @@ namespace sumdb
                 return s_ReadHashesByPtr(m_target_ptr, indexes);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static HashReader()

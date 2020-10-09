@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package unix -- go2cs converted at 2020 October 08 04:46:14 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:13 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dirent.go
 using @unsafe = go.@unsafe_package;
@@ -123,7 +123,7 @@ namespace sys
 
                 }
 
-                const var namoff = (var)uint64(@unsafe.Offsetof(new Dirent().Name));
+                const var namoff = uint64(@unsafe.Offsetof(new Dirent().Name));
 
                 var (namlen, ok) = direntNamlen(rec);
                 if (!ok || namoff + namlen > uint64(len(rec)))

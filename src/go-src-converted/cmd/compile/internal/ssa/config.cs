@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:07 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:27 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\config.go
 using types = go.cmd.compile.@internal.types_package;
@@ -176,8 +176,8 @@ namespace @internal
         }
 
         public static readonly StorageClass ClassAuto = (StorageClass)iota; // local stack variable
-        public static readonly var ClassParam = (var)0; // argument
-        public static readonly var ClassParamOut = (var)1; // return value
+        public static readonly var ClassParam = 0; // argument
+        public static readonly var ClassParamOut = 1; // return value
 
         // NewConfig returns a new configuration object for the given architecture.
         public static ptr<Config> NewConfig(@string arch, Types types, ptr<obj.Link> _addr_ctxt, bool optimize)

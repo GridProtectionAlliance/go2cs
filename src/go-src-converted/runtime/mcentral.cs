@@ -10,7 +10,7 @@
 // Each mcentral is two lists of mspans: those with free objects (c->nonempty)
 // and those that are completely allocated (c->empty).
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:33 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mcentral.go
 using atomic = go.runtime.@internal.atomic_package;

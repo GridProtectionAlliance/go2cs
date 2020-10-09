@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package png -- go2cs converted at 2020 October 08 04:59:40 UTC
+// package png -- go2cs converted at 2020 October 09 06:06:04 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Go\src\image\png\writer.go
 using bufio = go.bufio_package;

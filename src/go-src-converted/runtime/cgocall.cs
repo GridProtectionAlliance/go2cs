@@ -77,7 +77,7 @@
 // _cgoexp_GoF immediately returns to crosscall2, which restores the
 // callee-save registers for gcc and returns to GoF, which returns to f.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:06 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:35 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cgocall.go
 using atomic = go.runtime.@internal.atomic_package;

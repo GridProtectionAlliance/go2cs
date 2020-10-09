@@ -1,6 +1,6 @@
 // Tests of bound method closures.
 
-// package main -- go2cs converted at 2020 October 08 04:57:28 UTC
+// package main -- go2cs converted at 2020 October 09 06:03:42 UTC
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\testdata\boundmeth.go
 using errors = go.errors_package;
 using fmt = go.fmt_package;

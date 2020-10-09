@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package csv -- go2cs converted at 2020 October 08 03:42:29 UTC
+// package csv -- go2cs converted at 2020 October 09 04:59:46 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Go\src\encoding\csv\writer.go
 using bufio = go.bufio_package;

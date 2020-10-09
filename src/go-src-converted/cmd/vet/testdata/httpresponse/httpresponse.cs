@@ -1,4 +1,4 @@
-// package httpresponse -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package httpresponse -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/httpresponse" ==> using httpresponse = go.cmd.vet.testdata.httpresponse_package
 // Original source: C:\Go\src\cmd\vet\testdata\httpresponse\httpresponse.go
 using log = go.log_package;

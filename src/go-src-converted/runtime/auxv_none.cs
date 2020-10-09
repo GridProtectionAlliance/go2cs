@@ -10,7 +10,7 @@
 // +build !openbsd !arm64
 // +build !solaris
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:04 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\auxv_none.go
 

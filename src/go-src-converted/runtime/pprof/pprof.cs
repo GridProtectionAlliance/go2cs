@@ -70,7 +70,7 @@
 //
 // For more information about pprof, see
 // https://github.com/google/pprof/blob/master/doc/README.md.
-// package pprof -- go2cs converted at 2020 October 08 03:26:15 UTC
+// package pprof -- go2cs converted at 2020 October 09 04:49:54 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Go\src\runtime\pprof\pprof.go
 using bufio = go.bufio_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:44 UTC
+//     Generated on 2020 October 09 04:54:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using hash = go.hash_package;
 using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class keyAgreement<T> : keyAgreement
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace crypto
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0);
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchangeByVal(T value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0);
 
-            private static readonly generateServerKeyExchangeByPtr s_generateServerKeyExchangeByPtr;
-            private static readonly generateServerKeyExchangeByVal s_generateServerKeyExchangeByVal;
+            private static readonly generateServerKeyExchangeByPtr? s_generateServerKeyExchangeByPtr;
+            private static readonly generateServerKeyExchangeByVal? s_generateServerKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0)
@@ -98,8 +99,8 @@ namespace crypto
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0);
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchangeByVal(T value, ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0);
 
-            private static readonly processClientKeyExchangeByPtr s_processClientKeyExchangeByPtr;
-            private static readonly processClientKeyExchangeByVal s_processClientKeyExchangeByVal;
+            private static readonly processClientKeyExchangeByPtr? s_processClientKeyExchangeByPtr;
+            private static readonly processClientKeyExchangeByVal? s_processClientKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0)
@@ -118,8 +119,8 @@ namespace crypto
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0);
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchangeByVal(T value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0);
 
-            private static readonly processServerKeyExchangeByPtr s_processServerKeyExchangeByPtr;
-            private static readonly processServerKeyExchangeByVal s_processServerKeyExchangeByVal;
+            private static readonly processServerKeyExchangeByPtr? s_processServerKeyExchangeByPtr;
+            private static readonly processServerKeyExchangeByVal? s_processServerKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, ptr<clientKeyExchangeMsg>, error) processServerKeyExchange(ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0, ptr<x509.Certificate> _p0, ptr<serverKeyExchangeMsg> _p0)
@@ -138,8 +139,8 @@ namespace crypto
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchangeByPtr(ptr<T> value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0);
             private delegate (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchangeByVal(T value, ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0);
 
-            private static readonly generateClientKeyExchangeByPtr s_generateClientKeyExchangeByPtr;
-            private static readonly generateClientKeyExchangeByVal s_generateClientKeyExchangeByVal;
+            private static readonly generateClientKeyExchangeByPtr? s_generateClientKeyExchangeByPtr;
+            private static readonly generateClientKeyExchangeByVal? s_generateClientKeyExchangeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchange(ptr<Config> _p0, ptr<clientHelloMsg> _p0, ptr<x509.Certificate> _p0)
@@ -155,7 +156,7 @@ namespace crypto
                 return s_generateClientKeyExchangeByPtr(m_target_ptr, _p0, _p0, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static keyAgreement()

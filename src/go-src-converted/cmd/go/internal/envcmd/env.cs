@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package envcmd implements the ``go env'' command.
-// package envcmd -- go2cs converted at 2020 October 08 04:33:36 UTC
+// package envcmd -- go2cs converted at 2020 October 09 05:45:11 UTC
 // import "cmd/go/internal/envcmd" ==> using envcmd = go.cmd.go.@internal.envcmd_package
 // Original source: C:\Go\src\cmd\go\internal\envcmd\env.go
 using json = go.encoding.json_package;

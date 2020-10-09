@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package time -- go2cs converted at 2020 October 08 03:45:40 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:04 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\sys_plan9.go
 using errors = go.errors_package;

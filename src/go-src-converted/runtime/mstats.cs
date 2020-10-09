@@ -4,7 +4,7 @@
 
 // Memory statistics
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:32 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mstats.go
 using atomic = go.runtime.@internal.atomic_package;

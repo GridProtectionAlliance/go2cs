@@ -4,7 +4,7 @@
 
 // This file implements support functionality for iimport.go.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:56:12 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:45 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Go\src\go\internal\gcimporter\support.go
 using fmt = go.fmt_package;

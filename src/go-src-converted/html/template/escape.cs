@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:42:05 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:25 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\escape.go
 using bytes = go.bytes_package;

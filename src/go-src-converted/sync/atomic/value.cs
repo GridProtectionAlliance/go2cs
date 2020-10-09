@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package atomic -- go2cs converted at 2020 October 08 00:34:02 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:25 UTC
 // import "sync/atomic" ==> using atomic = go.sync.atomic_package
 // Original source: C:\Go\src\sync\atomic\value.go
 using @unsafe = go.@unsafe_package;

@@ -19,7 +19,7 @@
 // high-performance serialization, especially for large data structures,
 // should look at more advanced solutions such as the encoding/gob
 // package or protocol buffers.
-// package binary -- go2cs converted at 2020 October 08 03:24:33 UTC
+// package binary -- go2cs converted at 2020 October 09 04:49:25 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Go\src\encoding\binary\binary.go
 using errors = go.errors_package;

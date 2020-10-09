@@ -9,7 +9,7 @@
 // depending on the operating system. To process paths such as URLs
 // that always use forward slashes regardless of the operating
 // system, see the path package.
-// package filepath -- go2cs converted at 2020 October 08 03:37:01 UTC
+// package filepath -- go2cs converted at 2020 October 09 04:49:46 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\path.go
 using errors = go.errors_package;
@@ -84,8 +84,8 @@ namespace path
 
         }
 
-        public static readonly var Separator = (var)os.PathSeparator;
-        public static readonly var ListSeparator = (var)os.PathListSeparator;
+        public static readonly var Separator = os.PathSeparator;
+        public static readonly var ListSeparator = os.PathListSeparator;
 
 
         // Clean returns the shortest path name equivalent to path

@@ -4,7 +4,7 @@
 
 // Parse input AST and prepare Prog structure.
 
-// package main -- go2cs converted at 2020 October 08 04:08:27 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:15 UTC
 // Original source: C:\Go\src\cmd\cgo\ast.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -523,22 +523,22 @@ namespace go
         }
 
         private static readonly astContext ctxProg = (astContext)iota;
-        private static readonly var ctxEmbedType = (var)0;
-        private static readonly var ctxType = (var)1;
-        private static readonly var ctxStmt = (var)2;
-        private static readonly var ctxExpr = (var)3;
-        private static readonly var ctxField = (var)4;
-        private static readonly var ctxParam = (var)5;
-        private static readonly var ctxAssign2 = (var)6; // assignment of a single expression to two variables
-        private static readonly var ctxSwitch = (var)7;
-        private static readonly var ctxTypeSwitch = (var)8;
-        private static readonly var ctxFile = (var)9;
-        private static readonly var ctxDecl = (var)10;
-        private static readonly var ctxSpec = (var)11;
-        private static readonly var ctxDefer = (var)12;
-        private static readonly var ctxCall = (var)13; // any function call other than ctxCall2
-        private static readonly var ctxCall2 = (var)14; // function call whose result is assigned to two variables
-        private static readonly var ctxSelector = (var)15;
+        private static readonly var ctxEmbedType = 0;
+        private static readonly var ctxType = 1;
+        private static readonly var ctxStmt = 2;
+        private static readonly var ctxExpr = 3;
+        private static readonly var ctxField = 4;
+        private static readonly var ctxParam = 5;
+        private static readonly var ctxAssign2 = 6; // assignment of a single expression to two variables
+        private static readonly var ctxSwitch = 7;
+        private static readonly var ctxTypeSwitch = 8;
+        private static readonly var ctxFile = 9;
+        private static readonly var ctxDecl = 10;
+        private static readonly var ctxSpec = 11;
+        private static readonly var ctxDefer = 12;
+        private static readonly var ctxCall = 13; // any function call other than ctxCall2
+        private static readonly var ctxCall2 = 14; // function call whose result is assigned to two variables
+        private static readonly var ctxSelector = 15;
 
 
         // walk walks the AST x, calling visit(f, x, context) for each node.

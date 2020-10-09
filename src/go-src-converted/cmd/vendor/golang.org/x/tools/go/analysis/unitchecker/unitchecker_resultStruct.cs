@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:21 UTC
+//     Generated on 2020 October 09 06:04:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,6 +37,8 @@ using analysis = go.golang.org.x.tools.go.analysis_package;
 using analysisflags = go.golang.org.x.tools.go.analysis.@internal.analysisflags_package;
 using facts = go.golang.org.x.tools.go.analysis.@internal.facts_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

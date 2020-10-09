@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:29:56 UTC
+//     Generated on 2020 October 09 05:42:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using src = go.cmd.@internal.src_package;
 using heap = go.container.heap_package;
 using fmt = go.fmt_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

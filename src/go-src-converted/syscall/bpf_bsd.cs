@@ -6,7 +6,7 @@
 
 // Berkeley packet filter for BSD variants
 
-// package syscall -- go2cs converted at 2020 October 08 00:33:54 UTC
+// package syscall -- go2cs converted at 2020 October 09 04:45:21 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\bpf_bsd.go
 using @unsafe = go.@unsafe_package;

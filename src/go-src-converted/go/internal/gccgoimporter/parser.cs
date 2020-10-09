@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gccgoimporter -- go2cs converted at 2020 October 08 04:56:20 UTC
+// package gccgoimporter -- go2cs converted at 2020 October 09 06:02:52 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\parser.go
 using bytes = go.bytes_package;

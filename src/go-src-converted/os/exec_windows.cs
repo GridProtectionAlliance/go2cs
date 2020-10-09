@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:44:35 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:08 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\exec_windows.go
 using errors = go.errors_package;
@@ -124,7 +124,7 @@ namespace go
             ptr<Process> p = default!;
             error err = default!;
 
-            const var da = (var)syscall.STANDARD_RIGHTS_READ | syscall.PROCESS_QUERY_INFORMATION | syscall.SYNCHRONIZE;
+            const var da = syscall.STANDARD_RIGHTS_READ | syscall.PROCESS_QUERY_INFORMATION | syscall.SYNCHRONIZE;
 
             var (h, e) = syscall.OpenProcess(da, false, uint32(pid));
             if (e != null)

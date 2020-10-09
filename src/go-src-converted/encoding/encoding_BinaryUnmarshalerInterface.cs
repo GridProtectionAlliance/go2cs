@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:25 UTC
+//     Generated on 2020 October 09 04:59:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -38,7 +39,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class BinaryUnmarshaler<T> : BinaryUnmarshaler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,8 +65,8 @@ namespace go
             private delegate error UnmarshalBinaryByPtr(ptr<T> value, slice<byte> data);
             private delegate error UnmarshalBinaryByVal(T value, slice<byte> data);
 
-            private static readonly UnmarshalBinaryByPtr s_UnmarshalBinaryByPtr;
-            private static readonly UnmarshalBinaryByVal s_UnmarshalBinaryByVal;
+            private static readonly UnmarshalBinaryByPtr? s_UnmarshalBinaryByPtr;
+            private static readonly UnmarshalBinaryByVal? s_UnmarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error UnmarshalBinary(slice<byte> data)
@@ -81,7 +82,7 @@ namespace go
                 return s_UnmarshalBinaryByPtr(m_target_ptr, data);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static BinaryUnmarshaler()

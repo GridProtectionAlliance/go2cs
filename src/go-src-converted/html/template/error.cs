@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:41:53 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:15 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\error.go
 using fmt = go.fmt_package;
@@ -62,7 +62,7 @@ namespace html
         //  it may be either a URL suffix or a query parameter.
         //   Moving {{.X}} into the condition removes the ambiguity:
         //   <a href="{{if .C}}/path/{{.X}}{{else}}/search?q={{.X}}">
-        public static readonly var ErrAmbigContext = (var)0; 
+        public static readonly var ErrAmbigContext = 0; 
 
         // ErrBadHTML: "expected space, attr name, or end of tag, but got ...",
         //   "... in unquoted attr", "... in attribute name"
@@ -76,7 +76,7 @@ namespace html
         //   are banned in tag names, attribute names, and unquoted attribute
         //   values because they can tickle parser ambiguities.
         //   Quoting all attributes is the best policy.
-        public static readonly var ErrBadHTML = (var)1; 
+        public static readonly var ErrBadHTML = 1; 
 
         // ErrBranchEnd: "{{if}} branches end in different contexts"
         // Example:
@@ -94,7 +94,7 @@ namespace html
         //   into different branches of an if, range or with. If the problem
         //   is in a {{range}} over a collection that should never be empty,
         //   adding a dummy {{else}} can help.
-        public static readonly var ErrBranchEnd = (var)2; 
+        public static readonly var ErrBranchEnd = 2; 
 
         // ErrEndContext: "... ends in a non-text context: ..."
         // Examples:
@@ -112,7 +112,7 @@ namespace html
         //
         //   "helper" does not produce a valid document fragment, so should
         //   not be Executed directly.
-        public static readonly var ErrEndContext = (var)3; 
+        public static readonly var ErrEndContext = 3; 
 
         // ErrNoSuchTemplate: "no such template ..."
         // Examples:
@@ -124,7 +124,7 @@ namespace html
         //   Here the {{.URL}} in "attrs" must be treated as a URL when called
         //   from "main", but you will get this error if "attrs" is not defined
         //   when "main" is parsed.
-        public static readonly var ErrNoSuchTemplate = (var)4; 
+        public static readonly var ErrNoSuchTemplate = 4; 
 
         // ErrOutputContext: "cannot compute output context for template ..."
         // Examples:
@@ -136,7 +136,7 @@ namespace html
         //   If the template should not be called in the named start context,
         //   look for calls to that template in unexpected contexts.
         //   Maybe refactor recursive templates to not be recursive.
-        public static readonly var ErrOutputContext = (var)5; 
+        public static readonly var ErrOutputContext = 5; 
 
         // ErrPartialCharset: "unfinished JS regexp charset in ..."
         // Example:
@@ -144,7 +144,7 @@ namespace html
         // Discussion:
         //   Package html/template does not support interpolation into regular
         //   expression literal character sets.
-        public static readonly var ErrPartialCharset = (var)6; 
+        public static readonly var ErrPartialCharset = 6; 
 
         // ErrPartialEscape: "unfinished escape sequence in ..."
         // Example:
@@ -157,7 +157,7 @@ namespace html
         //     <script>alert("{{.X}}")</script>
         //   should work, and if {{.X}} is a partial escape sequence such as
         //   "xA0", mark the whole sequence as safe content: JSStr(`\xA0`)
-        public static readonly var ErrPartialEscape = (var)7; 
+        public static readonly var ErrPartialEscape = 7; 
 
         // ErrRangeLoopReentry: "on range loop re-entry: ..."
         // Example:
@@ -170,7 +170,7 @@ namespace html
         //   context. The second iteration would produce something like
         //
         //     <script>var x = ['firstValue,'secondValue]</script>
-        public static readonly var ErrRangeLoopReentry = (var)8; 
+        public static readonly var ErrRangeLoopReentry = 8; 
 
         // ErrSlashAmbig: '/' could start a division or regexp.
         // Example:
@@ -185,7 +185,7 @@ namespace html
         //   regexp literal.
         //   Look for missing semicolons inside branches, and maybe add
         //   parentheses to make it clear which interpretation you intend.
-        public static readonly var ErrSlashAmbig = (var)9; 
+        public static readonly var ErrSlashAmbig = 9; 
 
         // ErrPredefinedEscaper: "predefined escaper ... disallowed in template"
         // Example:
@@ -213,7 +213,7 @@ namespace html
         //   continue to be allowed as the last command in a pipeline. However, if the
         //   pipeline occurs in an unquoted attribute value context, "html" is
         //   disallowed. Avoid using "html" and "urlquery" entirely in new templates.
-        public static readonly var ErrPredefinedEscaper = (var)10;
+        public static readonly var ErrPredefinedEscaper = 10;
 
 
         private static @string Error(this ptr<Error> _addr_e)

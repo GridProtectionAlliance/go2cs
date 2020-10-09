@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2020 October 08 04:42:53 UTC
+// package binutils -- go2cs converted at 2020 October 09 05:53:22 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\disasm.go
 using bytes = go.bytes_package;

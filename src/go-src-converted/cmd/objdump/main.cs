@@ -29,7 +29,7 @@
 // Each stanza gives the disassembly for a contiguous range of addresses
 // all mapped to the same original source file and line number.
 // This mode is intended for use by pprof.
-// package main -- go2cs converted at 2020 October 08 04:39:55 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:40 UTC
 // Original source: C:\Go\src\cmd\objdump\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;

@@ -3,7 +3,7 @@
 
 // +build amd64,freebsd
 
-// package unix -- go2cs converted at 2020 October 08 04:53:28 UTC
+// package unix -- go2cs converted at 2020 October 09 06:00:31 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\ztypes_freebsd_amd64.go
 

@@ -15,7 +15,7 @@
 // used with a fixed key in order to generate one-time keys from an nonce.
 // However, in this package AES isn't used and the one-time key is specified
 // directly.
-// package poly1305 -- go2cs converted at 2020 October 08 05:00:15 UTC
+// package poly1305 -- go2cs converted at 2020 October 09 06:06:33 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\poly1305\poly1305.go
 // import "golang.org/x/crypto/poly1305"

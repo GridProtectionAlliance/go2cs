@@ -4,7 +4,7 @@
 
 // This file contains tests for the bool checker.
 
-// package @bool -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package @bool -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/bool" ==> using @bool = go.cmd.vet.testdata.@bool_package
 // Original source: C:\Go\src\cmd\vet\testdata\bool\bool.go
 

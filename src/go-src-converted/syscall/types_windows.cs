@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:53 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:02:03 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\types_windows.go
 
@@ -57,19 +57,19 @@ namespace go
 
  
         // More invented values for signals
-        public static readonly var SIGHUP = (var)Signal(0x1UL);
-        public static readonly var SIGINT = (var)Signal(0x2UL);
-        public static readonly var SIGQUIT = (var)Signal(0x3UL);
-        public static readonly var SIGILL = (var)Signal(0x4UL);
-        public static readonly var SIGTRAP = (var)Signal(0x5UL);
-        public static readonly var SIGABRT = (var)Signal(0x6UL);
-        public static readonly var SIGBUS = (var)Signal(0x7UL);
-        public static readonly var SIGFPE = (var)Signal(0x8UL);
-        public static readonly var SIGKILL = (var)Signal(0x9UL);
-        public static readonly var SIGSEGV = (var)Signal(0xbUL);
-        public static readonly var SIGPIPE = (var)Signal(0xdUL);
-        public static readonly var SIGALRM = (var)Signal(0xeUL);
-        public static readonly var SIGTERM = (var)Signal(0xfUL);
+        public static readonly var SIGHUP = Signal(0x1UL);
+        public static readonly var SIGINT = Signal(0x2UL);
+        public static readonly var SIGQUIT = Signal(0x3UL);
+        public static readonly var SIGILL = Signal(0x4UL);
+        public static readonly var SIGTRAP = Signal(0x5UL);
+        public static readonly var SIGABRT = Signal(0x6UL);
+        public static readonly var SIGBUS = Signal(0x7UL);
+        public static readonly var SIGFPE = Signal(0x8UL);
+        public static readonly var SIGKILL = Signal(0x9UL);
+        public static readonly var SIGSEGV = Signal(0xbUL);
+        public static readonly var SIGPIPE = Signal(0xdUL);
+        public static readonly var SIGALRM = Signal(0xeUL);
+        public static readonly var SIGTERM = Signal(0xfUL);
 
 
         private static array<@string> signals = new array<@string>(InitKeyedValues<@string>((1, "hangup"), (2, "interrupt"), (3, "quit"), (4, "illegal instruction"), (5, "trace/breakpoint trap"), (6, "aborted"), (7, "bus error"), (8, "floating point exception"), (9, "killed"), (10, "user defined signal 1"), (11, "segmentation fault"), (12, "user defined signal 2"), (13, "broken pipe"), (14, "alarm clock"), (15, "terminated")));
@@ -181,28 +181,28 @@ namespace go
         public static readonly ulong TH32CS_SNAPTHREAD = (ulong)0x04UL;
         public static readonly ulong TH32CS_SNAPMODULE = (ulong)0x08UL;
         public static readonly ulong TH32CS_SNAPMODULE32 = (ulong)0x10UL;
-        public static readonly var TH32CS_SNAPALL = (var)TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD;
+        public static readonly var TH32CS_SNAPALL = TH32CS_SNAPHEAPLIST | TH32CS_SNAPMODULE | TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD;
         public static readonly ulong TH32CS_INHERIT = (ulong)0x80000000UL;
 
 
  
         // do not reorder
         public static readonly long FILE_NOTIFY_CHANGE_FILE_NAME = (long)1L << (int)(iota);
-        public static readonly var FILE_NOTIFY_CHANGE_DIR_NAME = (var)0;
-        public static readonly var FILE_NOTIFY_CHANGE_ATTRIBUTES = (var)1;
-        public static readonly var FILE_NOTIFY_CHANGE_SIZE = (var)2;
-        public static readonly var FILE_NOTIFY_CHANGE_LAST_WRITE = (var)3;
-        public static readonly var FILE_NOTIFY_CHANGE_LAST_ACCESS = (var)4;
-        public static readonly var FILE_NOTIFY_CHANGE_CREATION = (var)5;
+        public static readonly var FILE_NOTIFY_CHANGE_DIR_NAME = 0;
+        public static readonly var FILE_NOTIFY_CHANGE_ATTRIBUTES = 1;
+        public static readonly var FILE_NOTIFY_CHANGE_SIZE = 2;
+        public static readonly var FILE_NOTIFY_CHANGE_LAST_WRITE = 3;
+        public static readonly var FILE_NOTIFY_CHANGE_LAST_ACCESS = 4;
+        public static readonly var FILE_NOTIFY_CHANGE_CREATION = 5;
 
 
  
         // do not reorder
-        public static readonly var FILE_ACTION_ADDED = (var)iota + 1L;
-        public static readonly var FILE_ACTION_REMOVED = (var)0;
-        public static readonly var FILE_ACTION_MODIFIED = (var)1;
-        public static readonly var FILE_ACTION_RENAMED_OLD_NAME = (var)2;
-        public static readonly var FILE_ACTION_RENAMED_NEW_NAME = (var)3;
+        public static readonly var FILE_ACTION_ADDED = iota + 1L;
+        public static readonly var FILE_ACTION_REMOVED = 0;
+        public static readonly var FILE_ACTION_MODIFIED = 1;
+        public static readonly var FILE_ACTION_RENAMED_OLD_NAME = 2;
+        public static readonly var FILE_ACTION_RENAMED_NEW_NAME = 3;
 
 
  
@@ -571,11 +571,11 @@ namespace go
         public static readonly ulong IOC_OUT = (ulong)0x40000000UL;
         public static readonly ulong IOC_IN = (ulong)0x80000000UL;
         public static readonly ulong IOC_VENDOR = (ulong)0x18000000UL;
-        public static readonly var IOC_INOUT = (var)IOC_IN | IOC_OUT;
+        public static readonly var IOC_INOUT = IOC_IN | IOC_OUT;
         public static readonly ulong IOC_WS2 = (ulong)0x08000000UL;
-        public static readonly var SIO_GET_EXTENSION_FUNCTION_POINTER = (var)IOC_INOUT | IOC_WS2 | 6L;
-        public static readonly var SIO_KEEPALIVE_VALS = (var)IOC_IN | IOC_VENDOR | 4L;
-        public static readonly var SIO_UDP_CONNRESET = (var)IOC_IN | IOC_VENDOR | 12L; 
+        public static readonly var SIO_GET_EXTENSION_FUNCTION_POINTER = IOC_INOUT | IOC_WS2 | 6L;
+        public static readonly var SIO_KEEPALIVE_VALS = IOC_IN | IOC_VENDOR | 4L;
+        public static readonly var SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12L; 
 
         // cf. https://support.microsoft.com/default.aspx?scid=kb;en-us;257460
 
@@ -1018,11 +1018,11 @@ namespace go
  
         // do not reorder
         public static readonly ulong HKEY_CLASSES_ROOT = (ulong)0x80000000UL + iota;
-        public static readonly var HKEY_CURRENT_USER = (var)0;
-        public static readonly var HKEY_LOCAL_MACHINE = (var)1;
-        public static readonly var HKEY_USERS = (var)2;
-        public static readonly var HKEY_PERFORMANCE_DATA = (var)3;
-        public static readonly var HKEY_CURRENT_CONFIG = (var)4;
+        public static readonly var HKEY_CURRENT_USER = 0;
+        public static readonly var HKEY_LOCAL_MACHINE = 1;
+        public static readonly var HKEY_USERS = 2;
+        public static readonly var HKEY_PERFORMANCE_DATA = 3;
+        public static readonly var HKEY_CURRENT_CONFIG = 4;
         public static readonly KEY_QUERY_VALUE HKEY_DYN_DATA = (KEY_QUERY_VALUE)1L;
         public static readonly long KEY_SET_VALUE = (long)2L;
         public static readonly long KEY_CREATE_SUB_KEY = (long)4L;
@@ -1039,19 +1039,19 @@ namespace go
 
  
         // do not reorder
-        public static readonly var REG_NONE = (var)iota;
-        public static readonly var REG_SZ = (var)0;
-        public static readonly var REG_EXPAND_SZ = (var)1;
-        public static readonly var REG_BINARY = (var)2;
-        public static readonly var REG_DWORD_LITTLE_ENDIAN = (var)3;
-        public static readonly var REG_DWORD_BIG_ENDIAN = (var)4;
-        public static readonly var REG_LINK = (var)5;
-        public static readonly var REG_MULTI_SZ = (var)6;
-        public static readonly var REG_RESOURCE_LIST = (var)7;
-        public static readonly var REG_FULL_RESOURCE_DESCRIPTOR = (var)8;
-        public static readonly var REG_RESOURCE_REQUIREMENTS_LIST = (var)9;
+        public static readonly var REG_NONE = iota;
+        public static readonly var REG_SZ = 0;
+        public static readonly var REG_EXPAND_SZ = 1;
+        public static readonly var REG_BINARY = 2;
+        public static readonly var REG_DWORD_LITTLE_ENDIAN = 3;
+        public static readonly var REG_DWORD_BIG_ENDIAN = 4;
+        public static readonly var REG_LINK = 5;
+        public static readonly var REG_MULTI_SZ = 6;
+        public static readonly var REG_RESOURCE_LIST = 7;
+        public static readonly var REG_FULL_RESOURCE_DESCRIPTOR = 8;
+        public static readonly var REG_RESOURCE_REQUIREMENTS_LIST = 9;
         public static readonly REG_DWORD REG_QWORD_LITTLE_ENDIAN = (REG_DWORD)REG_DWORD_LITTLE_ENDIAN;
-        public static readonly var REG_QWORD = (var)REG_QWORD_LITTLE_ENDIAN;
+        public static readonly var REG_QWORD = REG_QWORD_LITTLE_ENDIAN;
 
 
         public partial struct AddrinfoW

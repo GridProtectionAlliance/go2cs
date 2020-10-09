@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:43:29 UTC
+//     Generated on 2020 October 09 05:00:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using md5 = go.crypto.md5_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net

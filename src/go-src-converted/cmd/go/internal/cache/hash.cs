@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cache -- go2cs converted at 2020 October 08 04:34:35 UTC
+// package cache -- go2cs converted at 2020 October 09 05:46:01 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Go\src\cmd\go\internal\cache\hash.go
 using bytes = go.bytes_package;

@@ -4,7 +4,7 @@
 
 // go mod graph
 
-// package modcmd -- go2cs converted at 2020 October 08 04:36:44 UTC
+// package modcmd -- go2cs converted at 2020 October 09 05:47:52 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Go\src\cmd\go\internal\modcmd\graph.go
 using bufio = go.bufio_package;

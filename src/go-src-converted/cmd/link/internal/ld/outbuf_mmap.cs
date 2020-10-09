@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux openbsd
 
-// package ld -- go2cs converted at 2020 October 08 04:39:24 UTC
+// package ld -- go2cs converted at 2020 October 09 05:50:13 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\outbuf_mmap.go
 using syscall = go.syscall_package;

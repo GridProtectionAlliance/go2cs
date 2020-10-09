@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package net -- go2cs converted at 2020 October 08 03:34:18 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:15 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sockoptip_stub.go
 using syscall = go.syscall_package;

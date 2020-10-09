@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package gccgoimporter implements Import for gccgo-generated object files.
-// package gccgoimporter -- go2cs converted at 2020 October 08 04:56:14 UTC
+// package gccgoimporter -- go2cs converted at 2020 October 09 06:02:47 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\importer.go
 // import "go/internal/gccgoimporter"

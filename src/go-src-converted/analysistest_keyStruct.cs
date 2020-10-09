@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:23 UTC
+//     Generated on 2020 October 09 06:01:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,6 +36,8 @@ using span = go.golang.org.x.tools.@internal.span_package;
 using testenv = go.golang.org.x.tools.@internal.testenv_package;
 using txtar = go.golang.org.x.tools.txtar_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

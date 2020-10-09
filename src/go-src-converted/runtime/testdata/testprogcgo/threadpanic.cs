@@ -4,7 +4,7 @@
 
 // +build !plan9
 
-// package main -- go2cs converted at 2020 October 08 03:44:06 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:04 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\threadpanic.go
 // void start(void);
 using C = go.C_package;

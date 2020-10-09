@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package buildtag defines an Analyzer that checks build tags.
-// package buildtag -- go2cs converted at 2020 October 08 04:57:50 UTC
+// package buildtag -- go2cs converted at 2020 October 09 06:04:29 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/buildtag" ==> using buildtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.buildtag_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\buildtag\buildtag.go
 using bytes = go.bytes_package;

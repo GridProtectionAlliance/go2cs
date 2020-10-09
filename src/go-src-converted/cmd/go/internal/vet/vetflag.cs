@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package vet -- go2cs converted at 2020 October 08 04:35:05 UTC
+// package vet -- go2cs converted at 2020 October 09 05:46:26 UTC
 // import "cmd/go/internal/vet" ==> using vet = go.cmd.go.@internal.vet_package
 // Original source: C:\Go\src\cmd\go\internal\vet\vetflag.go
 using bytes = go.bytes_package;

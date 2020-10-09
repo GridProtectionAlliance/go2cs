@@ -4,7 +4,7 @@
 
 // +build !windows
 
-// package web -- go2cs converted at 2020 October 08 04:34:39 UTC
+// package web -- go2cs converted at 2020 October 09 05:46:04 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Go\src\cmd\go\internal\web\url_other.go
 using errors = go.errors_package;

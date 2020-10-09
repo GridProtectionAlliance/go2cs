@@ -8,7 +8,7 @@
 // TestDeps into testing.Main. This allows tests to use packages at run time
 // without making those packages direct dependencies of package testing.
 // Direct dependencies of package testing are harder to write tests for.
-// package testdeps -- go2cs converted at 2020 October 08 04:36:39 UTC
+// package testdeps -- go2cs converted at 2020 October 09 05:47:47 UTC
 // import "testing/internal/testdeps" ==> using testdeps = go.testing.@internal.testdeps_package
 // Original source: C:\Go\src\testing\internal\testdeps\deps.go
 using bufio = go.bufio_package;

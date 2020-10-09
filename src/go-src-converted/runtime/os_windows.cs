@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:12 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:38 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_windows.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -391,8 +391,8 @@ namespace go
             return uintptr(info.dwpagesize);
         }
 
-        private static readonly var currentProcess = (var)~uintptr(0L); // -1 = current process
-        private static readonly var currentThread = (var)~uintptr(1L); // -2 = current thread
+        private static readonly var currentProcess = ~uintptr(0L); // -1 = current process
+        private static readonly var currentThread = ~uintptr(1L); // -2 = current thread
 
         // in sys_windows_386.s and sys_windows_amd64.s:
         private static void externalthreadhandler()
@@ -666,8 +666,8 @@ namespace go
         //go:nosplit
         private static int write1(System.UIntPtr fd, unsafe.Pointer buf, int n)
         {
-            const var _STD_OUTPUT_HANDLE = (var)~uintptr(10L); // -11
-            const var _STD_ERROR_HANDLE = (var)~uintptr(11L); // -12
+            const var _STD_OUTPUT_HANDLE = ~uintptr(10L); // -11
+            const var _STD_ERROR_HANDLE = ~uintptr(11L); // -12
             System.UIntPtr handle = default;
             switch (fd)
             {
@@ -718,7 +718,7 @@ namespace go
         // It returns the number of bytes written.
         private static long writeConsole(System.UIntPtr handle, unsafe.Pointer buf, int bufLen)
         {
-            const var surr2 = (var)(surrogateMin + surrogateMax + 1L) / 2L; 
+            const var surr2 = (surrogateMin + surrogateMax + 1L) / 2L; 
 
             // Do not use defer for unlock. May cause issues when printing a panic.
  
@@ -1188,7 +1188,7 @@ namespace go
         // and is called "services".
         private static bool isWindowsService() => func((defer, _, __) =>
         {
-            const var _CURRENT_PROCESS = (var)~uintptr(0L);
+            const var _CURRENT_PROCESS = ~uintptr(0L);
             const ulong _PROCESS_QUERY_LIMITED_INFORMATION = (ulong)0x1000UL; 
             // pbi is a PROCESS_BASIC_INFORMATION struct, where we just care about
             // the 6th pointer inside of it, which contains the pid of the process
@@ -1424,7 +1424,7 @@ namespace go
 
         }
 
-        private static readonly var preemptMSupported = (var)GOARCH != "arm";
+        private static readonly var preemptMSupported = GOARCH != "arm";
 
         // suspendLock protects simultaneous SuspendThread operations from
         // suspending each other.

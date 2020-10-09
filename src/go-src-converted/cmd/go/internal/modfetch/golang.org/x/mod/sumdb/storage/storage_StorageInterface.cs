@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:23 UTC
+//     Generated on 2020 October 09 05:47:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using context = go.context_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Storage<T> : Storage
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sumdb
             private delegate error ReadOnlyByPtr(ptr<T> value, context.Context ctx, Func<context.Context, Transaction, error> f);
             private delegate error ReadOnlyByVal(T value, context.Context ctx, Func<context.Context, Transaction, error> f);
 
-            private static readonly ReadOnlyByPtr s_ReadOnlyByPtr;
-            private static readonly ReadOnlyByVal s_ReadOnlyByVal;
+            private static readonly ReadOnlyByPtr? s_ReadOnlyByPtr;
+            private static readonly ReadOnlyByVal? s_ReadOnlyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadOnly(context.Context ctx, Func<context.Context, Transaction, error> f)
@@ -90,8 +91,8 @@ namespace sumdb
             private delegate error ReadWriteByPtr(ptr<T> value, context.Context ctx, Func<context.Context, Transaction, error> f);
             private delegate error ReadWriteByVal(T value, context.Context ctx, Func<context.Context, Transaction, error> f);
 
-            private static readonly ReadWriteByPtr s_ReadWriteByPtr;
-            private static readonly ReadWriteByVal s_ReadWriteByVal;
+            private static readonly ReadWriteByPtr? s_ReadWriteByPtr;
+            private static readonly ReadWriteByVal? s_ReadWriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadWrite(context.Context ctx, Func<context.Context, Transaction, error> f)
@@ -107,7 +108,7 @@ namespace sumdb
                 return s_ReadWriteByPtr(m_target_ptr, ctx, f);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Storage()

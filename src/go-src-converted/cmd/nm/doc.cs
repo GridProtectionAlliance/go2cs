@@ -38,7 +38,7 @@
 //    -type
 //        print symbol type after name
 //
-// package main -- go2cs converted at 2020 October 08 04:39:54 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:38 UTC
 // Original source: C:\Go\src\cmd\nm\doc.go
     }
 

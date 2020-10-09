@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:00:17 UTC
+//     Generated on 2020 October 09 06:06:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,8 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using cpu = go.golang.org.x.sys.cpu_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace vendor {

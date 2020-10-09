@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2020 October 08 04:27:30 UTC
+// package ppc64 -- go2cs converted at 2020 October 09 05:40:14 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
 // Original source: C:\Go\src\cmd\compile\internal\ppc64\opt.go
 

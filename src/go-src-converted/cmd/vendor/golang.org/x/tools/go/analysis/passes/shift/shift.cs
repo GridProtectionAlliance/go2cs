@@ -4,7 +4,7 @@
 
 // Package shift defines an Analyzer that checks for shifts that exceed
 // the width of an integer.
-// package shift -- go2cs converted at 2020 October 08 04:58:09 UTC
+// package shift -- go2cs converted at 2020 October 09 06:04:44 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/shift" ==> using shift = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.shift_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\shift\shift.go
 // TODO(adonovan): integrate with ctrflow (CFG-based) dead code analysis. May

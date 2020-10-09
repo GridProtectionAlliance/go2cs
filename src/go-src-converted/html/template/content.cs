@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:41:52 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:14 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\content.go
 using fmt = go.fmt_package;
@@ -115,17 +115,17 @@ namespace html
         }
 
         private static readonly contentType contentTypePlain = (contentType)iota;
-        private static readonly var contentTypeCSS = (var)0;
-        private static readonly var contentTypeHTML = (var)1;
-        private static readonly var contentTypeHTMLAttr = (var)2;
-        private static readonly var contentTypeJS = (var)3;
-        private static readonly var contentTypeJSStr = (var)4;
-        private static readonly var contentTypeURL = (var)5;
-        private static readonly var contentTypeSrcset = (var)6; 
+        private static readonly var contentTypeCSS = 0;
+        private static readonly var contentTypeHTML = 1;
+        private static readonly var contentTypeHTMLAttr = 2;
+        private static readonly var contentTypeJS = 3;
+        private static readonly var contentTypeJSStr = 4;
+        private static readonly var contentTypeURL = 5;
+        private static readonly var contentTypeSrcset = 6; 
         // contentTypeUnsafe is used in attr.go for values that affect how
         // embedded content and network messages are formed, vetted,
         // or interpreted; or which credentials network messages carry.
-        private static readonly var contentTypeUnsafe = (var)7;
+        private static readonly var contentTypeUnsafe = 7;
 
 
         // indirect returns the value, after dereferencing as many times

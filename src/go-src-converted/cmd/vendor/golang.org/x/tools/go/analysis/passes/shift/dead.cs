@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package shift -- go2cs converted at 2020 October 08 04:58:08 UTC
+// package shift -- go2cs converted at 2020 October 09 06:04:44 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/shift" ==> using shift = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.shift_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\shift\dead.go
 // Simplified dead code detector.

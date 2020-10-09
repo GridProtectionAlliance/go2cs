@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gccgoimporter -- go2cs converted at 2020 October 08 04:56:07 UTC
+// package gccgoimporter -- go2cs converted at 2020 October 09 06:02:40 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\ar.go
 using bytes = go.bytes_package;
@@ -30,20 +30,20 @@ namespace @internal
         // Offsets and sizes for fields in a standard archive header.
         private static readonly long arNameOff = (long)0L;
         private static readonly long arNameSize = (long)16L;
-        private static readonly var arDateOff = (var)arNameOff + arNameSize;
+        private static readonly var arDateOff = arNameOff + arNameSize;
         private static readonly long arDateSize = (long)12L;
-        private static readonly var arUIDOff = (var)arDateOff + arDateSize;
+        private static readonly var arUIDOff = arDateOff + arDateSize;
         private static readonly long arUIDSize = (long)6L;
-        private static readonly var arGIDOff = (var)arUIDOff + arUIDSize;
+        private static readonly var arGIDOff = arUIDOff + arUIDSize;
         private static readonly long arGIDSize = (long)6L;
-        private static readonly var arModeOff = (var)arGIDOff + arGIDSize;
+        private static readonly var arModeOff = arGIDOff + arGIDSize;
         private static readonly long arModeSize = (long)8L;
-        private static readonly var arSizeOff = (var)arModeOff + arModeSize;
+        private static readonly var arSizeOff = arModeOff + arModeSize;
         private static readonly long arSizeSize = (long)10L;
-        private static readonly var arFmagOff = (var)arSizeOff + arSizeSize;
+        private static readonly var arFmagOff = arSizeOff + arSizeSize;
         private static readonly long arFmagSize = (long)2L;
 
-        private static readonly var arHdrSize = (var)arFmagOff + arFmagSize;
+        private static readonly var arHdrSize = arFmagOff + arFmagSize;
 
 
         // The contents of the fmag field of a standard archive header.

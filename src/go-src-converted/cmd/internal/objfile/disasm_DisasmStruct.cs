@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:49:34 UTC
+//     Generated on 2020 October 09 05:08:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,6 +33,8 @@ using arm64asm = go.golang.org.x.arch.arm64.arm64asm_package;
 using ppc64asm = go.golang.org.x.arch.ppc64.ppc64asm_package;
 using x86asm = go.golang.org.x.arch.x86.x86asm_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

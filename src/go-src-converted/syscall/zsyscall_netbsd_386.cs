@@ -3,7 +3,7 @@
 
 // +build netbsd,386
 
-// package syscall -- go2cs converted at 2020 October 08 03:29:46 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:03:43 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsyscall_netbsd_386.go
 using @unsafe = go.@unsafe_package;

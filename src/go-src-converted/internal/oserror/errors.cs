@@ -5,7 +5,7 @@
 // Package oserror defines errors values used in the os package.
 //
 // These types are defined here to permit the syscall package to reference them.
-// package oserror -- go2cs converted at 2020 October 08 03:27:24 UTC
+// package oserror -- go2cs converted at 2020 October 09 05:01:44 UTC
 // import "internal/oserror" ==> using oserror = go.@internal.oserror_package
 // Original source: C:\Go\src\internal\oserror\errors.go
 using errors = go.errors_package;

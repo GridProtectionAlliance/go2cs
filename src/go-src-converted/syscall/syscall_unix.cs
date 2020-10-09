@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:44 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:57 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_unix.go
 using oserror = go.@internal.oserror_package;
@@ -22,8 +22,8 @@ namespace go
     {
         public static long Stdin = 0L;        public static long Stdout = 1L;        public static long Stderr = 2L;
 
-        private static readonly var darwin64Bit = (var)runtime.GOOS == "darwin" && sizeofPtr == 8L;
-        private static readonly var netbsd32Bit = (var)runtime.GOOS == "netbsd" && sizeofPtr == 4L;
+        private static readonly var darwin64Bit = runtime.GOOS == "darwin" && sizeofPtr == 8L;
+        private static readonly var netbsd32Bit = runtime.GOOS == "netbsd" && sizeofPtr == 4L;
 
 
         public static (System.UIntPtr, System.UIntPtr, Errno) Syscall(System.UIntPtr trap, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3)

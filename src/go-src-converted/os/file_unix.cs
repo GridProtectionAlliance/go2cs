@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 October 08 03:44:45 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:13 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\file_unix.go
 using poll = go.@internal.poll_package;
@@ -143,9 +143,9 @@ namespace go
         }
 
         private static readonly newFileKind kindNewFile = (newFileKind)iota;
-        private static readonly var kindOpenFile = (var)0;
-        private static readonly var kindPipe = (var)1;
-        private static readonly var kindNonBlock = (var)2;
+        private static readonly var kindOpenFile = 0;
+        private static readonly var kindPipe = 1;
+        private static readonly var kindNonBlock = 2;
 
 
         // newFile is like NewFile, but if called from OpenFile or Pipe

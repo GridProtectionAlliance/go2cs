@@ -4,7 +4,7 @@
 
 // Parse Plan 9 timezone(2) files.
 
-// package time -- go2cs converted at 2020 October 08 03:45:54 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:13 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo_plan9.go
 using runtime = go.runtime_package;

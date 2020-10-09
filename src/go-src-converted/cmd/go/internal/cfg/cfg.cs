@@ -4,7 +4,7 @@
 
 // Package cfg holds configuration shared by multiple parts
 // of the go command.
-// package cfg -- go2cs converted at 2020 October 08 04:33:32 UTC
+// package cfg -- go2cs converted at 2020 October 09 05:45:08 UTC
 // import "cmd/go/internal/cfg" ==> using cfg = go.cmd.go.@internal.cfg_package
 // Original source: C:\Go\src\cmd\go\internal\cfg\cfg.go
 using bytes = go.bytes_package;

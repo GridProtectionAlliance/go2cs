@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:45:24 UTC
+//     Generated on 2020 October 09 05:07:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,8 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using syscall = go.syscall_package;
 using time = go.time_package;
+
+#nullable enable
 
 namespace go
 {

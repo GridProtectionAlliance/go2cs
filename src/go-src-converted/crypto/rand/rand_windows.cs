@@ -5,7 +5,7 @@
 // Windows cryptographically secure pseudorandom number
 // generator.
 
-// package rand -- go2cs converted at 2020 October 08 03:35:33 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:06 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\rand_windows.go
 using os = go.os_package;
@@ -52,9 +52,9 @@ namespace crypto
             r.mu.Lock();
             if (r.prov == 0L)
             {
-                const var provType = (var)syscall.PROV_RSA_FULL;
+                const var provType = syscall.PROV_RSA_FULL;
 
-                const var flags = (var)syscall.CRYPT_VERIFYCONTEXT | syscall.CRYPT_SILENT;
+                const var flags = syscall.CRYPT_VERIFYCONTEXT | syscall.CRYPT_SILENT;
 
                 var err = syscall.CryptAcquireContext(_addr_r.prov, null, null, provType, flags);
                 if (err != null)

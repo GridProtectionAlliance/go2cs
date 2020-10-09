@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package tool implements the ``go tool'' command.
-// package tool -- go2cs converted at 2020 October 08 04:33:48 UTC
+// package tool -- go2cs converted at 2020 October 09 05:45:22 UTC
 // import "cmd/go/internal/tool" ==> using tool = go.cmd.go.@internal.tool_package
 // Original source: C:\Go\src\cmd\go\internal\tool\tool.go
 using fmt = go.fmt_package;

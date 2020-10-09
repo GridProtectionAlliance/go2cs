@@ -6,7 +6,7 @@
 //
 // See "The Go image/draw package" for an introduction to this package:
 // https://golang.org/doc/articles/image_draw.html
-// package draw -- go2cs converted at 2020 October 08 04:59:18 UTC
+// package draw -- go2cs converted at 2020 October 09 06:05:46 UTC
 // import "image/draw" ==> using draw = go.image.draw_package
 // Original source: C:\Go\src\image\draw\draw.go
 using image = go.image_package;
@@ -47,7 +47,7 @@ namespace image
         // Over specifies ``(src in mask) over dst''.
         public static readonly Op Over = (Op)iota; 
         // Src specifies ``src in mask''.
-        public static readonly var Src = (var)0;
+        public static readonly var Src = 0;
 
 
         // Draw implements the Drawer interface by calling the Draw function with this

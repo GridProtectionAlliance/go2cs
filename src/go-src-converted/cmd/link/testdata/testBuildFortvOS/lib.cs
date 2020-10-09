@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 October 08 04:39:54 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:38 UTC
 // Original source: C:\Go\src\cmd\link\testdata\testBuildFortvOS\lib.go
 using C = go.C_package;
 using static go.builtin;

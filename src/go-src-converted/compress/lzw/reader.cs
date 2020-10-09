@@ -13,7 +13,7 @@
 // The TIFF file format uses a similar but incompatible version of the LZW
 // algorithm. See the golang.org/x/image/tiff/lzw package for an
 // implementation.
-// package lzw -- go2cs converted at 2020 October 08 04:58:43 UTC
+// package lzw -- go2cs converted at 2020 October 09 06:05:15 UTC
 // import "compress/lzw" ==> using lzw = go.compress.lzw_package
 // Original source: C:\Go\src\compress\lzw\reader.go
 // TODO(nigeltao): check that PDF uses LZW in the same way as GIF,
@@ -41,7 +41,7 @@ namespace compress
         public static readonly Order LSB = (Order)iota; 
         // MSB means Most Significant Bits first, as used in the TIFF and PDF
         // file formats.
-        public static readonly var MSB = (var)0;
+        public static readonly var MSB = 0;
 
 
         private static readonly long maxWidth = (long)12L;

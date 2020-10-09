@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package fmtcmd implements the ``go fmt'' command.
-// package fmtcmd -- go2cs converted at 2020 October 08 04:33:37 UTC
+// package fmtcmd -- go2cs converted at 2020 October 09 05:45:12 UTC
 // import "cmd/go/internal/fmtcmd" ==> using fmtcmd = go.cmd.go.@internal.fmtcmd_package
 // Original source: C:\Go\src\cmd\go\internal\fmtcmd\fmt.go
 using errors = go.errors_package;

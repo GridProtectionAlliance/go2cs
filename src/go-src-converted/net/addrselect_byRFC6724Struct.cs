@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:31:09 UTC
+//     Generated on 2020 October 09 04:50:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using sort = go.sort_package;
+
+#nullable enable
 
 namespace go
 {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 October 08 03:30:48 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:05 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\deflate.go
 using fmt = go.fmt_package;
@@ -35,7 +35,7 @@ namespace compress
 
         private static readonly long logWindowSize = (long)15L;
         private static readonly long windowSize = (long)1L << (int)(logWindowSize);
-        private static readonly var windowMask = (var)windowSize - 1L; 
+        private static readonly var windowMask = windowSize - 1L; 
 
         // The LZ77 step produces a sequence of literal tokens and <length, offset>
         // pair tokens. The offset is also known as distance. The underlying wire
@@ -58,7 +58,7 @@ namespace compress
         private static readonly long hashMask = (long)(1L << (int)(hashBits)) - 1L;
         private static readonly long maxHashOffset = (long)1L << (int)(24L);
 
-        private static readonly var skipNever = (var)math.MaxInt32;
+        private static readonly var skipNever = math.MaxInt32;
 
 
         private partial struct compressionLevel

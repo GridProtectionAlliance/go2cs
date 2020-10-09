@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 October 08 04:04:20 UTC
+// package ast -- go2cs converted at 2020 October 09 05:20:03 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\filter.go
 using token = go.go.token_package;
@@ -469,9 +469,9 @@ namespace go
         public static readonly MergeMode FilterFuncDuplicates = (MergeMode)1L << (int)(iota); 
         // If set, comments that are not associated with a specific
         // AST node (as Doc or Comment) are excluded.
-        public static readonly var FilterUnassociatedComments = (var)0; 
+        public static readonly var FilterUnassociatedComments = 0; 
         // If set, duplicate import declarations are excluded.
-        public static readonly var FilterImportDuplicates = (var)1;
+        public static readonly var FilterImportDuplicates = 1;
 
 
         // nameOf returns the function (foo) or method name (foo.bar) for

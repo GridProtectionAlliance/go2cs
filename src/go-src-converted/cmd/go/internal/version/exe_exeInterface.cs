@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:49 UTC
+//     Generated on 2020 October 09 05:45:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using io = go.io_package;
 using os = go.os_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class exe<T> : exe
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate ulong CloseByPtr(ptr<T> value);
             private delegate ulong CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Close()
@@ -96,8 +97,8 @@ namespace @internal
             private delegate ulong ReadDataByPtr(ptr<T> value, ulong addr, ulong size);
             private delegate ulong ReadDataByVal(T value, ulong addr, ulong size);
 
-            private static readonly ReadDataByPtr s_ReadDataByPtr;
-            private static readonly ReadDataByVal s_ReadDataByVal;
+            private static readonly ReadDataByPtr? s_ReadDataByPtr;
+            private static readonly ReadDataByVal? s_ReadDataByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong ReadData(ulong addr, ulong size)
@@ -116,8 +117,8 @@ namespace @internal
             private delegate ulong DataStartByPtr(ptr<T> value);
             private delegate ulong DataStartByVal(T value);
 
-            private static readonly DataStartByPtr s_DataStartByPtr;
-            private static readonly DataStartByVal s_DataStartByVal;
+            private static readonly DataStartByPtr? s_DataStartByPtr;
+            private static readonly DataStartByVal? s_DataStartByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong DataStart()
@@ -133,7 +134,7 @@ namespace @internal
                 return s_DataStartByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static exe()

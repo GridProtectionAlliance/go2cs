@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:33:18 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:59 UTC
 // Original source: C:\Go\src\cmd\fix\main.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -38,7 +38,7 @@ namespace go
         private static var doDiff = flag.Bool("diff", false, "display diffs instead of rewriting files");
 
         // enable for debugging fix failures
-        private static readonly var debug = (var)false; // display incorrectly reformatted source and exit
+        private static readonly var debug = false; // display incorrectly reformatted source and exit
 
  // display incorrectly reformatted source and exit
 
@@ -167,7 +167,7 @@ namespace go
 
         }
 
-        private static readonly var parserMode = (var)parser.ParseComments;
+        private static readonly var parserMode = parser.ParseComments;
 
 
 

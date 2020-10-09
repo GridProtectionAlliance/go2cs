@@ -4,7 +4,7 @@
 
 // Support for test coverage.
 
-// package testing -- go2cs converted at 2020 October 08 04:36:29 UTC
+// package testing -- go2cs converted at 2020 October 09 05:47:39 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\cover.go
 using fmt = go.fmt_package;

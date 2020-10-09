@@ -4,7 +4,7 @@
 
 // This file implements printing of syntax tree structures.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:07 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:40:44 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\dumper.go
 using fmt = go.fmt_package;

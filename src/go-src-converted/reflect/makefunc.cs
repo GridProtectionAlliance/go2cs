@@ -4,7 +4,7 @@
 
 // MakeFunc implementation.
 
-// package reflect -- go2cs converted at 2020 October 08 03:24:33 UTC
+// package reflect -- go2cs converted at 2020 October 09 05:06:35 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\makefunc.go
 using @unsafe = go.@unsafe_package;

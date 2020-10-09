@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:45 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:42 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\cert_pool.go
 using pem = go.encoding.pem_package;

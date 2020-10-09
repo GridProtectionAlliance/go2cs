@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package imports -- go2cs converted at 2020 October 08 04:34:17 UTC
+// package imports -- go2cs converted at 2020 October 09 05:45:46 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Go\src\cmd\go\internal\imports\tags.go
 using cfg = go.cmd.go.@internal.cfg_package;

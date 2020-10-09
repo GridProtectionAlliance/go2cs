@@ -4,7 +4,7 @@
 
 // Build initialization (after flag parsing).
 
-// package work -- go2cs converted at 2020 October 08 04:35:03 UTC
+// package work -- go2cs converted at 2020 October 09 05:46:24 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\init.go
 using @base = go.cmd.go.@internal.@base_package;

@@ -8,7 +8,7 @@
 // It is an internal package because these details are specific
 // to the Go team's test setup (on build.golang.org) and not
 // fundamental to tests in general.
-// package testenv -- go2cs converted at 2020 October 08 04:59:48 UTC
+// package testenv -- go2cs converted at 2020 October 09 06:06:11 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
 // Original source: C:\Go\src\internal\testenv\testenv.go
 using errors = go.errors_package;

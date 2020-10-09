@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:49:28 UTC
+//     Generated on 2020 October 09 05:08:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using sync = go.sync_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace archive

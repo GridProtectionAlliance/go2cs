@@ -5,7 +5,7 @@
 // This file implements convertions between *types.Node and *Node.
 // TODO(gri) try to eliminate these soon
 
-// package gc -- go2cs converted at 2020 October 08 04:31:37 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:36 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\types_acc.go
 using types = go.cmd.compile.@internal.types_package;

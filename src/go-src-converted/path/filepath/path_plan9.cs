@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package filepath -- go2cs converted at 2020 October 08 03:37:01 UTC
+// package filepath -- go2cs converted at 2020 October 09 04:49:46 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\path_plan9.go
 using strings = go.strings_package;

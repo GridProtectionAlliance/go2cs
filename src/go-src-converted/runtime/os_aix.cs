@@ -4,7 +4,7 @@
 
 // +build aix
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:48 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:22 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_aix.go
 using cpu = go.@internal.cpu_package;

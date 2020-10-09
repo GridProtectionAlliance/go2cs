@@ -19,7 +19,7 @@
 //
 // There is no support for groups, message sets, or "has" bits.
 
-// package profile -- go2cs converted at 2020 October 08 03:41:51 UTC
+// package profile -- go2cs converted at 2020 October 09 04:59:13 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Go\src\internal\profile\proto.go
 using errors = go.errors_package;

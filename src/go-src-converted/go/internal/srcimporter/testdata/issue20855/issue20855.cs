@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue20855 -- go2cs converted at 2020 October 08 04:56:09 UTC
+// package issue20855 -- go2cs converted at 2020 October 09 06:02:42 UTC
 // import "go/internal/srcimporter/testdata/issue20855" ==> using issue20855 = go.go.@internal.srcimporter.testdata.issue20855_package
 // Original source: C:\Go\src\go\internal\srcimporter\testdata\issue20855\issue20855.go
 

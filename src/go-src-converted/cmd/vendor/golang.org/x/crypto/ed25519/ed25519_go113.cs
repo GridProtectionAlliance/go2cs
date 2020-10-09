@@ -16,7 +16,7 @@
 // Beginning with Go 1.13, the functionality of this package was moved to the
 // standard library as crypto/ed25519. This package only acts as a compatibility
 // wrapper.
-// package ed25519 -- go2cs converted at 2020 October 08 04:45:25 UTC
+// package ed25519 -- go2cs converted at 2020 October 09 05:55:31 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519" ==> using ed25519 = go.cmd.vendor.golang.org.x.crypto.ed25519_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\ed25519_go113.go
 using ed25519 = go.crypto.ed25519_package;

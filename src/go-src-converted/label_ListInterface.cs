@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:53 UTC
+//     Generated on 2020 October 09 06:01:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using reflect = go.reflect_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace @event
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class List<T> : List
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace @event
             private delegate Label ValidByPtr(ptr<T> value, long index);
             private delegate Label ValidByVal(T value, long index);
 
-            private static readonly ValidByPtr s_ValidByPtr;
-            private static readonly ValidByVal s_ValidByVal;
+            private static readonly ValidByPtr? s_ValidByPtr;
+            private static readonly ValidByVal? s_ValidByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Label Valid(long index)
@@ -94,8 +95,8 @@ namespace @event
             private delegate Label LabelByPtr(ptr<T> value, long index);
             private delegate Label LabelByVal(T value, long index);
 
-            private static readonly LabelByPtr s_LabelByPtr;
-            private static readonly LabelByVal s_LabelByVal;
+            private static readonly LabelByPtr? s_LabelByPtr;
+            private static readonly LabelByVal? s_LabelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Label Label(long index)
@@ -111,7 +112,7 @@ namespace @event
                 return s_LabelByPtr(m_target_ptr, index);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static List()

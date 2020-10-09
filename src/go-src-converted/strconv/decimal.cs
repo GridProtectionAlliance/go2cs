@@ -9,7 +9,7 @@
 // because 2 divides 10; cannot do decimal floating point
 // in multiprecision binary precisely.
 
-// package strconv -- go2cs converted at 2020 October 08 03:48:51 UTC
+// package strconv -- go2cs converted at 2020 October 09 05:06:30 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Go\src\strconv\decimal.go
 
@@ -140,7 +140,7 @@ namespace go
         // A uint has 32 or 64 bits, and we have to be able to accommodate 9<<k.
         private static readonly long uintSize = (long)32L << (int)((~uint(0L) >> (int)(63L)));
 
-        private static readonly var maxShift = (var)uintSize - 4L;
+        private static readonly var maxShift = uintSize - 4L;
 
         // Binary shift right (/ 2) by k bits.  k <= maxShift to avoid overflow.
 

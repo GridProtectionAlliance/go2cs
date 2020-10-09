@@ -8,7 +8,7 @@
 // better done via channels and communication.
 //
 // Values containing the types defined in this package should not be copied.
-// package sync -- go2cs converted at 2020 October 08 00:34:03 UTC
+// package sync -- go2cs converted at 2020 October 09 04:45:27 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\mutex.go
 using race = go.@internal.race_package;
@@ -41,7 +41,7 @@ namespace go
         }
 
         private static readonly long mutexLocked = (long)1L << (int)(iota); // mutex is locked
-        private static readonly var mutexWoken = (var)0;
+        private static readonly var mutexWoken = 0;
         private static readonly mutexWaiterShift mutexStarving = (mutexWaiterShift)iota; 
 
         // Mutex fairness.

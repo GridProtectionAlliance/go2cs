@@ -9,7 +9,7 @@
 //
 // This package is EXPERIMENTAL. Its current scope is only to allow tests to run, but not yet to provide a
 // comprehensive API for users. It is exempt from the Go compatibility promise.
-// package js -- go2cs converted at 2020 October 08 03:26:43 UTC
+// package js -- go2cs converted at 2020 October 09 04:53:04 UTC
 // import "syscall/js" ==> using js = go.syscall.js_package
 // Original source: C:\Go\src\syscall\js\js.go
 using runtime = go.runtime_package;
@@ -55,11 +55,11 @@ namespace syscall
 
  
         // the type flags need to be in sync with wasm_exec.js
-        private static readonly var typeFlagNone = (var)iota;
-        private static readonly var typeFlagObject = (var)0;
-        private static readonly var typeFlagString = (var)1;
-        private static readonly var typeFlagSymbol = (var)2;
-        private static readonly var typeFlagFunction = (var)3;
+        private static readonly var typeFlagNone = iota;
+        private static readonly var typeFlagObject = 0;
+        private static readonly var typeFlagString = 1;
+        private static readonly var typeFlagSymbol = 2;
+        private static readonly var typeFlagFunction = 3;
 
 
         // JSValue implements Wrapper interface.
@@ -285,13 +285,13 @@ namespace syscall
         }
 
         public static readonly Type TypeUndefined = (Type)iota;
-        public static readonly var TypeNull = (var)0;
-        public static readonly var TypeBoolean = (var)1;
-        public static readonly var TypeNumber = (var)2;
-        public static readonly var TypeString = (var)3;
-        public static readonly var TypeSymbol = (var)4;
-        public static readonly var TypeObject = (var)5;
-        public static readonly var TypeFunction = (var)6;
+        public static readonly var TypeNull = 0;
+        public static readonly var TypeBoolean = 1;
+        public static readonly var TypeNumber = 2;
+        public static readonly var TypeString = 3;
+        public static readonly var TypeSymbol = 4;
+        public static readonly var TypeObject = 5;
+        public static readonly var TypeFunction = 6;
 
 
         public static @string String(this Type t) => func((_, panic, __) =>

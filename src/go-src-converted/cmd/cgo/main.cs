@@ -8,7 +8,7 @@
 //    Emit correct line number annotations.
 //    Make gc understand the annotations.
 
-// package main -- go2cs converted at 2020 October 08 04:09:11 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:45 UTC
 // Original source: C:\Go\src\cmd\cgo\main.go
 using md5 = go.crypto.md5_package;
 using flag = go.flag_package;

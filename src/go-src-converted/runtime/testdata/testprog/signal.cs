@@ -4,7 +4,7 @@
 
 // +build !windows,!plan9
 
-// package main -- go2cs converted at 2020 October 08 03:43:43 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:50 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\signal.go
 using syscall = go.syscall_package;
 using time = go.time_package;

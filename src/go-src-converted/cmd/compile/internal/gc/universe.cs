@@ -4,7 +4,7 @@
 
 // TODO(gri) This file should probably become part of package types.
 
-// package gc -- go2cs converted at 2020 October 08 04:31:40 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:38 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\universe.go
 using types = go.cmd.compile.@internal.types_package;

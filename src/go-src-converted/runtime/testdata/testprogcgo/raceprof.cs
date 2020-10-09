@@ -4,7 +4,7 @@
 
 // +build linux,amd64 freebsd,amd64
 
-// package main -- go2cs converted at 2020 October 08 03:44:02 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:02 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\raceprof.go
 // Test that we can collect a lot of colliding profiling signals from
 // an external C thread. This used to fail when built with the race

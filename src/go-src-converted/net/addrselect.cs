@@ -6,7 +6,7 @@
 
 // Minimal RFC 6724 address selection.
 
-// package net -- go2cs converted at 2020 October 08 03:31:09 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:25 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\addrselect.go
 using sort = go.sort_package;
@@ -143,9 +143,9 @@ namespace go
             var attrSourceDA = _addr_s.srcAttr[i];
             var attrSourceDB = _addr_s.srcAttr[j];
 
-            const var preferDA = (var)true;
+            const var preferDA = true;
 
-            const var preferDB = (var)false; 
+            const var preferDB = false; 
 
             // Rule 1: Avoid unusable destinations.
             // If DB is known to be unreachable or if Source(DB) is undefined, then

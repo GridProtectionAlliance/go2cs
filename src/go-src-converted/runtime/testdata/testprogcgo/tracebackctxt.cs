@@ -4,7 +4,7 @@
 
 // The __attribute__((weak)) used below doesn't seem to work on Windows.
 
-// package main -- go2cs converted at 2020 October 08 03:44:08 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:06 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\tracebackctxt.go
 // Test the context argument to SetCgoTraceback.
 // Use fake context, traceback, and symbolizer functions.

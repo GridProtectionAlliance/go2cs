@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:41:52 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:14 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Go\src\html\template\context.go
 using fmt = go.fmt_package;
@@ -110,58 +110,58 @@ namespace html
         // directive, comment, and special element body.
         private static readonly state stateText = (state)iota; 
         // stateTag occurs before an HTML attribute or the end of a tag.
-        private static readonly var stateTag = (var)0; 
+        private static readonly var stateTag = 0; 
         // stateAttrName occurs inside an attribute name.
         // It occurs between the ^'s in ` ^name^ = value`.
-        private static readonly var stateAttrName = (var)1; 
+        private static readonly var stateAttrName = 1; 
         // stateAfterName occurs after an attr name has ended but before any
         // equals sign. It occurs between the ^'s in ` name^ ^= value`.
-        private static readonly var stateAfterName = (var)2; 
+        private static readonly var stateAfterName = 2; 
         // stateBeforeValue occurs after the equals sign but before the value.
         // It occurs between the ^'s in ` name =^ ^value`.
-        private static readonly var stateBeforeValue = (var)3; 
+        private static readonly var stateBeforeValue = 3; 
         // stateHTMLCmt occurs inside an <!-- HTML comment -->.
-        private static readonly var stateHTMLCmt = (var)4; 
+        private static readonly var stateHTMLCmt = 4; 
         // stateRCDATA occurs inside an RCDATA element (<textarea> or <title>)
         // as described at https://www.w3.org/TR/html5/syntax.html#elements-0
-        private static readonly var stateRCDATA = (var)5; 
+        private static readonly var stateRCDATA = 5; 
         // stateAttr occurs inside an HTML attribute whose content is text.
-        private static readonly var stateAttr = (var)6; 
+        private static readonly var stateAttr = 6; 
         // stateURL occurs inside an HTML attribute whose content is a URL.
-        private static readonly var stateURL = (var)7; 
+        private static readonly var stateURL = 7; 
         // stateSrcset occurs inside an HTML srcset attribute.
-        private static readonly var stateSrcset = (var)8; 
+        private static readonly var stateSrcset = 8; 
         // stateJS occurs inside an event handler or script element.
-        private static readonly var stateJS = (var)9; 
+        private static readonly var stateJS = 9; 
         // stateJSDqStr occurs inside a JavaScript double quoted string.
-        private static readonly var stateJSDqStr = (var)10; 
+        private static readonly var stateJSDqStr = 10; 
         // stateJSSqStr occurs inside a JavaScript single quoted string.
-        private static readonly var stateJSSqStr = (var)11; 
+        private static readonly var stateJSSqStr = 11; 
         // stateJSRegexp occurs inside a JavaScript regexp literal.
-        private static readonly var stateJSRegexp = (var)12; 
+        private static readonly var stateJSRegexp = 12; 
         // stateJSBlockCmt occurs inside a JavaScript /* block comment */.
-        private static readonly var stateJSBlockCmt = (var)13; 
+        private static readonly var stateJSBlockCmt = 13; 
         // stateJSLineCmt occurs inside a JavaScript // line comment.
-        private static readonly var stateJSLineCmt = (var)14; 
+        private static readonly var stateJSLineCmt = 14; 
         // stateCSS occurs inside a <style> element or style attribute.
-        private static readonly var stateCSS = (var)15; 
+        private static readonly var stateCSS = 15; 
         // stateCSSDqStr occurs inside a CSS double quoted string.
-        private static readonly var stateCSSDqStr = (var)16; 
+        private static readonly var stateCSSDqStr = 16; 
         // stateCSSSqStr occurs inside a CSS single quoted string.
-        private static readonly var stateCSSSqStr = (var)17; 
+        private static readonly var stateCSSSqStr = 17; 
         // stateCSSDqURL occurs inside a CSS double quoted url("...").
-        private static readonly var stateCSSDqURL = (var)18; 
+        private static readonly var stateCSSDqURL = 18; 
         // stateCSSSqURL occurs inside a CSS single quoted url('...').
-        private static readonly var stateCSSSqURL = (var)19; 
+        private static readonly var stateCSSSqURL = 19; 
         // stateCSSURL occurs inside a CSS unquoted url(...).
-        private static readonly var stateCSSURL = (var)20; 
+        private static readonly var stateCSSURL = 20; 
         // stateCSSBlockCmt occurs inside a CSS /* block comment */.
-        private static readonly var stateCSSBlockCmt = (var)21; 
+        private static readonly var stateCSSBlockCmt = 21; 
         // stateCSSLineCmt occurs inside a CSS // line comment.
-        private static readonly var stateCSSLineCmt = (var)22; 
+        private static readonly var stateCSSLineCmt = 22; 
         // stateError is an infectious error state outside any valid
         // HTML/CSS/JS construct.
-        private static readonly var stateError = (var)23;
+        private static readonly var stateError = 23;
 
 
         // isComment is true for any state that contains content meant for template
@@ -196,12 +196,12 @@ namespace html
         // delimNone occurs outside any attribute.
         private static readonly delim delimNone = (delim)iota; 
         // delimDoubleQuote occurs when a double quote (") closes the attribute.
-        private static readonly var delimDoubleQuote = (var)0; 
+        private static readonly var delimDoubleQuote = 0; 
         // delimSingleQuote occurs when a single quote (') closes the attribute.
-        private static readonly var delimSingleQuote = (var)1; 
+        private static readonly var delimSingleQuote = 1; 
         // delimSpaceOrTagEnd occurs when a space or right angle bracket (>)
         // closes the attribute.
-        private static readonly var delimSpaceOrTagEnd = (var)2;
+        private static readonly var delimSpaceOrTagEnd = 2;
 
 
         // urlPart identifies a part in an RFC 3986 hierarchical URL to allow different
@@ -218,13 +218,13 @@ namespace html
         private static readonly urlPart urlPartNone = (urlPart)iota; 
         // urlPartPreQuery occurs in the scheme, authority, or path; between the
         // ^s in "h^ttp://auth/path^?k=v#frag".
-        private static readonly var urlPartPreQuery = (var)0; 
+        private static readonly var urlPartPreQuery = 0; 
         // urlPartQueryOrFrag occurs in the query portion between the ^s in
         // "http://auth/path?^k=v#frag^".
-        private static readonly var urlPartQueryOrFrag = (var)1; 
+        private static readonly var urlPartQueryOrFrag = 1; 
         // urlPartUnknown occurs due to joining of contexts both before and
         // after the query separator.
-        private static readonly var urlPartUnknown = (var)2;
+        private static readonly var urlPartUnknown = 2;
 
 
         // jsCtx determines whether a '/' starts a regular expression literal or a
@@ -239,9 +239,9 @@ namespace html
         // jsCtxRegexp occurs where a '/' would start a regexp literal.
         private static readonly jsCtx jsCtxRegexp = (jsCtx)iota; 
         // jsCtxDivOp occurs where a '/' would start a division operator.
-        private static readonly var jsCtxDivOp = (var)0; 
+        private static readonly var jsCtxDivOp = 0; 
         // jsCtxUnknown occurs where a '/' is ambiguous due to context joining.
-        private static readonly var jsCtxUnknown = (var)1;
+        private static readonly var jsCtxUnknown = 1;
 
 
         // element identifies the HTML element when inside a start tag or special body.
@@ -260,13 +260,13 @@ namespace html
         private static readonly element elementNone = (element)iota; 
         // elementScript corresponds to the raw text <script> element
         // with JS MIME type or no type attribute.
-        private static readonly var elementScript = (var)0; 
+        private static readonly var elementScript = 0; 
         // elementStyle corresponds to the raw text <style> element.
-        private static readonly var elementStyle = (var)1; 
+        private static readonly var elementStyle = 1; 
         // elementTextarea corresponds to the RCDATA <textarea> element.
-        private static readonly var elementTextarea = (var)2; 
+        private static readonly var elementTextarea = 2; 
         // elementTitle corresponds to the RCDATA <title> element.
-        private static readonly var elementTitle = (var)3;
+        private static readonly var elementTitle = 3;
 
 
         //go:generate stringer -type attr
@@ -281,15 +281,15 @@ namespace html
         // attrNone corresponds to a normal attribute or no attribute.
         private static readonly attr attrNone = (attr)iota; 
         // attrScript corresponds to an event handler attribute.
-        private static readonly var attrScript = (var)0; 
+        private static readonly var attrScript = 0; 
         // attrScriptType corresponds to the type attribute in script HTML element
-        private static readonly var attrScriptType = (var)1; 
+        private static readonly var attrScriptType = 1; 
         // attrStyle corresponds to the style attribute whose value is CSS.
-        private static readonly var attrStyle = (var)2; 
+        private static readonly var attrStyle = 2; 
         // attrURL corresponds to an attribute whose value is a URL.
-        private static readonly var attrURL = (var)3; 
+        private static readonly var attrURL = 3; 
         // attrSrcset corresponds to a srcset attribute.
-        private static readonly var attrSrcset = (var)4;
+        private static readonly var attrSrcset = 4;
 
     }
 }}

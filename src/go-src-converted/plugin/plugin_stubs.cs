@@ -4,7 +4,7 @@
 
 // +build !linux,!freebsd,!darwin !cgo
 
-// package plugin -- go2cs converted at 2020 October 08 04:59:51 UTC
+// package plugin -- go2cs converted at 2020 October 09 06:06:13 UTC
 // import "plugin" ==> using plugin = go.plugin_package
 // Original source: C:\Go\src\plugin\plugin_stubs.go
 using errors = go.errors_package;

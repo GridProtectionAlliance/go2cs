@@ -17,7 +17,7 @@
 //    translating the Stdout and Stderr handles into FDs 1 and 2.
 //    (See CL 192739 PS 3.)
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:06 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:59 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\time_fake.go
 using @unsafe = go.@unsafe_package;

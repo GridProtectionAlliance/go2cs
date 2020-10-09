@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package color -- go2cs converted at 2020 October 08 04:59:07 UTC
+// package color -- go2cs converted at 2020 October 09 06:05:37 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Go\src\image\color\ycbcr.go
 

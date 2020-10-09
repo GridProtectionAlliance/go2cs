@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:39 UTC
+//     Generated on 2020 October 09 05:47:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using pprof = go.runtime.pprof_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace testing {

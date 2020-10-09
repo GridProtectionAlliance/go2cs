@@ -1,7 +1,7 @@
 // +build mips64 mips64le
 // +build linux
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:34 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_linux_mips64x.go
 

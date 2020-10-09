@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 October 08 03:42:45 UTC
+// package gob -- go2cs converted at 2020 October 09 05:00:00 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\type.go
 using encoding = go.encoding_package;
@@ -38,8 +38,8 @@ namespace encoding
 
         // externalEncoding bits
         private static readonly long xGob = (long)1L + iota; // GobEncoder or GobDecoder
-        private static readonly var xBinary = (var)0; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
-        private static readonly var xText = (var)1; // encoding.TextMarshaler or encoding.TextUnmarshaler
+        private static readonly var xBinary = 0; // encoding.BinaryMarshaler or encoding.BinaryUnmarshaler
+        private static readonly var xText = 1; // encoding.TextMarshaler or encoding.TextUnmarshaler
 
         private static sync.Map userTypeCache = default; // map[reflect.Type]*userTypeInfo
 

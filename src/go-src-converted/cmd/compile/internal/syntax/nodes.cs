@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:07 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:40:44 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\nodes.go
 
@@ -358,8 +358,8 @@ namespace @internal
         }
 
         private static readonly ChanDir _ = (ChanDir)iota;
-        public static readonly var SendOnly = (var)0;
-        public static readonly var RecvOnly = (var)1;
+        public static readonly var SendOnly = 0;
+        public static readonly var RecvOnly = 1;
 
 
         // ----------------------------------------------------------------------------
@@ -530,9 +530,9 @@ namespace @internal
         }
 
         public static readonly CommentKind Above = (CommentKind)iota;
-        public static readonly var Below = (var)0;
-        public static readonly var Left = (var)1;
-        public static readonly var Right = (var)2;
+        public static readonly var Below = 0;
+        public static readonly var Left = 1;
+        public static readonly var Right = 2;
 
 
         public partial struct Comment

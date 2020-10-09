@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 October 08 03:42:52 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:06 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\fold.go
 using bytes = go.bytes_package;
@@ -15,7 +15,7 @@ namespace encoding
 {
     public static partial class json_package
     {
-        private static readonly var caseMask = (var)~byte(0x20UL); // Mask to ignore case in ASCII.
+        private static readonly var caseMask = ~byte(0x20UL); // Mask to ignore case in ASCII.
         private static readonly char kelvin = (char)'\u212a';
         private static readonly char smallLongEss = (char)'\u017f';
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lzw -- go2cs converted at 2020 October 08 04:58:43 UTC
+// package lzw -- go2cs converted at 2020 October 09 06:05:16 UTC
 // import "compress/lzw" ==> using lzw = go.compress.lzw_package
 // Original source: C:\Go\src\compress\lzw\writer.go
 using bufio = go.bufio_package;
@@ -53,7 +53,7 @@ namespace compress
         // There are 1<<12 possible codes, which is an upper bound on the number of
         // valid hash table entries at any given point in time. tableSize is 4x that.
         private static readonly long tableSize = (long)4L * 1L << (int)(12L);
-        private static readonly var tableMask = (var)tableSize - 1L; 
+        private static readonly var tableMask = tableSize - 1L; 
         // A hash table entry is a uint32. Zero is an invalid entry since the
         // lower 12 bits of a valid entry must be a non-literal code.
         private static readonly long invalidEntry = (long)0L;

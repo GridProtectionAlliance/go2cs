@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package route -- go2cs converted at 2020 October 08 03:33:26 UTC
+// package route -- go2cs converted at 2020 October 09 04:51:43 UTC
 // import "golang.org/x/net/route" ==> using route = go.golang.org.x.net.route_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\route\sys_openbsd.go
 using @unsafe = go.@unsafe_package;

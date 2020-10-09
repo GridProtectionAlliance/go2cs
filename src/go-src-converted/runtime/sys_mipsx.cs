@@ -4,7 +4,7 @@
 
 // +build mips mipsle
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:59 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:54 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sys_mipsx.go
 using @unsafe = go.@unsafe_package;

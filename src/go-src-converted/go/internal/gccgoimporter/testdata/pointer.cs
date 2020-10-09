@@ -1,4 +1,4 @@
-// package pointer -- go2cs converted at 2020 October 08 04:56:22 UTC
+// package pointer -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.pointer" ==> using pointer = go.go.@internal.gccgoimporter.pointer_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\pointer.go
 

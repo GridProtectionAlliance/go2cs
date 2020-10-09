@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tlog -- go2cs converted at 2020 October 08 04:46:02 UTC
+// package tlog -- go2cs converted at 2020 October 09 05:56:05 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/tlog" ==> using tlog = go.cmd.vendor.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\sumdb\tlog\note.go
 using bytes = go.bytes_package;

@@ -15,7 +15,7 @@
 //
 // Currently plugins are only supported on Linux, FreeBSD, and macOS.
 // Please report any issues.
-// package plugin -- go2cs converted at 2020 October 08 04:59:50 UTC
+// package plugin -- go2cs converted at 2020 October 09 06:06:12 UTC
 // import "plugin" ==> using plugin = go.plugin_package
 // Original source: C:\Go\src\plugin\plugin.go
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package token -- go2cs converted at 2020 October 08 03:43:27 UTC
+// package token -- go2cs converted at 2020 October 09 05:00:37 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Go\src\go\token\position.go
 using fmt = go.fmt_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jsonrpc -- go2cs converted at 2020 October 08 03:43:29 UTC
+// package jsonrpc -- go2cs converted at 2020 October 09 05:00:40 UTC
 // import "net/rpc/jsonrpc" ==> using jsonrpc = go.net.rpc.jsonrpc_package
 // Original source: C:\Go\src\net\rpc\jsonrpc\server.go
 using json = go.encoding.json_package;

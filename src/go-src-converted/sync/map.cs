@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 October 08 00:34:03 UTC
+// package sync -- go2cs converted at 2020 October 09 04:45:26 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\map.go
 using atomic = go.sync.atomic_package;

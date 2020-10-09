@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:31 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:41:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\tokens.go
 
@@ -22,75 +22,75 @@ namespace @internal
         //go:generate stringer -type token -linecomment
 
         private static readonly token _ = (token)iota;
-        private static readonly var _EOF = (var)0; // EOF
+        private static readonly var _EOF = 0; // EOF
 
         // names and literals
-        private static readonly var _Name = (var)1; // name
-        private static readonly var _Literal = (var)2; // literal
+        private static readonly var _Name = 1; // name
+        private static readonly var _Literal = 2; // literal
 
         // operators and operations
         // _Operator is excluding '*' (_Star)
-        private static readonly var _Operator = (var)3; // op
-        private static readonly var _AssignOp = (var)4; // op=
-        private static readonly var _IncOp = (var)5; // opop
-        private static readonly var _Assign = (var)6; // =
-        private static readonly var _Define = (var)7; // :=
-        private static readonly var _Arrow = (var)8; // <-
-        private static readonly var _Star = (var)9; // *
+        private static readonly var _Operator = 3; // op
+        private static readonly var _AssignOp = 4; // op=
+        private static readonly var _IncOp = 5; // opop
+        private static readonly var _Assign = 6; // =
+        private static readonly var _Define = 7; // :=
+        private static readonly var _Arrow = 8; // <-
+        private static readonly var _Star = 9; // *
 
         // delimiters
-        private static readonly var _Lparen = (var)10; // (
-        private static readonly var _Lbrack = (var)11; // [
-        private static readonly var _Lbrace = (var)12; // {
-        private static readonly var _Rparen = (var)13; // )
-        private static readonly var _Rbrack = (var)14; // ]
-        private static readonly var _Rbrace = (var)15; // }
-        private static readonly var _Comma = (var)16; // ,
-        private static readonly var _Semi = (var)17; // ;
-        private static readonly var _Colon = (var)18; // :
-        private static readonly var _Dot = (var)19; // .
-        private static readonly var _DotDotDot = (var)20; // ...
+        private static readonly var _Lparen = 10; // (
+        private static readonly var _Lbrack = 11; // [
+        private static readonly var _Lbrace = 12; // {
+        private static readonly var _Rparen = 13; // )
+        private static readonly var _Rbrack = 14; // ]
+        private static readonly var _Rbrace = 15; // }
+        private static readonly var _Comma = 16; // ,
+        private static readonly var _Semi = 17; // ;
+        private static readonly var _Colon = 18; // :
+        private static readonly var _Dot = 19; // .
+        private static readonly var _DotDotDot = 20; // ...
 
         // keywords
-        private static readonly var _Break = (var)21; // break
-        private static readonly var _Case = (var)22; // case
-        private static readonly var _Chan = (var)23; // chan
-        private static readonly var _Const = (var)24; // const
-        private static readonly var _Continue = (var)25; // continue
-        private static readonly var _Default = (var)26; // default
-        private static readonly var _Defer = (var)27; // defer
-        private static readonly var _Else = (var)28; // else
-        private static readonly var _Fallthrough = (var)29; // fallthrough
-        private static readonly var _For = (var)30; // for
-        private static readonly var _Func = (var)31; // func
-        private static readonly var _Go = (var)32; // go
-        private static readonly var _Goto = (var)33; // goto
-        private static readonly var _If = (var)34; // if
-        private static readonly var _Import = (var)35; // import
-        private static readonly var _Interface = (var)36; // interface
-        private static readonly var _Map = (var)37; // map
-        private static readonly var _Package = (var)38; // package
-        private static readonly var _Range = (var)39; // range
-        private static readonly var _Return = (var)40; // return
-        private static readonly var _Select = (var)41; // select
-        private static readonly var _Struct = (var)42; // struct
-        private static readonly var _Switch = (var)43; // switch
-        private static readonly var _Type = (var)44; // type
-        private static readonly var _Var = (var)45; // var
+        private static readonly var _Break = 21; // break
+        private static readonly var _Case = 22; // case
+        private static readonly var _Chan = 23; // chan
+        private static readonly var _Const = 24; // const
+        private static readonly var _Continue = 25; // continue
+        private static readonly var _Default = 26; // default
+        private static readonly var _Defer = 27; // defer
+        private static readonly var _Else = 28; // else
+        private static readonly var _Fallthrough = 29; // fallthrough
+        private static readonly var _For = 30; // for
+        private static readonly var _Func = 31; // func
+        private static readonly var _Go = 32; // go
+        private static readonly var _Goto = 33; // goto
+        private static readonly var _If = 34; // if
+        private static readonly var _Import = 35; // import
+        private static readonly var _Interface = 36; // interface
+        private static readonly var _Map = 37; // map
+        private static readonly var _Package = 38; // package
+        private static readonly var _Range = 39; // range
+        private static readonly var _Return = 40; // return
+        private static readonly var _Select = 41; // select
+        private static readonly var _Struct = 42; // struct
+        private static readonly var _Switch = 43; // switch
+        private static readonly var _Type = 44; // type
+        private static readonly var _Var = 45; // var
 
         // empty line comment to exclude it from .String
-        private static readonly var tokenCount = (var)46; //
+        private static readonly var tokenCount = 46; //
 
  
         // for BranchStmt
-        public static readonly var Break = (var)_Break;
-        public static readonly var Continue = (var)_Continue;
-        public static readonly var Fallthrough = (var)_Fallthrough;
-        public static readonly var Goto = (var)_Goto; 
+        public static readonly var Break = _Break;
+        public static readonly var Continue = _Continue;
+        public static readonly var Fallthrough = _Fallthrough;
+        public static readonly var Goto = _Goto; 
 
         // for CallStmt
-        public static readonly var Go = (var)_Go;
-        public static readonly var Defer = (var)_Defer;
+        public static readonly var Go = _Go;
+        public static readonly var Defer = _Defer;
 
 
         // Make sure we have at most 64 tokens so we can use them in a set.
@@ -113,10 +113,10 @@ namespace @internal
         //           and floating-point numbers, having a single ImagLit does
         //           not represent the literal kind well anymore. Remove it?
         public static readonly LitKind IntLit = (LitKind)iota;
-        public static readonly var FloatLit = (var)0;
-        public static readonly var ImagLit = (var)1;
-        public static readonly var RuneLit = (var)2;
-        public static readonly var StringLit = (var)3;
+        public static readonly var FloatLit = 0;
+        public static readonly var ImagLit = 1;
+        public static readonly var RuneLit = 2;
+        public static readonly var StringLit = 3;
 
 
         public partial struct Operator // : ulong
@@ -128,46 +128,46 @@ namespace @internal
         private static readonly Operator _ = (Operator)iota; 
 
         // Def is the : in :=
-        public static readonly var Def = (var)0; // :
-        public static readonly var Not = (var)1; // !
-        public static readonly var Recv = (var)2; // <-
+        public static readonly var Def = 0; // :
+        public static readonly var Not = 1; // !
+        public static readonly var Recv = 2; // <-
 
         // precOrOr
-        public static readonly var OrOr = (var)3; // ||
+        public static readonly var OrOr = 3; // ||
 
         // precAndAnd
-        public static readonly var AndAnd = (var)4; // &&
+        public static readonly var AndAnd = 4; // &&
 
         // precCmp
-        public static readonly var Eql = (var)5; // ==
-        public static readonly var Neq = (var)6; // !=
-        public static readonly var Lss = (var)7; // <
-        public static readonly var Leq = (var)8; // <=
-        public static readonly var Gtr = (var)9; // >
-        public static readonly var Geq = (var)10; // >=
+        public static readonly var Eql = 5; // ==
+        public static readonly var Neq = 6; // !=
+        public static readonly var Lss = 7; // <
+        public static readonly var Leq = 8; // <=
+        public static readonly var Gtr = 9; // >
+        public static readonly var Geq = 10; // >=
 
         // precAdd
-        public static readonly var Add = (var)11; // +
-        public static readonly var Sub = (var)12; // -
-        public static readonly var Or = (var)13; // |
-        public static readonly var Xor = (var)14; // ^
+        public static readonly var Add = 11; // +
+        public static readonly var Sub = 12; // -
+        public static readonly var Or = 13; // |
+        public static readonly var Xor = 14; // ^
 
         // precMul
-        public static readonly var Mul = (var)15; // *
-        public static readonly var Div = (var)16; // /
-        public static readonly var Rem = (var)17; // %
-        public static readonly var And = (var)18; // &
-        public static readonly var AndNot = (var)19; // &^
-        public static readonly var Shl = (var)20; // <<
-        public static readonly var Shr = (var)21; // >>
+        public static readonly var Mul = 15; // *
+        public static readonly var Div = 16; // /
+        public static readonly var Rem = 17; // %
+        public static readonly var And = 18; // &
+        public static readonly var AndNot = 19; // &^
+        public static readonly var Shl = 20; // <<
+        public static readonly var Shr = 21; // >>
 
         // Operator precedences
-        private static readonly var _ = (var)iota;
-        private static readonly var precOrOr = (var)0;
-        private static readonly var precAndAnd = (var)1;
-        private static readonly var precCmp = (var)2;
-        private static readonly var precAdd = (var)3;
-        private static readonly var precMul = (var)4;
+        private static readonly var _ = iota;
+        private static readonly var precOrOr = 0;
+        private static readonly var precAndAnd = 1;
+        private static readonly var precCmp = 2;
+        private static readonly var precAdd = 3;
+        private static readonly var precMul = 4;
 
     }
 }}}}

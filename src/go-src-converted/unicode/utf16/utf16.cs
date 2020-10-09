@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package utf16 implements encoding and decoding of UTF-16 sequences.
-// package utf16 -- go2cs converted at 2020 October 08 03:24:58 UTC
+// package utf16 -- go2cs converted at 2020 October 09 04:49:43 UTC
 // import "unicode/utf16" ==> using utf16 = go.unicode.utf16_package
 // Original source: C:\Go\src\unicode\utf16\utf16.go
 

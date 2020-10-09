@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2020 October 08 03:25:08 UTC
+// package reflect -- go2cs converted at 2020 October 09 05:06:56 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\value.go
 using unsafeheader = go.@internal.unsafeheader_package;
@@ -2877,9 +2877,9 @@ namespace go
         // NOTE: These values must match ../runtime/select.go:/selectDir.
 
         private static readonly SelectDir _ = (SelectDir)iota;
-        public static readonly var SelectSend = (var)0; // case Chan <- Send
-        public static readonly var SelectRecv = (var)1; // case <-Chan:
-        public static readonly var SelectDefault = (var)2; // default
+        public static readonly var SelectSend = 0; // case Chan <- Send
+        public static readonly var SelectRecv = 1; // case <-Chan:
+        public static readonly var SelectDefault = 2; // default
 
         // A SelectCase describes a single case in a select operation.
         // The kind of case depends on Dir, the communication direction.

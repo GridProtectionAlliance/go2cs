@@ -4,7 +4,7 @@
 
 // Package copylock defines an Analyzer that checks for locks
 // erroneously passed by value.
-// package copylock -- go2cs converted at 2020 October 08 04:57:54 UTC
+// package copylock -- go2cs converted at 2020 October 09 06:04:32 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/copylock" ==> using copylock = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.copylock_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\copylock\copylock.go
 using bytes = go.bytes_package;

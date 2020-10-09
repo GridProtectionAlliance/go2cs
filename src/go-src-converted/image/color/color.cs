@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package color implements a basic color library.
-// package color -- go2cs converted at 2020 October 08 04:59:06 UTC
+// package color -- go2cs converted at 2020 October 09 06:05:36 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Go\src\image\color\color.go
 

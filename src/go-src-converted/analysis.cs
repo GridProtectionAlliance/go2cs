@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package analysisinternal exposes internal-only fields from go/analysis.
-// package analysisinternal -- go2cs converted at 2020 October 08 04:54:17 UTC
+// package analysisinternal -- go2cs converted at 2020 October 09 06:01:15 UTC
 // import "golang.org/x/tools/internal/analysisinternal" ==> using analysisinternal = go.golang.org.x.tools.@internal.analysisinternal_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\analysisinternal\analysis.go
 using bytes = go.bytes_package;

@@ -4,7 +4,7 @@
 
 // +build aix darwin solaris
 
-// package poll -- go2cs converted at 2020 October 08 03:32:07 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:01 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fcntl_libc.go
 using _@unsafe_ = go.@unsafe_package;

@@ -4,7 +4,7 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime" and "unsafe".
-// package reflectlite -- go2cs converted at 2020 October 08 03:19:02 UTC
+// package reflectlite -- go2cs converted at 2020 October 09 04:49:17 UTC
 // import "internal/reflectlite" ==> using reflectlite = go.@internal.reflectlite_package
 // Original source: C:\Go\src\internal\reflectlite\type.go
 using unsafeheader = go.@internal.unsafeheader_package;
@@ -66,32 +66,32 @@ namespace @internal
         }
 
         public static readonly Kind Invalid = (Kind)iota;
-        public static readonly var Bool = (var)0;
-        public static readonly var Int = (var)1;
-        public static readonly var Int8 = (var)2;
-        public static readonly var Int16 = (var)3;
-        public static readonly var Int32 = (var)4;
-        public static readonly var Int64 = (var)5;
-        public static readonly var Uint = (var)6;
-        public static readonly var Uint8 = (var)7;
-        public static readonly var Uint16 = (var)8;
-        public static readonly var Uint32 = (var)9;
-        public static readonly var Uint64 = (var)10;
-        public static readonly var Uintptr = (var)11;
-        public static readonly var Float32 = (var)12;
-        public static readonly var Float64 = (var)13;
-        public static readonly var Complex64 = (var)14;
-        public static readonly var Complex128 = (var)15;
-        public static readonly var Array = (var)16;
-        public static readonly var Chan = (var)17;
-        public static readonly var Func = (var)18;
-        public static readonly var Interface = (var)19;
-        public static readonly var Map = (var)20;
-        public static readonly var Ptr = (var)21;
-        public static readonly var Slice = (var)22;
-        public static readonly var String = (var)23;
-        public static readonly var Struct = (var)24;
-        public static readonly var UnsafePointer = (var)25;
+        public static readonly var Bool = 0;
+        public static readonly var Int = 1;
+        public static readonly var Int8 = 2;
+        public static readonly var Int16 = 3;
+        public static readonly var Int32 = 4;
+        public static readonly var Int64 = 5;
+        public static readonly var Uint = 6;
+        public static readonly var Uint8 = 7;
+        public static readonly var Uint16 = 8;
+        public static readonly var Uint32 = 9;
+        public static readonly var Uint64 = 10;
+        public static readonly var Uintptr = 11;
+        public static readonly var Float32 = 12;
+        public static readonly var Float64 = 13;
+        public static readonly var Complex64 = 14;
+        public static readonly var Complex128 = 15;
+        public static readonly var Array = 16;
+        public static readonly var Chan = 17;
+        public static readonly var Func = 18;
+        public static readonly var Interface = 19;
+        public static readonly var Map = 20;
+        public static readonly var Ptr = 21;
+        public static readonly var Slice = 22;
+        public static readonly var String = 23;
+        public static readonly var Struct = 24;
+        public static readonly var UnsafePointer = 25;
 
 
         // tflag is used by an rtype to signal what extra type information is

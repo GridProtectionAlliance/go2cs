@@ -4,7 +4,7 @@
 
 // This file implements rat-to-string conversion functions.
 
-// package big -- go2cs converted at 2020 October 08 03:25:52 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:40 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\ratconv.go
 using errors = go.errors_package;

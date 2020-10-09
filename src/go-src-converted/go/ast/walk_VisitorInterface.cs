@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:25 UTC
+//     Generated on 2020 October 09 05:20:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using fmt = go.fmt_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Visitor<T> : Visitor
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace go
             private delegate Visitor VisitByPtr(ptr<T> value, Node node);
             private delegate Visitor VisitByVal(T value, Node node);
 
-            private static readonly VisitByPtr s_VisitByPtr;
-            private static readonly VisitByVal s_VisitByVal;
+            private static readonly VisitByPtr? s_VisitByPtr;
+            private static readonly VisitByVal? s_VisitByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Visitor Visit(Node node)
@@ -84,7 +85,7 @@ namespace go
                 return s_VisitByPtr(m_target_ptr, node);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Visitor()

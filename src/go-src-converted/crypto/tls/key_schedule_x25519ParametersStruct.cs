@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:22 UTC
+//     Generated on 2020 October 09 04:56:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using curve25519 = go.golang.org.x.crypto.curve25519_package;
 using hkdf = go.golang.org.x.crypto.hkdf_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

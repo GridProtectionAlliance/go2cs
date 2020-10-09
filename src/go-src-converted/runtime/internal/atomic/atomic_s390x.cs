@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package atomic -- go2cs converted at 2020 October 08 03:19:10 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:33 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\atomic_s390x.go
 using @unsafe = go.@unsafe_package;

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package generate implements the ``go generate'' command.
-// package generate -- go2cs converted at 2020 October 08 04:33:39 UTC
+// package generate -- go2cs converted at 2020 October 09 05:45:13 UTC
 // import "cmd/go/internal/generate" ==> using generate = go.cmd.go.@internal.generate_package
 // Original source: C:\Go\src\cmd\go\internal\generate\generate.go
 using bufio = go.bufio_package;

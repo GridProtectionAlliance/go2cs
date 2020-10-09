@@ -5,7 +5,7 @@
 // +build darwin dragonfly freebsd linux netbsd openbsd solaris
 // +build !gccgo,!ppc64le,!ppc64
 
-// package unix -- go2cs converted at 2020 October 08 04:47:58 UTC
+// package unix -- go2cs converted at 2020 October 09 05:57:00 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_unix_gc.go
 using syscall = go.syscall_package;

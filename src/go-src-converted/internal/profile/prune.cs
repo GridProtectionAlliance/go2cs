@@ -4,7 +4,7 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2020 October 08 03:41:51 UTC
+// package profile -- go2cs converted at 2020 October 09 04:59:13 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Go\src\internal\profile\prune.go
 using fmt = go.fmt_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amd64 -- go2cs converted at 2020 October 08 04:32:20 UTC
+// package amd64 -- go2cs converted at 2020 October 09 05:44:12 UTC
 // import "cmd/compile/internal/amd64" ==> using amd64 = go.cmd.compile.@internal.amd64_package
 // Original source: C:\Go\src\cmd\compile\internal\amd64\ggen.go
 using gc = go.cmd.compile.@internal.gc_package;
@@ -30,8 +30,8 @@ namespace @internal
         private static readonly long dzLeaqSize = (long)4L; // size of single LEAQ instruction
         private static readonly long dzClearStep = (long)16L; // number of bytes cleared by each MOV instruction
 
-        private static readonly var dzClearLen = (var)dzClearStep * dzBlockLen; // bytes cleared by one block
-        private static readonly var dzSize = (var)dzBlocks * dzBlockSize;
+        private static readonly var dzClearLen = dzClearStep * dzBlockLen; // bytes cleared by one block
+        private static readonly var dzSize = dzBlocks * dzBlockSize;
 
 
         // dzOff returns the offset for a jump into DUFFZERO.
@@ -72,7 +72,7 @@ namespace @internal
             ref uint state = ref _addr_state.val;
 
             const long ax = (long)1L << (int)(iota);
-            const var x0 = (var)0;
+            const var x0 = 0;
 
             if (cnt == 0L)
             {

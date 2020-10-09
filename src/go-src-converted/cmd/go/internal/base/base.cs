@@ -4,7 +4,7 @@
 
 // Package base defines shared basic pieces of the go command,
 // in particular logging and the Command structure.
-// package @base -- go2cs converted at 2020 October 08 04:33:29 UTC
+// package @base -- go2cs converted at 2020 October 09 05:45:06 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\base.go
 using flag = go.flag_package;

@@ -233,7 +233,7 @@
 //        os.Exit(m.Run())
 //    }
 //
-// package testing -- go2cs converted at 2020 October 08 04:36:38 UTC
+// package testing -- go2cs converted at 2020 October 09 05:47:46 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\testing.go
 using bytes = go.bytes_package;
@@ -1176,7 +1176,7 @@ namespace go
         }
 
         private static readonly panicHandling normalPanic = (panicHandling)iota;
-        private static readonly var recoverAndReturnPanic = (var)0;
+        private static readonly var recoverAndReturnPanic = 0;
 
 
         // runCleanup is called at the end of the test.
@@ -1901,7 +1901,7 @@ namespace go
                     var ctx = newTestContext(parallel.val, _addr_newMatcher(matchString, match.val, "-test.run"));
                     ctx.deadline = deadline;
                     ptr<T> t = addr(new T(common:common{signal:make(chanbool),barrier:make(chanbool),w:os.Stdout,chatty:*chatty,},context:ctx,));
-                    tRunner(_addr_t, t =>
+                    tRunner(t, t =>
                     {
                         foreach (var (_, test) in tests)
                         {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:46:03 UTC
+//     Generated on 2020 October 09 05:56:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class TileReader<T> : TileReader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace sumdb
             private delegate (slice<slice<byte>>, error) HeightByPtr(ptr<T> value);
             private delegate (slice<slice<byte>>, error) HeightByVal(T value);
 
-            private static readonly HeightByPtr s_HeightByPtr;
-            private static readonly HeightByVal s_HeightByVal;
+            private static readonly HeightByPtr? s_HeightByPtr;
+            private static readonly HeightByVal? s_HeightByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<slice<byte>>, error) Height()
@@ -94,8 +95,8 @@ namespace sumdb
             private delegate (slice<slice<byte>>, error) ReadTilesByPtr(ptr<T> value, slice<Tile> tiles);
             private delegate (slice<slice<byte>>, error) ReadTilesByVal(T value, slice<Tile> tiles);
 
-            private static readonly ReadTilesByPtr s_ReadTilesByPtr;
-            private static readonly ReadTilesByVal s_ReadTilesByVal;
+            private static readonly ReadTilesByPtr? s_ReadTilesByPtr;
+            private static readonly ReadTilesByVal? s_ReadTilesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<slice<byte>>, error) ReadTiles(slice<Tile> tiles)
@@ -114,8 +115,8 @@ namespace sumdb
             private delegate (slice<slice<byte>>, error) SaveTilesByPtr(ptr<T> value, slice<Tile> tiles, slice<slice<byte>> data);
             private delegate (slice<slice<byte>>, error) SaveTilesByVal(T value, slice<Tile> tiles, slice<slice<byte>> data);
 
-            private static readonly SaveTilesByPtr s_SaveTilesByPtr;
-            private static readonly SaveTilesByVal s_SaveTilesByVal;
+            private static readonly SaveTilesByPtr? s_SaveTilesByPtr;
+            private static readonly SaveTilesByVal? s_SaveTilesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<slice<byte>>, error) SaveTiles(slice<Tile> tiles, slice<slice<byte>> data)
@@ -131,7 +132,7 @@ namespace sumdb
                 return s_SaveTilesByPtr(m_target_ptr, tiles, data);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static TileReader()

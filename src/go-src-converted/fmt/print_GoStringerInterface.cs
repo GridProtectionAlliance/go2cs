@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:03 UTC
+//     Generated on 2020 October 09 05:07:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using reflect = go.reflect_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -44,7 +45,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class GoStringer<T> : GoStringer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace go
             private delegate @string GoStringByPtr(ptr<T> value);
             private delegate @string GoStringByVal(T value);
 
-            private static readonly GoStringByPtr s_GoStringByPtr;
-            private static readonly GoStringByVal s_GoStringByVal;
+            private static readonly GoStringByPtr? s_GoStringByPtr;
+            private static readonly GoStringByVal? s_GoStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string GoString()
@@ -87,7 +88,7 @@ namespace go
                 return s_GoStringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static GoStringer()

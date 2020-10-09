@@ -4,7 +4,7 @@
 // +build darwin,arm64 darwin,amd64,ios
 // +build !x509omitbundledroots
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:58 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:54 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\root_darwin_ios.go
 

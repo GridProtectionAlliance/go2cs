@@ -3,7 +3,7 @@
 
 // +build linux,riscv64
 
-// package syscall -- go2cs converted at 2020 October 08 03:29:37 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:03:35 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsyscall_linux_riscv64.go
 using @unsafe = go.@unsafe_package;

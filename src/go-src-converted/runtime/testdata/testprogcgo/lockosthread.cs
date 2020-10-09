@@ -4,7 +4,7 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 08 03:44:00 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:01 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\lockosthread.go
 using os = go.os_package;
 using runtime = go.runtime_package;

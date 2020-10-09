@@ -1,4 +1,4 @@
-// package packages -- go2cs converted at 2020 October 08 04:55:39 UTC
+// package packages -- go2cs converted at 2020 October 09 06:02:21 UTC
 // import "golang.org/x/tools/go/packages" ==> using packages = go.golang.org.x.tools.go.packages_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\packages\visit.go
 using fmt = go.fmt_package;

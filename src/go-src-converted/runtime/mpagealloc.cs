@@ -45,7 +45,7 @@
 // additional virtual address space. The choice of managing large arrays also means
 // that a large amount of virtual address space may be reserved by the runtime.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:18 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mpagealloc.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -61,9 +61,9 @@ namespace go
         // The size of a bitmap chunk, i.e. the amount of bits (that is, pages) to consider
         // in the bitmap at once.
         private static readonly long pallocChunkPages = (long)1L << (int)(logPallocChunkPages);
-        private static readonly var pallocChunkBytes = (var)pallocChunkPages * pageSize;
+        private static readonly var pallocChunkBytes = pallocChunkPages * pageSize;
         private static readonly long logPallocChunkPages = (long)9L;
-        private static readonly var logPallocChunkBytes = (var)logPallocChunkPages + pageShift; 
+        private static readonly var logPallocChunkBytes = logPallocChunkPages + pageShift; 
 
         // The number of radix bits for each level.
         //
@@ -77,15 +77,15 @@ namespace go
         //
         // summaryLevels is an architecture-dependent value defined in mpagealloc_*.go.
         private static readonly long summaryLevelBits = (long)3L;
-        private static readonly var summaryL0Bits = (var)heapAddrBits - logPallocChunkBytes - (summaryLevels - 1L) * summaryLevelBits; 
+        private static readonly var summaryL0Bits = heapAddrBits - logPallocChunkBytes - (summaryLevels - 1L) * summaryLevelBits; 
 
         // pallocChunksL2Bits is the number of bits of the chunk index number
         // covered by the second level of the chunks map.
         //
         // See (*pageAlloc).chunks for more details. Update the documentation
         // there should this change.
-        private static readonly var pallocChunksL2Bits = (var)heapAddrBits - logPallocChunkBytes - pallocChunksL1Bits;
-        private static readonly var pallocChunksL1Shift = (var)pallocChunksL2Bits;
+        private static readonly var pallocChunksL2Bits = heapAddrBits - logPallocChunkBytes - pallocChunksL1Bits;
+        private static readonly var pallocChunksL1Shift = pallocChunksL2Bits;
 
 
         // Maximum searchAddr value, which indicates that the heap has no free space.
@@ -1108,14 +1108,14 @@ Found:
 
         }
 
-        private static readonly var pallocSumBytes = (var)@unsafe.Sizeof(pallocSum(0L)); 
+        private static readonly var pallocSumBytes = @unsafe.Sizeof(pallocSum(0L)); 
 
         // maxPackedValue is the maximum value that any of the three fields in
         // the pallocSum may take on.
         private static readonly long maxPackedValue = (long)1L << (int)(logMaxPackedValue);
-        private static readonly var logMaxPackedValue = (var)logPallocChunkPages + (summaryLevels - 1L) * summaryLevelBits;
+        private static readonly var logMaxPackedValue = logPallocChunkPages + (summaryLevels - 1L) * summaryLevelBits;
 
-        private static readonly var freeChunkSum = (var)pallocSum(uint64(pallocChunkPages) | uint64(pallocChunkPages << (int)(logMaxPackedValue)) | uint64(pallocChunkPages << (int)((2L * logMaxPackedValue))));
+        private static readonly var freeChunkSum = pallocSum(uint64(pallocChunkPages) | uint64(pallocChunkPages << (int)(logMaxPackedValue)) | uint64(pallocChunkPages << (int)((2L * logMaxPackedValue))));
 
 
         // pallocSum is a packed summary type which packs three numbers: start, max,

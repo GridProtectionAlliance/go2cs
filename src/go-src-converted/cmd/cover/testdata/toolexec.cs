@@ -12,7 +12,7 @@
 // with the arguments shown above followed by the command to run.
 // This program will check whether it is expected to run the cover
 // program, and if so replace it with /path/to/testcover.
-// package main -- go2cs converted at 2020 October 08 04:32:38 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:26 UTC
 // Original source: C:\Go\src\cmd\cover\testdata\toolexec.go
 using os = go.os_package;
 using exec = go.os.exec_package;

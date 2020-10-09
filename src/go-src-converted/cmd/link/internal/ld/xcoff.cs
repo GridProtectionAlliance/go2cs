@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:39:51 UTC
+// package ld -- go2cs converted at 2020 October 09 05:50:35 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\xcoff.go
 using bytes = go.bytes_package;
@@ -33,7 +33,7 @@ namespace @internal
         // Total amount of space to reserve at the start of the file
         // for File Header, Auxiliary Header, and Section Headers.
         // May waste some.
-        public static readonly var XCOFFHDRRESERVE = (var)FILHSZ_64 + AOUTHSZ_EXEC64 + SCNHSZ_64 * 23L;
+        public static readonly var XCOFFHDRRESERVE = FILHSZ_64 + AOUTHSZ_EXEC64 + SCNHSZ_64 * 23L;
         public static readonly long XCOFFSECTALIGN = 32L; // base on dump -o
 
         // XCOFF binaries should normally have all its sections position-independent.
@@ -1100,7 +1100,7 @@ namespace @internal
             else 
                 return ;
                         {
-                XcoffSymEnt64 s__prev1 = s;
+                ptr<XcoffSymEnt64> s__prev1 = s;
 
                 foreach (var (_, __s) in syms)
                 {

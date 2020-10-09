@@ -4,7 +4,7 @@
 
 // This file is a copy of $GOROOT/src/go/internal/gcimporter/bimport.go.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:22 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:07 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\bimport.go
 using binary = go.encoding.binary_package;
@@ -1398,38 +1398,38 @@ namespace @internal
         // Tags. Must be < 0.
  
         // Objects
-        private static readonly var packageTag = (var)-(iota + 1L);
-        private static readonly var constTag = (var)0;
-        private static readonly var typeTag = (var)1;
-        private static readonly var varTag = (var)2;
-        private static readonly var funcTag = (var)3;
-        private static readonly var endTag = (var)4; 
+        private static readonly var packageTag = -(iota + 1L);
+        private static readonly var constTag = 0;
+        private static readonly var typeTag = 1;
+        private static readonly var varTag = 2;
+        private static readonly var funcTag = 3;
+        private static readonly var endTag = 4; 
 
         // Types
-        private static readonly var namedTag = (var)5;
-        private static readonly var arrayTag = (var)6;
-        private static readonly var sliceTag = (var)7;
-        private static readonly var dddTag = (var)8;
-        private static readonly var structTag = (var)9;
-        private static readonly var pointerTag = (var)10;
-        private static readonly var signatureTag = (var)11;
-        private static readonly var interfaceTag = (var)12;
-        private static readonly var mapTag = (var)13;
-        private static readonly var chanTag = (var)14; 
+        private static readonly var namedTag = 5;
+        private static readonly var arrayTag = 6;
+        private static readonly var sliceTag = 7;
+        private static readonly var dddTag = 8;
+        private static readonly var structTag = 9;
+        private static readonly var pointerTag = 10;
+        private static readonly var signatureTag = 11;
+        private static readonly var interfaceTag = 12;
+        private static readonly var mapTag = 13;
+        private static readonly var chanTag = 14; 
 
         // Values
-        private static readonly var falseTag = (var)15;
-        private static readonly var trueTag = (var)16;
-        private static readonly var int64Tag = (var)17;
-        private static readonly var floatTag = (var)18;
-        private static readonly var fractionTag = (var)19; // not used by gc
-        private static readonly var complexTag = (var)20;
-        private static readonly var stringTag = (var)21;
-        private static readonly var nilTag = (var)22; // only used by gc (appears in exported inlined function bodies)
-        private static readonly var unknownTag = (var)23; // not used by gc (only appears in packages with errors)
+        private static readonly var falseTag = 15;
+        private static readonly var trueTag = 16;
+        private static readonly var int64Tag = 17;
+        private static readonly var floatTag = 18;
+        private static readonly var fractionTag = 19; // not used by gc
+        private static readonly var complexTag = 20;
+        private static readonly var stringTag = 21;
+        private static readonly var nilTag = 22; // only used by gc (appears in exported inlined function bodies)
+        private static readonly var unknownTag = 23; // not used by gc (only appears in packages with errors)
 
         // Type aliases
-        private static readonly var aliasTag = (var)24;
+        private static readonly var aliasTag = 24;
 
 
         private static sync.Once predeclOnce = default;

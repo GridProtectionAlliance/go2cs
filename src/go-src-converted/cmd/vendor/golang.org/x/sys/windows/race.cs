@@ -4,7 +4,7 @@
 
 // +build windows,race
 
-// package windows -- go2cs converted at 2020 October 08 04:53:45 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:50 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\race.go
 using runtime = go.runtime_package;
@@ -20,7 +20,7 @@ namespace sys
 {
     public static partial class windows_package
     {
-        private static readonly var raceenabled = (var)true;
+        private static readonly var raceenabled = true;
 
 
 

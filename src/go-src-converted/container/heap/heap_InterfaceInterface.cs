@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:03:26 UTC
+//     Generated on 2020 October 09 05:19:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using sort = go.sort_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace container
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Interface<T> : Interface
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace container
             private delegate void PushByPtr(ptr<T> value, object x);
             private delegate void PushByVal(T value, object x);
 
-            private static readonly PushByPtr s_PushByPtr;
-            private static readonly PushByVal s_PushByVal;
+            private static readonly PushByPtr? s_PushByPtr;
+            private static readonly PushByVal? s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Push(object x)
@@ -92,8 +93,8 @@ namespace container
             private delegate void PopByPtr(ptr<T> value);
             private delegate void PopByVal(T value);
 
-            private static readonly PopByPtr s_PopByPtr;
-            private static readonly PopByVal s_PopByVal;
+            private static readonly PopByPtr? s_PopByPtr;
+            private static readonly PopByVal? s_PopByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Pop()
@@ -117,8 +118,8 @@ namespace container
             private delegate bool LenByPtr(ptr<T> value);
             private delegate bool LenByVal(T value);
 
-            private static readonly LenByPtr s_LenByPtr;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LenByPtr? s_LenByPtr;
+            private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Len()
@@ -137,8 +138,8 @@ namespace container
             private delegate bool LessByPtr(ptr<T> value, long i, long j);
             private delegate bool LessByVal(T value, long i, long j);
 
-            private static readonly LessByPtr s_LessByPtr;
-            private static readonly LessByVal s_LessByVal;
+            private static readonly LessByPtr? s_LessByPtr;
+            private static readonly LessByVal? s_LessByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Less(long i, long j)
@@ -157,8 +158,8 @@ namespace container
             private delegate bool SwapByPtr(ptr<T> value, long i, long j);
             private delegate bool SwapByVal(T value, long i, long j);
 
-            private static readonly SwapByPtr s_SwapByPtr;
-            private static readonly SwapByVal s_SwapByVal;
+            private static readonly SwapByPtr? s_SwapByPtr;
+            private static readonly SwapByVal? s_SwapByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Swap(long i, long j)
@@ -174,7 +175,7 @@ namespace container
                 return s_SwapByPtr(m_target_ptr, i, j);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Interface()

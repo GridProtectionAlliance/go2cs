@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package route -- go2cs converted at 2020 October 08 05:01:42 UTC
+// package route -- go2cs converted at 2020 October 09 06:07:49 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\route\route_openbsd.go
 using syscall = go.syscall_package;

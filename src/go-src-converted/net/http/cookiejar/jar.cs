@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cookiejar implements an in-memory RFC 6265-compliant http.CookieJar.
-// package cookiejar -- go2cs converted at 2020 October 08 03:41:21 UTC
+// package cookiejar -- go2cs converted at 2020 October 09 04:58:45 UTC
 // import "net/http/cookiejar" ==> using cookiejar = go.net.http.cookiejar_package
 // Original source: C:\Go\src\net\http\cookiejar\jar.go
 using errors = go.errors_package;

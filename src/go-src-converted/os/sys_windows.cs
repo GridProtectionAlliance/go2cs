@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:45:20 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:29 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sys_windows.go
 using windows = go.@internal.syscall.windows_package;
@@ -19,7 +19,7 @@ namespace go
             error err = default!;
  
             // Use PhysicalDnsHostname to uniquely identify host in a cluster
-            const var format = (var)windows.ComputerNamePhysicalDnsHostname;
+            const var format = windows.ComputerNamePhysicalDnsHostname;
 
 
 

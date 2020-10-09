@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:48 UTC
+//     Generated on 2020 October 09 05:01:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -38,7 +39,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class RawConn<T> : RawConn
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,8 +65,8 @@ namespace go
             private delegate error ControlByPtr(ptr<T> value, Action<System.UIntPtr> f);
             private delegate error ControlByVal(T value, Action<System.UIntPtr> f);
 
-            private static readonly ControlByPtr s_ControlByPtr;
-            private static readonly ControlByVal s_ControlByVal;
+            private static readonly ControlByPtr? s_ControlByPtr;
+            private static readonly ControlByVal? s_ControlByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Control(Action<System.UIntPtr> f)
@@ -84,8 +85,8 @@ namespace go
             private delegate error ReadByPtr(ptr<T> value, Func<System.UIntPtr, bool> f);
             private delegate error ReadByVal(T value, Func<System.UIntPtr, bool> f);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Read(Func<System.UIntPtr, bool> f)
@@ -104,8 +105,8 @@ namespace go
             private delegate error WriteByPtr(ptr<T> value, Func<System.UIntPtr, bool> f);
             private delegate error WriteByVal(T value, Func<System.UIntPtr, bool> f);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Write(Func<System.UIntPtr, bool> f)
@@ -121,7 +122,7 @@ namespace go
                 return s_WriteByPtr(m_target_ptr, f);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static RawConn()

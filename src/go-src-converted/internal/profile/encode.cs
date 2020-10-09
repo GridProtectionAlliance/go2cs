@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package profile -- go2cs converted at 2020 October 08 03:41:42 UTC
+// package profile -- go2cs converted at 2020 October 09 04:59:04 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Go\src\internal\profile\encode.go
 using errors = go.errors_package;

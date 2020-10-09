@@ -14,7 +14,7 @@
 
 // Package transport provides a mechanism to send requests with https cert,
 // key, and CA.
-// package transport -- go2cs converted at 2020 October 08 04:43:27 UTC
+// package transport -- go2cs converted at 2020 October 09 05:53:49 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/transport" ==> using transport = go.cmd.vendor.github.com.google.pprof.@internal.transport_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\transport\transport.go
 using tls = go.crypto.tls_package;

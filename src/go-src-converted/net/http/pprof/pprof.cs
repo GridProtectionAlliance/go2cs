@@ -54,7 +54,7 @@
 //
 //    https://blog.golang.org/2011/06/profiling-go-programs.html
 //
-// package pprof -- go2cs converted at 2020 October 08 03:41:38 UTC
+// package pprof -- go2cs converted at 2020 October 09 04:59:01 UTC
 // import "net/http/pprof" ==> using pprof = go.net.http.pprof_package
 // Original source: C:\Go\src\net\http\pprof\pprof.go
 using bufio = go.bufio_package;

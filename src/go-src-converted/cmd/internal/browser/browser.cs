@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package browser provides utilities for interacting with users' browsers.
-// package browser -- go2cs converted at 2020 October 08 04:32:35 UTC
+// package browser -- go2cs converted at 2020 October 09 05:44:23 UTC
 // import "cmd/internal/browser" ==> using browser = go.cmd.@internal.browser_package
 // Original source: C:\Go\src\cmd\internal\browser\browser.go
 using os = go.os_package;

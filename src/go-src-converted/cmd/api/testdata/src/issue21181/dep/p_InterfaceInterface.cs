@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:25 UTC
+//     Generated on 2020 October 09 05:20:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace issue21181
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Interface<T> : Interface
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace issue21181
             private delegate void NByPtr(ptr<T> value, slice<byte> _p0);
             private delegate void NByVal(T value, slice<byte> _p0);
 
-            private static readonly NByPtr s_NByPtr;
-            private static readonly NByVal s_NByVal;
+            private static readonly NByPtr? s_NByPtr;
+            private static readonly NByVal? s_NByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void N(slice<byte> _p0)
@@ -92,7 +93,7 @@ namespace issue21181
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Interface()

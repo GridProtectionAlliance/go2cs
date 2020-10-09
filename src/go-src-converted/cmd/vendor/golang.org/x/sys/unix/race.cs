@@ -4,7 +4,7 @@
 
 // +build darwin,race linux,race freebsd,race
 
-// package unix -- go2cs converted at 2020 October 08 04:46:30 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\race.go
 using runtime = go.runtime_package;
@@ -20,7 +20,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        private static readonly var raceenabled = (var)true;
+        private static readonly var raceenabled = true;
 
 
 

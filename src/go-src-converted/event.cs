@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @event -- go2cs converted at 2020 October 08 04:54:50 UTC
+// package @event -- go2cs converted at 2020 October 09 06:01:41 UTC
 // import "golang.org/x/tools/internal/event" ==> using @event = go.golang.org.x.tools.@internal.@event_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\event.go
 using context = go.context_package;

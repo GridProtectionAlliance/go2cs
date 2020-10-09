@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:56 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\select.go
 // This file contains the implementation of Go select statements.
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var debugSelect = (var)false;
+        private static readonly var debugSelect = false;
 
         // scase.kind values.
         // Known to compiler.
@@ -25,10 +25,10 @@ namespace go
         // scase.kind values.
         // Known to compiler.
         // Changes here must also be made in src/cmd/compile/internal/gc/select.go's walkselectcases.
-        private static readonly var caseNil = (var)iota;
-        private static readonly var caseRecv = (var)0;
-        private static readonly var caseSend = (var)1;
-        private static readonly var caseDefault = (var)2;
+        private static readonly var caseNil = iota;
+        private static readonly var caseRecv = 0;
+        private static readonly var caseSend = 1;
+        private static readonly var caseDefault = 2;
 
 
         // Select case descriptor.
@@ -742,9 +742,9 @@ sclose:
         }
 
         private static readonly selectDir _ = (selectDir)iota;
-        private static readonly var selectSend = (var)0; // case Chan <- Send
-        private static readonly var selectRecv = (var)1; // case <-Chan:
-        private static readonly var selectDefault = (var)2; // default
+        private static readonly var selectSend = 0; // case Chan <- Send
+        private static readonly var selectRecv = 1; // case <-Chan:
+        private static readonly var selectDefault = 2; // default
 
         //go:linkname reflect_rselect reflect.rselect
         private static (long, bool) reflect_rselect(slice<runtimeSelect> cases)

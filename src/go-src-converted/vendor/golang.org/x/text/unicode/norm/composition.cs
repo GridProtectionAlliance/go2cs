@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2020 October 08 05:02:17 UTC
+// package norm -- go2cs converted at 2020 October 09 06:08:20 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\norm\composition.go
 using utf8 = go.unicode.utf8_package;
@@ -21,11 +21,11 @@ namespace unicode
         private static readonly long maxNonStarters = (long)30L; 
         // The maximum number of characters needed for a buffer is
         // maxNonStarters + 1 for the starter + 1 for the GCJ
-        private static readonly var maxBufferSize = (var)maxNonStarters + 2L;
+        private static readonly var maxBufferSize = maxNonStarters + 2L;
         private static readonly long maxNFCExpansion = (long)3L; // NFC(0x1D160)
         private static readonly long maxNFKCExpansion = (long)18L; // NFKC(0xFDFA)
 
-        private static readonly var maxByteBufferSize = (var)utf8.UTFMax * maxBufferSize; // 128
+        private static readonly var maxByteBufferSize = utf8.UTFMax * maxBufferSize; // 128
 
         // ssState is used for reporting the segment state after inserting a rune.
         // It is returned by streamSafe.next.
@@ -37,9 +37,9 @@ namespace unicode
         // Indicates a rune was successfully added to the segment.
         private static readonly ssState ssSuccess = (ssState)iota; 
         // Indicates a rune starts a new segment and should not be added.
-        private static readonly var ssStarter = (var)0; 
+        private static readonly var ssStarter = 0; 
         // Indicates a rune caused a segment overflow and a CGJ should be inserted.
-        private static readonly var ssOverflow = (var)1;
+        private static readonly var ssOverflow = 1;
 
 
         // streamSafe implements the policy of when a CGJ should be inserted.
@@ -302,8 +302,8 @@ namespace unicode
         }
 
         private static readonly insertErr iSuccess = (insertErr)-iota;
-        private static readonly var iShortDst = (var)0;
-        private static readonly var iShortSrc = (var)1;
+        private static readonly var iShortDst = 0;
+        private static readonly var iShortSrc = 1;
 
 
         // insertFlush inserts the given rune in the buffer ordered by CCC.
@@ -464,7 +464,7 @@ namespace unicode
         private static readonly ulong hangulBase1 = (ulong)0xB0UL;
         private static readonly ulong hangulBase2 = (ulong)0x80UL;
 
-        private static readonly var hangulEnd = (var)hangulBase + jamoLVTCount; // UTF-8(0xD7A4) -> ED 9E A4
+        private static readonly var hangulEnd = hangulBase + jamoLVTCount; // UTF-8(0xD7A4) -> ED 9E A4
         private static readonly ulong hangulEnd0 = (ulong)0xEDUL;
         private static readonly ulong hangulEnd1 = (ulong)0x9EUL;
         private static readonly ulong hangulEnd2 = (ulong)0xA4UL;

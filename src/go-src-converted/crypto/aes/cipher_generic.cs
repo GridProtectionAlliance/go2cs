@@ -4,7 +4,7 @@
 
 // +build !amd64,!s390x,!ppc64le,!arm64
 
-// package aes -- go2cs converted at 2020 October 08 03:35:48 UTC
+// package aes -- go2cs converted at 2020 October 09 04:53:46 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\cipher_generic.go
 using cipher = go.crypto.cipher_package;

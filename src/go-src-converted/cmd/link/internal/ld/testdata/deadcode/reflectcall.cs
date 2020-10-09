@@ -6,7 +6,7 @@
 // reflect.{Value,Type}.Method. This should not
 // need to bring all methods live.
 
-// package main -- go2cs converted at 2020 October 08 04:39:52 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:36 UTC
 // Original source: C:\Go\src\cmd\link\internal\ld\testdata\deadcode\reflectcall.go
 using reflect = go.reflect_package;
 using static go.builtin;

@@ -4,7 +4,7 @@
 
 // +build !gccgo,!purego
 
-// package poly1305 -- go2cs converted at 2020 October 08 05:00:17 UTC
+// package poly1305 -- go2cs converted at 2020 October 09 06:06:34 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\poly1305\sum_s390x.go
 using cpu = go.golang.org.x.sys.cpu_package;

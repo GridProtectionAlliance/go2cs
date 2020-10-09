@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:45 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\profbuf.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -575,7 +575,7 @@ namespace go
         }
 
         private static readonly profBufReadMode profBufBlocking = (profBufReadMode)iota;
-        private static readonly var profBufNonBlocking = (var)0;
+        private static readonly var profBufNonBlocking = 0;
 
 
         private static array<unsafe.Pointer> overflowTag = new array<unsafe.Pointer>(1L); // always nil

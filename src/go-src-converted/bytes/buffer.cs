@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bytes -- go2cs converted at 2020 October 08 03:18:55 UTC
+// package bytes -- go2cs converted at 2020 October 09 04:49:28 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Go\src\bytes\buffer.go
 // Simple byte buffer for marshaling data.
@@ -54,7 +54,7 @@ namespace go
         public static var ErrTooLarge = errors.New("bytes.Buffer: too large");
         private static var errNegativeRead = errors.New("bytes.Buffer: reader returned negative count from Read");
 
-        private static readonly var maxInt = (var)int(~uint(0L) >> (int)(1L));
+        private static readonly var maxInt = int(~uint(0L) >> (int)(1L));
 
         // Bytes returns a slice of length b.Len() holding the unread portion of the buffer.
         // The slice is valid for use only until the next buffer modification (that is,

@@ -5,7 +5,7 @@
 // +build aix linux
 // +build ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:26 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\signal_ppc64x.go
 using sys = go.runtime.@internal.sys_package;

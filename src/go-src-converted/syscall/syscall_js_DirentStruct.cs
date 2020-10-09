@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:27:24 UTC
+//     Generated on 2020 October 09 05:01:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using oserror = go.@internal.oserror_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
+
+#nullable enable
 
 namespace go
 {

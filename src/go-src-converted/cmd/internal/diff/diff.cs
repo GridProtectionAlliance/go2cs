@@ -4,7 +4,7 @@
 
 // Package diff implements a Diff function that compare two inputs
 // using the 'diff' tool.
-// package diff -- go2cs converted at 2020 October 08 04:33:18 UTC
+// package diff -- go2cs converted at 2020 October 09 05:44:59 UTC
 // import "cmd/internal/diff" ==> using diff = go.cmd.@internal.diff_package
 // Original source: C:\Go\src\cmd\internal\diff\diff.go
 using ioutil = go.io.ioutil_package;

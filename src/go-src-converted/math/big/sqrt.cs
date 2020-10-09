@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package big -- go2cs converted at 2020 October 08 03:25:53 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:41 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\sqrt.go
 using math = go.math_package;

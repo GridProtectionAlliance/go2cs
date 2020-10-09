@@ -6,7 +6,7 @@
 // It is used by cmd/test2json and cmd/go.
 //
 // See the cmd/test2json documentation for details of the JSON encoding.
-// package test2json -- go2cs converted at 2020 October 08 04:35:14 UTC
+// package test2json -- go2cs converted at 2020 October 09 05:46:33 UTC
 // import "cmd/internal/test2json" ==> using test2json = go.cmd.@internal.test2json_package
 // Original source: C:\Go\src\cmd\internal\test2json\test2json.go
 using bytes = go.bytes_package;

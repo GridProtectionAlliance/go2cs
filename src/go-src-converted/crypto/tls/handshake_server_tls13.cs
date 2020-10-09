@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 October 08 03:38:19 UTC
+// package tls -- go2cs converted at 2020 October 09 04:55:58 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\handshake_server_tls13.go
 using bytes = go.bytes_package;

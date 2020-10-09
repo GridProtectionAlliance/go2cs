@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:30 UTC
+//     Generated on 2020 October 09 06:05:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using strings = go.strings_package;
 using types = go.go.types_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace types
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class hasMethods<T> : hasMethods
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace types
             private delegate long MethodByPtr(ptr<T> value, long _p0);
             private delegate long MethodByVal(T value, long _p0);
 
-            private static readonly MethodByPtr s_MethodByPtr;
-            private static readonly MethodByVal s_MethodByVal;
+            private static readonly MethodByPtr? s_MethodByPtr;
+            private static readonly MethodByVal? s_MethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Method(long _p0)
@@ -96,8 +97,8 @@ namespace types
             private delegate long NumMethodsByPtr(ptr<T> value);
             private delegate long NumMethodsByVal(T value);
 
-            private static readonly NumMethodsByPtr s_NumMethodsByPtr;
-            private static readonly NumMethodsByVal s_NumMethodsByVal;
+            private static readonly NumMethodsByPtr? s_NumMethodsByPtr;
+            private static readonly NumMethodsByVal? s_NumMethodsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long NumMethods()
@@ -113,7 +114,7 @@ namespace types
                 return s_NumMethodsByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static hasMethods()

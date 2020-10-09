@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:07:48 UTC
+//     Generated on 2020 October 09 05:22:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Sym<T> : Sym
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace @internal
             private delegate long LengthByPtr(ptr<T> value, object dwarfContext);
             private delegate long LengthByVal(T value, object dwarfContext);
 
-            private static readonly LengthByPtr s_LengthByPtr;
-            private static readonly LengthByVal s_LengthByVal;
+            private static readonly LengthByPtr? s_LengthByPtr;
+            private static readonly LengthByVal? s_LengthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Length(object dwarfContext)
@@ -92,7 +93,7 @@ namespace @internal
                 return s_LengthByPtr(m_target_ptr, dwarfContext);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Sym()

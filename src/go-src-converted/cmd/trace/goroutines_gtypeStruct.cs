@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:42:35 UTC
+//     Generated on 2020 October 09 05:53:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using time = go.time_package;
+
+#nullable enable
 
 namespace go
 {

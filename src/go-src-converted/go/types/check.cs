@@ -4,7 +4,7 @@
 
 // This file implements the Check function, which drives type-checking.
 
-// package types -- go2cs converted at 2020 October 08 04:03:04 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:18 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\check.go
 using errors = go.errors_package;
@@ -20,8 +20,8 @@ namespace go
     public static partial class types_package
     {
         // debugging/development support
-        private static readonly var debug = (var)false; // leave on during development
-        private static readonly var trace = (var)false; // turn on for detailed type resolution traces
+        private static readonly var debug = false; // leave on during development
+        private static readonly var trace = false; // turn on for detailed type resolution traces
 
         // If Strict is set, the type-checker enforces additional
         // rules not specified by the Go 1 spec, but which will
@@ -34,7 +34,7 @@ namespace go
         //   is invalid if any (statically known) method that exists
         //   for both x and T have different signatures.
         //
-        private static readonly var strict = (var)false;
+        private static readonly var strict = false;
 
         // exprInfo stores information about an untyped expression.
 

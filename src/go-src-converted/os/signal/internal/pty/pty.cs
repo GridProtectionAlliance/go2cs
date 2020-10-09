@@ -8,7 +8,7 @@
 // Package pty is a simple pseudo-terminal package for Unix systems,
 // implemented by calling C functions via cgo.
 // This is only used for testing the os/signal package.
-// package pty -- go2cs converted at 2020 October 08 03:43:59 UTC
+// package pty -- go2cs converted at 2020 October 09 05:01:00 UTC
 // import "os/signal/internal/pty" ==> using pty = go.os.signal.@internal.pty_package
 // Original source: C:\Go\src\os\signal\internal\pty\pty.go
 /*

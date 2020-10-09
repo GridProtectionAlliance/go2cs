@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:44 UTC
+//     Generated on 2020 October 09 04:53:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -40,7 +41,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class BlockMode<T> : BlockMode
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace crypto
             private delegate long BlockSizeByPtr(ptr<T> value);
             private delegate long BlockSizeByVal(T value);
 
-            private static readonly BlockSizeByPtr s_BlockSizeByPtr;
-            private static readonly BlockSizeByVal s_BlockSizeByVal;
+            private static readonly BlockSizeByPtr? s_BlockSizeByPtr;
+            private static readonly BlockSizeByVal? s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long BlockSize()
@@ -86,8 +87,8 @@ namespace crypto
             private delegate long CryptBlocksByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
             private delegate long CryptBlocksByVal(T value, slice<byte> dst, slice<byte> src);
 
-            private static readonly CryptBlocksByPtr s_CryptBlocksByPtr;
-            private static readonly CryptBlocksByVal s_CryptBlocksByVal;
+            private static readonly CryptBlocksByPtr? s_CryptBlocksByPtr;
+            private static readonly CryptBlocksByVal? s_CryptBlocksByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long CryptBlocks(slice<byte> dst, slice<byte> src)
@@ -103,7 +104,7 @@ namespace crypto
                 return s_CryptBlocksByPtr(m_target_ptr, dst, src);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static BlockMode()

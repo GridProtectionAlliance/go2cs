@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package socktest provides utilities for socket testing.
-// package socktest -- go2cs converted at 2020 October 08 03:43:12 UTC
+// package socktest -- go2cs converted at 2020 October 09 05:00:24 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\switch.go
 using fmt = go.fmt_package;
@@ -160,11 +160,11 @@ namespace @internal
         }
 
         public static readonly FilterType FilterSocket = (FilterType)iota; // for Socket
-        public static readonly var FilterConnect = (var)0; // for Connect or ConnectEx
-        public static readonly var FilterListen = (var)1; // for Listen
-        public static readonly var FilterAccept = (var)2; // for Accept, Accept4 or AcceptEx
-        public static readonly var FilterGetsockoptInt = (var)3; // for GetsockoptInt
-        public static readonly var FilterClose = (var)4; // for Close or Closesocket
+        public static readonly var FilterConnect = 0; // for Connect or ConnectEx
+        public static readonly var FilterListen = 1; // for Listen
+        public static readonly var FilterAccept = 2; // for Accept, Accept4 or AcceptEx
+        public static readonly var FilterGetsockoptInt = 3; // for GetsockoptInt
+        public static readonly var FilterClose = 4; // for Close or Closesocket
 
         // A Filter represents a socket system call filter.
         //

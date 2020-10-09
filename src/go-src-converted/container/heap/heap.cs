@@ -14,7 +14,7 @@
 // highest-priority item from the queue. The Examples include such an
 // implementation; the file example_pq_test.go has the complete source.
 //
-// package heap -- go2cs converted at 2020 October 08 04:03:26 UTC
+// package heap -- go2cs converted at 2020 October 09 05:19:29 UTC
 // import "container/heap" ==> using heap = go.container.heap_package
 // Original source: C:\Go\src\container\heap\heap.go
 using sort = go.sort_package;

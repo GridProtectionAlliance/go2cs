@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:54 UTC
+//     Generated on 2020 October 09 04:54:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using time = go.time_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class encoder<T> : encoder
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace encoding
             private delegate long LenByPtr(ptr<T> value);
             private delegate long LenByVal(T value);
 
-            private static readonly LenByPtr s_LenByPtr;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LenByPtr? s_LenByPtr;
+            private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Len()
@@ -94,8 +95,8 @@ namespace encoding
             private delegate long EncodeByPtr(ptr<T> value, slice<byte> dst);
             private delegate long EncodeByVal(T value, slice<byte> dst);
 
-            private static readonly EncodeByPtr s_EncodeByPtr;
-            private static readonly EncodeByVal s_EncodeByVal;
+            private static readonly EncodeByPtr? s_EncodeByPtr;
+            private static readonly EncodeByVal? s_EncodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Encode(slice<byte> dst)
@@ -111,7 +112,7 @@ namespace encoding
                 return s_EncodeByPtr(m_target_ptr, dst);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static encoder()

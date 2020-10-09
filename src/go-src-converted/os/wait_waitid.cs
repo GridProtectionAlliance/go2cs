@@ -7,7 +7,7 @@
 
 // +build linux
 
-// package os -- go2cs converted at 2020 October 08 03:45:27 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:32 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\wait_waitid.go
 using runtime = go.runtime_package;

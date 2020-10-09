@@ -11,7 +11,7 @@
 //          changed (no 3-operand slice expressions). If that
 //          changes, alias needs to be updated for correctness.
 
-// package big -- go2cs converted at 2020 October 08 03:25:47 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:35 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\nat.go
 using binary = go.encoding.binary_package;

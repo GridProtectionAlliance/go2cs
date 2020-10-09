@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:24:45 UTC
+//     Generated on 2020 October 09 05:06:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @unsafe = go.@unsafe_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -44,7 +45,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Type<T> : Type
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace go
             private delegate ptr<uncommonType> AlignByPtr(ptr<T> value);
             private delegate ptr<uncommonType> AlignByVal(T value);
 
-            private static readonly AlignByPtr s_AlignByPtr;
-            private static readonly AlignByVal s_AlignByVal;
+            private static readonly AlignByPtr? s_AlignByPtr;
+            private static readonly AlignByVal? s_AlignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Align()
@@ -90,8 +91,8 @@ namespace go
             private delegate ptr<uncommonType> FieldAlignByPtr(ptr<T> value);
             private delegate ptr<uncommonType> FieldAlignByVal(T value);
 
-            private static readonly FieldAlignByPtr s_FieldAlignByPtr;
-            private static readonly FieldAlignByVal s_FieldAlignByVal;
+            private static readonly FieldAlignByPtr? s_FieldAlignByPtr;
+            private static readonly FieldAlignByVal? s_FieldAlignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> FieldAlign()
@@ -110,8 +111,8 @@ namespace go
             private delegate ptr<uncommonType> MethodByPtr(ptr<T> value, long _p0);
             private delegate ptr<uncommonType> MethodByVal(T value, long _p0);
 
-            private static readonly MethodByPtr s_MethodByPtr;
-            private static readonly MethodByVal s_MethodByVal;
+            private static readonly MethodByPtr? s_MethodByPtr;
+            private static readonly MethodByVal? s_MethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Method(long _p0)
@@ -130,8 +131,8 @@ namespace go
             private delegate ptr<uncommonType> MethodByNameByPtr(ptr<T> value, @string _p0);
             private delegate ptr<uncommonType> MethodByNameByVal(T value, @string _p0);
 
-            private static readonly MethodByNameByPtr s_MethodByNameByPtr;
-            private static readonly MethodByNameByVal s_MethodByNameByVal;
+            private static readonly MethodByNameByPtr? s_MethodByNameByPtr;
+            private static readonly MethodByNameByVal? s_MethodByNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> MethodByName(@string _p0)
@@ -150,8 +151,8 @@ namespace go
             private delegate ptr<uncommonType> NumMethodByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NumMethodByVal(T value);
 
-            private static readonly NumMethodByPtr s_NumMethodByPtr;
-            private static readonly NumMethodByVal s_NumMethodByVal;
+            private static readonly NumMethodByPtr? s_NumMethodByPtr;
+            private static readonly NumMethodByVal? s_NumMethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> NumMethod()
@@ -170,8 +171,8 @@ namespace go
             private delegate ptr<uncommonType> NameByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Name()
@@ -190,8 +191,8 @@ namespace go
             private delegate ptr<uncommonType> PkgPathByPtr(ptr<T> value);
             private delegate ptr<uncommonType> PkgPathByVal(T value);
 
-            private static readonly PkgPathByPtr s_PkgPathByPtr;
-            private static readonly PkgPathByVal s_PkgPathByVal;
+            private static readonly PkgPathByPtr? s_PkgPathByPtr;
+            private static readonly PkgPathByVal? s_PkgPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> PkgPath()
@@ -210,8 +211,8 @@ namespace go
             private delegate ptr<uncommonType> SizeByPtr(ptr<T> value);
             private delegate ptr<uncommonType> SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Size()
@@ -230,8 +231,8 @@ namespace go
             private delegate ptr<uncommonType> StringByPtr(ptr<T> value);
             private delegate ptr<uncommonType> StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> String()
@@ -250,8 +251,8 @@ namespace go
             private delegate ptr<uncommonType> KindByPtr(ptr<T> value);
             private delegate ptr<uncommonType> KindByVal(T value);
 
-            private static readonly KindByPtr s_KindByPtr;
-            private static readonly KindByVal s_KindByVal;
+            private static readonly KindByPtr? s_KindByPtr;
+            private static readonly KindByVal? s_KindByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Kind()
@@ -270,8 +271,8 @@ namespace go
             private delegate ptr<uncommonType> ImplementsByPtr(ptr<T> value, Type u);
             private delegate ptr<uncommonType> ImplementsByVal(T value, Type u);
 
-            private static readonly ImplementsByPtr s_ImplementsByPtr;
-            private static readonly ImplementsByVal s_ImplementsByVal;
+            private static readonly ImplementsByPtr? s_ImplementsByPtr;
+            private static readonly ImplementsByVal? s_ImplementsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Implements(Type u)
@@ -290,8 +291,8 @@ namespace go
             private delegate ptr<uncommonType> AssignableToByPtr(ptr<T> value, Type u);
             private delegate ptr<uncommonType> AssignableToByVal(T value, Type u);
 
-            private static readonly AssignableToByPtr s_AssignableToByPtr;
-            private static readonly AssignableToByVal s_AssignableToByVal;
+            private static readonly AssignableToByPtr? s_AssignableToByPtr;
+            private static readonly AssignableToByVal? s_AssignableToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> AssignableTo(Type u)
@@ -310,8 +311,8 @@ namespace go
             private delegate ptr<uncommonType> ConvertibleToByPtr(ptr<T> value, Type u);
             private delegate ptr<uncommonType> ConvertibleToByVal(T value, Type u);
 
-            private static readonly ConvertibleToByPtr s_ConvertibleToByPtr;
-            private static readonly ConvertibleToByVal s_ConvertibleToByVal;
+            private static readonly ConvertibleToByPtr? s_ConvertibleToByPtr;
+            private static readonly ConvertibleToByVal? s_ConvertibleToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> ConvertibleTo(Type u)
@@ -330,8 +331,8 @@ namespace go
             private delegate ptr<uncommonType> ComparableByPtr(ptr<T> value);
             private delegate ptr<uncommonType> ComparableByVal(T value);
 
-            private static readonly ComparableByPtr s_ComparableByPtr;
-            private static readonly ComparableByVal s_ComparableByVal;
+            private static readonly ComparableByPtr? s_ComparableByPtr;
+            private static readonly ComparableByVal? s_ComparableByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Comparable()
@@ -350,8 +351,8 @@ namespace go
             private delegate ptr<uncommonType> BitsByPtr(ptr<T> value);
             private delegate ptr<uncommonType> BitsByVal(T value);
 
-            private static readonly BitsByPtr s_BitsByPtr;
-            private static readonly BitsByVal s_BitsByVal;
+            private static readonly BitsByPtr? s_BitsByPtr;
+            private static readonly BitsByVal? s_BitsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Bits()
@@ -370,8 +371,8 @@ namespace go
             private delegate ptr<uncommonType> ChanDirByPtr(ptr<T> value);
             private delegate ptr<uncommonType> ChanDirByVal(T value);
 
-            private static readonly ChanDirByPtr s_ChanDirByPtr;
-            private static readonly ChanDirByVal s_ChanDirByVal;
+            private static readonly ChanDirByPtr? s_ChanDirByPtr;
+            private static readonly ChanDirByVal? s_ChanDirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> ChanDir()
@@ -390,8 +391,8 @@ namespace go
             private delegate ptr<uncommonType> IsVariadicByPtr(ptr<T> value);
             private delegate ptr<uncommonType> IsVariadicByVal(T value);
 
-            private static readonly IsVariadicByPtr s_IsVariadicByPtr;
-            private static readonly IsVariadicByVal s_IsVariadicByVal;
+            private static readonly IsVariadicByPtr? s_IsVariadicByPtr;
+            private static readonly IsVariadicByVal? s_IsVariadicByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> IsVariadic()
@@ -410,8 +411,8 @@ namespace go
             private delegate ptr<uncommonType> ElemByPtr(ptr<T> value);
             private delegate ptr<uncommonType> ElemByVal(T value);
 
-            private static readonly ElemByPtr s_ElemByPtr;
-            private static readonly ElemByVal s_ElemByVal;
+            private static readonly ElemByPtr? s_ElemByPtr;
+            private static readonly ElemByVal? s_ElemByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Elem()
@@ -430,8 +431,8 @@ namespace go
             private delegate ptr<uncommonType> FieldByPtr(ptr<T> value, long i);
             private delegate ptr<uncommonType> FieldByVal(T value, long i);
 
-            private static readonly FieldByPtr s_FieldByPtr;
-            private static readonly FieldByVal s_FieldByVal;
+            private static readonly FieldByPtr? s_FieldByPtr;
+            private static readonly FieldByVal? s_FieldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Field(long i)
@@ -450,8 +451,8 @@ namespace go
             private delegate ptr<uncommonType> FieldByIndexByPtr(ptr<T> value, slice<long> index);
             private delegate ptr<uncommonType> FieldByIndexByVal(T value, slice<long> index);
 
-            private static readonly FieldByIndexByPtr s_FieldByIndexByPtr;
-            private static readonly FieldByIndexByVal s_FieldByIndexByVal;
+            private static readonly FieldByIndexByPtr? s_FieldByIndexByPtr;
+            private static readonly FieldByIndexByVal? s_FieldByIndexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> FieldByIndex(slice<long> index)
@@ -470,8 +471,8 @@ namespace go
             private delegate ptr<uncommonType> FieldByNameByPtr(ptr<T> value, @string name);
             private delegate ptr<uncommonType> FieldByNameByVal(T value, @string name);
 
-            private static readonly FieldByNameByPtr s_FieldByNameByPtr;
-            private static readonly FieldByNameByVal s_FieldByNameByVal;
+            private static readonly FieldByNameByPtr? s_FieldByNameByPtr;
+            private static readonly FieldByNameByVal? s_FieldByNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> FieldByName(@string name)
@@ -490,8 +491,8 @@ namespace go
             private delegate ptr<uncommonType> FieldByNameFuncByPtr(ptr<T> value, Func<@string, bool> match);
             private delegate ptr<uncommonType> FieldByNameFuncByVal(T value, Func<@string, bool> match);
 
-            private static readonly FieldByNameFuncByPtr s_FieldByNameFuncByPtr;
-            private static readonly FieldByNameFuncByVal s_FieldByNameFuncByVal;
+            private static readonly FieldByNameFuncByPtr? s_FieldByNameFuncByPtr;
+            private static readonly FieldByNameFuncByVal? s_FieldByNameFuncByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> FieldByNameFunc(Func<@string, bool> match)
@@ -510,8 +511,8 @@ namespace go
             private delegate ptr<uncommonType> InByPtr(ptr<T> value, long i);
             private delegate ptr<uncommonType> InByVal(T value, long i);
 
-            private static readonly InByPtr s_InByPtr;
-            private static readonly InByVal s_InByVal;
+            private static readonly InByPtr? s_InByPtr;
+            private static readonly InByVal? s_InByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> In(long i)
@@ -530,8 +531,8 @@ namespace go
             private delegate ptr<uncommonType> KeyByPtr(ptr<T> value);
             private delegate ptr<uncommonType> KeyByVal(T value);
 
-            private static readonly KeyByPtr s_KeyByPtr;
-            private static readonly KeyByVal s_KeyByVal;
+            private static readonly KeyByPtr? s_KeyByPtr;
+            private static readonly KeyByVal? s_KeyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Key()
@@ -550,8 +551,8 @@ namespace go
             private delegate ptr<uncommonType> LenByPtr(ptr<T> value);
             private delegate ptr<uncommonType> LenByVal(T value);
 
-            private static readonly LenByPtr s_LenByPtr;
-            private static readonly LenByVal s_LenByVal;
+            private static readonly LenByPtr? s_LenByPtr;
+            private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Len()
@@ -570,8 +571,8 @@ namespace go
             private delegate ptr<uncommonType> NumFieldByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NumFieldByVal(T value);
 
-            private static readonly NumFieldByPtr s_NumFieldByPtr;
-            private static readonly NumFieldByVal s_NumFieldByVal;
+            private static readonly NumFieldByPtr? s_NumFieldByPtr;
+            private static readonly NumFieldByVal? s_NumFieldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> NumField()
@@ -590,8 +591,8 @@ namespace go
             private delegate ptr<uncommonType> NumInByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NumInByVal(T value);
 
-            private static readonly NumInByPtr s_NumInByPtr;
-            private static readonly NumInByVal s_NumInByVal;
+            private static readonly NumInByPtr? s_NumInByPtr;
+            private static readonly NumInByVal? s_NumInByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> NumIn()
@@ -610,8 +611,8 @@ namespace go
             private delegate ptr<uncommonType> NumOutByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NumOutByVal(T value);
 
-            private static readonly NumOutByPtr s_NumOutByPtr;
-            private static readonly NumOutByVal s_NumOutByVal;
+            private static readonly NumOutByPtr? s_NumOutByPtr;
+            private static readonly NumOutByVal? s_NumOutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> NumOut()
@@ -630,8 +631,8 @@ namespace go
             private delegate ptr<uncommonType> OutByPtr(ptr<T> value, long i);
             private delegate ptr<uncommonType> OutByVal(T value, long i);
 
-            private static readonly OutByPtr s_OutByPtr;
-            private static readonly OutByVal s_OutByVal;
+            private static readonly OutByPtr? s_OutByPtr;
+            private static readonly OutByVal? s_OutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Out(long i)
@@ -650,8 +651,8 @@ namespace go
             private delegate ptr<uncommonType> commonByPtr(ptr<T> value);
             private delegate ptr<uncommonType> commonByVal(T value);
 
-            private static readonly commonByPtr s_commonByPtr;
-            private static readonly commonByVal s_commonByVal;
+            private static readonly commonByPtr? s_commonByPtr;
+            private static readonly commonByVal? s_commonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> common()
@@ -670,8 +671,8 @@ namespace go
             private delegate ptr<uncommonType> uncommonByPtr(ptr<T> value);
             private delegate ptr<uncommonType> uncommonByVal(T value);
 
-            private static readonly uncommonByPtr s_uncommonByPtr;
-            private static readonly uncommonByVal s_uncommonByVal;
+            private static readonly uncommonByPtr? s_uncommonByPtr;
+            private static readonly uncommonByVal? s_uncommonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> uncommon()
@@ -687,7 +688,7 @@ namespace go
                 return s_uncommonByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Type()

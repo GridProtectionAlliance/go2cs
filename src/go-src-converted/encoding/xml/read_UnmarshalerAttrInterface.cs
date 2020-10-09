@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:43:02 UTC
+//     Generated on 2020 October 09 05:00:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class UnmarshalerAttr<T> : UnmarshalerAttr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace encoding
             private delegate error UnmarshalXMLAttrByPtr(ptr<T> value, Attr attr);
             private delegate error UnmarshalXMLAttrByVal(T value, Attr attr);
 
-            private static readonly UnmarshalXMLAttrByPtr s_UnmarshalXMLAttrByPtr;
-            private static readonly UnmarshalXMLAttrByVal s_UnmarshalXMLAttrByVal;
+            private static readonly UnmarshalXMLAttrByPtr? s_UnmarshalXMLAttrByPtr;
+            private static readonly UnmarshalXMLAttrByVal? s_UnmarshalXMLAttrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error UnmarshalXMLAttr(Attr attr)
@@ -90,7 +91,7 @@ namespace encoding
                 return s_UnmarshalXMLAttrByPtr(m_target_ptr, attr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static UnmarshalerAttr()

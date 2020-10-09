@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:09:47 UTC
+// package types -- go2cs converted at 2020 October 09 05:24:12 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Go\src\cmd\compile\internal\types\pkg.go
 using obj = go.cmd.@internal.obj_package;

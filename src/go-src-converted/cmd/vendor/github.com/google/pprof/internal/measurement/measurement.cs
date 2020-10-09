@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package measurement export utility functions to manipulate/format performance profile sample values.
-// package measurement -- go2cs converted at 2020 October 08 04:43:17 UTC
+// package measurement -- go2cs converted at 2020 October 09 05:53:40 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/measurement" ==> using measurement = go.cmd.vendor.github.com.google.pprof.@internal.measurement_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\measurement\measurement.go
 using fmt = go.fmt_package;

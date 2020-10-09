@@ -19,7 +19,7 @@
 //
 // No other features of this package were included in Go 1.13, and at present
 // there are no plans to include any of them.
-// package xerrors -- go2cs converted at 2020 October 08 04:34:14 UTC
+// package xerrors -- go2cs converted at 2020 October 09 05:45:44 UTC
 // import "golang.org/x/xerrors" ==> using xerrors = go.golang.org.x.xerrors_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\xerrors\doc.go
     }

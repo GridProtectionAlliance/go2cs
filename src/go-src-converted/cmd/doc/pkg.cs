@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:33:09 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:51 UTC
 // Original source: C:\Go\src\cmd\doc\pkg.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
@@ -29,7 +29,7 @@ namespace go
     public static partial class main_package
     {
         private static readonly long punchedCardWidth = (long)80L; // These things just won't leave us alone.
-        private static readonly var indentedWidth = (var)punchedCardWidth - len(indent);
+        private static readonly var indentedWidth = punchedCardWidth - len(indent);
         private static readonly @string indent = (@string)"    ";
 
 

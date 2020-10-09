@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2020 October 08 04:36:10 UTC
+// package modfetch -- go2cs converted at 2020 October 09 05:47:21 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\proxy.go
 using json = go.encoding.json_package;
@@ -245,9 +245,9 @@ cached module versions with GOPROXY=https://example.com/proxy.
             // ErrNotExist. errUseProxy should only be returned if "noproxy" is the only
             // proxy. errNoproxy should never be returned, since there should always be a
             // more useful error from "noproxy" first.
-            const var notExistRank = (var)iota;
-            const var proxyRank = (var)0;
-            const var directRank = (var)1;
+            const var notExistRank = iota;
+            const var proxyRank = 0;
+            const var directRank = 1;
 
             error bestErr = default!;
             var bestErrRank = notExistRank;

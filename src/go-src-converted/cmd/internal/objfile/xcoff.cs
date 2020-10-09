@@ -4,7 +4,7 @@
 
 // Parsing of XCOFF executable (AIX)
 
-// package objfile -- go2cs converted at 2020 October 08 04:02:11 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:18:39 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\xcoff.go
 using dwarf = go.debug.dwarf_package;

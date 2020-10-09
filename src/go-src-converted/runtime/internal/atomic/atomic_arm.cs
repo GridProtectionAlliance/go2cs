@@ -4,7 +4,7 @@
 
 // +build arm
 
-// package atomic -- go2cs converted at 2020 October 08 03:19:09 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:33 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\atomic_arm.go
 using cpu = go.@internal.cpu_package;

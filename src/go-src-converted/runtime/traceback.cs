@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:16 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\traceback.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -37,7 +37,7 @@ namespace go
         //
         // usesLR is defined below in terms of minFrameSize, which is defined in
         // arch_$GOARCH.go. ptrSize and regSize are defined in stubs.go.
-        private static readonly var usesLR = (var)sys.MinFrameSize > 0L;
+        private static readonly var usesLR = sys.MinFrameSize > 0L;
 
 
 
@@ -1192,7 +1192,7 @@ namespace go
         // It is only for runtime functions, so ASCII A-Z is fine.
         private static bool isExportedRuntime(@string name)
         {
-            const var n = (var)len("runtime.");
+            const var n = len("runtime.");
 
             return len(name) > n && name[..n] == "runtime." && 'A' <= name[n] && name[n] <= 'Z';
         }

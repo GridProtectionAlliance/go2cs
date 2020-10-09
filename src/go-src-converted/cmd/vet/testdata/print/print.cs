@@ -4,7 +4,7 @@
 
 // This file contains tests for the printf checker.
 
-// package print -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package print -- go2cs converted at 2020 October 09 06:05:11 UTC
 // import "cmd/vet/testdata/print" ==> using print = go.cmd.vet.testdata.print_package
 // Original source: C:\Go\src\cmd\vet\testdata\print\print.go
 using fmt = go.fmt_package;

@@ -1,4 +1,4 @@
-// package p1 -- go2cs converted at 2020 October 08 04:04:26 UTC
+// package p1 -- go2cs converted at 2020 October 09 05:20:07 UTC
 // import "cmd/api/testdata/src/pkg/p1" ==> using p1 = go.cmd.api.testdata.src.pkg.p1_package
 // Original source: C:\Go\src\cmd\api\testdata\src\pkg\p1\p1.go
 using ptwo = go.p2_package;
@@ -14,16 +14,16 @@ namespace pkg
 {
     public static partial class p1_package
     {
-        public static readonly var ConstChase2 = (var)constChase; // forward declaration to unexported ident
-        private static readonly var constChase = (var)AIsLowerA; // forward declaration to exported ident
+        public static readonly var ConstChase2 = constChase; // forward declaration to unexported ident
+        private static readonly var constChase = AIsLowerA; // forward declaration to exported ident
 
         public static readonly long A = (long)1L;
         private static readonly long a = (long)11L;
         public static readonly long A64 = 1L;
 
-        public static readonly var AIsLowerA = (var)a; // previously declared
+        public static readonly var AIsLowerA = a; // previously declared
 
-        public static readonly var ConversionConst = (var)MyInt(5L);
+        public static readonly var ConversionConst = MyInt(5L);
 
 
         // Variables from function calls.
@@ -246,7 +246,7 @@ namespace pkg
 
         private static readonly @string foo = (@string)"foo";
         private static readonly @string foo2 = "foo2";
-        private static readonly var truth = (var)foo == "foo" || foo2 == "foo2";
+        private static readonly var truth = foo == "foo" || foo2 == "foo2";
 
 
         private static void ellipsis(params @string _p0)

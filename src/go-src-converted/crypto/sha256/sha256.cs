@@ -4,7 +4,7 @@
 
 // Package sha256 implements the SHA224 and SHA256 hash algorithms as defined
 // in FIPS 180-4.
-// package sha256 -- go2cs converted at 2020 October 08 03:36:43 UTC
+// package sha256 -- go2cs converted at 2020 October 09 04:54:39 UTC
 // import "crypto/sha256" ==> using sha256 = go.crypto.sha256_package
 // Original source: C:\Go\src\crypto\sha256\sha256.go
 using crypto = go.crypto_package;
@@ -72,7 +72,7 @@ namespace crypto
 
         private static readonly @string magic224 = (@string)"sha\x02";
         private static readonly @string magic256 = (@string)"sha\x03";
-        private static readonly var marshaledSize = (var)len(magic256) + 8L * 4L + chunk + 8L;
+        private static readonly var marshaledSize = len(magic256) + 8L * 4L + chunk + 8L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2020 October 08 03:43:02 UTC
+// package xml -- go2cs converted at 2020 October 09 05:00:15 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\read.go
 using bytes = go.bytes_package;

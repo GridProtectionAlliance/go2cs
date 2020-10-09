@@ -4,7 +4,7 @@
 
 // Package asm implements the parser and instruction generator for the assembler.
 // TODO: Split apart?
-// package asm -- go2cs converted at 2020 October 08 04:08:18 UTC
+// package asm -- go2cs converted at 2020 October 09 05:23:08 UTC
 // import "cmd/asm/internal/asm" ==> using asm = go.cmd.asm.@internal.asm_package
 // Original source: C:\Go\src\cmd\asm\internal\asm\parse.go
 using fmt = go.fmt_package;

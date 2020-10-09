@@ -4,7 +4,7 @@
 
 // Package nilfunc defines an Analyzer that checks for useless
 // comparisons against nil.
-// package nilfunc -- go2cs converted at 2020 October 08 04:58:03 UTC
+// package nilfunc -- go2cs converted at 2020 October 09 06:04:40 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/nilfunc" ==> using nilfunc = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.nilfunc_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\nilfunc\nilfunc.go
 using ast = go.go.ast_package;

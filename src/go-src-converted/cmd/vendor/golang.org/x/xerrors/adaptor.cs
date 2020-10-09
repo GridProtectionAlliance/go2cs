@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2020 October 08 04:58:34 UTC
+// package xerrors -- go2cs converted at 2020 October 09 06:05:06 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\xerrors\adaptor.go
 using bytes = go.bytes_package;

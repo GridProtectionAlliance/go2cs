@@ -4,7 +4,7 @@
 
 // +build nethttpomithttp2
 
-// package http -- go2cs converted at 2020 October 08 03:40:13 UTC
+// package http -- go2cs converted at 2020 October 09 04:57:46 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\omithttp2.go
 using errors = go.errors_package;

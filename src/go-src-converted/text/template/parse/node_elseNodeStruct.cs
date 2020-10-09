@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:59 UTC
+//     Generated on 2020 October 09 04:59:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace text {

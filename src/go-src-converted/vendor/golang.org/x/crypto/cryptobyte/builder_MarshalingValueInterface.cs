@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:00:01 UTC
+//     Generated on 2020 October 09 06:06:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class MarshalingValue<T> : MarshalingValue
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace crypto
             private delegate error MarshalByPtr(ptr<T> value, ptr<Builder> b);
             private delegate error MarshalByVal(T value, ptr<Builder> b);
 
-            private static readonly MarshalByPtr s_MarshalByPtr;
-            private static readonly MarshalByVal s_MarshalByVal;
+            private static readonly MarshalByPtr? s_MarshalByPtr;
+            private static readonly MarshalByVal? s_MarshalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Marshal(ptr<Builder> b)
@@ -88,7 +89,7 @@ namespace crypto
                 return s_MarshalByPtr(m_target_ptr, b);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static MarshalingValue()

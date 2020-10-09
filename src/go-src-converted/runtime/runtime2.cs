@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:52 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:08 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\runtime2.go
 using cpu = go.@internal.cpu_package;
@@ -37,21 +37,21 @@ namespace go
 
         // _Gidle means this goroutine was just allocated and has not
         // yet been initialized.
-        private static readonly var _Gidle = (var)iota; // 0
+        private static readonly var _Gidle = iota; // 0
 
         // _Grunnable means this goroutine is on a run queue. It is
         // not currently executing user code. The stack is not owned.
-        private static readonly var _Grunnable = (var)0; // 1
+        private static readonly var _Grunnable = 0; // 1
 
         // _Grunning means this goroutine may execute user code. The
         // stack is owned by this goroutine. It is not on a run queue.
         // It is assigned an M and a P (g.m and g.m.p are valid).
-        private static readonly var _Grunning = (var)1; // 2
+        private static readonly var _Grunning = 1; // 2
 
         // _Gsyscall means this goroutine is executing a system call.
         // It is not executing user code. The stack is owned by this
         // goroutine. It is not on a run queue. It is assigned an M.
-        private static readonly var _Gsyscall = (var)2; // 3
+        private static readonly var _Gsyscall = 2; // 3
 
         // _Gwaiting means this goroutine is blocked in the runtime.
         // It is not executing user code. It is not on a run queue,
@@ -61,11 +61,11 @@ namespace go
         // write parts of the stack under the appropriate channel
         // lock. Otherwise, it is not safe to access the stack after a
         // goroutine enters _Gwaiting (e.g., it may get moved).
-        private static readonly var _Gwaiting = (var)3; // 4
+        private static readonly var _Gwaiting = 3; // 4
 
         // _Gmoribund_unused is currently unused, but hardcoded in gdb
         // scripts.
-        private static readonly var _Gmoribund_unused = (var)4; // 5
+        private static readonly var _Gmoribund_unused = 4; // 5
 
         // _Gdead means this goroutine is currently unused. It may be
         // just exited, on a free list, or just being initialized. It
@@ -73,15 +73,15 @@ namespace go
         // allocated. The G and its stack (if any) are owned by the M
         // that is exiting the G or that obtained the G from the free
         // list.
-        private static readonly var _Gdead = (var)5; // 6
+        private static readonly var _Gdead = 5; // 6
 
         // _Genqueue_unused is currently unused.
-        private static readonly var _Genqueue_unused = (var)6; // 7
+        private static readonly var _Genqueue_unused = 6; // 7
 
         // _Gcopystack means this goroutine's stack is being moved. It
         // is not executing user code and is not on a run queue. The
         // stack is owned by the goroutine that put it in _Gcopystack.
-        private static readonly var _Gcopystack = (var)7; // 8
+        private static readonly var _Gcopystack = 7; // 8
 
         // _Gpreempted means this goroutine stopped itself for a
         // suspendG preemption. It is like _Gwaiting, but nothing is
@@ -89,11 +89,11 @@ namespace go
         // the status to _Gwaiting to take responsibility for
         // ready()ing this G.
         private static readonly _Gscan _Gpreempted = (_Gscan)0x1000UL;
-        private static readonly var _Gscanrunnable = (var)_Gscan + _Grunnable; // 0x1001
-        private static readonly var _Gscanrunning = (var)_Gscan + _Grunning; // 0x1002
-        private static readonly var _Gscansyscall = (var)_Gscan + _Gsyscall; // 0x1003
-        private static readonly var _Gscanwaiting = (var)_Gscan + _Gwaiting; // 0x1004
-        private static readonly var _Gscanpreempted = (var)_Gscan + _Gpreempted; // 0x1009
+        private static readonly var _Gscanrunnable = _Gscan + _Grunnable; // 0x1001
+        private static readonly var _Gscanrunning = _Gscan + _Grunning; // 0x1002
+        private static readonly var _Gscansyscall = _Gscan + _Gsyscall; // 0x1003
+        private static readonly var _Gscanwaiting = _Gscan + _Gwaiting; // 0x1004
+        private static readonly var _Gscanpreempted = _Gscan + _Gpreempted; // 0x1009
 
  
         // P status
@@ -105,7 +105,7 @@ namespace go
         //
         // The P is owned by the idle list or by whatever is
         // transitioning its state. Its run queue is empty.
-        private static readonly var _Pidle = (var)iota; 
+        private static readonly var _Pidle = iota; 
 
         // _Prunning means a P is owned by an M and is being used to
         // run user code or the scheduler. Only the M that owns this P
@@ -114,7 +114,7 @@ namespace go
         // do), _Psyscall (when entering a syscall), or _Pgcstop (to
         // halt for the GC). The M may also hand ownership of the P
         // off directly to another M (e.g., to schedule a locked G).
-        private static readonly var _Prunning = (var)0; 
+        private static readonly var _Prunning = 0; 
 
         // _Psyscall means a P is not running user code. It has
         // affinity to an M in a syscall but is not owned by it and
@@ -126,7 +126,7 @@ namespace go
         // an M successfully CASes its original P back to _Prunning
         // after a syscall, it must understand the P may have been
         // used by another M in the interim.
-        private static readonly var _Psyscall = (var)1; 
+        private static readonly var _Psyscall = 1; 
 
         // _Pgcstop means a P is halted for STW and owned by the M
         // that stopped the world. The M that stopped the world
@@ -136,13 +136,13 @@ namespace go
         //
         // The P retains its run queue and startTheWorld will restart
         // the scheduler on Ps with non-empty run queues.
-        private static readonly var _Pgcstop = (var)2; 
+        private static readonly var _Pgcstop = 2; 
 
         // _Pdead means a P is no longer used (GOMAXPROCS shrank). We
         // reuse Ps if GOMAXPROCS increases. A dead P is mostly
         // stripped of its resources, though a few things remain
         // (e.g., trace buffers).
-        private static readonly var _Pdead = (var)3;
+        private static readonly var _Pdead = 3;
 
 
         // Mutual exclusion locks.  In the uncontended case,
@@ -709,14 +709,14 @@ namespace go
 
         // Values for the flags field of a sigTabT.
         private static readonly long _SigNotify = (long)1L << (int)(iota); // let signal.Notify have signal, even if from kernel
-        private static readonly var _SigKill = (var)0; // if signal.Notify doesn't take it, exit quietly
-        private static readonly var _SigThrow = (var)1; // if signal.Notify doesn't take it, exit loudly
-        private static readonly var _SigPanic = (var)2; // if the signal is from the kernel, panic
-        private static readonly var _SigDefault = (var)3; // if the signal isn't explicitly requested, don't monitor it
-        private static readonly var _SigGoExit = (var)4; // cause all runtime procs to exit (only used on Plan 9).
-        private static readonly var _SigSetStack = (var)5; // add SA_ONSTACK to libc handler
-        private static readonly var _SigUnblock = (var)6; // always unblock; see blockableSig
-        private static readonly var _SigIgn = (var)7; // _SIG_DFL action is to ignore the signal
+        private static readonly var _SigKill = 0; // if signal.Notify doesn't take it, exit quietly
+        private static readonly var _SigThrow = 1; // if signal.Notify doesn't take it, exit loudly
+        private static readonly var _SigPanic = 2; // if the signal is from the kernel, panic
+        private static readonly var _SigDefault = 3; // if the signal isn't explicitly requested, don't monitor it
+        private static readonly var _SigGoExit = 4; // cause all runtime procs to exit (only used on Plan 9).
+        private static readonly var _SigSetStack = 5; // add SA_ONSTACK to libc handler
+        private static readonly var _SigUnblock = 6; // always unblock; see blockableSig
+        private static readonly var _SigIgn = 7; // _SIG_DFL action is to ignore the signal
 
         // Layout of in-memory per-function information prepared by linker
         // See https://golang.org/s/go12symtab.
@@ -894,8 +894,8 @@ namespace go
         }
 
         private static readonly long _TraceRuntimeFrames = (long)1L << (int)(iota); // include frames for internal runtime functions.
-        private static readonly var _TraceTrap = (var)0; // the initial PC, SP are from a trap, not a return PC from a call
-        private static readonly var _TraceJumpStack = (var)1; // if traceback is on a systemstack, resume trace at g that called into it
+        private static readonly var _TraceTrap = 0; // the initial PC, SP are from a trap, not a return PC from a call
+        private static readonly var _TraceJumpStack = 1; // if traceback is on a systemstack, resume trace at g that called into it
 
         // The maximum number of frames we print for a traceback
         private static readonly long _TracebackMaxFrames = (long)100L;
@@ -911,32 +911,32 @@ namespace go
         }
 
         private static readonly waitReason waitReasonZero = (waitReason)iota; // ""
-        private static readonly var waitReasonGCAssistMarking = (var)0; // "GC assist marking"
-        private static readonly var waitReasonIOWait = (var)1; // "IO wait"
-        private static readonly var waitReasonChanReceiveNilChan = (var)2; // "chan receive (nil chan)"
-        private static readonly var waitReasonChanSendNilChan = (var)3; // "chan send (nil chan)"
-        private static readonly var waitReasonDumpingHeap = (var)4; // "dumping heap"
-        private static readonly var waitReasonGarbageCollection = (var)5; // "garbage collection"
-        private static readonly var waitReasonGarbageCollectionScan = (var)6; // "garbage collection scan"
-        private static readonly var waitReasonPanicWait = (var)7; // "panicwait"
-        private static readonly var waitReasonSelect = (var)8; // "select"
-        private static readonly var waitReasonSelectNoCases = (var)9; // "select (no cases)"
-        private static readonly var waitReasonGCAssistWait = (var)10; // "GC assist wait"
-        private static readonly var waitReasonGCSweepWait = (var)11; // "GC sweep wait"
-        private static readonly var waitReasonGCScavengeWait = (var)12; // "GC scavenge wait"
-        private static readonly var waitReasonChanReceive = (var)13; // "chan receive"
-        private static readonly var waitReasonChanSend = (var)14; // "chan send"
-        private static readonly var waitReasonFinalizerWait = (var)15; // "finalizer wait"
-        private static readonly var waitReasonForceGCIdle = (var)16; // "force gc (idle)"
-        private static readonly var waitReasonSemacquire = (var)17; // "semacquire"
-        private static readonly var waitReasonSleep = (var)18; // "sleep"
-        private static readonly var waitReasonSyncCondWait = (var)19; // "sync.Cond.Wait"
-        private static readonly var waitReasonTimerGoroutineIdle = (var)20; // "timer goroutine (idle)"
-        private static readonly var waitReasonTraceReaderBlocked = (var)21; // "trace reader (blocked)"
-        private static readonly var waitReasonWaitForGCCycle = (var)22; // "wait for GC cycle"
-        private static readonly var waitReasonGCWorkerIdle = (var)23; // "GC worker (idle)"
-        private static readonly var waitReasonPreempted = (var)24; // "preempted"
-        private static readonly var waitReasonDebugCall = (var)25; // "debug call"
+        private static readonly var waitReasonGCAssistMarking = 0; // "GC assist marking"
+        private static readonly var waitReasonIOWait = 1; // "IO wait"
+        private static readonly var waitReasonChanReceiveNilChan = 2; // "chan receive (nil chan)"
+        private static readonly var waitReasonChanSendNilChan = 3; // "chan send (nil chan)"
+        private static readonly var waitReasonDumpingHeap = 4; // "dumping heap"
+        private static readonly var waitReasonGarbageCollection = 5; // "garbage collection"
+        private static readonly var waitReasonGarbageCollectionScan = 6; // "garbage collection scan"
+        private static readonly var waitReasonPanicWait = 7; // "panicwait"
+        private static readonly var waitReasonSelect = 8; // "select"
+        private static readonly var waitReasonSelectNoCases = 9; // "select (no cases)"
+        private static readonly var waitReasonGCAssistWait = 10; // "GC assist wait"
+        private static readonly var waitReasonGCSweepWait = 11; // "GC sweep wait"
+        private static readonly var waitReasonGCScavengeWait = 12; // "GC scavenge wait"
+        private static readonly var waitReasonChanReceive = 13; // "chan receive"
+        private static readonly var waitReasonChanSend = 14; // "chan send"
+        private static readonly var waitReasonFinalizerWait = 15; // "finalizer wait"
+        private static readonly var waitReasonForceGCIdle = 16; // "force gc (idle)"
+        private static readonly var waitReasonSemacquire = 17; // "semacquire"
+        private static readonly var waitReasonSleep = 18; // "sleep"
+        private static readonly var waitReasonSyncCondWait = 19; // "sync.Cond.Wait"
+        private static readonly var waitReasonTimerGoroutineIdle = 20; // "timer goroutine (idle)"
+        private static readonly var waitReasonTraceReaderBlocked = 21; // "trace reader (blocked)"
+        private static readonly var waitReasonWaitForGCCycle = 22; // "wait for GC cycle"
+        private static readonly var waitReasonGCWorkerIdle = 23; // "GC worker (idle)"
+        private static readonly var waitReasonPreempted = 24; // "preempted"
+        private static readonly var waitReasonDebugCall = 25; // "debug call"
 
         private static array<@string> waitReasonStrings = new array<@string>(InitKeyedValues<@string>((waitReasonZero, ""), (waitReasonGCAssistMarking, "GC assist marking"), (waitReasonIOWait, "IO wait"), (waitReasonChanReceiveNilChan, "chan receive (nil chan)"), (waitReasonChanSendNilChan, "chan send (nil chan)"), (waitReasonDumpingHeap, "dumping heap"), (waitReasonGarbageCollection, "garbage collection"), (waitReasonGarbageCollectionScan, "garbage collection scan"), (waitReasonPanicWait, "panicwait"), (waitReasonSelect, "select"), (waitReasonSelectNoCases, "select (no cases)"), (waitReasonGCAssistWait, "GC assist wait"), (waitReasonGCSweepWait, "GC sweep wait"), (waitReasonGCScavengeWait, "GC scavenge wait"), (waitReasonChanReceive, "chan receive"), (waitReasonChanSend, "chan send"), (waitReasonFinalizerWait, "finalizer wait"), (waitReasonForceGCIdle, "force gc (idle)"), (waitReasonSemacquire, "semacquire"), (waitReasonSleep, "sleep"), (waitReasonSyncCondWait, "sync.Cond.Wait"), (waitReasonTimerGoroutineIdle, "timer goroutine (idle)"), (waitReasonTraceReaderBlocked, "trace reader (blocked)"), (waitReasonWaitForGCCycle, "wait for GC cycle"), (waitReasonGCWorkerIdle, "GC worker (idle)"), (waitReasonPreempted, "preempted"), (waitReasonDebugCall, "debug call")));
 

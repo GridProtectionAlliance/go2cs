@@ -4,7 +4,7 @@
 
 // HTTP server. See RFC 7230 through 7235.
 
-// package http -- go2cs converted at 2020 October 08 03:40:31 UTC
+// package http -- go2cs converted at 2020 October 09 04:58:01 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\server.go
 using bufio = go.bufio_package;
@@ -676,7 +676,7 @@ namespace net
 
         // debugServerConnections controls whether all server connections are wrapped
         // with a verbose logging wrapper.
-        private static readonly var debugServerConnections = (var)false;
+        private static readonly var debugServerConnections = false;
 
         // Create new connection from rwc.
 
@@ -3808,22 +3808,22 @@ namespace net
         // active requests are complete. That means that ConnState
         // cannot be used to do per-request work; ConnState only notes
         // the overall state of the connection.
-        public static readonly var StateActive = (var)0; 
+        public static readonly var StateActive = 0; 
 
         // StateIdle represents a connection that has finished
         // handling a request and is in the keep-alive state, waiting
         // for a new request. Connections transition from StateIdle
         // to either StateActive or StateClosed.
-        public static readonly var StateIdle = (var)1; 
+        public static readonly var StateIdle = 1; 
 
         // StateHijacked represents a hijacked connection.
         // This is a terminal state. It does not transition to StateClosed.
-        public static readonly var StateHijacked = (var)2; 
+        public static readonly var StateHijacked = 2; 
 
         // StateClosed represents a closed connection.
         // This is a terminal state. Hijacked connections do not
         // transition to StateClosed.
-        public static readonly var StateClosed = (var)3;
+        public static readonly var StateClosed = 3;
 
 
         private static map stateName = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ConnState, @string>{StateNew:"new",StateActive:"active",StateIdle:"idle",StateHijacked:"hijacked",StateClosed:"closed",};

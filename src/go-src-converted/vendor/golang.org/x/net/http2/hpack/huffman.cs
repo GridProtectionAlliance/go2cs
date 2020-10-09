@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2020 October 08 05:00:35 UTC
+// package hpack -- go2cs converted at 2020 October 09 06:06:52 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\http2\hpack\huffman.go
 using bytes = go.bytes_package;

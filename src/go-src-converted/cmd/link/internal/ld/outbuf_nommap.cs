@@ -4,7 +4,7 @@
 
 // +build !darwin,!dragonfly,!freebsd,!linux,!openbsd,!windows
 
-// package ld -- go2cs converted at 2020 October 08 04:39:25 UTC
+// package ld -- go2cs converted at 2020 October 09 05:50:14 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\outbuf_nommap.go
 

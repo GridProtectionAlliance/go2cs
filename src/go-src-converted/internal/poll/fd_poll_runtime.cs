@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd windows solaris
 
-// package poll -- go2cs converted at 2020 October 08 03:32:17 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:06 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd_poll_runtime.go
 using errors = go.errors_package;

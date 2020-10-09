@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:10 UTC
+//     Generated on 2020 October 09 06:03:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Member<T> : Member
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace go
             private delegate ptr<Package> NameByPtr(ptr<T> value);
             private delegate ptr<Package> NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Name()
@@ -96,8 +97,8 @@ namespace go
             private delegate ptr<Package> StringByPtr(ptr<T> value);
             private delegate ptr<Package> StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> String()
@@ -116,8 +117,8 @@ namespace go
             private delegate ptr<Package> RelStringByPtr(ptr<T> value, ptr<types.Package> _p0);
             private delegate ptr<Package> RelStringByVal(T value, ptr<types.Package> _p0);
 
-            private static readonly RelStringByPtr s_RelStringByPtr;
-            private static readonly RelStringByVal s_RelStringByVal;
+            private static readonly RelStringByPtr? s_RelStringByPtr;
+            private static readonly RelStringByVal? s_RelStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> RelString(ptr<types.Package> _p0)
@@ -136,8 +137,8 @@ namespace go
             private delegate ptr<Package> ObjectByPtr(ptr<T> value);
             private delegate ptr<Package> ObjectByVal(T value);
 
-            private static readonly ObjectByPtr s_ObjectByPtr;
-            private static readonly ObjectByVal s_ObjectByVal;
+            private static readonly ObjectByPtr? s_ObjectByPtr;
+            private static readonly ObjectByVal? s_ObjectByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Object()
@@ -156,8 +157,8 @@ namespace go
             private delegate ptr<Package> PosByPtr(ptr<T> value);
             private delegate ptr<Package> PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Pos()
@@ -176,8 +177,8 @@ namespace go
             private delegate ptr<Package> TypeByPtr(ptr<T> value);
             private delegate ptr<Package> TypeByVal(T value);
 
-            private static readonly TypeByPtr s_TypeByPtr;
-            private static readonly TypeByVal s_TypeByVal;
+            private static readonly TypeByPtr? s_TypeByPtr;
+            private static readonly TypeByVal? s_TypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Type()
@@ -196,8 +197,8 @@ namespace go
             private delegate ptr<Package> TokenByPtr(ptr<T> value);
             private delegate ptr<Package> TokenByVal(T value);
 
-            private static readonly TokenByPtr s_TokenByPtr;
-            private static readonly TokenByVal s_TokenByVal;
+            private static readonly TokenByPtr? s_TokenByPtr;
+            private static readonly TokenByVal? s_TokenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Token()
@@ -216,8 +217,8 @@ namespace go
             private delegate ptr<Package> PackageByPtr(ptr<T> value);
             private delegate ptr<Package> PackageByVal(T value);
 
-            private static readonly PackageByPtr s_PackageByPtr;
-            private static readonly PackageByVal s_PackageByVal;
+            private static readonly PackageByPtr? s_PackageByPtr;
+            private static readonly PackageByVal? s_PackageByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Package> Package()
@@ -233,7 +234,7 @@ namespace go
                 return s_PackageByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Member()

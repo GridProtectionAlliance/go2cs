@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package demangle -- go2cs converted at 2020 October 08 04:43:51 UTC
+// package demangle -- go2cs converted at 2020 October 09 05:54:11 UTC
 // import "cmd/vendor/github.com/ianlancetaylor/demangle" ==> using demangle = go.cmd.vendor.github.com.ianlancetaylor.demangle_package
 // Original source: C:\Go\src\cmd\vendor\github.com\ianlancetaylor\demangle\ast.go
 using bytes = go.bytes_package;

@@ -4,7 +4,7 @@
 
 // Package ifaceassert defines an Analyzer that flags
 // impossible interface-interface type assertions.
-// package ifaceassert -- go2cs converted at 2020 October 08 04:57:57 UTC
+// package ifaceassert -- go2cs converted at 2020 October 09 06:04:36 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/ifaceassert" ==> using ifaceassert = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.ifaceassert_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\ifaceassert\ifaceassert.go
 using ast = go.go.ast_package;

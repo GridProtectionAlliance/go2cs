@@ -15,7 +15,7 @@
 //
 // This tool is intended for use only by pprof; its interface may change or
 // it may be deleted entirely in future releases.
-// package main -- go2cs converted at 2020 October 08 03:49:32 UTC
+// package main -- go2cs converted at 2020 October 09 05:08:14 UTC
 // Original source: C:\Go\src\cmd\addr2line\main.go
 using bufio = go.bufio_package;
 using flag = go.flag_package;

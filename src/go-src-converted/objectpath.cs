@@ -19,7 +19,7 @@
 // the field X has two paths due to its membership of both A and B.
 // The For(obj) function always returns one of these paths, arbitrarily
 // but consistently.
-// package objectpath -- go2cs converted at 2020 October 08 04:55:59 UTC
+// package objectpath -- go2cs converted at 2020 October 09 06:02:35 UTC
 // import "golang.org/x/tools/go/types/objectpath" ==> using objectpath = go.golang.org.x.tools.go.types.objectpath_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\types\objectpath\objectpath.go
 using fmt = go.fmt_package;

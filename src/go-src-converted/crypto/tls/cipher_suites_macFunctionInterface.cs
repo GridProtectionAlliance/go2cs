@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:44 UTC
+//     Generated on 2020 October 09 04:54:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using hash = go.hash_package;
 using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class macFunction<T> : macFunction
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace crypto
             private delegate slice<byte> SizeByPtr(ptr<T> value);
             private delegate slice<byte> SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> Size()
@@ -98,8 +99,8 @@ namespace crypto
             private delegate slice<byte> MACByPtr(ptr<T> value, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
             private delegate slice<byte> MACByVal(T value, slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra);
 
-            private static readonly MACByPtr s_MACByPtr;
-            private static readonly MACByVal s_MACByVal;
+            private static readonly MACByPtr? s_MACByPtr;
+            private static readonly MACByVal? s_MACByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> MAC(slice<byte> seq, slice<byte> header, slice<byte> data, slice<byte> extra)
@@ -115,7 +116,7 @@ namespace crypto
                 return s_MACByPtr(m_target_ptr, seq, header, data, extra);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static macFunction()

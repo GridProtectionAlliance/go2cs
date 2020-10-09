@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 October 08 04:59:25 UTC
+// package jpeg -- go2cs converted at 2020 October 09 06:05:52 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\huffman.go
 using io = go.io_package;

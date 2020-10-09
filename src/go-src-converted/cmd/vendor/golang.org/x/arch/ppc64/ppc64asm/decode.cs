@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2020 October 08 04:44:43 UTC
+// package ppc64asm -- go2cs converted at 2020 October 09 05:54:54 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\decode.go
 using binary = go.encoding.binary_package;
@@ -20,7 +20,7 @@ namespace ppc64
 {
     public static partial class ppc64asm_package
     {
-        private static readonly var debugDecode = (var)false;
+        private static readonly var debugDecode = false;
 
         // instFormat is a decoding rule for one specific instruction form.
         // a uint32 instruction ins matches the rule if ins&Mask == Value
@@ -95,19 +95,19 @@ namespace ppc64
         }
 
         public static readonly ArgType TypeUnknown = (ArgType)iota;
-        public static readonly var TypePCRel = (var)0; // PC-relative address
-        public static readonly var TypeLabel = (var)1; // absolute address
-        public static readonly var TypeReg = (var)2; // integer register
-        public static readonly var TypeCondRegBit = (var)3; // conditional register bit (0-31)
-        public static readonly var TypeCondRegField = (var)4; // conditional register field (0-7)
-        public static readonly var TypeFPReg = (var)5; // floating point register
-        public static readonly var TypeVecReg = (var)6; // vector register
-        public static readonly var TypeVecSReg = (var)7; // VSX register
-        public static readonly var TypeSpReg = (var)8; // special register (depends on Op)
-        public static readonly var TypeImmSigned = (var)9; // signed immediate
-        public static readonly var TypeImmUnsigned = (var)10; // unsigned immediate/flag/mask, this is the catch-all type
-        public static readonly var TypeOffset = (var)11; // signed offset in load/store
-        public static readonly var TypeLast = (var)12; // must be the last one
+        public static readonly var TypePCRel = 0; // PC-relative address
+        public static readonly var TypeLabel = 1; // absolute address
+        public static readonly var TypeReg = 2; // integer register
+        public static readonly var TypeCondRegBit = 3; // conditional register bit (0-31)
+        public static readonly var TypeCondRegField = 4; // conditional register field (0-7)
+        public static readonly var TypeFPReg = 5; // floating point register
+        public static readonly var TypeVecReg = 6; // vector register
+        public static readonly var TypeVecSReg = 7; // VSX register
+        public static readonly var TypeSpReg = 8; // special register (depends on Op)
+        public static readonly var TypeImmSigned = 9; // signed immediate
+        public static readonly var TypeImmUnsigned = 10; // unsigned immediate/flag/mask, this is the catch-all type
+        public static readonly var TypeOffset = 11; // signed offset in load/store
+        public static readonly var TypeLast = 12; // must be the last one
 
         public static @string String(this ArgType t)
         {

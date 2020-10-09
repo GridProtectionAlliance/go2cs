@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2020 October 08 04:34:41 UTC
+// package work -- go2cs converted at 2020 October 09 05:46:06 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\build.go
 using errors = go.errors_package;
@@ -169,7 +169,7 @@ some of the overheads and design decisions of the build tool.
 See also: go install, go get, go clean.
 	`,));
 
-        private static readonly var concurrentGCBackendCompilationEnabledByDefault = (var)true;
+        private static readonly var concurrentGCBackendCompilationEnabledByDefault = true;
 
 
 
@@ -250,8 +250,8 @@ See also: go install, go get, go clean.
 
         public static readonly BuildFlagMask DefaultBuildFlags = (BuildFlagMask)0L;
         public static readonly BuildFlagMask OmitModFlag = (BuildFlagMask)1L << (int)(iota);
-        public static readonly var OmitModCommonFlags = (var)0;
-        public static readonly var OmitVFlag = (var)1;
+        public static readonly var OmitModCommonFlags = 0;
+        public static readonly var OmitVFlag = 1;
 
 
         // AddBuildFlags adds the flags common to the build, clean, get,

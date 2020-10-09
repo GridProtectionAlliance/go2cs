@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:42 UTC
+// package gc -- go2cs converted at 2020 October 09 05:42:05 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\obj.go
 using types = go.cmd.compile.@internal.types_package;
@@ -50,7 +50,7 @@ namespace @internal
         // on the command line then the default -o output is a compiler object
         // and the -linkobj output is a linker object.
         private static readonly long modeCompilerObj = (long)1L << (int)(iota);
-        private static readonly var modeLinkerObj = (var)0;
+        private static readonly var modeLinkerObj = 0;
 
 
         private static void dumpobj()

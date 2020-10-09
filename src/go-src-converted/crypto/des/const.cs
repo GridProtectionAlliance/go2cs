@@ -8,7 +8,7 @@
 //
 // DES is cryptographically broken and should not be used for secure
 // applications.
-// package des -- go2cs converted at 2020 October 08 03:36:36 UTC
+// package des -- go2cs converted at 2020 October 09 04:54:32 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Go\src\crypto\des\const.go
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:53 UTC
+//     Generated on 2020 October 09 04:53:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using hash = go.hash_package;
 using io = go.io_package;
 using big = go.math.big_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

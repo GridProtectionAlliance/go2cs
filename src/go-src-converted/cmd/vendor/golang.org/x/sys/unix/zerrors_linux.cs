@@ -2,7 +2,7 @@
 
 // +build linux
 
-// package unix -- go2cs converted at 2020 October 08 04:48:34 UTC
+// package unix -- go2cs converted at 2020 October 09 05:57:15 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zerrors_linux.go
 using syscall = go.syscall_package;
@@ -2425,57 +2425,57 @@ namespace sys
 
 
         // Errors
-        public static readonly var E2BIG = (var)syscall.Errno(0x7UL);
-        public static readonly var EACCES = (var)syscall.Errno(0xdUL);
-        public static readonly var EAGAIN = (var)syscall.Errno(0xbUL);
-        public static readonly var EBADF = (var)syscall.Errno(0x9UL);
-        public static readonly var EBUSY = (var)syscall.Errno(0x10UL);
-        public static readonly var ECHILD = (var)syscall.Errno(0xaUL);
-        public static readonly var EDOM = (var)syscall.Errno(0x21UL);
-        public static readonly var EEXIST = (var)syscall.Errno(0x11UL);
-        public static readonly var EFAULT = (var)syscall.Errno(0xeUL);
-        public static readonly var EFBIG = (var)syscall.Errno(0x1bUL);
-        public static readonly var EINTR = (var)syscall.Errno(0x4UL);
-        public static readonly var EINVAL = (var)syscall.Errno(0x16UL);
-        public static readonly var EIO = (var)syscall.Errno(0x5UL);
-        public static readonly var EISDIR = (var)syscall.Errno(0x15UL);
-        public static readonly var EMFILE = (var)syscall.Errno(0x18UL);
-        public static readonly var EMLINK = (var)syscall.Errno(0x1fUL);
-        public static readonly var ENFILE = (var)syscall.Errno(0x17UL);
-        public static readonly var ENODEV = (var)syscall.Errno(0x13UL);
-        public static readonly var ENOENT = (var)syscall.Errno(0x2UL);
-        public static readonly var ENOEXEC = (var)syscall.Errno(0x8UL);
-        public static readonly var ENOMEM = (var)syscall.Errno(0xcUL);
-        public static readonly var ENOSPC = (var)syscall.Errno(0x1cUL);
-        public static readonly var ENOTBLK = (var)syscall.Errno(0xfUL);
-        public static readonly var ENOTDIR = (var)syscall.Errno(0x14UL);
-        public static readonly var ENOTTY = (var)syscall.Errno(0x19UL);
-        public static readonly var ENXIO = (var)syscall.Errno(0x6UL);
-        public static readonly var EPERM = (var)syscall.Errno(0x1UL);
-        public static readonly var EPIPE = (var)syscall.Errno(0x20UL);
-        public static readonly var ERANGE = (var)syscall.Errno(0x22UL);
-        public static readonly var EROFS = (var)syscall.Errno(0x1eUL);
-        public static readonly var ESPIPE = (var)syscall.Errno(0x1dUL);
-        public static readonly var ESRCH = (var)syscall.Errno(0x3UL);
-        public static readonly var ETXTBSY = (var)syscall.Errno(0x1aUL);
-        public static readonly var EWOULDBLOCK = (var)syscall.Errno(0xbUL);
-        public static readonly var EXDEV = (var)syscall.Errno(0x12UL);
+        public static readonly var E2BIG = syscall.Errno(0x7UL);
+        public static readonly var EACCES = syscall.Errno(0xdUL);
+        public static readonly var EAGAIN = syscall.Errno(0xbUL);
+        public static readonly var EBADF = syscall.Errno(0x9UL);
+        public static readonly var EBUSY = syscall.Errno(0x10UL);
+        public static readonly var ECHILD = syscall.Errno(0xaUL);
+        public static readonly var EDOM = syscall.Errno(0x21UL);
+        public static readonly var EEXIST = syscall.Errno(0x11UL);
+        public static readonly var EFAULT = syscall.Errno(0xeUL);
+        public static readonly var EFBIG = syscall.Errno(0x1bUL);
+        public static readonly var EINTR = syscall.Errno(0x4UL);
+        public static readonly var EINVAL = syscall.Errno(0x16UL);
+        public static readonly var EIO = syscall.Errno(0x5UL);
+        public static readonly var EISDIR = syscall.Errno(0x15UL);
+        public static readonly var EMFILE = syscall.Errno(0x18UL);
+        public static readonly var EMLINK = syscall.Errno(0x1fUL);
+        public static readonly var ENFILE = syscall.Errno(0x17UL);
+        public static readonly var ENODEV = syscall.Errno(0x13UL);
+        public static readonly var ENOENT = syscall.Errno(0x2UL);
+        public static readonly var ENOEXEC = syscall.Errno(0x8UL);
+        public static readonly var ENOMEM = syscall.Errno(0xcUL);
+        public static readonly var ENOSPC = syscall.Errno(0x1cUL);
+        public static readonly var ENOTBLK = syscall.Errno(0xfUL);
+        public static readonly var ENOTDIR = syscall.Errno(0x14UL);
+        public static readonly var ENOTTY = syscall.Errno(0x19UL);
+        public static readonly var ENXIO = syscall.Errno(0x6UL);
+        public static readonly var EPERM = syscall.Errno(0x1UL);
+        public static readonly var EPIPE = syscall.Errno(0x20UL);
+        public static readonly var ERANGE = syscall.Errno(0x22UL);
+        public static readonly var EROFS = syscall.Errno(0x1eUL);
+        public static readonly var ESPIPE = syscall.Errno(0x1dUL);
+        public static readonly var ESRCH = syscall.Errno(0x3UL);
+        public static readonly var ETXTBSY = syscall.Errno(0x1aUL);
+        public static readonly var EWOULDBLOCK = syscall.Errno(0xbUL);
+        public static readonly var EXDEV = syscall.Errno(0x12UL);
 
 
         // Signals
-        public static readonly var SIGABRT = (var)syscall.Signal(0x6UL);
-        public static readonly var SIGALRM = (var)syscall.Signal(0xeUL);
-        public static readonly var SIGFPE = (var)syscall.Signal(0x8UL);
-        public static readonly var SIGHUP = (var)syscall.Signal(0x1UL);
-        public static readonly var SIGILL = (var)syscall.Signal(0x4UL);
-        public static readonly var SIGINT = (var)syscall.Signal(0x2UL);
-        public static readonly var SIGIOT = (var)syscall.Signal(0x6UL);
-        public static readonly var SIGKILL = (var)syscall.Signal(0x9UL);
-        public static readonly var SIGPIPE = (var)syscall.Signal(0xdUL);
-        public static readonly var SIGQUIT = (var)syscall.Signal(0x3UL);
-        public static readonly var SIGSEGV = (var)syscall.Signal(0xbUL);
-        public static readonly var SIGTERM = (var)syscall.Signal(0xfUL);
-        public static readonly var SIGTRAP = (var)syscall.Signal(0x5UL);
+        public static readonly var SIGABRT = syscall.Signal(0x6UL);
+        public static readonly var SIGALRM = syscall.Signal(0xeUL);
+        public static readonly var SIGFPE = syscall.Signal(0x8UL);
+        public static readonly var SIGHUP = syscall.Signal(0x1UL);
+        public static readonly var SIGILL = syscall.Signal(0x4UL);
+        public static readonly var SIGINT = syscall.Signal(0x2UL);
+        public static readonly var SIGIOT = syscall.Signal(0x6UL);
+        public static readonly var SIGKILL = syscall.Signal(0x9UL);
+        public static readonly var SIGPIPE = syscall.Signal(0xdUL);
+        public static readonly var SIGQUIT = syscall.Signal(0x3UL);
+        public static readonly var SIGSEGV = syscall.Signal(0xbUL);
+        public static readonly var SIGTERM = syscall.Signal(0xfUL);
+        public static readonly var SIGTRAP = syscall.Signal(0x5UL);
 
     }
 }}}}}}

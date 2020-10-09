@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package time -- go2cs converted at 2020 October 08 03:45:42 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:05 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\sys_unix.go
 using errors = go.errors_package;

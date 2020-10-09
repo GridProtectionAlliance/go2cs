@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2020 October 08 04:40:00 UTC
+// package amd64 -- go2cs converted at 2020 October 09 05:50:44 UTC
 // import "cmd/oldlink/internal/amd64" ==> using amd64 = go.cmd.oldlink.@internal.amd64_package
 // Original source: C:\Go\src\cmd\oldlink\internal\amd64\asm.go
 using objabi = go.cmd.@internal.objabi_package;

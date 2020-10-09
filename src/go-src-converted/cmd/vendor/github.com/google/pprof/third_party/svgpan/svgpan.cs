@@ -1,7 +1,7 @@
 // SVG pan and zoom library.
 // See copyright notice in string constant below.
 
-// package svgpan -- go2cs converted at 2020 October 08 04:43:41 UTC
+// package svgpan -- go2cs converted at 2020 October 09 05:54:03 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/svgpan" ==> using svgpan = go.cmd.vendor.github.com.google.pprof.third_party.svgpan_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\third_party\svgpan\svgpan.go
 

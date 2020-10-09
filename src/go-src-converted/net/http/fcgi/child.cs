@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fcgi -- go2cs converted at 2020 October 08 03:41:23 UTC
+// package fcgi -- go2cs converted at 2020 October 09 04:58:47 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Go\src\net\http\fcgi\child.go
 // This file implements FastCGI from the perspective of a child process.

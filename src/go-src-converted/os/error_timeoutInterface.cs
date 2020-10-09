@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:44:20 UTC
+//     Generated on 2020 October 09 05:07:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using oserror = go.@internal.oserror_package;
 using poll = go.@internal.poll_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -40,7 +41,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class timeout<T> : timeout
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace go
             private delegate bool TimeoutByPtr(ptr<T> value);
             private delegate bool TimeoutByVal(T value);
 
-            private static readonly TimeoutByPtr s_TimeoutByPtr;
-            private static readonly TimeoutByVal s_TimeoutByVal;
+            private static readonly TimeoutByPtr? s_TimeoutByPtr;
+            private static readonly TimeoutByVal? s_TimeoutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Timeout()
@@ -83,7 +84,7 @@ namespace go
                 return s_TimeoutByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static timeout()

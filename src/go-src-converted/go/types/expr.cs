@@ -4,7 +4,7 @@
 
 // This file implements typechecking of expressions.
 
-// package types -- go2cs converted at 2020 October 08 04:03:23 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:27 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\expr.go
 using fmt = go.fmt_package;
@@ -1421,8 +1421,8 @@ Error:
         }
 
         private static readonly exprKind conversion = (exprKind)iota;
-        private static readonly var expression = (var)0;
-        private static readonly var statement = (var)1;
+        private static readonly var expression = 0;
+        private static readonly var statement = 1;
 
 
         // rawExpr typechecks expression e and initializes x with the expression

@@ -20,7 +20,7 @@
 // stack frame (since we don't know the types of the spilled
 // registers).
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:33 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mwbbuf.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -35,7 +35,7 @@ namespace go
     {
         // testSmallBuf forces a small write barrier buffer to stress write
         // barrier flushing.
-        private static readonly var testSmallBuf = (var)false;
+        private static readonly var testSmallBuf = false;
 
         // wbBuf is a per-P buffer of pointers queued by the write barrier.
         // This buffer is flushed to the GC workbufs when it fills up and on

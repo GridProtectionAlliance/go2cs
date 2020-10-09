@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:32:00 UTC
+//     Generated on 2020 October 09 05:43:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using strings = go.strings_package;
 using template = go.text.template_package;
+
+#nullable enable
 
 namespace go
 {

@@ -10,7 +10,7 @@
 //
 // aix and js,wasm are similar, in that they do not define syscall.Access.
 
-// package modload -- go2cs converted at 2020 October 08 04:35:43 UTC
+// package modload -- go2cs converted at 2020 October 09 05:46:58 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Go\src\cmd\go\internal\modload\stat_openfile.go
 using os = go.os_package;

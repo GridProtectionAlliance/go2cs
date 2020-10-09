@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:55 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:27 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_js.go
 using @unsafe = go.@unsafe_package;
@@ -220,7 +220,7 @@ namespace go
         {
         }
 
-        private static readonly var preemptMSupported = (var)false;
+        private static readonly var preemptMSupported = false;
 
 
 

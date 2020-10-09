@@ -4,7 +4,7 @@
 
 // Action graph creation (planning).
 
-// package work -- go2cs converted at 2020 October 08 04:33:55 UTC
+// package work -- go2cs converted at 2020 October 09 05:45:27 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\action.go
 using bufio = go.bufio_package;
@@ -332,7 +332,7 @@ namespace @internal
         }
 
         public static readonly BuildMode ModeBuild = (BuildMode)iota;
-        public static readonly var ModeInstall = (var)0;
+        public static readonly var ModeInstall = 0;
         public static readonly ModeVetOnly ModeBuggyInstall = (ModeVetOnly)1L << (int)(8L);
 
 

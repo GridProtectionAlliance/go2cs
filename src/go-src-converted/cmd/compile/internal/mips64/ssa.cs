@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips64 -- go2cs converted at 2020 October 08 04:27:47 UTC
+// package mips64 -- go2cs converted at 2020 October 09 05:40:29 UTC
 // import "cmd/compile/internal/mips64" ==> using mips64 = go.cmd.compile.@internal.mips64_package
 // Original source: C:\Go\src\cmd\compile\internal\mips64\ssa.go
 using math = go.math_package;

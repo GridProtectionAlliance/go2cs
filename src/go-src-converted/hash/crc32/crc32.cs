@@ -10,7 +10,7 @@
 //
 // See https://en.wikipedia.org/wiki/Mathematics_of_cyclic_redundancy_checks#Reversed_representations_and_reciprocal_polynomials
 // for information.
-// package crc32 -- go2cs converted at 2020 October 08 03:30:48 UTC
+// package crc32 -- go2cs converted at 2020 October 09 04:50:06 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Go\src\hash\crc32\crc32.go
 using errors = go.errors_package;
@@ -218,7 +218,7 @@ namespace hash
         }
 
         private static readonly @string magic = (@string)"crc\x01";
-        private static readonly var marshaledSize = (var)len(magic) + 4L + 4L;
+        private static readonly var marshaledSize = len(magic) + 4L + 4L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

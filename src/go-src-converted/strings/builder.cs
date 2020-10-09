@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2020 October 08 00:33:50 UTC
+// package strings -- go2cs converted at 2020 October 09 04:45:18 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Go\src\strings\builder.go
 using utf8 = go.unicode.utf8_package;

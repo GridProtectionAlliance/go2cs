@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:15 UTC
+//     Generated on 2020 October 09 05:47:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using utf8 = go.unicode.utf8_package;
 using ed25519 = go.golang.org.x.crypto.ed25519_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -55,7 +56,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Verifiers<T> : Verifiers
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -81,8 +82,8 @@ namespace sumdb
             private delegate (Verifier, error) VerifierByPtr(ptr<T> value, @string name, uint hash);
             private delegate (Verifier, error) VerifierByVal(T value, @string name, uint hash);
 
-            private static readonly VerifierByPtr s_VerifierByPtr;
-            private static readonly VerifierByVal s_VerifierByVal;
+            private static readonly VerifierByPtr? s_VerifierByPtr;
+            private static readonly VerifierByVal? s_VerifierByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Verifier, error) Verifier(@string name, uint hash)
@@ -98,7 +99,7 @@ namespace sumdb
                 return s_VerifierByPtr(m_target_ptr, name, hash);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Verifiers()

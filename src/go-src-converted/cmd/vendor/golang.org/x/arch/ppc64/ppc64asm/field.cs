@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2020 October 08 04:44:43 UTC
+// package ppc64asm -- go2cs converted at 2020 October 09 05:54:54 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\field.go
 using fmt = go.fmt_package;

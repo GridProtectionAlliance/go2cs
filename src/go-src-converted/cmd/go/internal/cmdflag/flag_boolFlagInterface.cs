@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:35:05 UTC
+//     Generated on 2020 October 09 05:46:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class boolFlag<T> : boolFlag
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace @internal
             private delegate bool IsBoolFlagByPtr(ptr<T> value);
             private delegate bool IsBoolFlagByVal(T value);
 
-            private static readonly IsBoolFlagByPtr s_IsBoolFlagByPtr;
-            private static readonly IsBoolFlagByVal s_IsBoolFlagByVal;
+            private static readonly IsBoolFlagByPtr? s_IsBoolFlagByPtr;
+            private static readonly IsBoolFlagByVal? s_IsBoolFlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool IsBoolFlag()
@@ -89,7 +90,7 @@ namespace @internal
                 return s_IsBoolFlagByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static boolFlag()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:46 UTC
+//     Generated on 2020 October 09 06:05:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using reflect = go.reflect_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sql
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class RowsColumnTypeDatabaseTypeName<T> : RowsColumnTypeDatabaseTypeName
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sql
             private delegate @string ColumnTypeDatabaseTypeNameByPtr(ptr<T> value, long index);
             private delegate @string ColumnTypeDatabaseTypeNameByVal(T value, long index);
 
-            private static readonly ColumnTypeDatabaseTypeNameByPtr s_ColumnTypeDatabaseTypeNameByPtr;
-            private static readonly ColumnTypeDatabaseTypeNameByVal s_ColumnTypeDatabaseTypeNameByVal;
+            private static readonly ColumnTypeDatabaseTypeNameByPtr? s_ColumnTypeDatabaseTypeNameByPtr;
+            private static readonly ColumnTypeDatabaseTypeNameByVal? s_ColumnTypeDatabaseTypeNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ColumnTypeDatabaseTypeName(long index)
@@ -90,8 +91,8 @@ namespace sql
             private delegate error ColumnsByPtr(ptr<T> value);
             private delegate error ColumnsByVal(T value);
 
-            private static readonly ColumnsByPtr s_ColumnsByPtr;
-            private static readonly ColumnsByVal s_ColumnsByVal;
+            private static readonly ColumnsByPtr? s_ColumnsByPtr;
+            private static readonly ColumnsByVal? s_ColumnsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Columns()
@@ -110,8 +111,8 @@ namespace sql
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -130,8 +131,8 @@ namespace sql
             private delegate error NextByPtr(ptr<T> value, slice<Value> dest);
             private delegate error NextByVal(T value, slice<Value> dest);
 
-            private static readonly NextByPtr s_NextByPtr;
-            private static readonly NextByVal s_NextByVal;
+            private static readonly NextByPtr? s_NextByPtr;
+            private static readonly NextByVal? s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Next(slice<Value> dest)
@@ -147,7 +148,7 @@ namespace sql
                 return s_NextByPtr(m_target_ptr, dest);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static RowsColumnTypeDatabaseTypeName()

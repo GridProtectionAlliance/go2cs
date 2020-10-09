@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:47:22 UTC
+//     Generated on 2020 October 09 05:56:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class TIPCAddr<T> : TIPCAddr
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace sys
             private delegate array<byte> tipcAddrtypeByPtr(ptr<T> value);
             private delegate array<byte> tipcAddrtypeByVal(T value);
 
-            private static readonly tipcAddrtypeByPtr s_tipcAddrtypeByPtr;
-            private static readonly tipcAddrtypeByVal s_tipcAddrtypeByVal;
+            private static readonly tipcAddrtypeByPtr? s_tipcAddrtypeByPtr;
+            private static readonly tipcAddrtypeByVal? s_tipcAddrtypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public array<byte> tipcAddrtype()
@@ -94,8 +95,8 @@ namespace sys
             private delegate array<byte> tipcAddrByPtr(ptr<T> value);
             private delegate array<byte> tipcAddrByVal(T value);
 
-            private static readonly tipcAddrByPtr s_tipcAddrByPtr;
-            private static readonly tipcAddrByVal s_tipcAddrByVal;
+            private static readonly tipcAddrByPtr? s_tipcAddrByPtr;
+            private static readonly tipcAddrByVal? s_tipcAddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public array<byte> tipcAddr()
@@ -111,7 +112,7 @@ namespace sys
                 return s_tipcAddrByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static TIPCAddr()

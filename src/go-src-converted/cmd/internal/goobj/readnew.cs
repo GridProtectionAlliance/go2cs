@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package goobj -- go2cs converted at 2020 October 08 03:50:17 UTC
+// package goobj -- go2cs converted at 2020 October 09 05:08:55 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Go\src\cmd\internal\goobj\readnew.go
 using goobj2 = go.cmd.@internal.goobj2_package;

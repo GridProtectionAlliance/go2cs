@@ -4,7 +4,7 @@
 
 // +build aix darwin freebsd linux netbsd openbsd solaris
 
-// package unix -- go2cs converted at 2020 October 08 04:46:36 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:21 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\sockcmsg_unix_other.go
 using runtime = go.runtime_package;

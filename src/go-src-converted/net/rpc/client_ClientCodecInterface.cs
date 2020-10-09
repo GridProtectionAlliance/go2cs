@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:43:23 UTC
+//     Generated on 2020 October 09 05:00:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using http = go.net.http_package;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ClientCodec<T> : ClientCodec
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace net
             private delegate error WriteRequestByPtr(ptr<T> value, ptr<Request> _p0, object _p0);
             private delegate error WriteRequestByVal(T value, ptr<Request> _p0, object _p0);
 
-            private static readonly WriteRequestByPtr s_WriteRequestByPtr;
-            private static readonly WriteRequestByVal s_WriteRequestByVal;
+            private static readonly WriteRequestByPtr? s_WriteRequestByPtr;
+            private static readonly WriteRequestByVal? s_WriteRequestByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteRequest(ptr<Request> _p0, object _p0)
@@ -94,8 +95,8 @@ namespace net
             private delegate error ReadResponseHeaderByPtr(ptr<T> value, ptr<Response> _p0);
             private delegate error ReadResponseHeaderByVal(T value, ptr<Response> _p0);
 
-            private static readonly ReadResponseHeaderByPtr s_ReadResponseHeaderByPtr;
-            private static readonly ReadResponseHeaderByVal s_ReadResponseHeaderByVal;
+            private static readonly ReadResponseHeaderByPtr? s_ReadResponseHeaderByPtr;
+            private static readonly ReadResponseHeaderByVal? s_ReadResponseHeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadResponseHeader(ptr<Response> _p0)
@@ -114,8 +115,8 @@ namespace net
             private delegate error ReadResponseBodyByPtr(ptr<T> value, object _p0);
             private delegate error ReadResponseBodyByVal(T value, object _p0);
 
-            private static readonly ReadResponseBodyByPtr s_ReadResponseBodyByPtr;
-            private static readonly ReadResponseBodyByVal s_ReadResponseBodyByVal;
+            private static readonly ReadResponseBodyByPtr? s_ReadResponseBodyByPtr;
+            private static readonly ReadResponseBodyByVal? s_ReadResponseBodyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadResponseBody(object _p0)
@@ -134,8 +135,8 @@ namespace net
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -151,7 +152,7 @@ namespace net
                 return s_CloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ClientCodec()

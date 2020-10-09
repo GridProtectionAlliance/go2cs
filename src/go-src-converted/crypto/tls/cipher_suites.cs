@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2020 October 08 03:36:44 UTC
+// package tls -- go2cs converted at 2020 October 09 04:54:41 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Go\src\crypto\tls\cipher_suites.go
 using crypto = go.crypto_package;
@@ -128,16 +128,16 @@ namespace crypto
         // EdDSA signature and therefore may only be selected when the server's
         // certificate is ECDSA or EdDSA. If this is not set then the cipher suite
         // is RSA based.
-        private static readonly var suiteECSign = (var)0; 
+        private static readonly var suiteECSign = 0; 
         // suiteTLS12 indicates that the cipher suite should only be advertised
         // and accepted when using TLS 1.2.
-        private static readonly var suiteTLS12 = (var)1; 
+        private static readonly var suiteTLS12 = 1; 
         // suiteSHA384 indicates that the cipher suite uses SHA384 as the
         // handshake hash.
-        private static readonly var suiteSHA384 = (var)2; 
+        private static readonly var suiteSHA384 = 2; 
         // suiteDefaultOff indicates that this cipher suite is not included by
         // default.
-        private static readonly var suiteDefaultOff = (var)3;
+        private static readonly var suiteDefaultOff = 3;
 
 
         // A cipherSuite is a specific combination of key agreement, cipher and MAC function.
@@ -673,8 +673,8 @@ namespace crypto
 
         // Legacy names for the corresponding cipher suites with the correct _SHA256
         // suffix, retained for backward compatibility.
-        public static readonly var TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305 = (var)TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256;
-        public static readonly var TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305 = (var)TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256;
+        public static readonly var TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305 = TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256;
+        public static readonly var TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305 = TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256;
 
     }
 }}

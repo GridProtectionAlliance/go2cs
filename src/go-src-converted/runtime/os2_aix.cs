@@ -8,7 +8,7 @@
 // Each syscall is made by calling its libc symbol using asmcgocall and asmsyscall6
 // assembly functions.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:43 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:19 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os2_aix.go
 using @unsafe = go.@unsafe_package;

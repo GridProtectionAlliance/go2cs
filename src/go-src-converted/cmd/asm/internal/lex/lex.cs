@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package lex implements lexical analysis for the assembler.
-// package lex -- go2cs converted at 2020 October 08 04:08:09 UTC
+// package lex -- go2cs converted at 2020 October 09 05:23:03 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Go\src\cmd\asm\internal\lex\lex.go
 using fmt = go.fmt_package;
@@ -32,10 +32,10 @@ namespace @internal
         // Asm defines some two-character lexemes. We make up
         // a rune/ScanToken value for them - ugly but simple.
         public static readonly ScanToken LSH = (ScanToken)-1000L - iota; // << Left shift.
-        public static readonly var RSH = (var)0; // >> Logical right shift.
-        public static readonly var ARR = (var)1; // -> Used on ARM for shift type 3, arithmetic right shift.
-        public static readonly var ROT = (var)2; // @> Used on ARM for shift type 4, rotate right.
-        private static readonly var macroName = (var)3; // name of macro that should not be expanded
+        public static readonly var RSH = 0; // >> Logical right shift.
+        public static readonly var ARR = 1; // -> Used on ARM for shift type 3, arithmetic right shift.
+        public static readonly var ROT = 2; // @> Used on ARM for shift type 4, rotate right.
+        private static readonly var macroName = 3; // name of macro that should not be expanded
 
         // IsRegisterShift reports whether the token is one of the ARM register shift operators.
         public static bool IsRegisterShift(ScanToken r)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:27:01 UTC
+//     Generated on 2020 October 09 05:39:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,6 +32,8 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using astutil = go.golang.org.x.tools.go.ast.astutil_package;
+
+#nullable enable
 
 namespace go
 {

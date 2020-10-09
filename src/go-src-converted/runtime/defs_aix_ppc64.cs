@@ -4,7 +4,7 @@
 
 // +build aix
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:29 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:47 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_aix_ppc64.go
 

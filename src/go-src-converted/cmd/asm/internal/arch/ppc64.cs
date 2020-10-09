@@ -6,7 +6,7 @@
 // 64-bit PowerPC (PPC64) instruction set, to minimize its interaction
 // with the core of the assembler.
 
-// package arch -- go2cs converted at 2020 October 08 04:08:21 UTC
+// package arch -- go2cs converted at 2020 October 09 05:23:10 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Go\src\cmd\asm\internal\arch\ppc64.go
 using obj = go.cmd.@internal.obj_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2020 October 08 04:04:38 UTC
+// package lex -- go2cs converted at 2020 October 09 05:20:18 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Go\src\cmd\asm\internal\lex\input.go
 using fmt = go.fmt_package;

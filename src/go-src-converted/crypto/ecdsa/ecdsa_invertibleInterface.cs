@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:16 UTC
+//     Generated on 2020 October 09 04:52:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,7 @@ using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class invertible<T> : invertible
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace crypto
             private delegate ptr<big.Int> InverseByPtr(ptr<T> value, ptr<big.Int> k);
             private delegate ptr<big.Int> InverseByVal(T value, ptr<big.Int> k);
 
-            private static readonly InverseByPtr s_InverseByPtr;
-            private static readonly InverseByVal s_InverseByVal;
+            private static readonly InverseByPtr? s_InverseByPtr;
+            private static readonly InverseByVal? s_InverseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<big.Int> Inverse(ptr<big.Int> k)
@@ -94,7 +95,7 @@ namespace crypto
                 return s_InverseByPtr(m_target_ptr, k);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static invertible()

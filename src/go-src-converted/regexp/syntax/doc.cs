@@ -128,7 +128,7 @@ ASCII character classes:
   [[:xdigit:]]   hex digit (== [0-9A-Fa-f])
 
 */
-// package syntax -- go2cs converted at 2020 October 08 03:40:58 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:26 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\doc.go
     }

@@ -3,7 +3,7 @@
 
 // +build 386,freebsd
 
-// package unix -- go2cs converted at 2020 October 08 04:53:24 UTC
+// package unix -- go2cs converted at 2020 October 09 06:00:25 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsysnum_freebsd_386.go
 

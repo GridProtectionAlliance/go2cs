@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package importer provides access to export data importers.
-// package importer -- go2cs converted at 2020 October 08 04:56:05 UTC
+// package importer -- go2cs converted at 2020 October 09 06:02:39 UTC
 // import "go/importer" ==> using importer = go.go.importer_package
 // Original source: C:\Go\src\go\importer\importer.go
 using build = go.go.build_package;

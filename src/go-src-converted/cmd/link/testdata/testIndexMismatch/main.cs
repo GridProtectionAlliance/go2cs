@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:39:54 UTC
+// package main -- go2cs converted at 2020 October 09 05:50:38 UTC
 // Original source: C:\Go\src\cmd\link\testdata\testIndexMismatch\main.go
 using a = go.a_package;
 using static go.builtin;

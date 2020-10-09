@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gcexportdata -- go2cs converted at 2020 October 08 04:55:38 UTC
+// package gcexportdata -- go2cs converted at 2020 October 09 06:02:21 UTC
 // import "golang.org/x/tools/go/gcexportdata" ==> using gcexportdata = go.golang.org.x.tools.go.gcexportdata_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\gcexportdata\importer.go
 using fmt = go.fmt_package;

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package metric aggregates events into metrics that can be exported.
-// package metric -- go2cs converted at 2020 October 08 04:55:00 UTC
+// package metric -- go2cs converted at 2020 October 09 06:01:49 UTC
 // import "golang.org/x/tools/internal/event/export/metric" ==> using metric = go.golang.org.x.tools.@internal.@event.export.metric_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\export\metric\exporter.go
 using context = go.context_package;

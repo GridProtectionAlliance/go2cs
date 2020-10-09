@@ -119,7 +119,7 @@
 //
 // TODO(rsc): The file format is good for a first pass but needs work.
 //    - There are SymID in the object file that should really just be strings.
-// package objabi -- go2cs converted at 2020 October 08 03:50:13 UTC
+// package objabi -- go2cs converted at 2020 October 09 05:08:51 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\doc.go
     }

@@ -6,7 +6,7 @@
 // This file was derived from $GOROOT/src/cmd/compile/internal/gc/bexport.go;
 // see that file for specification of the format.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:17 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:03 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\bexport.go
 using bytes = go.bytes_package;
@@ -42,13 +42,13 @@ namespace @internal
         //
         // NOTE: This flag is the first flag to enable if importing dies because of
         // (suspected) format errors, and whenever a change is made to the format.
-        private static readonly var debugFormat = (var)false; // default: false
+        private static readonly var debugFormat = false; // default: false
 
         // If trace is set, debugging output is printed to std out.
  // default: false
 
         // If trace is set, debugging output is printed to std out.
-        private static readonly var trace = (var)false; // default: false
+        private static readonly var trace = false; // default: false
 
         // Current export format version. Increase with each format change.
         // Note: The latest binary (non-indexed) export format is at version 6.
@@ -96,7 +96,7 @@ namespace @internal
         // some corner-case type declarations (but those are not handled correctly
         // with with the textual export format either).
         // TODO(gri) enable and remove once issues caused by it are fixed
-        private static readonly var trackAllTypes = (var)false;
+        private static readonly var trackAllTypes = false;
 
 
 

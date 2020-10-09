@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarf -- go2cs converted at 2020 October 08 04:07:48 UTC
+// package dwarf -- go2cs converted at 2020 October 09 05:22:46 UTC
 // import "cmd/internal/dwarf" ==> using dwarf = go.cmd.@internal.dwarf_package
 // Original source: C:\Go\src\cmd\internal\dwarf\dwarf_defs.go
 
@@ -93,16 +93,16 @@ namespace @internal
 
         // Not from the spec, but logically belongs here
         public static readonly ulong DW_CLS_ADDRESS = (ulong)0x01UL + iota;
-        public static readonly var DW_CLS_BLOCK = (var)0;
-        public static readonly var DW_CLS_CONSTANT = (var)1;
-        public static readonly var DW_CLS_FLAG = (var)2;
-        public static readonly var DW_CLS_PTR = (var)3; // lineptr, loclistptr, macptr, rangelistptr
-        public static readonly var DW_CLS_REFERENCE = (var)4;
-        public static readonly var DW_CLS_ADDRLOC = (var)5;
-        public static readonly var DW_CLS_STRING = (var)6; 
+        public static readonly var DW_CLS_BLOCK = 0;
+        public static readonly var DW_CLS_CONSTANT = 1;
+        public static readonly var DW_CLS_FLAG = 2;
+        public static readonly var DW_CLS_PTR = 3; // lineptr, loclistptr, macptr, rangelistptr
+        public static readonly var DW_CLS_REFERENCE = 4;
+        public static readonly var DW_CLS_ADDRLOC = 5;
+        public static readonly var DW_CLS_STRING = 6; 
 
         // Go-specific internal hackery.
-        public static readonly var DW_CLS_GO_TYPEREF = (var)7;
+        public static readonly var DW_CLS_GO_TYPEREF = 7;
 
 
         // Table 20

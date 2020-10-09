@@ -4,7 +4,7 @@
 
 // +build freebsd,386 freebsd,arm
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:56 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:29 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\route_freebsd_32bit.go
 using @unsafe = go.@unsafe_package;

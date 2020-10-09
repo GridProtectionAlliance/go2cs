@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 03:40:58 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:26 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\compile.go
 using unicode = go.unicode_package;

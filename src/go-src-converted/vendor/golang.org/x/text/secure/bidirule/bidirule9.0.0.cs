@@ -4,7 +4,7 @@
 
 // +build !go1.10
 
-// package bidirule -- go2cs converted at 2020 October 08 05:01:52 UTC
+// package bidirule -- go2cs converted at 2020 October 09 06:07:56 UTC
 // import "vendor/golang.org/x/text/secure/bidirule" ==> using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\secure\bidirule\bidirule9.0.0.go
 

@@ -7,7 +7,7 @@
 
 // +build 386,linux
 
-// package unix -- go2cs converted at 2020 October 08 04:47:25 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:45 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_386.go
 using @unsafe = go.@unsafe_package;
@@ -134,9 +134,9 @@ namespace sys
 
         //sysnb getrlimit(resource int, rlim *rlimit32) (err error) = SYS_GETRLIMIT
 
-        private static readonly var rlimInf32 = (var)~uint32(0L);
+        private static readonly var rlimInf32 = ~uint32(0L);
 
-        private static readonly var rlimInf64 = (var)~uint64(0L);
+        private static readonly var rlimInf64 = ~uint64(0L);
 
 
 

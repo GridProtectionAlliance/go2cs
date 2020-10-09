@@ -4,7 +4,7 @@
 
 // +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 October 08 03:44:16 UTC
+// package os -- go2cs converted at 2020 October 09 05:06:59 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\dir_unix.go
 using io = go.io_package;

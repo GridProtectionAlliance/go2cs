@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2020 October 08 03:40:11 UTC
+// package hpack -- go2cs converted at 2020 October 09 04:57:43 UTC
 // import "golang.org/x/net/http2/hpack" ==> using hpack = go.golang.org.x.net.http2.hpack_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\http2\hpack\tables.go
 using fmt = go.fmt_package;

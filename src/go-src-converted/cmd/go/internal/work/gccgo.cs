@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2020 October 08 04:35:02 UTC
+// package work -- go2cs converted at 2020 October 09 05:46:23 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Go\src\cmd\go\internal\work\gccgo.go
 using fmt = go.fmt_package;

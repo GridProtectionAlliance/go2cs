@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package graph -- go2cs converted at 2020 October 08 04:43:11 UTC
+// package graph -- go2cs converted at 2020 October 09 05:53:36 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/graph" ==> using graph = go.cmd.vendor.github.com.google.pprof.@internal.graph_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\graph\dotgraph.go
 using fmt = go.fmt_package;

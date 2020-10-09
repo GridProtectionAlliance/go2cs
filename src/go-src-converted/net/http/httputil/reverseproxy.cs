@@ -4,7 +4,7 @@
 
 // HTTP reverse proxy handler
 
-// package httputil -- go2cs converted at 2020 October 08 03:41:37 UTC
+// package httputil -- go2cs converted at 2020 October 09 04:58:59 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Go\src\net\http\httputil\reverseproxy.go
 using context = go.context_package;

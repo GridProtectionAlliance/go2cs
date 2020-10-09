@@ -9,7 +9,7 @@
 // and its proofs are compatible with that system.
 // See TestCertificateTransparency.
 //
-// package tlog -- go2cs converted at 2020 October 08 04:46:05 UTC
+// package tlog -- go2cs converted at 2020 October 09 05:56:08 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/tlog" ==> using tlog = go.cmd.vendor.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\sumdb\tlog\tlog.go
 using sha256 = go.crypto.sha256_package;

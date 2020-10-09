@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:00:32 UTC
+//     Generated on 2020 October 09 06:06:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using utf8 = go.unicode.utf8_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class matcher<T> : matcher
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace http
             private delegate bool matchByPtr(ptr<T> value, @string host, @string port, net.IP ip);
             private delegate bool matchByVal(T value, @string host, @string port, net.IP ip);
 
-            private static readonly matchByPtr s_matchByPtr;
-            private static readonly matchByVal s_matchByVal;
+            private static readonly matchByPtr? s_matchByPtr;
+            private static readonly matchByVal? s_matchByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool match(@string host, @string port, net.IP ip)
@@ -95,7 +96,7 @@ namespace http
                 return s_matchByPtr(m_target_ptr, host, port, ip);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static matcher()

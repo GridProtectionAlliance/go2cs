@@ -4,7 +4,7 @@
 
 // Package composite defines an Analyzer that checks for unkeyed
 // composite literals.
-// package composite -- go2cs converted at 2020 October 08 04:57:53 UTC
+// package composite -- go2cs converted at 2020 October 09 06:04:31 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/composite" ==> using composite = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.composite_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\composite\composite.go
 using ast = go.go.ast_package;

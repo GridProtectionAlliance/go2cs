@@ -5,7 +5,7 @@
 // Package demangle defines functions that demangle GCC/LLVM C++ symbol names.
 // This package recognizes names that were mangled according to the C++ ABI
 // defined at http://codesourcery.com/cxx-abi/.
-// package demangle -- go2cs converted at 2020 October 08 04:44:06 UTC
+// package demangle -- go2cs converted at 2020 October 09 05:54:22 UTC
 // import "cmd/vendor/github.com/ianlancetaylor/demangle" ==> using demangle = go.cmd.vendor.github.com.ianlancetaylor.demangle_package
 // Original source: C:\Go\src\cmd\vendor\github.com\ianlancetaylor\demangle\demangle.go
 using errors = go.errors_package;
@@ -36,14 +36,14 @@ namespace ianlancetaylor
         public static readonly Option NoParams = (Option)iota; 
 
         // The NoTemplateParams option disables demangling of template parameters.
-        public static readonly var NoTemplateParams = (var)0; 
+        public static readonly var NoTemplateParams = 0; 
 
         // The NoClones option disables inclusion of clone suffixes.
         // NoParams implies NoClones.
-        public static readonly var NoClones = (var)1; 
+        public static readonly var NoClones = 1; 
 
         // The Verbose option turns on more verbose demangling.
-        public static readonly var Verbose = (var)2;
+        public static readonly var Verbose = 2;
 
 
         // Filter demangles a C++ symbol name, returning the human-readable C++ name.
@@ -384,7 +384,7 @@ namespace ianlancetaylor
         }
 
         private static readonly forLocalNameType forLocalName = (forLocalNameType)iota;
-        private static readonly var notForLocalName = (var)0;
+        private static readonly var notForLocalName = 0;
 
 
         // encoding ::= <(function) name> <bare-function-type>

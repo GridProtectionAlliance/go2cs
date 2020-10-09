@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:38:31 UTC
+//     Generated on 2020 October 09 05:49:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using log = go.log_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

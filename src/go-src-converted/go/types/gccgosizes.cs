@@ -5,7 +5,7 @@
 // This is a copy of the file generated during the gccgo build process.
 // Last update 2019-01-22.
 
-// package types -- go2cs converted at 2020 October 08 04:03:25 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:28 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\gccgosizes.go
 

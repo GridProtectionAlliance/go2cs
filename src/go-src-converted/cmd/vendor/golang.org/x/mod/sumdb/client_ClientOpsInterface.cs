@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:45:57 UTC
+//     Generated on 2020 October 09 05:56:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,6 +26,7 @@ using note = go.golang.org.x.mod.sumdb.note_package;
 using tlog = go.golang.org.x.mod.sumdb.tlog_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -54,7 +55,7 @@ namespace mod
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ClientOps<T> : ClientOps
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace mod
             private delegate (slice<byte>, error) ReadRemoteByPtr(ptr<T> value, @string path);
             private delegate (slice<byte>, error) ReadRemoteByVal(T value, @string path);
 
-            private static readonly ReadRemoteByPtr s_ReadRemoteByPtr;
-            private static readonly ReadRemoteByVal s_ReadRemoteByVal;
+            private static readonly ReadRemoteByPtr? s_ReadRemoteByPtr;
+            private static readonly ReadRemoteByVal? s_ReadRemoteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) ReadRemote(@string path)
@@ -100,8 +101,8 @@ namespace mod
             private delegate (slice<byte>, error) ReadConfigByPtr(ptr<T> value, @string file);
             private delegate (slice<byte>, error) ReadConfigByVal(T value, @string file);
 
-            private static readonly ReadConfigByPtr s_ReadConfigByPtr;
-            private static readonly ReadConfigByVal s_ReadConfigByVal;
+            private static readonly ReadConfigByPtr? s_ReadConfigByPtr;
+            private static readonly ReadConfigByVal? s_ReadConfigByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) ReadConfig(@string file)
@@ -120,8 +121,8 @@ namespace mod
             private delegate (slice<byte>, error) WriteConfigByPtr(ptr<T> value, @string file, slice<byte> old, slice<byte> @new);
             private delegate (slice<byte>, error) WriteConfigByVal(T value, @string file, slice<byte> old, slice<byte> @new);
 
-            private static readonly WriteConfigByPtr s_WriteConfigByPtr;
-            private static readonly WriteConfigByVal s_WriteConfigByVal;
+            private static readonly WriteConfigByPtr? s_WriteConfigByPtr;
+            private static readonly WriteConfigByVal? s_WriteConfigByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) WriteConfig(@string file, slice<byte> old, slice<byte> @new)
@@ -140,8 +141,8 @@ namespace mod
             private delegate (slice<byte>, error) ReadCacheByPtr(ptr<T> value, @string file);
             private delegate (slice<byte>, error) ReadCacheByVal(T value, @string file);
 
-            private static readonly ReadCacheByPtr s_ReadCacheByPtr;
-            private static readonly ReadCacheByVal s_ReadCacheByVal;
+            private static readonly ReadCacheByPtr? s_ReadCacheByPtr;
+            private static readonly ReadCacheByVal? s_ReadCacheByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) ReadCache(@string file)
@@ -160,8 +161,8 @@ namespace mod
             private delegate (slice<byte>, error) WriteCacheByPtr(ptr<T> value, @string file, slice<byte> data);
             private delegate (slice<byte>, error) WriteCacheByVal(T value, @string file, slice<byte> data);
 
-            private static readonly WriteCacheByPtr s_WriteCacheByPtr;
-            private static readonly WriteCacheByVal s_WriteCacheByVal;
+            private static readonly WriteCacheByPtr? s_WriteCacheByPtr;
+            private static readonly WriteCacheByVal? s_WriteCacheByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) WriteCache(@string file, slice<byte> data)
@@ -180,8 +181,8 @@ namespace mod
             private delegate (slice<byte>, error) LogByPtr(ptr<T> value, @string msg);
             private delegate (slice<byte>, error) LogByVal(T value, @string msg);
 
-            private static readonly LogByPtr s_LogByPtr;
-            private static readonly LogByVal s_LogByVal;
+            private static readonly LogByPtr? s_LogByPtr;
+            private static readonly LogByVal? s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Log(@string msg)
@@ -200,8 +201,8 @@ namespace mod
             private delegate (slice<byte>, error) SecurityErrorByPtr(ptr<T> value, @string msg);
             private delegate (slice<byte>, error) SecurityErrorByVal(T value, @string msg);
 
-            private static readonly SecurityErrorByPtr s_SecurityErrorByPtr;
-            private static readonly SecurityErrorByVal s_SecurityErrorByVal;
+            private static readonly SecurityErrorByPtr? s_SecurityErrorByPtr;
+            private static readonly SecurityErrorByVal? s_SecurityErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) SecurityError(@string msg)
@@ -217,7 +218,7 @@ namespace mod
                 return s_SecurityErrorByPtr(m_target_ptr, msg);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ClientOps()

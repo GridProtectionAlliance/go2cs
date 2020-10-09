@@ -4,7 +4,7 @@
 
 // +build amd64 386
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:02 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:56 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sys_x86.go
 using sys = go.runtime.@internal.sys_package;

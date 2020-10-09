@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package smtp -- go2cs converted at 2020 October 08 03:43:29 UTC
+// package smtp -- go2cs converted at 2020 October 09 05:00:40 UTC
 // import "net/smtp" ==> using smtp = go.net.smtp_package
 // Original source: C:\Go\src\net\smtp\auth.go
 using hmac = go.crypto.hmac_package;

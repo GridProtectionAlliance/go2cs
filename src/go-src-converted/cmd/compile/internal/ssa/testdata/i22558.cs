@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 October 08 04:27:09 UTC
+// package main -- go2cs converted at 2020 October 09 05:39:57 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\testdata\i22558.go
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -59,7 +59,7 @@ namespace go
             growstack(); // Use stack early to prevent growth during test, which confuses gdb
             ptr<thing> t = addr(new thing(name:"t",self:nil,next:nil,stuff:make([]big,1)));
             ref thing u = ref heap(new thing(name:"u",self:t,next:t,stuff:make([]big,1)), out ptr<thing> _addr_u);
-            test(_addr_t, _addr_u);
+            test(t, _addr_u);
 
         }
 

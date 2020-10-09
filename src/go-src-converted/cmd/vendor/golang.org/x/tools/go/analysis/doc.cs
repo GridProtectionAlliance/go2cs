@@ -307,7 +307,7 @@ A tool that provides multiple analyzers can use multichecker in a
 similar way, giving it the list of Analyzers.
 
 */
-// package analysis -- go2cs converted at 2020 October 08 04:54:17 UTC
+// package analysis -- go2cs converted at 2020 October 09 06:01:15 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis" ==> using analysis = go.cmd.vendor.golang.org.x.tools.go.analysis_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\doc.go
     }

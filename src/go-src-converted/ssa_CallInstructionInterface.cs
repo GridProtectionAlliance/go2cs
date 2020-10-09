@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:10 UTC
+//     Generated on 2020 October 09 06:03:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using sync = go.sync_package;
 using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class CallInstruction<T> : CallInstruction
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace go
             private delegate ptr<Call> CommonByPtr(ptr<T> value);
             private delegate ptr<Call> CommonByVal(T value);
 
-            private static readonly CommonByPtr s_CommonByPtr;
-            private static readonly CommonByVal s_CommonByVal;
+            private static readonly CommonByPtr? s_CommonByPtr;
+            private static readonly CommonByVal? s_CommonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Call> Common()
@@ -96,8 +97,8 @@ namespace go
             private delegate ptr<Call> ValueByPtr(ptr<T> value);
             private delegate ptr<Call> ValueByVal(T value);
 
-            private static readonly ValueByPtr s_ValueByPtr;
-            private static readonly ValueByVal s_ValueByVal;
+            private static readonly ValueByPtr? s_ValueByPtr;
+            private static readonly ValueByVal? s_ValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<Call> Value()
@@ -116,8 +117,8 @@ namespace go
             private delegate token.Pos StringByPtr(ptr<T> value);
             private delegate token.Pos StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos String()
@@ -136,8 +137,8 @@ namespace go
             private delegate token.Pos ParentByPtr(ptr<T> value);
             private delegate token.Pos ParentByVal(T value);
 
-            private static readonly ParentByPtr s_ParentByPtr;
-            private static readonly ParentByVal s_ParentByVal;
+            private static readonly ParentByPtr? s_ParentByPtr;
+            private static readonly ParentByVal? s_ParentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Parent()
@@ -156,8 +157,8 @@ namespace go
             private delegate token.Pos BlockByPtr(ptr<T> value);
             private delegate token.Pos BlockByVal(T value);
 
-            private static readonly BlockByPtr s_BlockByPtr;
-            private static readonly BlockByVal s_BlockByVal;
+            private static readonly BlockByPtr? s_BlockByPtr;
+            private static readonly BlockByVal? s_BlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Block()
@@ -176,8 +177,8 @@ namespace go
             private delegate token.Pos setBlockByPtr(ptr<T> value, ptr<BasicBlock> _p0);
             private delegate token.Pos setBlockByVal(T value, ptr<BasicBlock> _p0);
 
-            private static readonly setBlockByPtr s_setBlockByPtr;
-            private static readonly setBlockByVal s_setBlockByVal;
+            private static readonly setBlockByPtr? s_setBlockByPtr;
+            private static readonly setBlockByVal? s_setBlockByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos setBlock(ptr<BasicBlock> _p0)
@@ -196,8 +197,8 @@ namespace go
             private delegate token.Pos OperandsByPtr(ptr<T> value, slice<ptr<Value>> rands);
             private delegate token.Pos OperandsByVal(T value, slice<ptr<Value>> rands);
 
-            private static readonly OperandsByPtr s_OperandsByPtr;
-            private static readonly OperandsByVal s_OperandsByVal;
+            private static readonly OperandsByPtr? s_OperandsByPtr;
+            private static readonly OperandsByVal? s_OperandsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Operands(slice<ptr<Value>> rands)
@@ -216,8 +217,8 @@ namespace go
             private delegate token.Pos PosByPtr(ptr<T> value);
             private delegate token.Pos PosByVal(T value);
 
-            private static readonly PosByPtr s_PosByPtr;
-            private static readonly PosByVal s_PosByVal;
+            private static readonly PosByPtr? s_PosByPtr;
+            private static readonly PosByVal? s_PosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public token.Pos Pos()
@@ -233,7 +234,7 @@ namespace go
                 return s_PosByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static CallInstruction()

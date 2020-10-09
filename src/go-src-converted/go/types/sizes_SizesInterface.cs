@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:03:43 UTC
+//     Generated on 2020 October 09 05:19:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -40,7 +41,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Sizes<T> : Sizes
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace go
             private delegate long AlignofByPtr(ptr<T> value, Type T);
             private delegate long AlignofByVal(T value, Type T);
 
-            private static readonly AlignofByPtr s_AlignofByPtr;
-            private static readonly AlignofByVal s_AlignofByVal;
+            private static readonly AlignofByPtr? s_AlignofByPtr;
+            private static readonly AlignofByVal? s_AlignofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Alignof(Type T)
@@ -86,8 +87,8 @@ namespace go
             private delegate long OffsetsofByPtr(ptr<T> value, slice<ptr<Var>> fields);
             private delegate long OffsetsofByVal(T value, slice<ptr<Var>> fields);
 
-            private static readonly OffsetsofByPtr s_OffsetsofByPtr;
-            private static readonly OffsetsofByVal s_OffsetsofByVal;
+            private static readonly OffsetsofByPtr? s_OffsetsofByPtr;
+            private static readonly OffsetsofByVal? s_OffsetsofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Offsetsof(slice<ptr<Var>> fields)
@@ -106,8 +107,8 @@ namespace go
             private delegate long SizeofByPtr(ptr<T> value, Type T);
             private delegate long SizeofByVal(T value, Type T);
 
-            private static readonly SizeofByPtr s_SizeofByPtr;
-            private static readonly SizeofByVal s_SizeofByVal;
+            private static readonly SizeofByPtr? s_SizeofByPtr;
+            private static readonly SizeofByVal? s_SizeofByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Sizeof(Type T)
@@ -123,7 +124,7 @@ namespace go
                 return s_SizeofByPtr(m_target_ptr, T);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Sizes()

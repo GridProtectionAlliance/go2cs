@@ -5,7 +5,7 @@
 // +build linux
 // +build 386 arm
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:20 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\vdso_elf32.go
 

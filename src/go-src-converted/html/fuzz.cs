@@ -4,7 +4,7 @@
 
 // +build gofuzz
 
-// package html -- go2cs converted at 2020 October 08 03:42:17 UTC
+// package html -- go2cs converted at 2020 October 09 04:59:35 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Go\src\html\fuzz.go
 using fmt = go.fmt_package;

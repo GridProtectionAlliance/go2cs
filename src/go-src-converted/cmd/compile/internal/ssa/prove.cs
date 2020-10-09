@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:11:35 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:25:34 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\prove.go
 using src = go.cmd.@internal.src_package;
@@ -23,8 +23,8 @@ namespace @internal
         }
 
         private static readonly branch unknown = (branch)iota;
-        private static readonly var positive = (var)0;
-        private static readonly var negative = (var)1;
+        private static readonly var positive = 0;
+        private static readonly var negative = 1;
 
 
         // relation represents the set of possible relations between
@@ -52,8 +52,8 @@ namespace @internal
         }
 
         private static readonly relation lt = (relation)1L << (int)(iota);
-        private static readonly var eq = (var)0;
-        private static readonly var gt = (var)1;
+        private static readonly var eq = 0;
+        private static readonly var gt = 1;
 
 
         private static array<@string> relationStrings = new array<@string>(InitKeyedValues<@string>((0, "none"), (lt, "<"), (eq, "=="), (lt|eq, "<="), (gt, ">"), (gt|lt, "!="), (gt|eq, ">="), (gt|eq|lt, "any")));
@@ -78,9 +78,9 @@ namespace @internal
         }
 
         private static readonly domain signed = (domain)1L << (int)(iota);
-        private static readonly var unsigned = (var)0;
-        private static readonly var pointer = (var)1;
-        private static readonly var boolean = (var)2;
+        private static readonly var unsigned = 0;
+        private static readonly var pointer = 1;
+        private static readonly var boolean = 2;
 
 
         private static array<@string> domainStrings = new array<@string>(new @string[] { "signed", "unsigned", "pointer", "boolean" });
@@ -1136,7 +1136,7 @@ namespace @internal
             {
             }
             const walkState descend = (walkState)iota;
-            const var simplify = (var)0;
+            const var simplify = 0;
  
             // work maintains the DFS stack.
             private partial struct bp

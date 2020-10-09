@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:22:52 UTC
+//     Generated on 2020 October 09 04:48:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
+
+#nullable enable
 
 namespace go
 {

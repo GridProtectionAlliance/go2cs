@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:40 UTC
+//     Generated on 2020 October 09 05:45:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,8 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using build = go.go.build_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

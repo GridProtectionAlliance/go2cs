@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2020 October 08 04:08:10 UTC
+// package lex -- go2cs converted at 2020 October 09 05:23:03 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Go\src\cmd\asm\internal\lex\tokenizer.go
 using io = go.io_package;

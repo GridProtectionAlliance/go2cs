@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:26 UTC
+//     Generated on 2020 October 09 05:20:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Private<T> : Private
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace pkg
             private delegate void XByPtr(ptr<T> value);
             private delegate void XByVal(T value);
 
-            private static readonly XByPtr s_XByPtr;
-            private static readonly XByVal s_XByVal;
+            private static readonly XByPtr? s_XByPtr;
+            private static readonly XByVal? s_XByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void X()
@@ -96,8 +97,8 @@ namespace pkg
             private delegate void yByPtr(ptr<T> value);
             private delegate void yByVal(T value);
 
-            private static readonly yByPtr s_yByPtr;
-            private static readonly yByVal s_yByVal;
+            private static readonly yByPtr? s_yByPtr;
+            private static readonly yByVal? s_yByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void y()
@@ -118,7 +119,7 @@ namespace pkg
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Private()

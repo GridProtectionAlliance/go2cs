@@ -14,7 +14,7 @@
 
 // Package symbolz symbolizes a profile using the output from the symbolz
 // service.
-// package symbolz -- go2cs converted at 2020 October 08 04:43:27 UTC
+// package symbolz -- go2cs converted at 2020 October 09 05:53:49 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/symbolz" ==> using symbolz = go.cmd.vendor.github.com.google.pprof.@internal.symbolz_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\symbolz\symbolz.go
 using bytes = go.bytes_package;

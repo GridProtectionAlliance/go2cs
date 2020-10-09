@@ -4,7 +4,7 @@
 
 // +build !windows
 
-// package execenv -- go2cs converted at 2020 October 08 03:40:57 UTC
+// package execenv -- go2cs converted at 2020 October 09 04:58:25 UTC
 // import "internal/syscall/execenv" ==> using execenv = go.@internal.syscall.execenv_package
 // Original source: C:\Go\src\internal\syscall\execenv\execenv_default.go
 using syscall = go.syscall_package;

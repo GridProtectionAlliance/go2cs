@@ -199,7 +199,7 @@
 // they're expected to change much more rapidly, so they're omitted
 // here. See exportWriter's varExt/funcExt/etc methods for details.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:08 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:38 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\iexport.go
 using bufio = go.bufio_package;
@@ -249,14 +249,14 @@ namespace @internal
  
         // Types
         private static readonly itag definedType = (itag)iota;
-        private static readonly var pointerType = (var)0;
-        private static readonly var sliceType = (var)1;
-        private static readonly var arrayType = (var)2;
-        private static readonly var chanType = (var)3;
-        private static readonly var mapType = (var)4;
-        private static readonly var signatureType = (var)5;
-        private static readonly var structType = (var)6;
-        private static readonly var interfaceType = (var)7;
+        private static readonly var pointerType = 0;
+        private static readonly var sliceType = 1;
+        private static readonly var arrayType = 2;
+        private static readonly var chanType = 3;
+        private static readonly var mapType = 4;
+        private static readonly var signatureType = 5;
+        private static readonly var structType = 6;
+        private static readonly var interfaceType = 7;
 
 
         private static void iexport(ptr<bufio.Writer> _addr_@out)

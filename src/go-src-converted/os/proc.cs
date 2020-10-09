@@ -4,7 +4,7 @@
 
 // Process etc.
 
-// package os -- go2cs converted at 2020 October 08 03:44:56 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:19 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\proc.go
 using runtime = go.runtime_package;

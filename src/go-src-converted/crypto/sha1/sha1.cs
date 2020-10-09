@@ -6,7 +6,7 @@
 //
 // SHA-1 is cryptographically broken and should not be used for secure
 // applications.
-// package sha1 -- go2cs converted at 2020 October 08 03:36:41 UTC
+// package sha1 -- go2cs converted at 2020 October 09 04:54:37 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Go\src\crypto\sha1\sha1.go
 using crypto = go.crypto_package;
@@ -54,7 +54,7 @@ namespace crypto
         }
 
         private static readonly @string magic = (@string)"sha\x01";
-        private static readonly var marshaledSize = (var)len(magic) + 5L * 4L + chunk + 8L;
+        private static readonly var marshaledSize = len(magic) + 5L * 4L + chunk + 8L;
 
 
         private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:56:59 UTC
+//     Generated on 2020 October 09 06:03:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using os = go.os_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class setNumable<T> : setNumable
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace go
             private delegate void setNumByPtr(ptr<T> value, long _p0);
             private delegate void setNumByVal(T value, long _p0);
 
-            private static readonly setNumByPtr s_setNumByPtr;
-            private static readonly setNumByVal s_setNumByVal;
+            private static readonly setNumByPtr? s_setNumByPtr;
+            private static readonly setNumByVal? s_setNumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void setNum(long _p0)
@@ -99,7 +100,7 @@ namespace go
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static setNumable()

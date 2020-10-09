@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:37 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:49 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\likelyadjust.go
 using fmt = go.fmt_package;
@@ -126,7 +126,7 @@ namespace @internal
         }
 
         private static readonly long blDEFAULT = (long)0L;
-        private static readonly var blMin = (var)blDEFAULT;
+        private static readonly var blMin = blDEFAULT;
         private static readonly long blCALL = (long)1L;
         private static readonly long blRET = (long)2L;
         private static readonly long blEXIT = (long)3L;

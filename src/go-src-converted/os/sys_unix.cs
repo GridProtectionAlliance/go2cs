@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 October 08 03:45:19 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:29 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\sys_unix.go
 
@@ -19,7 +19,7 @@ namespace go
         // On Darwin, the O_CLOEXEC flag was introduced in OS X 10.7 (Darwin 11.0.0).
         // See https://support.apple.com/kb/HT1633.
         // On FreeBSD, the O_CLOEXEC flag was introduced in version 8.3.
-        private static readonly var supportsCloseOnExec = (var)true;
+        private static readonly var supportsCloseOnExec = true;
 
     }
 }

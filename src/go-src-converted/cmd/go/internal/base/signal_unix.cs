@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js linux netbsd openbsd solaris
 
-// package @base -- go2cs converted at 2020 October 08 04:36:58 UTC
+// package @base -- go2cs converted at 2020 October 09 05:48:05 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Go\src\cmd\go\internal\base\signal_unix.go
 using os = go.os_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package c -- go2cs converted at 2020 October 08 04:02:52 UTC
+// package c -- go2cs converted at 2020 October 09 05:19:10 UTC
 // import "go/doc.c" ==> using c = go.go.doc.c_package
 // Original source: C:\Go\src\go\doc\testdata\c.go
 using a = go.a_package;

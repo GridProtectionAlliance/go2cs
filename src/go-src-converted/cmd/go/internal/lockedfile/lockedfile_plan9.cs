@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package lockedfile -- go2cs converted at 2020 October 08 04:34:21 UTC
+// package lockedfile -- go2cs converted at 2020 October 09 05:45:49 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\lockedfile_plan9.go
 using rand = go.math.rand_package;

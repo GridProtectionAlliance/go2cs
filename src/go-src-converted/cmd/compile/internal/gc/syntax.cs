@@ -4,7 +4,7 @@
 
 // “Abstract” syntax representation.
 
-// package gc -- go2cs converted at 2020 October 08 04:31:19 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:23 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\syntax.go
 using ssa = go.cmd.compile.@internal.ssa_package;
@@ -162,52 +162,52 @@ namespace @internal
 
         }
 
-        private static readonly var nodeClass = (var)iota;
+        private static readonly var nodeClass = iota;
         private static readonly long _ = (long)1L << (int)(iota); // PPARAM, PAUTO, PEXTERN, etc; three bits; first in the list because frequently accessed
-        private static readonly var _ = (var)0;
-        private static readonly var _ = (var)1; // second nodeClass bit
-        private static readonly var _ = (var)2;
-        private static readonly var _ = (var)3; // third nodeClass bit
-        private static readonly var nodeWalkdef = (var)4;
-        private static readonly var _ = (var)5; // tracks state during typecheckdef; 2 == loop detected; two bits
-        private static readonly var _ = (var)6;
-        private static readonly var _ = (var)7; // second nodeWalkdef bit
-        private static readonly var nodeTypecheck = (var)8;
-        private static readonly var _ = (var)9; // tracks state during typechecking; 2 == loop detected; two bits
-        private static readonly var _ = (var)10;
-        private static readonly var _ = (var)11; // second nodeTypecheck bit
-        private static readonly var nodeInitorder = (var)12;
-        private static readonly var _ = (var)13; // tracks state during init1; two bits
-        private static readonly var _ = (var)14;
-        private static readonly var _ = (var)15; // second nodeInitorder bit
-        private static readonly var _ = (var)16;
-        private static readonly var nodeHasBreak = (var)17;
-        private static readonly var _ = (var)18;
-        private static readonly var nodeNoInline = (var)19; // used internally by inliner to indicate that a function call should not be inlined; set for OCALLFUNC and OCALLMETH only
-        private static readonly var _ = (var)20;
-        private static readonly var nodeImplicit = (var)21; // implicit OADDR or ODEREF; ++/-- statement represented as OASOP; or ANDNOT lowered to OAND
-        private static readonly var _ = (var)22;
-        private static readonly var nodeIsDDD = (var)23; // is the argument variadic
-        private static readonly var _ = (var)24;
-        private static readonly var nodeDiag = (var)25; // already printed error about this
-        private static readonly var _ = (var)26;
-        private static readonly var nodeColas = (var)27; // OAS resulting from :=
-        private static readonly var _ = (var)28;
-        private static readonly var nodeNonNil = (var)29; // guaranteed to be non-nil
-        private static readonly var _ = (var)30;
-        private static readonly var nodeTransient = (var)31; // storage can be reused immediately after this statement
-        private static readonly var _ = (var)32;
-        private static readonly var nodeBounded = (var)33; // bounds check unnecessary
-        private static readonly var _ = (var)34;
-        private static readonly var nodeHasCall = (var)35; // expression contains a function call
-        private static readonly var _ = (var)36;
-        private static readonly var nodeLikely = (var)37; // if statement condition likely
-        private static readonly var _ = (var)38;
-        private static readonly var nodeHasVal = (var)39; // node.E contains a Val
-        private static readonly var _ = (var)40;
-        private static readonly var nodeHasOpt = (var)41; // node.E contains an Opt
-        private static readonly var _ = (var)42;
-        private static readonly var nodeEmbedded = (var)43; // ODCLFIELD embedded type
+        private static readonly var _ = 0;
+        private static readonly var _ = 1; // second nodeClass bit
+        private static readonly var _ = 2;
+        private static readonly var _ = 3; // third nodeClass bit
+        private static readonly var nodeWalkdef = 4;
+        private static readonly var _ = 5; // tracks state during typecheckdef; 2 == loop detected; two bits
+        private static readonly var _ = 6;
+        private static readonly var _ = 7; // second nodeWalkdef bit
+        private static readonly var nodeTypecheck = 8;
+        private static readonly var _ = 9; // tracks state during typechecking; 2 == loop detected; two bits
+        private static readonly var _ = 10;
+        private static readonly var _ = 11; // second nodeTypecheck bit
+        private static readonly var nodeInitorder = 12;
+        private static readonly var _ = 13; // tracks state during init1; two bits
+        private static readonly var _ = 14;
+        private static readonly var _ = 15; // second nodeInitorder bit
+        private static readonly var _ = 16;
+        private static readonly var nodeHasBreak = 17;
+        private static readonly var _ = 18;
+        private static readonly var nodeNoInline = 19; // used internally by inliner to indicate that a function call should not be inlined; set for OCALLFUNC and OCALLMETH only
+        private static readonly var _ = 20;
+        private static readonly var nodeImplicit = 21; // implicit OADDR or ODEREF; ++/-- statement represented as OASOP; or ANDNOT lowered to OAND
+        private static readonly var _ = 22;
+        private static readonly var nodeIsDDD = 23; // is the argument variadic
+        private static readonly var _ = 24;
+        private static readonly var nodeDiag = 25; // already printed error about this
+        private static readonly var _ = 26;
+        private static readonly var nodeColas = 27; // OAS resulting from :=
+        private static readonly var _ = 28;
+        private static readonly var nodeNonNil = 29; // guaranteed to be non-nil
+        private static readonly var _ = 30;
+        private static readonly var nodeTransient = 31; // storage can be reused immediately after this statement
+        private static readonly var _ = 32;
+        private static readonly var nodeBounded = 33; // bounds check unnecessary
+        private static readonly var _ = 34;
+        private static readonly var nodeHasCall = 35; // expression contains a function call
+        private static readonly var _ = 36;
+        private static readonly var nodeLikely = 37; // if statement condition likely
+        private static readonly var _ = 38;
+        private static readonly var nodeHasVal = 39; // node.E contains a Val
+        private static readonly var _ = 40;
+        private static readonly var nodeHasOpt = 41; // node.E contains an Opt
+        private static readonly var _ = 42;
+        private static readonly var nodeEmbedded = 43; // ODCLFIELD embedded type
 
         private static Class Class(this ptr<Node> _addr_n)
         {
@@ -651,20 +651,20 @@ namespace @internal
         }
 
         private static readonly long nameCaptured = (long)1L << (int)(iota); // is the variable captured by a closure
-        private static readonly var nameReadonly = (var)0;
-        private static readonly var nameByval = (var)1; // is the variable captured by value or by reference
-        private static readonly var nameNeedzero = (var)2; // if it contains pointers, needs to be zeroed on function entry
-        private static readonly var nameKeepalive = (var)3; // mark value live across unknown assembly call
-        private static readonly var nameAutoTemp = (var)4; // is the variable a temporary (implies no dwarf info. reset if escapes to heap)
-        private static readonly var nameUsed = (var)5; // for variable declared and not used error
-        private static readonly var nameIsClosureVar = (var)6; // PAUTOHEAP closure pseudo-variable; original at n.Name.Defn
-        private static readonly var nameIsOutputParamHeapAddr = (var)7; // pointer to a result parameter's heap copy
-        private static readonly var nameAssigned = (var)8; // is the variable ever assigned to
-        private static readonly var nameAddrtaken = (var)9; // address taken, even if not moved to heap
-        private static readonly var nameInlFormal = (var)10; // PAUTO created by inliner, derived from callee formal
-        private static readonly var nameInlLocal = (var)11; // PAUTO created by inliner, derived from callee local
-        private static readonly var nameOpenDeferSlot = (var)12; // if temporary var storing info for open-coded defers
-        private static readonly var nameLibfuzzerExtraCounter = (var)13; // if PEXTERN should be assigned to __libfuzzer_extra_counters section
+        private static readonly var nameReadonly = 0;
+        private static readonly var nameByval = 1; // is the variable captured by value or by reference
+        private static readonly var nameNeedzero = 2; // if it contains pointers, needs to be zeroed on function entry
+        private static readonly var nameKeepalive = 3; // mark value live across unknown assembly call
+        private static readonly var nameAutoTemp = 4; // is the variable a temporary (implies no dwarf info. reset if escapes to heap)
+        private static readonly var nameUsed = 5; // for variable declared and not used error
+        private static readonly var nameIsClosureVar = 6; // PAUTOHEAP closure pseudo-variable; original at n.Name.Defn
+        private static readonly var nameIsOutputParamHeapAddr = 7; // pointer to a result parameter's heap copy
+        private static readonly var nameAssigned = 8; // is the variable ever assigned to
+        private static readonly var nameAddrtaken = 9; // address taken, even if not moved to heap
+        private static readonly var nameInlFormal = 10; // PAUTO created by inliner, derived from callee formal
+        private static readonly var nameInlLocal = 11; // PAUTO created by inliner, derived from callee local
+        private static readonly var nameOpenDeferSlot = 12; // if temporary var storing info for open-coded defers
+        private static readonly var nameLibfuzzerExtraCounter = 13; // if PEXTERN should be assigned to __libfuzzer_extra_counters section
 
         private static bool Captured(this ptr<Name> _addr_n)
         {
@@ -1039,16 +1039,16 @@ namespace @internal
         }
 
         private static readonly long funcDupok = (long)1L << (int)(iota); // duplicate definitions ok
-        private static readonly var funcWrapper = (var)0; // is method wrapper
-        private static readonly var funcNeedctxt = (var)1; // function uses context register (has closure variables)
-        private static readonly var funcReflectMethod = (var)2; // function calls reflect.Type.Method or MethodByName
-        private static readonly var funcIsHiddenClosure = (var)3;
-        private static readonly var funcHasDefer = (var)4; // contains a defer statement
-        private static readonly var funcNilCheckDisabled = (var)5; // disable nil checks when compiling this function
-        private static readonly var funcInlinabilityChecked = (var)6; // inliner has already determined whether the function is inlinable
-        private static readonly var funcExportInline = (var)7; // include inline body in export data
-        private static readonly var funcInstrumentBody = (var)8; // add race/msan instrumentation during SSA construction
-        private static readonly var funcOpenCodedDeferDisallowed = (var)9; // can't do open-coded defers
+        private static readonly var funcWrapper = 0; // is method wrapper
+        private static readonly var funcNeedctxt = 1; // function uses context register (has closure variables)
+        private static readonly var funcReflectMethod = 2; // function calls reflect.Type.Method or MethodByName
+        private static readonly var funcIsHiddenClosure = 3;
+        private static readonly var funcHasDefer = 4; // contains a defer statement
+        private static readonly var funcNilCheckDisabled = 5; // disable nil checks when compiling this function
+        private static readonly var funcInlinabilityChecked = 6; // inliner has already determined whether the function is inlinable
+        private static readonly var funcExportInline = 7; // include inline body in export data
+        private static readonly var funcInstrumentBody = 8; // add race/msan instrumentation during SSA construction
+        private static readonly var funcOpenCodedDeferDisallowed = 9; // can't do open-coded defers
 
         private static bool Dupok(this ptr<Func> _addr_f)
         {
@@ -1210,91 +1210,91 @@ namespace @internal
         public static readonly Op OXXX = (Op)iota; 
 
         // names
-        public static readonly var ONAME = (var)0; // var or func name
-        public static readonly var ONONAME = (var)1; // unnamed arg or return value: f(int, string) (int, error) { etc }
-        public static readonly var OTYPE = (var)2; // type name
-        public static readonly var OPACK = (var)3; // import
-        public static readonly var OLITERAL = (var)4; // literal
+        public static readonly var ONAME = 0; // var or func name
+        public static readonly var ONONAME = 1; // unnamed arg or return value: f(int, string) (int, error) { etc }
+        public static readonly var OTYPE = 2; // type name
+        public static readonly var OPACK = 3; // import
+        public static readonly var OLITERAL = 4; // literal
 
         // expressions
-        public static readonly var OADD = (var)5; // Left + Right
-        public static readonly var OSUB = (var)6; // Left - Right
-        public static readonly var OOR = (var)7; // Left | Right
-        public static readonly var OXOR = (var)8; // Left ^ Right
-        public static readonly var OADDSTR = (var)9; // +{List} (string addition, list elements are strings)
-        public static readonly var OADDR = (var)10; // &Left
-        public static readonly var OANDAND = (var)11; // Left && Right
-        public static readonly var OAPPEND = (var)12; // append(List); after walk, Left may contain elem type descriptor
-        public static readonly var OBYTES2STR = (var)13; // Type(Left) (Type is string, Left is a []byte)
-        public static readonly var OBYTES2STRTMP = (var)14; // Type(Left) (Type is string, Left is a []byte, ephemeral)
-        public static readonly var ORUNES2STR = (var)15; // Type(Left) (Type is string, Left is a []rune)
-        public static readonly var OSTR2BYTES = (var)16; // Type(Left) (Type is []byte, Left is a string)
-        public static readonly var OSTR2BYTESTMP = (var)17; // Type(Left) (Type is []byte, Left is a string, ephemeral)
-        public static readonly var OSTR2RUNES = (var)18; // Type(Left) (Type is []rune, Left is a string)
-        public static readonly var OAS = (var)19; // Left = Right or (if Colas=true) Left := Right
-        public static readonly var OAS2 = (var)20; // List = Rlist (x, y, z = a, b, c)
-        public static readonly var OAS2DOTTYPE = (var)21; // List = Right (x, ok = I.(int))
-        public static readonly var OAS2FUNC = (var)22; // List = Right (x, y = f())
-        public static readonly var OAS2MAPR = (var)23; // List = Right (x, ok = m["foo"])
-        public static readonly var OAS2RECV = (var)24; // List = Right (x, ok = <-c)
-        public static readonly var OASOP = (var)25; // Left Etype= Right (x += y)
-        public static readonly var OCALL = (var)26; // Left(List) (function call, method call or type conversion)
+        public static readonly var OADD = 5; // Left + Right
+        public static readonly var OSUB = 6; // Left - Right
+        public static readonly var OOR = 7; // Left | Right
+        public static readonly var OXOR = 8; // Left ^ Right
+        public static readonly var OADDSTR = 9; // +{List} (string addition, list elements are strings)
+        public static readonly var OADDR = 10; // &Left
+        public static readonly var OANDAND = 11; // Left && Right
+        public static readonly var OAPPEND = 12; // append(List); after walk, Left may contain elem type descriptor
+        public static readonly var OBYTES2STR = 13; // Type(Left) (Type is string, Left is a []byte)
+        public static readonly var OBYTES2STRTMP = 14; // Type(Left) (Type is string, Left is a []byte, ephemeral)
+        public static readonly var ORUNES2STR = 15; // Type(Left) (Type is string, Left is a []rune)
+        public static readonly var OSTR2BYTES = 16; // Type(Left) (Type is []byte, Left is a string)
+        public static readonly var OSTR2BYTESTMP = 17; // Type(Left) (Type is []byte, Left is a string, ephemeral)
+        public static readonly var OSTR2RUNES = 18; // Type(Left) (Type is []rune, Left is a string)
+        public static readonly var OAS = 19; // Left = Right or (if Colas=true) Left := Right
+        public static readonly var OAS2 = 20; // List = Rlist (x, y, z = a, b, c)
+        public static readonly var OAS2DOTTYPE = 21; // List = Right (x, ok = I.(int))
+        public static readonly var OAS2FUNC = 22; // List = Right (x, y = f())
+        public static readonly var OAS2MAPR = 23; // List = Right (x, ok = m["foo"])
+        public static readonly var OAS2RECV = 24; // List = Right (x, ok = <-c)
+        public static readonly var OASOP = 25; // Left Etype= Right (x += y)
+        public static readonly var OCALL = 26; // Left(List) (function call, method call or type conversion)
 
         // OCALLFUNC, OCALLMETH, and OCALLINTER have the same structure.
         // Prior to walk, they are: Left(List), where List is all regular arguments.
         // After walk, List is a series of assignments to temporaries,
         // and Rlist is an updated set of arguments.
         // TODO(josharian/khr): Use Ninit instead of List for the assignments to temporaries. See CL 114797.
-        public static readonly var OCALLFUNC = (var)27; // Left(List/Rlist) (function call f(args))
-        public static readonly var OCALLMETH = (var)28; // Left(List/Rlist) (direct method call x.Method(args))
-        public static readonly var OCALLINTER = (var)29; // Left(List/Rlist) (interface method call x.Method(args))
-        public static readonly var OCALLPART = (var)30; // Left.Right (method expression x.Method, not called)
-        public static readonly var OCAP = (var)31; // cap(Left)
-        public static readonly var OCLOSE = (var)32; // close(Left)
-        public static readonly var OCLOSURE = (var)33; // func Type { Body } (func literal)
-        public static readonly var OCOMPLIT = (var)34; // Right{List} (composite literal, not yet lowered to specific form)
-        public static readonly var OMAPLIT = (var)35; // Type{List} (composite literal, Type is map)
-        public static readonly var OSTRUCTLIT = (var)36; // Type{List} (composite literal, Type is struct)
-        public static readonly var OARRAYLIT = (var)37; // Type{List} (composite literal, Type is array)
-        public static readonly var OSLICELIT = (var)38; // Type{List} (composite literal, Type is slice) Right.Int64() = slice length.
-        public static readonly var OPTRLIT = (var)39; // &Left (left is composite literal)
-        public static readonly var OCONV = (var)40; // Type(Left) (type conversion)
-        public static readonly var OCONVIFACE = (var)41; // Type(Left) (type conversion, to interface)
-        public static readonly var OCONVNOP = (var)42; // Type(Left) (type conversion, no effect)
-        public static readonly var OCOPY = (var)43; // copy(Left, Right)
-        public static readonly var ODCL = (var)44; // var Left (declares Left of type Left.Type)
+        public static readonly var OCALLFUNC = 27; // Left(List/Rlist) (function call f(args))
+        public static readonly var OCALLMETH = 28; // Left(List/Rlist) (direct method call x.Method(args))
+        public static readonly var OCALLINTER = 29; // Left(List/Rlist) (interface method call x.Method(args))
+        public static readonly var OCALLPART = 30; // Left.Right (method expression x.Method, not called)
+        public static readonly var OCAP = 31; // cap(Left)
+        public static readonly var OCLOSE = 32; // close(Left)
+        public static readonly var OCLOSURE = 33; // func Type { Body } (func literal)
+        public static readonly var OCOMPLIT = 34; // Right{List} (composite literal, not yet lowered to specific form)
+        public static readonly var OMAPLIT = 35; // Type{List} (composite literal, Type is map)
+        public static readonly var OSTRUCTLIT = 36; // Type{List} (composite literal, Type is struct)
+        public static readonly var OARRAYLIT = 37; // Type{List} (composite literal, Type is array)
+        public static readonly var OSLICELIT = 38; // Type{List} (composite literal, Type is slice) Right.Int64() = slice length.
+        public static readonly var OPTRLIT = 39; // &Left (left is composite literal)
+        public static readonly var OCONV = 40; // Type(Left) (type conversion)
+        public static readonly var OCONVIFACE = 41; // Type(Left) (type conversion, to interface)
+        public static readonly var OCONVNOP = 42; // Type(Left) (type conversion, no effect)
+        public static readonly var OCOPY = 43; // copy(Left, Right)
+        public static readonly var ODCL = 44; // var Left (declares Left of type Left.Type)
 
         // Used during parsing but don't last.
-        public static readonly var ODCLFUNC = (var)45; // func f() or func (r) f()
-        public static readonly var ODCLFIELD = (var)46; // struct field, interface field, or func/method argument/return value.
-        public static readonly var ODCLCONST = (var)47; // const pi = 3.14
-        public static readonly var ODCLTYPE = (var)48; // type Int int or type Int = int
+        public static readonly var ODCLFUNC = 45; // func f() or func (r) f()
+        public static readonly var ODCLFIELD = 46; // struct field, interface field, or func/method argument/return value.
+        public static readonly var ODCLCONST = 47; // const pi = 3.14
+        public static readonly var ODCLTYPE = 48; // type Int int or type Int = int
 
-        public static readonly var ODELETE = (var)49; // delete(Left, Right)
-        public static readonly var ODOT = (var)50; // Left.Sym (Left is of struct type)
-        public static readonly var ODOTPTR = (var)51; // Left.Sym (Left is of pointer to struct type)
-        public static readonly var ODOTMETH = (var)52; // Left.Sym (Left is non-interface, Right is method name)
-        public static readonly var ODOTINTER = (var)53; // Left.Sym (Left is interface, Right is method name)
-        public static readonly var OXDOT = (var)54; // Left.Sym (before rewrite to one of the preceding)
-        public static readonly var ODOTTYPE = (var)55; // Left.Right or Left.Type (.Right during parsing, .Type once resolved); after walk, .Right contains address of interface type descriptor and .Right.Right contains address of concrete type descriptor
-        public static readonly var ODOTTYPE2 = (var)56; // Left.Right or Left.Type (.Right during parsing, .Type once resolved; on rhs of OAS2DOTTYPE); after walk, .Right contains address of interface type descriptor
-        public static readonly var OEQ = (var)57; // Left == Right
-        public static readonly var ONE = (var)58; // Left != Right
-        public static readonly var OLT = (var)59; // Left < Right
-        public static readonly var OLE = (var)60; // Left <= Right
-        public static readonly var OGE = (var)61; // Left >= Right
-        public static readonly var OGT = (var)62; // Left > Right
-        public static readonly var ODEREF = (var)63; // *Left
-        public static readonly var OINDEX = (var)64; // Left[Right] (index of array or slice)
-        public static readonly var OINDEXMAP = (var)65; // Left[Right] (index of map)
-        public static readonly var OKEY = (var)66; // Left:Right (key:value in struct/array/map literal)
-        public static readonly var OSTRUCTKEY = (var)67; // Sym:Left (key:value in struct literal, after type checking)
-        public static readonly var OLEN = (var)68; // len(Left)
-        public static readonly var OMAKE = (var)69; // make(List) (before type checking converts to one of the following)
-        public static readonly var OMAKECHAN = (var)70; // make(Type, Left) (type is chan)
-        public static readonly var OMAKEMAP = (var)71; // make(Type, Left) (type is map)
-        public static readonly var OMAKESLICE = (var)72; // make(Type, Left, Right) (type is slice)
-        public static readonly var OMAKESLICECOPY = (var)73; // makeslicecopy(Type, Left, Right) (type is slice; Left is length and Right is the copied from slice)
+        public static readonly var ODELETE = 49; // delete(Left, Right)
+        public static readonly var ODOT = 50; // Left.Sym (Left is of struct type)
+        public static readonly var ODOTPTR = 51; // Left.Sym (Left is of pointer to struct type)
+        public static readonly var ODOTMETH = 52; // Left.Sym (Left is non-interface, Right is method name)
+        public static readonly var ODOTINTER = 53; // Left.Sym (Left is interface, Right is method name)
+        public static readonly var OXDOT = 54; // Left.Sym (before rewrite to one of the preceding)
+        public static readonly var ODOTTYPE = 55; // Left.Right or Left.Type (.Right during parsing, .Type once resolved); after walk, .Right contains address of interface type descriptor and .Right.Right contains address of concrete type descriptor
+        public static readonly var ODOTTYPE2 = 56; // Left.Right or Left.Type (.Right during parsing, .Type once resolved; on rhs of OAS2DOTTYPE); after walk, .Right contains address of interface type descriptor
+        public static readonly var OEQ = 57; // Left == Right
+        public static readonly var ONE = 58; // Left != Right
+        public static readonly var OLT = 59; // Left < Right
+        public static readonly var OLE = 60; // Left <= Right
+        public static readonly var OGE = 61; // Left >= Right
+        public static readonly var OGT = 62; // Left > Right
+        public static readonly var ODEREF = 63; // *Left
+        public static readonly var OINDEX = 64; // Left[Right] (index of array or slice)
+        public static readonly var OINDEXMAP = 65; // Left[Right] (index of map)
+        public static readonly var OKEY = 66; // Left:Right (key:value in struct/array/map literal)
+        public static readonly var OSTRUCTKEY = 67; // Sym:Left (key:value in struct literal, after type checking)
+        public static readonly var OLEN = 68; // len(Left)
+        public static readonly var OMAKE = 69; // make(List) (before type checking converts to one of the following)
+        public static readonly var OMAKECHAN = 70; // make(Type, Left) (type is chan)
+        public static readonly var OMAKEMAP = 71; // make(Type, Left) (type is map)
+        public static readonly var OMAKESLICE = 72; // make(Type, Left, Right) (type is slice)
+        public static readonly var OMAKESLICECOPY = 73; // makeslicecopy(Type, Left, Right) (type is slice; Left is length and Right is the copied from slice)
         // OMAKESLICECOPY is created by the order pass and corresponds to:
         //  s = make(Type, Left); copy(s, Right)
         //
@@ -1302,53 +1302,53 @@ namespace @internal
         //
         // This node is created so the walk pass can optimize this pattern which would
         // otherwise be hard to detect after the order pass.
-        public static readonly var OMUL = (var)74; // Left * Right
-        public static readonly var ODIV = (var)75; // Left / Right
-        public static readonly var OMOD = (var)76; // Left % Right
-        public static readonly var OLSH = (var)77; // Left << Right
-        public static readonly var ORSH = (var)78; // Left >> Right
-        public static readonly var OAND = (var)79; // Left & Right
-        public static readonly var OANDNOT = (var)80; // Left &^ Right
-        public static readonly var ONEW = (var)81; // new(Left); corresponds to calls to new in source code
-        public static readonly var ONEWOBJ = (var)82; // runtime.newobject(n.Type); introduced by walk; Left is type descriptor
-        public static readonly var ONOT = (var)83; // !Left
-        public static readonly var OBITNOT = (var)84; // ^Left
-        public static readonly var OPLUS = (var)85; // +Left
-        public static readonly var ONEG = (var)86; // -Left
-        public static readonly var OOROR = (var)87; // Left || Right
-        public static readonly var OPANIC = (var)88; // panic(Left)
-        public static readonly var OPRINT = (var)89; // print(List)
-        public static readonly var OPRINTN = (var)90; // println(List)
-        public static readonly var OPAREN = (var)91; // (Left)
-        public static readonly var OSEND = (var)92; // Left <- Right
-        public static readonly var OSLICE = (var)93; // Left[List[0] : List[1]] (Left is untypechecked or slice)
-        public static readonly var OSLICEARR = (var)94; // Left[List[0] : List[1]] (Left is array)
-        public static readonly var OSLICESTR = (var)95; // Left[List[0] : List[1]] (Left is string)
-        public static readonly var OSLICE3 = (var)96; // Left[List[0] : List[1] : List[2]] (Left is untypedchecked or slice)
-        public static readonly var OSLICE3ARR = (var)97; // Left[List[0] : List[1] : List[2]] (Left is array)
-        public static readonly var OSLICEHEADER = (var)98; // sliceheader{Left, List[0], List[1]} (Left is unsafe.Pointer, List[0] is length, List[1] is capacity)
-        public static readonly var ORECOVER = (var)99; // recover()
-        public static readonly var ORECV = (var)100; // <-Left
-        public static readonly var ORUNESTR = (var)101; // Type(Left) (Type is string, Left is rune)
-        public static readonly var OSELRECV = (var)102; // Left = <-Right.Left: (appears as .Left of OCASE; Right.Op == ORECV)
-        public static readonly var OSELRECV2 = (var)103; // List = <-Right.Left: (appears as .Left of OCASE; count(List) == 2, Right.Op == ORECV)
-        public static readonly var OIOTA = (var)104; // iota
-        public static readonly var OREAL = (var)105; // real(Left)
-        public static readonly var OIMAG = (var)106; // imag(Left)
-        public static readonly var OCOMPLEX = (var)107; // complex(Left, Right) or complex(List[0]) where List[0] is a 2-result function call
-        public static readonly var OALIGNOF = (var)108; // unsafe.Alignof(Left)
-        public static readonly var OOFFSETOF = (var)109; // unsafe.Offsetof(Left)
-        public static readonly var OSIZEOF = (var)110; // unsafe.Sizeof(Left)
+        public static readonly var OMUL = 74; // Left * Right
+        public static readonly var ODIV = 75; // Left / Right
+        public static readonly var OMOD = 76; // Left % Right
+        public static readonly var OLSH = 77; // Left << Right
+        public static readonly var ORSH = 78; // Left >> Right
+        public static readonly var OAND = 79; // Left & Right
+        public static readonly var OANDNOT = 80; // Left &^ Right
+        public static readonly var ONEW = 81; // new(Left); corresponds to calls to new in source code
+        public static readonly var ONEWOBJ = 82; // runtime.newobject(n.Type); introduced by walk; Left is type descriptor
+        public static readonly var ONOT = 83; // !Left
+        public static readonly var OBITNOT = 84; // ^Left
+        public static readonly var OPLUS = 85; // +Left
+        public static readonly var ONEG = 86; // -Left
+        public static readonly var OOROR = 87; // Left || Right
+        public static readonly var OPANIC = 88; // panic(Left)
+        public static readonly var OPRINT = 89; // print(List)
+        public static readonly var OPRINTN = 90; // println(List)
+        public static readonly var OPAREN = 91; // (Left)
+        public static readonly var OSEND = 92; // Left <- Right
+        public static readonly var OSLICE = 93; // Left[List[0] : List[1]] (Left is untypechecked or slice)
+        public static readonly var OSLICEARR = 94; // Left[List[0] : List[1]] (Left is array)
+        public static readonly var OSLICESTR = 95; // Left[List[0] : List[1]] (Left is string)
+        public static readonly var OSLICE3 = 96; // Left[List[0] : List[1] : List[2]] (Left is untypedchecked or slice)
+        public static readonly var OSLICE3ARR = 97; // Left[List[0] : List[1] : List[2]] (Left is array)
+        public static readonly var OSLICEHEADER = 98; // sliceheader{Left, List[0], List[1]} (Left is unsafe.Pointer, List[0] is length, List[1] is capacity)
+        public static readonly var ORECOVER = 99; // recover()
+        public static readonly var ORECV = 100; // <-Left
+        public static readonly var ORUNESTR = 101; // Type(Left) (Type is string, Left is rune)
+        public static readonly var OSELRECV = 102; // Left = <-Right.Left: (appears as .Left of OCASE; Right.Op == ORECV)
+        public static readonly var OSELRECV2 = 103; // List = <-Right.Left: (appears as .Left of OCASE; count(List) == 2, Right.Op == ORECV)
+        public static readonly var OIOTA = 104; // iota
+        public static readonly var OREAL = 105; // real(Left)
+        public static readonly var OIMAG = 106; // imag(Left)
+        public static readonly var OCOMPLEX = 107; // complex(Left, Right) or complex(List[0]) where List[0] is a 2-result function call
+        public static readonly var OALIGNOF = 108; // unsafe.Alignof(Left)
+        public static readonly var OOFFSETOF = 109; // unsafe.Offsetof(Left)
+        public static readonly var OSIZEOF = 110; // unsafe.Sizeof(Left)
 
         // statements
-        public static readonly var OBLOCK = (var)111; // { List } (block of code)
-        public static readonly var OBREAK = (var)112; // break [Sym]
-        public static readonly var OCASE = (var)113; // case List: Nbody (List==nil means default)
-        public static readonly var OCONTINUE = (var)114; // continue [Sym]
-        public static readonly var ODEFER = (var)115; // defer Left (Left must be call)
-        public static readonly var OEMPTY = (var)116; // no-op (empty statement)
-        public static readonly var OFALL = (var)117; // fallthrough
-        public static readonly var OFOR = (var)118; // for Ninit; Left; Right { Nbody }
+        public static readonly var OBLOCK = 111; // { List } (block of code)
+        public static readonly var OBREAK = 112; // break [Sym]
+        public static readonly var OCASE = 113; // case List: Nbody (List==nil means default)
+        public static readonly var OCONTINUE = 114; // continue [Sym]
+        public static readonly var ODEFER = 115; // defer Left (Left must be call)
+        public static readonly var OEMPTY = 116; // no-op (empty statement)
+        public static readonly var OFALL = 117; // fallthrough
+        public static readonly var OFOR = 118; // for Ninit; Left; Right { Nbody }
         // OFORUNTIL is like OFOR, but the test (Left) is applied after the body:
         //     Ninit
         //     top: { Nbody }   // Execute the body at least once
@@ -1358,46 +1358,46 @@ namespace @internal
         //         goto top
         //     }
         // OFORUNTIL is created by walk. There's no way to write this in Go code.
-        public static readonly var OFORUNTIL = (var)119;
-        public static readonly var OGOTO = (var)120; // goto Sym
-        public static readonly var OIF = (var)121; // if Ninit; Left { Nbody } else { Rlist }
-        public static readonly var OLABEL = (var)122; // Sym:
-        public static readonly var OGO = (var)123; // go Left (Left must be call)
-        public static readonly var ORANGE = (var)124; // for List = range Right { Nbody }
-        public static readonly var ORETURN = (var)125; // return List
-        public static readonly var OSELECT = (var)126; // select { List } (List is list of OCASE)
-        public static readonly var OSWITCH = (var)127; // switch Ninit; Left { List } (List is a list of OCASE)
-        public static readonly var OTYPESW = (var)128; // Left = Right.(type) (appears as .Left of OSWITCH)
+        public static readonly var OFORUNTIL = 119;
+        public static readonly var OGOTO = 120; // goto Sym
+        public static readonly var OIF = 121; // if Ninit; Left { Nbody } else { Rlist }
+        public static readonly var OLABEL = 122; // Sym:
+        public static readonly var OGO = 123; // go Left (Left must be call)
+        public static readonly var ORANGE = 124; // for List = range Right { Nbody }
+        public static readonly var ORETURN = 125; // return List
+        public static readonly var OSELECT = 126; // select { List } (List is list of OCASE)
+        public static readonly var OSWITCH = 127; // switch Ninit; Left { List } (List is a list of OCASE)
+        public static readonly var OTYPESW = 128; // Left = Right.(type) (appears as .Left of OSWITCH)
 
         // types
-        public static readonly var OTCHAN = (var)129; // chan int
-        public static readonly var OTMAP = (var)130; // map[string]int
-        public static readonly var OTSTRUCT = (var)131; // struct{}
-        public static readonly var OTINTER = (var)132; // interface{}
-        public static readonly var OTFUNC = (var)133; // func()
-        public static readonly var OTARRAY = (var)134; // []int, [8]int, [N]int or [...]int
+        public static readonly var OTCHAN = 129; // chan int
+        public static readonly var OTMAP = 130; // map[string]int
+        public static readonly var OTSTRUCT = 131; // struct{}
+        public static readonly var OTINTER = 132; // interface{}
+        public static readonly var OTFUNC = 133; // func()
+        public static readonly var OTARRAY = 134; // []int, [8]int, [N]int or [...]int
 
         // misc
-        public static readonly var ODDD = (var)135; // func f(args ...int) or f(l...) or var a = [...]int{0, 1, 2}.
-        public static readonly var OINLCALL = (var)136; // intermediary representation of an inlined call.
-        public static readonly var OEFACE = (var)137; // itable and data words of an empty-interface value.
-        public static readonly var OITAB = (var)138; // itable word of an interface value.
-        public static readonly var OIDATA = (var)139; // data word of an interface value in Left
-        public static readonly var OSPTR = (var)140; // base pointer of a slice or string.
-        public static readonly var OCLOSUREVAR = (var)141; // variable reference at beginning of closure function
-        public static readonly var OCFUNC = (var)142; // reference to c function pointer (not go func value)
-        public static readonly var OCHECKNIL = (var)143; // emit code to ensure pointer/interface not nil
-        public static readonly var OVARDEF = (var)144; // variable is about to be fully initialized
-        public static readonly var OVARKILL = (var)145; // variable is dead
-        public static readonly var OVARLIVE = (var)146; // variable is alive
-        public static readonly var ORESULT = (var)147; // result of a function call; Xoffset is stack offset
-        public static readonly var OINLMARK = (var)148; // start of an inlined body, with file/line of caller. Xoffset is an index into the inline tree.
+        public static readonly var ODDD = 135; // func f(args ...int) or f(l...) or var a = [...]int{0, 1, 2}.
+        public static readonly var OINLCALL = 136; // intermediary representation of an inlined call.
+        public static readonly var OEFACE = 137; // itable and data words of an empty-interface value.
+        public static readonly var OITAB = 138; // itable word of an interface value.
+        public static readonly var OIDATA = 139; // data word of an interface value in Left
+        public static readonly var OSPTR = 140; // base pointer of a slice or string.
+        public static readonly var OCLOSUREVAR = 141; // variable reference at beginning of closure function
+        public static readonly var OCFUNC = 142; // reference to c function pointer (not go func value)
+        public static readonly var OCHECKNIL = 143; // emit code to ensure pointer/interface not nil
+        public static readonly var OVARDEF = 144; // variable is about to be fully initialized
+        public static readonly var OVARKILL = 145; // variable is dead
+        public static readonly var OVARLIVE = 146; // variable is alive
+        public static readonly var ORESULT = 147; // result of a function call; Xoffset is stack offset
+        public static readonly var OINLMARK = 148; // start of an inlined body, with file/line of caller. Xoffset is an index into the inline tree.
 
         // arch-specific opcodes
-        public static readonly var ORETJMP = (var)149; // return to other function
-        public static readonly var OGETG = (var)150; // runtime.getg() (read g pointer)
+        public static readonly var ORETJMP = 149; // return to other function
+        public static readonly var OGETG = 150; // runtime.getg() (read g pointer)
 
-        public static readonly var OEND = (var)151;
+        public static readonly var OEND = 151;
 
 
         // Nodes is a pointer to a slice of *Node.

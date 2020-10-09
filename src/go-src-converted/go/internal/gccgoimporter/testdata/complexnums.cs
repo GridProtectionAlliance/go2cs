@@ -1,4 +1,4 @@
-// package complexnums -- go2cs converted at 2020 October 08 04:56:21 UTC
+// package complexnums -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.complexnums" ==> using complexnums = go.go.@internal.gccgoimporter.complexnums_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\complexnums.go
 

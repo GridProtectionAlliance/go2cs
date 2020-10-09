@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:31:02 UTC
+//     Generated on 2020 October 09 04:50:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using strconv = go.strconv_package;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace compress
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Reader<T> : Reader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace compress
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -91,8 +92,8 @@ namespace compress
             private delegate (byte, error) ReadByteByPtr(ptr<T> value);
             private delegate (byte, error) ReadByteByVal(T value);
 
-            private static readonly ReadByteByPtr s_ReadByteByPtr;
-            private static readonly ReadByteByVal s_ReadByteByVal;
+            private static readonly ReadByteByPtr? s_ReadByteByPtr;
+            private static readonly ReadByteByVal? s_ReadByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (byte, error) ReadByte()
@@ -108,7 +109,7 @@ namespace compress
                 return s_ReadByteByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Reader()

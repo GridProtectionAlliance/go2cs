@@ -4,7 +4,7 @@
 
 // This file implements typechecking of conversions.
 
-// package types -- go2cs converted at 2020 October 08 04:03:05 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:19 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\conversions.go
 using constant = go.go.constant_package;

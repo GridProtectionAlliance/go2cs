@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2020 October 08 05:02:18 UTC
+// package norm -- go2cs converted at 2020 October 09 06:08:21 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\norm\forminfo.go
 using binary = go.encoding.binary_package;

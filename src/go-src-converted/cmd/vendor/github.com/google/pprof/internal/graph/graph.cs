@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package graph collects a set of samples into a directed graph.
-// package graph -- go2cs converted at 2020 October 08 04:43:15 UTC
+// package graph -- go2cs converted at 2020 October 09 05:53:39 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/graph" ==> using graph = go.cmd.vendor.github.com.google.pprof.@internal.graph_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\graph\graph.go
 using fmt = go.fmt_package;
@@ -1653,12 +1653,12 @@ namespace @internal
 
         // Sorting options for node sort.
         public static readonly NodeOrder FlatNameOrder = (NodeOrder)iota;
-        public static readonly var FlatCumNameOrder = (var)0;
-        public static readonly var CumNameOrder = (var)1;
-        public static readonly var NameOrder = (var)2;
-        public static readonly var FileOrder = (var)3;
-        public static readonly var AddressOrder = (var)4;
-        public static readonly var EntropyOrder = (var)5;
+        public static readonly var FlatCumNameOrder = 0;
+        public static readonly var CumNameOrder = 1;
+        public static readonly var NameOrder = 2;
+        public static readonly var FileOrder = 3;
+        public static readonly var AddressOrder = 4;
+        public static readonly var EntropyOrder = 5;
 
 
         // Sort returns a slice of the edges in the map, in a consistent

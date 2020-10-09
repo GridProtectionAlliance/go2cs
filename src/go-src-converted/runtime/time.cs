@@ -4,7 +4,7 @@
 
 // Time-related runtime and pieces of package time.
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:04 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:58 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\time.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -112,45 +112,45 @@ namespace go
         // Values for the timer status field.
  
         // Timer has no status set yet.
-        private static readonly var timerNoStatus = (var)iota; 
+        private static readonly var timerNoStatus = iota; 
 
         // Waiting for timer to fire.
         // The timer is in some P's heap.
-        private static readonly var timerWaiting = (var)0; 
+        private static readonly var timerWaiting = 0; 
 
         // Running the timer function.
         // A timer will only have this status briefly.
-        private static readonly var timerRunning = (var)1; 
+        private static readonly var timerRunning = 1; 
 
         // The timer is deleted and should be removed.
         // It should not be run, but it is still in some P's heap.
-        private static readonly var timerDeleted = (var)2; 
+        private static readonly var timerDeleted = 2; 
 
         // The timer is being removed.
         // The timer will only have this status briefly.
-        private static readonly var timerRemoving = (var)3; 
+        private static readonly var timerRemoving = 3; 
 
         // The timer has been stopped.
         // It is not in any P's heap.
-        private static readonly var timerRemoved = (var)4; 
+        private static readonly var timerRemoved = 4; 
 
         // The timer is being modified.
         // The timer will only have this status briefly.
-        private static readonly var timerModifying = (var)5; 
+        private static readonly var timerModifying = 5; 
 
         // The timer has been modified to an earlier time.
         // The new when value is in the nextwhen field.
         // The timer is in some P's heap, possibly in the wrong place.
-        private static readonly var timerModifiedEarlier = (var)6; 
+        private static readonly var timerModifiedEarlier = 6; 
 
         // The timer has been modified to the same or a later time.
         // The new when value is in the nextwhen field.
         // The timer is in some P's heap, possibly in the wrong place.
-        private static readonly var timerModifiedLater = (var)7; 
+        private static readonly var timerModifiedLater = 7; 
 
         // The timer has been modified and is being moved.
         // The timer will only have this status briefly.
-        private static readonly var timerMoving = (var)8;
+        private static readonly var timerMoving = 8;
 
 
         // maxWhen is the maximum value for timer's when field.
@@ -162,7 +162,7 @@ namespace go
 
         // verifyTimers can be set to true to add debugging checks that the
         // timer heaps are valid.
-        private static readonly var verifyTimers = (var)false;
+        private static readonly var verifyTimers = false;
 
         // Package time APIs.
         // Godoc uses the comments in package time, not these.

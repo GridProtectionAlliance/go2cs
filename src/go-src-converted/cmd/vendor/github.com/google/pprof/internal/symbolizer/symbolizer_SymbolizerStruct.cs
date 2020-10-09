@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:26 UTC
+//     Generated on 2020 October 09 05:53:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using symbolz = go.github.com.google.pprof.@internal.symbolz_package;
 using profile = go.github.com.google.pprof.profile_package;
 using demangle = go.github.com.ianlancetaylor.demangle_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

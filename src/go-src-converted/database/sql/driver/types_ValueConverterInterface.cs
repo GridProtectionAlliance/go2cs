@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:47 UTC
+//     Generated on 2020 October 09 06:05:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using strconv = go.strconv_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace sql
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ValueConverter<T> : ValueConverter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace sql
             private delegate (Value, error) ConvertValueByPtr(ptr<T> value, object v);
             private delegate (Value, error) ConvertValueByVal(T value, object v);
 
-            private static readonly ConvertValueByPtr s_ConvertValueByPtr;
-            private static readonly ConvertValueByVal s_ConvertValueByVal;
+            private static readonly ConvertValueByPtr? s_ConvertValueByPtr;
+            private static readonly ConvertValueByVal? s_ConvertValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Value, error) ConvertValue(object v)
@@ -88,7 +89,7 @@ namespace sql
                 return s_ConvertValueByPtr(m_target_ptr, v);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ValueConverter()

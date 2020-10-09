@@ -4,7 +4,7 @@
 
 // This file implements the visitor that computes the (line, column)-(line-column) range for each function.
 
-// package main -- go2cs converted at 2020 October 08 04:32:33 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:22 UTC
 // Original source: C:\Go\src\cmd\cover\func.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;

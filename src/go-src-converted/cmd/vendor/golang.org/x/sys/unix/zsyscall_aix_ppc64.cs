@@ -3,7 +3,7 @@
 
 // +build aix,ppc64
 
-// package unix -- go2cs converted at 2020 October 08 04:49:41 UTC
+// package unix -- go2cs converted at 2020 October 09 05:57:44 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_aix_ppc64.go
 using @unsafe = go.@unsafe_package;

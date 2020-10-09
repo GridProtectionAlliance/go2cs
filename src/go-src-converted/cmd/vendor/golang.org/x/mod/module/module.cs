@@ -82,7 +82,7 @@
 // as the same path. If we do allow Unicode marks in paths, there
 // must be some kind of normalization to allow only one canonical
 // encoding of any character used in an import path.
-// package module -- go2cs converted at 2020 October 08 04:45:54 UTC
+// package module -- go2cs converted at 2020 October 09 05:55:58 UTC
 // import "cmd/vendor/golang.org/x/mod/module" ==> using module = go.cmd.vendor.golang.org.x.mod.module_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\module\module.go
 // IMPORTANT NOTE

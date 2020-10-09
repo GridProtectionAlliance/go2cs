@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package poll -- go2cs converted at 2020 October 08 03:32:40 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:20 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\hook_unix.go
 using syscall = go.syscall_package;

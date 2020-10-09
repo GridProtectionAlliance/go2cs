@@ -16,7 +16,7 @@
 //
 // For random numbers suitable for security-sensitive work, see the crypto/rand
 // package.
-// package rand -- go2cs converted at 2020 October 08 03:25:39 UTC
+// package rand -- go2cs converted at 2020 October 09 04:50:47 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\rand.go
 using sync = go.sync_package;

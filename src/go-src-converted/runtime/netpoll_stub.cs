@@ -4,7 +4,7 @@
 
 // +build plan9
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:40 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:17 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_stub.go
 using atomic = go.runtime.@internal.atomic_package;

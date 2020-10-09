@@ -6,7 +6,7 @@
 // efficiently representing HTTP header fields in the context of HTTP/2.
 //
 // See http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-09
-// package hpack -- go2cs converted at 2020 October 08 03:40:09 UTC
+// package hpack -- go2cs converted at 2020 October 09 04:57:42 UTC
 // import "golang.org/x/net/http2/hpack" ==> using hpack = go.golang.org.x.net.http2.hpack_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\http2\hpack\hpack.go
 using bytes = go.bytes_package;
@@ -412,8 +412,8 @@ namespace http2
         }
 
         private static readonly indexType indexedTrue = (indexType)iota;
-        private static readonly var indexedFalse = (var)0;
-        private static readonly var indexedNever = (var)1;
+        private static readonly var indexedFalse = 0;
+        private static readonly var indexedNever = 1;
 
 
         private static bool indexed(this indexType v)

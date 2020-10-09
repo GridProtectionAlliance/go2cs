@@ -4,7 +4,7 @@
 
 // This file implements printing of syntax trees in source format.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:28 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:41:03 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\printer.go
 using bytes = go.bytes_package;
@@ -69,11 +69,11 @@ namespace @internal
         }
 
         private static readonly ctrlSymbol none = (ctrlSymbol)iota;
-        private static readonly var semi = (var)0;
-        private static readonly var blank = (var)1;
-        private static readonly var newline = (var)2;
-        private static readonly var indent = (var)3;
-        private static readonly var outdent = (var)4; 
+        private static readonly var semi = 0;
+        private static readonly var blank = 1;
+        private static readonly var newline = 2;
+        private static readonly var indent = 3;
+        private static readonly var outdent = 4; 
         // comment
         // eolComment
 

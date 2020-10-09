@@ -4,7 +4,7 @@
 
 // This file contains tests for the suspicious shift checker.
 
-// package shift -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package shift -- go2cs converted at 2020 October 09 06:05:12 UTC
 // import "cmd/vet/testdata/shift" ==> using shift = go.cmd.vet.testdata.shift_package
 // Original source: C:\Go\src\cmd\vet\testdata\shift\shift.go
 

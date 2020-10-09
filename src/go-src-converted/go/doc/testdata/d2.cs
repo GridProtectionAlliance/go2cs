@@ -4,7 +4,7 @@
 
 // Test cases for sort order of declarations.
 
-// package d -- go2cs converted at 2020 October 08 04:02:53 UTC
+// package d -- go2cs converted at 2020 October 09 05:19:10 UTC
 // import "go/doc.d" ==> using d = go.go.doc.d_package
 // Original source: C:\Go\src\go\doc\testdata\d2.go
 
@@ -34,9 +34,9 @@ namespace go
         public static System.UIntPtr V0 = default;
 
         // CAx constants should appear after CBx constants.
-        public static readonly var CA2 = (var)iota; // before CA1
-        public static readonly var CA1 = (var)0; // before CA0
-        public static readonly var CA0 = (var)1; // at end
+        public static readonly var CA2 = iota; // before CA1
+        public static readonly var CA1 = 0; // before CA0
+        public static readonly var CA0 = 1; // at end
 
         // VAx variables should appear after VBx variables.
         public static long VA2 = default;        public static long VA1 = default;        public static long VA0 = default;

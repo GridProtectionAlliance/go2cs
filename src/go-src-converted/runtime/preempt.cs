@@ -50,7 +50,7 @@
 // is not designed to run from a signal handler, as it tends to
 // allocate memory and start threads in the preemption path.)
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:25 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:47 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\preempt.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -63,11 +63,11 @@ namespace go
     public static partial class runtime_package
     {
         // Keep in sync with cmd/compile/internal/gc/plive.go:go115ReduceLiveness.
-        private static readonly var go115ReduceLiveness = (var)true;
+        private static readonly var go115ReduceLiveness = true;
 
 
 
-        private static readonly var go115RestartSeq = (var)go115ReduceLiveness && true; // enable restartable sequences
+        private static readonly var go115RestartSeq = go115ReduceLiveness && true; // enable restartable sequences
 
  // enable restartable sequences
 

@@ -4,7 +4,7 @@
 
 // Parsing of Plan 9 a.out executables.
 
-// package objfile -- go2cs converted at 2020 October 08 04:02:09 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:18:37 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\plan9obj.go
 using dwarf = go.debug.dwarf_package;

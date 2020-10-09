@@ -4,7 +4,7 @@
 
 // Package httpresponse defines an Analyzer that checks for mistakes
 // using HTTP responses.
-// package httpresponse -- go2cs converted at 2020 October 08 04:57:56 UTC
+// package httpresponse -- go2cs converted at 2020 October 09 06:04:34 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/httpresponse" ==> using httpresponse = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.httpresponse_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\httpresponse\httpresponse.go
 using ast = go.go.ast_package;

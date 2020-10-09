@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package socktest -- go2cs converted at 2020 October 08 03:43:13 UTC
+// package socktest -- go2cs converted at 2020 October 09 05:00:25 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Go\src\net\internal\socktest\switch_windows.go
 using syscall = go.syscall_package;

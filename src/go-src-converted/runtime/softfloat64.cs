@@ -6,7 +6,7 @@
 // Only referred to (and thus linked in) by arm port
 // and by tests in this directory.
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:39 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:40 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\softfloat64.go
 
@@ -439,7 +439,7 @@ namespace go
                 return fs32 ^ inf32;
             }
 
-            const var d = (var)mantbits64 - mantbits32 - 1L;
+            const var d = mantbits64 - mantbits32 - 1L;
 
             return fpack32(fs32, uint32(fm >> (int)(d)), fe - 1L, uint32(fm & (1L << (int)(d) - 1L)));
 
@@ -447,7 +447,7 @@ namespace go
 
         private static ulong f32to64(uint f)
         {
-            const var d = (var)mantbits64 - mantbits32;
+            const var d = mantbits64 - mantbits32;
 
             var (fs, fm, fe, fi, fn) = funpack32(f);
             if (fn)

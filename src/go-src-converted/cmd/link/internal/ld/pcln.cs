@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:39:32 UTC
+// package ld -- go2cs converted at 2020 October 09 05:50:17 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\pcln.go
 using obj = go.cmd.@internal.obj_package;
@@ -814,7 +814,7 @@ namespace @internal
 
         private static @string expandGoroot(@string s)
         {
-            const var n = (var)len("$GOROOT");
+            const var n = len("$GOROOT");
 
             if (len(s) >= n + 1L && s[..n] == "$GOROOT" && (s[n] == '/' || s[n] == '\\'))
             {
@@ -827,7 +827,7 @@ namespace @internal
 
         public static readonly long BUCKETSIZE = (long)256L * MINFUNC;
         public static readonly long SUBBUCKETS = (long)16L;
-        public static readonly var SUBBUCKETSIZE = (var)BUCKETSIZE / SUBBUCKETS;
+        public static readonly var SUBBUCKETSIZE = BUCKETSIZE / SUBBUCKETS;
         public static readonly ulong NOIDX = (ulong)0x7fffffffUL;
 
 

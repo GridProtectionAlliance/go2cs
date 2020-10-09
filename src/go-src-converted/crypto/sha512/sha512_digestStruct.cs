@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:23 UTC
+//     Generated on 2020 October 09 04:52:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

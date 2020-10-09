@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 October 08 03:34:12 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:14 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sockaddr_posix.go
 using syscall = go.syscall_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:57 UTC
+//     Generated on 2020 October 09 06:02:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using sync = go.sync_package;
 using analysis = go.golang.org.x.tools.go.analysis_package;
 using objectpath = go.golang.org.x.tools.go.types.objectpath_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

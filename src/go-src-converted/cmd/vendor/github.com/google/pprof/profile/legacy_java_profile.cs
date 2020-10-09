@@ -15,7 +15,7 @@
 // This file implements parsers to convert java legacy profiles into
 // the profile.proto format.
 
-// package profile -- go2cs converted at 2020 October 08 04:43:32 UTC
+// package profile -- go2cs converted at 2020 October 09 05:53:54 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\legacy_java_profile.go
 using bytes = go.bytes_package;
@@ -58,7 +58,7 @@ namespace pprof
                 return (_addr_null!, error.As(err)!);
             }
 
-            err = error.As(parseJavaLocations(b, locs, _addr_p))!;
+            err = error.As(parseJavaLocations(b, locs, p))!;
 
             if (err != null)
             {
@@ -108,7 +108,7 @@ namespace pprof
                     break;
             }
 
-            b, err = parseJavaHeader(pType, h[1L], _addr_p);
+            b, err = parseJavaHeader(pType, h[1L], p);
 
             if (err != null)
             {
@@ -116,14 +116,14 @@ namespace pprof
             }
 
             map<ulong, ptr<Location>> locs = default;
-            b, locs, err = parseJavaSamples(pType, b, _addr_p);
+            b, locs, err = parseJavaSamples(pType, b, p);
 
             if (err != null)
             {
                 return (_addr_null!, error.As(err)!);
             }
 
-            err = error.As(parseJavaLocations(b, locs, _addr_p))!;
+            err = error.As(parseJavaLocations(b, locs, p))!;
 
             if (err != null)
             {

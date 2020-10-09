@@ -14,7 +14,7 @@
 //    offsets1 := index.Lookup(s, -1) // the list of all indices where s occurs in data
 //    offsets2 := index.Lookup(s, 3)  // the list of at most 3 indices where s occurs in data
 //
-// package suffixarray -- go2cs converted at 2020 October 08 04:59:47 UTC
+// package suffixarray -- go2cs converted at 2020 October 09 06:06:10 UTC
 // import "index/suffixarray" ==> using suffixarray = go.index.suffixarray_package
 // Original source: C:\Go\src\index\suffixarray\suffixarray.go
 using bytes = go.bytes_package;
@@ -35,7 +35,7 @@ namespace index
         // Can change for testing
         private static long maxData32 = realMaxData32;
 
-        private static readonly var realMaxData32 = (var)math.MaxInt32;
+        private static readonly var realMaxData32 = math.MaxInt32;
 
         // Index implements a suffix array for fast substring search.
 

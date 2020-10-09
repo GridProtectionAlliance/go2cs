@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:41:39 UTC
+// package ld -- go2cs converted at 2020 October 09 05:52:18 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\macho.go
 using bytes = go.bytes_package;
@@ -216,9 +216,9 @@ namespace @internal
         private static long nsect = default;
 
         public static readonly long SymKindLocal = (long)0L + iota;
-        public static readonly var SymKindExtdef = (var)0;
-        public static readonly var SymKindUndef = (var)1;
-        public static readonly var NumSymKind = (var)2;
+        public static readonly var SymKindExtdef = 0;
+        public static readonly var SymKindUndef = 1;
+        public static readonly var NumSymKind = 2;
 
 
         private static array<long> nkind = new array<long>(NumSymKind);

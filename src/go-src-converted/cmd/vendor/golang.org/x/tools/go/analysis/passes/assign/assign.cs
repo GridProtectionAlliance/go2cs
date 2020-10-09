@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package assign defines an Analyzer that detects useless assignments.
-// package assign -- go2cs converted at 2020 October 08 04:57:48 UTC
+// package assign -- go2cs converted at 2020 October 09 06:04:28 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/assign" ==> using assign = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.assign_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\assign\assign.go
 // TODO(adonovan): check also for assignments to struct fields inside

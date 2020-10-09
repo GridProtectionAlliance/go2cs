@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2020 October 08 04:36:24 UTC
+// package testing -- go2cs converted at 2020 October 09 05:47:35 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Go\src\testing\allocs.go
 using runtime = go.runtime_package;

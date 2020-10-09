@@ -4,7 +4,7 @@
 
 // +build !compiler_bootstrap
 
-// package bits -- go2cs converted at 2020 October 08 03:25:15 UTC
+// package bits -- go2cs converted at 2020 October 09 04:50:12 UTC
 // import "math/bits" ==> using bits = go.math.bits_package
 // Original source: C:\Go\src\math\bits\bits_errors.go
 using _@unsafe_ = go.@unsafe_package;

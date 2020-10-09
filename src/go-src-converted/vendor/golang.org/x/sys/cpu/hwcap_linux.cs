@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cpu -- go2cs converted at 2020 October 08 05:01:50 UTC
+// package cpu -- go2cs converted at 2020 October 09 06:07:55 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\hwcap_linux.go
 using ioutil = go.io.ioutil_package;
@@ -21,7 +21,7 @@ namespace sys
 
         private static readonly @string procAuxv = (@string)"/proc/self/auxv";
 
-        private static readonly var uintSize = (var)int(32L << (int)((~uint(0L) >> (int)(63L))));
+        private static readonly var uintSize = int(32L << (int)((~uint(0L) >> (int)(63L))));
 
 
         // For those platforms don't have a 'cpuid' equivalent we use HWCAP/HWCAP2

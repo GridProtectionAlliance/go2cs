@@ -4,7 +4,7 @@
 
 // This file implements Scopes.
 
-// package types -- go2cs converted at 2020 October 08 04:03:42 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:37 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\scope.go
 using bytes = go.bytes_package;

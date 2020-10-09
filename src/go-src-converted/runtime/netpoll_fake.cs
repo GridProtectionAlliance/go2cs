@@ -7,7 +7,7 @@
 
 // +build js,wasm
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:37 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_fake.go
 

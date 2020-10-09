@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:32:34 UTC
+//     Generated on 2020 October 09 05:44:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,8 @@ using math = go.math_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
+
+#nullable enable
 
 namespace go
 {

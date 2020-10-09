@@ -5,7 +5,7 @@
 // Malloc profiling.
 // Patterned after tcmalloc's algorithms; shorter code.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:26 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:07 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mprof.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -26,7 +26,7 @@ namespace go
  
         // profile types
         private static readonly bucketType memProfile = (bucketType)1L + iota;
-        private static readonly var blockProfile = (var)0;
+        private static readonly var blockProfile = 0;
         private static readonly buckHashSize mutexProfile = (buckHashSize)179999L; 
 
         // max depth of stack to record in bucket
@@ -107,7 +107,7 @@ namespace go
 
         private static ptr<bucket> mbuckets;        private static ptr<bucket> bbuckets;        private static ptr<bucket> xbuckets;        private static ptr<array<ptr<bucket>>> buckhash;        private static System.UIntPtr bucketmem = default;        private static var mProf = default;
 
-        private static readonly var mProfCycleWrap = (var)uint32(len(new memRecord().future)) * (2L << (int)(24L));
+        private static readonly var mProfCycleWrap = uint32(len(new memRecord().future)) * (2L << (int)(24L));
 
         // newBucket allocates a bucket with the given type and number of stack entries.
 

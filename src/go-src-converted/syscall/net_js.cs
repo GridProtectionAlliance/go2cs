@@ -7,7 +7,7 @@
 
 // +build js,wasm
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:50 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:25 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\net_js.go
 
@@ -17,16 +17,16 @@ namespace go
 {
     public static partial class syscall_package
     {
-        public static readonly var AF_UNSPEC = (var)iota;
-        public static readonly var AF_UNIX = (var)0;
-        public static readonly var AF_INET = (var)1;
-        public static readonly var AF_INET6 = (var)2;
+        public static readonly var AF_UNSPEC = iota;
+        public static readonly var AF_UNIX = 0;
+        public static readonly var AF_INET = 1;
+        public static readonly var AF_INET6 = 2;
 
 
         public static readonly long SOCK_STREAM = (long)1L + iota;
-        public static readonly var SOCK_DGRAM = (var)0;
-        public static readonly var SOCK_RAW = (var)1;
-        public static readonly var SOCK_SEQPACKET = (var)2;
+        public static readonly var SOCK_DGRAM = 0;
+        public static readonly var SOCK_RAW = 1;
+        public static readonly var SOCK_SEQPACKET = 2;
 
 
         public static readonly long IPPROTO_IP = (long)0L;
@@ -36,14 +36,14 @@ namespace go
         public static readonly ulong IPPROTO_UDP = (ulong)0x11UL;
 
 
-        private static readonly var _ = (var)iota;
-        public static readonly var IPV6_V6ONLY = (var)0;
-        public static readonly var SOMAXCONN = (var)1;
-        public static readonly var SO_ERROR = (var)2;
+        private static readonly var _ = iota;
+        public static readonly var IPV6_V6ONLY = 0;
+        public static readonly var SOMAXCONN = 1;
+        public static readonly var SO_ERROR = 2;
 
 
         // Misc constants expected by package net but not supported.
-        private static readonly var _ = (var)iota;
+        private static readonly var _ = iota;
         public static readonly SYS_FCNTL F_DUPFD_CLOEXEC = (SYS_FCNTL)500L; // unsupported
 
         public partial interface Sockaddr

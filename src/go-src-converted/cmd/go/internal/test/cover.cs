@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2020 October 08 04:33:48 UTC
+// package test -- go2cs converted at 2020 October 09 05:45:21 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Go\src\cmd\go\internal\test\cover.go
 using @base = go.cmd.go.@internal.@base_package;

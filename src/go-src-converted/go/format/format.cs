@@ -12,7 +12,7 @@
 // For example, pre-submit checks that use this package directly would behave
 // differently depending on what Go version each developer uses, causing the
 // check to be inherently fragile.
-// package format -- go2cs converted at 2020 October 08 04:27:02 UTC
+// package format -- go2cs converted at 2020 October 09 05:39:51 UTC
 // import "go/format" ==> using format = go.go.format_package
 // Original source: C:\Go\src\go\format\format.go
 using bytes = go.bytes_package;
@@ -31,7 +31,7 @@ namespace go
     {
         // Keep these in sync with cmd/gofmt/gofmt.go.
         private static readonly long tabWidth = (long)8L;
-        private static readonly var printerMode = (var)printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
+        private static readonly var printerMode = printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
 
         // printerNormalizeNumbers means to canonicalize number literal prefixes
         // and exponents while printing. See https://golang.org/doc/go1.13#gofmt.
@@ -42,7 +42,7 @@ namespace go
 
         private static printer.Config config = new printer.Config(Mode:printerMode,Tabwidth:tabWidth);
 
-        private static readonly var parserMode = (var)parser.ParseComments;
+        private static readonly var parserMode = parser.ParseComments;
 
         // Node formats node in canonical gofmt style and writes the result to dst.
         //

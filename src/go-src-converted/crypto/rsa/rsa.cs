@@ -20,7 +20,7 @@
 // Decrypter and Signer interfaces from the crypto package.
 //
 // The RSA operations in this package are not implemented using constant-time algorithms.
-// package rsa -- go2cs converted at 2020 October 08 03:35:55 UTC
+// package rsa -- go2cs converted at 2020 October 09 04:53:53 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Go\src\crypto\rsa\rsa.go
 using crypto = go.crypto_package;

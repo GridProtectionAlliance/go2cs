@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:56 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:28 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_linux.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -152,7 +152,7 @@ namespace go
         // In non-QEMU environments CLONE_SYSVSEM is inconsequential as we do not
         // use System V semaphores.
 
-        private static readonly var cloneFlags = (var)_CLONE_VM | _CLONE_FS | _CLONE_FILES | _CLONE_SIGHAND | _CLONE_SYSVSEM | _CLONE_THREAD; /* revisit - okay for now */
+        private static readonly var cloneFlags = _CLONE_VM | _CLONE_FS | _CLONE_FILES | _CLONE_SIGHAND | _CLONE_SYSVSEM | _CLONE_THREAD; /* revisit - okay for now */
 
         //go:noescape
         private static int clone(int flags, unsafe.Pointer stk, unsafe.Pointer mp, unsafe.Pointer gp, unsafe.Pointer fn)

@@ -15,7 +15,7 @@
 //
 // See the documentation and examples for the Builder and String types to get
 // started.
-// package cryptobyte -- go2cs converted at 2020 October 08 05:00:02 UTC
+// package cryptobyte -- go2cs converted at 2020 October 09 06:06:21 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte" ==> using cryptobyte = go.vendor.golang.org.x.crypto.cryptobyte_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\cryptobyte\string.go
 

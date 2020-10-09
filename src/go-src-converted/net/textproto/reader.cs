@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2020 October 08 03:38:29 UTC
+// package textproto -- go2cs converted at 2020 October 09 04:56:07 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\reader.go
 using bufio = go.bufio_package;
@@ -476,12 +476,12 @@ namespace net
             // Run data through a simple state machine to
             // elide leading dots, rewrite trailing \r\n into \n,
             // and detect ending .\r\n line.
-            const var stateBeginLine = (var)iota; // beginning of line; initial state; must be zero
-            const var stateDot = (var)0; // read . at beginning of line
-            const var stateDotCR = (var)1; // read .\r at beginning of line
-            const var stateCR = (var)2; // read \r (possibly at end of line)
-            const var stateData = (var)3; // reading data in middle of line
-            const var stateEOF = (var)4; // reached .\r\n end marker line
+            const var stateBeginLine = iota; // beginning of line; initial state; must be zero
+            const var stateDot = 0; // read . at beginning of line
+            const var stateDotCR = 1; // read .\r at beginning of line
+            const var stateCR = 2; // read \r (possibly at end of line)
+            const var stateData = 3; // reading data in middle of line
+            const var stateEOF = 4; // reached .\r\n end marker line
             var br = d.r.R;
             while (n < len(b) && d.state != stateEOF)
             {

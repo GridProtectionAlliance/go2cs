@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package signal -- go2cs converted at 2020 October 08 03:43:58 UTC
+// package signal -- go2cs converted at 2020 October 09 05:01:00 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Go\src\os\signal\signal_unix.go
 using os = go.os_package;

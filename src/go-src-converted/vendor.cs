@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gocommand -- go2cs converted at 2020 October 08 04:55:06 UTC
+// package gocommand -- go2cs converted at 2020 October 09 06:01:53 UTC
 // import "golang.org/x/tools/internal/gocommand" ==> using gocommand = go.golang.org.x.tools.@internal.gocommand_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\gocommand\vendor.go
 using bytes = go.bytes_package;

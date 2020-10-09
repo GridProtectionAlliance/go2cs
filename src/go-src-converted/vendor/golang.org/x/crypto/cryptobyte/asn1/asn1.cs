@@ -4,7 +4,7 @@
 
 // Package asn1 contains supporting types for parsing and building ASN.1
 // messages with the cryptobyte package.
-// package asn1 -- go2cs converted at 2020 October 08 05:00:02 UTC
+// package asn1 -- go2cs converted at 2020 October 09 06:06:21 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte/asn1" ==> using asn1 = go.vendor.golang.org.x.crypto.cryptobyte.asn1_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\cryptobyte\asn1\asn1.go
 
@@ -47,22 +47,22 @@ namespace cryptobyte
         }
 
         // The following is a list of standard tag and class combinations.
-        public static readonly var BOOLEAN = (var)Tag(1L);
-        public static readonly var INTEGER = (var)Tag(2L);
-        public static readonly var BIT_STRING = (var)Tag(3L);
-        public static readonly var OCTET_STRING = (var)Tag(4L);
-        public static readonly var NULL = (var)Tag(5L);
-        public static readonly var OBJECT_IDENTIFIER = (var)Tag(6L);
-        public static readonly var ENUM = (var)Tag(10L);
-        public static readonly var UTF8String = (var)Tag(12L);
-        public static readonly var SEQUENCE = (var)Tag(16L | classConstructed);
-        public static readonly var SET = (var)Tag(17L | classConstructed);
-        public static readonly var PrintableString = (var)Tag(19L);
-        public static readonly var T61String = (var)Tag(20L);
-        public static readonly var IA5String = (var)Tag(22L);
-        public static readonly var UTCTime = (var)Tag(23L);
-        public static readonly var GeneralizedTime = (var)Tag(24L);
-        public static readonly var GeneralString = (var)Tag(27L);
+        public static readonly var BOOLEAN = Tag(1L);
+        public static readonly var INTEGER = Tag(2L);
+        public static readonly var BIT_STRING = Tag(3L);
+        public static readonly var OCTET_STRING = Tag(4L);
+        public static readonly var NULL = Tag(5L);
+        public static readonly var OBJECT_IDENTIFIER = Tag(6L);
+        public static readonly var ENUM = Tag(10L);
+        public static readonly var UTF8String = Tag(12L);
+        public static readonly var SEQUENCE = Tag(16L | classConstructed);
+        public static readonly var SET = Tag(17L | classConstructed);
+        public static readonly var PrintableString = Tag(19L);
+        public static readonly var T61String = Tag(20L);
+        public static readonly var IA5String = Tag(22L);
+        public static readonly var UTCTime = Tag(23L);
+        public static readonly var GeneralizedTime = Tag(24L);
+        public static readonly var GeneralString = Tag(27L);
 
     }
 }}}}}}

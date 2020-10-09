@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:11:53 UTC
+//     Generated on 2020 October 09 05:25:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,8 @@ using bits = go.math.bits_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

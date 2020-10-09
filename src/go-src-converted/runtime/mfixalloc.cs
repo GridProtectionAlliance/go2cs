@@ -6,7 +6,7 @@
 //
 // See malloc.go for overview.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:42 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:35 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mfixalloc.go
 using @unsafe = go.@unsafe_package;

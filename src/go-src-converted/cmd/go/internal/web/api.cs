@@ -7,7 +7,7 @@
 //
 // If the cmd_go_bootstrap build tag is present, web avoids the use of the net
 // package and returns errors for all network operations.
-// package web -- go2cs converted at 2020 October 08 04:33:56 UTC
+// package web -- go2cs converted at 2020 October 09 05:45:28 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Go\src\cmd\go\internal\web\api.go
 using bytes = go.bytes_package;
@@ -36,8 +36,8 @@ namespace @internal
         }
 
         public static readonly SecurityMode SecureOnly = (SecurityMode)iota; // Reject plain HTTP; validate HTTPS.
-        public static readonly var DefaultSecurity = (var)0; // Allow plain HTTP if explicit; validate HTTPS.
-        public static readonly var Insecure = (var)1; // Allow plain HTTP if not explicitly HTTPS; skip HTTPS validation.
+        public static readonly var DefaultSecurity = 0; // Allow plain HTTP if explicit; validate HTTPS.
+        public static readonly var Insecure = 1; // Allow plain HTTP if not explicitly HTTPS; skip HTTPS validation.
 
         // An HTTPError describes an HTTP error response (non-200 result).
         public partial struct HTTPError
@@ -50,7 +50,7 @@ namespace @internal
         }
 
         private static readonly long maxErrorDetailLines = (long)8L;
-        private static readonly var maxErrorDetailBytes = (var)maxErrorDetailLines * 81L;
+        private static readonly var maxErrorDetailBytes = maxErrorDetailLines * 81L;
 
 
         private static @string Error(this ptr<HTTPError> _addr_e)

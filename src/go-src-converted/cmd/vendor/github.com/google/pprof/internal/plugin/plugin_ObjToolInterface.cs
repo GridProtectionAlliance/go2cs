@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:17 UTC
+//     Generated on 2020 October 09 05:53:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using time = go.time_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ObjTool<T> : ObjTool
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate (slice<Inst>, error) OpenByPtr(ptr<T> value, @string file, ulong start, ulong limit, ulong offset);
             private delegate (slice<Inst>, error) OpenByVal(T value, @string file, ulong start, ulong limit, ulong offset);
 
-            private static readonly OpenByPtr s_OpenByPtr;
-            private static readonly OpenByVal s_OpenByVal;
+            private static readonly OpenByPtr? s_OpenByPtr;
+            private static readonly OpenByVal? s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<Inst>, error) Open(@string file, ulong start, ulong limit, ulong offset)
@@ -96,8 +97,8 @@ namespace @internal
             private delegate (slice<Inst>, error) DisasmByPtr(ptr<T> value, @string file, ulong start, ulong end);
             private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end);
 
-            private static readonly DisasmByPtr s_DisasmByPtr;
-            private static readonly DisasmByVal s_DisasmByVal;
+            private static readonly DisasmByPtr? s_DisasmByPtr;
+            private static readonly DisasmByVal? s_DisasmByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<Inst>, error) Disasm(@string file, ulong start, ulong end)
@@ -113,7 +114,7 @@ namespace @internal
                 return s_DisasmByPtr(m_target_ptr, file, start, end);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ObjTool()

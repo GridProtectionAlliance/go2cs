@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2020 October 08 04:44:09 UTC
+// package armasm -- go2cs converted at 2020 October 09 05:54:25 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\inst.go
 using bytes = go.bytes_package;
@@ -25,8 +25,8 @@ namespace arm
         }
 
         private static readonly Mode _ = (Mode)iota;
-        public static readonly var ModeARM = (var)0;
-        public static readonly var ModeThumb = (var)1;
+        public static readonly var ModeARM = 0;
+        public static readonly var ModeThumb = 1;
 
 
         public static @string String(this Mode m)
@@ -196,93 +196,93 @@ namespace arm
         }
 
         public static readonly Reg R0 = (Reg)iota;
-        public static readonly var R1 = (var)0;
-        public static readonly var R2 = (var)1;
-        public static readonly var R3 = (var)2;
-        public static readonly var R4 = (var)3;
-        public static readonly var R5 = (var)4;
-        public static readonly var R6 = (var)5;
-        public static readonly var R7 = (var)6;
-        public static readonly var R8 = (var)7;
-        public static readonly var R9 = (var)8;
-        public static readonly var R10 = (var)9;
-        public static readonly var R11 = (var)10;
-        public static readonly var R12 = (var)11;
-        public static readonly var R13 = (var)12;
-        public static readonly var R14 = (var)13;
-        public static readonly var R15 = (var)14;
+        public static readonly var R1 = 0;
+        public static readonly var R2 = 1;
+        public static readonly var R3 = 2;
+        public static readonly var R4 = 3;
+        public static readonly var R5 = 4;
+        public static readonly var R6 = 5;
+        public static readonly var R7 = 6;
+        public static readonly var R8 = 7;
+        public static readonly var R9 = 8;
+        public static readonly var R10 = 9;
+        public static readonly var R11 = 10;
+        public static readonly var R12 = 11;
+        public static readonly var R13 = 12;
+        public static readonly var R14 = 13;
+        public static readonly var R15 = 14;
 
-        public static readonly var S0 = (var)15;
-        public static readonly var S1 = (var)16;
-        public static readonly var S2 = (var)17;
-        public static readonly var S3 = (var)18;
-        public static readonly var S4 = (var)19;
-        public static readonly var S5 = (var)20;
-        public static readonly var S6 = (var)21;
-        public static readonly var S7 = (var)22;
-        public static readonly var S8 = (var)23;
-        public static readonly var S9 = (var)24;
-        public static readonly var S10 = (var)25;
-        public static readonly var S11 = (var)26;
-        public static readonly var S12 = (var)27;
-        public static readonly var S13 = (var)28;
-        public static readonly var S14 = (var)29;
-        public static readonly var S15 = (var)30;
-        public static readonly var S16 = (var)31;
-        public static readonly var S17 = (var)32;
-        public static readonly var S18 = (var)33;
-        public static readonly var S19 = (var)34;
-        public static readonly var S20 = (var)35;
-        public static readonly var S21 = (var)36;
-        public static readonly var S22 = (var)37;
-        public static readonly var S23 = (var)38;
-        public static readonly var S24 = (var)39;
-        public static readonly var S25 = (var)40;
-        public static readonly var S26 = (var)41;
-        public static readonly var S27 = (var)42;
-        public static readonly var S28 = (var)43;
-        public static readonly var S29 = (var)44;
-        public static readonly var S30 = (var)45;
-        public static readonly var S31 = (var)46;
+        public static readonly var S0 = 15;
+        public static readonly var S1 = 16;
+        public static readonly var S2 = 17;
+        public static readonly var S3 = 18;
+        public static readonly var S4 = 19;
+        public static readonly var S5 = 20;
+        public static readonly var S6 = 21;
+        public static readonly var S7 = 22;
+        public static readonly var S8 = 23;
+        public static readonly var S9 = 24;
+        public static readonly var S10 = 25;
+        public static readonly var S11 = 26;
+        public static readonly var S12 = 27;
+        public static readonly var S13 = 28;
+        public static readonly var S14 = 29;
+        public static readonly var S15 = 30;
+        public static readonly var S16 = 31;
+        public static readonly var S17 = 32;
+        public static readonly var S18 = 33;
+        public static readonly var S19 = 34;
+        public static readonly var S20 = 35;
+        public static readonly var S21 = 36;
+        public static readonly var S22 = 37;
+        public static readonly var S23 = 38;
+        public static readonly var S24 = 39;
+        public static readonly var S25 = 40;
+        public static readonly var S26 = 41;
+        public static readonly var S27 = 42;
+        public static readonly var S28 = 43;
+        public static readonly var S29 = 44;
+        public static readonly var S30 = 45;
+        public static readonly var S31 = 46;
 
-        public static readonly var D0 = (var)47;
-        public static readonly var D1 = (var)48;
-        public static readonly var D2 = (var)49;
-        public static readonly var D3 = (var)50;
-        public static readonly var D4 = (var)51;
-        public static readonly var D5 = (var)52;
-        public static readonly var D6 = (var)53;
-        public static readonly var D7 = (var)54;
-        public static readonly var D8 = (var)55;
-        public static readonly var D9 = (var)56;
-        public static readonly var D10 = (var)57;
-        public static readonly var D11 = (var)58;
-        public static readonly var D12 = (var)59;
-        public static readonly var D13 = (var)60;
-        public static readonly var D14 = (var)61;
-        public static readonly var D15 = (var)62;
-        public static readonly var D16 = (var)63;
-        public static readonly var D17 = (var)64;
-        public static readonly var D18 = (var)65;
-        public static readonly var D19 = (var)66;
-        public static readonly var D20 = (var)67;
-        public static readonly var D21 = (var)68;
-        public static readonly var D22 = (var)69;
-        public static readonly var D23 = (var)70;
-        public static readonly var D24 = (var)71;
-        public static readonly var D25 = (var)72;
-        public static readonly var D26 = (var)73;
-        public static readonly var D27 = (var)74;
-        public static readonly var D28 = (var)75;
-        public static readonly var D29 = (var)76;
-        public static readonly var D30 = (var)77;
-        public static readonly var D31 = (var)78;
+        public static readonly var D0 = 47;
+        public static readonly var D1 = 48;
+        public static readonly var D2 = 49;
+        public static readonly var D3 = 50;
+        public static readonly var D4 = 51;
+        public static readonly var D5 = 52;
+        public static readonly var D6 = 53;
+        public static readonly var D7 = 54;
+        public static readonly var D8 = 55;
+        public static readonly var D9 = 56;
+        public static readonly var D10 = 57;
+        public static readonly var D11 = 58;
+        public static readonly var D12 = 59;
+        public static readonly var D13 = 60;
+        public static readonly var D14 = 61;
+        public static readonly var D15 = 62;
+        public static readonly var D16 = 63;
+        public static readonly var D17 = 64;
+        public static readonly var D18 = 65;
+        public static readonly var D19 = 66;
+        public static readonly var D20 = 67;
+        public static readonly var D21 = 68;
+        public static readonly var D22 = 69;
+        public static readonly var D23 = 70;
+        public static readonly var D24 = 71;
+        public static readonly var D25 = 72;
+        public static readonly var D26 = 73;
+        public static readonly var D27 = 74;
+        public static readonly var D28 = 75;
+        public static readonly var D29 = 76;
+        public static readonly var D30 = 77;
+        public static readonly var D31 = 78;
 
-        public static readonly var APSR = (var)79;
-        public static readonly var APSR_nzcv = (var)80;
+        public static readonly var APSR = 79;
+        public static readonly var APSR_nzcv = 80;
         public static readonly SP FPSCR = (SP)R13;
-        public static readonly var LR = (var)R14;
-        public static readonly var PC = (var)R15;
+        public static readonly var LR = R14;
+        public static readonly var PC = R15;
 
 
         public static void IsArg(this Reg _p0)
@@ -478,11 +478,11 @@ namespace arm
         }
 
         private static readonly AddrMode _ = (AddrMode)iota;
-        public static readonly var AddrPostIndex = (var)0; // [R], X – use address R, set R = R + X
-        public static readonly var AddrPreIndex = (var)1; // [R, X]! – use address R + X, set R = R + X
-        public static readonly var AddrOffset = (var)2; // [R, X] – use address R + X
-        public static readonly var AddrLDM = (var)3; // R – [R] but formats as R, for LDM/STM only
-        public static readonly var AddrLDM_WB = (var)4; // R! - [R], X where X is instruction-specific amount, for LDM/STM only
+        public static readonly var AddrPostIndex = 0; // [R], X – use address R, set R = R + X
+        public static readonly var AddrPreIndex = 1; // [R, X]! – use address R + X, set R = R + X
+        public static readonly var AddrOffset = 2; // [R, X] – use address R + X
+        public static readonly var AddrLDM = 3; // R – [R] but formats as R, for LDM/STM only
+        public static readonly var AddrLDM_WB = 4; // R! - [R], X where X is instruction-specific amount, for LDM/STM only
 
         // A Mem is a memory reference made up of a base R and index expression X.
         // The effective memory address is R or R+X depending on AddrMode.

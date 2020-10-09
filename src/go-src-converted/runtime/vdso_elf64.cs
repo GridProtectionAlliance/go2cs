@@ -5,7 +5,7 @@
 // +build linux
 // +build amd64 arm64 mips64 mips64le ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:21 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\vdso_elf64.go
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2020 October 08 03:36:47 UTC
+// package x509 -- go2cs converted at 2020 October 09 04:54:44 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Go\src\crypto\x509\pem_decrypt.go
 // RFC 1423 describes the encryption of PEM blocks. The algorithm used to
@@ -32,11 +32,11 @@ namespace crypto
 
         // Possible values for the EncryptPEMBlock encryption algorithm.
         private static readonly PEMCipher _ = (PEMCipher)iota;
-        public static readonly var PEMCipherDES = (var)0;
-        public static readonly var PEMCipher3DES = (var)1;
-        public static readonly var PEMCipherAES128 = (var)2;
-        public static readonly var PEMCipherAES192 = (var)3;
-        public static readonly var PEMCipherAES256 = (var)4;
+        public static readonly var PEMCipherDES = 0;
+        public static readonly var PEMCipher3DES = 1;
+        public static readonly var PEMCipherAES128 = 2;
+        public static readonly var PEMCipherAES192 = 3;
+        public static readonly var PEMCipherAES256 = 4;
 
 
         // rfc1423Algo holds a method for enciphering a PEM block.

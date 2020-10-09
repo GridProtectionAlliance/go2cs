@@ -4,7 +4,7 @@
 
 // Parse nodes.
 
-// package parse -- go2cs converted at 2020 October 08 03:41:58 UTC
+// package parse -- go2cs converted at 2020 October 09 04:59:20 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Go\src\text\template\parse\node.go
 using fmt = go.fmt_package;
@@ -61,25 +61,25 @@ namespace template
         }
 
         public static readonly NodeType NodeText = (NodeType)iota; // Plain text.
-        public static readonly var NodeAction = (var)0; // A non-control action such as a field evaluation.
-        public static readonly var NodeBool = (var)1; // A boolean constant.
-        public static readonly var NodeChain = (var)2; // A sequence of field accesses.
-        public static readonly var NodeCommand = (var)3; // An element of a pipeline.
-        public static readonly var NodeDot = (var)4; // The cursor, dot.
-        private static readonly var nodeElse = (var)5; // An else action. Not added to tree.
-        private static readonly var nodeEnd = (var)6; // An end action. Not added to tree.
-        public static readonly var NodeField = (var)7; // A field or method name.
-        public static readonly var NodeIdentifier = (var)8; // An identifier; always a function name.
-        public static readonly var NodeIf = (var)9; // An if action.
-        public static readonly var NodeList = (var)10; // A list of Nodes.
-        public static readonly var NodeNil = (var)11; // An untyped nil constant.
-        public static readonly var NodeNumber = (var)12; // A numerical constant.
-        public static readonly var NodePipe = (var)13; // A pipeline of commands.
-        public static readonly var NodeRange = (var)14; // A range action.
-        public static readonly var NodeString = (var)15; // A string constant.
-        public static readonly var NodeTemplate = (var)16; // A template invocation action.
-        public static readonly var NodeVariable = (var)17; // A $ variable.
-        public static readonly var NodeWith = (var)18; // A with action.
+        public static readonly var NodeAction = 0; // A non-control action such as a field evaluation.
+        public static readonly var NodeBool = 1; // A boolean constant.
+        public static readonly var NodeChain = 2; // A sequence of field accesses.
+        public static readonly var NodeCommand = 3; // An element of a pipeline.
+        public static readonly var NodeDot = 4; // The cursor, dot.
+        private static readonly var nodeElse = 5; // An else action. Not added to tree.
+        private static readonly var nodeEnd = 6; // An end action. Not added to tree.
+        public static readonly var NodeField = 7; // A field or method name.
+        public static readonly var NodeIdentifier = 8; // An identifier; always a function name.
+        public static readonly var NodeIf = 9; // An if action.
+        public static readonly var NodeList = 10; // A list of Nodes.
+        public static readonly var NodeNil = 11; // An untyped nil constant.
+        public static readonly var NodeNumber = 12; // A numerical constant.
+        public static readonly var NodePipe = 13; // A pipeline of commands.
+        public static readonly var NodeRange = 14; // A range action.
+        public static readonly var NodeString = 15; // A string constant.
+        public static readonly var NodeTemplate = 16; // A template invocation action.
+        public static readonly var NodeVariable = 17; // A $ variable.
+        public static readonly var NodeWith = 18; // A with action.
 
         // Nodes.
 

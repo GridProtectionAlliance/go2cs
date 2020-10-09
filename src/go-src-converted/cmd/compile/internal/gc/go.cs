@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:58 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:30 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\go.go
 using ssa = go.cmd.compile.@internal.ssa_package;
@@ -20,7 +20,7 @@ namespace @internal
 {
     public static partial class gc_package
     {
-        public static readonly var BADWIDTH = (var)types.BADWIDTH;
+        public static readonly var BADWIDTH = types.BADWIDTH;
 
 
  
@@ -66,11 +66,11 @@ namespace @internal
 
         //go:generate stringer -type=Class
         public static readonly Class Pxxx = (Class)iota; // no class; used during ssa conversion to indicate pseudo-variables
-        public static readonly var PEXTERN = (var)0; // global variable
-        public static readonly var PAUTO = (var)1; // local variables
-        public static readonly var PAUTOHEAP = (var)2; // local variable or parameter moved to heap
-        public static readonly var PPARAM = (var)3; // input arguments
-        public static readonly var PPARAMOUT = (var)4; // output results
+        public static readonly var PEXTERN = 0; // global variable
+        public static readonly var PAUTO = 1; // local variables
+        public static readonly var PAUTOHEAP = 2; // local variable or parameter moved to heap
+        public static readonly var PPARAM = 3; // input arguments
+        public static readonly var PPARAMOUT = 4; // output results
         public static readonly _ PFUNC = (_)uint((1L << (int)(3L)) - iota); // static assert for iota <= (1 << 3)
 
         // Slices in the runtime are represented by three components:

@@ -5,7 +5,7 @@
 // Package multichecker defines the main function for an analysis driver
 // with several analyzers. This package makes it easy for anyone to build
 // an analysis tool containing just the analyzers they need.
-// package multichecker -- go2cs converted at 2020 October 08 04:55:59 UTC
+// package multichecker -- go2cs converted at 2020 October 09 06:02:36 UTC
 // import "golang.org/x/tools/go/analysis/multichecker" ==> using multichecker = go.golang.org.x.tools.go.analysis.multichecker_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\multichecker\multichecker.go
 using flag = go.flag_package;

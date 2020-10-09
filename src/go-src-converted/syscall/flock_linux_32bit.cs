@@ -7,7 +7,7 @@
 
 // +build linux,386 linux,arm linux,mips linux,mipsle
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:39 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:20 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\flock_linux_32bit.go
 

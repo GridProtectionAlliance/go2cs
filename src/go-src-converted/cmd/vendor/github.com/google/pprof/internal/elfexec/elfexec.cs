@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package elfexec provides utility routines to examine ELF binaries.
-// package elfexec -- go2cs converted at 2020 October 08 04:43:09 UTC
+// package elfexec -- go2cs converted at 2020 October 09 05:53:35 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/elfexec" ==> using elfexec = go.cmd.vendor.github.com.google.pprof.@internal.elfexec_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\elfexec\elfexec.go
 using bufio = go.bufio_package;

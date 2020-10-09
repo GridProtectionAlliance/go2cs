@@ -17,7 +17,7 @@ for normal archives both fields will be the same. For files requiring
 the ZIP64 format the 32 bit fields will be 0xffffffff and the 64 bit
 fields must be used instead.
 */
-// package zip -- go2cs converted at 2020 October 08 03:49:28 UTC
+// package zip -- go2cs converted at 2020 October 09 05:08:11 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\struct.go
 using os = go.os_package;

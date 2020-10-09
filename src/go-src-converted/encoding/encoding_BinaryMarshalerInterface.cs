@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:25 UTC
+//     Generated on 2020 October 09 04:59:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -38,7 +39,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class BinaryMarshaler<T> : BinaryMarshaler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,8 +65,8 @@ namespace go
             private delegate (slice<byte>, error) MarshalBinaryByPtr(ptr<T> value);
             private delegate (slice<byte>, error) MarshalBinaryByVal(T value);
 
-            private static readonly MarshalBinaryByPtr s_MarshalBinaryByPtr;
-            private static readonly MarshalBinaryByVal s_MarshalBinaryByVal;
+            private static readonly MarshalBinaryByPtr? s_MarshalBinaryByPtr;
+            private static readonly MarshalBinaryByVal? s_MarshalBinaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) MarshalBinary()
@@ -81,7 +82,7 @@ namespace go
                 return s_MarshalBinaryByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static BinaryMarshaler()

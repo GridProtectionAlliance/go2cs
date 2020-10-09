@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue34182 -- go2cs converted at 2020 October 08 04:56:22 UTC
+// package issue34182 -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.issue34182" ==> using issue34182 = go.go.@internal.gccgoimporter.issue34182_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\issue34182.go
 

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package modget implements the module-aware ``go get'' command.
-// package modget -- go2cs converted at 2020 October 08 04:33:45 UTC
+// package modget -- go2cs converted at 2020 October 09 05:45:19 UTC
 // import "cmd/go/internal/modget" ==> using modget = go.cmd.go.@internal.modget_package
 // Original source: C:\Go\src\cmd\go\internal\modget\get.go
 using errors = go.errors_package;
@@ -563,7 +563,7 @@ Usage: `+CmdGet.UsageLine+`
             // We call SetBuildList here and elsewhere, since newUpgrader,
             // ImportPathsQuiet, and other functions read the global build list.
             {
-                query q__prev1 = q;
+                ptr<query> q__prev1 = q;
 
                 foreach (var (_, __q) in queries)
                 {
@@ -593,7 +593,7 @@ Usage: `+CmdGet.UsageLine+`
             var upgrade = make_map<@string, ptr<query>>();
             {
                 var path__prev1 = path;
-                query q__prev1 = q;
+                ptr<query> q__prev1 = q;
 
                 foreach (var (__path, __q) in byPath)
                 {
@@ -627,7 +627,7 @@ Usage: `+CmdGet.UsageLine+`
             sync.Mutex modOnlyMu = default;
             var modOnly = make_map<@string, ptr<query>>();
             {
-                query q__prev1 = q;
+                ptr<query> q__prev1 = q;
 
                 foreach (var (_, __q) in queries)
                 {
@@ -921,7 +921,7 @@ Usage: `+CmdGet.UsageLine+`
                 }
 
                 {
-                    query q__prev1 = q;
+                    ptr<query> q__prev1 = q;
 
                     foreach (var (_, __q) in byPath)
                     {
@@ -976,7 +976,7 @@ Usage: `+CmdGet.UsageLine+`
                 fmt.Fprintf(_addr_buf, "go get: inconsistent versions:");
                 var reqs = modload.Reqs();
                 {
-                    query q__prev1 = q;
+                    ptr<query> q__prev1 = q;
 
                     foreach (var (_, __q) in lostUpgrades)
                     {

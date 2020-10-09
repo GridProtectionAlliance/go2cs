@@ -4,7 +4,7 @@
 
 // +build !android
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:25 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\write_err.go
 using @unsafe = go.@unsafe_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bytes -- go2cs converted at 2020 October 08 03:49:11 UTC
+// package bytes -- go2cs converted at 2020 October 09 04:49:44 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Go\src\bytes\reader.go
 using errors = go.errors_package;

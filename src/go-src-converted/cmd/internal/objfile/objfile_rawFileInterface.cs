@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:50:22 UTC
+//     Generated on 2020 October 09 05:09:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using os = go.os_package;
 using sort = go.sort_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class rawFile<T> : rawFile
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) symbolsByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) symbolsByVal(T value);
 
-            private static readonly symbolsByPtr s_symbolsByPtr;
-            private static readonly symbolsByVal s_symbolsByVal;
+            private static readonly symbolsByPtr? s_symbolsByPtr;
+            private static readonly symbolsByVal? s_symbolsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) symbols()
@@ -93,8 +94,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) pclnByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) pclnByVal(T value);
 
-            private static readonly pclnByPtr s_pclnByPtr;
-            private static readonly pclnByVal s_pclnByVal;
+            private static readonly pclnByPtr? s_pclnByPtr;
+            private static readonly pclnByVal? s_pclnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) pcln()
@@ -113,8 +114,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) textByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) textByVal(T value);
 
-            private static readonly textByPtr s_textByPtr;
-            private static readonly textByVal s_textByVal;
+            private static readonly textByPtr? s_textByPtr;
+            private static readonly textByVal? s_textByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) text()
@@ -133,8 +134,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) goarchByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) goarchByVal(T value);
 
-            private static readonly goarchByPtr s_goarchByPtr;
-            private static readonly goarchByVal s_goarchByVal;
+            private static readonly goarchByPtr? s_goarchByPtr;
+            private static readonly goarchByVal? s_goarchByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) goarch()
@@ -153,8 +154,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) loadAddressByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) loadAddressByVal(T value);
 
-            private static readonly loadAddressByPtr s_loadAddressByPtr;
-            private static readonly loadAddressByVal s_loadAddressByVal;
+            private static readonly loadAddressByPtr? s_loadAddressByPtr;
+            private static readonly loadAddressByVal? s_loadAddressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) loadAddress()
@@ -173,8 +174,8 @@ namespace @internal
             private delegate (ptr<dwarf.Data>, error) dwarfByPtr(ptr<T> value);
             private delegate (ptr<dwarf.Data>, error) dwarfByVal(T value);
 
-            private static readonly dwarfByPtr s_dwarfByPtr;
-            private static readonly dwarfByVal s_dwarfByVal;
+            private static readonly dwarfByPtr? s_dwarfByPtr;
+            private static readonly dwarfByVal? s_dwarfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<dwarf.Data>, error) dwarf()
@@ -190,7 +191,7 @@ namespace @internal
                 return s_dwarfByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static rawFile()

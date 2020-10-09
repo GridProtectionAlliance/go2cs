@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 October 08 04:59:25 UTC
+// package jpeg -- go2cs converted at 2020 October 09 06:05:52 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\idct.go
 
@@ -60,12 +60,12 @@ namespace image
         private static readonly long w6 = (long)1108L; // 2048*sqrt(2)*cos(6*pi/16)
         private static readonly long w7 = (long)565L; // 2048*sqrt(2)*cos(7*pi/16)
 
-        private static readonly var w1pw7 = (var)w1 + w7;
-        private static readonly var w1mw7 = (var)w1 - w7;
-        private static readonly var w2pw6 = (var)w2 + w6;
-        private static readonly var w2mw6 = (var)w2 - w6;
-        private static readonly var w3pw5 = (var)w3 + w5;
-        private static readonly var w3mw5 = (var)w3 - w5;
+        private static readonly var w1pw7 = w1 + w7;
+        private static readonly var w1mw7 = w1 - w7;
+        private static readonly var w2pw6 = w2 + w6;
+        private static readonly var w2mw6 = w2 - w6;
+        private static readonly var w3pw5 = w3 + w5;
+        private static readonly var w3mw5 = w3 - w5;
 
         private static readonly long r2 = (long)181L; // 256/sqrt(2)
 

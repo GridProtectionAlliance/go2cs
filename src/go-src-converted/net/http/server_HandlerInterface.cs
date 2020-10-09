@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:31 UTC
+//     Generated on 2020 October 09 04:58:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,6 +38,7 @@ using time = go.time_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -62,7 +63,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Handler<T> : Handler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -88,8 +89,8 @@ namespace net
             private delegate void ServeHTTPByPtr(ptr<T> value, ResponseWriter _p0, ptr<Request> _p0);
             private delegate void ServeHTTPByVal(T value, ResponseWriter _p0, ptr<Request> _p0);
 
-            private static readonly ServeHTTPByPtr s_ServeHTTPByPtr;
-            private static readonly ServeHTTPByVal s_ServeHTTPByVal;
+            private static readonly ServeHTTPByPtr? s_ServeHTTPByPtr;
+            private static readonly ServeHTTPByVal? s_ServeHTTPByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void ServeHTTP(ResponseWriter _p0, ptr<Request> _p0)
@@ -110,7 +111,7 @@ namespace net
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Handler()

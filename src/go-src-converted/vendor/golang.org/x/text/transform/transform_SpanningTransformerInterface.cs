@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:01:53 UTC
+//     Generated on 2020 October 09 06:07:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using io = go.io_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace text
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class SpanningTransformer<T> : SpanningTransformer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace text
             private delegate (long, error) SpanByPtr(ptr<T> value, slice<byte> src, bool atEOF);
             private delegate (long, error) SpanByVal(T value, slice<byte> src, bool atEOF);
 
-            private static readonly SpanByPtr s_SpanByPtr;
-            private static readonly SpanByVal s_SpanByVal;
+            private static readonly SpanByPtr? s_SpanByPtr;
+            private static readonly SpanByVal? s_SpanByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Span(slice<byte> src, bool atEOF)
@@ -93,8 +94,8 @@ namespace text
             private delegate (long, long, error) TransformByPtr(ptr<T> value, slice<byte> dst, slice<byte> src, bool atEOF);
             private delegate (long, long, error) TransformByVal(T value, slice<byte> dst, slice<byte> src, bool atEOF);
 
-            private static readonly TransformByPtr s_TransformByPtr;
-            private static readonly TransformByVal s_TransformByVal;
+            private static readonly TransformByPtr? s_TransformByPtr;
+            private static readonly TransformByVal? s_TransformByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, long, error) Transform(slice<byte> dst, slice<byte> src, bool atEOF)
@@ -113,8 +114,8 @@ namespace text
             private delegate (long, long, error) ResetByPtr(ptr<T> value);
             private delegate (long, long, error) ResetByVal(T value);
 
-            private static readonly ResetByPtr s_ResetByPtr;
-            private static readonly ResetByVal s_ResetByVal;
+            private static readonly ResetByPtr? s_ResetByPtr;
+            private static readonly ResetByVal? s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, long, error) Reset()
@@ -130,7 +131,7 @@ namespace text
                 return s_ResetByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static SpanningTransformer()

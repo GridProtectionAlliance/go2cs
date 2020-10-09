@@ -10,7 +10,7 @@
 // it in our own nicer implementation, either here or in
 // syscall_solaris.go or syscall_unix.go.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:42 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:56 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_solaris.go
 using @unsafe = go.@unsafe_package;
@@ -202,7 +202,7 @@ namespace go
 
         }
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
         //sys    Getcwd(buf []byte) (n int, err error)
 

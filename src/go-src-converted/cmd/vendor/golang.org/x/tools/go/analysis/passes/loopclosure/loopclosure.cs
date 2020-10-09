@@ -4,7 +4,7 @@
 
 // Package loopclosure defines an Analyzer that checks for references to
 // enclosing loop variables from within nested functions.
-// package loopclosure -- go2cs converted at 2020 October 08 04:58:00 UTC
+// package loopclosure -- go2cs converted at 2020 October 09 06:04:38 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/loopclosure" ==> using loopclosure = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.loopclosure_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\loopclosure\loopclosure.go
 using ast = go.go.ast_package;

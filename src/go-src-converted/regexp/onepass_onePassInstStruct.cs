@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:13 UTC
+//     Generated on 2020 October 09 04:58:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using syntax = go.regexp.syntax_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
+
+#nullable enable
 
 namespace go
 {

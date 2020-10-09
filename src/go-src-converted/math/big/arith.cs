@@ -8,7 +8,7 @@
 // This file also contains elementary operations that can be implemented
 // sufficiently efficiently in Go.
 
-// package big -- go2cs converted at 2020 October 08 03:25:23 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:15 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\arith.go
 using bits = go.math.bits_package;
@@ -24,11 +24,11 @@ namespace math
         {
         }
 
-        private static readonly var _S = (var)_W / 8L; // word size in bytes
+        private static readonly var _S = _W / 8L; // word size in bytes
 
-        private static readonly var _W = (var)bits.UintSize; // word size in bits
+        private static readonly var _W = bits.UintSize; // word size in bits
         private static readonly long _B = (long)1L << (int)(_W); // digit base
-        private static readonly var _M = (var)_B - 1L; // digit mask
+        private static readonly var _M = _B - 1L; // digit mask
 
         // Many of the loops in this file are of the form
         //   for i := 0; i < len(z) && i < len(x) && i < len(y); i++

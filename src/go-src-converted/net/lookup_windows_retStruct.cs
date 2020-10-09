@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:34:00 UTC
+//     Generated on 2020 October 09 04:52:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using os = go.os_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
+
+#nullable enable
 
 namespace go
 {

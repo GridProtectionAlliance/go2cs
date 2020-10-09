@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sort -- go2cs converted at 2020 October 08 03:18:58 UTC
+// package sort -- go2cs converted at 2020 October 09 04:49:14 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Go\src\sort\slice.go
 

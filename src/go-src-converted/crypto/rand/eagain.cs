@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package rand -- go2cs converted at 2020 October 08 03:35:29 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:01 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\eagain.go
 using os = go.os_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package get -- go2cs converted at 2020 October 08 04:33:39 UTC
+// package get -- go2cs converted at 2020 October 09 05:45:14 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Go\src\cmd\go\internal\get\discovery.go
 using xml = go.encoding.xml_package;

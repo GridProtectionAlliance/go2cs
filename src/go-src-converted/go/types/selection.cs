@@ -4,7 +4,7 @@
 
 // This file implements Selections.
 
-// package types -- go2cs converted at 2020 October 08 04:03:42 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:37 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\selection.go
 using bytes = go.bytes_package;
@@ -23,8 +23,8 @@ namespace go
         }
 
         public static readonly SelectionKind FieldVal = (SelectionKind)iota; // x.f is a struct field selector
-        public static readonly var MethodVal = (var)0; // x.f is a method selector
-        public static readonly var MethodExpr = (var)1; // x.f is a method expression
+        public static readonly var MethodVal = 0; // x.f is a method selector
+        public static readonly var MethodExpr = 1; // x.f is a method expression
 
         // A Selection describes a selector expression x.f.
         // For the declarations:

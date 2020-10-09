@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:34:08 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:11 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\port.go
 
@@ -32,8 +32,8 @@ namespace go
                 return (0L, false);
 
             }
-            const var max = (var)uint32(1L << (int)(32L) - 1L);
-            const var cutoff = (var)uint32(1L << (int)(30L));
+            const var max = uint32(1L << (int)(32L) - 1L);
+            const var cutoff = uint32(1L << (int)(30L));
 
             var neg = false;
             if (service[0L] == '+')

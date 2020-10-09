@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:17 UTC
+//     Generated on 2020 October 09 04:56:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,6 +44,8 @@ using httpguts = go.golang.org.x.net.http.httpguts_package;
 using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net

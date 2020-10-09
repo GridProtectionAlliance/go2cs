@@ -4,7 +4,7 @@
 
 // Deep equality test via reflection
 
-// package reflect -- go2cs converted at 2020 October 08 00:33:49 UTC
+// package reflect -- go2cs converted at 2020 October 09 04:45:17 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\deepequal.go
 using @unsafe = go.@unsafe_package;

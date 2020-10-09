@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:19:42 UTC
+//     Generated on 2020 October 09 04:45:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using bytealg = go.@internal.bytealg_package;
+
+#nullable enable
 
 namespace go
 {

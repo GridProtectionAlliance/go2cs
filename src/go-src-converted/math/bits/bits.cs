@@ -6,7 +6,7 @@
 
 // Package bits implements bit counting and manipulation
 // functions for the predeclared unsigned integer types.
-// package bits -- go2cs converted at 2020 October 08 03:25:15 UTC
+// package bits -- go2cs converted at 2020 October 09 04:50:12 UTC
 // import "math/bits" ==> using bits = go.math.bits_package
 // Original source: C:\Go\src\math\bits\bits.go
 
@@ -23,7 +23,7 @@ namespace math
  // 32 or 64
 
         // UintSize is the size of a uint in bits.
-        public static readonly var UintSize = (var)uintSize;
+        public static readonly var UintSize = uintSize;
 
         // --- LeadingZeros ---
 
@@ -700,7 +700,7 @@ namespace math
             ulong rem = default;
 
             const long two32 = (long)1L << (int)(32L);
-            const var mask32 = (var)two32 - 1L;
+            const var mask32 = two32 - 1L;
             if (y == 0L)
             {
                 panic(divideError);

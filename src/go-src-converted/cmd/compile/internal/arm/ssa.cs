@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm -- go2cs converted at 2020 October 08 04:32:18 UTC
+// package arm -- go2cs converted at 2020 October 09 05:44:11 UTC
 // import "cmd/compile/internal/arm" ==> using arm = go.cmd.compile.@internal.arm_package
 // Original source: C:\Go\src\cmd\compile\internal\arm\ssa.go
 using fmt = go.fmt_package;

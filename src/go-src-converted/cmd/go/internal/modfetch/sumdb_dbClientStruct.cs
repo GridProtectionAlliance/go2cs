@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:13 UTC
+//     Generated on 2020 October 09 05:47:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,6 +33,8 @@ using module = go.golang.org.x.mod.module_package;
 using sumdb = go.golang.org.x.mod.sumdb_package;
 using note = go.golang.org.x.mod.sumdb.note_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

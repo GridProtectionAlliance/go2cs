@@ -6,7 +6,7 @@
 // that returns multiple types.
 // See golang.org/issue/12839.
 // (See also golang.org/issue/27928.)
-// package issue12839 -- go2cs converted at 2020 October 08 04:02:54 UTC
+// package issue12839 -- go2cs converted at 2020 October 09 05:19:11 UTC
 // import "go/doc.issue12839" ==> using issue12839 = go.go.doc.issue12839_package
 // Original source: C:\Go\src\go\doc\testdata\issue12839.go
 using p = go.p_package;

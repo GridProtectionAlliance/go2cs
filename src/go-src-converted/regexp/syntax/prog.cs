@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 03:41:05 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:32 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\prog.go
 using strconv = go.strconv_package;
@@ -32,16 +32,16 @@ namespace regexp
         }
 
         public static readonly InstOp InstAlt = (InstOp)iota;
-        public static readonly var InstAltMatch = (var)0;
-        public static readonly var InstCapture = (var)1;
-        public static readonly var InstEmptyWidth = (var)2;
-        public static readonly var InstMatch = (var)3;
-        public static readonly var InstFail = (var)4;
-        public static readonly var InstNop = (var)5;
-        public static readonly var InstRune = (var)6;
-        public static readonly var InstRune1 = (var)7;
-        public static readonly var InstRuneAny = (var)8;
-        public static readonly var InstRuneAnyNotNL = (var)9;
+        public static readonly var InstAltMatch = 0;
+        public static readonly var InstCapture = 1;
+        public static readonly var InstEmptyWidth = 2;
+        public static readonly var InstMatch = 3;
+        public static readonly var InstFail = 4;
+        public static readonly var InstNop = 5;
+        public static readonly var InstRune = 6;
+        public static readonly var InstRune1 = 7;
+        public static readonly var InstRuneAny = 8;
+        public static readonly var InstRuneAnyNotNL = 9;
 
 
         private static @string instOpNames = new slice<@string>(new @string[] { "InstAlt", "InstAltMatch", "InstCapture", "InstEmptyWidth", "InstMatch", "InstFail", "InstNop", "InstRune", "InstRune1", "InstRuneAny", "InstRuneAnyNotNL" });
@@ -63,11 +63,11 @@ namespace regexp
         }
 
         public static readonly EmptyOp EmptyBeginLine = (EmptyOp)1L << (int)(iota);
-        public static readonly var EmptyEndLine = (var)0;
-        public static readonly var EmptyBeginText = (var)1;
-        public static readonly var EmptyEndText = (var)2;
-        public static readonly var EmptyWordBoundary = (var)3;
-        public static readonly var EmptyNoWordBoundary = (var)4;
+        public static readonly var EmptyEndLine = 0;
+        public static readonly var EmptyBeginText = 1;
+        public static readonly var EmptyEndText = 2;
+        public static readonly var EmptyWordBoundary = 3;
+        public static readonly var EmptyNoWordBoundary = 4;
 
 
         // EmptyOpContext returns the zero-width assertions

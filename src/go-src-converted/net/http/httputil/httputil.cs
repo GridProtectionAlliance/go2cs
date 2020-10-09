@@ -4,7 +4,7 @@
 
 // Package httputil provides HTTP utility functions, complementing the
 // more common ones in the net/http package.
-// package httputil -- go2cs converted at 2020 October 08 03:41:32 UTC
+// package httputil -- go2cs converted at 2020 October 09 04:58:56 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Go\src\net\http\httputil\httputil.go
 using io = go.io_package;

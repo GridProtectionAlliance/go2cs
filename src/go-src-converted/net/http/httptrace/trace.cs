@@ -4,7 +4,7 @@
 
 // Package httptrace provides mechanisms to trace the events within
 // HTTP client requests.
-// package httptrace -- go2cs converted at 2020 October 08 03:39:22 UTC
+// package httptrace -- go2cs converted at 2020 October 09 04:56:55 UTC
 // import "net/http/httptrace" ==> using httptrace = go.net.http.httptrace_package
 // Original source: C:\Go\src\net\http\httptrace\trace.go
 using context = go.context_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:19 UTC
+//     Generated on 2020 October 09 04:56:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2writeFramer<T> : http2writeFramer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate bool writeFrameByPtr(ptr<T> value, http2writeContext _p0);
             private delegate bool writeFrameByVal(T value, http2writeContext _p0);
 
-            private static readonly writeFrameByPtr s_writeFrameByPtr;
-            private static readonly writeFrameByVal s_writeFrameByVal;
+            private static readonly writeFrameByPtr? s_writeFrameByPtr;
+            private static readonly writeFrameByVal? s_writeFrameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool writeFrame(http2writeContext _p0)
@@ -116,8 +117,8 @@ namespace net
             private delegate bool staysWithinBufferByPtr(ptr<T> value, long size);
             private delegate bool staysWithinBufferByVal(T value, long size);
 
-            private static readonly staysWithinBufferByPtr s_staysWithinBufferByPtr;
-            private static readonly staysWithinBufferByVal s_staysWithinBufferByVal;
+            private static readonly staysWithinBufferByPtr? s_staysWithinBufferByPtr;
+            private static readonly staysWithinBufferByVal? s_staysWithinBufferByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool staysWithinBuffer(long size)
@@ -133,7 +134,7 @@ namespace net
                 return s_staysWithinBufferByPtr(m_target_ptr, size);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2writeFramer()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:02 UTC
+//     Generated on 2020 October 09 06:03:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using ast = go.go.ast_package;
 using token = go.go.token_package;
 using types = go.go.types_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

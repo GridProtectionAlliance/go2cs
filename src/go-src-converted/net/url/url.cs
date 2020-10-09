@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package url parses URLs and implements query escaping.
-// package url -- go2cs converted at 2020 October 08 03:35:13 UTC
+// package url -- go2cs converted at 2020 October 09 04:52:45 UTC
 // import "net/url" ==> using url = go.net.url_package
 // Original source: C:\Go\src\net\url\url.go
 // See RFC 3986. This package generally follows RFC 3986, except where
@@ -93,12 +93,12 @@ namespace net
         }
 
         private static readonly encoding encodePath = (encoding)1L + iota;
-        private static readonly var encodePathSegment = (var)0;
-        private static readonly var encodeHost = (var)1;
-        private static readonly var encodeZone = (var)2;
-        private static readonly var encodeUserPassword = (var)3;
-        private static readonly var encodeQueryComponent = (var)4;
-        private static readonly var encodeFragment = (var)5;
+        private static readonly var encodePathSegment = 0;
+        private static readonly var encodeHost = 1;
+        private static readonly var encodeZone = 2;
+        private static readonly var encodeUserPassword = 3;
+        private static readonly var encodeQueryComponent = 4;
+        private static readonly var encodeFragment = 5;
 
 
         public partial struct EscapeError // : @string

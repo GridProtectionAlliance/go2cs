@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:45 UTC
+//     Generated on 2020 October 09 04:54:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using pem = go.encoding.pem_package;
 using errors = go.errors_package;
 using runtime = go.runtime_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

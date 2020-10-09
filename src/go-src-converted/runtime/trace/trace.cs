@@ -105,7 +105,7 @@
 // The trace tool computes the latency of a task by measuring the
 // time between the task creation and the task end and provides
 // latency distributions for each task type found in the trace.
-// package trace -- go2cs converted at 2020 October 08 03:41:43 UTC
+// package trace -- go2cs converted at 2020 October 09 04:59:05 UTC
 // import "runtime/trace" ==> using trace = go.runtime.trace_package
 // Original source: C:\Go\src\runtime\trace\trace.go
 using io = go.io_package;

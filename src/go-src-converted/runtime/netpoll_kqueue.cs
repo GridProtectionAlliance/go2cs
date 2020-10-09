@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:38 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll_kqueue.go
 // Integrated network poller (kqueue-based implementation).

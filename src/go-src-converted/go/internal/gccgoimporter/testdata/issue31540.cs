@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue31540 -- go2cs converted at 2020 October 08 04:56:22 UTC
+// package issue31540 -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.issue31540" ==> using issue31540 = go.go.@internal.gccgoimporter.issue31540_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\issue31540.go
 

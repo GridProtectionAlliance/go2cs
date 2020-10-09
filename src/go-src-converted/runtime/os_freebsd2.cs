@@ -4,7 +4,7 @@
 
 // +build freebsd,!amd64
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:53 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_freebsd2.go
 

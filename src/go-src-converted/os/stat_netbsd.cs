@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:45:09 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:24 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\stat_netbsd.go
 using syscall = go.syscall_package;

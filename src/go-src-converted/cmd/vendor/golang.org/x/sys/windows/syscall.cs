@@ -22,7 +22,7 @@
 // These calls return err == nil to indicate success; otherwise
 // err represents an operating system error describing the failure and
 // holds a value of type syscall.Errno.
-// package windows -- go2cs converted at 2020 October 08 04:53:49 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:53 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\syscall.go
 // import "golang.org/x/sys/windows"

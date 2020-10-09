@@ -10,7 +10,7 @@
 // The package supports any version of Darwin, any version of
 // DragonFly BSD, FreeBSD 7 and above, NetBSD 6 and above, and OpenBSD
 // 5.6 and above.
-// package route -- go2cs converted at 2020 October 08 05:01:38 UTC
+// package route -- go2cs converted at 2020 October 09 06:07:48 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\route\route.go
 using errors = go.errors_package;

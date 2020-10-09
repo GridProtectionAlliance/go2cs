@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:16 UTC
+//     Generated on 2020 October 09 04:52:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,6 +27,7 @@ using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
 using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -51,7 +52,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class combinedMult<T> : combinedMult
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -77,8 +78,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) CombinedMultByPtr(ptr<T> value, ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar);
             private delegate (ptr<big.Int>, ptr<big.Int>) CombinedMultByVal(T value, ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar);
 
-            private static readonly CombinedMultByPtr s_CombinedMultByPtr;
-            private static readonly CombinedMultByVal s_CombinedMultByVal;
+            private static readonly CombinedMultByPtr? s_CombinedMultByPtr;
+            private static readonly CombinedMultByVal? s_CombinedMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) CombinedMult(ptr<big.Int> bigX, ptr<big.Int> bigY, slice<byte> baseScalar, slice<byte> scalar)
@@ -94,7 +95,7 @@ namespace crypto
                 return s_CombinedMultByPtr(m_target_ptr, bigX, bigY, baseScalar, scalar);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static combinedMult()

@@ -4,7 +4,7 @@
 
 // Package bools defines an Analyzer that detects common mistakes
 // involving boolean operators.
-// package bools -- go2cs converted at 2020 October 08 04:56:33 UTC
+// package bools -- go2cs converted at 2020 October 09 06:03:02 UTC
 // import "golang.org/x/tools/go/analysis/passes/bools" ==> using bools = go.golang.org.x.tools.go.analysis.passes.bools_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\passes\bools\bools.go
 using ast = go.go.ast_package;

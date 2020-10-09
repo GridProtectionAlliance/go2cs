@@ -5,7 +5,7 @@
 // Package png implements a PNG image decoder and encoder.
 //
 // The PNG specification is at https://www.w3.org/TR/PNG/.
-// package png -- go2cs converted at 2020 October 08 04:59:38 UTC
+// package png -- go2cs converted at 2020 October 09 06:06:02 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Go\src\image\png\reader.go
 using zlib = go.compress.zlib_package;
@@ -32,22 +32,22 @@ namespace image
 
 
         // A cb is a combination of color type and bit depth.
-        private static readonly var cbInvalid = (var)iota;
-        private static readonly var cbG1 = (var)0;
-        private static readonly var cbG2 = (var)1;
-        private static readonly var cbG4 = (var)2;
-        private static readonly var cbG8 = (var)3;
-        private static readonly var cbGA8 = (var)4;
-        private static readonly var cbTC8 = (var)5;
-        private static readonly var cbP1 = (var)6;
-        private static readonly var cbP2 = (var)7;
-        private static readonly var cbP4 = (var)8;
-        private static readonly var cbP8 = (var)9;
-        private static readonly var cbTCA8 = (var)10;
-        private static readonly var cbG16 = (var)11;
-        private static readonly var cbGA16 = (var)12;
-        private static readonly var cbTC16 = (var)13;
-        private static readonly var cbTCA16 = (var)14;
+        private static readonly var cbInvalid = iota;
+        private static readonly var cbG1 = 0;
+        private static readonly var cbG2 = 1;
+        private static readonly var cbG4 = 2;
+        private static readonly var cbG8 = 3;
+        private static readonly var cbGA8 = 4;
+        private static readonly var cbTC8 = 5;
+        private static readonly var cbP1 = 6;
+        private static readonly var cbP2 = 7;
+        private static readonly var cbP4 = 8;
+        private static readonly var cbP8 = 9;
+        private static readonly var cbTCA8 = 10;
+        private static readonly var cbG16 = 11;
+        private static readonly var cbGA16 = 12;
+        private static readonly var cbTC16 = 13;
+        private static readonly var cbTCA16 = 14;
 
 
         private static bool cbPaletted(long cb)
@@ -88,12 +88,12 @@ namespace image
         // multiple IDAT chunks, and IDAT chunks must be sequential (i.e. they may not
         // have any other chunks between them).
         // https://www.w3.org/TR/PNG/#5ChunkOrdering
-        private static readonly var dsStart = (var)iota;
-        private static readonly var dsSeenIHDR = (var)0;
-        private static readonly var dsSeenPLTE = (var)1;
-        private static readonly var dsSeentRNS = (var)2;
-        private static readonly var dsSeenIDAT = (var)3;
-        private static readonly var dsSeenIEND = (var)4;
+        private static readonly var dsStart = iota;
+        private static readonly var dsSeenIHDR = 0;
+        private static readonly var dsSeenPLTE = 1;
+        private static readonly var dsSeentRNS = 2;
+        private static readonly var dsSeenIDAT = 3;
+        private static readonly var dsSeenIEND = 4;
 
 
         private static readonly @string pngHeader = (@string)"\x89PNG\r\n\x1a\n";

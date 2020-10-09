@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:31:04 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:11 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\ssa.go
 using binary = go.encoding.binary_package;
@@ -2234,7 +2234,7 @@ namespace @internal
 
         // If true, share as many open-coded defer exits as possible (with the downside of
         // worse line-number information)
-        private static readonly var shareDeferExits = (var)false;
+        private static readonly var shareDeferExits = false;
 
         // exit processes any code that needs to be generated just before returning.
         // It returns a BlockRet block that ends the control flow. Its control value
@@ -3780,8 +3780,8 @@ namespace @internal
         }
 
         private static readonly skipMask skipPtr = (skipMask)1L << (int)(iota);
-        private static readonly var skipLen = (var)0;
-        private static readonly var skipCap = (var)1;
+        private static readonly var skipLen = 0;
+        private static readonly var skipCap = 1;
 
 
         // assign does left = right.
@@ -4040,9 +4040,9 @@ namespace @internal
         }
 
         private static readonly callKind callNormal = (callKind)iota;
-        private static readonly var callDefer = (var)0;
-        private static readonly var callDeferStack = (var)1;
-        private static readonly var callGo = (var)2;
+        private static readonly var callDefer = 0;
+        private static readonly var callDeferStack = 1;
+        private static readonly var callGo = 2;
 
 
         private partial struct sfRtCallDef

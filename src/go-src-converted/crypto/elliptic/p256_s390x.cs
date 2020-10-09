@@ -4,7 +4,7 @@
 
 // +build s390x
 
-// package elliptic -- go2cs converted at 2020 October 08 03:36:33 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:54:29 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256_s390x.go
 using subtle = go.crypto.subtle_package;
@@ -18,8 +18,8 @@ namespace crypto
 {
     public static partial class elliptic_package
     {
-        private static readonly var offsetS390xHasVX = (var)@unsafe.Offsetof(cpu.S390X.HasVX);
-        private static readonly var offsetS390xHasVE1 = (var)@unsafe.Offsetof(cpu.S390X.HasVXE);
+        private static readonly var offsetS390xHasVX = @unsafe.Offsetof(cpu.S390X.HasVX);
+        private static readonly var offsetS390xHasVE1 = @unsafe.Offsetof(cpu.S390X.HasVXE);
 
 
         private partial struct p256CurveFast

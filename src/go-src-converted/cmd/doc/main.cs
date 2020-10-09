@@ -35,7 +35,7 @@
 // all its visible symbols. The argument must identify a package.
 //
 // For complete documentation, run "go help doc".
-// package main -- go2cs converted at 2020 October 08 04:33:05 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:48 UTC
 // Original source: C:\Go\src\cmd\doc\main.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;

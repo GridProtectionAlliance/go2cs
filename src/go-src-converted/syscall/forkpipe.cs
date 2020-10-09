@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly solaris
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:39 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:21 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\forkpipe.go
 

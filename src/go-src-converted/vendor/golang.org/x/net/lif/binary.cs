@@ -4,7 +4,7 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2020 October 08 05:01:24 UTC
+// package lif -- go2cs converted at 2020 October 09 06:07:38 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\lif\binary.go
 

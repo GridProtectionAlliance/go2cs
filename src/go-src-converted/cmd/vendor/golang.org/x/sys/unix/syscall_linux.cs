@@ -9,7 +9,7 @@
 // Note that sometimes we use a lowercase //sys name and
 // wrap it in our own nicer implementation.
 
-// package unix -- go2cs converted at 2020 October 08 04:47:21 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:42 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux.go
 using binary = go.encoding.binary_package;
@@ -374,7 +374,7 @@ namespace sys
 
         }
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
         //sys    Getcwd(buf []byte) (n int, err error)
 
@@ -2933,7 +2933,7 @@ namespace sys
         // NewFileHandle constructs a FileHandle.
         public static FileHandle NewFileHandle(int handleType, slice<byte> handle)
         {
-            const var hdrSize = (var)@unsafe.Sizeof(new fileHandle());
+            const var hdrSize = @unsafe.Sizeof(new fileHandle());
 
             var buf = make_slice<byte>(hdrSize + uintptr(len(handle)));
             copy(buf[hdrSize..], handle);

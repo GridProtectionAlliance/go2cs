@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2020 October 08 01:30:45 UTC
+// package sync -- go2cs converted at 2020 October 09 05:01:08 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Go\src\sync\pool.go
 using race = go.@internal.race_package;

@@ -3353,7 +3353,7 @@
 // See the documentation of the testing package for more information.
 //
 //
-// package main -- go2cs converted at 2020 October 08 04:33:27 UTC
+// package main -- go2cs converted at 2020 October 09 05:45:04 UTC
 // Original source: C:\Go\src\cmd\go\alldocs.go
     }
 

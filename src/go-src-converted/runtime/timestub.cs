@@ -7,7 +7,7 @@
 
 // +build !windows
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:06 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:58 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\timestub.go
 using _@unsafe_ = go.@unsafe_package;

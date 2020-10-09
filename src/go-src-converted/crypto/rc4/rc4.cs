@@ -7,7 +7,7 @@
 //
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
-// package rc4 -- go2cs converted at 2020 October 08 03:36:39 UTC
+// package rc4 -- go2cs converted at 2020 October 09 04:54:36 UTC
 // import "crypto/rc4" ==> using rc4 = go.crypto.rc4_package
 // Original source: C:\Go\src\crypto\rc4\rc4.go
 using subtle = go.crypto.@internal.subtle_package;

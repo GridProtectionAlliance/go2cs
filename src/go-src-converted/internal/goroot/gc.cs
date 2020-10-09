@@ -4,7 +4,7 @@
 
 // +build gc
 
-// package goroot -- go2cs converted at 2020 October 08 04:02:34 UTC
+// package goroot -- go2cs converted at 2020 October 09 05:18:59 UTC
 // import "internal/goroot" ==> using goroot = go.@internal.goroot_package
 // Original source: C:\Go\src\internal\goroot\gc.go
 using os = go.os_package;

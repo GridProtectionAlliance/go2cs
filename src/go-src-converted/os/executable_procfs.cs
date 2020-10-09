@@ -4,7 +4,7 @@
 
 // +build linux netbsd dragonfly js,wasm
 
-// package os -- go2cs converted at 2020 October 08 03:44:27 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:04 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\executable_procfs.go
 using errors = go.errors_package;

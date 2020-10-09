@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:14 UTC
+//     Generated on 2020 October 09 04:56:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2stringWriter<T> : http2stringWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate (long, error) WriteStringByPtr(ptr<T> value, @string s);
             private delegate (long, error) WriteStringByVal(T value, @string s);
 
-            private static readonly WriteStringByPtr s_WriteStringByPtr;
-            private static readonly WriteStringByVal s_WriteStringByVal;
+            private static readonly WriteStringByPtr? s_WriteStringByPtr;
+            private static readonly WriteStringByVal? s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) WriteString(@string s)
@@ -113,7 +114,7 @@ namespace net
                 return s_WriteStringByPtr(m_target_ptr, s);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2stringWriter()

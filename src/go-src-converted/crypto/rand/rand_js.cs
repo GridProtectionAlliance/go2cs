@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package rand -- go2cs converted at 2020 October 08 03:35:32 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:03 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\rand_js.go
 using js = go.syscall.js_package;

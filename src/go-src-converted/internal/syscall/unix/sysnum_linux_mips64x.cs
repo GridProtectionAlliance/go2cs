@@ -4,7 +4,7 @@
 
 // +build mips64 mips64le
 
-// package unix -- go2cs converted at 2020 October 08 03:32:05 UTC
+// package unix -- go2cs converted at 2020 October 09 04:51:00 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Go\src\internal\syscall\unix\sysnum_linux_mips64x.go
 

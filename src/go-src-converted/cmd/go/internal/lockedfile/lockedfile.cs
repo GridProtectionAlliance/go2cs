@@ -4,7 +4,7 @@
 
 // Package lockedfile creates and manipulates files whose contents should only
 // change atomically.
-// package lockedfile -- go2cs converted at 2020 October 08 04:33:59 UTC
+// package lockedfile -- go2cs converted at 2020 October 09 05:45:31 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\lockedfile.go
 using fmt = go.fmt_package;

@@ -4,7 +4,7 @@
 
 // +build cgo,!netgo
 
-// package net -- go2cs converted at 2020 October 08 03:31:14 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:28 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\cgo_windows.go
 

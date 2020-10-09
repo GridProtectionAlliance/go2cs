@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:49:52 UTC
+//     Generated on 2020 October 09 05:08:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using hash = go.hash_package;
 using adler32 = go.hash.adler32_package;
 using io = go.io_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace compress

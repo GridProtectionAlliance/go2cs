@@ -29,7 +29,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:40:44 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:26 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\data.go
 using bufio = go.bufio_package;
@@ -1250,7 +1250,7 @@ namespace @internal
 
             var buf = bytes.NewBuffer(make_slice<byte>(0L, size));
             ptr<OutBuf> @out = addr(new OutBuf(w:bufio.NewWriter(buf)));
-            writeDatblkToOutBuf(_addr_ctxt, _addr_out, addr, size);
+            writeDatblkToOutBuf(_addr_ctxt, out, addr, size);
             @out.Flush();
             return buf.Bytes();
         }
@@ -1603,7 +1603,7 @@ namespace @internal
             return Rnd(datsize, int64(symalign(_addr_s)));
         }
 
-        private static readonly var debugGCProg = (var)false;
+        private static readonly var debugGCProg = false;
 
 
 

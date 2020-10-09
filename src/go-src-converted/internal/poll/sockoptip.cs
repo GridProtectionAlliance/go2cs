@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package poll -- go2cs converted at 2020 October 08 03:32:46 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:22 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\sockoptip.go
 using syscall = go.syscall_package;

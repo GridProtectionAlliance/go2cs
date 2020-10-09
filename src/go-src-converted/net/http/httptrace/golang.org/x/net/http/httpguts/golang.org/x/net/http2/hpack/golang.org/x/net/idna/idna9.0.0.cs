@@ -15,7 +15,7 @@
 // UTS #46 is defined in https://www.unicode.org/reports/tr46.
 // See https://unicode.org/cldr/utility/idna.jsp for a visualization of the
 // differences between these two standards.
-// package idna -- go2cs converted at 2020 October 08 03:39:26 UTC
+// package idna -- go2cs converted at 2020 October 09 04:57:00 UTC
 // import "golang.org/x/net/idna" ==> using idna = go.golang.org.x.net.idna_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\idna\idna9.0.0.go
 // import "golang.org/x/net/idna"
@@ -773,11 +773,11 @@ namespace net
         }
 
         private static readonly joinState stateStart = (joinState)iota;
-        private static readonly var stateVirama = (var)0;
-        private static readonly var stateBefore = (var)1;
-        private static readonly var stateBeforeVirama = (var)2;
-        private static readonly var stateAfter = (var)3;
-        private static readonly var stateFAIL = (var)4;
+        private static readonly var stateVirama = 0;
+        private static readonly var stateBefore = 1;
+        private static readonly var stateBeforeVirama = 2;
+        private static readonly var stateAfter = 3;
+        private static readonly var stateFAIL = 4;
 
 
         private static array<joinState> joinStates = new slice<array<joinState>>(InitKeyedValues<array<joinState>>((stateStart, {joiningL:stateBefore,joiningD:stateBefore,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateVirama,}), (stateVirama, {joiningL:stateBefore,joiningD:stateBefore,}), (stateBefore, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,joinZWNJ:stateAfter,joinZWJ:stateFAIL,joinVirama:stateBeforeVirama,}), (stateBeforeVirama, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,}), (stateAfter, {joiningL:stateFAIL,joiningD:stateBefore,joiningT:stateAfter,joiningR:stateStart,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateAfter,}), (stateFAIL, {0:stateFAIL,joiningL:stateFAIL,joiningD:stateFAIL,joiningT:stateFAIL,joiningR:stateFAIL,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateFAIL,})));

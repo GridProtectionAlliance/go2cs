@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package signal -- go2cs converted at 2020 October 08 03:43:57 UTC
+// package signal -- go2cs converted at 2020 October 09 05:00:59 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Go\src\os\signal\signal_plan9.go
 using os = go.os_package;

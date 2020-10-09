@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 00:33:47 UTC
+//     Generated on 2020 October 09 04:45:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using strings = go.strings_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class fileState<T> : fileState
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace archive
             private delegate long LogicalRemainingByPtr(ptr<T> value);
             private delegate long LogicalRemainingByVal(T value);
 
-            private static readonly LogicalRemainingByPtr s_LogicalRemainingByPtr;
-            private static readonly LogicalRemainingByVal s_LogicalRemainingByVal;
+            private static readonly LogicalRemainingByPtr? s_LogicalRemainingByPtr;
+            private static readonly LogicalRemainingByVal? s_LogicalRemainingByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long LogicalRemaining()
@@ -95,8 +96,8 @@ namespace archive
             private delegate long PhysicalRemainingByPtr(ptr<T> value);
             private delegate long PhysicalRemainingByVal(T value);
 
-            private static readonly PhysicalRemainingByPtr s_PhysicalRemainingByPtr;
-            private static readonly PhysicalRemainingByVal s_PhysicalRemainingByVal;
+            private static readonly PhysicalRemainingByPtr? s_PhysicalRemainingByPtr;
+            private static readonly PhysicalRemainingByVal? s_PhysicalRemainingByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long PhysicalRemaining()
@@ -112,7 +113,7 @@ namespace archive
                 return s_PhysicalRemainingByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static fileState()

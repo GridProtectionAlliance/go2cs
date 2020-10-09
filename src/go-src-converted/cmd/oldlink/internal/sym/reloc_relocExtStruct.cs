@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:40:29 UTC
+//     Generated on 2020 October 09 05:51:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using elf = go.debug.elf_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

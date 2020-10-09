@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:08 UTC
+//     Generated on 2020 October 09 04:52:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -54,7 +55,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class closeIdler<T> : closeIdler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace net
             private delegate void CloseIdleConnectionsByPtr(ptr<T> value);
             private delegate void CloseIdleConnectionsByVal(T value);
 
-            private static readonly CloseIdleConnectionsByPtr s_CloseIdleConnectionsByPtr;
-            private static readonly CloseIdleConnectionsByVal s_CloseIdleConnectionsByVal;
+            private static readonly CloseIdleConnectionsByPtr? s_CloseIdleConnectionsByPtr;
+            private static readonly CloseIdleConnectionsByVal? s_CloseIdleConnectionsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void CloseIdleConnections()
@@ -102,7 +103,7 @@ namespace net
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static closeIdler()

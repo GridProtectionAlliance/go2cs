@@ -5,7 +5,7 @@
 // Package ocagent adds the ability to export all telemetry to an ocagent.
 // This keeps the compile time dependencies to zero and allows the agent to
 // have the exporters needed for telemetry aggregation and viewing systems.
-// package ocagent -- go2cs converted at 2020 October 08 04:55:03 UTC
+// package ocagent -- go2cs converted at 2020 October 09 06:01:51 UTC
 // import "golang.org/x/tools/internal/event/export/ocagent" ==> using ocagent = go.golang.org.x.tools.@internal.@event.export.ocagent_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\export\ocagent\ocagent.go
 using bytes = go.bytes_package;

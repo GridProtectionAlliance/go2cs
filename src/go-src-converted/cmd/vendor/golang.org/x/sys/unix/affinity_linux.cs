@@ -4,7 +4,7 @@
 
 // CPU affinity functions
 
-// package unix -- go2cs converted at 2020 October 08 04:46:08 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:11 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\affinity_linux.go
 using bits = go.math.bits_package;
@@ -20,7 +20,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        private static readonly var cpuSetSize = (var)_CPU_SETSIZE / _NCPUBITS;
+        private static readonly var cpuSetSize = _CPU_SETSIZE / _NCPUBITS;
 
         // CPUSet represents a CPU affinity mask.
 

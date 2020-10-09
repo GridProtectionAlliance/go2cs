@@ -4,7 +4,7 @@
 
 // +build !amd64,!386,!arm,!ppc64le,!ppc64,!s390x,!arm64
 
-// package md5 -- go2cs converted at 2020 October 08 03:36:39 UTC
+// package md5 -- go2cs converted at 2020 October 09 04:54:36 UTC
 // import "crypto/md5" ==> using md5 = go.crypto.md5_package
 // Original source: C:\Go\src\crypto\md5\md5block_generic.go
 
@@ -15,7 +15,7 @@ namespace crypto
 {
     public static partial class md5_package
     {
-        private static readonly var haveAsm = (var)false;
+        private static readonly var haveAsm = false;
 
 
 

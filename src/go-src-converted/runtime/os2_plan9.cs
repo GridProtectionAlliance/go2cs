@@ -4,7 +4,7 @@
 
 // Plan 9-specific system calls
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:44 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:20 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os2_plan9.go
 

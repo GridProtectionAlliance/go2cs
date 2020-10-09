@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package html provides functions for escaping and unescaping HTML text.
-// package html -- go2cs converted at 2020 October 08 03:42:17 UTC
+// package html -- go2cs converted at 2020 October 09 04:59:35 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Go\src\html\escape.go
 using strings = go.strings_package;
@@ -27,7 +27,7 @@ namespace go
             long dst1 = default;
             long src1 = default;
 
-            const var attribute = (var)false; 
+            const var attribute = false; 
 
             // http://www.whatwg.org/specs/web-apps/current-work/multipage/tokenization.html#consume-a-character-reference
 

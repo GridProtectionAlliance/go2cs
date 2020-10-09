@@ -7,7 +7,7 @@
 // of the code, and name the measurements during that stage. There is also
 // optional GCs that can be performed at the end of each stage, so you
 // can get an accurate measurement of how each stage changes live memory.
-// package benchmark -- go2cs converted at 2020 October 08 04:39:20 UTC
+// package benchmark -- go2cs converted at 2020 October 09 05:50:11 UTC
 // import "cmd/link/internal/benchmark" ==> using benchmark = go.cmd.link.@internal.benchmark_package
 // Original source: C:\Go\src\cmd\link\internal\benchmark\bench.go
 using fmt = go.fmt_package;

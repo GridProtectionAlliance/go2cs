@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 08 04:41:21 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:59 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\lib.go
 using bufio = go.bufio_package;
@@ -3857,8 +3857,8 @@ namespace @internal
         {
         } // for postorder traversal
         private static readonly markKind _ = (markKind)iota;
-        private static readonly var visiting = (var)0;
-        private static readonly var visited = (var)1;
+        private static readonly var visiting = 0;
+        private static readonly var visited = 1;
 
 
         private static slice<ptr<sym.Library>> postorder(slice<ptr<sym.Library>> libs)

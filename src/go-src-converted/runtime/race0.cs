@@ -6,7 +6,7 @@
 
 // Dummy race detection API, used when not built with -race.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:48 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\race0.go
 using @unsafe = go.@unsafe_package;
@@ -16,7 +16,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        private static readonly var raceenabled = (var)false;
+        private static readonly var raceenabled = false;
 
         // Because raceenabled is false, none of these functions should be called.
 

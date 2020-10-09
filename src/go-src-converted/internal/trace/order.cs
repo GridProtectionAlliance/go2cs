@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:26 UTC
+// package trace -- go2cs converted at 2020 October 09 05:53:00 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\order.go
 using fmt = go.fmt_package;
@@ -40,12 +40,12 @@ namespace @internal
         }
 
         private static readonly gStatus gDead = (gStatus)iota;
-        private static readonly var gRunnable = (var)0;
-        private static readonly var gRunning = (var)1;
+        private static readonly var gRunnable = 0;
+        private static readonly var gRunning = 1;
         private static readonly unordered gWaiting = (unordered)~uint64(0L);
-        private static readonly var garbage = (var)~uint64(0L) - 1L;
-        private static readonly var noseq = (var)~uint64(0L);
-        private static readonly var seqinc = (var)~uint64(0L) - 1L;
+        private static readonly var garbage = ~uint64(0L) - 1L;
+        private static readonly var noseq = ~uint64(0L);
+        private static readonly var seqinc = ~uint64(0L) - 1L;
 
 
         // order1007 merges a set of per-P event batches into a single, consistent stream.

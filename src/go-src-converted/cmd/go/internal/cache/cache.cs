@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cache implements a build artifact cache.
-// package cache -- go2cs converted at 2020 October 08 04:33:58 UTC
+// package cache -- go2cs converted at 2020 October 09 05:45:30 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Go\src\cmd\go\internal\cache\cache.go
 using bytes = go.bytes_package;
@@ -135,7 +135,7 @@ namespace @internal
 
  
         // action entry file is "v1 <hex id> <hex out> <decimal size space-padded to 20 bytes> <unixnano space-padded to 20 bytes>\n"
-        private static readonly var hexSize = (var)HashSize * 2L;
+        private static readonly var hexSize = HashSize * 2L;
         private static readonly long entrySize = (long)2L + 1L + hexSize + 1L + hexSize + 1L + 20L + 1L + 20L + 1L;
 
 

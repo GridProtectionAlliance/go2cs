@@ -4,7 +4,7 @@
 
 // Parsing of ELF executables (Linux, FreeBSD, and so on).
 
-// package objfile -- go2cs converted at 2020 October 08 03:49:41 UTC
+// package objfile -- go2cs converted at 2020 October 09 05:08:22 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Go\src\cmd\internal\objfile\elf.go
 using dwarf = go.debug.dwarf_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:15 UTC
+//     Generated on 2020 October 09 05:45:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @internal = go.golang.org.x.xerrors.@internal_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

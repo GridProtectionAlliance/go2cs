@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package run implements the ``go run'' command.
-// package run -- go2cs converted at 2020 October 08 04:33:47 UTC
+// package run -- go2cs converted at 2020 October 09 05:45:21 UTC
 // import "cmd/go/internal/run" ==> using run = go.cmd.go.@internal.run_package
 // Original source: C:\Go\src\cmd\go\internal\run\run.go
 using fmt = go.fmt_package;

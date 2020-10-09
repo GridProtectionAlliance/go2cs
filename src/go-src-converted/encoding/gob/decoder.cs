@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 October 08 03:42:36 UTC
+// package gob -- go2cs converted at 2020 October 09 04:59:51 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\decoder.go
 using bufio = go.bufio_package;

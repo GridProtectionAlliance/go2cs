@@ -4,7 +4,7 @@
 
 // +build darwin,amd64
 
-// package macOS -- go2cs converted at 2020 October 08 03:36:58 UTC
+// package macOS -- go2cs converted at 2020 October 09 04:54:54 UTC
 // import "crypto/x509/internal.macOS" ==> using macOS = go.crypto.x509.internal.macOS_package
 // Original source: C:\Go\src\crypto\x509\internal\macos\security.go
 using errors = go.errors_package;
@@ -24,10 +24,10 @@ namespace x509
         }
 
         public static readonly SecTrustSettingsResult SecTrustSettingsResultInvalid = (SecTrustSettingsResult)iota;
-        public static readonly var SecTrustSettingsResultTrustRoot = (var)0;
-        public static readonly var SecTrustSettingsResultTrustAsRoot = (var)1;
-        public static readonly var SecTrustSettingsResultDeny = (var)2;
-        public static readonly var SecTrustSettingsResultUnspecified = (var)3;
+        public static readonly var SecTrustSettingsResultTrustRoot = 0;
+        public static readonly var SecTrustSettingsResultTrustAsRoot = 1;
+        public static readonly var SecTrustSettingsResultDeny = 2;
+        public static readonly var SecTrustSettingsResultUnspecified = 3;
 
 
         public partial struct SecTrustSettingsDomain // : int
@@ -35,8 +35,8 @@ namespace x509
         }
 
         public static readonly SecTrustSettingsDomain SecTrustSettingsDomainUser = (SecTrustSettingsDomain)iota;
-        public static readonly var SecTrustSettingsDomainAdmin = (var)0;
-        public static readonly var SecTrustSettingsDomainSystem = (var)1;
+        public static readonly var SecTrustSettingsDomainAdmin = 0;
+        public static readonly var SecTrustSettingsDomainSystem = 1;
 
 
         public partial struct OSStatus

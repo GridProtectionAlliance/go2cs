@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:22 UTC
+//     Generated on 2020 October 09 05:47:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using lazyregexp = go.golang.org.x.mod.@internal.lazyregexp_package;
 using module = go.golang.org.x.mod.module_package;
 using tlog = go.golang.org.x.mod.sumdb.tlog_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

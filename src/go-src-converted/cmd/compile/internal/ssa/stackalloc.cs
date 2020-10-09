@@ -4,7 +4,7 @@
 
 // TODO: live at start of block instead?
 
-// package ssa -- go2cs converted at 2020 October 08 04:26:43 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:39:36 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\stackalloc.go
 using types = go.cmd.compile.@internal.types_package;

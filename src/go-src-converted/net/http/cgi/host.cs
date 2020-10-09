@@ -12,7 +12,7 @@
 // request, which is typically less efficient than using a
 // long-running server. This package is intended primarily for
 // compatibility with existing systems.
-// package cgi -- go2cs converted at 2020 October 08 03:40:51 UTC
+// package cgi -- go2cs converted at 2020 October 09 04:58:20 UTC
 // import "net/http/cgi" ==> using cgi = go.net.http.cgi_package
 // Original source: C:\Go\src\net\http\cgi\host.go
 using bufio = go.bufio_package;

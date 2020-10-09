@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:43 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:17 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\esc.go
 using types = go.cmd.compile.@internal.types_package;
@@ -23,9 +23,9 @@ namespace @internal
         }
 
         public static readonly long EscFuncUnknown = (long)0L + iota;
-        public static readonly var EscFuncPlanned = (var)0;
-        public static readonly var EscFuncStarted = (var)1;
-        public static readonly var EscFuncTagged = (var)2;
+        public static readonly var EscFuncPlanned = 0;
+        public static readonly var EscFuncStarted = 1;
+        public static readonly var EscFuncTagged = 2;
 
 
         private static sbyte min8(sbyte a, sbyte b)
@@ -50,10 +50,10 @@ namespace @internal
 
         }
 
-        public static readonly var EscUnknown = (var)iota;
-        public static readonly var EscNone = (var)0; // Does not escape to heap, result, or parameters.
-        public static readonly var EscHeap = (var)1; // Reachable from the heap
-        public static readonly var EscNever = (var)2; // By construction will not escape.
+        public static readonly var EscUnknown = iota;
+        public static readonly var EscNone = 0; // Does not escape to heap, result, or parameters.
+        public static readonly var EscHeap = 1; // Reachable from the heap
+        public static readonly var EscNever = 2; // By construction will not escape.
 
         // funcSym returns fn.Func.Nname.Sym if no nils are encountered along the way.
         private static ptr<types.Sym> funcSym(ptr<Node> _addr_fn)

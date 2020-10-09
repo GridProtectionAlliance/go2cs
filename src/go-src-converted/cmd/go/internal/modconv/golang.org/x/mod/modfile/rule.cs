@@ -17,7 +17,7 @@
 //
 // The Format function formats a File back to a byte slice which can be
 // written to a file.
-// package modfile -- go2cs converted at 2020 October 08 04:35:28 UTC
+// package modfile -- go2cs converted at 2020 October 09 05:46:46 UTC
 // import "golang.org/x/mod/modfile" ==> using modfile = go.golang.org.x.mod.modfile_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\modfile\rule.go
 using errors = go.errors_package;

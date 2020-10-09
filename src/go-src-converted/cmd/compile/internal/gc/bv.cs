@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:03 UTC
+// package gc -- go2cs converted at 2020 October 09 05:40:41 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\bv.go
 using bits = go.math.bits_package;
@@ -16,7 +16,7 @@ namespace @internal
     public static partial class gc_package
     {
         private static readonly long wordBits = (long)32L;
-        private static readonly var wordMask = (var)wordBits - 1L;
+        private static readonly var wordMask = wordBits - 1L;
         private static readonly long wordShift = (long)5L;
 
 

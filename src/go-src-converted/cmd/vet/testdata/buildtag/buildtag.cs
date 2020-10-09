@@ -7,7 +7,7 @@
 // +builder // ERROR "possible malformed \+build comment"
 // +build !ignore
 
-// package testdata -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package testdata -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata.testdata" ==> using testdata = go.cmd.vet.testdata.testdata_package
 // Original source: C:\Go\src\cmd\vet\testdata\buildtag\buildtag.go
 

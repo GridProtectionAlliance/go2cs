@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package codehost -- go2cs converted at 2020 October 08 04:35:55 UTC
+// package codehost -- go2cs converted at 2020 October 09 05:47:07 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Go\src\cmd\go\internal\modfetch\codehost\svn.go
 using zip = go.archive.zip_package;

@@ -4,7 +4,7 @@
 
 // +build aix linux dragonfly openbsd solaris
 
-// package tar -- go2cs converted at 2020 October 08 03:49:12 UTC
+// package tar -- go2cs converted at 2020 October 09 05:08:03 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\stat_actime1.go
 using syscall = go.syscall_package;

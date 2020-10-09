@@ -5,7 +5,7 @@
 // Package testlog provides a back-channel communication path
 // between tests and package os, so that cmd/go can see which
 // environment variables and files a test consults.
-// package testlog -- go2cs converted at 2020 October 08 03:44:20 UTC
+// package testlog -- go2cs converted at 2020 October 09 05:07:00 UTC
 // import "internal/testlog" ==> using testlog = go.@internal.testlog_package
 // Original source: C:\Go\src\internal\testlog\log.go
 using atomic = go.sync.atomic_package;

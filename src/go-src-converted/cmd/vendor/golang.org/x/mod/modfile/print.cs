@@ -4,7 +4,7 @@
 
 // Module file printer.
 
-// package modfile -- go2cs converted at 2020 October 08 04:45:46 UTC
+// package modfile -- go2cs converted at 2020 October 09 05:55:50 UTC
 // import "cmd/vendor/golang.org/x/mod/modfile" ==> using modfile = go.cmd.vendor.golang.org.x.mod.modfile_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\modfile\print.go
 using bytes = go.bytes_package;

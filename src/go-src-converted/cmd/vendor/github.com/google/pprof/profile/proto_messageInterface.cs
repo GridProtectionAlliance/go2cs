@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:41 UTC
+//     Generated on 2020 October 09 05:54:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace pprof
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class message<T> : message
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace pprof
             private delegate slice<decoder> decoderByPtr(ptr<T> value);
             private delegate slice<decoder> decoderByVal(T value);
 
-            private static readonly decoderByPtr s_decoderByPtr;
-            private static readonly decoderByVal s_decoderByVal;
+            private static readonly decoderByPtr? s_decoderByPtr;
+            private static readonly decoderByVal? s_decoderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<decoder> decoder()
@@ -92,8 +93,8 @@ namespace pprof
             private delegate slice<decoder> encodeByPtr(ptr<T> value, ptr<buffer> _p0);
             private delegate slice<decoder> encodeByVal(T value, ptr<buffer> _p0);
 
-            private static readonly encodeByPtr s_encodeByPtr;
-            private static readonly encodeByVal s_encodeByVal;
+            private static readonly encodeByPtr? s_encodeByPtr;
+            private static readonly encodeByVal? s_encodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<decoder> encode(ptr<buffer> _p0)
@@ -109,7 +110,7 @@ namespace pprof
                 return s_encodeByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static message()

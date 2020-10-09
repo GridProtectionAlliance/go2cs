@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package nettest provides utilities for network testing.
-// package nettest -- go2cs converted at 2020 October 08 05:01:32 UTC
+// package nettest -- go2cs converted at 2020 October 09 06:07:43 UTC
 // import "vendor/golang.org/x/net/nettest" ==> using nettest = go.vendor.golang.org.x.net.nettest_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\nettest\nettest.go
 using errors = go.errors_package;

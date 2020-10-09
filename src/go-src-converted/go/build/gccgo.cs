@@ -4,7 +4,7 @@
 
 // +build gccgo
 
-// package build -- go2cs converted at 2020 October 08 04:04:15 UTC
+// package build -- go2cs converted at 2020 October 09 05:20:00 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Go\src\go\build\gccgo.go
 using runtime = go.runtime_package;

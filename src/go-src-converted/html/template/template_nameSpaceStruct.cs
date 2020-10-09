@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:43:10 UTC
+//     Generated on 2020 October 09 05:00:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using sync = go.sync_package;
 using template = go.text.template_package;
 using parse = go.text.template.parse_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace html

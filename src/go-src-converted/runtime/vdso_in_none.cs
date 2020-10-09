@@ -4,7 +4,7 @@
 
 // +build linux,!386,!amd64,!arm,!arm64,!mips64,!mips64le,!ppc64,!ppc64le !linux
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:22 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:10 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\vdso_in_none.go
 

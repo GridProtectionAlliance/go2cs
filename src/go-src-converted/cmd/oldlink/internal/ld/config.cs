@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:40:34 UTC
+// package ld -- go2cs converted at 2020 October 09 05:51:16 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\config.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -28,12 +28,12 @@ namespace @internal
         }
 
         public static readonly BuildMode BuildModeUnset = (BuildMode)iota;
-        public static readonly var BuildModeExe = (var)0;
-        public static readonly var BuildModePIE = (var)1;
-        public static readonly var BuildModeCArchive = (var)2;
-        public static readonly var BuildModeCShared = (var)3;
-        public static readonly var BuildModeShared = (var)4;
-        public static readonly var BuildModePlugin = (var)5;
+        public static readonly var BuildModeExe = 0;
+        public static readonly var BuildModePIE = 1;
+        public static readonly var BuildModeCArchive = 2;
+        public static readonly var BuildModeCShared = 3;
+        public static readonly var BuildModeShared = 4;
+        public static readonly var BuildModePlugin = 5;
 
 
         private static error Set(this ptr<BuildMode> _addr_mode, @string s)
@@ -246,8 +246,8 @@ namespace @internal
         }
 
         public static readonly LinkMode LinkAuto = (LinkMode)iota;
-        public static readonly var LinkInternal = (var)0;
-        public static readonly var LinkExternal = (var)1;
+        public static readonly var LinkInternal = 0;
+        public static readonly var LinkExternal = 1;
 
 
         private static error Set(this ptr<LinkMode> _addr_mode, @string s)

@@ -111,7 +111,7 @@
 // will have no use (so don't run deadcode after regalloc!).
 // TODO: maybe we should introduce these extra phis?
 
-// package ssa -- go2cs converted at 2020 October 08 04:11:47 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:25:44 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\regalloc.go
 using types = go.cmd.compile.@internal.types_package;
@@ -131,10 +131,10 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        private static readonly var moveSpills = (var)iota;
-        private static readonly var logSpills = (var)0;
-        private static readonly var regDebug = (var)1;
-        private static readonly var stackDebug = (var)2;
+        private static readonly var moveSpills = iota;
+        private static readonly var logSpills = 0;
+        private static readonly var regDebug = 1;
+        private static readonly var stackDebug = 2;
 
 
         // distance is a measure of how far into the future values are used.

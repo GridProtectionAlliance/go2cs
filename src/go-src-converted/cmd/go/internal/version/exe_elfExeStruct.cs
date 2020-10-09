@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:49 UTC
+//     Generated on 2020 October 09 05:45:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,8 @@ using xcoff = go.@internal.xcoff_package;
 using io = go.io_package;
 using os = go.os_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

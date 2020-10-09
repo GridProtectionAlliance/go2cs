@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:14 UTC
+//     Generated on 2020 October 09 04:56:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2headersOrContinuation<T> : http2headersOrContinuation
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate slice<byte> HeaderBlockFragmentByPtr(ptr<T> value);
             private delegate slice<byte> HeaderBlockFragmentByVal(T value);
 
-            private static readonly HeaderBlockFragmentByPtr s_HeaderBlockFragmentByPtr;
-            private static readonly HeaderBlockFragmentByVal s_HeaderBlockFragmentByVal;
+            private static readonly HeaderBlockFragmentByPtr? s_HeaderBlockFragmentByPtr;
+            private static readonly HeaderBlockFragmentByVal? s_HeaderBlockFragmentByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> HeaderBlockFragment()
@@ -116,8 +117,8 @@ namespace net
             private delegate bool HeadersEndedByPtr(ptr<T> value);
             private delegate bool HeadersEndedByVal(T value);
 
-            private static readonly HeadersEndedByPtr s_HeadersEndedByPtr;
-            private static readonly HeadersEndedByVal s_HeadersEndedByVal;
+            private static readonly HeadersEndedByPtr? s_HeadersEndedByPtr;
+            private static readonly HeadersEndedByVal? s_HeadersEndedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool HeadersEnded()
@@ -133,7 +134,7 @@ namespace net
                 return s_HeadersEndedByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2headersOrContinuation()

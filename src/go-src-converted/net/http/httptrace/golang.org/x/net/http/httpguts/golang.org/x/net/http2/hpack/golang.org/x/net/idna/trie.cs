@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package idna -- go2cs converted at 2020 October 08 03:40:08 UTC
+// package idna -- go2cs converted at 2020 October 09 04:57:41 UTC
 // import "golang.org/x/net/idna" ==> using idna = go.golang.org.x.net.idna_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\idna\trie.go
 

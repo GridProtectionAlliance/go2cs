@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package get implements the ``go get'' command.
-// package get -- go2cs converted at 2020 October 08 04:36:51 UTC
+// package get -- go2cs converted at 2020 October 09 05:47:59 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Go\src\cmd\go\internal\get\get.go
 using fmt = go.fmt_package;

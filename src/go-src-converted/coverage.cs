@@ -4,7 +4,7 @@
 // Validate this file with 'go run' after editing.
 // TODO(adonovan): break this into small files organized by theme.
 
-// package main -- go2cs converted at 2020 October 08 04:57:30 UTC
+// package main -- go2cs converted at 2020 October 09 06:03:45 UTC
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\testdata\coverage.go
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;

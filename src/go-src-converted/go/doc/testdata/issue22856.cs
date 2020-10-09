@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue22856 -- go2cs converted at 2020 October 08 04:02:54 UTC
+// package issue22856 -- go2cs converted at 2020 October 09 05:19:11 UTC
 // import "go/doc.issue22856" ==> using issue22856 = go.go.doc.issue22856_package
 // Original source: C:\Go\src\go\doc\testdata\issue22856.go
 

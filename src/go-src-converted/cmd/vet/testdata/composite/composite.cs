@@ -4,7 +4,7 @@
 
 // This file contains the test for untagged struct literals.
 
-// package composite -- go2cs converted at 2020 October 08 04:58:36 UTC
+// package composite -- go2cs converted at 2020 October 09 06:05:08 UTC
 // import "cmd/vet/testdata/composite" ==> using composite = go.cmd.vet.testdata.composite_package
 // Original source: C:\Go\src\cmd\vet\testdata\composite\composite.go
 using flag = go.flag_package;

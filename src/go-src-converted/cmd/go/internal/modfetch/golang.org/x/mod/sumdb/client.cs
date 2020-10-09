@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sumdb -- go2cs converted at 2020 October 08 04:36:18 UTC
+// package sumdb -- go2cs converted at 2020 October 09 05:47:29 UTC
 // import "golang.org/x/mod/sumdb" ==> using sumdb = go.golang.org.x.mod.sumdb_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\sumdb\client.go
 using bytes = go.bytes_package;
@@ -499,8 +499,8 @@ namespace mod
         }
 
         private static readonly long msgPast = (long)1L + iota;
-        private static readonly var msgNow = (var)0;
-        private static readonly var msgFuture = (var)1;
+        private static readonly var msgNow = 0;
+        private static readonly var msgFuture = 1;
 
         // mergeLatestMem is like mergeLatest but is only concerned with
         // updating the in-memory copy of the latest tree head (c.latest)

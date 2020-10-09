@@ -6,7 +6,7 @@
 // how to use golang.org/x/tools/go/packages to load, parse,
 // type-check, and print one or more Go packages.
 // Its precise output is unspecified and may change.
-// package main -- go2cs converted at 2020 October 08 04:55:40 UTC
+// package main -- go2cs converted at 2020 October 09 06:02:22 UTC
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\packages\gopackages\main.go
 using context = go.context_package;
 using json = go.encoding.json_package;

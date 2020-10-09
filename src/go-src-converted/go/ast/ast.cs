@@ -5,7 +5,7 @@
 // Package ast declares the types used to represent syntax trees for Go
 // packages.
 //
-// package ast -- go2cs converted at 2020 October 08 04:02:23 UTC
+// package ast -- go2cs converted at 2020 October 09 05:18:49 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\ast.go
 using token = go.go.token_package;
@@ -544,7 +544,7 @@ namespace go
         }
 
         public static readonly ChanDir SEND = (ChanDir)1L << (int)(iota);
-        public static readonly var RECV = (var)0;
+        public static readonly var RECV = 0;
 
 
         // A type is represented by a tree consisting of one

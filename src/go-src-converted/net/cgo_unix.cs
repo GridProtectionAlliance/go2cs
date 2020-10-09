@@ -5,7 +5,7 @@
 // +build cgo,!netgo
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 October 08 03:31:13 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:27 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\cgo_unix.go
 /*

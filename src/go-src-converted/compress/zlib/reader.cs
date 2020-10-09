@@ -21,7 +21,7 @@ and to read that data back:
     io.Copy(os.Stdout, r)
     r.Close()
 */
-// package zlib -- go2cs converted at 2020 October 08 03:49:52 UTC
+// package zlib -- go2cs converted at 2020 October 09 05:08:32 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Go\src\compress\zlib\reader.go
 using bufio = go.bufio_package;

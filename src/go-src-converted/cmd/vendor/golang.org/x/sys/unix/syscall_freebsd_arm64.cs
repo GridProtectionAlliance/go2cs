@@ -4,7 +4,7 @@
 
 // +build arm64,freebsd
 
-// package unix -- go2cs converted at 2020 October 08 04:47:12 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:37 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_freebsd_arm64.go
 using syscall = go.syscall_package;

@@ -1,4 +1,4 @@
-// package a -- go2cs converted at 2020 October 08 04:39:53 UTC
+// package a -- go2cs converted at 2020 October 09 05:50:36 UTC
 // import "cmd/link/internal/ld/testdata/issue25459/a" ==> using a = go.cmd.link.@internal.ld.testdata.issue25459.a_package
 // Original source: C:\Go\src\cmd\link\internal\ld\testdata\issue25459\a\a.go
 
@@ -15,7 +15,7 @@ namespace issue25459
 {
     public static partial class a_package
     {
-        public static readonly var Always = (var)true;
+        public static readonly var Always = true;
 
 
 

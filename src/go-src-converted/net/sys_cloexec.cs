@@ -7,7 +7,7 @@
 
 // +build aix darwin solaris
 
-// package net -- go2cs converted at 2020 October 08 03:34:38 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:24 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sys_cloexec.go
 using poll = go.@internal.poll_package;

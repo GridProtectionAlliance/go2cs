@@ -4,7 +4,7 @@
 
 // +build !gccgo,!purego
 
-// package chacha20poly1305 -- go2cs converted at 2020 October 08 04:59:54 UTC
+// package chacha20poly1305 -- go2cs converted at 2020 October 09 06:06:16 UTC
 // import "vendor/golang.org/x/crypto/chacha20poly1305" ==> using chacha20poly1305 = go.vendor.golang.org.x.crypto.chacha20poly1305_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\chacha20poly1305\chacha20poly1305_amd64.go
 using binary = go.encoding.binary_package;

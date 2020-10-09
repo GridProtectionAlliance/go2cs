@@ -65,7 +65,7 @@
     analogous to the top-level functions for the command-line
     flag set.
 */
-// package flag -- go2cs converted at 2020 October 08 03:41:30 UTC
+// package flag -- go2cs converted at 2020 October 09 04:58:54 UTC
 // import "flag" ==> using flag = go.flag_package
 // Original source: C:\Go\src\flag\flag.go
 using errors = go.errors_package;
@@ -493,8 +493,8 @@ namespace go
 
         // These constants cause FlagSet.Parse to behave as described if the parse fails.
         public static readonly ErrorHandling ContinueOnError = (ErrorHandling)iota; // Return a descriptive error.
-        public static readonly var ExitOnError = (var)0; // Call os.Exit(2) or for -h/-help Exit(0).
-        public static readonly var PanicOnError = (var)1; // Call panic with a descriptive error.
+        public static readonly var ExitOnError = 0; // Call os.Exit(2) or for -h/-help Exit(0).
+        public static readonly var PanicOnError = 1; // Call panic with a descriptive error.
 
         // A FlagSet represents a set of defined flags. The zero value of a FlagSet
         // has no name and has ContinueOnError error handling.

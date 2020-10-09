@@ -1,4 +1,4 @@
-// package runtime -- go2cs converted at 2020 October 08 03:19:36 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:52 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_openbsd_arm64.go
 using @unsafe = go.@unsafe_package;

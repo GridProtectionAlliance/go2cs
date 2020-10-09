@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2020 October 08 04:44:11 UTC
+// package armasm -- go2cs converted at 2020 October 09 05:54:26 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\plan9x.go
 using bytes = go.bytes_package;

@@ -3,7 +3,7 @@
 
 // +build netbsd,amd64
 
-// package unix -- go2cs converted at 2020 October 08 04:52:36 UTC
+// package unix -- go2cs converted at 2020 October 09 05:59:48 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_netbsd_amd64.go
 using syscall = go.syscall_package;

@@ -4,7 +4,7 @@
 
 // +build s390x ppc64le
 
-// package sha512 -- go2cs converted at 2020 October 08 03:35:43 UTC
+// package sha512 -- go2cs converted at 2020 October 09 04:53:41 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Go\src\crypto\sha512\sha512block_decl.go
 

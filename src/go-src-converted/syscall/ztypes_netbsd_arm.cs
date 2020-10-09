@@ -3,7 +3,7 @@
 
 // +build arm,netbsd
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:40 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:33 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_netbsd_arm.go
 

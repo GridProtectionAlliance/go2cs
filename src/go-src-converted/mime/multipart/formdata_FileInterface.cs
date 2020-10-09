@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:27 UTC
+//     Generated on 2020 October 09 04:56:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using textproto = go.net.textproto_package;
 using os = go.os_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace mime
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class File<T> : File
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace mime
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -92,8 +93,8 @@ namespace mime
             private delegate (long, error) ReadAtByPtr(ptr<T> value, slice<byte> p, long off);
             private delegate (long, error) ReadAtByVal(T value, slice<byte> p, long off);
 
-            private static readonly ReadAtByPtr s_ReadAtByPtr;
-            private static readonly ReadAtByVal s_ReadAtByVal;
+            private static readonly ReadAtByPtr? s_ReadAtByPtr;
+            private static readonly ReadAtByVal? s_ReadAtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) ReadAt(slice<byte> p, long off)
@@ -112,8 +113,8 @@ namespace mime
             private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
             private delegate (long, error) SeekByVal(T value, long offset, long whence);
 
-            private static readonly SeekByPtr s_SeekByPtr;
-            private static readonly SeekByVal s_SeekByVal;
+            private static readonly SeekByPtr? s_SeekByPtr;
+            private static readonly SeekByVal? s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Seek(long offset, long whence)
@@ -132,8 +133,8 @@ namespace mime
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -149,7 +150,7 @@ namespace mime
                 return s_CloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static File()

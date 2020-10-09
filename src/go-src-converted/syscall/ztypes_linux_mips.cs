@@ -1,7 +1,7 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_linux.go
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:36 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:27 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_linux_mips.go
 

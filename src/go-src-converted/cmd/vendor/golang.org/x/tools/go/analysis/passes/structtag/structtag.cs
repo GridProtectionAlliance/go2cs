@@ -4,7 +4,7 @@
 
 // Package structtag defines an Analyzer that checks struct field tags
 // are well formed.
-// package structtag -- go2cs converted at 2020 October 08 04:58:11 UTC
+// package structtag -- go2cs converted at 2020 October 09 06:04:46 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/structtag" ==> using structtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.structtag_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\structtag\structtag.go
 using errors = go.errors_package;

@@ -53,7 +53,7 @@
 // not sufficiently large to satisfy a page-level memory allocation, so we
 // scavenge those fragments eagerly to offset the growth in RSS that results.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:59 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgcscavenge.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -84,7 +84,7 @@ namespace go
 
         // maxPagesPerPhysPage is the maximum number of supported runtime pages per
         // physical page, based on maxPhysPageSize.
-        private static readonly var maxPagesPerPhysPage = (var)maxPhysPageSize / pageSize; 
+        private static readonly var maxPagesPerPhysPage = maxPhysPageSize / pageSize; 
 
         // scavengeCostRatio is the approximate ratio between the costs of using previously
         // scavenged memory and scavenging memory.
@@ -294,7 +294,7 @@ namespace go
             // it makes sense to also make the scavenger scale with it; if you're
             // allocating more frequently, then presumably you're also generating
             // more work for the scavenger.
-            const var idealFraction = (var)scavengePercent / 100.0F;
+            const var idealFraction = scavengePercent / 100.0F;
 
             var scavengeEWMA = float64(idealFraction);
 

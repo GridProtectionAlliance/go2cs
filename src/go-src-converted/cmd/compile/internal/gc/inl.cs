@@ -24,7 +24,7 @@
 // The debug['m'] flag enables diagnostic output.  a single -m is useful for verifying
 // which calls get inlined or not, more is for debugging, and may go away at any point.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:19 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:47 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\inl.go
 using logopt = go.cmd.compile.@internal.logopt_package;
@@ -49,7 +49,7 @@ namespace @internal
         // default is to inline if there's at most one call. -l=4 overrides this by using 1 instead.
         private static readonly long inlineExtraCallCost = (long)57L; // 57 was benchmarked to provided most benefit with no bad surprises; see https://github.com/golang/go/issues/19348#issuecomment-439370742
         private static readonly long inlineExtraPanicCost = (long)1L; // do not penalize inlining panics.
-        private static readonly var inlineExtraThrowCost = (var)inlineMaxBudget; // with current (2018-05/1.11) code, inlining runtime.throw does not help.
+        private static readonly var inlineExtraThrowCost = inlineMaxBudget; // with current (2018-05/1.11) code, inlining runtime.throw does not help.
 
         private static readonly long inlineBigFunctionNodes = (long)5000L; // Functions with this many nodes are considered "big".
         private static readonly long inlineBigFunctionMaxCost = (long)20L; // Max cost of inlinee when inlining into a "big" function.

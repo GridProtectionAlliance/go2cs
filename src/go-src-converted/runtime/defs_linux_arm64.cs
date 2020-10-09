@@ -1,7 +1,7 @@
 // Created by cgo -cdefs and converted (by hand) to Go
 // ../cmd/cgo/cgo -cdefs defs_linux.go defs1_linux.go defs2_linux.go
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:34 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:50 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\defs_linux_arm64.go
 

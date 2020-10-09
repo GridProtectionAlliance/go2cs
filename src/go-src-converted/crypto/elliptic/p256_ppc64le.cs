@@ -4,7 +4,7 @@
 
 // +build ppc64le
 
-// package elliptic -- go2cs converted at 2020 October 08 03:36:31 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:54:28 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p256_ppc64le.go
 using subtle = go.crypto.subtle_package;

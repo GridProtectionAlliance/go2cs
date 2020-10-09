@@ -8,7 +8,7 @@
 // launch with `go run constFoldGen.go` a file called constFold_test.go
 // will be written into the grandparent directory containing the tests.
 
-// package main -- go2cs converted at 2020 October 08 04:32:03 UTC
+// package main -- go2cs converted at 2020 October 09 05:43:56 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\constFoldGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;

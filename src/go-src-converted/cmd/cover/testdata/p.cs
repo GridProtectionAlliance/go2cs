@@ -4,7 +4,7 @@
 
 // A package such that there are 3 functions with zero total and covered lines.
 // And one with 1 total and covered lines. Reproduces issue #20515.
-// package p -- go2cs converted at 2020 October 08 04:32:37 UTC
+// package p -- go2cs converted at 2020 October 09 05:44:25 UTC
 // import "cmd/cover.p" ==> using p = go.cmd.cover.p_package
 // Original source: C:\Go\src\cmd\cover\testdata\p.go
 

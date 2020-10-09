@@ -26,7 +26,7 @@
 
 // +build !plan9
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:33 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:36 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\sigqueue.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -50,9 +50,9 @@ namespace go
         // but atomic instructions should minimize it.
         private static var sig = default;
 
-        private static readonly var sigIdle = (var)iota;
-        private static readonly var sigReceiving = (var)0;
-        private static readonly var sigSending = (var)1;
+        private static readonly var sigIdle = iota;
+        private static readonly var sigReceiving = 0;
+        private static readonly var sigSending = 1;
 
 
         // sigsend delivers a signal from sighandler to the internal signal delivery queue.

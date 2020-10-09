@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:52 UTC
+//     Generated on 2020 October 09 05:54:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace ianlancetaylor
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class innerPrinter<T> : innerPrinter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace ianlancetaylor
             private delegate void printInnerByPtr(ptr<T> value, ptr<printState> _p0);
             private delegate void printInnerByVal(T value, ptr<printState> _p0);
 
-            private static readonly printInnerByPtr s_printInnerByPtr;
-            private static readonly printInnerByVal s_printInnerByVal;
+            private static readonly printInnerByPtr? s_printInnerByPtr;
+            private static readonly printInnerByVal? s_printInnerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void printInner(ptr<printState> _p0)
@@ -94,7 +95,7 @@ namespace ianlancetaylor
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static innerPrinter()

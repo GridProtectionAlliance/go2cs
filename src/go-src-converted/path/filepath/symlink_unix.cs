@@ -1,6 +1,6 @@
 // +build !windows
 
-// package filepath -- go2cs converted at 2020 October 08 03:37:04 UTC
+// package filepath -- go2cs converted at 2020 October 09 04:49:48 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Go\src\path\filepath\symlink_unix.go
 

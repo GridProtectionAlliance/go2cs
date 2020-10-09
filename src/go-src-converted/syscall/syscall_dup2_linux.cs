@@ -5,7 +5,7 @@
 // +build !android
 // +build 386 amd64 arm mips mipsle mips64 mips64le ppc64 ppc64le s390x
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:17 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:40 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_dup2_linux.go
 
@@ -15,7 +15,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var _SYS_dup = (var)SYS_DUP2;
+        private static readonly var _SYS_dup = SYS_DUP2;
 
     }
 }

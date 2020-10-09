@@ -4,7 +4,7 @@
 
 // Package chacha20 implements the ChaCha20 and XChaCha20 encryption algorithms
 // as specified in RFC 8439 and draft-irtf-cfrg-xchacha-01.
-// package chacha20 -- go2cs converted at 2020 October 08 04:59:53 UTC
+// package chacha20 -- go2cs converted at 2020 October 09 06:06:15 UTC
 // import "vendor/golang.org/x/crypto/chacha20" ==> using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\chacha20\chacha_generic.go
 using cipher = go.crypto.cipher_package;
@@ -88,7 +88,7 @@ namespace crypto
             // be inlined, and depending on how the caller uses the return value, won't
             // escape to the heap.
             ptr<Cipher> c = addr(new Cipher());
-            return _addr_newUnauthenticatedCipher(_addr_c, key, nonce)!;
+            return _addr_newUnauthenticatedCipher(c, key, nonce)!;
 
         }
 
@@ -285,7 +285,7 @@ namespace crypto
 
             // If using a multi-block xorKeyStreamBlocks would overflow, use the generic
             // one that does one block at a time.
-            const var blocksPerBuf = (var)bufSize / blockSize;
+            const var blocksPerBuf = bufSize / blockSize;
 
             if (uint64(s.counter) + blocksPerBuf > 1L << (int)(32L))
             {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package driver -- go2cs converted at 2020 October 08 04:58:47 UTC
+// package driver -- go2cs converted at 2020 October 09 06:05:19 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Go\src\database\sql\driver\types.go
 using fmt = go.fmt_package;

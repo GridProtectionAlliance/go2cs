@@ -9,7 +9,7 @@
 // rounding mode of the result operand determines the rounding
 // mode of an operation. This is a from-scratch implementation.
 
-// package big -- go2cs converted at 2020 October 08 03:25:30 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:22 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\float.go
 using fmt = go.fmt_package;
@@ -22,7 +22,7 @@ namespace math
 {
     public static partial class big_package
     {
-        private static readonly var debugFloat = (var)false; // enable for debugging
+        private static readonly var debugFloat = false; // enable for debugging
 
         // A nonzero finite Float represents a multi-precision floating point number
         //
@@ -150,9 +150,9 @@ namespace math
         });
 
         // Exponent and precision limits.
-        public static readonly var MaxExp = (var)math.MaxInt32; // largest supported exponent
-        public static readonly var MinExp = (var)math.MinInt32; // smallest supported exponent
-        public static readonly var MaxPrec = (var)math.MaxUint32; // largest (theoretically) supported precision; likely memory-limited
+        public static readonly var MaxExp = math.MaxInt32; // largest supported exponent
+        public static readonly var MinExp = math.MinInt32; // smallest supported exponent
+        public static readonly var MaxPrec = math.MaxUint32; // largest (theoretically) supported precision; likely memory-limited
 
         // Internal representation: The mantissa bits x.mant of a nonzero finite
         // Float x are stored in a nat slice long enough to hold up to x.prec bits;
@@ -178,8 +178,8 @@ namespace math
 
         // The form value order is relevant - do not change!
         private static readonly form zero = (form)iota;
-        private static readonly var finite = (var)0;
-        private static readonly var inf = (var)1;
+        private static readonly var finite = 0;
+        private static readonly var inf = 1;
 
 
         // RoundingMode determines how a Float value is rounded to the
@@ -191,11 +191,11 @@ namespace math
 
         // These constants define supported rounding modes.
         public static readonly RoundingMode ToNearestEven = (RoundingMode)iota; // == IEEE 754-2008 roundTiesToEven
-        public static readonly var ToNearestAway = (var)0; // == IEEE 754-2008 roundTiesToAway
-        public static readonly var ToZero = (var)1; // == IEEE 754-2008 roundTowardZero
-        public static readonly var AwayFromZero = (var)2; // no IEEE 754-2008 equivalent
-        public static readonly var ToNegativeInf = (var)3; // == IEEE 754-2008 roundTowardNegative
-        public static readonly var ToPositiveInf = (var)4; // == IEEE 754-2008 roundTowardPositive
+        public static readonly var ToNearestAway = 0; // == IEEE 754-2008 roundTiesToAway
+        public static readonly var ToZero = 1; // == IEEE 754-2008 roundTowardZero
+        public static readonly var AwayFromZero = 2; // no IEEE 754-2008 equivalent
+        public static readonly var ToNegativeInf = 3; // == IEEE 754-2008 roundTowardNegative
+        public static readonly var ToPositiveInf = 4; // == IEEE 754-2008 roundTowardPositive
 
         //go:generate stringer -type=RoundingMode
 
@@ -1158,11 +1158,11 @@ namespace math
 
                 const long fbits = (long)32L; //        float size
                 const long mbits = (long)23L; //        mantissa size (excluding implicit msb)
-                const var ebits = (var)fbits - mbits - 1L; //     8  exponent size
+                const var ebits = fbits - mbits - 1L; //     8  exponent size
                 const long bias = (long)1L << (int)((ebits - 1L)) - 1L; //   127  exponent bias
                 const long dmin = (long)1L - bias - mbits; //  -149  smallest unbiased exponent (denormal)
                 const long emin = (long)1L - bias; //  -126  smallest unbiased exponent (normal)
-                const var emax = (var)bias; //   127  largest unbiased exponent (normal) 
+                const var emax = bias; //   127  largest unbiased exponent (normal) 
 
                 // Float mantissa m is 0.5 <= m < 1.0; compute exponent e for float32 mantissa.
                 var e = x.exp - 1L; // exponent for normal mantissa m with 1.0 <= m < 2.0
@@ -1303,11 +1303,11 @@ namespace math
 
                 const long fbits = (long)64L; //        float size
                 const long mbits = (long)52L; //        mantissa size (excluding implicit msb)
-                const var ebits = (var)fbits - mbits - 1L; //    11  exponent size
+                const var ebits = fbits - mbits - 1L; //    11  exponent size
                 const long bias = (long)1L << (int)((ebits - 1L)) - 1L; //  1023  exponent bias
                 const long dmin = (long)1L - bias - mbits; // -1074  smallest unbiased exponent (denormal)
                 const long emin = (long)1L - bias; // -1022  smallest unbiased exponent (normal)
-                const var emax = (var)bias; //  1023  largest unbiased exponent (normal) 
+                const var emax = bias; //  1023  largest unbiased exponent (normal) 
 
                 // Float mantissa m is 0.5 <= m < 1.0; compute exponent e for float64 mantissa.
                 var e = x.exp - 1L; // exponent for normal mantissa m with 1.0 <= m < 2.0

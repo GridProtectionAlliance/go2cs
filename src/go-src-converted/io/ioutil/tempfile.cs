@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ioutil -- go2cs converted at 2020 October 08 03:49:02 UTC
+// package ioutil -- go2cs converted at 2020 October 09 04:49:44 UTC
 // import "io/ioutil" ==> using ioutil = go.io.ioutil_package
 // Original source: C:\Go\src\io\ioutil\tempfile.go
 using errors = go.errors_package;

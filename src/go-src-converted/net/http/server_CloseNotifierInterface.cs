@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:31 UTC
+//     Generated on 2020 October 09 04:58:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,6 +38,7 @@ using time = go.time_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -62,7 +63,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class CloseNotifier<T> : CloseNotifier
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -88,8 +89,8 @@ namespace net
             private delegate channel<bool> CloseNotifyByPtr(ptr<T> value);
             private delegate channel<bool> CloseNotifyByVal(T value);
 
-            private static readonly CloseNotifyByPtr s_CloseNotifyByPtr;
-            private static readonly CloseNotifyByVal s_CloseNotifyByVal;
+            private static readonly CloseNotifyByPtr? s_CloseNotifyByPtr;
+            private static readonly CloseNotifyByVal? s_CloseNotifyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public channel<bool> CloseNotify()
@@ -105,7 +106,7 @@ namespace net
                 return s_CloseNotifyByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static CloseNotifier()

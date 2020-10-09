@@ -4,7 +4,7 @@
 
 //go:generate ./mkalldocs.sh
 
-// package main -- go2cs converted at 2020 October 08 04:33:28 UTC
+// package main -- go2cs converted at 2020 October 09 05:45:04 UTC
 // Original source: C:\Go\src\cmd\go\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;

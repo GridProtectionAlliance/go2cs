@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:11 UTC
+//     Generated on 2020 October 09 05:53:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using filepath = go.path.filepath_package;
 using strings = go.strings_package;
 using measurement = go.github.com.google.pprof.@internal.measurement_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package unix -- go2cs converted at 2020 October 08 04:46:55 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:30 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_darwin_arm.go
 using syscall = go.syscall_package;
@@ -90,7 +90,7 @@ namespace sys
 
         // SYS___SYSCTL is used by syscall_bsd.go for all BSDs, but in modern versions
         // of darwin/arm the syscall is called sysctl instead of __sysctl.
-        public static readonly var SYS___SYSCTL = (var)SYS_SYSCTL;
+        public static readonly var SYS___SYSCTL = SYS_SYSCTL;
 
         //sys    Fstat(fd int, stat *Stat_t) (err error)
         //sys    Fstatat(fd int, path string, stat *Stat_t, flags int) (err error)

@@ -19,7 +19,7 @@
 // this way, link this package into your program:
 //    import _ "expvar"
 //
-// package expvar -- go2cs converted at 2020 October 08 04:59:00 UTC
+// package expvar -- go2cs converted at 2020 October 09 06:05:32 UTC
 // import "expvar" ==> using expvar = go.expvar_package
 // Original source: C:\Go\src\expvar\expvar.go
 using json = go.encoding.json_package;

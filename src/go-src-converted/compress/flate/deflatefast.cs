@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2020 October 08 03:30:56 UTC
+// package flate -- go2cs converted at 2020 October 09 04:50:13 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Go\src\compress\flate\deflatefast.go
 using math = go.math_package;
@@ -17,7 +17,7 @@ namespace compress
         // based on Snappy's LZ77-style encoder: github.com/golang/snappy
         private static readonly long tableBits = (long)14L; // Bits used in the table.
         private static readonly long tableSize = (long)1L << (int)(tableBits); // Size of the table.
-        private static readonly var tableMask = (var)tableSize - 1L; // Mask for table indices. Redundant, but can eliminate bounds checks.
+        private static readonly var tableMask = tableSize - 1L; // Mask for table indices. Redundant, but can eliminate bounds checks.
         private static readonly long tableShift = (long)32L - tableBits; // Right-shift to get the tableBits most significant bits of a uint32.
 
         // Reset the buffer offset when reaching this.
@@ -25,7 +25,7 @@ namespace compress
         // Since the offset we are checking against is at the beginning
         // of the buffer, we need to subtract the current and input
         // buffer to not risk overflowing the int32.
-        private static readonly var bufferReset = (var)math.MaxInt32 - maxStoreBlockSize * 2L;
+        private static readonly var bufferReset = math.MaxInt32 - maxStoreBlockSize * 2L;
 
 
         private static uint load32(slice<byte> b, int i)

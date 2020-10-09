@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 October 08 03:40:33 UTC
+// package http -- go2cs converted at 2020 October 09 04:58:03 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\sniff.go
 using bytes = go.bytes_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:03 UTC
+//     Generated on 2020 October 09 05:07:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using reflect = go.reflect_package;
 using sync = go.sync_package;
 using utf8 = go.unicode.utf8_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -44,7 +45,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class State<T> : State
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace go
             private delegate bool WriteByPtr(ptr<T> value, slice<byte> b);
             private delegate bool WriteByVal(T value, slice<byte> b);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Write(slice<byte> b)
@@ -90,8 +91,8 @@ namespace go
             private delegate bool WidthByPtr(ptr<T> value);
             private delegate bool WidthByVal(T value);
 
-            private static readonly WidthByPtr s_WidthByPtr;
-            private static readonly WidthByVal s_WidthByVal;
+            private static readonly WidthByPtr? s_WidthByPtr;
+            private static readonly WidthByVal? s_WidthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Width()
@@ -110,8 +111,8 @@ namespace go
             private delegate bool PrecisionByPtr(ptr<T> value);
             private delegate bool PrecisionByVal(T value);
 
-            private static readonly PrecisionByPtr s_PrecisionByPtr;
-            private static readonly PrecisionByVal s_PrecisionByVal;
+            private static readonly PrecisionByPtr? s_PrecisionByPtr;
+            private static readonly PrecisionByVal? s_PrecisionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Precision()
@@ -130,8 +131,8 @@ namespace go
             private delegate bool FlagByPtr(ptr<T> value, long c);
             private delegate bool FlagByVal(T value, long c);
 
-            private static readonly FlagByPtr s_FlagByPtr;
-            private static readonly FlagByVal s_FlagByVal;
+            private static readonly FlagByPtr? s_FlagByPtr;
+            private static readonly FlagByVal? s_FlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Flag(long c)
@@ -147,7 +148,7 @@ namespace go
                 return s_FlagByPtr(m_target_ptr, c);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static State()

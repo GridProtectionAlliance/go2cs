@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2020 October 08 04:45:30 UTC
+// package edwards25519 -- go2cs converted at 2020 October 09 05:55:37 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.cmd.vendor.golang.org.x.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\internal\edwards25519\const.go
 

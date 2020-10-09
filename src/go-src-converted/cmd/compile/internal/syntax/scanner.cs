@@ -10,7 +10,7 @@
 // (`go tool compile scanner.go source.go tokens.go token_string.go` compiles)
 // and thus could be made into their own package.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:30 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:41:06 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\scanner.go
 using fmt = go.fmt_package;
@@ -31,7 +31,7 @@ namespace @internal
         // by calling the error handler. If no flag is set, comments
         // are ignored.
         private static readonly ulong comments = (ulong)1L << (int)(iota); // call handler for all comments
-        private static readonly var directives = (var)0; // call handler for directives only
+        private static readonly var directives = 0; // call handler for directives only
 
         private partial struct scanner
         {

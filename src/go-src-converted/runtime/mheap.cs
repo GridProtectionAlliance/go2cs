@@ -6,7 +6,7 @@
 //
 // See malloc.go for overview.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:14 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:59 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mheap.go
 using cpu = go.@internal.cpu_package;
@@ -31,7 +31,7 @@ namespace go
 
         // maxPhysHugePageSize sets an upper-bound on the maximum huge page size
         // that the runtime supports.
-        private static readonly var maxPhysHugePageSize = (var)pallocChunkBytes; 
+        private static readonly var maxPhysHugePageSize = pallocChunkBytes; 
 
         // pagesPerReclaimerChunk indicates how many pages to scan from the
         // pageInUse bitmap at a time. Used by the page reclaimer.
@@ -57,7 +57,7 @@ namespace go
         // The definition of this flag helps ensure that if there's a problem with
         // the new markroot spans implementation and it gets turned off, that the new
         // mcentral implementation also gets turned off so the runtime isn't broken.
-        private static readonly var go115NewMCentralImpl = (var)true && go115NewMarkrootSpans;
+        private static readonly var go115NewMCentralImpl = true && go115NewMarkrootSpans;
 
 
         // Main malloc heap.
@@ -320,8 +320,8 @@ namespace go
         }
 
         private static readonly mSpanState mSpanDead = (mSpanState)iota;
-        private static readonly var mSpanInUse = (var)0; // allocated for garbage collected heap
-        private static readonly var mSpanManual = (var)1; // allocated for manual management (e.g., stack allocator)
+        private static readonly var mSpanInUse = 0; // allocated for garbage collected heap
+        private static readonly var mSpanManual = 1; // allocated for manual management (e.g., stack allocator)
 
         // mSpanStateNames are the names of the span states, indexed by
         // mSpanState.
@@ -529,8 +529,8 @@ namespace go
         {
         }
 
-        private static readonly var numSpanClasses = (var)_NumSizeClasses << (int)(1L);
-        private static readonly var tinySpanClass = (var)spanClass(tinySizeClass << (int)(1L) | 1L);
+        private static readonly var numSpanClasses = _NumSizeClasses << (int)(1L);
+        private static readonly var tinySpanClass = spanClass(tinySizeClass << (int)(1L) | 1L);
 
 
         private static spanClass makeSpanClass(byte sizeclass, bool noscan)
@@ -1205,7 +1205,7 @@ namespace go
             // Refill the cache if necessary.
             if (pp.mspancache.len == 0L)
             {
-                const var refillCount = (var)len(pp.mspancache.buf) / 2L;
+                const var refillCount = len(pp.mspancache.buf) / 2L;
 
                 for (long i = 0L; i < refillCount; i++)
                 {
@@ -2303,9 +2303,9 @@ HaveSpan:
             return (_addr_b.bytep(n / 8L)!, 1L << (int)((n % 8L)));
         }
 
-        private static readonly var gcBitsChunkBytes = (var)uintptr(64L << (int)(10L));
+        private static readonly var gcBitsChunkBytes = uintptr(64L << (int)(10L));
 
-        private static readonly var gcBitsHeaderBytes = (var)@unsafe.Sizeof(new gcBitsHeader());
+        private static readonly var gcBitsHeaderBytes = @unsafe.Sizeof(new gcBitsHeader());
 
 
 

@@ -7,7 +7,7 @@
 // from Monotone Discrete Distributions"
 // http://eeyore.wu-wien.ac.at/papers/96-04-04.wh-der.ps.gz
 
-// package rand -- go2cs converted at 2020 October 08 03:25:40 UTC
+// package rand -- go2cs converted at 2020 October 09 04:50:48 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Go\src\math\rand\zipf.go
 using math = go.math_package;

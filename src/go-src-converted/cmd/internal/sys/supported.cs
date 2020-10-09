@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 08 03:50:13 UTC
+// package sys -- go2cs converted at 2020 October 09 05:08:51 UTC
 // import "cmd/internal/sys" ==> using sys = go.cmd.@internal.sys_package
 // Original source: C:\Go\src\cmd\internal\sys\supported.go
 

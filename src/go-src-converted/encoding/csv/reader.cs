@@ -49,7 +49,7 @@
 //
 //    {`Multi-line
 //    field`, `comma is ,`}
-// package csv -- go2cs converted at 2020 October 08 03:42:29 UTC
+// package csv -- go2cs converted at 2020 October 09 04:59:45 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Go\src\encoding\csv\reader.go
 using bufio = go.bufio_package;
@@ -335,7 +335,7 @@ namespace encoding
 
             // Parse each field in the record.
             error err = default!;
-            const var quoteLen = (var)len("\"");
+            const var quoteLen = len("\"");
 
             var commaLen = utf8.RuneLen(r.Comma);
             var recLine = r.numLine; // Starting line for record

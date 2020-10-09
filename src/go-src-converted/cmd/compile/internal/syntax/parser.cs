@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:18 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:40:54 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\parser.go
 using fmt = go.fmt_package;
@@ -19,9 +19,9 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        private static readonly var debug = (var)false;
+        private static readonly var debug = false;
 
-        private static readonly var trace = (var)false;
+        private static readonly var trace = false;
 
 
 

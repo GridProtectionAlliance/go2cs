@@ -5,7 +5,7 @@
 // Package dirhash defines hashes over directory trees.
 // These hashes are recorded in go.sum files and in the Go checksum database,
 // to allow verifying that a newly-downloaded module has the expected content.
-// package dirhash -- go2cs converted at 2020 October 08 04:45:59 UTC
+// package dirhash -- go2cs converted at 2020 October 09 05:56:03 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/dirhash" ==> using dirhash = go.cmd.vendor.golang.org.x.mod.sumdb.dirhash_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\sumdb\dirhash\hash.go
 using zip = go.archive.zip_package;

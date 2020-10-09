@@ -1,4 +1,4 @@
-// package analysis -- go2cs converted at 2020 October 08 04:54:15 UTC
+// package analysis -- go2cs converted at 2020 October 09 06:01:14 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis" ==> using analysis = go.cmd.vendor.golang.org.x.tools.go.analysis_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\analysis.go
 using flag = go.flag_package;

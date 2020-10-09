@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:35 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\netpoll.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -750,7 +750,7 @@ namespace go
             lock(_addr_c.@lock);
             if (c.first == null)
             {
-                const var pdSize = (var)@unsafe.Sizeof(new pollDesc());
+                const var pdSize = @unsafe.Sizeof(new pollDesc());
 
                 var n = pollBlockSize / pdSize;
                 if (n == 0L)

@@ -226,7 +226,7 @@ Notify with a syscall.Note will cause that value to be sent on the
 channel when that string is posted as a note.
 
 */
-// package signal -- go2cs converted at 2020 October 08 03:43:56 UTC
+// package signal -- go2cs converted at 2020 October 09 05:00:58 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Go\src\os\signal\doc.go
     }

@@ -496,7 +496,7 @@ The following options are available when running cgo directly:
         Put all generated files in directory.
     -srcdir directory
 */
-// package main -- go2cs converted at 2020 October 08 04:08:27 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:15 UTC
 // Original source: C:\Go\src\cmd\cgo\doc.go
     }
 

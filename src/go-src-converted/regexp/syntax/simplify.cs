@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 03:41:07 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:34 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\simplify.go
 
@@ -131,7 +131,7 @@ namespace regexp
                         {
                             ptr<Regexp> nre2 = addr(new Regexp(Op:OpConcat));
                             nre2.Sub = append(nre2.Sub0[..0L], sub, suffix);
-                            suffix = simplify1(OpQuest, re.Flags, _addr_nre2, _addr_null);
+                            suffix = simplify1(OpQuest, re.Flags, nre2, _addr_null);
                         }
 
                         i = i__prev1;

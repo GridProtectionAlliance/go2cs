@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2020 October 08 03:44:40 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:11 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\file_plan9.go
 using poll = go.@internal.poll_package;
@@ -290,7 +290,7 @@ namespace go
 
         }
 
-        private static readonly var chmodMask = (var)uint32(syscall.DMAPPEND | syscall.DMEXCL | syscall.DMTMP | ModePerm);
+        private static readonly var chmodMask = uint32(syscall.DMAPPEND | syscall.DMEXCL | syscall.DMTMP | ModePerm);
 
 
 

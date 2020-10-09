@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:46 UTC
+//     Generated on 2020 October 09 06:05:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using reflect = go.reflect_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sql
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Conn<T> : Conn
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sql
             private delegate (Tx, error) PrepareByPtr(ptr<T> value, @string query);
             private delegate (Tx, error) PrepareByVal(T value, @string query);
 
-            private static readonly PrepareByPtr s_PrepareByPtr;
-            private static readonly PrepareByVal s_PrepareByVal;
+            private static readonly PrepareByPtr? s_PrepareByPtr;
+            private static readonly PrepareByVal? s_PrepareByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Tx, error) Prepare(@string query)
@@ -90,8 +91,8 @@ namespace sql
             private delegate (Tx, error) CloseByPtr(ptr<T> value);
             private delegate (Tx, error) CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Tx, error) Close()
@@ -110,8 +111,8 @@ namespace sql
             private delegate (Tx, error) BeginByPtr(ptr<T> value);
             private delegate (Tx, error) BeginByVal(T value);
 
-            private static readonly BeginByPtr s_BeginByPtr;
-            private static readonly BeginByVal s_BeginByVal;
+            private static readonly BeginByPtr? s_BeginByPtr;
+            private static readonly BeginByVal? s_BeginByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Tx, error) Begin()
@@ -127,7 +128,7 @@ namespace sql
                 return s_BeginByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Conn()

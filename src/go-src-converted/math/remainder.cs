@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 08 03:25:21 UTC
+// package math -- go2cs converted at 2020 October 09 05:07:46 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Go\src\math\remainder.go
 
@@ -48,7 +48,7 @@ namespace go
         private static double remainder(double x, double y)
         {
             const float Tiny = (float)4.45014771701440276618e-308F; // 0x0020000000000000
-            const var HalfMax = (var)MaxFloat64 / 2L;
+            const var HalfMax = MaxFloat64 / 2L;
  
             // special cases
 

@@ -1,4 +1,4 @@
-// package analysisflags -- go2cs converted at 2020 October 08 04:57:43 UTC
+// package analysisflags -- go2cs converted at 2020 October 09 06:04:23 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/analysisflags" ==> using analysisflags = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.analysisflags_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\analysisflags\help.go
 using flag = go.flag_package;

@@ -15,7 +15,7 @@
 // to 64 bits because there are too many summary levels to fit in just 33
 // bits.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:18 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mpagealloc_32bit.go
 using @unsafe = go.@unsafe_package;

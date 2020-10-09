@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package interp -- go2cs converted at 2020 October 08 04:57:23 UTC
+// package interp -- go2cs converted at 2020 October 09 06:03:38 UTC
 // import "golang.org/x/tools/go/ssa/interp" ==> using interp = go.golang.org.x.tools.go.ssa.interp_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\ops.go
 using bytes = go.bytes_package;

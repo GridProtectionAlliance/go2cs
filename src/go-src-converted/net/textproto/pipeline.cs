@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2020 October 08 03:38:27 UTC
+// package textproto -- go2cs converted at 2020 October 09 04:56:05 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Go\src\net\textproto\pipeline.go
 using sync = go.sync_package;

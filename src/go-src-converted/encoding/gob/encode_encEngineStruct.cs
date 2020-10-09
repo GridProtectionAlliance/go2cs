@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:40 UTC
+//     Generated on 2020 October 09 04:59:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using bits = go.math.bits_package;
 using reflect = go.reflect_package;
 using sync = go.sync_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace encoding

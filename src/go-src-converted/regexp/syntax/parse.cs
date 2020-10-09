@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2020 October 08 03:41:04 UTC
+// package syntax -- go2cs converted at 2020 October 09 04:58:31 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Go\src\regexp\syntax\parse.go
 using sort = go.sort_package;
@@ -67,22 +67,22 @@ namespace regexp
         }
 
         public static readonly Flags FoldCase = (Flags)1L << (int)(iota); // case-insensitive match
-        public static readonly var Literal = (var)0; // treat pattern as literal string
-        public static readonly var ClassNL = (var)1; // allow character classes like [^a-z] and [[:space:]] to match newline
-        public static readonly var DotNL = (var)2; // allow . to match newline
-        public static readonly var OneLine = (var)3; // treat ^ and $ as only matching at beginning and end of text
-        public static readonly var NonGreedy = (var)4; // make repetition operators default to non-greedy
-        public static readonly var PerlX = (var)5; // allow Perl extensions
-        public static readonly var UnicodeGroups = (var)6; // allow \p{Han}, \P{Han} for Unicode group and negation
-        public static readonly var WasDollar = (var)7; // regexp OpEndText was $, not \z
+        public static readonly var Literal = 0; // treat pattern as literal string
+        public static readonly var ClassNL = 1; // allow character classes like [^a-z] and [[:space:]] to match newline
+        public static readonly var DotNL = 2; // allow . to match newline
+        public static readonly var OneLine = 3; // treat ^ and $ as only matching at beginning and end of text
+        public static readonly var NonGreedy = 4; // make repetition operators default to non-greedy
+        public static readonly var PerlX = 5; // allow Perl extensions
+        public static readonly var UnicodeGroups = 6; // allow \p{Han}, \P{Han} for Unicode group and negation
+        public static readonly var WasDollar = 7; // regexp OpEndText was $, not \z
         public static readonly MatchNL Simple = (MatchNL)ClassNL | DotNL;
 
-        public static readonly var Perl = (var)ClassNL | OneLine | PerlX | UnicodeGroups; // as close to Perl as possible
+        public static readonly var Perl = ClassNL | OneLine | PerlX | UnicodeGroups; // as close to Perl as possible
         public static readonly Flags POSIX = (Flags)0L; // POSIX syntax
 
         // Pseudo-ops for parsing stack.
-        private static readonly var opLeftParen = (var)opPseudo + iota;
-        private static readonly var opVerticalBar = (var)0;
+        private static readonly var opLeftParen = opPseudo + iota;
+        private static readonly var opVerticalBar = 0;
 
 
         private partial struct parser

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package html -- go2cs converted at 2020 October 08 03:42:07 UTC
+// package html -- go2cs converted at 2020 October 09 04:59:27 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Go\src\html\entity.go
 using sync = go.sync_package;

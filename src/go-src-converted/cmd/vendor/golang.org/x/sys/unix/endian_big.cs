@@ -4,7 +4,7 @@
 //
 // +build ppc64 s390x mips mips64
 
-// package unix -- go2cs converted at 2020 October 08 04:46:15 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:13 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\endian_big.go
 
@@ -19,7 +19,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        private static readonly var isBigEndian = (var)true;
+        private static readonly var isBigEndian = true;
 
     }
 }}}}}}

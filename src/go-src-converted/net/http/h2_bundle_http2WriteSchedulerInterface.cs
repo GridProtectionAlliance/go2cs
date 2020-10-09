@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:20 UTC
+//     Generated on 2020 October 09 04:56:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class http2WriteScheduler<T> : http2WriteScheduler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate (http2FrameWriteRequest, bool) OpenStreamByPtr(ptr<T> value, uint streamID, http2OpenStreamOptions options);
             private delegate (http2FrameWriteRequest, bool) OpenStreamByVal(T value, uint streamID, http2OpenStreamOptions options);
 
-            private static readonly OpenStreamByPtr s_OpenStreamByPtr;
-            private static readonly OpenStreamByVal s_OpenStreamByVal;
+            private static readonly OpenStreamByPtr? s_OpenStreamByPtr;
+            private static readonly OpenStreamByVal? s_OpenStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (http2FrameWriteRequest, bool) OpenStream(uint streamID, http2OpenStreamOptions options)
@@ -116,8 +117,8 @@ namespace net
             private delegate (http2FrameWriteRequest, bool) CloseStreamByPtr(ptr<T> value, uint streamID);
             private delegate (http2FrameWriteRequest, bool) CloseStreamByVal(T value, uint streamID);
 
-            private static readonly CloseStreamByPtr s_CloseStreamByPtr;
-            private static readonly CloseStreamByVal s_CloseStreamByVal;
+            private static readonly CloseStreamByPtr? s_CloseStreamByPtr;
+            private static readonly CloseStreamByVal? s_CloseStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (http2FrameWriteRequest, bool) CloseStream(uint streamID)
@@ -136,8 +137,8 @@ namespace net
             private delegate (http2FrameWriteRequest, bool) AdjustStreamByPtr(ptr<T> value, uint streamID, http2PriorityParam priority);
             private delegate (http2FrameWriteRequest, bool) AdjustStreamByVal(T value, uint streamID, http2PriorityParam priority);
 
-            private static readonly AdjustStreamByPtr s_AdjustStreamByPtr;
-            private static readonly AdjustStreamByVal s_AdjustStreamByVal;
+            private static readonly AdjustStreamByPtr? s_AdjustStreamByPtr;
+            private static readonly AdjustStreamByVal? s_AdjustStreamByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (http2FrameWriteRequest, bool) AdjustStream(uint streamID, http2PriorityParam priority)
@@ -156,8 +157,8 @@ namespace net
             private delegate (http2FrameWriteRequest, bool) PushByPtr(ptr<T> value, http2FrameWriteRequest wr);
             private delegate (http2FrameWriteRequest, bool) PushByVal(T value, http2FrameWriteRequest wr);
 
-            private static readonly PushByPtr s_PushByPtr;
-            private static readonly PushByVal s_PushByVal;
+            private static readonly PushByPtr? s_PushByPtr;
+            private static readonly PushByVal? s_PushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (http2FrameWriteRequest, bool) Push(http2FrameWriteRequest wr)
@@ -176,8 +177,8 @@ namespace net
             private delegate (http2FrameWriteRequest, bool) PopByPtr(ptr<T> value);
             private delegate (http2FrameWriteRequest, bool) PopByVal(T value);
 
-            private static readonly PopByPtr s_PopByPtr;
-            private static readonly PopByVal s_PopByVal;
+            private static readonly PopByPtr? s_PopByPtr;
+            private static readonly PopByVal? s_PopByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (http2FrameWriteRequest, bool) Pop()
@@ -193,7 +194,7 @@ namespace net
                 return s_PopByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static http2WriteScheduler()

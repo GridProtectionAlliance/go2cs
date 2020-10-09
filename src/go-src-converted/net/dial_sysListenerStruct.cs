@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:31:19 UTC
+//     Generated on 2020 October 09 04:50:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using context = go.context_package;
 using nettrace = go.@internal.nettrace_package;
 using syscall = go.syscall_package;
 using time = go.time_package;
+
+#nullable enable
 
 namespace go
 {

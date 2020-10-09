@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:23:45 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\string.go
 using bytealg = go.@internal.bytealg_package;
@@ -570,8 +570,8 @@ namespace go
             return len(s) >= len(prefix) && s[..len(prefix)] == prefix;
         }
 
-        private static readonly var maxUint = (var)~uint(0L);
-        private static readonly var maxInt = (var)int(maxUint >> (int)(1L));
+        private static readonly var maxUint = ~uint(0L);
+        private static readonly var maxInt = int(maxUint >> (int)(1L));
 
 
         // atoi parses an int from a string s.

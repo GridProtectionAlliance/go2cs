@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2020 October 08 03:50:15 UTC
+// package objabi -- go2cs converted at 2020 October 09 05:08:53 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Go\src\cmd\internal\objabi\stack.go
 
@@ -16,7 +16,7 @@ namespace @internal
     {
         // For the linkers. Must match Go definitions.
         public static readonly long STACKSYSTEM = (long)0L;
-        public static readonly var StackSystem = (var)STACKSYSTEM;
+        public static readonly var StackSystem = STACKSYSTEM;
         public static readonly long StackBig = (long)4096L;
         public static readonly long StackSmall = (long)128L;
 

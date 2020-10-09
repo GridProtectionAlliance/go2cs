@@ -126,7 +126,7 @@
 // object, it scans only the first oblet and enqueues the remaining
 // oblets as new scan jobs.
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:51 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:41 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgc.go
 using cpu = go.@internal.cpu_package;
@@ -141,12 +141,12 @@ namespace go
     public static partial class runtime_package
     {
         private static readonly long _DebugGC = (long)0L;
-        private static readonly var _ConcurrentSweep = (var)true;
+        private static readonly var _ConcurrentSweep = true;
         private static readonly long _FinBlockSize = (long)4L * 1024L; 
 
         // debugScanConservative enables debug logging for stack
         // frames that are scanned conservatively.
-        private static readonly var debugScanConservative = (var)false; 
+        private static readonly var debugScanConservative = false; 
 
         // sweepMinHeapDistance is a lower bound on the heap distance
         // (in bytes) reserved for concurrent sweeping between GC
@@ -292,9 +292,9 @@ namespace go
         // gcphase == _GCmark.
         private static uint gcBlackenEnabled = default;
 
-        private static readonly var _GCoff = (var)iota; // GC not running; sweeping in background, write barrier disabled
-        private static readonly var _GCmark = (var)0; // GC marking roots and workbufs: allocate black, write barrier ENABLED
-        private static readonly var _GCmarktermination = (var)1; // GC mark termination: allocate black, P's help GC, write barrier ENABLED
+        private static readonly var _GCoff = iota; // GC not running; sweeping in background, write barrier disabled
+        private static readonly var _GCmark = 0; // GC marking roots and workbufs: allocate black, write barrier ENABLED
+        private static readonly var _GCmarktermination = 1; // GC mark termination: allocate black, P's help GC, write barrier ENABLED
 
         //go:nosplit
         private static void setGCPhase(uint x)
@@ -327,13 +327,13 @@ namespace go
         // an integer. The fractional worker should run until it is
         // preempted and will be scheduled to pick up the fractional
         // part of GOMAXPROCS*gcBackgroundUtilization.
-        private static readonly var gcMarkWorkerFractionalMode = (var)0; 
+        private static readonly var gcMarkWorkerFractionalMode = 0; 
 
         // gcMarkWorkerIdleMode indicates that a P is running the mark
         // worker because it has nothing else to do. The idle worker
         // should run until it is preempted and account its time
         // against gcController.idleMarkTime.
-        private static readonly var gcMarkWorkerIdleMode = (var)1;
+        private static readonly var gcMarkWorkerIdleMode = 1;
 
 
         // gcMarkWorkerModeStrings are the strings labels of gcMarkWorkerModes
@@ -1238,8 +1238,8 @@ namespace go
         }
 
         private static readonly gcMode gcBackgroundMode = (gcMode)iota; // concurrent GC and sweep
-        private static readonly var gcForceMode = (var)0; // stop-the-world GC now, concurrent sweep
-        private static readonly var gcForceBlockMode = (var)1; // stop-the-world GC now and STW sweep (forced by user)
+        private static readonly var gcForceMode = 0; // stop-the-world GC now, concurrent sweep
+        private static readonly var gcForceBlockMode = 1; // stop-the-world GC now and STW sweep (forced by user)
 
         // A gcTrigger is a predicate for starting a GC cycle. Specifically,
         // it is an exit condition for the _GCoff phase.
@@ -1263,12 +1263,12 @@ namespace go
         // gcTriggerTime indicates that a cycle should be started when
         // it's been more than forcegcperiod nanoseconds since the
         // previous GC cycle.
-        private static readonly var gcTriggerTime = (var)0; 
+        private static readonly var gcTriggerTime = 0; 
 
         // gcTriggerCycle indicates that a cycle should be started if
         // we have not yet started cycle number gcTrigger.n (relative
         // to work.cycles).
-        private static readonly var gcTriggerCycle = (var)1;
+        private static readonly var gcTriggerCycle = 1;
 
 
         // test reports whether the trigger condition is satisfied, meaning
@@ -1529,7 +1529,7 @@ namespace go
         // termination.
         //
         // For debugging issue #27993.
-        private static readonly var debugCachedWork = (var)false;
+        private static readonly var debugCachedWork = false;
 
         // gcWorkPauseGen is for debugging the mark completion algorithm.
         // gcWork put operations spin while gcWork.pauseGen == gcWorkPauseGen.

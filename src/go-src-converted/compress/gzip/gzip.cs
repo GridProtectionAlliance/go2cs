@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gzip -- go2cs converted at 2020 October 08 03:31:03 UTC
+// package gzip -- go2cs converted at 2020 October 09 04:50:20 UTC
 // import "compress/gzip" ==> using gzip = go.compress.gzip_package
 // Original source: C:\Go\src\compress\gzip\gzip.go
 using flate = go.compress.flate_package;
@@ -20,11 +20,11 @@ namespace compress
     {
         // These constants are copied from the flate package, so that code that imports
         // "compress/gzip" does not also have to import "compress/flate".
-        public static readonly var NoCompression = (var)flate.NoCompression;
-        public static readonly var BestSpeed = (var)flate.BestSpeed;
-        public static readonly var BestCompression = (var)flate.BestCompression;
-        public static readonly var DefaultCompression = (var)flate.DefaultCompression;
-        public static readonly var HuffmanOnly = (var)flate.HuffmanOnly;
+        public static readonly var NoCompression = flate.NoCompression;
+        public static readonly var BestSpeed = flate.BestSpeed;
+        public static readonly var BestCompression = flate.BestCompression;
+        public static readonly var DefaultCompression = flate.DefaultCompression;
+        public static readonly var HuffmanOnly = flate.HuffmanOnly;
 
 
         // A Writer is an io.WriteCloser.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:57:02 UTC
+//     Generated on 2020 October 09 06:03:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using token = go.go.token_package;
 using types = go.go.types_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class lvalue<T> : lvalue
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace go
             private delegate types.Type storeByPtr(ptr<T> value, ptr<Function> fn, Value v);
             private delegate types.Type storeByVal(T value, ptr<Function> fn, Value v);
 
-            private static readonly storeByPtr s_storeByPtr;
-            private static readonly storeByVal s_storeByVal;
+            private static readonly storeByPtr? s_storeByPtr;
+            private static readonly storeByVal? s_storeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public types.Type store(ptr<Function> fn, Value v)
@@ -92,8 +93,8 @@ namespace go
             private delegate types.Type loadByPtr(ptr<T> value, ptr<Function> fn);
             private delegate types.Type loadByVal(T value, ptr<Function> fn);
 
-            private static readonly loadByPtr s_loadByPtr;
-            private static readonly loadByVal s_loadByVal;
+            private static readonly loadByPtr? s_loadByPtr;
+            private static readonly loadByVal? s_loadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public types.Type load(ptr<Function> fn)
@@ -112,8 +113,8 @@ namespace go
             private delegate types.Type addressByPtr(ptr<T> value, ptr<Function> fn);
             private delegate types.Type addressByVal(T value, ptr<Function> fn);
 
-            private static readonly addressByPtr s_addressByPtr;
-            private static readonly addressByVal s_addressByVal;
+            private static readonly addressByPtr? s_addressByPtr;
+            private static readonly addressByVal? s_addressByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public types.Type address(ptr<Function> fn)
@@ -132,8 +133,8 @@ namespace go
             private delegate types.Type typByPtr(ptr<T> value);
             private delegate types.Type typByVal(T value);
 
-            private static readonly typByPtr s_typByPtr;
-            private static readonly typByVal s_typByVal;
+            private static readonly typByPtr? s_typByPtr;
+            private static readonly typByVal? s_typByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public types.Type typ()
@@ -149,7 +150,7 @@ namespace go
                 return s_typByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static lvalue()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:18:58 UTC
+//     Generated on 2020 October 09 05:01:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using race = go.@internal.race_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = go.@unsafe_package;
+
+#nullable enable
 
 namespace go
 {

@@ -6,7 +6,7 @@
 // In its own file so that a faster assembly or C version
 // can be substituted easily.
 
-// package sha512 -- go2cs converted at 2020 October 08 03:35:43 UTC
+// package sha512 -- go2cs converted at 2020 October 09 04:53:41 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Go\src\crypto\sha512\sha512block.go
 using bits = go.math.bits_package;

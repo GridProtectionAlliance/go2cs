@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package build -- go2cs converted at 2020 October 08 04:02:29 UTC
+// package build -- go2cs converted at 2020 October 09 05:18:55 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Go\src\go\build\build.go
 using bytes = go.bytes_package;
@@ -234,7 +234,7 @@ namespace go
             @string rel = default;
             bool ok = default;
 
-            const var sep = (var)string(filepath.Separator);
+            const var sep = string(filepath.Separator);
 
             root = filepath.Clean(root);
             if (!strings.HasSuffix(root, sep))
@@ -523,13 +523,13 @@ namespace go
         // the top of the file. Such a package will be recognized
         // regardless of this flag setting (because it has source code)
         // and will have BinaryOnly set to true in the returned Package.
-        public static readonly var AllowBinary = (var)0; 
+        public static readonly var AllowBinary = 0; 
 
         // If ImportComment is set, parse import comments on package statements.
         // Import returns an error if it finds a comment it cannot understand
         // or finds conflicting comments in multiple source files.
         // See golang.org/s/go14customimport for more information.
-        public static readonly var ImportComment = (var)1; 
+        public static readonly var ImportComment = 1; 
 
         // By default, Import searches vendor directories
         // that apply in the given source directory before searching
@@ -549,7 +549,7 @@ namespace go
         // the returned package's Imports, TestImports, and XTestImports
         // are always the exact import paths from the source files:
         // Import makes no attempt to resolve or check those paths.
-        public static readonly var IgnoreVendor = (var)2;
+        public static readonly var IgnoreVendor = 2;
 
 
         // A Package describes the Go package found in a directory.

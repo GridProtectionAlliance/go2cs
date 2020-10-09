@@ -6,7 +6,7 @@
 
 // Read system DNS config from /etc/resolv.conf
 
-// package net -- go2cs converted at 2020 October 08 03:31:41 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:51 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\dnsconfig_unix.go
 using bytealg = go.@internal.bytealg_package;

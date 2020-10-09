@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:33:01 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:45 UTC
 // Original source: C:\Go\src\cmd\dist\util.go
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -70,8 +70,8 @@ namespace go
         }
 
         public static readonly long CheckExit = (long)1L << (int)(iota);
-        public static readonly var ShowOutput = (var)0;
-        public static readonly var Background = (var)1;
+        public static readonly var ShowOutput = 0;
+        public static readonly var Background = 1;
 
 
         private static sync.Mutex outputLock = default;
@@ -305,7 +305,7 @@ namespace go
         }
 
         private static readonly long writeExec = (long)1L << (int)(iota);
-        private static readonly var writeSkipSame = (var)0;
+        private static readonly var writeSkipSame = 0;
 
 
         // writefile writes text to the named file, creating it if needed.

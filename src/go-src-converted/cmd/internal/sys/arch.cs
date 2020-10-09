@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 08 03:50:07 UTC
+// package sys -- go2cs converted at 2020 October 09 05:08:46 UTC
 // import "cmd/internal/sys" ==> using sys = go.cmd.@internal.sys_package
 // Original source: C:\Go\src\cmd\internal\sys\arch.go
 using binary = go.encoding.binary_package;
@@ -21,16 +21,16 @@ namespace @internal
         }
 
         public static readonly ArchFamily NoArch = (ArchFamily)iota;
-        public static readonly var AMD64 = (var)0;
-        public static readonly var ARM = (var)1;
-        public static readonly var ARM64 = (var)2;
-        public static readonly var I386 = (var)3;
-        public static readonly var MIPS = (var)4;
-        public static readonly var MIPS64 = (var)5;
-        public static readonly var PPC64 = (var)6;
-        public static readonly var RISCV64 = (var)7;
-        public static readonly var S390X = (var)8;
-        public static readonly var Wasm = (var)9;
+        public static readonly var AMD64 = 0;
+        public static readonly var ARM = 1;
+        public static readonly var ARM64 = 2;
+        public static readonly var I386 = 3;
+        public static readonly var MIPS = 4;
+        public static readonly var MIPS64 = 5;
+        public static readonly var PPC64 = 6;
+        public static readonly var RISCV64 = 7;
+        public static readonly var S390X = 8;
+        public static readonly var Wasm = 9;
 
 
         // Arch represents an individual architecture.

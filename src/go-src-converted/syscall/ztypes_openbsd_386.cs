@@ -3,7 +3,7 @@
 
 // +build 386,openbsd
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:40 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:34 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\ztypes_openbsd_386.go
 

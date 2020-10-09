@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2020 October 08 04:03:11 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:22 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\eval.go
 using fmt = go.fmt_package;
@@ -40,7 +40,7 @@ namespace go
                 return (new TypeAndValue(), error.As(err)!);
             }
             ptr<Info> info = addr(new Info(Types:make(map[ast.Expr]TypeAndValue),));
-            err = CheckExpr(_addr_fset, _addr_pkg, pos, node, _addr_info);
+            err = CheckExpr(_addr_fset, _addr_pkg, pos, node, info);
             return (info.Types[node], error.As(err)!);
 
         }

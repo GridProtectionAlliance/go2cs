@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amd64 -- go2cs converted at 2020 October 08 04:32:28 UTC
+// package amd64 -- go2cs converted at 2020 October 09 05:44:19 UTC
 // import "cmd/compile/internal/amd64" ==> using amd64 = go.cmd.compile.@internal.amd64_package
 // Original source: C:\Go\src\cmd\compile\internal\amd64\ssa.go
 using fmt = go.fmt_package;

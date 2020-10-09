@@ -4,7 +4,7 @@
 
 // Package stringintconv defines an Analyzer that flags type conversions
 // from integers to strings.
-// package stringintconv -- go2cs converted at 2020 October 08 04:58:10 UTC
+// package stringintconv -- go2cs converted at 2020 October 09 06:04:46 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/stringintconv" ==> using stringintconv = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.stringintconv_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\stringintconv\string.go
 using fmt = go.fmt_package;

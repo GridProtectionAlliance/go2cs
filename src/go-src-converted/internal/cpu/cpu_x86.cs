@@ -4,7 +4,7 @@
 
 // +build 386 amd64
 
-// package cpu -- go2cs converted at 2020 October 08 03:19:10 UTC
+// package cpu -- go2cs converted at 2020 October 09 04:45:32 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Go\src\internal\cpu\cpu_x86.go
 

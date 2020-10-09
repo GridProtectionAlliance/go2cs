@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:39 UTC
+//     Generated on 2020 October 09 06:05:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using testing = go.testing_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace testdata
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class errorInterface<T> : errorInterface
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace testdata
             private delegate void ExtraMethodByPtr(ptr<T> value);
             private delegate void ExtraMethodByVal(T value);
 
-            private static readonly ExtraMethodByPtr s_ExtraMethodByPtr;
-            private static readonly ExtraMethodByVal s_ExtraMethodByVal;
+            private static readonly ExtraMethodByPtr? s_ExtraMethodByPtr;
+            private static readonly ExtraMethodByVal? s_ExtraMethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void ExtraMethod()
@@ -99,8 +100,8 @@ namespace testdata
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -116,7 +117,7 @@ namespace testdata
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static errorInterface()

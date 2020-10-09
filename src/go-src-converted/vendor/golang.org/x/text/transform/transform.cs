@@ -6,7 +6,7 @@
 // bytes passing through as well as various transformations. Example
 // transformations provided by other packages include normalization and
 // conversion between character sets.
-// package transform -- go2cs converted at 2020 October 08 05:01:53 UTC
+// package transform -- go2cs converted at 2020 October 09 06:07:57 UTC
 // import "vendor/golang.org/x/text/transform" ==> using transform = go.vendor.golang.org.x.text.transform_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\transform\transform.go
 // import "golang.org/x/text/transform"

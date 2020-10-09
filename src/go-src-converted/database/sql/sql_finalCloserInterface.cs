@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:57 UTC
+//     Generated on 2020 October 09 06:05:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class finalCloser<T> : finalCloser
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace database
             private delegate error finalCloseByPtr(ptr<T> value);
             private delegate error finalCloseByVal(T value);
 
-            private static readonly finalCloseByPtr s_finalCloseByPtr;
-            private static readonly finalCloseByVal s_finalCloseByVal;
+            private static readonly finalCloseByPtr? s_finalCloseByPtr;
+            private static readonly finalCloseByVal? s_finalCloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error finalClose()
@@ -95,7 +96,7 @@ namespace database
                 return s_finalCloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static finalCloser()

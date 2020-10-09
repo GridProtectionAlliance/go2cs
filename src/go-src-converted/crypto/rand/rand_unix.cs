@@ -7,7 +7,7 @@
 // Unix cryptographically secure pseudorandom number
 // generator.
 
-// package rand -- go2cs converted at 2020 October 08 03:35:32 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:05 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\rand_unix.go
 using bufio = go.bufio_package;

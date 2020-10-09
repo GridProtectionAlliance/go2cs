@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:23 UTC
+// package trace -- go2cs converted at 2020 October 09 05:52:57 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\gc.go
 using heap = go.container.heap_package;
@@ -37,17 +37,17 @@ namespace @internal
         public static readonly UtilFlags UtilSTW = (UtilFlags)1L << (int)(iota); 
         // UtilBackground means utilization should account for
         // background mark workers.
-        public static readonly var UtilBackground = (var)0; 
+        public static readonly var UtilBackground = 0; 
         // UtilAssist means utilization should account for mark
         // assists.
-        public static readonly var UtilAssist = (var)1; 
+        public static readonly var UtilAssist = 1; 
         // UtilSweep means utilization should account for sweeping.
-        public static readonly var UtilSweep = (var)2; 
+        public static readonly var UtilSweep = 2; 
 
         // UtilPerProc means each P should be given a separate
         // utilization function. Otherwise, there is a single function
         // and each P is given a fraction of the utilization.
-        public static readonly var UtilPerProc = (var)3;
+        public static readonly var UtilPerProc = 3;
 
 
         // MutatorUtilization returns a set of mutator utilization functions

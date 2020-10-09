@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:37 UTC
+//     Generated on 2020 October 09 06:01:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,8 @@ using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using path = go.path_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

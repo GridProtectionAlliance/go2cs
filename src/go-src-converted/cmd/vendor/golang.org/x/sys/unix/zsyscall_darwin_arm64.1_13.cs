@@ -3,7 +3,7 @@
 
 // +build darwin,arm64,go1.13
 
-// package unix -- go2cs converted at 2020 October 08 04:50:43 UTC
+// package unix -- go2cs converted at 2020 October 09 05:58:27 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_darwin_arm64.1_13.go
 using syscall = go.syscall_package;

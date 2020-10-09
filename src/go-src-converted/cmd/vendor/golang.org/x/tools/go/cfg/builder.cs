@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cfg -- go2cs converted at 2020 October 08 04:58:28 UTC
+// package cfg -- go2cs converted at 2020 October 09 06:05:01 UTC
 // import "cmd/vendor/golang.org/x/tools/go/cfg" ==> using cfg = go.cmd.vendor.golang.org.x.tools.go.cfg_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\cfg\builder.go
 // This file implements the CFG construction pass.

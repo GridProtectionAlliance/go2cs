@@ -3,7 +3,7 @@
 // +build linux
 // +build arm arm64
 
-// package unix -- go2cs converted at 2020 October 08 04:49:27 UTC
+// package unix -- go2cs converted at 2020 October 09 05:57:35 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zptrace_armnn_linux.go
 using @unsafe = go.@unsafe_package;

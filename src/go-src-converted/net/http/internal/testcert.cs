@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @internal -- go2cs converted at 2020 October 08 03:40:39 UTC
+// package @internal -- go2cs converted at 2020 October 09 04:58:09 UTC
 // import "net/http/internal" ==> using @internal = go.net.http.@internal_package
 // Original source: C:\Go\src\net\http\internal\testcert.go
 using strings = go.strings_package;

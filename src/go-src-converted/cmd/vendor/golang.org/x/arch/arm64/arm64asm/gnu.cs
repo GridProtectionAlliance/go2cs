@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2020 October 08 04:44:32 UTC
+// package arm64asm -- go2cs converted at 2020 October 09 05:54:45 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\gnu.go
 using strings = go.strings_package;

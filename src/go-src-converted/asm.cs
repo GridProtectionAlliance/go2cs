@@ -4,7 +4,7 @@
 
 // This file contains declarations to test the assembly in test_asm.s.
 
-// package a -- go2cs converted at 2020 October 08 04:56:26 UTC
+// package a -- go2cs converted at 2020 October 09 06:02:58 UTC
 // import "golang.org/x/tools/go/analysis/passes/asmdecl/testdata/src/a" ==> using a = go.golang.org.x.tools.go.analysis.passes.asmdecl.testdata.src.a_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\analysis\passes\asmdecl\testdata\src\a\asm.go
 

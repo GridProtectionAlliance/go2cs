@@ -4,7 +4,7 @@
 
 // This file implements multi-precision rational numbers.
 
-// package big -- go2cs converted at 2020 October 08 03:25:51 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:39 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\rat.go
 using fmt = go.fmt_package;
@@ -97,14 +97,14 @@ namespace math
 
             // mantissa
             const long Msize = (long)23L;
-            const var Msize1 = (var)Msize + 1L; // incl. implicit 1
-            const var Msize2 = (var)Msize1 + 1L; 
+            const var Msize1 = Msize + 1L; // incl. implicit 1
+            const var Msize2 = Msize1 + 1L; 
 
             // exponent
-            const var Esize = (var)Fsize - Msize1;
+            const var Esize = Fsize - Msize1;
             const long Ebias = (long)1L << (int)((Esize - 1L)) - 1L;
             const long Emin = (long)1L - Ebias;
-            const var Emax = (var)Ebias;
+            const var Emax = Ebias;
  
 
             // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
@@ -238,14 +238,14 @@ namespace math
 
             // mantissa
             const long Msize = (long)52L;
-            const var Msize1 = (var)Msize + 1L; // incl. implicit 1
-            const var Msize2 = (var)Msize1 + 1L; 
+            const var Msize1 = Msize + 1L; // incl. implicit 1
+            const var Msize2 = Msize1 + 1L; 
 
             // exponent
-            const var Esize = (var)Fsize - Msize1;
+            const var Esize = Fsize - Msize1;
             const long Ebias = (long)1L << (int)((Esize - 1L)) - 1L;
             const long Emin = (long)1L - Ebias;
-            const var Emax = (var)Ebias;
+            const var Emax = Ebias;
  
 
             // TODO(adonovan): specialize common degenerate cases: 1.0, integers.

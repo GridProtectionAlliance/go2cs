@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lockedfile -- go2cs converted at 2020 October 08 04:34:21 UTC
+// package lockedfile -- go2cs converted at 2020 October 09 05:45:49 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\mutex.go
 using fmt = go.fmt_package;

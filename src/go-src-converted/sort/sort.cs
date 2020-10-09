@@ -6,7 +6,7 @@
 
 // Package sort provides primitives for sorting slices and user-defined
 // collections.
-// package sort -- go2cs converted at 2020 October 08 03:44:12 UTC
+// package sort -- go2cs converted at 2020 October 09 04:49:20 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Go\src\sort\sort.go
 

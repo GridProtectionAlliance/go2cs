@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:31 UTC
+//     Generated on 2020 October 09 04:58:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,6 +38,7 @@ using time = go.time_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -62,7 +63,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ResponseWriter<T> : ResponseWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -88,8 +89,8 @@ namespace net
             private delegate (long, error) HeaderByPtr(ptr<T> value);
             private delegate (long, error) HeaderByVal(T value);
 
-            private static readonly HeaderByPtr s_HeaderByPtr;
-            private static readonly HeaderByVal s_HeaderByVal;
+            private static readonly HeaderByPtr? s_HeaderByPtr;
+            private static readonly HeaderByVal? s_HeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Header()
@@ -108,8 +109,8 @@ namespace net
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> _p0);
             private delegate (long, error) WriteByVal(T value, slice<byte> _p0);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> _p0)
@@ -128,8 +129,8 @@ namespace net
             private delegate (long, error) WriteHeaderByPtr(ptr<T> value, long statusCode);
             private delegate (long, error) WriteHeaderByVal(T value, long statusCode);
 
-            private static readonly WriteHeaderByPtr s_WriteHeaderByPtr;
-            private static readonly WriteHeaderByVal s_WriteHeaderByVal;
+            private static readonly WriteHeaderByPtr? s_WriteHeaderByPtr;
+            private static readonly WriteHeaderByVal? s_WriteHeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) WriteHeader(long statusCode)
@@ -145,7 +146,7 @@ namespace net
                 return s_WriteHeaderByPtr(m_target_ptr, statusCode);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ResponseWriter()

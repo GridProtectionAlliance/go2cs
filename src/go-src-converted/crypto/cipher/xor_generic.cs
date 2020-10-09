@@ -4,7 +4,7 @@
 
 // +build !amd64,!ppc64,!ppc64le
 
-// package cipher -- go2cs converted at 2020 October 08 03:35:46 UTC
+// package cipher -- go2cs converted at 2020 October 09 04:53:44 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\xor_generic.go
 using runtime = go.runtime_package;
@@ -43,9 +43,9 @@ namespace crypto
 
         }
 
-        private static readonly var wordSize = (var)int(@unsafe.Sizeof(uintptr(0L)));
+        private static readonly var wordSize = int(@unsafe.Sizeof(uintptr(0L)));
 
-        private static readonly var supportsUnaligned = (var)runtime.GOARCH == "386" || runtime.GOARCH == "ppc64" || runtime.GOARCH == "ppc64le" || runtime.GOARCH == "s390x";
+        private static readonly var supportsUnaligned = runtime.GOARCH == "386" || runtime.GOARCH == "ppc64" || runtime.GOARCH == "ppc64le" || runtime.GOARCH == "s390x";
 
         // fastXORBytes xors in bulk. It only works on architectures that
         // support unaligned read/writes.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:59 UTC
+//     Generated on 2020 October 09 06:02:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using strings = go.strings_package;
 using types = go.go.types_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace types
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class hasElem<T> : hasElem
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace types
             private delegate types.Type ElemByPtr(ptr<T> value);
             private delegate types.Type ElemByVal(T value);
 
-            private static readonly ElemByPtr s_ElemByPtr;
-            private static readonly ElemByVal s_ElemByVal;
+            private static readonly ElemByPtr? s_ElemByPtr;
+            private static readonly ElemByVal? s_ElemByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public types.Type Elem()
@@ -91,7 +92,7 @@ namespace types
                 return s_ElemByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static hasElem()

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2020 October 08 04:59:14 UTC
+// package image -- go2cs converted at 2020 October 09 06:05:43 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\ycbcr.go
 using color = go.image.color_package;
@@ -18,11 +18,11 @@ namespace go
         }
 
         public static readonly YCbCrSubsampleRatio YCbCrSubsampleRatio444 = (YCbCrSubsampleRatio)iota;
-        public static readonly var YCbCrSubsampleRatio422 = (var)0;
-        public static readonly var YCbCrSubsampleRatio420 = (var)1;
-        public static readonly var YCbCrSubsampleRatio440 = (var)2;
-        public static readonly var YCbCrSubsampleRatio411 = (var)3;
-        public static readonly var YCbCrSubsampleRatio410 = (var)4;
+        public static readonly var YCbCrSubsampleRatio422 = 0;
+        public static readonly var YCbCrSubsampleRatio420 = 1;
+        public static readonly var YCbCrSubsampleRatio440 = 2;
+        public static readonly var YCbCrSubsampleRatio411 = 3;
+        public static readonly var YCbCrSubsampleRatio410 = 4;
 
 
         public static @string String(this YCbCrSubsampleRatio s)

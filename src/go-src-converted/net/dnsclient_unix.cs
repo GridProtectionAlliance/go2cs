@@ -12,7 +12,7 @@
 //    Random UDP source port (net.Dial should do that for us).
 //    Random request IDs.
 
-// package net -- go2cs converted at 2020 October 08 03:31:41 UTC
+// package net -- go2cs converted at 2020 October 09 04:50:50 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\dnsclient_unix.go
 using context = go.context_package;
@@ -34,8 +34,8 @@ namespace go
     {
  
         // to be used as a useTCP parameter to exchange
-        private static readonly var useTCPOnly = (var)true;
-        private static readonly var useUDPOrTCP = (var)false;
+        private static readonly var useTCPOnly = true;
+        private static readonly var useUDPOrTCP = false;
 
 
         private static var errLameReferral = errors.New("lame referral");        private static var errCannotUnmarshalDNSMessage = errors.New("cannot unmarshal DNS message");        private static var errCannotMarshalDNSMessage = errors.New("cannot marshal DNS message");        private static var errServerMisbehaving = errors.New("server misbehaving");        private static var errInvalidDNSResponse = errors.New("invalid DNS response");        private static var errNoAnswerFromDNSServer = errors.New("no answer from DNS server");        private static var errServerTemporarilyMisbehaving = errors.New("server misbehaving");
@@ -761,10 +761,10 @@ namespace go
  
         // hostLookupCgo means defer to cgo.
         private static readonly hostLookupOrder hostLookupCgo = (hostLookupOrder)iota;
-        private static readonly var hostLookupFilesDNS = (var)0; // files first
-        private static readonly var hostLookupDNSFiles = (var)1; // dns first
-        private static readonly var hostLookupFiles = (var)2; // only files
-        private static readonly var hostLookupDNS = (var)3; // only DNS
+        private static readonly var hostLookupFilesDNS = 0; // files first
+        private static readonly var hostLookupDNSFiles = 1; // dns first
+        private static readonly var hostLookupFiles = 2; // only files
+        private static readonly var hostLookupDNS = 3; // only DNS
 
         private static map lookupOrderName = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<hostLookupOrder, @string>{hostLookupCgo:"cgo",hostLookupFilesDNS:"files,dns",hostLookupDNSFiles:"dns,files",hostLookupFiles:"files",hostLookupDNS:"dns",};
 

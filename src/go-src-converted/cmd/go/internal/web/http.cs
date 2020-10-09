@@ -9,7 +9,7 @@
 // to avoid needing to build net (and thus use cgo) during the
 // bootstrap process.
 
-// package web -- go2cs converted at 2020 October 08 04:34:37 UTC
+// package web -- go2cs converted at 2020 October 09 05:46:02 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Go\src\cmd\go\internal\web\http.go
 using tls = go.crypto.tls_package;

@@ -5,7 +5,7 @@
 // Package dwarf generates DWARF debugging information.
 // DWARF generation is split between the compiler and the linker,
 // this package contains the shared code.
-// package dwarf -- go2cs converted at 2020 October 08 04:07:48 UTC
+// package dwarf -- go2cs converted at 2020 October 09 05:22:46 UTC
 // import "cmd/internal/dwarf" ==> using dwarf = go.cmd.@internal.dwarf_package
 // Original source: C:\Go\src\cmd\internal\dwarf\dwarf.go
 using bytes = go.bytes_package;
@@ -413,46 +413,46 @@ namespace @internal
         // Index into the abbrevs table below.
         // Keep in sync with ispubname() and ispubtype() in ld/dwarf.go.
         // ispubtype considers >= NULLTYPE public
-        public static readonly var DW_ABRV_NULL = (var)iota;
-        public static readonly var DW_ABRV_COMPUNIT = (var)0;
-        public static readonly var DW_ABRV_COMPUNIT_TEXTLESS = (var)1;
-        public static readonly var DW_ABRV_FUNCTION = (var)2;
-        public static readonly var DW_ABRV_FUNCTION_ABSTRACT = (var)3;
-        public static readonly var DW_ABRV_FUNCTION_CONCRETE = (var)4;
-        public static readonly var DW_ABRV_INLINED_SUBROUTINE = (var)5;
-        public static readonly var DW_ABRV_INLINED_SUBROUTINE_RANGES = (var)6;
-        public static readonly var DW_ABRV_VARIABLE = (var)7;
-        public static readonly var DW_ABRV_INT_CONSTANT = (var)8;
-        public static readonly var DW_ABRV_AUTO = (var)9;
-        public static readonly var DW_ABRV_AUTO_LOCLIST = (var)10;
-        public static readonly var DW_ABRV_AUTO_ABSTRACT = (var)11;
-        public static readonly var DW_ABRV_AUTO_CONCRETE = (var)12;
-        public static readonly var DW_ABRV_AUTO_CONCRETE_LOCLIST = (var)13;
-        public static readonly var DW_ABRV_PARAM = (var)14;
-        public static readonly var DW_ABRV_PARAM_LOCLIST = (var)15;
-        public static readonly var DW_ABRV_PARAM_ABSTRACT = (var)16;
-        public static readonly var DW_ABRV_PARAM_CONCRETE = (var)17;
-        public static readonly var DW_ABRV_PARAM_CONCRETE_LOCLIST = (var)18;
-        public static readonly var DW_ABRV_LEXICAL_BLOCK_RANGES = (var)19;
-        public static readonly var DW_ABRV_LEXICAL_BLOCK_SIMPLE = (var)20;
-        public static readonly var DW_ABRV_STRUCTFIELD = (var)21;
-        public static readonly var DW_ABRV_FUNCTYPEPARAM = (var)22;
-        public static readonly var DW_ABRV_DOTDOTDOT = (var)23;
-        public static readonly var DW_ABRV_ARRAYRANGE = (var)24;
-        public static readonly var DW_ABRV_NULLTYPE = (var)25;
-        public static readonly var DW_ABRV_BASETYPE = (var)26;
-        public static readonly var DW_ABRV_ARRAYTYPE = (var)27;
-        public static readonly var DW_ABRV_CHANTYPE = (var)28;
-        public static readonly var DW_ABRV_FUNCTYPE = (var)29;
-        public static readonly var DW_ABRV_IFACETYPE = (var)30;
-        public static readonly var DW_ABRV_MAPTYPE = (var)31;
-        public static readonly var DW_ABRV_PTRTYPE = (var)32;
-        public static readonly var DW_ABRV_BARE_PTRTYPE = (var)33; // only for void*, no DW_AT_type attr to please gdb 6.
-        public static readonly var DW_ABRV_SLICETYPE = (var)34;
-        public static readonly var DW_ABRV_STRINGTYPE = (var)35;
-        public static readonly var DW_ABRV_STRUCTTYPE = (var)36;
-        public static readonly var DW_ABRV_TYPEDECL = (var)37;
-        public static readonly var DW_NABRV = (var)38;
+        public static readonly var DW_ABRV_NULL = iota;
+        public static readonly var DW_ABRV_COMPUNIT = 0;
+        public static readonly var DW_ABRV_COMPUNIT_TEXTLESS = 1;
+        public static readonly var DW_ABRV_FUNCTION = 2;
+        public static readonly var DW_ABRV_FUNCTION_ABSTRACT = 3;
+        public static readonly var DW_ABRV_FUNCTION_CONCRETE = 4;
+        public static readonly var DW_ABRV_INLINED_SUBROUTINE = 5;
+        public static readonly var DW_ABRV_INLINED_SUBROUTINE_RANGES = 6;
+        public static readonly var DW_ABRV_VARIABLE = 7;
+        public static readonly var DW_ABRV_INT_CONSTANT = 8;
+        public static readonly var DW_ABRV_AUTO = 9;
+        public static readonly var DW_ABRV_AUTO_LOCLIST = 10;
+        public static readonly var DW_ABRV_AUTO_ABSTRACT = 11;
+        public static readonly var DW_ABRV_AUTO_CONCRETE = 12;
+        public static readonly var DW_ABRV_AUTO_CONCRETE_LOCLIST = 13;
+        public static readonly var DW_ABRV_PARAM = 14;
+        public static readonly var DW_ABRV_PARAM_LOCLIST = 15;
+        public static readonly var DW_ABRV_PARAM_ABSTRACT = 16;
+        public static readonly var DW_ABRV_PARAM_CONCRETE = 17;
+        public static readonly var DW_ABRV_PARAM_CONCRETE_LOCLIST = 18;
+        public static readonly var DW_ABRV_LEXICAL_BLOCK_RANGES = 19;
+        public static readonly var DW_ABRV_LEXICAL_BLOCK_SIMPLE = 20;
+        public static readonly var DW_ABRV_STRUCTFIELD = 21;
+        public static readonly var DW_ABRV_FUNCTYPEPARAM = 22;
+        public static readonly var DW_ABRV_DOTDOTDOT = 23;
+        public static readonly var DW_ABRV_ARRAYRANGE = 24;
+        public static readonly var DW_ABRV_NULLTYPE = 25;
+        public static readonly var DW_ABRV_BASETYPE = 26;
+        public static readonly var DW_ABRV_ARRAYTYPE = 27;
+        public static readonly var DW_ABRV_CHANTYPE = 28;
+        public static readonly var DW_ABRV_FUNCTYPE = 29;
+        public static readonly var DW_ABRV_IFACETYPE = 30;
+        public static readonly var DW_ABRV_MAPTYPE = 31;
+        public static readonly var DW_ABRV_PTRTYPE = 32;
+        public static readonly var DW_ABRV_BARE_PTRTYPE = 33; // only for void*, no DW_AT_type attr to please gdb 6.
+        public static readonly var DW_ABRV_SLICETYPE = 34;
+        public static readonly var DW_ABRV_STRINGTYPE = 35;
+        public static readonly var DW_ABRV_STRUCTTYPE = 36;
+        public static readonly var DW_ABRV_TYPEDECL = 37;
+        public static readonly var DW_NABRV = 38;
 
 
         private partial struct dwAbbrev

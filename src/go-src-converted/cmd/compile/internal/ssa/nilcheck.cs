@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:47 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:54 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\nilcheck.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -36,7 +36,7 @@ namespace @internal
             {
             }
             const walkState Work = (walkState)iota; // process nil checks and traverse to dominees
-            const var ClearPtr = (var)0; // forget the fact that ptr is nil
+            const var ClearPtr = 0; // forget the fact that ptr is nil
 
             private partial struct bp
             {

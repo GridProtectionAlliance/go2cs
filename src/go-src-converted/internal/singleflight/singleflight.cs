@@ -4,7 +4,7 @@
 
 // Package singleflight provides a duplicate function call suppression
 // mechanism.
-// package singleflight -- go2cs converted at 2020 October 08 03:33:52 UTC
+// package singleflight -- go2cs converted at 2020 October 09 04:52:00 UTC
 // import "internal/singleflight" ==> using singleflight = go.@internal.singleflight_package
 // Original source: C:\Go\src\internal\singleflight\singleflight.go
 using sync = go.sync_package;

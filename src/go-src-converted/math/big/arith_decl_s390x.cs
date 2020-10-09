@@ -4,7 +4,7 @@
 
 // +build !math_big_pure_go
 
-// package big -- go2cs converted at 2020 October 08 03:25:24 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:16 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\arith_decl_s390x.go
 using cpu = go.@internal.cpu_package;

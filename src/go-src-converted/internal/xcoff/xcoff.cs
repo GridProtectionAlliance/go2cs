@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xcoff -- go2cs converted at 2020 October 08 04:02:15 UTC
+// package xcoff -- go2cs converted at 2020 October 09 05:18:43 UTC
 // import "internal/xcoff" ==> using xcoff = go.@internal.xcoff_package
 // Original source: C:\Go\src\internal\xcoff\xcoff.go
 

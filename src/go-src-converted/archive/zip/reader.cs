@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2020 October 08 03:49:26 UTC
+// package zip -- go2cs converted at 2020 October 09 05:08:09 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Go\src\archive\zip\reader.go
 using bufio = go.bufio_package;
@@ -145,7 +145,7 @@ namespace archive
             while (true)
             {
                 ptr<File> f = addr(new File(zip:z,zipr:r,zipsize:size));
-                err = readDirectoryHeader(_addr_f, buf);
+                err = readDirectoryHeader(f, buf);
                 if (err == ErrFormat || err == io.ErrUnexpectedEOF)
                 {
                     break;
@@ -756,7 +756,7 @@ parseExtras:
                 var (p, err) = findDirectory64End(r, directoryEndOffset);
                 if (err == null && p >= 0L)
                 {
-                    err = readDirectory64End(r, p, _addr_d);
+                    err = readDirectory64End(r, p, d);
                 }
 
                 if (err != null)

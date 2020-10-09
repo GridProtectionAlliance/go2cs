@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:02:53 UTC
+//     Generated on 2020 October 09 05:19:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -40,7 +41,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class error<T> : error
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -66,8 +67,8 @@ namespace go
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -83,7 +84,7 @@ namespace go
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static error()

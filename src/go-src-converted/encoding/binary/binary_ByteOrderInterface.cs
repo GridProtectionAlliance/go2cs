@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:24:33 UTC
+//     Generated on 2020 October 09 04:49:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using reflect = go.reflect_package;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ByteOrder<T> : ByteOrder
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace encoding
             private delegate @string Uint16ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint16ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint16ByPtr s_Uint16ByPtr;
-            private static readonly Uint16ByVal s_Uint16ByVal;
+            private static readonly Uint16ByPtr? s_Uint16ByPtr;
+            private static readonly Uint16ByVal? s_Uint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Uint16(slice<byte> _p0)
@@ -91,8 +92,8 @@ namespace encoding
             private delegate @string Uint32ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint32ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint32ByPtr s_Uint32ByPtr;
-            private static readonly Uint32ByVal s_Uint32ByVal;
+            private static readonly Uint32ByPtr? s_Uint32ByPtr;
+            private static readonly Uint32ByVal? s_Uint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Uint32(slice<byte> _p0)
@@ -111,8 +112,8 @@ namespace encoding
             private delegate @string Uint64ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate @string Uint64ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint64ByPtr s_Uint64ByPtr;
-            private static readonly Uint64ByVal s_Uint64ByVal;
+            private static readonly Uint64ByPtr? s_Uint64ByPtr;
+            private static readonly Uint64ByVal? s_Uint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Uint64(slice<byte> _p0)
@@ -131,8 +132,8 @@ namespace encoding
             private delegate @string PutUint16ByPtr(ptr<T> value, slice<byte> _p0, ushort _p0);
             private delegate @string PutUint16ByVal(T value, slice<byte> _p0, ushort _p0);
 
-            private static readonly PutUint16ByPtr s_PutUint16ByPtr;
-            private static readonly PutUint16ByVal s_PutUint16ByVal;
+            private static readonly PutUint16ByPtr? s_PutUint16ByPtr;
+            private static readonly PutUint16ByVal? s_PutUint16ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string PutUint16(slice<byte> _p0, ushort _p0)
@@ -151,8 +152,8 @@ namespace encoding
             private delegate @string PutUint32ByPtr(ptr<T> value, slice<byte> _p0, uint _p0);
             private delegate @string PutUint32ByVal(T value, slice<byte> _p0, uint _p0);
 
-            private static readonly PutUint32ByPtr s_PutUint32ByPtr;
-            private static readonly PutUint32ByVal s_PutUint32ByVal;
+            private static readonly PutUint32ByPtr? s_PutUint32ByPtr;
+            private static readonly PutUint32ByVal? s_PutUint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string PutUint32(slice<byte> _p0, uint _p0)
@@ -171,8 +172,8 @@ namespace encoding
             private delegate @string PutUint64ByPtr(ptr<T> value, slice<byte> _p0, ulong _p0);
             private delegate @string PutUint64ByVal(T value, slice<byte> _p0, ulong _p0);
 
-            private static readonly PutUint64ByPtr s_PutUint64ByPtr;
-            private static readonly PutUint64ByVal s_PutUint64ByVal;
+            private static readonly PutUint64ByPtr? s_PutUint64ByPtr;
+            private static readonly PutUint64ByVal? s_PutUint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string PutUint64(slice<byte> _p0, ulong _p0)
@@ -191,8 +192,8 @@ namespace encoding
             private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string String()
@@ -208,7 +209,7 @@ namespace encoding
                 return s_StringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ByteOrder()

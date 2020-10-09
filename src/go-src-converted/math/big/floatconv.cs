@@ -4,7 +4,7 @@
 
 // This file implements string-to-Float conversion functions.
 
-// package big -- go2cs converted at 2020 October 08 03:25:30 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:23 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\floatconv.go
 using fmt = go.fmt_package;
@@ -219,7 +219,7 @@ namespace math
         {
             ref Float z = ref _addr_z.val;
 
-            const var m = (var)uint64(len(pow5tab) - 1L);
+            const var m = uint64(len(pow5tab) - 1L);
 
             if (n <= m)
             {

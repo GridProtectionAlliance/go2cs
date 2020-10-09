@@ -37,7 +37,7 @@
 // nor abnormal control flow caused by panic.  If you need this
 // information, use golang.org/x/tools/go/ssa instead.
 //
-// package cfg -- go2cs converted at 2020 October 08 04:58:29 UTC
+// package cfg -- go2cs converted at 2020 October 09 06:05:01 UTC
 // import "cmd/vendor/golang.org/x/tools/go/cfg" ==> using cfg = go.cmd.vendor.golang.org.x.tools.go.cfg_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\cfg\cfg.go
 using bytes = go.bytes_package;

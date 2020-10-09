@@ -42,7 +42,7 @@
 //
 // * os.Exit is implemented using panic, causing deferred functions to
 // run.
-// package interp -- go2cs converted at 2020 October 08 04:57:17 UTC
+// package interp -- go2cs converted at 2020 October 09 06:03:35 UTC
 // import "golang.org/x/tools/go/ssa/interp" ==> using interp = go.golang.org.x.tools.go.ssa.interp_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\interp.go
 // import "golang.org/x/tools/go/ssa/interp"
@@ -74,8 +74,8 @@ namespace ssa
         }
 
         private static readonly continuation kNext = (continuation)iota;
-        private static readonly var kReturn = (var)0;
-        private static readonly var kJump = (var)1;
+        private static readonly var kReturn = 0;
+        private static readonly var kJump = 1;
 
 
         // Mode is a bitmask of options affecting the interpreter.
@@ -84,7 +84,7 @@ namespace ssa
         }
 
         public static readonly Mode DisableRecover = (Mode)1L << (int)(iota); // Disable recover() in target programs; show interpreter crash instead.
-        public static readonly var EnableTracing = (var)0; // Print a trace of all instructions as they are interpreted.
+        public static readonly var EnableTracing = 0; // Print a trace of all instructions as they are interpreted.
 
         private partial struct methodSet // : map<@string, ptr<ssa.Function>>
         {
@@ -787,7 +787,7 @@ namespace ssa
 
             while (fr.block != null)
             {
-                runFrame(_addr_fr);
+                runFrame(fr);
             } 
             // Destroy the locals to avoid accidental use after return.
  
@@ -1050,13 +1050,13 @@ block:
             }()); 
 
             // Run!
-            call(_addr_i, _addr_null, token.NoPos, mainpkg.Func("init"), null);
+            call(i, _addr_null, token.NoPos, mainpkg.Func("init"), null);
             {
                 var mainFn = mainpkg.Func("main");
 
                 if (mainFn != null)
                 {
-                    call(_addr_i, _addr_null, token.NoPos, mainFn, null);
+                    call(i, _addr_null, token.NoPos, mainFn, null);
                     exitCode = 0L;
                 }
                 else

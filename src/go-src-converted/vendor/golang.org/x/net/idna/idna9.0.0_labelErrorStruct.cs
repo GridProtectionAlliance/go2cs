@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:00:39 UTC
+//     Generated on 2020 October 09 06:06:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using utf8 = go.unicode.utf8_package;
 using bidirule = go.golang.org.x.text.secure.bidirule_package;
 using norm = go.golang.org.x.text.unicode.norm_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace vendor {

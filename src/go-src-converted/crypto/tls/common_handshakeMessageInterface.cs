@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:37:25 UTC
+//     Generated on 2020 October 09 04:55:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,6 +34,7 @@ using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -58,7 +59,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class handshakeMessage<T> : handshakeMessage
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -84,8 +85,8 @@ namespace crypto
             private delegate bool marshalByPtr(ptr<T> value);
             private delegate bool marshalByVal(T value);
 
-            private static readonly marshalByPtr s_marshalByPtr;
-            private static readonly marshalByVal s_marshalByVal;
+            private static readonly marshalByPtr? s_marshalByPtr;
+            private static readonly marshalByVal? s_marshalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool marshal()
@@ -104,8 +105,8 @@ namespace crypto
             private delegate bool unmarshalByPtr(ptr<T> value, slice<byte> _p0);
             private delegate bool unmarshalByVal(T value, slice<byte> _p0);
 
-            private static readonly unmarshalByPtr s_unmarshalByPtr;
-            private static readonly unmarshalByVal s_unmarshalByVal;
+            private static readonly unmarshalByPtr? s_unmarshalByPtr;
+            private static readonly unmarshalByVal? s_unmarshalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool unmarshal(slice<byte> _p0)
@@ -121,7 +122,7 @@ namespace crypto
                 return s_unmarshalByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static handshakeMessage()

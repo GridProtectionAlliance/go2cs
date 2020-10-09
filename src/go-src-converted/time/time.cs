@@ -73,7 +73,7 @@
 // clock reading if present. If t != u because of different monotonic clock readings,
 // that difference will be visible when printing t.String() and u.String().
 //
-// package time -- go2cs converted at 2020 October 08 03:45:47 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:09 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\time.go
 using errors = go.errors_package;
@@ -140,8 +140,8 @@ namespace go
         }
 
         private static readonly long hasMonotonic = (long)1L << (int)(63L);
-        private static readonly var maxWall = (var)wallToInternal + (1L << (int)(33L) - 1L); // year 2157
-        private static readonly var minWall = (var)wallToInternal; // year 1885
+        private static readonly var maxWall = wallToInternal + (1L << (int)(33L) - 1L); // year 2157
+        private static readonly var minWall = wallToInternal; // year 1885
         private static readonly long nsecMask = (long)1L << (int)(30L) - 1L;
         private static readonly long nsecShift = (long)30L;
 
@@ -326,17 +326,17 @@ namespace go
         }
 
         public static readonly Month January = (Month)1L + iota;
-        public static readonly var February = (var)0;
-        public static readonly var March = (var)1;
-        public static readonly var April = (var)2;
-        public static readonly var May = (var)3;
-        public static readonly var June = (var)4;
-        public static readonly var July = (var)5;
-        public static readonly var August = (var)6;
-        public static readonly var September = (var)7;
-        public static readonly var October = (var)8;
-        public static readonly var November = (var)9;
-        public static readonly var December = (var)10;
+        public static readonly var February = 0;
+        public static readonly var March = 1;
+        public static readonly var April = 2;
+        public static readonly var May = 3;
+        public static readonly var June = 4;
+        public static readonly var July = 5;
+        public static readonly var August = 6;
+        public static readonly var September = 7;
+        public static readonly var October = 8;
+        public static readonly var November = 9;
+        public static readonly var December = 10;
 
 
         // String returns the English name of the month ("January", "February", ...).
@@ -359,12 +359,12 @@ namespace go
         }
 
         public static readonly Weekday Sunday = (Weekday)iota;
-        public static readonly var Monday = (var)0;
-        public static readonly var Tuesday = (var)1;
-        public static readonly var Wednesday = (var)2;
-        public static readonly var Thursday = (var)3;
-        public static readonly var Friday = (var)4;
-        public static readonly var Saturday = (var)5;
+        public static readonly var Monday = 0;
+        public static readonly var Tuesday = 1;
+        public static readonly var Wednesday = 2;
+        public static readonly var Thursday = 3;
+        public static readonly var Friday = 4;
+        public static readonly var Saturday = 5;
 
 
         // String returns the English name of the day ("Sunday", "Monday", ...).
@@ -473,7 +473,7 @@ namespace go
 
         // Offsets to convert between internal and absolute or Unix times.
         private static readonly long absoluteToInternal = (long)(absoluteZeroYear - internalYear) * 365.2425F * secondsPerDay;
-        private static readonly var internalToAbsolute = (var)-absoluteToInternal;
+        private static readonly var internalToAbsolute = -absoluteToInternal;
 
         private static readonly long unixToInternal = (1969L * 365L + 1969L / 4L - 1969L / 100L + 1969L / 400L) * secondsPerDay;
         private static readonly long internalToUnix = (long)-unixToInternal;

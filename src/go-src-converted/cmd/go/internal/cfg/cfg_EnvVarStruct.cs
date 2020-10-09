@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:32 UTC
+//     Generated on 2020 October 09 05:45:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using objabi = go.cmd.@internal.objabi_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

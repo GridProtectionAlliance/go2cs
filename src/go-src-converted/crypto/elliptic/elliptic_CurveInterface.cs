@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:20 UTC
+//     Generated on 2020 October 09 04:52:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using big = go.math.big_package;
 using sync = go.sync_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -43,7 +44,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Curve<T> : Curve
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) ParamsByPtr(ptr<T> value);
             private delegate (ptr<big.Int>, ptr<big.Int>) ParamsByVal(T value);
 
-            private static readonly ParamsByPtr s_ParamsByPtr;
-            private static readonly ParamsByVal s_ParamsByVal;
+            private static readonly ParamsByPtr? s_ParamsByPtr;
+            private static readonly ParamsByVal? s_ParamsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) Params()
@@ -89,8 +90,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) IsOnCurveByPtr(ptr<T> value, ptr<big.Int> x, ptr<big.Int> y);
             private delegate (ptr<big.Int>, ptr<big.Int>) IsOnCurveByVal(T value, ptr<big.Int> x, ptr<big.Int> y);
 
-            private static readonly IsOnCurveByPtr s_IsOnCurveByPtr;
-            private static readonly IsOnCurveByVal s_IsOnCurveByVal;
+            private static readonly IsOnCurveByPtr? s_IsOnCurveByPtr;
+            private static readonly IsOnCurveByVal? s_IsOnCurveByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) IsOnCurve(ptr<big.Int> x, ptr<big.Int> y)
@@ -109,8 +110,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) AddByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2);
             private delegate (ptr<big.Int>, ptr<big.Int>) AddByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2);
 
-            private static readonly AddByPtr s_AddByPtr;
-            private static readonly AddByVal s_AddByVal;
+            private static readonly AddByPtr? s_AddByPtr;
+            private static readonly AddByVal? s_AddByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) Add(ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2)
@@ -129,8 +130,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) DoubleByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1);
             private delegate (ptr<big.Int>, ptr<big.Int>) DoubleByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1);
 
-            private static readonly DoubleByPtr s_DoubleByPtr;
-            private static readonly DoubleByVal s_DoubleByVal;
+            private static readonly DoubleByPtr? s_DoubleByPtr;
+            private static readonly DoubleByVal? s_DoubleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) Double(ptr<big.Int> x1, ptr<big.Int> y1)
@@ -149,8 +150,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarMultByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k);
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarMultByVal(T value, ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k);
 
-            private static readonly ScalarMultByPtr s_ScalarMultByPtr;
-            private static readonly ScalarMultByVal s_ScalarMultByVal;
+            private static readonly ScalarMultByPtr? s_ScalarMultByPtr;
+            private static readonly ScalarMultByVal? s_ScalarMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) ScalarMult(ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k)
@@ -169,8 +170,8 @@ namespace crypto
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarBaseMultByPtr(ptr<T> value, slice<byte> k);
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarBaseMultByVal(T value, slice<byte> k);
 
-            private static readonly ScalarBaseMultByPtr s_ScalarBaseMultByPtr;
-            private static readonly ScalarBaseMultByVal s_ScalarBaseMultByVal;
+            private static readonly ScalarBaseMultByPtr? s_ScalarBaseMultByPtr;
+            private static readonly ScalarBaseMultByVal? s_ScalarBaseMultByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(slice<byte> k)
@@ -186,7 +187,7 @@ namespace crypto
                 return s_ScalarBaseMultByPtr(m_target_ptr, k);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Curve()

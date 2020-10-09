@@ -4,7 +4,7 @@
 
 // +build !wasm,!windows
 
-// package ld -- go2cs converted at 2020 October 08 04:38:43 UTC
+// package ld -- go2cs converted at 2020 October 09 05:49:38 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\execarchive.go
 using os = go.os_package;
@@ -20,7 +20,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        private static readonly var syscallExecSupported = (var)true;
+        private static readonly var syscallExecSupported = true;
 
         // execArchive invokes the archiver tool with syscall.Exec(), with
         // the expectation that this is the last thing that takes place

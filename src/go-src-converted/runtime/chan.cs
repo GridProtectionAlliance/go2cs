@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:16 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:39 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\chan.go
 // This file contains the implementation of Go channels.
@@ -29,8 +29,8 @@ namespace go
     public static partial class runtime_package
     {
         private static readonly long maxAlign = (long)8L;
-        private static readonly var hchanSize = (var)@unsafe.Sizeof(new hchan()) + uintptr(-int(@unsafe.Sizeof(new hchan())) & (maxAlign - 1L));
-        private static readonly var debugChan = (var)false;
+        private static readonly var hchanSize = @unsafe.Sizeof(new hchan()) + uintptr(-int(@unsafe.Sizeof(new hchan())) & (maxAlign - 1L));
+        private static readonly var debugChan = false;
 
 
         private partial struct hchan

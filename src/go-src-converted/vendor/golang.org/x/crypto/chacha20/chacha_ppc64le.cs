@@ -4,7 +4,7 @@
 
 // +build !gccgo,!purego
 
-// package chacha20 -- go2cs converted at 2020 October 08 04:59:53 UTC
+// package chacha20 -- go2cs converted at 2020 October 09 06:06:15 UTC
 // import "vendor/golang.org/x/crypto/chacha20" ==> using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\chacha20\chacha_ppc64le.go
 

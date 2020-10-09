@@ -176,7 +176,7 @@
 //    — PeterNeumann x08go/ZJkuBS9UG/SffcvIAQxVBtiFupLLr8pAcElZInNIuGUgYN1FFYC2pZSNXgKvqfqdngotpRZb6KE6RyyBwJnAM=
 //    — EnochRoot rwz+eBzmZa0SO3NbfRGzPCpDckykFXSdeX+MNtCOXm2/5n2tiOHp+vAF1aGrQ5ovTG01oOTGwnWLox33WWd1RvMc+QQ=
 //
-// package note -- go2cs converted at 2020 October 08 04:36:15 UTC
+// package note -- go2cs converted at 2020 October 09 05:47:26 UTC
 // import "golang.org/x/mod/sumdb/note" ==> using note = go.golang.org.x.mod.sumdb.note_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\mod\sumdb\note\note.go
 using bytes = go.bytes_package;

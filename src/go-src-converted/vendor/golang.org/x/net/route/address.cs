@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2020 October 08 05:01:35 UTC
+// package route -- go2cs converted at 2020 October 09 06:07:45 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\route\address.go
 using runtime = go.runtime_package;

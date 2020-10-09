@@ -4,7 +4,7 @@
 
 //go:generate bundle -o=h2_bundle.go -prefix=http2 -tags=!nethttpomithttp2 golang.org/x/net/http2
 
-// package http -- go2cs converted at 2020 October 08 03:40:13 UTC
+// package http -- go2cs converted at 2020 October 09 04:57:45 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\http.go
 using io = go.io_package;

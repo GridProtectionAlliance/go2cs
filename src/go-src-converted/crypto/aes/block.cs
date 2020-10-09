@@ -34,7 +34,7 @@
 //    https://csrc.nist.gov/csrc/media/publications/fips/197/final/documents/fips-197.pdf
 //    https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
 
-// package aes -- go2cs converted at 2020 October 08 03:35:47 UTC
+// package aes -- go2cs converted at 2020 October 09 04:53:45 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\block.go
 using binary = go.encoding.binary_package;

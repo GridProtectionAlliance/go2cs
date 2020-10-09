@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sql -- go2cs converted at 2020 October 08 04:58:48 UTC
+// package sql -- go2cs converted at 2020 October 09 06:05:20 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Go\src\database\sql\ctxutil.go
 using context = go.context_package;

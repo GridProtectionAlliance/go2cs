@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cipher -- go2cs converted at 2020 October 08 03:35:45 UTC
+// package cipher -- go2cs converted at 2020 October 09 04:53:43 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Go\src\crypto\cipher\gcm.go
 using subtleoverlap = go.crypto.@internal.subtle_package;

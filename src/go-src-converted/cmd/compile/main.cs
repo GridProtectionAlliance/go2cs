@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 04:09:24 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:57 UTC
 // Original source: C:\Go\src\cmd\compile\main.go
 using amd64 = go.cmd.compile.@internal.amd64_package;
 using arm = go.cmd.compile.@internal.arm_package;

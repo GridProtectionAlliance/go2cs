@@ -4,7 +4,7 @@
 
 // Package quotedprintable implements quoted-printable encoding as specified by
 // RFC 2045.
-// package quotedprintable -- go2cs converted at 2020 October 08 03:38:32 UTC
+// package quotedprintable -- go2cs converted at 2020 October 09 04:56:12 UTC
 // import "mime/quotedprintable" ==> using quotedprintable = go.mime.quotedprintable_package
 // Original source: C:\Go\src\mime\quotedprintable\reader.go
 using bufio = go.bufio_package;

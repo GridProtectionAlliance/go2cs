@@ -4,7 +4,7 @@
 
 // This file implements typechecking of call and selector expressions.
 
-// package types -- go2cs converted at 2020 October 08 04:03:03 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:18 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\call.go
 using ast = go.go.ast_package;

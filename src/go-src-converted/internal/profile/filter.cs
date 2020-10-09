@@ -4,7 +4,7 @@
 
 // Implements methods to filter samples from profiles.
 
-// package profile -- go2cs converted at 2020 October 08 03:41:43 UTC
+// package profile -- go2cs converted at 2020 October 09 04:59:06 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Go\src\internal\profile\filter.go
 using regexp = go.regexp_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2020 October 08 04:35:43 UTC
+// package modload -- go2cs converted at 2020 October 09 05:46:58 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Go\src\cmd\go\internal\modload\search.go
 using fmt = go.fmt_package;
@@ -29,8 +29,8 @@ namespace @internal
         {
         }
 
-        private static readonly var omitStd = (var)stdFilter(iota);
-        private static readonly var includeStd = (var)0;
+        private static readonly var omitStd = stdFilter(iota);
+        private static readonly var includeStd = 0;
 
 
         // matchPackages is like m.MatchPackages, but uses a local variable (rather than
@@ -59,8 +59,8 @@ namespace @internal
             private partial struct pruning // : sbyte
             {
             }
-            const var pruneVendor = (var)pruning(1L << (int)(iota));
-            const var pruneGoMod = (var)0;
+            const var pruneVendor = pruning(1L << (int)(iota));
+            const var pruneGoMod = 0;
 
 
             Action<@string, @string, pruning> walkPkgs = (root, importPathRoot, prune) =>

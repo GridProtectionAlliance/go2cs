@@ -4,7 +4,7 @@
 
 // Implementation of Server
 
-// package httptest -- go2cs converted at 2020 October 08 03:41:27 UTC
+// package httptest -- go2cs converted at 2020 October 09 04:58:50 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Go\src\net\http\httptest\server.go
 using tls = go.crypto.tls_package;

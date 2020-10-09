@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2020 October 08 03:45:48 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:11 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\zoneinfo.go
 using errors = go.errors_package;
@@ -638,8 +638,8 @@ namespace go
         }
 
         private static readonly ruleKind ruleJulian = (ruleKind)iota;
-        private static readonly var ruleDOY = (var)0;
-        private static readonly var ruleMonthWeekDay = (var)1;
+        private static readonly var ruleDOY = 0;
+        private static readonly var ruleMonthWeekDay = 1;
 
 
         // rule is a rule read from a tzset string.

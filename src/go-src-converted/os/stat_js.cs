@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package os -- go2cs converted at 2020 October 08 03:45:06 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:23 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\stat_js.go
 using syscall = go.syscall_package;

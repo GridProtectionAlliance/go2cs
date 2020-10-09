@@ -9,7 +9,7 @@
 // Note that sometimes we use a lowercase //sys name and
 // wrap it in our own nicer implementation.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:40 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:55 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_plan9.go
 using oserror = go.@internal.oserror_package;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
         private static readonly long bitSize16 = (long)2L;
 

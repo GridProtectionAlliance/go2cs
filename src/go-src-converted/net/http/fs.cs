@@ -4,7 +4,7 @@
 
 // HTTP file system request handler
 
-// package http -- go2cs converted at 2020 October 08 03:38:41 UTC
+// package http -- go2cs converted at 2020 October 09 04:56:20 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\fs.go
 using errors = go.errors_package;
@@ -468,8 +468,8 @@ namespace net
         }
 
         private static readonly condResult condNone = (condResult)iota;
-        private static readonly var condTrue = (var)0;
-        private static readonly var condFalse = (var)1;
+        private static readonly var condTrue = 0;
+        private static readonly var condFalse = 1;
 
 
         private static condResult checkIfMatch(ResponseWriter w, ptr<Request> _addr_r)

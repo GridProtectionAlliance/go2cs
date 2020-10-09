@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:59 UTC
+//     Generated on 2020 October 09 05:46:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,8 @@ using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using sha1 = go.crypto.sha1_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

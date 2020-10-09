@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:56 UTC
+//     Generated on 2020 October 09 04:54:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using fmt = go.fmt_package;
 using big = go.math.big_package;
 using time = go.time_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto {

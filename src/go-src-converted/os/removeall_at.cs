@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2020 October 08 03:44:59 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:21 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\removeall_at.go
 using unix = go.@internal.syscall.unix_package;

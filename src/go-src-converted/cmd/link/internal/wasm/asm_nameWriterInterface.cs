@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:37:38 UTC
+//     Generated on 2020 October 09 05:48:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using io = go.io_package;
 using regexp = go.regexp_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class nameWriter<T> : nameWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace @internal
             private delegate error WriteByteByPtr(ptr<T> value, byte c);
             private delegate error WriteByteByVal(T value, byte c);
 
-            private static readonly WriteByteByPtr s_WriteByteByPtr;
-            private static readonly WriteByteByVal s_WriteByteByVal;
+            private static readonly WriteByteByPtr? s_WriteByteByPtr;
+            private static readonly WriteByteByVal? s_WriteByteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error WriteByte(byte c)
@@ -95,8 +96,8 @@ namespace @internal
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -112,7 +113,7 @@ namespace @internal
                 return s_WriteByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static nameWriter()

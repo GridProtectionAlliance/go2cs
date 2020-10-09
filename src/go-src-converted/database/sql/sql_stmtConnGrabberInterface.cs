@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:57 UTC
+//     Generated on 2020 October 09 06:05:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using atomic = go.sync.atomic_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace database
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class stmtConnGrabber<T> : stmtConnGrabber
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace database
             private delegate context.Context grabConnByPtr(ptr<T> value, context.Context _p0);
             private delegate context.Context grabConnByVal(T value, context.Context _p0);
 
-            private static readonly grabConnByPtr s_grabConnByPtr;
-            private static readonly grabConnByVal s_grabConnByVal;
+            private static readonly grabConnByPtr? s_grabConnByPtr;
+            private static readonly grabConnByVal? s_grabConnByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public context.Context grabConn(context.Context _p0)
@@ -98,8 +99,8 @@ namespace database
             private delegate context.Context txCtxByPtr(ptr<T> value);
             private delegate context.Context txCtxByVal(T value);
 
-            private static readonly txCtxByPtr s_txCtxByPtr;
-            private static readonly txCtxByVal s_txCtxByVal;
+            private static readonly txCtxByPtr? s_txCtxByPtr;
+            private static readonly txCtxByVal? s_txCtxByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public context.Context txCtx()
@@ -115,7 +116,7 @@ namespace database
                 return s_txCtxByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static stmtConnGrabber()

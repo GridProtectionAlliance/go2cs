@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:33:52 UTC
+// package net -- go2cs converted at 2020 October 09 04:51:59 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\lookup.go
 using context = go.context_package;
@@ -38,7 +38,7 @@ namespace go
         // complete. This avoids races on the test hooks.
         private static sync.WaitGroup dnsWaitGroup = default;
 
-        private static readonly var maxProtoLength = (var)len("RSVP-E2E-IGNORE") + 10L; // with room to grow
+        private static readonly var maxProtoLength = len("RSVP-E2E-IGNORE") + 10L; // with room to grow
 
  // with room to grow
 
@@ -65,7 +65,7 @@ namespace go
         // Currently the longest known IANA-unregistered name is
         // "mobility-header", so we use that length, plus some slop in case
         // something longer is added in the future.
-        private static readonly var maxPortBufSize = (var)len("mobility-header") + 10L;
+        private static readonly var maxPortBufSize = len("mobility-header") + 10L;
 
 
 

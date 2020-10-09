@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:57 UTC
+//     Generated on 2020 October 09 05:48:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using strings = go.strings_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class boolFlag<T> : boolFlag
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace @internal
             private delegate bool IsBoolFlagByPtr(ptr<T> value);
             private delegate bool IsBoolFlagByVal(T value);
 
-            private static readonly IsBoolFlagByPtr s_IsBoolFlagByPtr;
-            private static readonly IsBoolFlagByVal s_IsBoolFlagByVal;
+            private static readonly IsBoolFlagByPtr? s_IsBoolFlagByPtr;
+            private static readonly IsBoolFlagByVal? s_IsBoolFlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool IsBoolFlag()
@@ -93,8 +94,8 @@ namespace @internal
             private delegate error StringByPtr(ptr<T> value);
             private delegate error StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error String()
@@ -113,8 +114,8 @@ namespace @internal
             private delegate error SetByPtr(ptr<T> value, @string _p0);
             private delegate error SetByVal(T value, @string _p0);
 
-            private static readonly SetByPtr s_SetByPtr;
-            private static readonly SetByVal s_SetByVal;
+            private static readonly SetByPtr? s_SetByPtr;
+            private static readonly SetByVal? s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Set(@string _p0)
@@ -130,7 +131,7 @@ namespace @internal
                 return s_SetByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static boolFlag()

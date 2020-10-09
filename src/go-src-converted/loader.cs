@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package loader -- go2cs converted at 2020 October 08 04:57:39 UTC
+// package loader -- go2cs converted at 2020 October 09 06:03:51 UTC
 // import "golang.org/x/tools/go/loader" ==> using loader = go.golang.org.x.tools.go.loader_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\loader\loader.go
 // See doc.go for package documentation and implementation notes.
@@ -37,7 +37,7 @@ namespace go
     {
         private static build.ImportMode ignoreVendor = default;
 
-        private static readonly var trace = (var)false; // show timing info for type-checking
+        private static readonly var trace = false; // show timing info for type-checking
 
         // Config specifies the configuration for loading a whole program from
         // Go source code.

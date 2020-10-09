@@ -1,4 +1,4 @@
-// package p -- go2cs converted at 2020 October 08 04:04:25 UTC
+// package p -- go2cs converted at 2020 October 09 05:20:07 UTC
 // import "cmd/api/testdata/src/issue21181/p" ==> using p = go.cmd.api.testdata.src.issue21181.p_package
 // Original source: C:\Go\src\cmd\api\testdata\src\issue21181\p\p_amd64.go
 using indirect = go.indirect_package;

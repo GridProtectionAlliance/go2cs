@@ -8,7 +8,7 @@
 // launch with `go run cmpConstGen.go` a file called cmpConst.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2020 October 08 04:32:02 UTC
+// package main -- go2cs converted at 2020 October 09 05:43:55 UTC
 // Original source: C:\Go\src\cmd\compile\internal\gc\testdata\gen\cmpConstGen.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -101,7 +101,7 @@ namespace go
                     panic("unexpected type");
                     break;
             }
-            return cmp(_addr_min, "<=", _addr_val) && cmp(_addr_val, "<=", _addr_max);
+            return cmp(min, "<=", _addr_val) && cmp(_addr_val, "<=", max);
 
         });
 

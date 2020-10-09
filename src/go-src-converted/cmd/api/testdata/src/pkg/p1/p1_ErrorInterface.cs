@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:04:26 UTC
+//     Generated on 2020 October 09 05:20:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace pkg
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Error<T> : Error
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace pkg
             private delegate bool TemporaryByPtr(ptr<T> value);
             private delegate bool TemporaryByVal(T value);
 
-            private static readonly TemporaryByPtr s_TemporaryByPtr;
-            private static readonly TemporaryByVal s_TemporaryByVal;
+            private static readonly TemporaryByPtr? s_TemporaryByPtr;
+            private static readonly TemporaryByVal? s_TemporaryByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public bool Temporary()
@@ -91,8 +92,8 @@ namespace pkg
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -108,7 +109,7 @@ namespace pkg
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Error()

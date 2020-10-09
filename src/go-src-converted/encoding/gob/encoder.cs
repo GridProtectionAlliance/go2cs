@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 October 08 03:42:41 UTC
+// package gob -- go2cs converted at 2020 October 09 04:59:56 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\encoder.go
 using errors = go.errors_package;

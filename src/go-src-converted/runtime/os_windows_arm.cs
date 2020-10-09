@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:13 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:47:38 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\os_windows_arm.go
 using @unsafe = go.@unsafe_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:06 UTC
+//     Generated on 2020 October 09 05:45:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using par = go.cmd.go.@internal.par_package;
 using module = go.golang.org.x.mod.module_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Reqs<T> : Reqs
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace @internal
             private delegate (module.Version, error) RequiredByPtr(ptr<T> value, module.Version m);
             private delegate (module.Version, error) RequiredByVal(T value, module.Version m);
 
-            private static readonly RequiredByPtr s_RequiredByPtr;
-            private static readonly RequiredByVal s_RequiredByVal;
+            private static readonly RequiredByPtr? s_RequiredByPtr;
+            private static readonly RequiredByVal? s_RequiredByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (module.Version, error) Required(module.Version m)
@@ -95,8 +96,8 @@ namespace @internal
             private delegate (module.Version, error) MaxByPtr(ptr<T> value, @string v1, @string v2);
             private delegate (module.Version, error) MaxByVal(T value, @string v1, @string v2);
 
-            private static readonly MaxByPtr s_MaxByPtr;
-            private static readonly MaxByVal s_MaxByVal;
+            private static readonly MaxByPtr? s_MaxByPtr;
+            private static readonly MaxByVal? s_MaxByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (module.Version, error) Max(@string v1, @string v2)
@@ -115,8 +116,8 @@ namespace @internal
             private delegate (module.Version, error) UpgradeByPtr(ptr<T> value, module.Version m);
             private delegate (module.Version, error) UpgradeByVal(T value, module.Version m);
 
-            private static readonly UpgradeByPtr s_UpgradeByPtr;
-            private static readonly UpgradeByVal s_UpgradeByVal;
+            private static readonly UpgradeByPtr? s_UpgradeByPtr;
+            private static readonly UpgradeByVal? s_UpgradeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (module.Version, error) Upgrade(module.Version m)
@@ -135,8 +136,8 @@ namespace @internal
             private delegate (module.Version, error) PreviousByPtr(ptr<T> value, module.Version m);
             private delegate (module.Version, error) PreviousByVal(T value, module.Version m);
 
-            private static readonly PreviousByPtr s_PreviousByPtr;
-            private static readonly PreviousByVal s_PreviousByVal;
+            private static readonly PreviousByPtr? s_PreviousByPtr;
+            private static readonly PreviousByVal? s_PreviousByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (module.Version, error) Previous(module.Version m)
@@ -152,7 +153,7 @@ namespace @internal
                 return s_PreviousByPtr(m_target_ptr, m);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Reqs()

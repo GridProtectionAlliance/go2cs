@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:30:48 UTC
+//     Generated on 2020 October 09 04:50:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using io = go.io_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -39,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Hash64<T> : Hash64
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -65,8 +66,8 @@ namespace go
             private delegate ulong Sum64ByPtr(ptr<T> value);
             private delegate ulong Sum64ByVal(T value);
 
-            private static readonly Sum64ByPtr s_Sum64ByPtr;
-            private static readonly Sum64ByVal s_Sum64ByVal;
+            private static readonly Sum64ByPtr? s_Sum64ByPtr;
+            private static readonly Sum64ByVal? s_Sum64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Sum64()
@@ -85,8 +86,8 @@ namespace go
             private delegate long SumByPtr(ptr<T> value, slice<byte> b);
             private delegate long SumByVal(T value, slice<byte> b);
 
-            private static readonly SumByPtr s_SumByPtr;
-            private static readonly SumByVal s_SumByVal;
+            private static readonly SumByPtr? s_SumByPtr;
+            private static readonly SumByVal? s_SumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Sum(slice<byte> b)
@@ -105,8 +106,8 @@ namespace go
             private delegate long ResetByPtr(ptr<T> value);
             private delegate long ResetByVal(T value);
 
-            private static readonly ResetByPtr s_ResetByPtr;
-            private static readonly ResetByVal s_ResetByVal;
+            private static readonly ResetByPtr? s_ResetByPtr;
+            private static readonly ResetByVal? s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Reset()
@@ -125,8 +126,8 @@ namespace go
             private delegate long SizeByPtr(ptr<T> value);
             private delegate long SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Size()
@@ -145,8 +146,8 @@ namespace go
             private delegate long BlockSizeByPtr(ptr<T> value);
             private delegate long BlockSizeByVal(T value);
 
-            private static readonly BlockSizeByPtr s_BlockSizeByPtr;
-            private static readonly BlockSizeByVal s_BlockSizeByVal;
+            private static readonly BlockSizeByPtr? s_BlockSizeByPtr;
+            private static readonly BlockSizeByVal? s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long BlockSize()
@@ -165,8 +166,8 @@ namespace go
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -182,7 +183,7 @@ namespace go
                 return s_WriteByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Hash64()

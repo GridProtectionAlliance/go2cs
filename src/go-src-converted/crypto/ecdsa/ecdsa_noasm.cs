@@ -4,7 +4,7 @@
 
 // +build !s390x
 
-// package ecdsa -- go2cs converted at 2020 October 08 03:36:33 UTC
+// package ecdsa -- go2cs converted at 2020 October 09 04:54:30 UTC
 // import "crypto/ecdsa" ==> using ecdsa = go.crypto.ecdsa_package
 // Original source: C:\Go\src\crypto\ecdsa\ecdsa_noasm.go
 using cipher = go.crypto.cipher_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rsa -- go2cs converted at 2020 October 08 03:35:21 UTC
+// package rsa -- go2cs converted at 2020 October 09 04:52:52 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Go\src\crypto\rsa\pkcs1v15.go
 using crypto = go.crypto_package;

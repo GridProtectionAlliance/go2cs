@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2020 October 08 03:42:55 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:09 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\stream.go
 using bytes = go.bytes_package;
@@ -402,15 +402,15 @@ Input:
         {
         }
 
-        private static readonly var tokenTopValue = (var)iota;
-        private static readonly var tokenArrayStart = (var)0;
-        private static readonly var tokenArrayValue = (var)1;
-        private static readonly var tokenArrayComma = (var)2;
-        private static readonly var tokenObjectStart = (var)3;
-        private static readonly var tokenObjectKey = (var)4;
-        private static readonly var tokenObjectColon = (var)5;
-        private static readonly var tokenObjectValue = (var)6;
-        private static readonly var tokenObjectComma = (var)7;
+        private static readonly var tokenTopValue = iota;
+        private static readonly var tokenArrayStart = 0;
+        private static readonly var tokenArrayValue = 1;
+        private static readonly var tokenArrayComma = 2;
+        private static readonly var tokenObjectStart = 3;
+        private static readonly var tokenObjectKey = 4;
+        private static readonly var tokenObjectColon = 5;
+        private static readonly var tokenObjectValue = 6;
+        private static readonly var tokenObjectComma = 7;
 
 
         // advance tokenstate from a separator state to a value state

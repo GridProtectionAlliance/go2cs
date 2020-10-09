@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package sumdb implements the HTTP protocols for serving or accessing a module checksum database.
-// package sumdb -- go2cs converted at 2020 October 08 04:45:58 UTC
+// package sumdb -- go2cs converted at 2020 October 09 05:56:02 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\sumdb\server.go
 using context = go.context_package;

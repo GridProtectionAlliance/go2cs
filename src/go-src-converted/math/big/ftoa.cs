@@ -6,7 +6,7 @@
 // It is closely following the corresponding implementation
 // in strconv/ftoa.go, but modified and simplified for Float.
 
-// package big -- go2cs converted at 2020 October 08 03:25:33 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:25 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\ftoa.go
 using bytes = go.bytes_package;

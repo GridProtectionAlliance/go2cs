@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package httptest provides utilities for HTTP testing.
-// package httptest -- go2cs converted at 2020 October 08 03:41:25 UTC
+// package httptest -- go2cs converted at 2020 October 09 04:58:48 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Go\src\net\http\httptest\httptest.go
 using bufio = go.bufio_package;

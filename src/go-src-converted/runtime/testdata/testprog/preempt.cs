@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 08 03:43:43 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:50 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\preempt.go
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;

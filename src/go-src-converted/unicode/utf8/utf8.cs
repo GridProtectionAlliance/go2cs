@@ -5,7 +5,7 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 // See https://en.wikipedia.org/wiki/UTF-8
-// package utf8 -- go2cs converted at 2020 October 08 00:33:52 UTC
+// package utf8 -- go2cs converted at 2020 October 09 04:45:19 UTC
 // import "unicode/utf8" ==> using utf8 = go.unicode.utf8_package
 // Original source: C:\Go\src\unicode\utf8\utf8.go
 

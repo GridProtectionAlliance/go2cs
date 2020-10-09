@@ -4,7 +4,7 @@
 
 // The unmarshal package defines an Analyzer that checks for passing
 // non-pointer or non-interface types to unmarshal and decode functions.
-// package unmarshal -- go2cs converted at 2020 October 08 04:58:13 UTC
+// package unmarshal -- go2cs converted at 2020 October 09 06:04:48 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unmarshal" ==> using unmarshal = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unmarshal_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unmarshal\unmarshal.go
 using ast = go.go.ast_package;

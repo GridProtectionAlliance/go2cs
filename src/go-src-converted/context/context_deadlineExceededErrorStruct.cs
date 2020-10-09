@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:10 UTC
+//     Generated on 2020 October 09 04:49:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+
+#nullable enable
 
 namespace go
 {

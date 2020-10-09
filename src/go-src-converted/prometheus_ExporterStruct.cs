@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:06 UTC
+//     Generated on 2020 October 09 06:01:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,8 @@ using core = go.golang.org.x.tools.@internal.@event.core_package;
 using metric = go.golang.org.x.tools.@internal.@event.export.metric_package;
 using label = go.golang.org.x.tools.@internal.@event.label_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

@@ -3,7 +3,7 @@
 
 // +build linux,mips64le
 
-// package syscall -- go2cs converted at 2020 October 08 03:29:15 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:03:16 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsyscall_linux_mips64le.go
 using @unsafe = go.@unsafe_package;

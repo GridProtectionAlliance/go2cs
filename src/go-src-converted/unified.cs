@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package diff -- go2cs converted at 2020 October 08 04:54:41 UTC
+// package diff -- go2cs converted at 2020 October 09 06:01:34 UTC
 // import "golang.org/x/tools/internal/lsp/diff" ==> using diff = go.golang.org.x.tools.@internal.lsp.diff_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\lsp\diff\unified.go
 using fmt = go.fmt_package;
@@ -53,10 +53,10 @@ namespace lsp
         // but not in the output.
         public static readonly OpKind Delete = (OpKind)iota; 
         // Insert is the operation kind for a line that is new in the output.
-        public static readonly var Insert = (var)0; 
+        public static readonly var Insert = 0; 
         // Equal is the operation kind for a line that is the same in the input and
         // output, often used to provide context around edited lines.
-        public static readonly var Equal = (var)1;
+        public static readonly var Equal = 1;
 
 
         // String returns a human readable representation of an OpKind. It is not
@@ -76,7 +76,7 @@ namespace lsp
         });
 
         private static readonly long edge = (long)3L;
-        private static readonly var gap = (var)edge * 2L;
+        private static readonly var gap = edge * 2L;
 
 
         // ToUnified takes a file contents and a sequence of edits, and calculates

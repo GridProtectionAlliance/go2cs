@@ -5,7 +5,7 @@
 // +build linux
 // +build 386 amd64 arm arm64 mips64 mips64le ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2020 October 08 03:24:23 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:49:10 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\vdso_linux.go
 using @unsafe = go.@unsafe_package;
@@ -56,15 +56,15 @@ namespace go
 
         // Maximum indices for the array types used when traversing the vDSO ELF structures.
         // Computed from architecture-specific max provided by vdso_linux_*.go
-        private static readonly var vdsoSymTabSize = (var)vdsoArrayMax / @unsafe.Sizeof(new elfSym());
-        private static readonly var vdsoDynSize = (var)vdsoArrayMax / @unsafe.Sizeof(new elfDyn());
-        private static readonly var vdsoSymStringsSize = (var)vdsoArrayMax; // byte
-        private static readonly var vdsoVerSymSize = (var)vdsoArrayMax / 2L; // uint16
-        private static readonly var vdsoHashSize = (var)vdsoArrayMax / 4L; // uint32
+        private static readonly var vdsoSymTabSize = vdsoArrayMax / @unsafe.Sizeof(new elfSym());
+        private static readonly var vdsoDynSize = vdsoArrayMax / @unsafe.Sizeof(new elfDyn());
+        private static readonly var vdsoSymStringsSize = vdsoArrayMax; // byte
+        private static readonly var vdsoVerSymSize = vdsoArrayMax / 2L; // uint16
+        private static readonly var vdsoHashSize = vdsoArrayMax / 4L; // uint32
 
         // vdsoBloomSizeScale is a scaling factor for gnuhash tables which are uint32 indexed,
         // but contain uintptrs
-        private static readonly var vdsoBloomSizeScale = (var)@unsafe.Sizeof(uintptr(0L)) / 4L; // uint32
+        private static readonly var vdsoBloomSizeScale = @unsafe.Sizeof(uintptr(0L)) / 4L; // uint32
 
         /* How to extract and insert information held in the st_info field.  */
         private static byte _ELF_ST_BIND(byte val)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:46 UTC
+//     Generated on 2020 October 09 06:05:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using reflect = go.reflect_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sql
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Connector<T> : Connector
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sql
             private delegate Driver ConnectByPtr(ptr<T> value, context.Context _p0);
             private delegate Driver ConnectByVal(T value, context.Context _p0);
 
-            private static readonly ConnectByPtr s_ConnectByPtr;
-            private static readonly ConnectByVal s_ConnectByVal;
+            private static readonly ConnectByPtr? s_ConnectByPtr;
+            private static readonly ConnectByVal? s_ConnectByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Driver Connect(context.Context _p0)
@@ -90,8 +91,8 @@ namespace sql
             private delegate Driver DriverByPtr(ptr<T> value);
             private delegate Driver DriverByVal(T value);
 
-            private static readonly DriverByPtr s_DriverByPtr;
-            private static readonly DriverByVal s_DriverByVal;
+            private static readonly DriverByPtr? s_DriverByPtr;
+            private static readonly DriverByVal? s_DriverByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public Driver Driver()
@@ -107,7 +108,7 @@ namespace sql
                 return s_DriverByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Connector()

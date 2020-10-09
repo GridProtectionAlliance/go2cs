@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2020 October 08 04:42:49 UTC
+// package binutils -- go2cs converted at 2020 October 09 05:53:19 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner.go
 using bufio = go.bufio_package;
@@ -40,7 +40,7 @@ namespace @internal
 
         // addr2line may produce multiple lines of output. We
         // use this sentinel to identify the end of the output.
-        private static readonly var sentinel = (var)~uint64(0L);
+        private static readonly var sentinel = ~uint64(0L);
 
 
         // addr2Liner is a connection to an addr2line command for obtaining

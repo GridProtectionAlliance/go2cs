@@ -9,7 +9,7 @@
 // +build !appengine
 // +build !android
 
-// package main -- go2cs converted at 2020 October 08 04:42:12 UTC
+// package main -- go2cs converted at 2020 October 09 05:52:48 UTC
 // Original source: C:\Go\src\cmd\pprof\readlineui.go
 using fmt = go.fmt_package;
 using io = go.io_package;

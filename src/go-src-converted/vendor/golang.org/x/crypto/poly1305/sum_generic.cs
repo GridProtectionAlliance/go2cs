@@ -5,7 +5,7 @@
 // This file provides the generic implementation of Sum and MAC. Other files
 // might provide optimized assembly implementations of some of this code.
 
-// package poly1305 -- go2cs converted at 2020 October 08 05:00:16 UTC
+// package poly1305 -- go2cs converted at 2020 October 09 06:06:34 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\poly1305\sum_generic.go
 using binary = go.encoding.binary_package;

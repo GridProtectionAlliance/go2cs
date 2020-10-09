@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:41:37 UTC
+//     Generated on 2020 October 09 04:59:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using time = go.time_package;
 using httpguts = go.golang.org.x.net.http.httpguts_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -53,7 +54,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class writeFlusher<T> : writeFlusher
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -79,8 +80,8 @@ namespace http
             private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) WriteByVal(T value, slice<byte> p);
 
-            private static readonly WriteByPtr s_WriteByPtr;
-            private static readonly WriteByVal s_WriteByVal;
+            private static readonly WriteByPtr? s_WriteByPtr;
+            private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Write(slice<byte> p)
@@ -99,8 +100,8 @@ namespace http
             private delegate void FlushByPtr(ptr<T> value);
             private delegate void FlushByVal(T value);
 
-            private static readonly FlushByPtr s_FlushByPtr;
-            private static readonly FlushByVal s_FlushByVal;
+            private static readonly FlushByPtr? s_FlushByPtr;
+            private static readonly FlushByVal? s_FlushByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Flush()
@@ -121,7 +122,7 @@ namespace http
                 
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static writeFlusher()

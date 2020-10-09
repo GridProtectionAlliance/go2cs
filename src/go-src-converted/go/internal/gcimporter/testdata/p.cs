@@ -4,7 +4,7 @@
 
 // Input for TestIssue15517
 
-// package p -- go2cs converted at 2020 October 08 04:56:12 UTC
+// package p -- go2cs converted at 2020 October 09 06:02:46 UTC
 // import "go/internal/gcimporter.p" ==> using p = go.go.@internal.gcimporter.p_package
 // Original source: C:\Go\src\go\internal\gcimporter\testdata\p.go
 

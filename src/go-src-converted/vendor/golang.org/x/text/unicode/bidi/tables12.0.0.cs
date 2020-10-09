@@ -2,7 +2,7 @@
 
 // +build go1.14
 
-// package bidi -- go2cs converted at 2020 October 08 05:02:11 UTC
+// package bidi -- go2cs converted at 2020 October 09 06:08:14 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\bidi\tables12.0.0.go
 

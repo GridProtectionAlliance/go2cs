@@ -2,7 +2,7 @@
 // gccgo -fgo-optimize-allocs -c escapeinfo.go
 // objcopy -j .go_export escapeinfo.o escapeinfo.gox
 
-// package escapeinfo -- go2cs converted at 2020 October 08 04:56:21 UTC
+// package escapeinfo -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.escapeinfo" ==> using escapeinfo = go.go.@internal.gccgoimporter.escapeinfo_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\escapeinfo.go
 

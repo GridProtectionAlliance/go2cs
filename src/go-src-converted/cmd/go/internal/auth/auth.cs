@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package auth provides access to user-provided authentication credentials.
-// package auth -- go2cs converted at 2020 October 08 04:34:38 UTC
+// package auth -- go2cs converted at 2020 October 09 05:46:03 UTC
 // import "cmd/go/internal/auth" ==> using auth = go.cmd.go.@internal.auth_package
 // Original source: C:\Go\src\cmd\go\internal\auth\auth.go
 using http = go.net.http_package;

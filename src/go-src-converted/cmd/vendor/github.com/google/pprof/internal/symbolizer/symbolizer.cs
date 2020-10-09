@@ -15,7 +15,7 @@
 // Package symbolizer provides a routine to populate a profile with
 // symbol, file and line number information. It relies on the
 // addr2liner and demangle packages to do the actual work.
-// package symbolizer -- go2cs converted at 2020 October 08 04:43:26 UTC
+// package symbolizer -- go2cs converted at 2020 October 09 05:53:48 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/symbolizer" ==> using symbolizer = go.cmd.vendor.github.com.google.pprof.@internal.symbolizer_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\symbolizer\symbolizer.go
 using fmt = go.fmt_package;

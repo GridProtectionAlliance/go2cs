@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:25 UTC
+//     Generated on 2020 October 09 04:59:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,6 +25,7 @@ using utf16 = go.unicode.utf16_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Unmarshaler<T> : Unmarshaler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace encoding
             private delegate error UnmarshalJSONByPtr(ptr<T> value, slice<byte> _p0);
             private delegate error UnmarshalJSONByVal(T value, slice<byte> _p0);
 
-            private static readonly UnmarshalJSONByPtr s_UnmarshalJSONByPtr;
-            private static readonly UnmarshalJSONByVal s_UnmarshalJSONByVal;
+            private static readonly UnmarshalJSONByPtr? s_UnmarshalJSONByPtr;
+            private static readonly UnmarshalJSONByVal? s_UnmarshalJSONByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error UnmarshalJSON(slice<byte> _p0)
@@ -92,7 +93,7 @@ namespace encoding
                 return s_UnmarshalJSONByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Unmarshaler()

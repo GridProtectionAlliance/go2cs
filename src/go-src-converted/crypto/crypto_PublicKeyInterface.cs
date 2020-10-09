@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:15 UTC
+//     Generated on 2020 October 09 04:52:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using hash = go.hash_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -41,7 +42,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class PublicKey<T> : PublicKey
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -64,7 +65,7 @@ namespace go
                 m_target_is_ptr = true;
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static PublicKey()

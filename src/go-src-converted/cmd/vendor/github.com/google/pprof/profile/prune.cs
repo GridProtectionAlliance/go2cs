@@ -14,7 +14,7 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2020 October 08 04:43:41 UTC
+// package profile -- go2cs converted at 2020 October 09 05:54:02 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\prune.go
 using fmt = go.fmt_package;

@@ -4,7 +4,7 @@
 
 // Package xml implements a simple XML 1.0 parser that
 // understands XML name spaces.
-// package xml -- go2cs converted at 2020 October 08 03:43:08 UTC
+// package xml -- go2cs converted at 2020 October 09 05:00:20 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\xml.go
 // References:
@@ -465,9 +465,9 @@ namespace encoding
             public bool ok;
         }
 
-        private static readonly var stkStart = (var)iota;
-        private static readonly var stkNs = (var)0;
-        private static readonly var stkEOF = (var)1;
+        private static readonly var stkStart = iota;
+        private static readonly var stkNs = 0;
+        private static readonly var stkEOF = 1;
 
 
         private static ptr<stack> push(this ptr<Decoder> _addr_d, long kind)

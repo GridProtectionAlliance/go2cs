@@ -4,7 +4,7 @@
 
 // +build linux,amd64 freebsd,amd64
 
-// package main -- go2cs converted at 2020 October 08 03:44:03 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:02 UTC
 // Original source: C:\Go\src\runtime\testdata\testprogcgo\racesig.go
 // Test that an external C thread that is calling malloc can be hit
 // with SIGCHLD signals. This used to fail when built with the race

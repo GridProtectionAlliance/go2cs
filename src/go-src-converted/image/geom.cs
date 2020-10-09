@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2020 October 08 04:59:05 UTC
+// package image -- go2cs converted at 2020 October 09 06:05:35 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\geom.go
 using color = go.image.color_package;

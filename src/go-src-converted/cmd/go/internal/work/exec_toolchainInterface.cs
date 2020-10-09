@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:55 UTC
+//     Generated on 2020 October 09 05:46:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,6 +39,7 @@ using load = go.cmd.go.@internal.load_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -65,7 +66,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class toolchain<T> : toolchain
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -91,8 +92,8 @@ namespace @internal
             private delegate @string gcByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
             private delegate @string gcByVal(T value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
 
-            private static readonly gcByPtr s_gcByPtr;
-            private static readonly gcByVal s_gcByVal;
+            private static readonly gcByPtr? s_gcByPtr;
+            private static readonly gcByVal? s_gcByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string gc(ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles)
@@ -111,8 +112,8 @@ namespace @internal
             private delegate @string ccByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile);
             private delegate @string ccByVal(T value, ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile);
 
-            private static readonly ccByPtr s_ccByPtr;
-            private static readonly ccByVal s_ccByVal;
+            private static readonly ccByPtr? s_ccByPtr;
+            private static readonly ccByVal? s_ccByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string cc(ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile)
@@ -131,8 +132,8 @@ namespace @internal
             private delegate @string asmByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
             private delegate @string asmByVal(T value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
 
-            private static readonly asmByPtr s_asmByPtr;
-            private static readonly asmByVal s_asmByVal;
+            private static readonly asmByPtr? s_asmByPtr;
+            private static readonly asmByVal? s_asmByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string asm(ptr<Builder> b, ptr<Action> a, slice<@string> sfiles)
@@ -151,8 +152,8 @@ namespace @internal
             private delegate @string symabisByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
             private delegate @string symabisByVal(T value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
 
-            private static readonly symabisByPtr s_symabisByPtr;
-            private static readonly symabisByVal s_symabisByVal;
+            private static readonly symabisByPtr? s_symabisByPtr;
+            private static readonly symabisByVal? s_symabisByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string symabis(ptr<Builder> b, ptr<Action> a, slice<@string> sfiles)
@@ -171,8 +172,8 @@ namespace @internal
             private delegate @string packByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles);
             private delegate @string packByVal(T value, ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles);
 
-            private static readonly packByPtr s_packByPtr;
-            private static readonly packByVal s_packByVal;
+            private static readonly packByPtr? s_packByPtr;
+            private static readonly packByVal? s_packByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string pack(ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles)
@@ -191,8 +192,8 @@ namespace @internal
             private delegate @string ldByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg);
             private delegate @string ldByVal(T value, ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg);
 
-            private static readonly ldByPtr s_ldByPtr;
-            private static readonly ldByVal s_ldByVal;
+            private static readonly ldByPtr? s_ldByPtr;
+            private static readonly ldByVal? s_ldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ld(ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg)
@@ -211,8 +212,8 @@ namespace @internal
             private delegate @string ldSharedByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions);
             private delegate @string ldSharedByVal(T value, ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions);
 
-            private static readonly ldSharedByPtr s_ldSharedByPtr;
-            private static readonly ldSharedByVal s_ldSharedByVal;
+            private static readonly ldSharedByPtr? s_ldSharedByPtr;
+            private static readonly ldSharedByVal? s_ldSharedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ldShared(ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions)
@@ -231,8 +232,8 @@ namespace @internal
             private delegate @string compilerByPtr(ptr<T> value);
             private delegate @string compilerByVal(T value);
 
-            private static readonly compilerByPtr s_compilerByPtr;
-            private static readonly compilerByVal s_compilerByVal;
+            private static readonly compilerByPtr? s_compilerByPtr;
+            private static readonly compilerByVal? s_compilerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string compiler()
@@ -251,8 +252,8 @@ namespace @internal
             private delegate @string linkerByPtr(ptr<T> value);
             private delegate @string linkerByVal(T value);
 
-            private static readonly linkerByPtr s_linkerByPtr;
-            private static readonly linkerByVal s_linkerByVal;
+            private static readonly linkerByPtr? s_linkerByPtr;
+            private static readonly linkerByVal? s_linkerByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string linker()
@@ -268,7 +269,7 @@ namespace @internal
                 return s_linkerByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static toolchain()

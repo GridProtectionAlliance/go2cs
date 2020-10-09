@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:22 UTC
+//     Generated on 2020 October 09 05:47:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using module = go.golang.org.x.mod.module_package;
 using tlog = go.golang.org.x.mod.sumdb.tlog_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -49,7 +50,7 @@ namespace mod
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ServerOps<T> : ServerOps
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -75,8 +76,8 @@ namespace mod
             private delegate (slice<byte>, error) SignedByPtr(ptr<T> value, context.Context ctx);
             private delegate (slice<byte>, error) SignedByVal(T value, context.Context ctx);
 
-            private static readonly SignedByPtr s_SignedByPtr;
-            private static readonly SignedByVal s_SignedByVal;
+            private static readonly SignedByPtr? s_SignedByPtr;
+            private static readonly SignedByVal? s_SignedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Signed(context.Context ctx)
@@ -95,8 +96,8 @@ namespace mod
             private delegate (slice<byte>, error) ReadRecordsByPtr(ptr<T> value, context.Context ctx, long id, long n);
             private delegate (slice<byte>, error) ReadRecordsByVal(T value, context.Context ctx, long id, long n);
 
-            private static readonly ReadRecordsByPtr s_ReadRecordsByPtr;
-            private static readonly ReadRecordsByVal s_ReadRecordsByVal;
+            private static readonly ReadRecordsByPtr? s_ReadRecordsByPtr;
+            private static readonly ReadRecordsByVal? s_ReadRecordsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) ReadRecords(context.Context ctx, long id, long n)
@@ -115,8 +116,8 @@ namespace mod
             private delegate (slice<byte>, error) LookupByPtr(ptr<T> value, context.Context ctx, module.Version m);
             private delegate (slice<byte>, error) LookupByVal(T value, context.Context ctx, module.Version m);
 
-            private static readonly LookupByPtr s_LookupByPtr;
-            private static readonly LookupByVal s_LookupByVal;
+            private static readonly LookupByPtr? s_LookupByPtr;
+            private static readonly LookupByVal? s_LookupByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Lookup(context.Context ctx, module.Version m)
@@ -135,8 +136,8 @@ namespace mod
             private delegate (slice<byte>, error) ReadTileDataByPtr(ptr<T> value, context.Context ctx, tlog.Tile t);
             private delegate (slice<byte>, error) ReadTileDataByVal(T value, context.Context ctx, tlog.Tile t);
 
-            private static readonly ReadTileDataByPtr s_ReadTileDataByPtr;
-            private static readonly ReadTileDataByVal s_ReadTileDataByVal;
+            private static readonly ReadTileDataByPtr? s_ReadTileDataByPtr;
+            private static readonly ReadTileDataByVal? s_ReadTileDataByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) ReadTileData(context.Context ctx, tlog.Tile t)
@@ -152,7 +153,7 @@ namespace mod
                 return s_ReadTileDataByPtr(m_target_ptr, ctx, t);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ServerOps()

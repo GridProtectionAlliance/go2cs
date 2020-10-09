@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:24 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:44 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_js.go
 using oserror = go.@internal.oserror_package;
@@ -137,12 +137,12 @@ namespace go
         }
 
         private static readonly Signal _ = (Signal)iota;
-        public static readonly var SIGCHLD = (var)0;
-        public static readonly var SIGINT = (var)1;
-        public static readonly var SIGKILL = (var)2;
-        public static readonly var SIGTRAP = (var)3;
-        public static readonly var SIGQUIT = (var)4;
-        public static readonly var SIGTERM = (var)5;
+        public static readonly var SIGCHLD = 0;
+        public static readonly var SIGINT = 1;
+        public static readonly var SIGKILL = 2;
+        public static readonly var SIGTRAP = 3;
+        public static readonly var SIGQUIT = 4;
+        public static readonly var SIGTERM = 5;
 
 
         public static void Signal(this Signal s)
@@ -179,7 +179,7 @@ namespace go
         public static readonly long O_RDWR = (long)2L;
 
         public static readonly long O_CREAT = (long)0100L;
-        public static readonly var O_CREATE = (var)O_CREAT;
+        public static readonly var O_CREATE = O_CREAT;
         public static readonly long O_TRUNC = (long)01000L;
         public static readonly long O_APPEND = (long)02000L;
         public static readonly long O_EXCL = (long)0200L;
@@ -389,7 +389,7 @@ namespace go
 
         }
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
 
 

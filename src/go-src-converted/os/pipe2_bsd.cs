@@ -4,7 +4,7 @@
 
 // +build freebsd netbsd openbsd
 
-// package os -- go2cs converted at 2020 October 08 03:44:53 UTC
+// package os -- go2cs converted at 2020 October 09 05:07:18 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Go\src\os\pipe2_bsd.go
 using syscall = go.syscall_package;

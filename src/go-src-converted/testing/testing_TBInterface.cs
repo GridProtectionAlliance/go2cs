@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:38 UTC
+//     Generated on 2020 October 09 05:47:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,6 +31,7 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -54,7 +55,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class TB<T> : TB
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace go
             private delegate @string CleanupByPtr(ptr<T> value, Action _p0);
             private delegate @string CleanupByVal(T value, Action _p0);
 
-            private static readonly CleanupByPtr s_CleanupByPtr;
-            private static readonly CleanupByVal s_CleanupByVal;
+            private static readonly CleanupByPtr? s_CleanupByPtr;
+            private static readonly CleanupByVal? s_CleanupByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Cleanup(Action _p0)
@@ -100,8 +101,8 @@ namespace go
             private delegate @string ErrorByPtr(ptr<T> value, params object[] args);
             private delegate @string ErrorByVal(T value, params object[] args);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error(params object[] args)
@@ -120,8 +121,8 @@ namespace go
             private delegate @string ErrorfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate @string ErrorfByVal(T value, @string format, params object[] args);
 
-            private static readonly ErrorfByPtr s_ErrorfByPtr;
-            private static readonly ErrorfByVal s_ErrorfByVal;
+            private static readonly ErrorfByPtr? s_ErrorfByPtr;
+            private static readonly ErrorfByVal? s_ErrorfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Errorf(@string format, params object[] args)
@@ -140,8 +141,8 @@ namespace go
             private delegate @string FailByPtr(ptr<T> value);
             private delegate @string FailByVal(T value);
 
-            private static readonly FailByPtr s_FailByPtr;
-            private static readonly FailByVal s_FailByVal;
+            private static readonly FailByPtr? s_FailByPtr;
+            private static readonly FailByVal? s_FailByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Fail()
@@ -160,8 +161,8 @@ namespace go
             private delegate @string FailNowByPtr(ptr<T> value);
             private delegate @string FailNowByVal(T value);
 
-            private static readonly FailNowByPtr s_FailNowByPtr;
-            private static readonly FailNowByVal s_FailNowByVal;
+            private static readonly FailNowByPtr? s_FailNowByPtr;
+            private static readonly FailNowByVal? s_FailNowByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string FailNow()
@@ -180,8 +181,8 @@ namespace go
             private delegate @string FailedByPtr(ptr<T> value);
             private delegate @string FailedByVal(T value);
 
-            private static readonly FailedByPtr s_FailedByPtr;
-            private static readonly FailedByVal s_FailedByVal;
+            private static readonly FailedByPtr? s_FailedByPtr;
+            private static readonly FailedByVal? s_FailedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Failed()
@@ -200,8 +201,8 @@ namespace go
             private delegate @string FatalByPtr(ptr<T> value, params object[] args);
             private delegate @string FatalByVal(T value, params object[] args);
 
-            private static readonly FatalByPtr s_FatalByPtr;
-            private static readonly FatalByVal s_FatalByVal;
+            private static readonly FatalByPtr? s_FatalByPtr;
+            private static readonly FatalByVal? s_FatalByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Fatal(params object[] args)
@@ -220,8 +221,8 @@ namespace go
             private delegate @string FatalfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate @string FatalfByVal(T value, @string format, params object[] args);
 
-            private static readonly FatalfByPtr s_FatalfByPtr;
-            private static readonly FatalfByVal s_FatalfByVal;
+            private static readonly FatalfByPtr? s_FatalfByPtr;
+            private static readonly FatalfByVal? s_FatalfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Fatalf(@string format, params object[] args)
@@ -240,8 +241,8 @@ namespace go
             private delegate @string HelperByPtr(ptr<T> value);
             private delegate @string HelperByVal(T value);
 
-            private static readonly HelperByPtr s_HelperByPtr;
-            private static readonly HelperByVal s_HelperByVal;
+            private static readonly HelperByPtr? s_HelperByPtr;
+            private static readonly HelperByVal? s_HelperByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Helper()
@@ -260,8 +261,8 @@ namespace go
             private delegate @string LogByPtr(ptr<T> value, params object[] args);
             private delegate @string LogByVal(T value, params object[] args);
 
-            private static readonly LogByPtr s_LogByPtr;
-            private static readonly LogByVal s_LogByVal;
+            private static readonly LogByPtr? s_LogByPtr;
+            private static readonly LogByVal? s_LogByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Log(params object[] args)
@@ -280,8 +281,8 @@ namespace go
             private delegate @string LogfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate @string LogfByVal(T value, @string format, params object[] args);
 
-            private static readonly LogfByPtr s_LogfByPtr;
-            private static readonly LogfByVal s_LogfByVal;
+            private static readonly LogfByPtr? s_LogfByPtr;
+            private static readonly LogfByVal? s_LogfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Logf(@string format, params object[] args)
@@ -300,8 +301,8 @@ namespace go
             private delegate @string NameByPtr(ptr<T> value);
             private delegate @string NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Name()
@@ -320,8 +321,8 @@ namespace go
             private delegate @string SkipByPtr(ptr<T> value, params object[] args);
             private delegate @string SkipByVal(T value, params object[] args);
 
-            private static readonly SkipByPtr s_SkipByPtr;
-            private static readonly SkipByVal s_SkipByVal;
+            private static readonly SkipByPtr? s_SkipByPtr;
+            private static readonly SkipByVal? s_SkipByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Skip(params object[] args)
@@ -340,8 +341,8 @@ namespace go
             private delegate @string SkipNowByPtr(ptr<T> value);
             private delegate @string SkipNowByVal(T value);
 
-            private static readonly SkipNowByPtr s_SkipNowByPtr;
-            private static readonly SkipNowByVal s_SkipNowByVal;
+            private static readonly SkipNowByPtr? s_SkipNowByPtr;
+            private static readonly SkipNowByVal? s_SkipNowByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string SkipNow()
@@ -360,8 +361,8 @@ namespace go
             private delegate @string SkipfByPtr(ptr<T> value, @string format, params object[] args);
             private delegate @string SkipfByVal(T value, @string format, params object[] args);
 
-            private static readonly SkipfByPtr s_SkipfByPtr;
-            private static readonly SkipfByVal s_SkipfByVal;
+            private static readonly SkipfByPtr? s_SkipfByPtr;
+            private static readonly SkipfByVal? s_SkipfByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Skipf(@string format, params object[] args)
@@ -380,8 +381,8 @@ namespace go
             private delegate @string SkippedByPtr(ptr<T> value);
             private delegate @string SkippedByVal(T value);
 
-            private static readonly SkippedByPtr s_SkippedByPtr;
-            private static readonly SkippedByVal s_SkippedByVal;
+            private static readonly SkippedByPtr? s_SkippedByPtr;
+            private static readonly SkippedByVal? s_SkippedByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Skipped()
@@ -400,8 +401,8 @@ namespace go
             private delegate @string TempDirByPtr(ptr<T> value);
             private delegate @string TempDirByVal(T value);
 
-            private static readonly TempDirByPtr s_TempDirByPtr;
-            private static readonly TempDirByVal s_TempDirByVal;
+            private static readonly TempDirByPtr? s_TempDirByPtr;
+            private static readonly TempDirByVal? s_TempDirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string TempDir()
@@ -420,8 +421,8 @@ namespace go
             private delegate @string privateByPtr(ptr<T> value);
             private delegate @string privateByVal(T value);
 
-            private static readonly privateByPtr s_privateByPtr;
-            private static readonly privateByVal s_privateByVal;
+            private static readonly privateByPtr? s_privateByPtr;
+            private static readonly privateByVal? s_privateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string private()
@@ -437,7 +438,7 @@ namespace go
                 return s_privateByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static TB()

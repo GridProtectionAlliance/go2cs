@@ -10,7 +10,7 @@
 // This file is self-contained (go tool compile source.go
 // compiles) and thus could be made into its own package.
 
-// package syntax -- go2cs converted at 2020 October 08 04:28:31 UTC
+// package syntax -- go2cs converted at 2020 October 09 05:41:06 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Go\src\cmd\compile\internal\syntax\source.go
 using io = go.io_package;
@@ -65,7 +65,7 @@ namespace @internal
             public long chw; // width of ch
         }
 
-        private static readonly var sentinel = (var)utf8.RuneSelf;
+        private static readonly var sentinel = utf8.RuneSelf;
 
 
 

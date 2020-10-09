@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:40 UTC
+//     Generated on 2020 October 09 06:06:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using io = go.io_package;
 using strconv = go.strconv_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace image
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class EncoderBufferPool<T> : EncoderBufferPool
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace image
             private delegate ptr<EncoderBuffer> GetByPtr(ptr<T> value);
             private delegate ptr<EncoderBuffer> GetByVal(T value);
 
-            private static readonly GetByPtr s_GetByPtr;
-            private static readonly GetByVal s_GetByVal;
+            private static readonly GetByPtr? s_GetByPtr;
+            private static readonly GetByVal? s_GetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<EncoderBuffer> Get()
@@ -94,8 +95,8 @@ namespace image
             private delegate ptr<EncoderBuffer> PutByPtr(ptr<T> value, ptr<EncoderBuffer> _p0);
             private delegate ptr<EncoderBuffer> PutByVal(T value, ptr<EncoderBuffer> _p0);
 
-            private static readonly PutByPtr s_PutByPtr;
-            private static readonly PutByVal s_PutByVal;
+            private static readonly PutByPtr? s_PutByPtr;
+            private static readonly PutByVal? s_PutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<EncoderBuffer> Put(ptr<EncoderBuffer> _p0)
@@ -111,7 +112,7 @@ namespace image
                 return s_PutByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static EncoderBufferPool()

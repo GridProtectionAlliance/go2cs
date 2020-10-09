@@ -7,7 +7,7 @@
 
 // This file is a copy of $GOROOT/src/go/internal/gcimporter/iimport.go.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:55:36 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:19 UTC
 // import "golang.org/x/tools/go/internal/gcimporter" ==> using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\iimport.go
 using bytes = go.bytes_package;
@@ -75,14 +75,14 @@ namespace @internal
  
         // Types
         private static readonly itag definedType = (itag)iota;
-        private static readonly var pointerType = (var)0;
-        private static readonly var sliceType = (var)1;
-        private static readonly var arrayType = (var)2;
-        private static readonly var chanType = (var)3;
-        private static readonly var mapType = (var)4;
-        private static readonly var signatureType = (var)5;
-        private static readonly var structType = (var)6;
-        private static readonly var interfaceType = (var)7;
+        private static readonly var pointerType = 0;
+        private static readonly var sliceType = 1;
+        private static readonly var arrayType = 2;
+        private static readonly var chanType = 3;
+        private static readonly var mapType = 4;
+        private static readonly var signatureType = 5;
+        private static readonly var structType = 6;
+        private static readonly var interfaceType = 7;
 
 
         // IImportData imports a package from the serialized package data

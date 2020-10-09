@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2020 October 08 04:39:54 UTC
+// package amd64 -- go2cs converted at 2020 October 09 05:50:37 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
 // Original source: C:\Go\src\cmd\link\internal\amd64\l.go
 

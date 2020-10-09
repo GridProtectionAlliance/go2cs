@@ -5,7 +5,7 @@
 // Package cfg holds configuration shared by the Go command and internal/testenv.
 // Definitions that don't need to be exposed outside of cmd/go should be in
 // cmd/go/internal/cfg instead of this package.
-// package cfg -- go2cs converted at 2020 October 08 04:33:57 UTC
+// package cfg -- go2cs converted at 2020 October 09 05:45:28 UTC
 // import "internal/cfg" ==> using cfg = go.@internal.cfg_package
 // Original source: C:\Go\src\internal\cfg\cfg.go
 

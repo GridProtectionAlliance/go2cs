@@ -4,7 +4,7 @@
 
 // +build !testtag
 
-// package main -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package main -- go2cs converted at 2020 October 09 06:05:12 UTC
 // Original source: C:\Go\src\cmd\vet\testdata\tagtest\file2.go
 using fmt = go.fmt_package;
 using static go.builtin;

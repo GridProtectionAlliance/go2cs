@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package path -- go2cs converted at 2020 October 08 00:33:48 UTC
+// package path -- go2cs converted at 2020 October 09 04:45:16 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Go\src\path\match.go
 using errors = go.errors_package;

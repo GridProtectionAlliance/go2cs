@@ -51,7 +51,7 @@
 //    }
 //
 // because the former will succeed if err wraps an *os.PathError.
-// package errors -- go2cs converted at 2020 October 08 00:33:47 UTC
+// package errors -- go2cs converted at 2020 October 09 04:45:16 UTC
 // import "errors" ==> using errors = go.errors_package
 // Original source: C:\Go\src\errors\errors.go
 

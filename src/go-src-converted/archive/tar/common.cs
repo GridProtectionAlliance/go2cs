@@ -8,7 +8,7 @@
 // can be read and written in a streaming manner.
 // This package aims to cover most variations of the format,
 // including those produced by GNU and BSD tar tools.
-// package tar -- go2cs converted at 2020 October 08 00:33:47 UTC
+// package tar -- go2cs converted at 2020 October 09 04:45:15 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Go\src\archive\tar\common.go
 using errors = go.errors_package;

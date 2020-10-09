@@ -4,7 +4,7 @@
 
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2020 October 08 03:34:59 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:34 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\udpsock_posix.go
 using context = go.context_package;

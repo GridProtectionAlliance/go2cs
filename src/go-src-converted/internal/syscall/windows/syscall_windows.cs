@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package windows -- go2cs converted at 2020 October 08 03:32:30 UTC
+// package windows -- go2cs converted at 2020 October 09 04:51:14 UTC
 // import "internal/syscall/windows" ==> using windows = go.@internal.syscall.windows_package
 // Original source: C:\Go\src\internal\syscall\windows\syscall_windows.go
 using unsafeheader = go.@internal.unsafeheader_package;
@@ -172,7 +172,7 @@ namespace syscall
         public static readonly ulong MSG_TRUNC = (ulong)0x0100UL;
         public static readonly ulong MSG_CTRUNC = (ulong)0x0200UL;
 
-        private static readonly var socket_error = (var)uintptr(~uint32(0L));
+        private static readonly var socket_error = uintptr(~uint32(0L));
 
 
         public static syscall.GUID WSAID_WSASENDMSG = new syscall.GUID(Data1:0xa441e712,Data2:0x754f,Data3:0x43ca,Data4:[8]byte{0x84,0xa7,0x0d,0xee,0x44,0xcf,0x60,0x6d},);

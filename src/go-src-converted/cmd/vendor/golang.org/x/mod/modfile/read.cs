@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfile -- go2cs converted at 2020 October 08 04:45:49 UTC
+// package modfile -- go2cs converted at 2020 October 09 05:55:53 UTC
 // import "cmd/vendor/golang.org/x/mod/modfile" ==> using modfile = go.cmd.vendor.golang.org.x.mod.modfile_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\modfile\read.go
 using bytes = go.bytes_package;
@@ -648,10 +648,10 @@ Loop:
         }
 
         private static readonly tokenKind _EOF = (tokenKind)-(iota + 1L);
-        private static readonly var _EOLCOMMENT = (var)0;
-        private static readonly var _IDENT = (var)1;
-        private static readonly var _STRING = (var)2;
-        private static readonly var _COMMENT = (var)3; 
+        private static readonly var _EOLCOMMENT = 0;
+        private static readonly var _IDENT = 1;
+        private static readonly var _STRING = 2;
+        private static readonly var _COMMENT = 3; 
 
         // newlines and punctuation tokens are allowed as ASCII codes.
 
@@ -995,7 +995,7 @@ Loop:
         {
             ref input @in = ref _addr_@in.val;
 
-            const var debug = (var)false; 
+            const var debug = false; 
 
             // Generate preorder and postorder lists.
  

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:39:15 UTC
+//     Generated on 2020 October 09 04:56:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -46,6 +46,7 @@ using hpack = go.golang.org.x.net.http2.hpack_package;
 using idna = go.golang.org.x.net.idna_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -70,7 +71,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class baseContexter<T> : baseContexter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -96,8 +97,8 @@ namespace net
             private delegate context.Context BaseContextByPtr(ptr<T> value);
             private delegate context.Context BaseContextByVal(T value);
 
-            private static readonly BaseContextByPtr s_BaseContextByPtr;
-            private static readonly BaseContextByVal s_BaseContextByVal;
+            private static readonly BaseContextByPtr? s_BaseContextByPtr;
+            private static readonly BaseContextByVal? s_BaseContextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public context.Context BaseContext()
@@ -113,7 +114,7 @@ namespace net
                 return s_BaseContextByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static baseContexter()

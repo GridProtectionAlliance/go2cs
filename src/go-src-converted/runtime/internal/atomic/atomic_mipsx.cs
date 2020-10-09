@@ -11,7 +11,7 @@
 //go:linkname Load64
 //go:linkname Store64
 
-// package atomic -- go2cs converted at 2020 October 08 03:19:10 UTC
+// package atomic -- go2cs converted at 2020 October 09 04:45:33 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Go\src\runtime\internal\atomic\atomic_mipsx.go
 using cpu = go.@internal.cpu_package;

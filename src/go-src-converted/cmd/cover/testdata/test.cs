@@ -8,7 +8,7 @@
 // The word LINE is replaced by the line number in this file. When the file is executed,
 // the coverage processing has changed the line numbers, so we can't use runtime.Caller.
 
-// package main -- go2cs converted at 2020 October 08 04:32:37 UTC
+// package main -- go2cs converted at 2020 October 09 05:44:26 UTC
 // Original source: C:\Go\src\cmd\cover\testdata\test.go
 using _@unsafe_ = go.@unsafe_package;
 using static go.builtin;

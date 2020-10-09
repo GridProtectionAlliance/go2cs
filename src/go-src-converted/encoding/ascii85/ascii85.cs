@@ -4,7 +4,7 @@
 
 // Package ascii85 implements the ascii85 data encoding
 // as used in the btoa tool and Adobe's PostScript and PDF document formats.
-// package ascii85 -- go2cs converted at 2020 October 08 03:42:26 UTC
+// package ascii85 -- go2cs converted at 2020 October 09 04:59:42 UTC
 // import "encoding/ascii85" ==> using ascii85 = go.encoding.ascii85_package
 // Original source: C:\Go\src\encoding\ascii85\ascii85.go
 using io = go.io_package;

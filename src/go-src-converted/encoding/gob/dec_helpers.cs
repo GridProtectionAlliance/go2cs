@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2020 October 08 03:42:37 UTC
+// package gob -- go2cs converted at 2020 October 09 04:59:52 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Go\src\encoding\gob\dec_helpers.go
 using math = go.math_package;

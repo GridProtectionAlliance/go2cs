@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:33:09 UTC
+//     Generated on 2020 October 09 05:44:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using io = go.io_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace cmd
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ExportedInterface<T> : ExportedInterface
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace cmd
             private delegate void ExportedMethodByPtr(ptr<T> value);
             private delegate void ExportedMethodByVal(T value);
 
-            private static readonly ExportedMethodByPtr s_ExportedMethodByPtr;
-            private static readonly ExportedMethodByVal s_ExportedMethodByVal;
+            private static readonly ExportedMethodByPtr? s_ExportedMethodByPtr;
+            private static readonly ExportedMethodByVal? s_ExportedMethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void ExportedMethod()
@@ -92,8 +93,8 @@ namespace cmd
             private delegate void unexportedMethodByPtr(ptr<T> value);
             private delegate void unexportedMethodByVal(T value);
 
-            private static readonly unexportedMethodByPtr s_unexportedMethodByPtr;
-            private static readonly unexportedMethodByVal s_unexportedMethodByVal;
+            private static readonly unexportedMethodByPtr? s_unexportedMethodByPtr;
+            private static readonly unexportedMethodByVal? s_unexportedMethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void unexportedMethod()
@@ -117,8 +118,8 @@ namespace cmd
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -137,8 +138,8 @@ namespace cmd
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -154,7 +155,7 @@ namespace cmd
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ExportedInterface()

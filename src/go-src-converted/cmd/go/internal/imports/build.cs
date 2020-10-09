@@ -4,7 +4,7 @@
 
 // Copied from Go distribution src/go/build/build.go, syslist.go
 
-// package imports -- go2cs converted at 2020 October 08 04:34:03 UTC
+// package imports -- go2cs converted at 2020 October 09 05:45:34 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Go\src\cmd\go\internal\imports\build.go
 using bytes = go.bytes_package;

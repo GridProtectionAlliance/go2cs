@@ -1,7 +1,7 @@
 // Code generated from gen/PPC64.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2020 October 08 04:23:59 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:37:05 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\rewritePPC64.go
 using math = go.math_package;

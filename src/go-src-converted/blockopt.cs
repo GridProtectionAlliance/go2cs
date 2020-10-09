@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:56:35 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:04 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\blockopt.go
 // Simple block optimizations to simplify the control flow graph.
@@ -25,7 +25,7 @@ namespace go
     {
         // If true, perform sanity checking and show progress at each
         // successive iteration of optimizeBlocks.  Very verbose.
-        private static readonly var debugBlockOpt = (var)false;
+        private static readonly var debugBlockOpt = false;
 
         // markReachable sets Index=-1 for all blocks reachable from b.
 

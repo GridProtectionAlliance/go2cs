@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:54 UTC
+//     Generated on 2020 October 09 06:06:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,8 @@ using static go.builtin;
 using cipher = go.crypto.cipher_package;
 using errors = go.errors_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace vendor {

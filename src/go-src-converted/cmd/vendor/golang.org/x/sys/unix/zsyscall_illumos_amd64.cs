@@ -3,7 +3,7 @@
 
 // +build illumos,amd64
 
-// package unix -- go2cs converted at 2020 October 08 04:51:27 UTC
+// package unix -- go2cs converted at 2020 October 09 05:59:01 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_illumos_amd64.go
 using @unsafe = go.@unsafe_package;

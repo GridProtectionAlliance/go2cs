@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:29 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:43 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\fuse.go
 using src = go.cmd.@internal.src_package;
@@ -36,9 +36,9 @@ namespace @internal
         }
 
         private static readonly fuseType fuseTypePlain = (fuseType)1L << (int)(iota);
-        private static readonly var fuseTypeIf = (var)0;
-        private static readonly var fuseTypeIntInRange = (var)1;
-        private static readonly var fuseTypeShortCircuit = (var)2;
+        private static readonly var fuseTypeIf = 0;
+        private static readonly var fuseTypeIntInRange = 1;
+        private static readonly var fuseTypeShortCircuit = 2;
 
 
         // fuse simplifies control flow by joining basic blocks.

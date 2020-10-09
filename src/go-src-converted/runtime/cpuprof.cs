@@ -10,7 +10,7 @@
 // with the log, those writes will be recorded as a count of lost records.
 // The actual profile buffer is in profbuf.go.
 
-// package runtime -- go2cs converted at 2020 October 08 03:19:20 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:45:41 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\cpuprof.go
 using atomic = go.runtime.@internal.atomic_package;

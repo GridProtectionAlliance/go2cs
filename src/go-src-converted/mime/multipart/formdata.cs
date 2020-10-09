@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package multipart -- go2cs converted at 2020 October 08 03:38:27 UTC
+// package multipart -- go2cs converted at 2020 October 09 04:56:05 UTC
 // import "mime/multipart" ==> using multipart = go.mime.multipart_package
 // Original source: C:\Go\src\mime\multipart\formdata.go
 using bytes = go.bytes_package;

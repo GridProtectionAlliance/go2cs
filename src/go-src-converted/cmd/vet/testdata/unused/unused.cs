@@ -4,7 +4,7 @@
 
 // This file contains tests for the unusedresult checker.
 
-// package unused -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package unused -- go2cs converted at 2020 October 09 06:05:12 UTC
 // import "cmd/vet/testdata/unused" ==> using unused = go.cmd.vet.testdata.unused_package
 // Original source: C:\Go\src\cmd\vet\testdata\unused\unused.go
 using fmt = go.fmt_package;

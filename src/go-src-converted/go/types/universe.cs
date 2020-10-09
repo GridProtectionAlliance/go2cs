@@ -4,7 +4,7 @@
 
 // This file sets up the universe scope and the unsafe package.
 
-// package types -- go2cs converted at 2020 October 08 04:03:57 UTC
+// package types -- go2cs converted at 2020 October 09 05:19:46 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Go\src\go\types\universe.go
 using constant = go.go.constant_package;
@@ -98,29 +98,29 @@ namespace go
  
         // universe scope
         private static readonly builtinId _Append = (builtinId)iota;
-        private static readonly var _Cap = (var)0;
-        private static readonly var _Close = (var)1;
-        private static readonly var _Complex = (var)2;
-        private static readonly var _Copy = (var)3;
-        private static readonly var _Delete = (var)4;
-        private static readonly var _Imag = (var)5;
-        private static readonly var _Len = (var)6;
-        private static readonly var _Make = (var)7;
-        private static readonly var _New = (var)8;
-        private static readonly var _Panic = (var)9;
-        private static readonly var _Print = (var)10;
-        private static readonly var _Println = (var)11;
-        private static readonly var _Real = (var)12;
-        private static readonly var _Recover = (var)13; 
+        private static readonly var _Cap = 0;
+        private static readonly var _Close = 1;
+        private static readonly var _Complex = 2;
+        private static readonly var _Copy = 3;
+        private static readonly var _Delete = 4;
+        private static readonly var _Imag = 5;
+        private static readonly var _Len = 6;
+        private static readonly var _Make = 7;
+        private static readonly var _New = 8;
+        private static readonly var _Panic = 9;
+        private static readonly var _Print = 10;
+        private static readonly var _Println = 11;
+        private static readonly var _Real = 12;
+        private static readonly var _Recover = 13; 
 
         // package unsafe
-        private static readonly var _Alignof = (var)14;
-        private static readonly var _Offsetof = (var)15;
-        private static readonly var _Sizeof = (var)16; 
+        private static readonly var _Alignof = 14;
+        private static readonly var _Offsetof = 15;
+        private static readonly var _Sizeof = 16; 
 
         // testing support
-        private static readonly var _Assert = (var)17;
-        private static readonly var _Trace = (var)18;
+        private static readonly var _Assert = 17;
+        private static readonly var _Trace = 18;
 
 
 

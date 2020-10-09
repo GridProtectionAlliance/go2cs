@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:18:53 UTC
+//     Generated on 2020 October 09 05:08:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using strings = go.strings_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class fileReader<T> : fileReader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace archive
             private delegate (long, error) WriteToByPtr(ptr<T> value, io.Writer _p0);
             private delegate (long, error) WriteToByVal(T value, io.Writer _p0);
 
-            private static readonly WriteToByPtr s_WriteToByPtr;
-            private static readonly WriteToByVal s_WriteToByVal;
+            private static readonly WriteToByPtr? s_WriteToByPtr;
+            private static readonly WriteToByVal? s_WriteToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) WriteTo(io.Writer _p0)
@@ -92,8 +93,8 @@ namespace archive
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -109,7 +110,7 @@ namespace archive
                 return s_ReadByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static fileReader()

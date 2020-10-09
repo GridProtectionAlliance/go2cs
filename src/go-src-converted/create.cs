@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:56:53 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:15 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\create.go
 // This file implements the CREATE phase of SSA construction.
@@ -234,7 +234,7 @@ namespace go
                 {
                     foreach (var (_, decl) in file.Decls)
                     {
-                        membersFromDecl(_addr_p, decl);
+                        membersFromDecl(p, decl);
                     }
             else
                 }
@@ -247,7 +247,7 @@ namespace go
                 foreach (var (_, name) in scope.Names())
                 {
                     var obj = scope.Lookup(name);
-                    memberFromObject(_addr_p, obj, null);
+                    memberFromObject(p, obj, null);
                     {
                         var obj__prev2 = obj;
 
@@ -263,7 +263,7 @@ namespace go
                                     for (long i = 0L;
                                     var n = named.NumMethods(); i < n; i++)
                                     {
-                                        memberFromObject(_addr_p, named.Method(i), null);
+                                        memberFromObject(p, named.Method(i), null);
                                     }
 
 

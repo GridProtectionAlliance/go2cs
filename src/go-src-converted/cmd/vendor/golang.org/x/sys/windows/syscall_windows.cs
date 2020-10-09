@@ -4,7 +4,7 @@
 
 // Windows system calls.
 
-// package windows -- go2cs converted at 2020 October 08 04:53:54 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:56 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\syscall_windows.go
 using errorspkg = go.errors_package;
@@ -29,7 +29,7 @@ namespace sys
         {
         }
 
-        public static readonly var InvalidHandle = (var)~Handle(0L); 
+        public static readonly var InvalidHandle = ~Handle(0L); 
 
         // Flags for DefineDosDevice.
         public static readonly ulong DDD_EXACT_MATCH_ON_REMOVE = (ulong)0x00000004UL;
@@ -74,7 +74,7 @@ namespace sys
 
         // Return values of SleepEx and other APC functions
         public static readonly ulong STATUS_USER_APC = (ulong)0x000000C0UL;
-        public static readonly var WAIT_IO_COMPLETION = (var)STATUS_USER_APC;
+        public static readonly var WAIT_IO_COMPLETION = STATUS_USER_APC;
 
 
         // StringToUTF16 is deprecated. Use UTF16FromString instead.
@@ -631,7 +631,7 @@ namespace sys
             return r;
         }
 
-        public static readonly var ImplementsGetwd = (var)true;
+        public static readonly var ImplementsGetwd = true;
 
 
 
@@ -938,7 +938,7 @@ namespace sys
 
         // net api calls
 
-        private static readonly var socket_error = (var)uintptr(~uint32(0L));
+        private static readonly var socket_error = uintptr(~uint32(0L));
 
         //sys    WSAStartup(verreq uint32, data *WSAData) (sockerr error) = ws2_32.WSAStartup
         //sys    WSACleanup() (err error) [failretval==socket_error] = ws2_32.WSACleanup

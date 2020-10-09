@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package runtime -- go2cs converted at 2020 October 08 03:20:36 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mem_js.go
 using @unsafe = go.@unsafe_package;

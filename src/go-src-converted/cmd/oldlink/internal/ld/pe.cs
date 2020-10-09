@@ -5,7 +5,7 @@
 // PE (Portable Executable) file writing
 // https://www.microsoft.com/whdc/system/platform/firmware/PECOFF.mspx
 
-// package ld -- go2cs converted at 2020 October 08 04:41:56 UTC
+// package ld -- go2cs converted at 2020 October 09 05:52:33 UTC
 // import "cmd/oldlink/internal/ld" ==> using ld = go.cmd.oldlink.@internal.ld_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\pe.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -1770,7 +1770,7 @@ dwarfLoop:
             // described by a base relocation block.
             const ulong pageSize = (ulong)0x1000UL;
 
-            const var pageMask = (var)pageSize - 1L;
+            const var pageMask = pageSize - 1L;
 
 
 

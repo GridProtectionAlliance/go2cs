@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:45 UTC
+//     Generated on 2020 October 09 04:53:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,8 @@ using subtle = go.crypto.subtle_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace crypto

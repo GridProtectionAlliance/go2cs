@@ -4,7 +4,7 @@
 
 // This file implements scopes and the objects they contain.
 
-// package ast -- go2cs converted at 2020 October 08 04:04:24 UTC
+// package ast -- go2cs converted at 2020 October 09 05:20:06 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\scope.go
 using bytes = go.bytes_package;
@@ -219,12 +219,12 @@ namespace go
 
         // The list of possible Object kinds.
         public static readonly ObjKind Bad = (ObjKind)iota; // for error handling
-        public static readonly var Pkg = (var)0; // package
-        public static readonly var Con = (var)1; // constant
-        public static readonly var Typ = (var)2; // type
-        public static readonly var Var = (var)3; // variable
-        public static readonly var Fun = (var)4; // function or method
-        public static readonly var Lbl = (var)5; // label
+        public static readonly var Pkg = 0; // package
+        public static readonly var Con = 1; // constant
+        public static readonly var Typ = 2; // type
+        public static readonly var Var = 3; // variable
+        public static readonly var Fun = 4; // function or method
+        public static readonly var Lbl = 5; // label
 
         private static array<@string> objKindStrings = new array<@string>(InitKeyedValues<@string>((Bad, "bad"), (Pkg, "package"), (Con, "const"), (Typ, "type"), (Var, "var"), (Fun, "func"), (Lbl, "label")));
 

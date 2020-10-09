@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:31 UTC
+//     Generated on 2020 October 09 05:45:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,6 +39,7 @@ using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -65,7 +66,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ImportPathError<T> : ImportPathError
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -91,8 +92,8 @@ namespace @internal
             private delegate @string ImportPathByPtr(ptr<T> value);
             private delegate @string ImportPathByVal(T value);
 
-            private static readonly ImportPathByPtr s_ImportPathByPtr;
-            private static readonly ImportPathByVal s_ImportPathByVal;
+            private static readonly ImportPathByPtr? s_ImportPathByPtr;
+            private static readonly ImportPathByVal? s_ImportPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string ImportPath()
@@ -111,8 +112,8 @@ namespace @internal
             private delegate @string ErrorByPtr(ptr<T> value);
             private delegate @string ErrorByVal(T value);
 
-            private static readonly ErrorByPtr s_ErrorByPtr;
-            private static readonly ErrorByVal s_ErrorByVal;
+            private static readonly ErrorByPtr? s_ErrorByPtr;
+            private static readonly ErrorByVal? s_ErrorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Error()
@@ -128,7 +129,7 @@ namespace @internal
                 return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ImportPathError()

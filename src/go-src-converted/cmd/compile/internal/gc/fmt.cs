@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:28:57 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:29 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\fmt.go
 using bytes = go.bytes_package;
@@ -33,13 +33,13 @@ namespace @internal
 
  //                                 fmt.Format flag/prec or verb
         public static readonly FmtFlag FmtLeft = (FmtFlag)1L << (int)(iota); // '-'
-        public static readonly var FmtSharp = (var)0; // '#'
-        public static readonly var FmtSign = (var)1; // '+'
-        public static readonly var FmtUnsigned = (var)2; // internal use only (historic: u flag)
-        public static readonly var FmtShort = (var)3; // verb == 'S'       (historic: h flag)
-        public static readonly var FmtLong = (var)4; // verb == 'L'       (historic: l flag)
-        public static readonly var FmtComma = (var)5; // '.' (== hasPrec)  (historic: , flag)
-        public static readonly var FmtByte = (var)6; // '0'               (historic: hh flag)
+        public static readonly var FmtSharp = 0; // '#'
+        public static readonly var FmtSign = 1; // '+'
+        public static readonly var FmtUnsigned = 2; // internal use only (historic: u flag)
+        public static readonly var FmtShort = 3; // verb == 'S'       (historic: h flag)
+        public static readonly var FmtLong = 4; // verb == 'L'       (historic: l flag)
+        public static readonly var FmtComma = 5; // '.' (== hasPrec)  (historic: , flag)
+        public static readonly var FmtByte = 6; // '0'               (historic: hh flag)
 
         // fmtFlag computes the (internal) FmtFlag
         // value given the fmt.State and format verb.
@@ -127,9 +127,9 @@ namespace @internal
 
         // *types.Sym, *types.Type, and *Node types use the flags below to set the format mode
         public static readonly fmtMode FErr = (fmtMode)iota;
-        public static readonly var FDbg = (var)0;
-        public static readonly var FTypeId = (var)1;
-        public static readonly var FTypeIdName = (var)2; // same as FTypeId, but use package name instead of prefix
+        public static readonly var FDbg = 0;
+        public static readonly var FTypeId = 1;
+        public static readonly var FTypeIdName = 2; // same as FTypeId, but use package name instead of prefix
 
         // The mode flags '+', '-', and '#' are sticky; they persist through
         // recursions of *Node, *types.Type, and *types.Sym values. The ' ' flag is

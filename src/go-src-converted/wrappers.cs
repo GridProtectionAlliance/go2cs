@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:57:14 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:32 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\wrappers.go
 // This file defines synthesis of Functions that delegate to declared
@@ -82,7 +82,7 @@ namespace go
             ptr<Function> fn = addr(new Function(name:name,method:sel,object:obj,Signature:sig,Synthetic:description,Prog:prog,pos:obj.Pos(),));
             fn.startBody();
             fn.addSpilledParam(recv);
-            createParams(_addr_fn, start);
+            createParams(fn, start);
 
             var indices = sel.Index();
 

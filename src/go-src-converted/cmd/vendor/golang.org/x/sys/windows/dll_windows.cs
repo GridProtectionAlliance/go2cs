@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package windows -- go2cs converted at 2020 October 08 04:53:43 UTC
+// package windows -- go2cs converted at 2020 October 09 06:00:49 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\dll_windows.go
 using sync = go.sync_package;

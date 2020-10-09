@@ -11,7 +11,7 @@
 // meanings of bits 0-15 or wasting time and space shifting bits 16-31 for
 // devices that don't use them.
 
-// package unix -- go2cs converted at 2020 October 08 04:46:13 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_dragonfly.go
 

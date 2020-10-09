@@ -4,7 +4,7 @@
 
 // +build darwin
 
-// package poll -- go2cs converted at 2020 October 08 03:32:37 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:19 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\fd_writev_darwin.go
 using syscall = go.syscall_package;

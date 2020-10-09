@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ppc64 -- go2cs converted at 2020 October 08 04:40:19 UTC
+// package ppc64 -- go2cs converted at 2020 October 09 05:51:01 UTC
 // import "cmd/oldlink/internal/ppc64" ==> using ppc64 = go.cmd.oldlink.@internal.ppc64_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ppc64\asm.go
 using objabi = go.cmd.@internal.objabi_package;

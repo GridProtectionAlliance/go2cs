@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:19:02 UTC
+//     Generated on 2020 October 09 04:49:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using unsafeheader = go.@internal.unsafeheader_package;
 using @unsafe = go.@unsafe_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -42,7 +43,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Type<T> : Type
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -68,8 +69,8 @@ namespace @internal
             private delegate ptr<uncommonType> NameByPtr(ptr<T> value);
             private delegate ptr<uncommonType> NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Name()
@@ -88,8 +89,8 @@ namespace @internal
             private delegate ptr<uncommonType> PkgPathByPtr(ptr<T> value);
             private delegate ptr<uncommonType> PkgPathByVal(T value);
 
-            private static readonly PkgPathByPtr s_PkgPathByPtr;
-            private static readonly PkgPathByVal s_PkgPathByVal;
+            private static readonly PkgPathByPtr? s_PkgPathByPtr;
+            private static readonly PkgPathByVal? s_PkgPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> PkgPath()
@@ -108,8 +109,8 @@ namespace @internal
             private delegate ptr<uncommonType> SizeByPtr(ptr<T> value);
             private delegate ptr<uncommonType> SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Size()
@@ -128,8 +129,8 @@ namespace @internal
             private delegate ptr<uncommonType> KindByPtr(ptr<T> value);
             private delegate ptr<uncommonType> KindByVal(T value);
 
-            private static readonly KindByPtr s_KindByPtr;
-            private static readonly KindByVal s_KindByVal;
+            private static readonly KindByPtr? s_KindByPtr;
+            private static readonly KindByVal? s_KindByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Kind()
@@ -148,8 +149,8 @@ namespace @internal
             private delegate ptr<uncommonType> ImplementsByPtr(ptr<T> value, Type u);
             private delegate ptr<uncommonType> ImplementsByVal(T value, Type u);
 
-            private static readonly ImplementsByPtr s_ImplementsByPtr;
-            private static readonly ImplementsByVal s_ImplementsByVal;
+            private static readonly ImplementsByPtr? s_ImplementsByPtr;
+            private static readonly ImplementsByVal? s_ImplementsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Implements(Type u)
@@ -168,8 +169,8 @@ namespace @internal
             private delegate ptr<uncommonType> AssignableToByPtr(ptr<T> value, Type u);
             private delegate ptr<uncommonType> AssignableToByVal(T value, Type u);
 
-            private static readonly AssignableToByPtr s_AssignableToByPtr;
-            private static readonly AssignableToByVal s_AssignableToByVal;
+            private static readonly AssignableToByPtr? s_AssignableToByPtr;
+            private static readonly AssignableToByVal? s_AssignableToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> AssignableTo(Type u)
@@ -188,8 +189,8 @@ namespace @internal
             private delegate ptr<uncommonType> ComparableByPtr(ptr<T> value);
             private delegate ptr<uncommonType> ComparableByVal(T value);
 
-            private static readonly ComparableByPtr s_ComparableByPtr;
-            private static readonly ComparableByVal s_ComparableByVal;
+            private static readonly ComparableByPtr? s_ComparableByPtr;
+            private static readonly ComparableByVal? s_ComparableByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Comparable()
@@ -208,8 +209,8 @@ namespace @internal
             private delegate ptr<uncommonType> StringByPtr(ptr<T> value);
             private delegate ptr<uncommonType> StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> String()
@@ -228,8 +229,8 @@ namespace @internal
             private delegate ptr<uncommonType> ElemByPtr(ptr<T> value);
             private delegate ptr<uncommonType> ElemByVal(T value);
 
-            private static readonly ElemByPtr s_ElemByPtr;
-            private static readonly ElemByVal s_ElemByVal;
+            private static readonly ElemByPtr? s_ElemByPtr;
+            private static readonly ElemByVal? s_ElemByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> Elem()
@@ -248,8 +249,8 @@ namespace @internal
             private delegate ptr<uncommonType> commonByPtr(ptr<T> value);
             private delegate ptr<uncommonType> commonByVal(T value);
 
-            private static readonly commonByPtr s_commonByPtr;
-            private static readonly commonByVal s_commonByVal;
+            private static readonly commonByPtr? s_commonByPtr;
+            private static readonly commonByVal? s_commonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> common()
@@ -268,8 +269,8 @@ namespace @internal
             private delegate ptr<uncommonType> uncommonByPtr(ptr<T> value);
             private delegate ptr<uncommonType> uncommonByVal(T value);
 
-            private static readonly uncommonByPtr s_uncommonByPtr;
-            private static readonly uncommonByVal s_uncommonByVal;
+            private static readonly uncommonByPtr? s_uncommonByPtr;
+            private static readonly uncommonByVal? s_uncommonByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ptr<uncommonType> uncommon()
@@ -285,7 +286,7 @@ namespace @internal
                 return s_uncommonByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Type()

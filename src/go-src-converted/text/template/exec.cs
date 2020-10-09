@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2020 October 08 03:42:11 UTC
+// package template -- go2cs converted at 2020 October 09 04:59:30 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Go\src\text\template\exec.go
 using fmt = go.fmt_package;

@@ -7,7 +7,7 @@
 
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package net -- go2cs converted at 2020 October 08 03:34:32 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:21 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\sock_cloexec.go
 using poll = go.@internal.poll_package;

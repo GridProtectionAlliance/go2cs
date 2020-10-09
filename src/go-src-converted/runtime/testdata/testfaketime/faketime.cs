@@ -6,7 +6,7 @@
 // to build it with custom build tags and hence want to minimize
 // dependencies.
 
-// package main -- go2cs converted at 2020 October 08 03:43:31 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:42 UTC
 // Original source: C:\Go\src\runtime\testdata\testfaketime\faketime.go
 using os = go.os_package;
 using time = go.time_package;

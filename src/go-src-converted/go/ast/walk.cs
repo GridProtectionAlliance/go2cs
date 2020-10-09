@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2020 October 08 04:04:25 UTC
+// package ast -- go2cs converted at 2020 October 09 05:20:07 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Go\src\go\ast\walk.go
 using fmt = go.fmt_package;

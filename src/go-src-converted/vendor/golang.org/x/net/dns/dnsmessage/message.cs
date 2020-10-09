@@ -10,7 +10,7 @@
 //
 // This implementation is designed to minimize heap allocations and avoid
 // unnecessary packing and unpacking as much as possible.
-// package dnsmessage -- go2cs converted at 2020 October 08 05:00:30 UTC
+// package dnsmessage -- go2cs converted at 2020 October 09 06:06:47 UTC
 // import "vendor/golang.org/x/net/dns/dnsmessage" ==> using dnsmessage = go.vendor.golang.org.x.net.dns.dnsmessage_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\dns\dnsmessage\message.go
 using errors = go.errors_package;
@@ -427,11 +427,11 @@ namespace dns
         }
 
         private static readonly section sectionNotStarted = (section)iota;
-        private static readonly var sectionHeader = (var)0;
-        private static readonly var sectionQuestions = (var)1;
-        private static readonly var sectionAnswers = (var)2;
-        private static readonly var sectionAuthorities = (var)3;
-        private static readonly var sectionAdditionals = (var)4;
+        private static readonly var sectionHeader = 0;
+        private static readonly var sectionQuestions = 1;
+        private static readonly var sectionAnswers = 2;
+        private static readonly var sectionAuthorities = 3;
+        private static readonly var sectionAdditionals = 4;
         private static readonly headerBitQR sectionDone = (headerBitQR)1L << (int)(15L); // query/response (response=1)
         private static readonly long headerBitAA = (long)1L << (int)(10L); // authoritative
         private static readonly long headerBitTC = (long)1L << (int)(9L); // truncated

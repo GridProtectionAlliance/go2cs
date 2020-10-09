@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:15 UTC
+//     Generated on 2020 October 09 04:52:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using hash = go.hash_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -41,7 +42,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Signer<T> : Signer
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace go
             private delegate (slice<byte>, error) PublicByPtr(ptr<T> value);
             private delegate (slice<byte>, error) PublicByVal(T value);
 
-            private static readonly PublicByPtr s_PublicByPtr;
-            private static readonly PublicByVal s_PublicByVal;
+            private static readonly PublicByPtr? s_PublicByPtr;
+            private static readonly PublicByVal? s_PublicByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Public()
@@ -87,8 +88,8 @@ namespace go
             private delegate (slice<byte>, error) SignByPtr(ptr<T> value, io.Reader rand, slice<byte> digest, SignerOpts opts);
             private delegate (slice<byte>, error) SignByVal(T value, io.Reader rand, slice<byte> digest, SignerOpts opts);
 
-            private static readonly SignByPtr s_SignByPtr;
-            private static readonly SignByVal s_SignByVal;
+            private static readonly SignByPtr? s_SignByPtr;
+            private static readonly SignByVal? s_SignByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Sign(io.Reader rand, slice<byte> digest, SignerOpts opts)
@@ -104,7 +105,7 @@ namespace go
                 return s_SignByPtr(m_target_ptr, rand, digest, opts);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Signer()

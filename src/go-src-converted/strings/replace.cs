@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2020 October 08 03:48:21 UTC
+// package strings -- go2cs converted at 2020 October 09 05:06:22 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Go\src\strings\replace.go
 using io = go.io_package;

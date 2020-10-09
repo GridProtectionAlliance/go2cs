@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2020 October 08 04:38:41 UTC
+// package ld -- go2cs converted at 2020 October 09 05:49:37 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Go\src\cmd\link\internal\ld\elf.go
 using objabi = go.cmd.@internal.objabi_package;
@@ -125,8 +125,8 @@ namespace @internal
         public static readonly long ELFOSABI_NSK = (long)14L;
         public static readonly long ELFOSABI_ARM = (long)97L;
         public static readonly long ELFOSABI_STANDALONE = (long)255L;
-        public static readonly var ELFOSABI_SYSV = (var)ELFOSABI_NONE;
-        public static readonly var ELFOSABI_MONTEREY = (var)ELFOSABI_AIX;
+        public static readonly var ELFOSABI_SYSV = ELFOSABI_NONE;
+        public static readonly var ELFOSABI_MONTEREY = ELFOSABI_AIX;
         public static readonly long ET_NONE = (long)0L;
         public static readonly long ET_REL = (long)1L;
         public static readonly long ET_EXEC = (long)2L;
@@ -296,8 +296,8 @@ namespace @internal
         public static readonly ulong DT_VERNEED = (ulong)0x6ffffffeUL;
         public static readonly ulong DT_VERNEEDNUM = (ulong)0x6fffffffUL;
         public static readonly ulong DT_VERSYM = (ulong)0x6ffffff0UL;
-        public static readonly var DT_PPC64_GLINK = (var)DT_LOPROC + 0L;
-        public static readonly var DT_PPC64_OPT = (var)DT_LOPROC + 3L;
+        public static readonly var DT_PPC64_GLINK = DT_LOPROC + 0L;
+        public static readonly var DT_PPC64_OPT = DT_LOPROC + 3L;
         public static readonly ulong DF_ORIGIN = (ulong)0x0001UL;
         public static readonly ulong DF_SYMBOLIC = (ulong)0x0002UL;
         public static readonly ulong DF_TEXTREL = (ulong)0x0004UL;

@@ -4,7 +4,7 @@
 
 // +build !race
 
-// package race -- go2cs converted at 2020 October 08 00:34:03 UTC
+// package race -- go2cs converted at 2020 October 09 04:45:27 UTC
 // import "internal/race" ==> using race = go.@internal.race_package
 // Original source: C:\Go\src\internal\race\norace.go
 using @unsafe = go.@unsafe_package;
@@ -15,7 +15,7 @@ namespace @internal
 {
     public static partial class race_package
     {
-        public static readonly var Enabled = (var)false;
+        public static readonly var Enabled = false;
 
 
 

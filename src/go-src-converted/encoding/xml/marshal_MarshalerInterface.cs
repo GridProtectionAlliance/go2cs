@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:42:59 UTC
+//     Generated on 2020 October 09 05:00:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,6 +24,7 @@ using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Marshaler<T> : Marshaler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace encoding
             private delegate error MarshalXMLByPtr(ptr<T> value, ptr<Encoder> e, StartElement start);
             private delegate error MarshalXMLByVal(T value, ptr<Encoder> e, StartElement start);
 
-            private static readonly MarshalXMLByPtr s_MarshalXMLByPtr;
-            private static readonly MarshalXMLByVal s_MarshalXMLByVal;
+            private static readonly MarshalXMLByPtr? s_MarshalXMLByPtr;
+            private static readonly MarshalXMLByVal? s_MarshalXMLByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error MarshalXML(ptr<Encoder> e, StartElement start)
@@ -91,7 +92,7 @@ namespace encoding
                 return s_MarshalXMLByPtr(m_target_ptr, e, start);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Marshaler()

@@ -9,7 +9,7 @@
 // which reports whether if did something.
 // Ideas stolen from Swift: http://www.hpl.hp.com/techreports/Compaq-DEC/WRL-2000-2.html
 
-// package main -- go2cs converted at 2020 October 08 04:27:01 UTC
+// package main -- go2cs converted at 2020 October 09 05:39:49 UTC
 // Original source: C:\Go\src\cmd\compile\internal\ssa\gen\rulegen.go
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
@@ -845,7 +845,7 @@ namespace go
                     break;
                 case ptr<ast.Ident> node:
                     {
-                        object obj__prev1 = obj;
+                        ptr<object> obj__prev1 = obj;
 
                         obj = u.scope.Lookup(node.Name);
 
@@ -1393,7 +1393,7 @@ namespace go
                         }
 
                         rr.add(declf(vname, cname));
-                        var (p, op) = genMatch0(_addr_rr, arch, expr, vname, null, false); // TODO: pass non-nil cnt?
+                        var (p, op) = genMatch0(rr, arch, expr, vname, null, false); // TODO: pass non-nil cnt?
                         if (op != "")
                         {
                             var check = fmt.Sprintf("%s.Op == %s", cname, op);
@@ -1545,7 +1545,7 @@ namespace go
                     } 
 
                     // Generate a new control value (or copy an existing value).
-                    genControls[i] = genResult0(_addr_rr, arch, control, false, false, newpos, null);
+                    genControls[i] = genResult0(rr, arch, control, false, false, newpos, null);
 
                 }
 

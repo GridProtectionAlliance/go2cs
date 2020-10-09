@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:15 UTC
+//     Generated on 2020 October 09 06:04:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using analysis = go.golang.org.x.tools.go.analysis_package;
 using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
 using inspector = go.golang.org.x.tools.go.ast.inspector_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

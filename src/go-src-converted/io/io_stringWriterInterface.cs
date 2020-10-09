@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 01:30:43 UTC
+//     Generated on 2020 October 09 04:49:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using static go.builtin;
 using errors = go.errors_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -39,7 +40,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class StringWriter<T> : StringWriter
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -65,8 +66,8 @@ namespace go
             private delegate (long, error) WriteStringByPtr(ptr<T> value, @string s);
             private delegate (long, error) WriteStringByVal(T value, @string s);
 
-            private static readonly WriteStringByPtr s_WriteStringByPtr;
-            private static readonly WriteStringByVal s_WriteStringByVal;
+            private static readonly WriteStringByPtr? s_WriteStringByPtr;
+            private static readonly WriteStringByVal? s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) WriteString(@string s)
@@ -82,7 +83,7 @@ namespace go
                 return s_WriteStringByPtr(m_target_ptr, s);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static StringWriter()

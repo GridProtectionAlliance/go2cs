@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips -- go2cs converted at 2020 October 08 04:37:22 UTC
+// package mips -- go2cs converted at 2020 October 09 05:48:25 UTC
 // import "cmd/link/internal/mips" ==> using mips = go.cmd.link.@internal.mips_package
 // Original source: C:\Go\src\cmd\link\internal\mips\asm.go
 using objabi = go.cmd.@internal.objabi_package;

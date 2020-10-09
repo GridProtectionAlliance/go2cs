@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Package binutils provides access to the GNU binutils.
-// package binutils -- go2cs converted at 2020 October 08 04:42:51 UTC
+// package binutils -- go2cs converted at 2020 October 09 05:53:21 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\binutils.go
 using elf = go.debug.elf_package;
@@ -96,7 +96,7 @@ namespace @internal
             defer(bu.mu.Unlock());
             if (bu.rep == null)
             {
-                initTools(_addr_r, "");
+                initTools(r, "");
             }
             else
             {

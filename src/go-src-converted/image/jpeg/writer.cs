@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2020 October 08 04:59:32 UTC
+// package jpeg -- go2cs converted at 2020 October 09 06:05:58 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Go\src\image\jpeg\writer.go
 using bufio = go.bufio_package;
@@ -48,8 +48,8 @@ namespace image
         }
 
         private static readonly quantIndex quantIndexLuminance = (quantIndex)iota;
-        private static readonly var quantIndexChrominance = (var)0;
-        private static readonly var nQuantIndex = (var)1;
+        private static readonly var quantIndexChrominance = 0;
+        private static readonly var nQuantIndex = 1;
 
 
         // unscaledQuant are the unscaled quantization tables in zig-zag order. Each
@@ -63,10 +63,10 @@ namespace image
         }
 
         private static readonly huffIndex huffIndexLuminanceDC = (huffIndex)iota;
-        private static readonly var huffIndexLuminanceAC = (var)0;
-        private static readonly var huffIndexChrominanceDC = (var)1;
-        private static readonly var huffIndexChrominanceAC = (var)2;
-        private static readonly var nHuffIndex = (var)3;
+        private static readonly var huffIndexLuminanceAC = 0;
+        private static readonly var huffIndexChrominanceDC = 1;
+        private static readonly var huffIndexChrominanceAC = 2;
+        private static readonly var nHuffIndex = 3;
 
 
         // huffmanSpec specifies a Huffman encoding.

@@ -5,7 +5,7 @@
 // Package filelock provides a platform-independent API for advisory file
 // locking. Calls to functions in this package on platforms that do not support
 // advisory locks will return errors for which IsNotSupported returns true.
-// package filelock -- go2cs converted at 2020 October 08 04:34:18 UTC
+// package filelock -- go2cs converted at 2020 October 09 05:45:47 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock.go
 using errors = go.errors_package;

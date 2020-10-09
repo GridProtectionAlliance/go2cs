@@ -12,7 +12,7 @@
 // literals as defined by the Go language specification. It may be
 // customized to recognize only a subset of those literals and to recognize
 // different identifier and white space characters.
-// package scanner -- go2cs converted at 2020 October 08 04:04:41 UTC
+// package scanner -- go2cs converted at 2020 October 09 05:20:21 UTC
 // import "text/scanner" ==> using scanner = go.text.scanner_package
 // Original source: C:\Go\src\text\scanner\scanner.go
 using bytes = go.bytes_package;
@@ -87,21 +87,21 @@ namespace text
         public static readonly long ScanRawStrings = (long)1L << (int)(-RawString);
         public static readonly long ScanComments = (long)1L << (int)(-Comment);
         public static readonly long SkipComments = (long)1L << (int)(-skipComment); // if set with ScanComments, comments become white space
-        public static readonly var GoTokens = (var)ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments;
+        public static readonly var GoTokens = ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments;
 
 
         // The result of Scan is one of these tokens or a Unicode character.
-        public static readonly var EOF = (var)-(iota + 1L);
-        public static readonly var Ident = (var)0;
-        public static readonly var Int = (var)1;
-        public static readonly var Float = (var)2;
-        public static readonly var Char = (var)3;
-        public static readonly var String = (var)4;
-        public static readonly var RawString = (var)5;
-        public static readonly var Comment = (var)6; 
+        public static readonly var EOF = -(iota + 1L);
+        public static readonly var Ident = 0;
+        public static readonly var Int = 1;
+        public static readonly var Float = 2;
+        public static readonly var Char = 3;
+        public static readonly var String = 4;
+        public static readonly var RawString = 5;
+        public static readonly var Comment = 6; 
 
         // internal use only
-        private static readonly var skipComment = (var)7;
+        private static readonly var skipComment = 7;
 
 
         private static map tokenString = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<int, @string>{EOF:"EOF",Ident:"Ident",Int:"Int",Float:"Float",Char:"Char",String:"String",RawString:"RawString",Comment:"Comment",};

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:39 UTC
+// package gc -- go2cs converted at 2020 October 09 05:42:02 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\noder.go
 using fmt = go.fmt_package;
@@ -67,7 +67,7 @@ namespace @internal
 
             }            ulong lines = default;
             {
-                noder p__prev1 = p;
+                ptr<noder> p__prev1 = p;
 
                 foreach (var (_, __p) in noders)
                 {
@@ -2389,7 +2389,7 @@ namespace @internal
                 }
 
                 var flag = pragmaFlag(verb);
-                const var runtimePragmas = (var)Systemstack | Nowritebarrier | Nowritebarrierrec | Yeswritebarrierrec;
+                const var runtimePragmas = Systemstack | Nowritebarrier | Nowritebarrierrec | Yeswritebarrierrec;
 
                 if (!compiling_runtime && flag & runtimePragmas != 0L)
                 {

@@ -28,7 +28,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package gc -- go2cs converted at 2020 October 08 04:29:00 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:31 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\gsubr.go
 using ssa = go.cmd.compile.@internal.ssa_package;

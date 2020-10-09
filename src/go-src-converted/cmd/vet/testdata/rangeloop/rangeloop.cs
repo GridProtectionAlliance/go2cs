@@ -4,7 +4,7 @@
 
 // This file contains tests for the rangeloop checker.
 
-// package rangeloop -- go2cs converted at 2020 October 08 04:58:39 UTC
+// package rangeloop -- go2cs converted at 2020 October 09 06:05:12 UTC
 // import "cmd/vet/testdata/rangeloop" ==> using rangeloop = go.cmd.vet.testdata.rangeloop_package
 // Original source: C:\Go\src\cmd\vet\testdata\rangeloop\rangeloop.go
 

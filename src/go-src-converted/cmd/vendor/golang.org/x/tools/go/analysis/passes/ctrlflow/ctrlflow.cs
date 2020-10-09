@@ -6,7 +6,7 @@
 // control-flow graph (CFG) for the body of a function.
 // It records whether a function cannot return.
 // By itself, it does not report any diagnostics.
-// package ctrlflow -- go2cs converted at 2020 October 08 04:57:54 UTC
+// package ctrlflow -- go2cs converted at 2020 October 09 06:04:33 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/ctrlflow" ==> using ctrlflow = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.ctrlflow_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\ctrlflow\ctrlflow.go
 using ast = go.go.ast_package;

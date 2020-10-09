@@ -1,4 +1,4 @@
-// package html -- go2cs converted at 2020 October 08 04:32:38 UTC
+// package html -- go2cs converted at 2020 October 09 05:44:26 UTC
 // import "cmd/cover/testdata/html" ==> using html = go.cmd.cover.testdata.html_package
 // Original source: C:\Go\src\cmd\cover\testdata\html\html.go
 using fmt = go.fmt_package;

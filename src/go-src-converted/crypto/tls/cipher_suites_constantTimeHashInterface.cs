@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:36:44 UTC
+//     Generated on 2020 October 09 04:54:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,6 +28,7 @@ using hash = go.hash_package;
 using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -52,7 +53,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class constantTimeHash<T> : constantTimeHash
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -78,8 +79,8 @@ namespace crypto
             private delegate slice<byte> ConstantTimeSumByPtr(ptr<T> value, slice<byte> b);
             private delegate slice<byte> ConstantTimeSumByVal(T value, slice<byte> b);
 
-            private static readonly ConstantTimeSumByPtr s_ConstantTimeSumByPtr;
-            private static readonly ConstantTimeSumByVal s_ConstantTimeSumByVal;
+            private static readonly ConstantTimeSumByPtr? s_ConstantTimeSumByPtr;
+            private static readonly ConstantTimeSumByVal? s_ConstantTimeSumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<byte> ConstantTimeSum(slice<byte> b)
@@ -98,8 +99,8 @@ namespace crypto
             private delegate long SumByPtr(ptr<T> value, slice<byte> b);
             private delegate long SumByVal(T value, slice<byte> b);
 
-            private static readonly SumByPtr s_SumByPtr;
-            private static readonly SumByVal s_SumByVal;
+            private static readonly SumByPtr? s_SumByPtr;
+            private static readonly SumByVal? s_SumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Sum(slice<byte> b)
@@ -118,8 +119,8 @@ namespace crypto
             private delegate long ResetByPtr(ptr<T> value);
             private delegate long ResetByVal(T value);
 
-            private static readonly ResetByPtr s_ResetByPtr;
-            private static readonly ResetByVal s_ResetByVal;
+            private static readonly ResetByPtr? s_ResetByPtr;
+            private static readonly ResetByVal? s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Reset()
@@ -138,8 +139,8 @@ namespace crypto
             private delegate long SizeByPtr(ptr<T> value);
             private delegate long SizeByVal(T value);
 
-            private static readonly SizeByPtr s_SizeByPtr;
-            private static readonly SizeByVal s_SizeByVal;
+            private static readonly SizeByPtr? s_SizeByPtr;
+            private static readonly SizeByVal? s_SizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Size()
@@ -158,8 +159,8 @@ namespace crypto
             private delegate long BlockSizeByPtr(ptr<T> value);
             private delegate long BlockSizeByVal(T value);
 
-            private static readonly BlockSizeByPtr s_BlockSizeByPtr;
-            private static readonly BlockSizeByVal s_BlockSizeByVal;
+            private static readonly BlockSizeByPtr? s_BlockSizeByPtr;
+            private static readonly BlockSizeByVal? s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long BlockSize()
@@ -175,7 +176,7 @@ namespace crypto
                 return s_BlockSizeByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static constantTimeHash()

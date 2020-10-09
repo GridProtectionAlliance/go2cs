@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:55:12 UTC
+//     Generated on 2020 October 09 06:01:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,6 +33,8 @@ using gocommand = go.golang.org.x.tools.@internal.gocommand_package;
 using packagesinternal = go.golang.org.x.tools.@internal.packagesinternal_package;
 using typesinternal = go.golang.org.x.tools.@internal.typesinternal_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace golang.org {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package str -- go2cs converted at 2020 October 08 04:33:56 UTC
+// package str -- go2cs converted at 2020 October 09 05:45:28 UTC
 // import "cmd/go/internal/str" ==> using str = go.cmd.go.@internal.str_package
 // Original source: C:\Go\src\cmd\go\internal\str\path.go
 using path = go.path_package;

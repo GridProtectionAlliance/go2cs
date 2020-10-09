@@ -1,4 +1,4 @@
-// package trace -- go2cs converted at 2020 October 08 03:41:42 UTC
+// package trace -- go2cs converted at 2020 October 09 04:59:05 UTC
 // import "runtime/trace" ==> using trace = go.runtime.trace_package
 // Original source: C:\Go\src\runtime\trace\annotation.go
 using context = go.context_package;
@@ -136,8 +136,8 @@ namespace runtime
 
         }
 
-        private static readonly var regionStartCode = (var)uint64(0L);
-        private static readonly var regionEndCode = (var)uint64(1L);
+        private static readonly var regionStartCode = uint64(0L);
+        private static readonly var regionEndCode = uint64(1L);
 
 
         // WithRegion starts a region associated with its calling goroutine, runs fn,

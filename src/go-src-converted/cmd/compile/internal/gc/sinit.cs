@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:30:22 UTC
+// package gc -- go2cs converted at 2020 October 09 05:42:37 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\sinit.go
 using types = go.cmd.compile.@internal.types_package;
@@ -464,7 +464,7 @@ namespace @internal
         }
 
         private static readonly initContext inInitFunction = (initContext)iota;
-        private static readonly var inNonInitFunction = (var)0;
+        private static readonly var inNonInitFunction = 0;
 
 
         private static @string String(this initContext c)
@@ -535,7 +535,7 @@ namespace @internal
         }
 
         private static readonly initGenType initDynamic = (initGenType)1L << (int)(iota); // contains some dynamic values, for which init code will be generated
-        private static readonly var initConst = (var)0; // contains some constant values, which may be written into data symbols
+        private static readonly var initConst = 0; // contains some constant values, which may be written into data symbols
 
         // getdyn calculates the initGenType for n.
         // If top is false, getdyn is recursing.
@@ -681,8 +681,8 @@ namespace @internal
         }
 
         private static readonly initKind initKindStatic = (initKind)iota + 1L;
-        private static readonly var initKindDynamic = (var)0;
-        private static readonly var initKindLocalCode = (var)1;
+        private static readonly var initKindDynamic = 0;
+        private static readonly var initKindLocalCode = 1;
 
 
         // fixedlit handles struct, array, and slice literals.

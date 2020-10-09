@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:40:21 UTC
+//     Generated on 2020 October 09 04:57:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,8 @@ using ioutil = go.io.ioutil_package;
 using strconv = go.strconv_package;
 using js = go.syscall.js_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace net

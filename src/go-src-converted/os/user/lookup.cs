@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package user -- go2cs converted at 2020 October 08 03:45:32 UTC
+// package user -- go2cs converted at 2020 October 09 05:07:35 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Go\src\os\user\lookup.go
 using sync = go.sync_package;

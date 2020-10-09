@@ -4,7 +4,7 @@
 
 // +build android arm64 riscv64
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:17 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:41 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\syscall_dup3_linux.go
 
@@ -14,7 +14,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        private static readonly var _SYS_dup = (var)SYS_DUP3;
+        private static readonly var _SYS_dup = SYS_DUP3;
 
     }
 }

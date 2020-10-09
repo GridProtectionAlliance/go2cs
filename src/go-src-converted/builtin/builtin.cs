@@ -8,7 +8,7 @@
     but their descriptions here allow godoc to present documentation
     for the language's special identifiers.
 */
-// package builtin -- go2cs converted at 2020 October 08 03:49:31 UTC
+// package builtin -- go2cs converted at 2020 October 09 05:08:13 UTC
 // import "builtin" ==> using builtin = go.builtin_package
 // Original source: C:\Go\src\builtin\builtin.go
 

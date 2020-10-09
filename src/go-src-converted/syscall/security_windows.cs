@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2020 October 08 03:27:01 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\security_windows.go
 using @unsafe = go.@unsafe_package;
@@ -76,10 +76,10 @@ namespace go
 
  
         // do not reorder
-        public static readonly var NetSetupUnknownStatus = (var)iota;
-        public static readonly var NetSetupUnjoined = (var)0;
-        public static readonly var NetSetupWorkgroupName = (var)1;
-        public static readonly var NetSetupDomainName = (var)2;
+        public static readonly var NetSetupUnknownStatus = iota;
+        public static readonly var NetSetupUnjoined = 0;
+        public static readonly var NetSetupWorkgroupName = 1;
+        public static readonly var NetSetupDomainName = 2;
 
 
         public partial struct UserInfo10
@@ -97,15 +97,15 @@ namespace go
  
         // do not reorder
         public static readonly long SidTypeUser = (long)1L + iota;
-        public static readonly var SidTypeGroup = (var)0;
-        public static readonly var SidTypeDomain = (var)1;
-        public static readonly var SidTypeAlias = (var)2;
-        public static readonly var SidTypeWellKnownGroup = (var)3;
-        public static readonly var SidTypeDeletedAccount = (var)4;
-        public static readonly var SidTypeInvalid = (var)5;
-        public static readonly var SidTypeUnknown = (var)6;
-        public static readonly var SidTypeComputer = (var)7;
-        public static readonly var SidTypeLabel = (var)8;
+        public static readonly var SidTypeGroup = 0;
+        public static readonly var SidTypeDomain = 1;
+        public static readonly var SidTypeAlias = 2;
+        public static readonly var SidTypeWellKnownGroup = 3;
+        public static readonly var SidTypeDeletedAccount = 4;
+        public static readonly var SidTypeInvalid = 5;
+        public static readonly var SidTypeUnknown = 6;
+        public static readonly var SidTypeComputer = 7;
+        public static readonly var SidTypeLabel = 8;
 
 
         //sys    LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) = advapi32.LookupAccountSidW
@@ -305,50 +305,50 @@ namespace go
  
         // do not reorder
         public static readonly long TOKEN_ASSIGN_PRIMARY = (long)1L << (int)(iota);
-        public static readonly var TOKEN_DUPLICATE = (var)0;
-        public static readonly var TOKEN_IMPERSONATE = (var)1;
-        public static readonly var TOKEN_QUERY = (var)2;
-        public static readonly var TOKEN_QUERY_SOURCE = (var)3;
-        public static readonly var TOKEN_ADJUST_PRIVILEGES = (var)4;
-        public static readonly var TOKEN_ADJUST_GROUPS = (var)5;
-        public static readonly var TOKEN_ADJUST_DEFAULT = (var)6;
+        public static readonly var TOKEN_DUPLICATE = 0;
+        public static readonly var TOKEN_IMPERSONATE = 1;
+        public static readonly var TOKEN_QUERY = 2;
+        public static readonly var TOKEN_QUERY_SOURCE = 3;
+        public static readonly var TOKEN_ADJUST_PRIVILEGES = 4;
+        public static readonly var TOKEN_ADJUST_GROUPS = 5;
+        public static readonly var TOKEN_ADJUST_DEFAULT = 6;
         public static readonly TOKEN_ALL_ACCESS TOKEN_ADJUST_SESSIONID = (TOKEN_ALL_ACCESS)STANDARD_RIGHTS_REQUIRED | TOKEN_ASSIGN_PRIMARY | TOKEN_DUPLICATE | TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_QUERY_SOURCE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT | TOKEN_ADJUST_SESSIONID;
-        public static readonly var TOKEN_READ = (var)STANDARD_RIGHTS_READ | TOKEN_QUERY;
-        public static readonly var TOKEN_WRITE = (var)STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
-        public static readonly var TOKEN_EXECUTE = (var)STANDARD_RIGHTS_EXECUTE;
+        public static readonly var TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
+        public static readonly var TOKEN_WRITE = STANDARD_RIGHTS_WRITE | TOKEN_ADJUST_PRIVILEGES | TOKEN_ADJUST_GROUPS | TOKEN_ADJUST_DEFAULT;
+        public static readonly var TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE;
 
 
  
         // do not reorder
         public static readonly long TokenUser = (long)1L + iota;
-        public static readonly var TokenGroups = (var)0;
-        public static readonly var TokenPrivileges = (var)1;
-        public static readonly var TokenOwner = (var)2;
-        public static readonly var TokenPrimaryGroup = (var)3;
-        public static readonly var TokenDefaultDacl = (var)4;
-        public static readonly var TokenSource = (var)5;
-        public static readonly var TokenType = (var)6;
-        public static readonly var TokenImpersonationLevel = (var)7;
-        public static readonly var TokenStatistics = (var)8;
-        public static readonly var TokenRestrictedSids = (var)9;
-        public static readonly var TokenSessionId = (var)10;
-        public static readonly var TokenGroupsAndPrivileges = (var)11;
-        public static readonly var TokenSessionReference = (var)12;
-        public static readonly var TokenSandBoxInert = (var)13;
-        public static readonly var TokenAuditPolicy = (var)14;
-        public static readonly var TokenOrigin = (var)15;
-        public static readonly var TokenElevationType = (var)16;
-        public static readonly var TokenLinkedToken = (var)17;
-        public static readonly var TokenElevation = (var)18;
-        public static readonly var TokenHasRestrictions = (var)19;
-        public static readonly var TokenAccessInformation = (var)20;
-        public static readonly var TokenVirtualizationAllowed = (var)21;
-        public static readonly var TokenVirtualizationEnabled = (var)22;
-        public static readonly var TokenIntegrityLevel = (var)23;
-        public static readonly var TokenUIAccess = (var)24;
-        public static readonly var TokenMandatoryPolicy = (var)25;
-        public static readonly var TokenLogonSid = (var)26;
-        public static readonly var MaxTokenInfoClass = (var)27;
+        public static readonly var TokenGroups = 0;
+        public static readonly var TokenPrivileges = 1;
+        public static readonly var TokenOwner = 2;
+        public static readonly var TokenPrimaryGroup = 3;
+        public static readonly var TokenDefaultDacl = 4;
+        public static readonly var TokenSource = 5;
+        public static readonly var TokenType = 6;
+        public static readonly var TokenImpersonationLevel = 7;
+        public static readonly var TokenStatistics = 8;
+        public static readonly var TokenRestrictedSids = 9;
+        public static readonly var TokenSessionId = 10;
+        public static readonly var TokenGroupsAndPrivileges = 11;
+        public static readonly var TokenSessionReference = 12;
+        public static readonly var TokenSandBoxInert = 13;
+        public static readonly var TokenAuditPolicy = 14;
+        public static readonly var TokenOrigin = 15;
+        public static readonly var TokenElevationType = 16;
+        public static readonly var TokenLinkedToken = 17;
+        public static readonly var TokenElevation = 18;
+        public static readonly var TokenHasRestrictions = 19;
+        public static readonly var TokenAccessInformation = 20;
+        public static readonly var TokenVirtualizationAllowed = 21;
+        public static readonly var TokenVirtualizationEnabled = 22;
+        public static readonly var TokenIntegrityLevel = 23;
+        public static readonly var TokenUIAccess = 24;
+        public static readonly var TokenMandatoryPolicy = 25;
+        public static readonly var TokenLogonSid = 26;
+        public static readonly var MaxTokenInfoClass = 27;
 
 
         public partial struct SIDAndAttributes

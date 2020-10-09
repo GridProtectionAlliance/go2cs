@@ -7,7 +7,7 @@
 // one without the other. Determine if we can factor out functionality
 // in a public API. See also #11844 for context.
 
-// package main -- go2cs converted at 2020 October 08 04:37:02 UTC
+// package main -- go2cs converted at 2020 October 09 05:48:08 UTC
 // Original source: C:\Go\src\cmd\gofmt\internal.go
 using bytes = go.bytes_package;
 using ast = go.go.ast_package;

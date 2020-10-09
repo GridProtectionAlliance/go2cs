@@ -6,7 +6,7 @@
 
 // Unix environment variables.
 
-// package syscall -- go2cs converted at 2020 October 08 03:26:21 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:01:11 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\env_unix.go
 using runtime = go.runtime_package;

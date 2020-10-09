@@ -29,7 +29,7 @@
 // parsers should consider a final newline to be present anyway.
 //
 // There are no possible syntax errors in a txtar archive.
-// package txtar -- go2cs converted at 2020 October 08 04:37:00 UTC
+// package txtar -- go2cs converted at 2020 October 09 05:48:06 UTC
 // import "cmd/go/internal/txtar" ==> using txtar = go.cmd.go.@internal.txtar_package
 // Original source: C:\Go\src\cmd\go\internal\txtar\archive.go
 using bytes = go.bytes_package;

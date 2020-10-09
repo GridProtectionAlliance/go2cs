@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:01:48 UTC
+//     Generated on 2020 October 09 06:07:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using runtime = go.runtime_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class byteOrder<T> : byteOrder
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sys
             private delegate ulong Uint32ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate ulong Uint32ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint32ByPtr s_Uint32ByPtr;
-            private static readonly Uint32ByVal s_Uint32ByVal;
+            private static readonly Uint32ByPtr? s_Uint32ByPtr;
+            private static readonly Uint32ByVal? s_Uint32ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Uint32(slice<byte> _p0)
@@ -90,8 +91,8 @@ namespace sys
             private delegate ulong Uint64ByPtr(ptr<T> value, slice<byte> _p0);
             private delegate ulong Uint64ByVal(T value, slice<byte> _p0);
 
-            private static readonly Uint64ByPtr s_Uint64ByPtr;
-            private static readonly Uint64ByVal s_Uint64ByVal;
+            private static readonly Uint64ByPtr? s_Uint64ByPtr;
+            private static readonly Uint64ByVal? s_Uint64ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public ulong Uint64(slice<byte> _p0)
@@ -107,7 +108,7 @@ namespace sys
                 return s_Uint64ByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static byteOrder()

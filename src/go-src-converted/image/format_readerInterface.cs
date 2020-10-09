@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:03 UTC
+//     Generated on 2020 October 09 06:05:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using io = go.io_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -43,7 +44,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class reader<T> : reader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace go
             private delegate (slice<byte>, error) PeekByPtr(ptr<T> value, long _p0);
             private delegate (slice<byte>, error) PeekByVal(T value, long _p0);
 
-            private static readonly PeekByPtr s_PeekByPtr;
-            private static readonly PeekByVal s_PeekByVal;
+            private static readonly PeekByPtr? s_PeekByPtr;
+            private static readonly PeekByVal? s_PeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Peek(long _p0)
@@ -89,8 +90,8 @@ namespace go
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -106,7 +107,7 @@ namespace go
                 return s_ReadByPtr(m_target_ptr, p);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static reader()

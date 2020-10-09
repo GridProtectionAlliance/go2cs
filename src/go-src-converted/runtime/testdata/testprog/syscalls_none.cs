@@ -4,7 +4,7 @@
 
 // +build !linux
 
-// package main -- go2cs converted at 2020 October 08 03:43:45 UTC
+// package main -- go2cs converted at 2020 October 09 05:00:51 UTC
 // Original source: C:\Go\src\runtime\testdata\testprog\syscalls_none.go
 
 using static go.builtin;

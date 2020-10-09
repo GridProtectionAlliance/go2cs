@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package xcoff implements access to XCOFF (Extended Common Object File Format) files.
-// package xcoff -- go2cs converted at 2020 October 08 04:02:15 UTC
+// package xcoff -- go2cs converted at 2020 October 09 05:18:42 UTC
 // import "internal/xcoff" ==> using xcoff = go.@internal.xcoff_package
 // Original source: C:\Go\src\internal\xcoff\file.go
 using dwarf = go.debug.dwarf_package;

@@ -1,6 +1,6 @@
 // +build windows
 
-// package main -- go2cs converted at 2020 October 08 03:44:11 UTC
+// package main -- go2cs converted at 2020 October 09 05:01:07 UTC
 // Original source: C:\Go\src\runtime\testdata\testwinlibsignal\dummy.go
 
 using static go.builtin;

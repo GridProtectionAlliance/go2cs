@@ -9,7 +9,7 @@
 //        // do something with e.Value
 //    }
 //
-// package list -- go2cs converted at 2020 October 08 03:37:25 UTC
+// package list -- go2cs converted at 2020 October 09 04:55:12 UTC
 // import "container/list" ==> using list = go.container.list_package
 // Original source: C:\Go\src\container\list\list.go
 

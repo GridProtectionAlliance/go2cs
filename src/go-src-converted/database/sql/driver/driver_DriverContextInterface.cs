@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:58:46 UTC
+//     Generated on 2020 October 09 06:05:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using errors = go.errors_package;
 using reflect = go.reflect_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sql
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class DriverContext<T> : DriverContext
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sql
             private delegate (Connector, error) OpenConnectorByPtr(ptr<T> value, @string name);
             private delegate (Connector, error) OpenConnectorByVal(T value, @string name);
 
-            private static readonly OpenConnectorByPtr s_OpenConnectorByPtr;
-            private static readonly OpenConnectorByVal s_OpenConnectorByVal;
+            private static readonly OpenConnectorByPtr? s_OpenConnectorByPtr;
+            private static readonly OpenConnectorByVal? s_OpenConnectorByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (Connector, error) OpenConnector(@string name)
@@ -87,7 +88,7 @@ namespace sql
                 return s_OpenConnectorByPtr(m_target_ptr, name);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static DriverContext()

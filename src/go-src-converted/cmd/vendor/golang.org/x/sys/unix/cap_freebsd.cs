@@ -4,7 +4,7 @@
 
 // +build freebsd
 
-// package unix -- go2cs converted at 2020 October 08 04:46:11 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\cap_freebsd.go
 using errors = go.errors_package;
@@ -23,9 +23,9 @@ namespace sys
         // Go implementation of C mostly found in /usr/src/sys/kern/subr_capability.c
  
         // This is the version of CapRights this package understands. See C implementation for parallels.
-        private static readonly var capRightsGoVersion = (var)CAP_RIGHTS_VERSION_00;
-        private static readonly var capArSizeMin = (var)CAP_RIGHTS_VERSION_00 + 2L;
-        private static readonly var capArSizeMax = (var)capRightsGoVersion + 2L;
+        private static readonly var capRightsGoVersion = CAP_RIGHTS_VERSION_00;
+        private static readonly var capArSizeMin = CAP_RIGHTS_VERSION_00 + 2L;
+        private static readonly var capArSizeMax = capRightsGoVersion + 2L;
 
 
         private static long bit2idx = new slice<long>(new long[] { -1, 0, 1, -1, 2, -1, -1, -1, 3, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 });

@@ -4,7 +4,7 @@
 
 // +build gofuzz
 
-// package json -- go2cs converted at 2020 October 08 03:42:52 UTC
+// package json -- go2cs converted at 2020 October 09 05:00:06 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Go\src\encoding\json\fuzz.go
 using fmt = go.fmt_package;

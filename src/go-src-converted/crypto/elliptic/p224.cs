@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package elliptic -- go2cs converted at 2020 October 08 03:35:58 UTC
+// package elliptic -- go2cs converted at 2020 October 09 04:53:56 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Go\src\crypto\elliptic\p224.go
 // This is a constant-time, 32-bit implementation of P224. See FIPS 186-3,

@@ -4,7 +4,7 @@
 
 // +build !amd64,!386,!arm,!s390x,!arm64
 
-// package sha1 -- go2cs converted at 2020 October 08 03:36:42 UTC
+// package sha1 -- go2cs converted at 2020 October 09 04:54:38 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Go\src\crypto\sha1\sha1block_generic.go
 

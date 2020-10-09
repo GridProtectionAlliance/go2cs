@@ -27,7 +27,7 @@
 //         return nil
 //     }
 //
-// package inspect -- go2cs converted at 2020 October 08 04:57:57 UTC
+// package inspect -- go2cs converted at 2020 October 09 06:04:36 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/inspect" ==> using inspect = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.inspect_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\inspect\inspect.go
 using reflect = go.reflect_package;

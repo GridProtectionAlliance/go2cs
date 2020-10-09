@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2020 October 08 03:32:51 UTC
+// package poll -- go2cs converted at 2020 October 09 04:51:24 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Go\src\internal\poll\splice_linux.go
 using unix = go.@internal.syscall.unix_package;
@@ -291,7 +291,7 @@ namespace @internal
             // might not be implemented. Falling back to pipe is possible, but prior to
             // 2.6.29 splice returns -EAGAIN instead of 0 when the connection is
             // closed.
-            const var flags = (var)syscall.O_CLOEXEC | syscall.O_NONBLOCK;
+            const var flags = syscall.O_CLOEXEC | syscall.O_NONBLOCK;
 
             {
                 var err = syscall.Pipe2(fds[..], flags);

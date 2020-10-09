@@ -4,7 +4,7 @@
 
 // Serving of pprof-like profiles.
 
-// package main -- go2cs converted at 2020 October 08 04:42:40 UTC
+// package main -- go2cs converted at 2020 October 09 05:53:11 UTC
 // Original source: C:\Go\src\cmd\trace\pprof.go
 using bufio = go.bufio_package;
 using fmt = go.fmt_package;

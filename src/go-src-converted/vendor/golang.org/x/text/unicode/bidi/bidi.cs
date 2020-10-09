@@ -10,7 +10,7 @@
 //
 // NOTE: UNDER CONSTRUCTION. This API may change in backwards incompatible ways
 // and without notice.
-// package bidi -- go2cs converted at 2020 October 08 05:01:53 UTC
+// package bidi -- go2cs converted at 2020 October 09 06:07:57 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Go\src\vendor\golang.org\x\text\unicode\bidi\bidi.go
 
@@ -54,15 +54,15 @@ namespace unicode
         // RightToLeft indicates the text contains no left-to-right characters and
         // that either there are some right-to-left characters or the option
         // DefaultDirection(RightToLeft) was passed.
-        public static readonly var RightToLeft = (var)0; 
+        public static readonly var RightToLeft = 0; 
 
         // Mixed indicates text contains both left-to-right and right-to-left
         // characters.
-        public static readonly var Mixed = (var)1; 
+        public static readonly var Mixed = 1; 
 
         // Neutral means that text contains no left-to-right and right-to-left
         // characters and that no default direction has been set.
-        public static readonly var Neutral = (var)2;
+        public static readonly var Neutral = 2;
 
 
         private partial struct options

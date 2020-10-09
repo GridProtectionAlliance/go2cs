@@ -4,7 +4,7 @@
 
 // +build gofuzz
 
-// package csv -- go2cs converted at 2020 October 08 03:42:28 UTC
+// package csv -- go2cs converted at 2020 October 09 04:59:44 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Go\src\encoding\csv\fuzz.go
 using bytes = go.bytes_package;

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package expect -- go2cs converted at 2020 October 08 04:55:53 UTC
+// package expect -- go2cs converted at 2020 October 09 06:02:31 UTC
 // import "golang.org/x/tools/go/expect" ==> using expect = go.golang.org.x.tools.go.expect_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\expect\extract.go
 using fmt = go.fmt_package;
@@ -29,7 +29,7 @@ namespace go
     {
         private static readonly @string commentStart = (@string)"@";
 
-        private static readonly var commentStartLen = (var)len(commentStart);
+        private static readonly var commentStartLen = len(commentStart);
 
         // Identifier is the type for an identifier in an Note argument list.
 

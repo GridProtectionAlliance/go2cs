@@ -4,7 +4,7 @@
 
 // +build !windows
 
-// package runtime -- go2cs converted at 2020 October 08 03:22:49 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:48:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\relax_stub.go
 

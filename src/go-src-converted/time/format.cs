@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2020 October 08 03:45:40 UTC
+// package time -- go2cs converted at 2020 October 09 05:06:03 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Go\src\time\format.go
 using errors = go.errors_package;
@@ -94,37 +94,37 @@ namespace go
         public static readonly @string StampNano = (@string)"Jan _2 15:04:05.000000000";
 
 
-        private static readonly var _ = (var)iota;
-        private static readonly var stdLongMonth = (var)iota + stdNeedDate; // "January"
-        private static readonly var stdMonth = (var)0; // "Jan"
-        private static readonly var stdNumMonth = (var)1; // "1"
-        private static readonly var stdZeroMonth = (var)2; // "01"
-        private static readonly var stdLongWeekDay = (var)3; // "Monday"
-        private static readonly var stdWeekDay = (var)4; // "Mon"
-        private static readonly var stdDay = (var)5; // "2"
-        private static readonly var stdUnderDay = (var)6; // "_2"
-        private static readonly var stdZeroDay = (var)7; // "02"
-        private static readonly var stdUnderYearDay = (var)8; // "__2"
+        private static readonly var _ = iota;
+        private static readonly var stdLongMonth = iota + stdNeedDate; // "January"
+        private static readonly var stdMonth = 0; // "Jan"
+        private static readonly var stdNumMonth = 1; // "1"
+        private static readonly var stdZeroMonth = 2; // "01"
+        private static readonly var stdLongWeekDay = 3; // "Monday"
+        private static readonly var stdWeekDay = 4; // "Mon"
+        private static readonly var stdDay = 5; // "2"
+        private static readonly var stdUnderDay = 6; // "_2"
+        private static readonly var stdZeroDay = 7; // "02"
+        private static readonly var stdUnderYearDay = 8; // "__2"
         private static readonly stdHour stdZeroYearDay = (stdHour)iota + stdNeedClock; // "15"
-        private static readonly var stdHour12 = (var)9; // "3"
-        private static readonly var stdZeroHour12 = (var)10; // "03"
-        private static readonly var stdMinute = (var)11; // "4"
-        private static readonly var stdZeroMinute = (var)12; // "04"
-        private static readonly var stdSecond = (var)13; // "5"
+        private static readonly var stdHour12 = 9; // "3"
+        private static readonly var stdZeroHour12 = 10; // "03"
+        private static readonly var stdMinute = 11; // "4"
+        private static readonly var stdZeroMinute = 12; // "04"
+        private static readonly var stdSecond = 13; // "5"
         private static readonly stdLongYear stdZeroSecond = (stdLongYear)iota + stdNeedDate; // "2006"
         private static readonly stdPM stdYear = (stdPM)iota + stdNeedClock; // "PM"
         private static readonly stdTZ stdpm = (stdTZ)iota; // "MST"
-        private static readonly var stdISO8601TZ = (var)14; // "Z0700"  // prints Z for UTC
-        private static readonly var stdISO8601SecondsTZ = (var)15; // "Z070000"
-        private static readonly var stdISO8601ShortTZ = (var)16; // "Z07"
-        private static readonly var stdISO8601ColonTZ = (var)17; // "Z07:00" // prints Z for UTC
-        private static readonly var stdISO8601ColonSecondsTZ = (var)18; // "Z07:00:00"
-        private static readonly var stdNumTZ = (var)19; // "-0700"  // always numeric
-        private static readonly var stdNumSecondsTz = (var)20; // "-070000"
-        private static readonly var stdNumShortTZ = (var)21; // "-07"    // always numeric
-        private static readonly var stdNumColonTZ = (var)22; // "-07:00" // always numeric
-        private static readonly var stdNumColonSecondsTZ = (var)23; // "-07:00:00"
-        private static readonly var stdFracSecond0 = (var)24; // ".0", ".00", ... , trailing zeros included
+        private static readonly var stdISO8601TZ = 14; // "Z0700"  // prints Z for UTC
+        private static readonly var stdISO8601SecondsTZ = 15; // "Z070000"
+        private static readonly var stdISO8601ShortTZ = 16; // "Z07"
+        private static readonly var stdISO8601ColonTZ = 17; // "Z07:00" // prints Z for UTC
+        private static readonly var stdISO8601ColonSecondsTZ = 18; // "Z07:00:00"
+        private static readonly var stdNumTZ = 19; // "-0700"  // always numeric
+        private static readonly var stdNumSecondsTz = 20; // "-070000"
+        private static readonly var stdNumShortTZ = 21; // "-07"    // always numeric
+        private static readonly var stdNumColonTZ = 22; // "-07:00" // always numeric
+        private static readonly var stdNumColonSecondsTZ = 23; // "-07:00:00"
+        private static readonly var stdFracSecond0 = 24; // ".0", ".00", ... , trailing zeros included
         private static readonly stdNeedDate stdFracSecond9 = (stdNeedDate)1L << (int)(8L); // need month, day, year
         private static readonly long stdNeedClock = (long)2L << (int)(8L); // need hour, minute, second
         private static readonly long stdArgShift = (long)16L; // extra argument in high bits, above low stdArgShift

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:35:45 UTC
+//     Generated on 2020 October 09 04:53:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class AEAD<T> : AEAD
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace crypto
             private delegate (slice<byte>, error) NonceSizeByPtr(ptr<T> value);
             private delegate (slice<byte>, error) NonceSizeByVal(T value);
 
-            private static readonly NonceSizeByPtr s_NonceSizeByPtr;
-            private static readonly NonceSizeByVal s_NonceSizeByVal;
+            private static readonly NonceSizeByPtr? s_NonceSizeByPtr;
+            private static readonly NonceSizeByVal? s_NonceSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) NonceSize()
@@ -90,8 +91,8 @@ namespace crypto
             private delegate (slice<byte>, error) OverheadByPtr(ptr<T> value);
             private delegate (slice<byte>, error) OverheadByVal(T value);
 
-            private static readonly OverheadByPtr s_OverheadByPtr;
-            private static readonly OverheadByVal s_OverheadByVal;
+            private static readonly OverheadByPtr? s_OverheadByPtr;
+            private static readonly OverheadByVal? s_OverheadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Overhead()
@@ -110,8 +111,8 @@ namespace crypto
             private delegate (slice<byte>, error) SealByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
             private delegate (slice<byte>, error) SealByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
 
-            private static readonly SealByPtr s_SealByPtr;
-            private static readonly SealByVal s_SealByVal;
+            private static readonly SealByPtr? s_SealByPtr;
+            private static readonly SealByVal? s_SealByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Seal(slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData)
@@ -130,8 +131,8 @@ namespace crypto
             private delegate (slice<byte>, error) OpenByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
             private delegate (slice<byte>, error) OpenByVal(T value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
 
-            private static readonly OpenByPtr s_OpenByPtr;
-            private static readonly OpenByVal s_OpenByVal;
+            private static readonly OpenByPtr? s_OpenByPtr;
+            private static readonly OpenByVal? s_OpenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (slice<byte>, error) Open(slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData)
@@ -147,7 +148,7 @@ namespace crypto
                 return s_OpenByPtr(m_target_ptr, dst, nonce, ciphertext, additionalData);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static AEAD()

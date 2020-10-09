@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:38:41 UTC
+//     Generated on 2020 October 09 04:56:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,6 +30,7 @@ using strings = go.strings_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -54,7 +55,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class File<T> : File
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -80,8 +81,8 @@ namespace net
             private delegate (os.FileInfo, error) ReaddirByPtr(ptr<T> value, long count);
             private delegate (os.FileInfo, error) ReaddirByVal(T value, long count);
 
-            private static readonly ReaddirByPtr s_ReaddirByPtr;
-            private static readonly ReaddirByVal s_ReaddirByVal;
+            private static readonly ReaddirByPtr? s_ReaddirByPtr;
+            private static readonly ReaddirByVal? s_ReaddirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (os.FileInfo, error) Readdir(long count)
@@ -100,8 +101,8 @@ namespace net
             private delegate (os.FileInfo, error) StatByPtr(ptr<T> value);
             private delegate (os.FileInfo, error) StatByVal(T value);
 
-            private static readonly StatByPtr s_StatByPtr;
-            private static readonly StatByVal s_StatByVal;
+            private static readonly StatByPtr? s_StatByPtr;
+            private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (os.FileInfo, error) Stat()
@@ -120,8 +121,8 @@ namespace net
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -140,8 +141,8 @@ namespace net
             private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
             private delegate (long, error) ReadByVal(T value, slice<byte> p);
 
-            private static readonly ReadByPtr s_ReadByPtr;
-            private static readonly ReadByVal s_ReadByVal;
+            private static readonly ReadByPtr? s_ReadByPtr;
+            private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Read(slice<byte> p)
@@ -160,8 +161,8 @@ namespace net
             private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
             private delegate (long, error) SeekByVal(T value, long offset, long whence);
 
-            private static readonly SeekByPtr s_SeekByPtr;
-            private static readonly SeekByVal s_SeekByVal;
+            private static readonly SeekByPtr? s_SeekByPtr;
+            private static readonly SeekByVal? s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public (long, error) Seek(long offset, long whence)
@@ -177,7 +178,7 @@ namespace net
                 return s_SeekByPtr(m_target_ptr, offset, whence);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static File()

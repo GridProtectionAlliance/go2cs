@@ -7,7 +7,7 @@
 // This is the high-level Client interface.
 // The low-level implementation is in transport.go.
 
-// package http -- go2cs converted at 2020 October 08 03:35:08 UTC
+// package http -- go2cs converted at 2020 October 09 04:52:40 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\client.go
 using context = go.context_package;

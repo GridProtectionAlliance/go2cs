@@ -5,7 +5,7 @@
 // Package strings implements simple functions to manipulate UTF-8 encoded strings.
 //
 // For information about UTF-8 strings in Go, see https://blog.golang.org/strings.
-// package strings -- go2cs converted at 2020 October 08 03:48:35 UTC
+// package strings -- go2cs converted at 2020 October 09 05:06:25 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Go\src\strings\strings.go
 using bytealg = go.@internal.bytealg_package;

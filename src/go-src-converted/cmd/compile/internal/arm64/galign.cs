@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2020 October 08 04:09:26 UTC
+// package arm64 -- go2cs converted at 2020 October 09 05:23:58 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Go\src\cmd\compile\internal\arm64\galign.go
 using gc = go.cmd.compile.@internal.gc_package;

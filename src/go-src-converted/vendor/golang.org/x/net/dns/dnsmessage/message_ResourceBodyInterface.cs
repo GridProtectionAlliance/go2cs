@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 05:00:30 UTC
+//     Generated on 2020 October 09 06:06:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using errors = go.errors_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -45,7 +46,7 @@ namespace dns
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ResourceBody<T> : ResourceBody
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -71,8 +72,8 @@ namespace dns
             private delegate @string packByPtr(ptr<T> value, slice<byte> msg, map<@string, long> compression, long compressionOff);
             private delegate @string packByVal(T value, slice<byte> msg, map<@string, long> compression, long compressionOff);
 
-            private static readonly packByPtr s_packByPtr;
-            private static readonly packByVal s_packByVal;
+            private static readonly packByPtr? s_packByPtr;
+            private static readonly packByVal? s_packByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string pack(slice<byte> msg, map<@string, long> compression, long compressionOff)
@@ -91,8 +92,8 @@ namespace dns
             private delegate @string realTypeByPtr(ptr<T> value);
             private delegate @string realTypeByVal(T value);
 
-            private static readonly realTypeByPtr s_realTypeByPtr;
-            private static readonly realTypeByVal s_realTypeByVal;
+            private static readonly realTypeByPtr? s_realTypeByPtr;
+            private static readonly realTypeByVal? s_realTypeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string realType()
@@ -111,8 +112,8 @@ namespace dns
             private delegate @string GoStringByPtr(ptr<T> value);
             private delegate @string GoStringByVal(T value);
 
-            private static readonly GoStringByPtr s_GoStringByPtr;
-            private static readonly GoStringByVal s_GoStringByVal;
+            private static readonly GoStringByPtr? s_GoStringByPtr;
+            private static readonly GoStringByVal? s_GoStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string GoString()
@@ -128,7 +129,7 @@ namespace dns
                 return s_GoStringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ResourceBody()

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:41 UTC
+//     Generated on 2020 October 09 05:47:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,7 @@ using strings = go.strings_package;
 using time = go.time_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace testing
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Generator<T> : Generator
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace testing
             private delegate reflect.Value GenerateByPtr(ptr<T> value, ptr<rand.Rand> rand, long size);
             private delegate reflect.Value GenerateByVal(T value, ptr<rand.Rand> rand, long size);
 
-            private static readonly GenerateByPtr s_GenerateByPtr;
-            private static readonly GenerateByVal s_GenerateByVal;
+            private static readonly GenerateByPtr? s_GenerateByPtr;
+            private static readonly GenerateByVal? s_GenerateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public reflect.Value Generate(ptr<rand.Rand> rand, long size)
@@ -90,7 +91,7 @@ namespace testing
                 return s_GenerateByPtr(m_target_ptr, rand, size);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Generator()

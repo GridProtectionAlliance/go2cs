@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 03:26:10 UTC
+//     Generated on 2020 October 09 04:49:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,6 +20,7 @@ using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go
@@ -43,7 +44,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private class canceler<T> : canceler
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -69,8 +70,8 @@ namespace go
             private delegate channel<object> cancelByPtr(ptr<T> value, bool removeFromParent, error err);
             private delegate channel<object> cancelByVal(T value, bool removeFromParent, error err);
 
-            private static readonly cancelByPtr s_cancelByPtr;
-            private static readonly cancelByVal s_cancelByVal;
+            private static readonly cancelByPtr? s_cancelByPtr;
+            private static readonly cancelByVal? s_cancelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public channel<object> cancel(bool removeFromParent, error err)
@@ -89,8 +90,8 @@ namespace go
             private delegate channel<object> DoneByPtr(ptr<T> value);
             private delegate channel<object> DoneByVal(T value);
 
-            private static readonly DoneByPtr s_DoneByPtr;
-            private static readonly DoneByVal s_DoneByVal;
+            private static readonly DoneByPtr? s_DoneByPtr;
+            private static readonly DoneByVal? s_DoneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public channel<object> Done()
@@ -106,7 +107,7 @@ namespace go
                 return s_DoneByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static canceler()

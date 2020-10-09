@@ -4,7 +4,7 @@
 
 // +build !386,!amd64,!s390x,!arm,!arm64,!ppc64,!ppc64le,!mips,!mipsle,!wasm,!mips64,!mips64le
 
-// package bytealg -- go2cs converted at 2020 October 08 03:19:42 UTC
+// package bytealg -- go2cs converted at 2020 October 09 04:45:56 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Go\src\internal\bytealg\compare_generic.go
 using _@unsafe_ = go.@unsafe_package;

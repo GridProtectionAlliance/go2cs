@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2020 October 08 03:24:34 UTC
+// package reflect -- go2cs converted at 2020 October 09 05:06:36 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Go\src\reflect\swapper.go
 using unsafeheader = go.@internal.unsafeheader_package;

@@ -22,7 +22,7 @@
 // Both algorithms ultimately call mspan.sweep, which sweeps a single
 // heap span.
 
-// package runtime -- go2cs converted at 2020 October 08 03:21:04 UTC
+// package runtime -- go2cs converted at 2020 October 09 04:46:52 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Go\src\runtime\mgcsweep.go
 using atomic = go.runtime.@internal.atomic_package;
@@ -60,7 +60,7 @@ namespace go
         {
         }
 
-        private static readonly var numSweepClasses = (var)numSpanClasses * 2L;
+        private static readonly var numSweepClasses = numSpanClasses * 2L;
         private static readonly sweepClass sweepClassDone = (sweepClass)sweepClass(~uint32(0L));
 
 

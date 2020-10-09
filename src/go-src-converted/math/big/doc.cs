@@ -96,7 +96,7 @@ Finally, *Int, *Rat, and *Float satisfy the fmt package's Scanner interface
 for scanning and (except for *Rat) the Formatter interface for formatted
 printing.
 */
-// package big -- go2cs converted at 2020 October 08 03:25:25 UTC
+// package big -- go2cs converted at 2020 October 09 04:53:17 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Go\src\math\big\doc.go
     }

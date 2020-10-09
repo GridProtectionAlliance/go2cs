@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:59:38 UTC
+//     Generated on 2020 October 09 06:06:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,8 @@ using image = go.image_package;
 using color = go.image.color_package;
 using io = go.io_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace image

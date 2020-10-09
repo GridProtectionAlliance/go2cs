@@ -4,7 +4,7 @@
 
 // Package bytes implements functions for the manipulation of byte slices.
 // It is analogous to the facilities of the strings package.
-// package bytes -- go2cs converted at 2020 October 08 03:49:09 UTC
+// package bytes -- go2cs converted at 2020 October 09 04:49:31 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Go\src\bytes\bytes.go
 using bytealg = go.@internal.bytealg_package;

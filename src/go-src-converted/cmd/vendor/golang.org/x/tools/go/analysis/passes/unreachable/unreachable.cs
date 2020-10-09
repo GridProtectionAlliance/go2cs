@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package unreachable defines an Analyzer that checks for unreachable code.
-// package unreachable -- go2cs converted at 2020 October 08 04:58:15 UTC
+// package unreachable -- go2cs converted at 2020 October 09 06:04:49 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unreachable" ==> using unreachable = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unreachable_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unreachable\unreachable.go
 // TODO(adonovan): use the new cfg package, which is more precise.

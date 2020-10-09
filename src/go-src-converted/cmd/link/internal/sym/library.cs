@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2020 October 08 04:37:53 UTC
+// package sym -- go2cs converted at 2020 October 09 05:48:53 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Go\src\cmd\link\internal\sym\library.go
 using goobj2 = go.cmd.@internal.goobj2_package;

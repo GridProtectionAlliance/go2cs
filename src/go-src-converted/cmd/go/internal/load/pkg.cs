@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package load loads packages.
-// package load -- go2cs converted at 2020 October 08 04:34:30 UTC
+// package load -- go2cs converted at 2020 October 09 05:45:56 UTC
 // import "cmd/go/internal/load" ==> using load = go.cmd.go.@internal.load_package
 // Original source: C:\Go\src\cmd\go\internal\load\pkg.go
 using bytes = go.bytes_package;
@@ -782,11 +782,11 @@ namespace @internal
 
         // ResolveModule is for download (part of "go get") and indicates
         // that the module adjustment should be done, but not vendor adjustment.
-        public static readonly var ResolveModule = (var)0; 
+        public static readonly var ResolveModule = 0; 
 
         // GetTestDeps is for download (part of "go get") and indicates
         // that test dependencies should be fetched too.
-        public static readonly var GetTestDeps = (var)1;
+        public static readonly var GetTestDeps = 1;
 
 
         // LoadImport scans the directory named by path, which must be an import path,
@@ -2066,8 +2066,8 @@ HaveGoMod:
         }
 
         public static readonly TargetDir ToTool = (TargetDir)iota; // to GOROOT/pkg/tool (default for cmd/*)
-        public static readonly var ToBin = (var)0; // to bin dir inside package root (default for non-cmd/*)
-        public static readonly var StalePath = (var)1; // an old import path; fail to build
+        public static readonly var ToBin = 0; // to bin dir inside package root (default for non-cmd/*)
+        public static readonly var StalePath = 1; // an old import path; fail to build
 
         // InstallTargetDir reports the target directory for installing the command p.
         public static TargetDir InstallTargetDir(ptr<Package> _addr_p)

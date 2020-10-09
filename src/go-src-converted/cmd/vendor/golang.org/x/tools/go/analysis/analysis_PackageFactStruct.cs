@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:15 UTC
+//     Generated on 2020 October 09 06:01:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,8 @@ using types = go.go.types_package;
 using reflect = go.reflect_package;
 using analysisinternal = go.golang.org.x.tools.@internal.analysisinternal_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

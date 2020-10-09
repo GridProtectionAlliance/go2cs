@@ -14,7 +14,7 @@
 // entries where the spec permits exactly one. Consequently, the corresponding
 // field in the AST (ast.FuncDecl.Recv) field is not restricted to one entry.
 //
-// package parser -- go2cs converted at 2020 October 08 04:04:11 UTC
+// package parser -- go2cs converted at 2020 October 09 05:19:56 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Go\src\go\parser\parser.go
 using fmt = go.fmt_package;
@@ -329,7 +329,7 @@ namespace go
 
             const @string dots = (@string)". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ";
 
-            const var n = (var)len(dots);
+            const var n = len(dots);
 
             var pos = p.file.Position(p.pos);
             fmt.Printf("%5d:%3d: ", pos.Line, pos.Column);
@@ -2373,9 +2373,9 @@ L:
         // Statements
 
         // Parsing modes for parseSimpleStmt.
-        private static readonly var basic = (var)iota;
-        private static readonly var labelOk = (var)0;
-        private static readonly var rangeOk = (var)1;
+        private static readonly var basic = iota;
+        private static readonly var labelOk = 0;
+        private static readonly var rangeOk = 1;
 
 
         // parseSimpleStmt returns true as 2nd result if it parsed the assignment

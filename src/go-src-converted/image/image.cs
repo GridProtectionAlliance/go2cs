@@ -19,7 +19,7 @@
 //
 // See "The Go image package" for more details:
 // https://golang.org/doc/articles/image_package.html
-// package image -- go2cs converted at 2020 October 08 04:59:12 UTC
+// package image -- go2cs converted at 2020 October 09 06:05:42 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Go\src\image\image.go
 using color = go.image.color_package;

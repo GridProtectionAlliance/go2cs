@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:17 UTC
+//     Generated on 2020 October 09 05:53:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using time = go.time_package;
 using profile = go.github.com.google.pprof.profile_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class ObjFile<T> : ObjFile
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace @internal
             private delegate error NameByPtr(ptr<T> value);
             private delegate error NameByVal(T value);
 
-            private static readonly NameByPtr s_NameByPtr;
-            private static readonly NameByVal s_NameByVal;
+            private static readonly NameByPtr? s_NameByPtr;
+            private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Name()
@@ -96,8 +97,8 @@ namespace @internal
             private delegate error BaseByPtr(ptr<T> value);
             private delegate error BaseByVal(T value);
 
-            private static readonly BaseByPtr s_BaseByPtr;
-            private static readonly BaseByVal s_BaseByVal;
+            private static readonly BaseByPtr? s_BaseByPtr;
+            private static readonly BaseByVal? s_BaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Base()
@@ -116,8 +117,8 @@ namespace @internal
             private delegate error BuildIDByPtr(ptr<T> value);
             private delegate error BuildIDByVal(T value);
 
-            private static readonly BuildIDByPtr s_BuildIDByPtr;
-            private static readonly BuildIDByVal s_BuildIDByVal;
+            private static readonly BuildIDByPtr? s_BuildIDByPtr;
+            private static readonly BuildIDByVal? s_BuildIDByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error BuildID()
@@ -136,8 +137,8 @@ namespace @internal
             private delegate error SourceLineByPtr(ptr<T> value, ulong addr);
             private delegate error SourceLineByVal(T value, ulong addr);
 
-            private static readonly SourceLineByPtr s_SourceLineByPtr;
-            private static readonly SourceLineByVal s_SourceLineByVal;
+            private static readonly SourceLineByPtr? s_SourceLineByPtr;
+            private static readonly SourceLineByVal? s_SourceLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error SourceLine(ulong addr)
@@ -156,8 +157,8 @@ namespace @internal
             private delegate error SymbolsByPtr(ptr<T> value, ptr<regexp.Regexp> r, ulong addr);
             private delegate error SymbolsByVal(T value, ptr<regexp.Regexp> r, ulong addr);
 
-            private static readonly SymbolsByPtr s_SymbolsByPtr;
-            private static readonly SymbolsByVal s_SymbolsByVal;
+            private static readonly SymbolsByPtr? s_SymbolsByPtr;
+            private static readonly SymbolsByVal? s_SymbolsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Symbols(ptr<regexp.Regexp> r, ulong addr)
@@ -176,8 +177,8 @@ namespace @internal
             private delegate error CloseByPtr(ptr<T> value);
             private delegate error CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Close()
@@ -193,7 +194,7 @@ namespace @internal
                 return s_CloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static ObjFile()

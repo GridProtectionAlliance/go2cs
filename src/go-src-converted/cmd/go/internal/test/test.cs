@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2020 October 08 04:35:12 UTC
+// package test -- go2cs converted at 2020 October 09 05:46:31 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Go\src\cmd\go\internal\test\test.go
 using bytes = go.bytes_package;
@@ -893,7 +893,7 @@ See the documentation of the testing package for more information.
             // one at a time.
             {
                 var i__prev1 = i;
-                work.Action a__prev1 = a;
+                ptr<work.Action> a__prev1 = a;
 
                 foreach (var (__i, __a) in prints)
                 {
@@ -980,7 +980,7 @@ See the documentation of the testing package for more information.
             {
                 var build = b.CompileAction(work.ModeBuild, work.ModeBuild, p);
                 ptr<work.Action> run = addr(new work.Action(Mode:"test run",Package:p,Deps:[]*work.Action{build}));
-                addTestVet(_addr_b, _addr_p, _addr_run, _addr_null);
+                addTestVet(_addr_b, _addr_p, run, _addr_null);
                 ptr<work.Action> print = addr(new work.Action(Mode:"test print",Func:builderNoTest,Package:p,Deps:[]*work.Action{run}));
                 return (_addr_build!, _addr_run!, _addr_print!, error.As(null!)!);
             } 

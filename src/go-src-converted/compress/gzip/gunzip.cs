@@ -4,7 +4,7 @@
 
 // Package gzip implements reading and writing of gzip format compressed files,
 // as specified in RFC 1952.
-// package gzip -- go2cs converted at 2020 October 08 03:30:45 UTC
+// package gzip -- go2cs converted at 2020 October 09 04:50:03 UTC
 // import "compress/gzip" ==> using gzip = go.compress.gzip_package
 // Original source: C:\Go\src\compress\gzip\gunzip.go
 using bufio = go.bufio_package;

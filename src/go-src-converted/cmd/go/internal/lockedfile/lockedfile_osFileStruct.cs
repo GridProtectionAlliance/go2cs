@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:34:00 UTC
+//     Generated on 2020 October 09 05:45:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,8 @@ using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

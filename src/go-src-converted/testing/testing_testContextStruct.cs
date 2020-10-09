@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:38 UTC
+//     Generated on 2020 October 09 05:47:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,6 +29,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+
+#nullable enable
 
 namespace go
 {

@@ -1,4 +1,4 @@
-// package b -- go2cs converted at 2020 October 08 04:42:06 UTC
+// package b -- go2cs converted at 2020 October 09 05:52:43 UTC
 // import "cmd/oldlink/internal/ld/testdata/issue26237.b" ==> using b = go.cmd.oldlink.@internal.ld.testdata.issue26237.b_package
 // Original source: C:\Go\src\cmd\oldlink\internal\ld\testdata\issue26237\b.dir\b.go
 

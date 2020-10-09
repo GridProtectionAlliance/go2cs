@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 October 08 03:35:34 UTC
+// package rand -- go2cs converted at 2020 October 09 04:53:06 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Go\src\crypto\rand\util.go
 using errors = go.errors_package;

@@ -4,7 +4,7 @@
 
 // +build js,wasm
 
-// package exec -- go2cs converted at 2020 October 08 03:41:19 UTC
+// package exec -- go2cs converted at 2020 October 09 04:58:43 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Go\src\os\exec\lp_js.go
 using errors = go.errors_package;

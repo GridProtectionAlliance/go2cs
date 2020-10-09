@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:05 UTC
+//     Generated on 2020 October 09 05:53:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,6 +23,8 @@ using plugin = go.github.com.google.pprof.@internal.plugin_package;
 using symbolizer = go.github.com.google.pprof.@internal.symbolizer_package;
 using transport = go.github.com.google.pprof.@internal.transport_package;
 using go;
+
+#nullable enable
 
 namespace go {
 namespace cmd {

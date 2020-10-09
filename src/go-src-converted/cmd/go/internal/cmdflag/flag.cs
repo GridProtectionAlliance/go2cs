@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package cmdflag handles flag processing common to several go tools.
-// package cmdflag -- go2cs converted at 2020 October 08 04:35:05 UTC
+// package cmdflag -- go2cs converted at 2020 October 09 05:46:26 UTC
 // import "cmd/go/internal/cmdflag" ==> using cmdflag = go.cmd.go.@internal.cmdflag_package
 // Original source: C:\Go\src\cmd\go\internal\cmdflag\flag.go
 using errors = go.errors_package;

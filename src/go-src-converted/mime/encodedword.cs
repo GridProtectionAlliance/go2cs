@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2020 October 08 03:38:32 UTC
+// package mime -- go2cs converted at 2020 October 09 04:56:11 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Go\src\mime\encodedword.go
 using bytes = go.bytes_package;
@@ -27,9 +27,9 @@ namespace go
 
  
         // BEncoding represents Base64 encoding scheme as defined by RFC 2045.
-        public static readonly var BEncoding = (var)WordEncoder('b'); 
+        public static readonly var BEncoding = WordEncoder('b'); 
         // QEncoding represents the Q-encoding scheme as defined by RFC 2047.
-        public static readonly var QEncoding = (var)WordEncoder('q');
+        public static readonly var QEncoding = WordEncoder('q');
 
 
         private static var errInvalidWord = errors.New("mime: invalid RFC 2047 encoded-word");
@@ -93,7 +93,7 @@ namespace go
         private static readonly long maxEncodedWordLen = (long)75L; 
         // maxContentLen is how much content can be encoded, ignoring the header and
         // 2-byte footer.
-        private static readonly var maxContentLen = (var)maxEncodedWordLen - len("=?UTF-8?q?") - len("?=");
+        private static readonly var maxContentLen = maxEncodedWordLen - len("=?UTF-8?q?") - len("?=");
 
 
         private static var maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);

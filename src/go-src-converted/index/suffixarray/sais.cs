@@ -120,7 +120,7 @@
 
 //go:generate go run gen.go
 
-// package suffixarray -- go2cs converted at 2020 October 08 04:59:42 UTC
+// package suffixarray -- go2cs converted at 2020 October 09 06:06:06 UTC
 // import "index/suffixarray" ==> using suffixarray = go.index.suffixarray_package
 // Original source: C:\Go\src\index\suffixarray\sais.go
 

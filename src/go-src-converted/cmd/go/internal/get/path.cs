@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package get -- go2cs converted at 2020 October 08 04:36:52 UTC
+// package get -- go2cs converted at 2020 October 09 05:48:00 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Go\src\cmd\go\internal\get\path.go
 using fmt = go.fmt_package;

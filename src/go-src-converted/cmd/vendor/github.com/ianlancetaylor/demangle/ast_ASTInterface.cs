@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:43:51 UTC
+//     Generated on 2020 October 09 05:54:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -19,6 +19,7 @@ using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -46,7 +47,7 @@ namespace ianlancetaylor
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class AST<T> : AST
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -72,8 +73,8 @@ namespace ianlancetaylor
             private delegate @string printByPtr(ptr<T> value, ptr<printState> _p0);
             private delegate @string printByVal(T value, ptr<printState> _p0);
 
-            private static readonly printByPtr s_printByPtr;
-            private static readonly printByVal s_printByVal;
+            private static readonly printByPtr? s_printByPtr;
+            private static readonly printByVal? s_printByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string print(ptr<printState> _p0)
@@ -92,8 +93,8 @@ namespace ianlancetaylor
             private delegate @string TraverseByPtr(ptr<T> value, Func<AST, bool> _p0);
             private delegate @string TraverseByVal(T value, Func<AST, bool> _p0);
 
-            private static readonly TraverseByPtr s_TraverseByPtr;
-            private static readonly TraverseByVal s_TraverseByVal;
+            private static readonly TraverseByPtr? s_TraverseByPtr;
+            private static readonly TraverseByVal? s_TraverseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Traverse(Func<AST, bool> _p0)
@@ -112,8 +113,8 @@ namespace ianlancetaylor
             private delegate @string CopyByPtr(ptr<T> value, Func<AST, AST> copy, Func<AST, bool> skip);
             private delegate @string CopyByVal(T value, Func<AST, AST> copy, Func<AST, bool> skip);
 
-            private static readonly CopyByPtr s_CopyByPtr;
-            private static readonly CopyByVal s_CopyByVal;
+            private static readonly CopyByPtr? s_CopyByPtr;
+            private static readonly CopyByVal? s_CopyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string Copy(Func<AST, AST> copy, Func<AST, bool> skip)
@@ -132,8 +133,8 @@ namespace ianlancetaylor
             private delegate @string GoStringByPtr(ptr<T> value);
             private delegate @string GoStringByVal(T value);
 
-            private static readonly GoStringByPtr s_GoStringByPtr;
-            private static readonly GoStringByVal s_GoStringByVal;
+            private static readonly GoStringByPtr? s_GoStringByPtr;
+            private static readonly GoStringByVal? s_GoStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string GoString()
@@ -152,8 +153,8 @@ namespace ianlancetaylor
             private delegate @string goStringByPtr(ptr<T> value, long indent, @string field);
             private delegate @string goStringByVal(T value, long indent, @string field);
 
-            private static readonly goStringByPtr s_goStringByPtr;
-            private static readonly goStringByVal s_goStringByVal;
+            private static readonly goStringByPtr? s_goStringByPtr;
+            private static readonly goStringByVal? s_goStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string goString(long indent, @string field)
@@ -169,7 +170,7 @@ namespace ianlancetaylor
                 return s_goStringByPtr(m_target_ptr, indent, field);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static AST()

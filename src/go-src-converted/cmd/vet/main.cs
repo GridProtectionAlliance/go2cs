@@ -1,4 +1,4 @@
-// package main -- go2cs converted at 2020 October 08 04:58:35 UTC
+// package main -- go2cs converted at 2020 October 09 06:05:08 UTC
 // Original source: C:\Go\src\cmd\vet\main.go
 using objabi = go.cmd.@internal.objabi_package;
 

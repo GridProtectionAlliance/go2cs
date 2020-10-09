@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:08:09 UTC
+//     Generated on 2020 October 09 05:23:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,6 +22,7 @@ using scanner = go.text.scanner_package;
 using src = go.cmd.@internal.src_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -48,7 +49,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class TokenReader<T> : TokenReader
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -74,8 +75,8 @@ namespace @internal
             private delegate long NextByPtr(ptr<T> value);
             private delegate long NextByVal(T value);
 
-            private static readonly NextByPtr s_NextByPtr;
-            private static readonly NextByVal s_NextByVal;
+            private static readonly NextByPtr? s_NextByPtr;
+            private static readonly NextByVal? s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Next()
@@ -94,8 +95,8 @@ namespace @internal
             private delegate long TextByPtr(ptr<T> value);
             private delegate long TextByVal(T value);
 
-            private static readonly TextByPtr s_TextByPtr;
-            private static readonly TextByVal s_TextByVal;
+            private static readonly TextByPtr? s_TextByPtr;
+            private static readonly TextByVal? s_TextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Text()
@@ -114,8 +115,8 @@ namespace @internal
             private delegate long FileByPtr(ptr<T> value);
             private delegate long FileByVal(T value);
 
-            private static readonly FileByPtr s_FileByPtr;
-            private static readonly FileByVal s_FileByVal;
+            private static readonly FileByPtr? s_FileByPtr;
+            private static readonly FileByVal? s_FileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long File()
@@ -134,8 +135,8 @@ namespace @internal
             private delegate long BaseByPtr(ptr<T> value);
             private delegate long BaseByVal(T value);
 
-            private static readonly BaseByPtr s_BaseByPtr;
-            private static readonly BaseByVal s_BaseByVal;
+            private static readonly BaseByPtr? s_BaseByPtr;
+            private static readonly BaseByVal? s_BaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Base()
@@ -154,8 +155,8 @@ namespace @internal
             private delegate long SetBaseByPtr(ptr<T> value, ptr<src.PosBase> _p0);
             private delegate long SetBaseByVal(T value, ptr<src.PosBase> _p0);
 
-            private static readonly SetBaseByPtr s_SetBaseByPtr;
-            private static readonly SetBaseByVal s_SetBaseByVal;
+            private static readonly SetBaseByPtr? s_SetBaseByPtr;
+            private static readonly SetBaseByVal? s_SetBaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long SetBase(ptr<src.PosBase> _p0)
@@ -174,8 +175,8 @@ namespace @internal
             private delegate long LineByPtr(ptr<T> value);
             private delegate long LineByVal(T value);
 
-            private static readonly LineByPtr s_LineByPtr;
-            private static readonly LineByVal s_LineByVal;
+            private static readonly LineByPtr? s_LineByPtr;
+            private static readonly LineByVal? s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Line()
@@ -194,8 +195,8 @@ namespace @internal
             private delegate long ColByPtr(ptr<T> value);
             private delegate long ColByVal(T value);
 
-            private static readonly ColByPtr s_ColByPtr;
-            private static readonly ColByVal s_ColByVal;
+            private static readonly ColByPtr? s_ColByPtr;
+            private static readonly ColByVal? s_ColByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Col()
@@ -214,8 +215,8 @@ namespace @internal
             private delegate long CloseByPtr(ptr<T> value);
             private delegate long CloseByVal(T value);
 
-            private static readonly CloseByPtr s_CloseByPtr;
-            private static readonly CloseByVal s_CloseByVal;
+            private static readonly CloseByPtr? s_CloseByPtr;
+            private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public long Close()
@@ -231,7 +232,7 @@ namespace @internal
                 return s_CloseByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static TokenReader()

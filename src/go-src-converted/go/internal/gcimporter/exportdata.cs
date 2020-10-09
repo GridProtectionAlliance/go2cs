@@ -4,7 +4,7 @@
 
 // This file implements FindExportData.
 
-// package gcimporter -- go2cs converted at 2020 October 08 04:56:07 UTC
+// package gcimporter -- go2cs converted at 2020 October 09 06:02:40 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Go\src\go\internal\gcimporter\exportdata.go
 using bufio = go.bufio_package;

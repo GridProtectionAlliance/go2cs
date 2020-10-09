@@ -4,7 +4,7 @@
 
 // Package subtle implements functions that are often useful in cryptographic
 // code but require careful thought to use correctly.
-// package subtle -- go2cs converted at 2020 October 08 03:35:30 UTC
+// package subtle -- go2cs converted at 2020 October 09 04:53:01 UTC
 // import "crypto/subtle" ==> using subtle = go.crypto.subtle_package
 // Original source: C:\Go\src\crypto\subtle\constant_time.go
 

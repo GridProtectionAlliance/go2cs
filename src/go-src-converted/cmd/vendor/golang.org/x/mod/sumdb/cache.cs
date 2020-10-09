@@ -5,7 +5,7 @@
 // Parallel cache.
 // This file is copied from cmd/go/internal/par.
 
-// package sumdb -- go2cs converted at 2020 October 08 04:45:55 UTC
+// package sumdb -- go2cs converted at 2020 October 09 05:55:59 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\sumdb\cache.go
 using sync = go.sync_package;

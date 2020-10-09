@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:56:21 UTC
+//     Generated on 2020 October 09 06:02:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -41,7 +42,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class A13<T> : A13
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -67,8 +68,8 @@ namespace @internal
             private delegate A2 mByPtr(ptr<T> value);
             private delegate A2 mByVal(T value);
 
-            private static readonly mByPtr s_mByPtr;
-            private static readonly mByVal s_mByVal;
+            private static readonly mByPtr? s_mByPtr;
+            private static readonly mByVal? s_mByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public A2 m()
@@ -84,7 +85,7 @@ namespace @internal
                 return s_mByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static A13()

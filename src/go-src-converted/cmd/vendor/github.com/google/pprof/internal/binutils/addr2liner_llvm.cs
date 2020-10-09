@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2020 October 08 04:42:49 UTC
+// package binutils -- go2cs converted at 2020 October 09 05:53:19 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner_llvm.go
 using bufio = go.bufio_package;

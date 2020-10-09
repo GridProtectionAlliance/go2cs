@@ -7,7 +7,7 @@ Package cgo contains runtime support for code generated
 by the cgo tool.  See the documentation for the cgo command
 for details on using cgo.
 */
-// package cgo -- go2cs converted at 2020 October 08 03:24:26 UTC
+// package cgo -- go2cs converted at 2020 October 09 04:49:12 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Go\src\runtime\cgo\cgo.go
 /*

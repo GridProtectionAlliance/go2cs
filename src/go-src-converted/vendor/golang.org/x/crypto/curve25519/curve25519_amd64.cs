@@ -4,7 +4,7 @@
 
 // +build amd64,!gccgo,!appengine,!purego
 
-// package curve25519 -- go2cs converted at 2020 October 08 05:00:04 UTC
+// package curve25519 -- go2cs converted at 2020 October 09 06:06:23 UTC
 // import "vendor/golang.org/x/crypto/curve25519" ==> using curve25519 = go.vendor.golang.org.x.crypto.curve25519_package
 // Original source: C:\Go\src\vendor\golang.org\x\crypto\curve25519\curve25519_amd64.go
 

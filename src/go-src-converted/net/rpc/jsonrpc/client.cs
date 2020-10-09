@@ -5,7 +5,7 @@
 // Package jsonrpc implements a JSON-RPC 1.0 ClientCodec and ServerCodec
 // for the rpc package.
 // For JSON-RPC 2.0 support, see https://godoc.org/?q=json-rpc+2.0
-// package jsonrpc -- go2cs converted at 2020 October 08 03:43:28 UTC
+// package jsonrpc -- go2cs converted at 2020 October 09 05:00:39 UTC
 // import "net/rpc/jsonrpc" ==> using jsonrpc = go.net.rpc.jsonrpc_package
 // Original source: C:\Go\src\net\rpc\jsonrpc\client.go
 using json = go.encoding.json_package;

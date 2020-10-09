@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:44:33 UTC
+//     Generated on 2020 October 09 05:54:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,6 +18,7 @@ using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -47,7 +48,7 @@ namespace arm64
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Arg<T> : Arg
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -73,8 +74,8 @@ namespace arm64
             private delegate @string isArgByPtr(ptr<T> value);
             private delegate @string isArgByVal(T value);
 
-            private static readonly isArgByPtr s_isArgByPtr;
-            private static readonly isArgByVal s_isArgByVal;
+            private static readonly isArgByPtr? s_isArgByPtr;
+            private static readonly isArgByVal? s_isArgByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string isArg()
@@ -93,8 +94,8 @@ namespace arm64
             private delegate @string StringByPtr(ptr<T> value);
             private delegate @string StringByVal(T value);
 
-            private static readonly StringByPtr s_StringByPtr;
-            private static readonly StringByVal s_StringByVal;
+            private static readonly StringByPtr? s_StringByPtr;
+            private static readonly StringByVal? s_StringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public @string String()
@@ -110,7 +111,7 @@ namespace arm64
                 return s_StringByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Arg()

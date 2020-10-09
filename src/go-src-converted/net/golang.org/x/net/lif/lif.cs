@@ -8,7 +8,7 @@
 // logical network interfaces and interface addresses on Solaris.
 //
 // The package supports Solaris 11 or above.
-// package lif -- go2cs converted at 2020 October 08 03:33:35 UTC
+// package lif -- go2cs converted at 2020 October 09 04:51:48 UTC
 // import "golang.org/x/net/lif" ==> using lif = go.golang.org.x.net.lif_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\lif\lif.go
 using syscall = go.syscall_package;

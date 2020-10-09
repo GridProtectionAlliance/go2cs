@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2020 October 08 04:31:37 UTC
+// package gc -- go2cs converted at 2020 October 09 05:43:35 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\typecheck.go
 using types = go.cmd.compile.@internal.types_package;
@@ -20,7 +20,7 @@ namespace @internal
     public static partial class gc_package
     {
         // To enable tracing support (-t flag), set enableTrace to true.
-        private static readonly var enableTrace = (var)false;
+        private static readonly var enableTrace = false;
 
 
 
@@ -87,11 +87,11 @@ namespace @internal
         });
 
         private static readonly long ctxStmt = (long)1L << (int)(iota); // evaluated at statement level
-        private static readonly var ctxExpr = (var)0; // evaluated in value context
-        private static readonly var ctxType = (var)1; // evaluated in type context
-        private static readonly var ctxCallee = (var)2; // call-only expressions are ok
-        private static readonly var ctxMultiOK = (var)3; // multivalue function returns are ok
-        private static readonly var ctxAssign = (var)4; // assigning to expression
+        private static readonly var ctxExpr = 0; // evaluated in value context
+        private static readonly var ctxType = 1; // evaluated in type context
+        private static readonly var ctxCallee = 2; // call-only expressions are ok
+        private static readonly var ctxMultiOK = 3; // multivalue function returns are ok
+        private static readonly var ctxAssign = 4; // assigning to expression
 
         // type checks the whole tree of an expression.
         // calculates expression types.

@@ -255,7 +255,7 @@ the symbol accessible to other packages.
 Because this directive can subvert the type system and package
 modularity, it is only enabled in files that have imported "unsafe".
 */
-// package main -- go2cs converted at 2020 October 08 04:09:24 UTC
+// package main -- go2cs converted at 2020 October 09 05:23:56 UTC
 // Original source: C:\Go\src\cmd\compile\doc.go
     }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2020 October 08 04:42:25 UTC
+// package trace -- go2cs converted at 2020 October 09 05:52:59 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Go\src\internal\trace\goroutines.go
 using sort = go.sort_package;
@@ -315,7 +315,7 @@ namespace @internal
                     gcStartTime = ev.Ts;
                 else if (ev.Type == EvGCDone) 
                     {
-                        GDesc g__prev2 = g;
+                        ptr<GDesc> g__prev2 = g;
 
                         foreach (var (_, __g) in gs)
                         {
@@ -379,7 +379,7 @@ namespace @internal
                 
             }
             {
-                GDesc g__prev1 = g;
+                ptr<GDesc> g__prev1 = g;
 
                 foreach (var (_, __g) in gs)
                 {

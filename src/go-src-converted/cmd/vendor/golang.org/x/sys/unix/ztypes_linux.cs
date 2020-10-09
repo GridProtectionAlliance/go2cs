@@ -2,7 +2,7 @@
 
 // +build linux
 
-// package unix -- go2cs converted at 2020 October 08 04:53:31 UTC
+// package unix -- go2cs converted at 2020 October 09 06:00:33 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\ztypes_linux.go
 
@@ -951,32 +951,32 @@ namespace sys
         }
 
         public static readonly ulong PerfBitDisabled = (ulong)CBitFieldMaskBit0;
-        public static readonly var PerfBitInherit = (var)CBitFieldMaskBit1;
-        public static readonly var PerfBitPinned = (var)CBitFieldMaskBit2;
-        public static readonly var PerfBitExclusive = (var)CBitFieldMaskBit3;
-        public static readonly var PerfBitExcludeUser = (var)CBitFieldMaskBit4;
-        public static readonly var PerfBitExcludeKernel = (var)CBitFieldMaskBit5;
-        public static readonly var PerfBitExcludeHv = (var)CBitFieldMaskBit6;
-        public static readonly var PerfBitExcludeIdle = (var)CBitFieldMaskBit7;
-        public static readonly var PerfBitMmap = (var)CBitFieldMaskBit8;
-        public static readonly var PerfBitComm = (var)CBitFieldMaskBit9;
-        public static readonly var PerfBitFreq = (var)CBitFieldMaskBit10;
-        public static readonly var PerfBitInheritStat = (var)CBitFieldMaskBit11;
-        public static readonly var PerfBitEnableOnExec = (var)CBitFieldMaskBit12;
-        public static readonly var PerfBitTask = (var)CBitFieldMaskBit13;
-        public static readonly var PerfBitWatermark = (var)CBitFieldMaskBit14;
-        public static readonly var PerfBitPreciseIPBit1 = (var)CBitFieldMaskBit15;
-        public static readonly var PerfBitPreciseIPBit2 = (var)CBitFieldMaskBit16;
-        public static readonly var PerfBitMmapData = (var)CBitFieldMaskBit17;
-        public static readonly var PerfBitSampleIDAll = (var)CBitFieldMaskBit18;
-        public static readonly var PerfBitExcludeHost = (var)CBitFieldMaskBit19;
-        public static readonly var PerfBitExcludeGuest = (var)CBitFieldMaskBit20;
-        public static readonly var PerfBitExcludeCallchainKernel = (var)CBitFieldMaskBit21;
-        public static readonly var PerfBitExcludeCallchainUser = (var)CBitFieldMaskBit22;
-        public static readonly var PerfBitMmap2 = (var)CBitFieldMaskBit23;
-        public static readonly var PerfBitCommExec = (var)CBitFieldMaskBit24;
-        public static readonly var PerfBitUseClockID = (var)CBitFieldMaskBit25;
-        public static readonly var PerfBitContextSwitch = (var)CBitFieldMaskBit26;
+        public static readonly var PerfBitInherit = CBitFieldMaskBit1;
+        public static readonly var PerfBitPinned = CBitFieldMaskBit2;
+        public static readonly var PerfBitExclusive = CBitFieldMaskBit3;
+        public static readonly var PerfBitExcludeUser = CBitFieldMaskBit4;
+        public static readonly var PerfBitExcludeKernel = CBitFieldMaskBit5;
+        public static readonly var PerfBitExcludeHv = CBitFieldMaskBit6;
+        public static readonly var PerfBitExcludeIdle = CBitFieldMaskBit7;
+        public static readonly var PerfBitMmap = CBitFieldMaskBit8;
+        public static readonly var PerfBitComm = CBitFieldMaskBit9;
+        public static readonly var PerfBitFreq = CBitFieldMaskBit10;
+        public static readonly var PerfBitInheritStat = CBitFieldMaskBit11;
+        public static readonly var PerfBitEnableOnExec = CBitFieldMaskBit12;
+        public static readonly var PerfBitTask = CBitFieldMaskBit13;
+        public static readonly var PerfBitWatermark = CBitFieldMaskBit14;
+        public static readonly var PerfBitPreciseIPBit1 = CBitFieldMaskBit15;
+        public static readonly var PerfBitPreciseIPBit2 = CBitFieldMaskBit16;
+        public static readonly var PerfBitMmapData = CBitFieldMaskBit17;
+        public static readonly var PerfBitSampleIDAll = CBitFieldMaskBit18;
+        public static readonly var PerfBitExcludeHost = CBitFieldMaskBit19;
+        public static readonly var PerfBitExcludeGuest = CBitFieldMaskBit20;
+        public static readonly var PerfBitExcludeCallchainKernel = CBitFieldMaskBit21;
+        public static readonly var PerfBitExcludeCallchainUser = CBitFieldMaskBit22;
+        public static readonly var PerfBitMmap2 = CBitFieldMaskBit23;
+        public static readonly var PerfBitCommExec = CBitFieldMaskBit24;
+        public static readonly var PerfBitUseClockID = CBitFieldMaskBit25;
+        public static readonly var PerfBitContextSwitch = CBitFieldMaskBit26;
 
 
         public static readonly ulong PERF_TYPE_HARDWARE = (ulong)0x0UL;

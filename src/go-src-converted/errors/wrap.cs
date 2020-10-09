@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package errors -- go2cs converted at 2020 October 08 03:45:36 UTC
+// package errors -- go2cs converted at 2020 October 09 05:08:00 UTC
 // import "errors" ==> using errors = go.errors_package
 // Original source: C:\Go\src\errors\wrap.go
 using reflectlite = go.@internal.reflectlite_package;

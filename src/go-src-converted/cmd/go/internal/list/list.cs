@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package list implements the ``go list'' command.
-// package list -- go2cs converted at 2020 October 08 04:36:49 UTC
+// package list -- go2cs converted at 2020 October 09 05:47:57 UTC
 // import "cmd/go/internal/list" ==> using list = go.cmd.go.@internal.list_package
 // Original source: C:\Go\src\cmd\go\internal\list\list.go
 using bufio = go.bufio_package;

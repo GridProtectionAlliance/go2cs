@@ -16,7 +16,7 @@
 // See https://http2.golang.org/ for a test server running this code.
 //
 
-// package http -- go2cs converted at 2020 October 08 03:39:12 UTC
+// package http -- go2cs converted at 2020 October 09 04:56:46 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Go\src\net\http\h2_bundle.go
 using bufio = go.bufio_package;
@@ -458,8 +458,8 @@ namespace net
             return _addr_p.getClientConn(req, addr, http2dialOnMiss)!;
         }
 
-        private static readonly var http2dialOnMiss = (var)true;
-        private static readonly var http2noDialOnMiss = (var)false;
+        private static readonly var http2dialOnMiss = true;
+        private static readonly var http2noDialOnMiss = false;
 
 
         // shouldTraceGetConn reports whether getClientConn should call any
@@ -507,7 +507,7 @@ namespace net
             { 
                 // It gets its own connection.
                 http2traceGetConn(_addr_req, addr);
-                const var singleUse = (var)true;
+                const var singleUse = true;
 
                 var (cc, err) = p.t.dialClientConn(addr, singleUse);
                 if (err != null)
@@ -609,7 +609,7 @@ namespace net
         {
             ref http2dialCall c = ref _addr_c.val;
 
-            const var singleUse = (var)false; // shared conn
+            const var singleUse = false; // shared conn
  // shared conn
             c.res, c.err = c.p.t.dialClientConn(addr, singleUse);
             close(c.done);
@@ -3735,10 +3735,10 @@ Error:
         // "reserved (remote)" is omitted since the client code does not
         // support server push.
         private static readonly http2streamState http2stateIdle = (http2streamState)iota;
-        private static readonly var http2stateOpen = (var)0;
-        private static readonly var http2stateHalfClosedLocal = (var)1;
-        private static readonly var http2stateHalfClosedRemote = (var)2;
-        private static readonly var http2stateClosed = (var)3;
+        private static readonly var http2stateOpen = 0;
+        private static readonly var http2stateHalfClosedLocal = 1;
+        private static readonly var http2stateHalfClosedRemote = 2;
+        private static readonly var http2stateClosed = 3;
 
 
         private static array<@string> http2stateName = new array<@string>(InitKeyedValues<@string>((http2stateIdle, "Idle"), (http2stateOpen, "Open"), (http2stateHalfClosedLocal, "HalfClosedLocal"), (http2stateHalfClosedRemote, "HalfClosedRemote"), (http2stateClosed, "Closed")));
@@ -13345,8 +13345,8 @@ Error:
         }
 
         private static readonly http2priorityNodeState http2priorityNodeOpen = (http2priorityNodeState)iota;
-        private static readonly var http2priorityNodeClosed = (var)0;
-        private static readonly var http2priorityNodeIdle = (var)1;
+        private static readonly var http2priorityNodeClosed = 0;
+        private static readonly var http2priorityNodeIdle = 1;
 
 
         // priorityNode is a node in an HTTP/2 priority tree.

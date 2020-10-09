@@ -4,7 +4,7 @@
 
 // +build darwin
 
-// package unix -- go2cs converted at 2020 October 08 04:46:32 UTC
+// package unix -- go2cs converted at 2020 October 09 05:56:19 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\readdirent_getdirentries.go
 using @unsafe = go.@unsafe_package;

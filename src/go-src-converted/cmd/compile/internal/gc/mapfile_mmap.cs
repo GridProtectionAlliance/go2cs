@@ -4,7 +4,7 @@
 
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package gc -- go2cs converted at 2020 October 08 04:29:27 UTC
+// package gc -- go2cs converted at 2020 October 09 05:41:53 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Go\src\cmd\compile\internal\gc\mapfile_mmap.go
 using os = go.os_package;

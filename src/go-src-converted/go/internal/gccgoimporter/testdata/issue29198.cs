@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package server -- go2cs converted at 2020 October 08 04:56:22 UTC
+// package server -- go2cs converted at 2020 October 09 06:02:54 UTC
 // import "go/internal/gccgoimporter.server" ==> using server = go.go.@internal.gccgoimporter.server_package
 // Original source: C:\Go\src\go\internal\gccgoimporter\testdata\issue29198.go
 using context = go.context_package;

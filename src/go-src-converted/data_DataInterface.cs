@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:54:59 UTC
+//     Generated on 2020 October 09 06:01:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,6 +21,7 @@ using keys = go.golang.org.x.tools.@internal.@event.keys_package;
 using label = go.golang.org.x.tools.@internal.@event.label_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -50,7 +51,7 @@ namespace export
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Data<T> : Data
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -76,8 +77,8 @@ namespace export
             private delegate slice<slice<label.Label>> HandleByPtr(ptr<T> value);
             private delegate slice<slice<label.Label>> HandleByVal(T value);
 
-            private static readonly HandleByPtr s_HandleByPtr;
-            private static readonly HandleByVal s_HandleByVal;
+            private static readonly HandleByPtr? s_HandleByPtr;
+            private static readonly HandleByVal? s_HandleByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<slice<label.Label>> Handle()
@@ -96,8 +97,8 @@ namespace export
             private delegate slice<slice<label.Label>> GroupsByPtr(ptr<T> value);
             private delegate slice<slice<label.Label>> GroupsByVal(T value);
 
-            private static readonly GroupsByPtr s_GroupsByPtr;
-            private static readonly GroupsByVal s_GroupsByVal;
+            private static readonly GroupsByPtr? s_GroupsByPtr;
+            private static readonly GroupsByVal? s_GroupsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public slice<slice<label.Label>> Groups()
@@ -113,7 +114,7 @@ namespace export
                 return s_GroupsByPtr(m_target_ptr);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Data()

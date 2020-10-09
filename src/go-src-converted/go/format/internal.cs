@@ -7,7 +7,7 @@
 // one without the other. Determine if we can factor out functionality
 // in a public API. See also #11844 for context.
 
-// package format -- go2cs converted at 2020 October 08 04:27:08 UTC
+// package format -- go2cs converted at 2020 October 09 05:39:56 UTC
 // import "go/format" ==> using format = go.go.format_package
 // Original source: C:\Go\src\go\format\internal.go
 using bytes = go.bytes_package;

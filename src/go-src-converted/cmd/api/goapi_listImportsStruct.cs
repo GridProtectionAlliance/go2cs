@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:02:21 UTC
+//     Generated on 2020 October 09 05:18:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,6 +34,8 @@ using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+
+#nullable enable
 
 namespace go
 {

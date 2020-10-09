@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2020 October 08 03:42:59 UTC
+// package xml -- go2cs converted at 2020 October 09 05:00:13 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Go\src\encoding\xml\marshal.go
 using bufio = go.bufio_package;

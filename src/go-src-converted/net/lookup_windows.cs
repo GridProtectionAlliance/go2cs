@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 08 03:33:58 UTC
+// package net -- go2cs converted at 2020 October 09 04:52:04 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Go\src\net\lookup_windows.go
 using context = go.context_package;
@@ -19,7 +19,7 @@ namespace go
 {
     public static partial class net_package
     {
-        private static readonly var _WSAHOST_NOT_FOUND = (var)syscall.Errno(11001L);
+        private static readonly var _WSAHOST_NOT_FOUND = syscall.Errno(11001L);
 
 
 

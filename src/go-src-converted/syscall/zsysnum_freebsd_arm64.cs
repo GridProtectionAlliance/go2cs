@@ -3,7 +3,7 @@
 
 // +build arm64,freebsd
 
-// package syscall -- go2cs converted at 2020 October 08 03:30:31 UTC
+// package syscall -- go2cs converted at 2020 October 09 05:04:20 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Go\src\syscall\zsysnum_freebsd_arm64.go
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:10:50 UTC
+// package ssa -- go2cs converted at 2020 October 09 05:24:56 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Go\src\cmd\compile\internal\ssa\op.go
 using obj = go.cmd.@internal.obj_package;
@@ -76,29 +76,29 @@ namespace @internal
         }
 
         private static readonly auxType auxNone = (auxType)iota;
-        private static readonly var auxBool = (var)0; // auxInt is 0/1 for false/true
-        private static readonly var auxInt8 = (var)1; // auxInt is an 8-bit integer
-        private static readonly var auxInt16 = (var)2; // auxInt is a 16-bit integer
-        private static readonly var auxInt32 = (var)3; // auxInt is a 32-bit integer
-        private static readonly var auxInt64 = (var)4; // auxInt is a 64-bit integer
-        private static readonly var auxInt128 = (var)5; // auxInt represents a 128-bit integer.  Always 0.
-        private static readonly var auxFloat32 = (var)6; // auxInt is a float32 (encoded with math.Float64bits)
-        private static readonly var auxFloat64 = (var)7; // auxInt is a float64 (encoded with math.Float64bits)
-        private static readonly var auxFlagConstant = (var)8; // auxInt is a flagConstant
-        private static readonly var auxString = (var)9; // aux is a string
-        private static readonly var auxSym = (var)10; // aux is a symbol (a *gc.Node for locals, an *obj.LSym for globals, or nil for none)
-        private static readonly var auxSymOff = (var)11; // aux is a symbol, auxInt is an offset
-        private static readonly var auxSymValAndOff = (var)12; // aux is a symbol, auxInt is a ValAndOff
-        private static readonly var auxTyp = (var)13; // aux is a type
-        private static readonly var auxTypSize = (var)14; // aux is a type, auxInt is a size, must have Aux.(Type).Size() == AuxInt
-        private static readonly var auxCCop = (var)15; // aux is a ssa.Op that represents a flags-to-bool conversion (e.g. LessThan)
+        private static readonly var auxBool = 0; // auxInt is 0/1 for false/true
+        private static readonly var auxInt8 = 1; // auxInt is an 8-bit integer
+        private static readonly var auxInt16 = 2; // auxInt is a 16-bit integer
+        private static readonly var auxInt32 = 3; // auxInt is a 32-bit integer
+        private static readonly var auxInt64 = 4; // auxInt is a 64-bit integer
+        private static readonly var auxInt128 = 5; // auxInt represents a 128-bit integer.  Always 0.
+        private static readonly var auxFloat32 = 6; // auxInt is a float32 (encoded with math.Float64bits)
+        private static readonly var auxFloat64 = 7; // auxInt is a float64 (encoded with math.Float64bits)
+        private static readonly var auxFlagConstant = 8; // auxInt is a flagConstant
+        private static readonly var auxString = 9; // aux is a string
+        private static readonly var auxSym = 10; // aux is a symbol (a *gc.Node for locals, an *obj.LSym for globals, or nil for none)
+        private static readonly var auxSymOff = 11; // aux is a symbol, auxInt is an offset
+        private static readonly var auxSymValAndOff = 12; // aux is a symbol, auxInt is a ValAndOff
+        private static readonly var auxTyp = 13; // aux is a type
+        private static readonly var auxTypSize = 14; // aux is a type, auxInt is a size, must have Aux.(Type).Size() == AuxInt
+        private static readonly var auxCCop = 15; // aux is a ssa.Op that represents a flags-to-bool conversion (e.g. LessThan)
 
         // architecture specific aux types
-        private static readonly var auxARM64BitField = (var)16; // aux is an arm64 bitfield lsb and width packed into auxInt
-        private static readonly var auxS390XRotateParams = (var)17; // aux is a s390x rotate parameters object encoding start bit, end bit and rotate amount
-        private static readonly var auxS390XCCMask = (var)18; // aux is a s390x 4-bit condition code mask
-        private static readonly var auxS390XCCMaskInt8 = (var)19; // aux is a s390x 4-bit condition code mask, auxInt is a int8 immediate
-        private static readonly var auxS390XCCMaskUint8 = (var)20; // aux is a s390x 4-bit condition code mask, auxInt is a uint8 immediate
+        private static readonly var auxARM64BitField = 16; // aux is an arm64 bitfield lsb and width packed into auxInt
+        private static readonly var auxS390XRotateParams = 17; // aux is a s390x rotate parameters object encoding start bit, end bit and rotate amount
+        private static readonly var auxS390XCCMask = 18; // aux is a s390x 4-bit condition code mask
+        private static readonly var auxS390XCCMaskInt8 = 19; // aux is a s390x 4-bit condition code mask, auxInt is a int8 immediate
+        private static readonly var auxS390XCCMaskUint8 = 20; // aux is a s390x 4-bit condition code mask, auxInt is a uint8 immediate
 
         // A SymEffect describes the effect that an SSA Value has on the variable
         // identified by the symbol in its Aux field.
@@ -107,7 +107,7 @@ namespace @internal
         }
 
         public static readonly SymEffect SymRead = (SymEffect)1L << (int)(iota);
-        public static readonly var SymWrite = (var)0;
+        public static readonly var SymWrite = 0;
         public static readonly SymRdWr SymAddr = (SymRdWr)SymRead | SymWrite;
 
         public static readonly SymEffect SymNone = (SymEffect)0L;
@@ -273,22 +273,22 @@ namespace @internal
         }
 
         public static readonly BoundsKind BoundsIndex = (BoundsKind)iota; // indexing operation, 0 <= idx < len failed
-        public static readonly var BoundsIndexU = (var)0; // ... with unsigned idx
-        public static readonly var BoundsSliceAlen = (var)1; // 2-arg slicing operation, 0 <= high <= len failed
-        public static readonly var BoundsSliceAlenU = (var)2; // ... with unsigned high
-        public static readonly var BoundsSliceAcap = (var)3; // 2-arg slicing operation, 0 <= high <= cap failed
-        public static readonly var BoundsSliceAcapU = (var)4; // ... with unsigned high
-        public static readonly var BoundsSliceB = (var)5; // 2-arg slicing operation, 0 <= low <= high failed
-        public static readonly var BoundsSliceBU = (var)6; // ... with unsigned low
-        public static readonly var BoundsSlice3Alen = (var)7; // 3-arg slicing operation, 0 <= max <= len failed
-        public static readonly var BoundsSlice3AlenU = (var)8; // ... with unsigned max
-        public static readonly var BoundsSlice3Acap = (var)9; // 3-arg slicing operation, 0 <= max <= cap failed
-        public static readonly var BoundsSlice3AcapU = (var)10; // ... with unsigned max
-        public static readonly var BoundsSlice3B = (var)11; // 3-arg slicing operation, 0 <= high <= max failed
-        public static readonly var BoundsSlice3BU = (var)12; // ... with unsigned high
-        public static readonly var BoundsSlice3C = (var)13; // 3-arg slicing operation, 0 <= low <= high failed
-        public static readonly var BoundsSlice3CU = (var)14; // ... with unsigned low
-        public static readonly var BoundsKindCount = (var)15;
+        public static readonly var BoundsIndexU = 0; // ... with unsigned idx
+        public static readonly var BoundsSliceAlen = 1; // 2-arg slicing operation, 0 <= high <= len failed
+        public static readonly var BoundsSliceAlenU = 2; // ... with unsigned high
+        public static readonly var BoundsSliceAcap = 3; // 2-arg slicing operation, 0 <= high <= cap failed
+        public static readonly var BoundsSliceAcapU = 4; // ... with unsigned high
+        public static readonly var BoundsSliceB = 5; // 2-arg slicing operation, 0 <= low <= high failed
+        public static readonly var BoundsSliceBU = 6; // ... with unsigned low
+        public static readonly var BoundsSlice3Alen = 7; // 3-arg slicing operation, 0 <= max <= len failed
+        public static readonly var BoundsSlice3AlenU = 8; // ... with unsigned max
+        public static readonly var BoundsSlice3Acap = 9; // 3-arg slicing operation, 0 <= max <= cap failed
+        public static readonly var BoundsSlice3AcapU = 10; // ... with unsigned max
+        public static readonly var BoundsSlice3B = 11; // 3-arg slicing operation, 0 <= high <= max failed
+        public static readonly var BoundsSlice3BU = 12; // ... with unsigned high
+        public static readonly var BoundsSlice3C = 13; // 3-arg slicing operation, 0 <= low <= high failed
+        public static readonly var BoundsSlice3CU = 14; // ... with unsigned low
+        public static readonly var BoundsKindCount = 15;
 
 
         // boundsAPI determines which register arguments a bounds check call should use. For an [a:b:c] slice, we do:

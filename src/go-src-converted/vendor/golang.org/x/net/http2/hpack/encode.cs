@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2020 October 08 05:00:33 UTC
+// package hpack -- go2cs converted at 2020 October 09 06:06:50 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Go\src\vendor\golang.org\x\net\http2\hpack\encode.go
 using io = go.io_package;
@@ -17,7 +17,7 @@ namespace http2
 {
     public static partial class hpack_package
     {
-        private static readonly var uint32Max = (var)~uint32(0L);
+        private static readonly var uint32Max = ~uint32(0L);
         private static readonly long initialHeaderTableSize = (long)4096L;
 
 

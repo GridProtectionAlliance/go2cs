@@ -5,7 +5,7 @@
 // Package pem implements the PEM data encoding, which originated in Privacy
 // Enhanced Mail. The most common use of PEM encoding today is in TLS keys and
 // certificates. See RFC 1421.
-// package pem -- go2cs converted at 2020 October 08 03:36:46 UTC
+// package pem -- go2cs converted at 2020 October 09 04:54:43 UTC
 // import "encoding/pem" ==> using pem = go.encoding.pem_package
 // Original source: C:\Go\src\encoding\pem\pem.go
 using bytes = go.bytes_package;

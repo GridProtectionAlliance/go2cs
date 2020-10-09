@@ -11,7 +11,7 @@
 // extensions and s390x systems using Message-Security-Assist extensions.
 // On such systems, when the result of NewCipher is passed to cipher.NewGCM,
 // the GHASH operation used by GCM is also constant-time.
-// package aes -- go2cs converted at 2020 October 08 03:35:50 UTC
+// package aes -- go2cs converted at 2020 October 09 04:53:48 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Go\src\crypto\aes\const.go
 

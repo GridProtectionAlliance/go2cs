@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 08 04:56:48 UTC
+// package ssa -- go2cs converted at 2020 October 09 06:03:12 UTC
 // import "golang.org/x/tools/go/ssa" ==> using ssa = go.golang.org.x.tools.go.ssa_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\builder.go
 // This file implements the BUILD phase of SSA construction.
@@ -760,7 +760,7 @@ namespace go
                                 if (ok)
                                 {
                                     {
-                                        MakeClosure v__prev3 = v;
+                                        ptr<MakeClosure> v__prev3 = v;
 
                                         v = b.builtin(fn, obj, e.Args, tv.Type, e.Lparen);
 
@@ -906,7 +906,7 @@ namespace go
                     } 
                     // Package-level func or var?
                     {
-                        MakeClosure v__prev1 = v;
+                        ptr<MakeClosure> v__prev1 = v;
 
                         v = fn.Prog.packageLevelValue(obj);
 

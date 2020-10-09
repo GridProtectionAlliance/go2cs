@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 08 04:36:23 UTC
+//     Generated on 2020 October 09 05:47:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -17,6 +17,7 @@ using static go.builtin;
 using context = go.context_package;
 using go;
 
+#nullable enable
 #pragma warning disable CS0660, CS0661
 
 namespace go {
@@ -44,7 +45,7 @@ namespace sumdb
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Transaction<T> : Transaction
         {
-            private T m_target;
+            private T m_target = default!;
             private readonly ptr<T>? m_target_ptr;
             private readonly bool m_target_is_ptr;
 
@@ -70,8 +71,8 @@ namespace sumdb
             private delegate error ReadValueByPtr(ptr<T> value, context.Context ctx, @string key);
             private delegate error ReadValueByVal(T value, context.Context ctx, @string key);
 
-            private static readonly ReadValueByPtr s_ReadValueByPtr;
-            private static readonly ReadValueByVal s_ReadValueByVal;
+            private static readonly ReadValueByPtr? s_ReadValueByPtr;
+            private static readonly ReadValueByVal? s_ReadValueByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadValue(context.Context ctx, @string key)
@@ -90,8 +91,8 @@ namespace sumdb
             private delegate error ReadValuesByPtr(ptr<T> value, context.Context ctx, slice<@string> keys);
             private delegate error ReadValuesByVal(T value, context.Context ctx, slice<@string> keys);
 
-            private static readonly ReadValuesByPtr s_ReadValuesByPtr;
-            private static readonly ReadValuesByVal s_ReadValuesByVal;
+            private static readonly ReadValuesByPtr? s_ReadValuesByPtr;
+            private static readonly ReadValuesByVal? s_ReadValuesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error ReadValues(context.Context ctx, slice<@string> keys)
@@ -110,8 +111,8 @@ namespace sumdb
             private delegate error BufferWritesByPtr(ptr<T> value, slice<Write> writes);
             private delegate error BufferWritesByVal(T value, slice<Write> writes);
 
-            private static readonly BufferWritesByPtr s_BufferWritesByPtr;
-            private static readonly BufferWritesByVal s_BufferWritesByVal;
+            private static readonly BufferWritesByPtr? s_BufferWritesByPtr;
+            private static readonly BufferWritesByVal? s_BufferWritesByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error BufferWrites(slice<Write> writes)
@@ -127,7 +128,7 @@ namespace sumdb
                 return s_BufferWritesByPtr(m_target_ptr, writes);
             }
             
-            public string ToString(string format, IFormatProvider formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format;
 
             [DebuggerStepperBoundary]
             static Transaction()
