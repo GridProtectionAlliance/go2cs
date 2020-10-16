@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.VisualBasic.CompilerServices;
 using rune = System.Int32;
 
 #pragma warning disable IDE1006
@@ -262,8 +263,27 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, @string value) => value != nil;
 
+        // Enable @string to @string comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(NilType _) => Default;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(@string a, @string b) => a.Equals(b);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(@string a, @string b) => !a.Equals(b);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(@string a, @string b) => string.CompareOrdinal(a, b) < 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <=(@string a, @string b) => string.CompareOrdinal(a, b) <= 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(@string a, @string b) => string.CompareOrdinal(a, b) > 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
 
         #endregion
 

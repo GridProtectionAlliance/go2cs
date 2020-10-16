@@ -52,7 +52,7 @@ namespace go
     }
 
     [Serializable]
-    public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(long, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
+    public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
     {
         private readonly T[] m_array;
         private readonly int m_low;
@@ -164,7 +164,7 @@ namespace go
             }
         }
 
-        public ref T this[long index]
+        public ref T this[nint index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -182,7 +182,7 @@ namespace go
         public ref T this[ulong index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref this[(long)index];
+            get => ref this[(nint)index];
         }
 
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
@@ -230,22 +230,22 @@ namespace go
         public slice<T> Clone() => Array?.slice() ?? new slice<T>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<(long, T)> GetEnumerator()
+        public IEnumerator<(nint, T)> GetEnumerator()
         {
             SliceEnumerator enumerator = new SliceEnumerator(this);
-            long index = 0;
+            nint index = 0;
 
             while (enumerator.MoveNext())
                 yield return (index++, enumerator.Current);
         }
 
         // Returns an enumerator for just index enumeration
-        public IEnumerable<long> Range
+        public IEnumerable<nint> Range
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                for (long i = Low; i < High; i++)
+                for (nint i = Low; i < High; i++)
                     yield return i;
             }
         }

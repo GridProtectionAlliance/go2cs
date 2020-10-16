@@ -42,7 +42,7 @@ namespace go
     }
 
     [Serializable]
-    public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerable<(long, T)>, IEquatable<array<T>>, IEquatable<IArray>
+    public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<array<T>>, IEquatable<IArray>
     {
         private readonly T[] m_array;
 
@@ -50,7 +50,7 @@ namespace go
         public array(int length) => m_array = new T[length];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public array(long length) => m_array = new T[length];
+        public array(nint length) => m_array = new T[length];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public array(ulong length) => m_array = new T[length];
@@ -71,7 +71,7 @@ namespace go
             get => ref m_array[index];
         }
 
-        public ref T this[long index]
+        public ref T this[nint index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => ref m_array[index];
@@ -80,7 +80,7 @@ namespace go
         public ref T this[ulong index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref this[(long)index];
+            get => ref this[(nint)index];
         }
 
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
@@ -89,7 +89,7 @@ namespace go
             new slice<T>(m_array, start, start + length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice<T> Slice(long start, long length) =>
+        public slice<T> Slice(nint start, nint length) =>
             new slice<T>(m_array, (int)start, (int)(start + length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,21 +109,21 @@ namespace go
         public array<T> Clone() => new array<T>(m_array.Clone() as T[]);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<(long, T)> GetEnumerator()
+        public IEnumerator<(nint, T)> GetEnumerator()
         {
-            long index = 0;
+            nint index = 0;
 
             foreach (T item in m_array)
                 yield return (index++, item);
         }
 
         // Returns an enumerator for just index enumeration
-        public IEnumerable<long> Range
+        public IEnumerable<nint> Range
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                for (long i = 0; i < m_array.Length; i++)
+                for (nint i = 0; i < m_array.Length; i++)
                     yield return i;
             }
         }
