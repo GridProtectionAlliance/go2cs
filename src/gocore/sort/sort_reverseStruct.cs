@@ -43,14 +43,36 @@ namespace go
             public bool Less(nint i, nint j) => s_LessByRef?.Invoke(ref this, i, j) ?? s_LessByVal?.Invoke(this, i, j) ?? Interface?.Less(i, j) ?? throw RuntimeErrorPanic.NilPointerDereference();
 
             // Interface.Swap function promotion
-            private delegate bool SwapByVal(reverse value, nint i, nint j);
-            private delegate bool SwapByRef(ref reverse value, nint i, nint j);
+            private delegate void SwapByVal(reverse value, nint i, nint j);
+            private delegate void SwapByRef(ref reverse value, nint i, nint j);
 
             private static readonly SwapByVal? s_SwapByVal;
             private static readonly SwapByRef? s_SwapByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Swap(nint i, nint j) => s_SwapByRef?.Invoke(ref this, i, j) ?? s_SwapByVal?.Invoke(this, i, j) ?? Interface?.Swap(i, j) ?? throw RuntimeErrorPanic.NilPointerDereference();
+            public void Swap(nint i, nint j)
+            {
+                if (s_SwapByRef is not null)
+                {
+                    s_SwapByRef.Invoke(ref this, i, j);
+                    return;
+                }
+
+                if (s_SwapByVal is not null)
+                {
+                    s_SwapByVal.Invoke(this, i, j);
+                    return;
+                }
+
+                if (Interface is not null)
+                {
+                    Interface.Swap(i, j);
+                    return;
+                }
+
+                throw RuntimeErrorPanic.NilPointerDereference();
+            }
+
             
             [DebuggerStepperBoundary]
             static reverse()

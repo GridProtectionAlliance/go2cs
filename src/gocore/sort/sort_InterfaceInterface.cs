@@ -102,14 +102,14 @@ namespace go
                 return s_LessByPtr(m_target_ptr!, i, j);
             }
 
-            private delegate bool SwapByPtr(ptr<T> value, nint i, nint j);
-            private delegate bool SwapByVal(T value, nint i, nint j);
+            private delegate void SwapByPtr(ptr<T> value, nint i, nint j);
+            private delegate void SwapByVal(T value, nint i, nint j);
 
             private static readonly SwapByPtr? s_SwapByPtr;
             private static readonly SwapByVal? s_SwapByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Swap(nint i, nint j)
+            public void Swap(nint i, nint j)
             {
                 T target = m_target;
 
@@ -117,14 +117,17 @@ namespace go
                     target = m_target_ptr.val;
 
                 if (s_SwapByPtr is null || !m_target_is_ptr)
-                    return s_SwapByVal!(target, i, j);
+                {
+                    s_SwapByVal!(target, i, j);
+                    return;
+                }
 
-                return s_SwapByPtr(m_target_ptr!, i, j);
+                s_SwapByPtr(m_target_ptr!, i, j);
             }
             
             public string? ToString(string? format, IFormatProvider? formatProvider) => format;
 
-            [DebuggerStepperBoundary]
+            //[DebuggerStepperBoundary]
             static Interface()
             {
                 Type targetType = typeof(T);

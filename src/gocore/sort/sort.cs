@@ -36,7 +36,7 @@ namespace go
             // Less reports whether the element with
             // index i should sort before the element with index j.
             bool Less(nint i, nint j); // Swap swaps the elements with indexes i and j.
-            bool Swap(nint i, nint j);
+            void Swap(nint i, nint j);
         }
 
         // Insertion sort
@@ -376,7 +376,6 @@ namespace go
             }
 
             return true;
-
         }
 
         // Convenience types for common cases
