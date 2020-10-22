@@ -4,22 +4,26 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2018 August 14 00:22:20 UTC
+//     Generated on 2020 October 16 14:52:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 
+#nullable enable
+
 namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.1.0")]
-        public partial struct Person : EmptyInterface
+        [GeneratedCode("go2cs", "0.1.0.0")]
+        public partial struct Person
         {
             // Constructors
             public Person(NilType _)
@@ -29,11 +33,16 @@ namespace go
                 this.ShoeSize = default;
             }
 
-            public Person(@string Name, @int Age, float32 ShoeSize)
+            public Person(@string Name = default, nint Age = default, float ShoeSize = default)
             {
                 this.Name = Name;
                 this.Age = Age;
                 this.ShoeSize = ShoeSize;
+            }
+
+            public override string ToString()
+            {
+                return $"{{{Name} {Age} {ShoeSize}}}";
             }
 
             // Enable comparisons between nil and Person struct
@@ -53,7 +62,7 @@ namespace go
             public static implicit operator Person(NilType nil) => default(Person);
         }
 
-        [GeneratedCode("go2cs", "0.1.1.0")]
+        [GeneratedCode("go2cs", "0.1.0.0")]
         public static Person Person_cast(dynamic value)
         {
             return new Person(value.Name, value.Age, value.ShoeSize);
