@@ -18,6 +18,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SortArrayType.cs.target" />
+    <None Remove="SortArrayType_PeopleByAgeStructOf(slice(Person)).cs.target" />
+    <None Remove="SortArrayType_PeopleByShoeSizeStructOf(slice(Person)).cs.target" />
+    <None Remove="SortArrayType_PersonStruct.cs.target" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="SortArrayType.cs.target" />
+    <Compile Include="SortArrayType_PeopleByAgeStructOf%28slice%28Person%29%29.cs.target" />
+    <Compile Include="SortArrayType_PeopleByShoeSizeStructOf%28slice%28Person%29%29.cs.target" />
+    <Compile Include="SortArrayType_PersonStruct.cs.target" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="golib">
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>

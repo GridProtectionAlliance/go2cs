@@ -2,8 +2,6 @@ using fmt = go.fmt_package;
 using sort = go.sort_package;
 using static go.builtin;
 
-using PeopleByShoeSize = go.slice<go.main_package.Person>;
-
 namespace go
 {
     public static partial class main_package
@@ -15,6 +13,14 @@ namespace go
             public float ShoeSize;
         }
 
+        public partial struct PeopleByShoeSize // : slice<Person>
+        {
+        }
+
+        public partial struct PeopleByAge // : slice<Person>
+        {
+        }
+
         public static nint Len(this PeopleByShoeSize p)
         {
             return len(p);
@@ -22,7 +28,7 @@ namespace go
 
         public static void Swap(this PeopleByShoeSize p, nint i, nint j)
         {
-            Person tmp = p[i];
+            var tmp = p[i];
             p[i] = p[j];
             p[j] = tmp;
         }
@@ -32,12 +38,29 @@ namespace go
             return (p[i].ShoeSize < p[j].ShoeSize);
         }
 
+        public static nint Len(this PeopleByAge p)
+        {
+            return len(p);
+        }
+
+        public static void Swap(this PeopleByAge p, nint i, nint j)
+        {
+            var tmp = p[i];
+            p[i] = p[j];
+            p[j] = tmp;
+        }
+
+        public static bool Less(this PeopleByAge p, nint i, nint j)
+        {
+            return (p[i].Age < p[j].Age);
+        }
+
         private static void Main()
         {
             var people = new slice<Person>(new[] {
                 new Person(
                     Name: "Person1",
-                    Age: 25,
+                    Age: 26,
                     ShoeSize: 8F
                 ),
                 new Person(
@@ -63,7 +86,11 @@ namespace go
             });
 
             fmt.Println(people);
+
             sort.Sort(sort.Interface.As((PeopleByShoeSize)people));
+            fmt.Println(people);
+
+            sort.Sort(sort.Interface.As((PeopleByAge)people));
             fmt.Println(people);
         }
     }

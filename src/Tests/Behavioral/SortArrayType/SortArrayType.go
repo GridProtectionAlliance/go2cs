@@ -11,6 +11,8 @@ type Person struct {
 
 type PeopleByShoeSize []Person
 
+type PeopleByAge []Person
+
 func (p PeopleByShoeSize) Len() int {
     return len(p)
 }
@@ -23,11 +25,23 @@ func (p PeopleByShoeSize) Less(i, j int) bool {
     return (p[i].ShoeSize < p[j].ShoeSize)
 }
 
+func (p PeopleByAge) Len() int {
+    return len(p)
+}
+
+func (p PeopleByAge) Swap(i, j int) {
+    p[i], p[j] = p[j], p[i]
+}
+
+func (p PeopleByAge) Less(i, j int) bool {
+    return (p[i].Age < p[j].Age)
+}
+
 func main() {
     people := []Person {
     {
         Name: "Person1",
-        Age: 25,
+        Age: 26,
         ShoeSize: 8,
     },
     {
@@ -52,6 +66,10 @@ func main() {
     }}
 
     fmt.Println(people)
+    
     sort.Sort(PeopleByShoeSize(people))
+    fmt.Println(people)
+    
+    sort.Sort(PeopleByAge(people))
     fmt.Println(people)
 }
