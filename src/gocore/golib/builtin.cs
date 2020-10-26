@@ -198,7 +198,7 @@ namespace go
             if (src == nil)
                 throw new InvalidOperationException("Source slice array reference is null.");
 
-            nint min = Min(dst.Length, src.Length);
+            nint min = (nint)Min(dst.Length, src.Length);
 
             if (min > 0)
             {
@@ -285,6 +285,14 @@ namespace go
         /// <summary>
         /// Gets the length of the <paramref name="array"/>.
         /// </summary>
+        /// <param name="array">Target array.</param>
+        /// <returns>The length of the <paramref name="array"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint len(IArray array) => array.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="array"/>.
+        /// </summary>
         /// <param name="array">Target array pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
@@ -297,6 +305,14 @@ namespace go
         /// <returns>The length of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static nint len<T>(in slice<T> slice) => slice.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="slice"/>.
+        /// </summary>
+        /// <param name="slice">Target slice.</param>
+        /// <returns>The length of the <paramref name="slice"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint len(ISlice slice) => slice.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="slice"/>.

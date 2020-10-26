@@ -36,9 +36,9 @@ namespace go
 {
     public interface IArray : IEnumerable, ICloneable
     {
-        int Length { get; }
+        nint Length { get; }
 
-        object? this[int index] { get; set; }
+        object? this[nint index] { get; set; }
     }
 
     [Serializable]
@@ -58,7 +58,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public array(T[]? array) => m_array = array ?? new T[0];
 
-        public int Length
+        public nint Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => m_array.Length;
@@ -90,7 +90,7 @@ namespace go
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public slice<T> Slice(nint start, nint length) =>
-            new slice<T>(m_array, (int)start, (int)(start + length));
+            new slice<T>(m_array, start, start + length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IndexOf(in T item)
@@ -194,7 +194,7 @@ namespace go
 
         object ICloneable.Clone() => m_array.Clone();
 
-        object? IArray.this[int index]
+        object? IArray.this[nint index]
         {
             get => this![index];
             set => this[index] = (T)value!;
@@ -218,13 +218,13 @@ namespace go
 
         void IList<T>.RemoveAt(int index) => throw new NotSupportedException();
 
-        int IReadOnlyCollection<T>.Count => Length;
+        int IReadOnlyCollection<T>.Count => (int)Length;
 
         T IReadOnlyList<T>.this[int index] => this[index];
 
         bool ICollection<T>.IsReadOnly => false;
 
-        int ICollection<T>.Count => Length;
+        int ICollection<T>.Count => (int)Length;
 
         void ICollection<T>.Add(T item) => throw new NotSupportedException();
 
