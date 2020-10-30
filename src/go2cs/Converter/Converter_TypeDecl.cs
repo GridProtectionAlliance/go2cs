@@ -264,7 +264,7 @@ namespace go2cs
                             PackageName = Package,
                             StructName = identifier,
                             Scope = scope,
-                            TypeName = typeInfo.TypeName
+                            TypeInfo = typeInfo
                         }
                         .TransformText());
                     }
