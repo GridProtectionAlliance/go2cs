@@ -129,12 +129,39 @@ namespace go
         public static slice<T> append<T>(in slice<T> slice, params T[] elems) => go.slice<T>.Append(slice, elems);
 
         /// <summary>
+        /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
+        /// resliced to accommodate the new elements. If it does not, a new underlying array will be
+        /// allocated.
+        /// </summary>
+        /// <param name="slice">Destination slice pointer.</param>
+        /// <param name="elems">Elements to append.</param>
+        /// <returns>New slice with specified values appended.</returns>
+        /// <remarks>
+        /// Append returns the updated slice. It is therefore necessary to store the result of append,
+        /// often in the variable holding the slice itself:
+        /// <code>
+        /// slice = append(slice, elem1, elem2)
+        /// slice = append(slice, anotherSlice...)
+        /// </code>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static slice<T> append<T>(ISlice slice, params T[] elems) => (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
+
+        /// <summary>
         /// Gets the length of the <paramref name="array"/> (same as len(array)).
         /// </summary>
         /// <param name="array">Target array pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static nint cap<T>(in array<T> array) => array.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="array"/> (same as len(array)).
+        /// </summary>
+        /// <param name="array">Target array pointer.</param>
+        /// <returns>The length of the <paramref name="array"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint cap<T>(IArray array) => array.Length;
 
         /// <summary>
         /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
@@ -145,12 +172,28 @@ namespace go
         public static nint cap<T>(in slice<T> slice) => slice.Capacity;
 
         /// <summary>
+        /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
+        /// </summary>
+        /// <param name="slice">Target slice pointer.</param>
+        /// <returns>The capacity of the <paramref name="slice"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint cap<T>(ISlice slice) => slice.Capacity;
+
+        /// <summary>
         /// Gets the maximum capacity of the <paramref name="channel"/>.
         /// </summary>
         /// <param name="channel">Target channel pointer.</param>
         /// <returns>The capacity of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static nint cap<T>(in channel<T> channel) => channel.Capacity;
+
+        /// <summary>
+        /// Gets the maximum capacity of the <paramref name="channel"/>.
+        /// </summary>
+        /// <param name="channel">Target channel pointer.</param>
+        /// <returns>The capacity of the <paramref name="channel"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint cap<T>(IChannel channel) => channel.Capacity;
 
         /// <summary>
         /// Closes the channel.
@@ -357,6 +400,14 @@ namespace go
         /// <summary>
         /// Gets the length of the <paramref name="map"/>.
         /// </summary>
+        /// <param name="map">Target map.</param>
+        /// <returns>The length of the <paramref name="map"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint len(IMap map) => map.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="map"/>.
+        /// </summary>
         /// <param name="map">Target map pointer.</param>
         /// <returns>The length of the <paramref name="map"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
@@ -369,6 +420,14 @@ namespace go
         /// <returns>The length of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
         public static nint len<T>(in channel<T> channel) => channel.Length;
+
+        /// <summary>
+        /// Gets the length of the <paramref name="channel"/>.
+        /// </summary>
+        /// <param name="channel">Target channel.</param>
+        /// <returns>The length of the <paramref name="channel"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+        public static nint len<T>(IChannel channel) => channel.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="channel"/>.
