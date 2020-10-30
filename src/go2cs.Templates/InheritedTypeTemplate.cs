@@ -310,7 +310,7 @@ public string InterfaceImplementation
                 string[] mapType = Common.RemoveSurrounding(TypeName, "map<", ">").Split(",");
                 return new IMapImplementation { KeyName = mapType[0].Trim(), TypeName = mapType[1].Trim() }.TransformText();
             case TypeClass.Channel:
-                return "";
+                return new IChannelImplementation { TypeName = Common.RemoveSurrounding(TypeName, "channel<", ">") }.TransformText();
             default:
                 return "";
         }

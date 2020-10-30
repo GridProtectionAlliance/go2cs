@@ -56,10 +56,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>InterfaceTypeTemplate.tt</DependentUpon>
     </Compile>
-    <Compile Update="ISliceImplementation.cs">
+    <Compile Update="IChannelImplementation.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ISliceImplementation.tt</DependentUpon>
+      <DependentUpon>IChannelImplementation.tt</DependentUpon>
     </Compile>
     <Compile Update="MainProjectTemplate.cs">
       <DesignTime>True</DesignTime>
@@ -95,8 +95,8 @@
 
   <ItemGroup>
     <None Update="IChannelImplementation.tt">
-      <LastGenOutput>ISliceImplementation.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>IChannelImplementation.cs</LastGenOutput>
     </None>
     <None Update="IMapImplementation.tt">
       <LastGenOutput>IMapImplementation.cs</LastGenOutput>
@@ -131,8 +131,8 @@
       <LastGenOutput>MainProjectTemplate.cs</LastGenOutput>
     </None>
     <None Update="LibraryProjectTemplate.tt">
-      <LastGenOutput>LibraryProjectTemplate.cs</LastGenOutput>
       <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>LibraryProjectTemplate.cs</LastGenOutput>
     </None>
     <None Update="StructFuncDeclTemplate.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
