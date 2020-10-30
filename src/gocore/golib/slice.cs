@@ -49,6 +49,8 @@ namespace go
         nint Capacity { get; }
 
         nint Available { get; }
+
+        ISlice? Append(object[] elems);
     }
 
     [Serializable]
@@ -324,6 +326,8 @@ namespace go
         object ICloneable.Clone() => MemberwiseClone();
 
         Array ISlice.Array => m_array;
+
+        ISlice? ISlice.Append(object[] elems) => Append(this, elems.Cast<T>().ToArray());
 
         object? IArray.this[nint index]
         {
