@@ -34,11 +34,14 @@ using System.Runtime.CompilerServices;
 
 namespace go
 {
-    public interface IMap : IDictionary
+    public interface IMap : IEnumerable
     {
+        nint Length { get; }
+
+        object? this[object key] { get; set; }
     }
 
-    public struct map<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
+    public struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, TValue> where TKey : notnull
     {
         private Dictionary<TKey, TValue>? m_map;
 
@@ -157,6 +160,14 @@ namespace go
         #endregion
 
         #region [ Interface Implementations ]
+
+        nint IMap.Length => Count;
+
+        object? IMap.this[object key]
+        {
+            get => this[(TKey)key];
+            set => this[(TKey)key] = (TValue)value!;
+        }
 
         TValue IDictionary<TKey, TValue>.this[TKey key]
         {
