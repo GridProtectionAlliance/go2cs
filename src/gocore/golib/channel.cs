@@ -37,9 +37,9 @@ namespace go
 {
     public interface IChannel : IEnumerable
     {
-        int Capacity { get; }
+        nint Capacity { get; }
 
-        int Length { get; }
+        nint Length { get; }
 
         bool SendIsReady { get; }
 
@@ -105,7 +105,7 @@ namespace go
         /// an unbuffered channel will be created.
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public channel(int size)
+        public channel(nint size)
         {
             if (size < 1)
                 throw new ArgumentOutOfRangeException(nameof(size));
@@ -122,7 +122,7 @@ namespace go
         /// <summary>
         /// Gets the capacity of the channel.
         /// </summary>
-        public int Capacity
+        public nint Capacity
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get;
@@ -131,7 +131,7 @@ namespace go
         /// <summary>
         /// Gets the count of items in the channel.
         /// </summary>
-        public int Length
+        public nint Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
