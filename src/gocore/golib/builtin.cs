@@ -161,7 +161,7 @@ namespace go
         /// <param name="array">Target array pointer.</param>
         /// <returns>The length of the <paramref name="array"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static nint cap<T>(IArray array) => array.Length;
+        public static nint cap(IArray array) => array.Length;
 
         /// <summary>
         /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
@@ -177,7 +177,7 @@ namespace go
         /// <param name="slice">Target slice pointer.</param>
         /// <returns>The capacity of the <paramref name="slice"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static nint cap<T>(ISlice slice) => slice.Capacity;
+        public static nint cap(ISlice slice) => slice.Capacity;
 
         /// <summary>
         /// Gets the maximum capacity of the <paramref name="channel"/>.
@@ -193,7 +193,7 @@ namespace go
         /// <param name="channel">Target channel pointer.</param>
         /// <returns>The capacity of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static nint cap<T>(IChannel channel) => channel.Capacity;
+        public static nint cap(IChannel channel) => channel.Capacity;
 
         /// <summary>
         /// Closes the channel.
@@ -427,7 +427,7 @@ namespace go
         /// <param name="channel">Target channel.</param>
         /// <returns>The length of the <paramref name="channel"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static nint len<T>(IChannel channel) => channel.Length;
+        public static nint len(IChannel channel) => channel.Length;
 
         /// <summary>
         /// Gets the length of the <paramref name="channel"/>.
@@ -503,7 +503,7 @@ namespace go
         /// <summary>
         /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="pointer">Out reference to pointer to heap allocated copy of <paramref name="target"/> value.</param>
+        /// <param name="pointer">Out reference to pointer to heap allocated zero value.</param>
         /// <typeparam name="T">Target type of reference.</typeparam>
         /// <returns>Reference to heap allocated instance of the zero value for type <typeparamref name="T"/>.</returns>
         /// <remarks>
@@ -700,7 +700,7 @@ namespace go
         /// </summary>
         /// <param name="type">Target type</param>
         /// <returns>Common Go type name for the specified <paramref name="type"/>.</returns>
-        public static string GetGoTypeName(Type type)
+        public static string GetGoTypeName(Type? type)
         {
             if (type is null)
                 return "nil";
@@ -737,15 +737,12 @@ namespace go
                 {
                     string typeName = type.FullName?? type.Name;
 
-                    switch (typeName)
+                    return typeName switch
                     {
-                        case "System.Numerics.Complex":
-                            return "complex128";
-                        case "go.complex64":
-                            return "complex64";
-                        default:
-                            return type == typeof(object) ? "interface {}" : typeName;
-                    }
+                        "System.Numerics.Complex" => "complex128",
+                        "go.complex64" => "complex64",
+                        _ => type == typeof(object) ? "interface {}" : typeName
+                    };
                 }
             }
         }
@@ -990,7 +987,7 @@ namespace go
         /// <param name="value">Value to convert.</param>
         /// <returns><paramref name="value"/> converted to a int64.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static int64 int64(object value) => (nint)Convert.ChangeType(value, TypeCode.Int64);
+        public static int64 int64(object value) => (int64)Convert.ChangeType(value, TypeCode.Int64);
 
         /// <summary>
         /// Converts <paramref name="value"/> to a float32.
@@ -1035,7 +1032,7 @@ namespace go
             if (value is complex128 dcomplex)
                 return (complex64)dcomplex;
 
-            if (!(value is complex64 fcomplex))
+            if (value is not complex64 fcomplex)
                 return (float)Convert.ChangeType(value, TypeCode.Single);
 
             return fcomplex;
@@ -1060,7 +1057,7 @@ namespace go
             if (value is complex64 fcomplex)
                 return fcomplex;
 
-            if (!(value is complex128 dcomplex))
+            if (value is not complex128 dcomplex)
                 return (double)Convert.ChangeType(value, TypeCode.Double);
 
             return dcomplex;
@@ -1144,7 +1141,7 @@ namespace go
         /// <param name="value">Value to convert.</param>
         /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-        public static @string @string(object value)
+        public static @string @string(object? value)
         {
             // Only reference types can be null, therefore "" is its default value
             if (value is null)
@@ -1308,7 +1305,7 @@ namespace go
         /// <param name="value">An object that implements the <see cref="IConvertible" /> interface.</param>
         /// <returns>A Go type whose value is equivalent to <paramref name="value"/>.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static object ConvertToType<T>(in T value) where T : IConvertible
+        public static object ConvertToType<T>(in T? value) where T : IConvertible
         {
             if (value is null)
                 return nil;
@@ -1351,16 +1348,18 @@ namespace go
                         values[values.Length] = value;
 
                         break;
+                #if NET5_0
                     case (var index, T indexValue):
+                    {
+                        if (!(index is null))
                         {
-                            if (!(index is null))
-                            {
-                                if (index.TryCastAsInteger(out ulong key))
-                                    values[key] = indexValue;
-                            }
-
-                            break;
+                            if (index.TryCastAsInteger(out ulong key))
+                                values[key] = indexValue;
                         }
+
+                        break;
+                    }
+                #endif
                 }
             }
 
@@ -1386,21 +1385,23 @@ namespace go
                         values.Add(value);
 
                         break;
+                #if NET5_0
                     case (var index, T indexValue):
+                    {
+                        if (!(index is null))
                         {
-                            if (!(index is null))
+                            if (index.TryCastAsInteger(out ulong key))
                             {
-                                if (index.TryCastAsInteger(out ulong key))
-                                {
-                                    for (ulong i = (ulong)values.Count; i < key; i++)
-                                        values.Add(default);
+                                for (ulong i = (ulong)values.Count; i < key; i++)
+                                    values.Add(default);
 
-                                    values.Add(indexValue);
-                                }
+                                values.Add(indexValue);
                             }
-
-                            break;
                         }
+
+                        break;
+                        }
+                #endif
                 }
             }
 
@@ -1439,7 +1440,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function) => new GoFunc<TRef1, T>(function).Execute(ref ref1);
 
-        #region [ func<TRef1, TRef2, ... TRef16> Implementations ]
+#region [ func<TRef1, TRef2, ... TRef16> Implementations ]
 
         /*  The following code was generated using the "GenGoFuncRefInstances" utility: */
 
@@ -1923,6 +1924,6 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
 
-        #endregion
+#endregion
     }
 }

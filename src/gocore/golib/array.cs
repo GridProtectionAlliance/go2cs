@@ -30,8 +30,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-#pragma warning disable IDE1006
-
 namespace go
 {
     public interface IArray : IEnumerable, ICloneable
@@ -56,7 +54,7 @@ namespace go
         public array(ulong length) => m_array = new T[length];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public array(T[]? array) => m_array = array ?? new T[0];
+        public array(T[]? array) => m_array = array ?? Array.Empty<T>();
 
         public nint Length
         {

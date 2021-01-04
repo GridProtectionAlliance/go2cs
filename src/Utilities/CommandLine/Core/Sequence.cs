@@ -20,8 +20,8 @@ namespace CommandLine.Core
                             ? typeLookup(f.Text).MapValueOrDefault(info =>
                                    info.TargetType == TargetType.Sequence
                                         ? new[] { f }.Concat(tokens.OfSequence(f, info))
-                                        : new Token[] { }, new Token[] { })
-                            : new Token[] { })
+                                        : Array.Empty<Token>(), Array.Empty<Token>())
+                            : Array.Empty<Token>())
                    from t in tseq
                    select t;
         }
@@ -37,7 +37,7 @@ namespace CommandLine.Core
                                  tokens.Skip(nameIndex + 1).TakeWhile(v => v.IsValue())),
                     tokens.Skip(nameIndex + 1).TakeWhile(v => v.IsValue()));
             }
-            return new Token[] { };
+            return Array.Empty<Token>();
         }
     }
 }

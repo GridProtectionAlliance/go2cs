@@ -34,7 +34,7 @@ namespace go
         // The zero value for Reader operates like a Reader of an empty string.
         public partial struct Reader {
             public @string s;
-            public long i;
+            public nint i;
             public int prevRune;
         }
 
@@ -44,22 +44,28 @@ namespace go
             return addr(new Reader(s, 0, -1));
         }
 
-        public static (long n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
+        public static (nint n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
             Read(ref r.val, b);
 
         // Size returns the original length of the underlying string.
         // Size is the number of bytes available for reading via ReadAt.
         // The returned value is always the same and is not affected by calls
         // to any other method.
-        public static (long n, error err) Read(this ref Reader r, in slice<byte> b) {
-            long n;
+        public static (nint n, error err) Read(this ref Reader r, in slice<byte> b) {
+            nint n;
             error err = default!;
 
             if (r.i >= len(r.s))
                 return (0, io.EOF);
 
             r.prevRune = -1;
+        
+        #if NET5_0
             n = copy(b, r.s[(int)r.i..]);
+        #else
+            n = copy(b, r.s.Slice((int)r.i, r.s.Length - r.i));
+        #endif
+        
             r.i += n;
 
             return (n, err);

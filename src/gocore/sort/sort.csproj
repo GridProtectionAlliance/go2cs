@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>sort_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
@@ -23,6 +23,7 @@
     <Nullable>enable</Nullable>
     <NoWarn>660;661;1701;1702;IDE1006;CS0219</NoWarn>
     <Version>0.1.0</Version>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

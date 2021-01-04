@@ -29,8 +29,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using static go.builtin;
 
-#pragma warning disable IDE0044, CS8618
-
 // TODO: Keep error implementation updated to match best interface template pattern
 
 namespace go
@@ -46,15 +44,19 @@ namespace go
         /// </summary>
         @string Error();
 
+    #if NET5_0
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static error As<T>(in T target) => (error<T>)target!;
+        public static error As<T>(in T target) =>
+            (error<T>)target!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static error As<T>(ptr<T> target_ptr) => (error<T>)target_ptr;
+        public static error As<T>(ptr<T> target_ptr) =>
+            (error<T>)target_ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static error? As(object target) =>
             typeof(error<>).CreateInterfaceHandler<error>(target);
+    #endif
     }
 
     public class error<T> : error
@@ -151,7 +153,7 @@ namespace go
 
         // Enable comparisons between nil and error<T> interface instance
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(error<T> value, NilType nil) => Activator.CreateInstance<error<T>>().Equals(value);
+        public static bool operator ==(error<T> value, NilType _) => Activator.CreateInstance<error<T>>().Equals(value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(error<T> value, NilType nil) => !(value == nil);

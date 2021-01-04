@@ -22,7 +22,6 @@
 //******************************************************************************************************
 
 using System.Runtime.CompilerServices;
-using int64 = System.Int64;
 
 namespace go
 {
@@ -30,12 +29,12 @@ namespace go
     {
         public partial struct Reader
         {
-            public Reader((@string, int64, int) i) :
+            public Reader((@string, nint, int) i) :
                 this(i.Item1, i.Item2)
             { }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Reader(@string s = default, int64 i = default, int prevRune = default)
+            public Reader(@string s = default, nint i = default, int prevRune = default)
             {
                 this.s = s;
                 this.i = i;
@@ -46,7 +45,7 @@ namespace go
             public override string ToString() => $"{{{s}}} {{{i}}} {{{prevRune}}}";
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Reader((@string, int64, int) value) => new Reader(value);
+            public static implicit operator Reader((@string, nint, int) value) => new Reader(value);
 
             // Person to nil comparisons
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

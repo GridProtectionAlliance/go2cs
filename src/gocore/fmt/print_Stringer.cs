@@ -42,6 +42,7 @@ namespace go
         /// </summary>
         public partial interface Stringer : IFormattable
         {
+        #if NET5_0
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Stringer As<T>(in T target) =>
                 (Stringer<T>)target!;
@@ -53,6 +54,7 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Stringer? As(object target) =>
                 typeof(Stringer<>).CreateInterfaceHandler<Stringer>(target);
+        #endif
         }
 
         public class Stringer<T> : Stringer
@@ -152,7 +154,7 @@ namespace go
 
             // Enable comparisons between nil and Stringer<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Stringer<T> value, NilType nil) => Activator.CreateInstance<Stringer<T>>().Equals(value);
+            public static bool operator ==(Stringer<T> value, NilType _) => Activator.CreateInstance<Stringer<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Stringer<T> value, NilType nil) => !(value == nil);

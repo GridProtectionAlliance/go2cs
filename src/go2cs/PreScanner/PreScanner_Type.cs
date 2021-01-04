@@ -120,7 +120,7 @@ namespace go2cs
                             Name = GetValidIdentifierName(typeInfo.TypeName),
                             Signature = new Signature
                             {
-                                Parameters = new ParameterInfo[0],
+                                Parameters = System.Array.Empty<ParameterInfo>(),
                                 Result = new[]
                                 {
                                     new ParameterInfo
@@ -145,8 +145,8 @@ namespace go2cs
                         Name = identifier,
                         Signature = Signatures[context] = new Signature
                         {
-                            Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
-                            Result = Result?.ToArray() ?? new ParameterInfo[0]
+                            Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
+                            Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
                         },
                         Comments = CheckForCommentsRight(methodSpec),
                         IsPromoted = false

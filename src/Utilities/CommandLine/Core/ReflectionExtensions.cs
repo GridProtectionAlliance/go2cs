@@ -197,7 +197,7 @@ namespace CommandLine.Core
                 BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Static,
                 null,
                 null,
-                new object[] { });
+                Array.Empty<object>());
 #endif
         }
 
@@ -212,7 +212,7 @@ namespace CommandLine.Core
                 BindingFlags.GetProperty | BindingFlags.Public | BindingFlags.Instance,
                 null,
                 target,
-                new object[] { });
+                Array.Empty<object>());
 #endif
         }
 

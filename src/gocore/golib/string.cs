@@ -33,10 +33,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Microsoft.VisualBasic.CompilerServices;
+//using Microsoft.VisualBasic.CompilerServices;
 using rune = System.Int32;
-
-#pragma warning disable IDE1006
 
 namespace go
 {
@@ -48,11 +46,11 @@ namespace go
         private readonly byte[] m_value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public @string(byte[] bytes)
+        public @string(byte[]? bytes)
         {
             if (bytes is null)
             {
-                m_value = new byte[0];
+                m_value = Array.Empty<byte>();
             }
             else
             {
@@ -85,7 +83,7 @@ namespace go
         private byte[] Value
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_value ?? new byte[0];
+            get => m_value ?? Array.Empty<byte>();
         }
 
         public int Length
@@ -190,7 +188,7 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe bool Decode(Decoder decoder, byte[] value, long index, int byteCount, char[] rune)
+        private static unsafe bool Decode(Decoder decoder, byte[] value, long index, int byteCount, char[] rune)
         {
             bool completed;
 

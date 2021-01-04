@@ -66,7 +66,7 @@ namespace go2cs.Metadata
                         Name = "Error",
                         Signature = new Signature
                         {
-                            Parameters = new ParameterInfo[0],
+                            Parameters = Array.Empty<ParameterInfo>(),
                             Result = new[]
                             {
                                 new ParameterInfo

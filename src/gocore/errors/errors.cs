@@ -80,8 +80,14 @@ namespace go
     {
         // New returns an error that formats as the given text.
         // Each call to New returns a distinct error value even if the text is identical.
-        public static error New(@string text) =>
-            error.As(new errorString(text))!;
+        public static error New(@string text)
+        {
+        #if NET5_0
+            return error.As(new errorString(text))!;
+        #else
+            return (error<errorString>)new errorString(text)!;
+        #endif
+        }
 
         // errorString is a trivial implementation of error.
         private partial struct errorString {

@@ -55,8 +55,8 @@ namespace go2cs
             Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
             Signatures[context] = new Signature
             {
-                Parameters = parameters?.ToArray() ?? new ParameterInfo[0],
-                Result = Result?.ToArray() ?? new ParameterInfo[0]
+                Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
+                Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
             };
         }
 

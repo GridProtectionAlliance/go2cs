@@ -432,7 +432,7 @@ namespace go
         public static slice<T> From<TSource>(TSource[] array)
         {
             if (array is null)
-                return new slice<T>(new T[0]);
+                return new slice<T>(System.Array.Empty<T>());
 
             if (array is T[] baseTypeArray)
                 return new slice<T>(baseTypeArray);

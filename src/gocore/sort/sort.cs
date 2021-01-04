@@ -359,7 +359,7 @@ namespace go
         // Reverse returns the reverse order for data.
         public static Interface Reverse(Interface data)
         {
-            return Interface.As(new reverse(data));
+            return (Interface<reverse>)new reverse(data)!;
         }
 
         // IsSorted reports whether data is sorted.
@@ -372,7 +372,6 @@ namespace go
                 {
                     return false;
                 }
-
             }
 
             return true;
@@ -383,10 +382,12 @@ namespace go
         {
             return len(p);
         }
+
         public static bool Less(this IntSlice p, nint i, nint j)
         {
             return p[i] < p[j];
         }
+
         public static void Swap(this IntSlice p, nint i, nint j)
         {
             var tmp = p[i];
@@ -476,20 +477,20 @@ namespace go
         // IntsAreSorted tests whether a slice of ints is sorted in increasing order.
         public static bool IntsAreSorted(slice<nint> a)
         {
-            return IsSorted(Interface.As((IntSlice)a));
+            return IsSorted((Interface<IntSlice>)a);
         }
 
         // Float64sAreSorted tests whether a slice of float64s is sorted in increasing order
         // (not-a-number values are treated as less than other values).
         public static bool Float64sAreSorted(slice<double> a)
         {
-            return IsSorted(Interface.As((Float64Slice)a));
+            return IsSorted((Interface<Float64Slice>)a);
         }
 
         // StringsAreSorted tests whether a slice of strings is sorted in increasing order.
         public static bool StringsAreSorted(slice<@string> a)
         {
-            return IsSorted(Interface.As((StringSlice)a));
+            return IsSorted((Interface<StringSlice>)a);
         }
 
         // Notes on stable sorting:

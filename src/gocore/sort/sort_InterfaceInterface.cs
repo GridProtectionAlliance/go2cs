@@ -25,15 +25,19 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public partial interface Interface
         {
+        #if NET5_0
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Interface As<T>(in T target) => (Interface<T>)target!;
+            public static Interface As<T>(in T target) => 
+                (Interface<T>)target!;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Interface As<T>(ptr<T> target_ptr) => (Interface<T>)target_ptr;
+            public static Interface As<T>(ptr<T> target_ptr) => 
+                (Interface<T>)target_ptr;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Interface? As(object target) =>
                 typeof(Interface<>).CreateInterfaceHandler<Interface>(target);
+        #endif
         }
 
         [GeneratedCode("go2cs", "0.1.0.0")]

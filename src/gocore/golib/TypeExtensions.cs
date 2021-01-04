@@ -31,8 +31,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-#pragma warning disable CA1031
-
 namespace go
 {
     /// <summary>
@@ -173,7 +171,7 @@ namespace go
                 // move this pointer location at will.
                 TypedReference reference = __makeref(instance);
                 IntPtr ptr = **(IntPtr**)&reference;
-                return $"0x{ptr.ToString("x")}";
+                return $"0x{ptr:x}";
             }
             catch
             {
@@ -196,7 +194,7 @@ namespace go
             if (!interfaceType.IsInterface)
                 return false;
 
-            while (!(targetType is null))
+            while (!(targetType is null!))
             {
                 if (targetType.GetInterfaces().Any(targetInterface => targetInterface == interfaceType || targetInterface.ImplementsInterface(interfaceType)))
                     return true;
@@ -283,7 +281,7 @@ namespace go
             Func<Type[], Type> getMethodType;
             List<Type> types = methodInfo.GetParameters().Select(paramInfo => paramInfo.ParameterType).ToList();
 
-            if (delegateType is null)
+            if (delegateType is null!)
             {
                 if (methodInfo.ReturnType == typeof(void))
                 {
@@ -297,7 +295,7 @@ namespace go
             }
             else
             {
-                getMethodType = sourceTypes => delegateType;
+                getMethodType = _ => delegateType;
             }
 
             isByRef = types[0].IsByRef;
@@ -338,7 +336,7 @@ namespace go
         /// <returns>Interface handler for <typeparamref name="T"/> interface</returns>
         /// <typeparam name="T">Target interface.</typeparam>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T? CreateInterfaceHandler<T>(this Type handlerType, object target) where T : class
+        public static T? CreateInterfaceHandler<T>(this Type handlerType, object? target) where T : class
         {
             if (target is null)
                 return default;
@@ -415,7 +413,7 @@ namespace go
         /// </summary>
         /// <param name="value">Value to check.</param>
         /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; othwerwise, <c>false</c>.</returns>
-        public static bool IsNumeric(this IConvertible value) => 
+        public static bool IsNumeric(this IConvertible? value) => 
             !(value is null) && IsNumericType(value.GetTypeCode());
 
         /// <summary>

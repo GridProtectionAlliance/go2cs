@@ -49,7 +49,14 @@ namespace go
         public map(int size) => m_map = new Dictionary<TKey, TValue>(size);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public map(IEnumerable<KeyValuePair<TKey, TValue>> map) => m_map = new Dictionary<TKey, TValue>(map);
+        public map(IEnumerable<KeyValuePair<TKey, TValue>> map)
+        {
+        #if NET5_0
+            m_map = new Dictionary<TKey, TValue>(map);
+        #else
+            m_map = map.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        #endif
+        }
 
         private Dictionary<TKey, TValue> Map
         {
@@ -112,7 +119,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode() => Map.GetHashCode();
 
-        #region [ Operators ]
+#region [ Operators ]
 
         // Enable implicit conversions between map<TKey, TValue> and IDictionary<T>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -157,9 +164,9 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator map<TKey, TValue>(NilType _) => default;
 
-        #endregion
+#endregion
 
-        #region [ Interface Implementations ]
+#region [ Interface Implementations ]
 
         nint IMap.Length => Count;
 
@@ -223,6 +230,6 @@ namespace go
 
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_map)?.GetEnumerator()!;
 
-        #endregion
+#endregion
     }
 }

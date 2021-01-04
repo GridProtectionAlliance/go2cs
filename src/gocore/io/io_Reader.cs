@@ -41,6 +41,7 @@ namespace go
         /// </summary>
         public partial interface Reader : IFormattable
         {
+        #if NET5_0
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Reader As<T>(ref T target) =>
                 (Reader<T>)target!;
@@ -52,6 +53,7 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
             public static Reader? As(object target) =>
                 typeof(Reader<>).CreateInterfaceHandler<Reader>(target);
+        #endif
         }
 
         public class Reader<T> : Reader
@@ -151,7 +153,7 @@ namespace go
 
             // Enable comparisons between nil and Reader<T> interface instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Reader<T> value, NilType nil) => Activator.CreateInstance<Reader<T>>().Equals(value);
+            public static bool operator ==(Reader<T> value, NilType _) => Activator.CreateInstance<Reader<T>>().Equals(value);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Reader<T> value, NilType nil) => !(value == nil);
