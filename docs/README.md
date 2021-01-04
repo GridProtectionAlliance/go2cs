@@ -5,6 +5,12 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 ![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
 
+## News
+
+* A recent example usage of `go2cs` allows the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) gaming platform. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) project.
+
+* Project has been updated to use .NET 5.0 and supports [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
+
 ## Goals
 
 * Convert Go code into C# so that Go code can be directly used within .NET ecosystem.
@@ -18,8 +24,6 @@ Converts source code developed using the Go programming language (see [Go Langua
   * Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
 
 ## Project Status
-
-Picking up this project again now that .NET 5.0 is forthcoming and some of the new changes are conducive to this project's original goals, such as [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
 
 ### Automated Code Conversion of Go Standard Library
 
@@ -37,7 +41,7 @@ Note that go2cs simple conversions currently depend on a small subset of the Go 
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
-Converted code now targets .NET Core only, specifically version 3.1 and C# 8.0 with goal to support .NET 5.0 and C# 9.0 when it comes out.
+Converted code now targets .NET 5.0 and C# 9.0.
 
 Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
 
