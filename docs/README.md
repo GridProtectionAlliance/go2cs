@@ -7,7 +7,7 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 ## News
 
-* A recent example usage of `go2cs` allows the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) gaming platform. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) project.
+* Recent example usages of `go2cs` allow the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) and [Godot](https://godotengine.org/) game engine platforms. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and [GodotGo](https://github.com/ritchiecarroll/GodotGo) projects.
 
 * Project has been updated to use .NET 5.0 and supports [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
 
