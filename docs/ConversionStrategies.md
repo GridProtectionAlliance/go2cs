@@ -31,7 +31,7 @@ So that Go packages are more readily usable in C# applications, all converted co
 
 Go projects that contain a `main` function are converted into a standard C# executable project, i.e., `<OutputType>Exe</OutputType>`. The conversion process will automatically reference and convert needed external projects as library projects, i.e., `<OutputType>Library</OutputType>` per any defined encountered `import` statements, recursively. In this manner an executable with packages compiled as project referenced assemblies can be created. To create a single executable, like the original Go counterpart, a [self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained) will be created.
 
-Long term plan is to provide ability to use reference packages that have already been converted, e.g., from NuGet. See existing [`go2cs NuGet libraries`](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22). Automating library conversion using packages will require an intermediate repository of original Go package name / location mapped to published NuGet package reference. A web site has been reserved for this purpose, i.e., http://nugetgo.net/ - for the moment, this just redirects to the go2cs GitHub site.
+Long term plan is to provide ability to use reference packages that have already been converted, e.g., from NuGet. See existing [`go2cs NuGet libraries`](https://www.nuget.org/packages?q=go2cs). Automating library conversion using packages will require an intermediate repository of original Go package name / location mapped to published NuGet package reference. A web site has been reserved for this purpose, i.e., http://nugetgo.net/ - for the moment, this just redirects to the go2cs GitHub site.
 
 ## Constant Values
 Go constants hold arbitrary-precision literals with expression support. Applying value to variables in Go happens at compile time, so C# conversion will need to support this operation. Ideally every numeric constant that can hold the value without overflowing should to be defined, see [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants). An additional run-time lazy initialized BigInteger can be provided for simpler library usage but use of constants should be encouraged for best performance.
@@ -53,22 +53,23 @@ In Go `nil` is the equivalent of C# `null`. Where possible converted code will u
 In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`. If there are type specific semantic use cases where this does not work, this strategy may need to be reevaluated.
 
 ## Inline Assignment Order of Operations
-All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. This is tricky, for example, consider the following Go code:
+All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For example the following Go code:
 
 ```go
 x, y = y, x+y
 ```
-In C#, the following will _not_ produce the same results:
+the equivalent C# code operates as follows:
 ```csharp
-x = y;
-y = x+y;
+(x, y) = (y, x+y)
 ```
-Instead,  equivalent code in C# is as follows:
-```csharp
-var _y1 = x+y;
-x = y;
-y = _y1;
-```
+See working examples:
+* Go: https://play.golang.org/p/bOhOvo1s846
+* C#: https://dotnetfiddle.net/HfIpjz
+
+~~ Old conversion strategy:<br/>~
+~~`var _y1 = x+y;`<br/>~~
+~~`x = y;`<br/>~~
+~~`y = _y1;`~~
 
 ## Short Variable Redeclaration (Shadowing)
 
@@ -111,25 +112,25 @@ namespace go
 {
     public static partial class main_package
     {
-        private static void f(long y) {
+        private static void f(nint y) {
             fmt.Print(y);
         }
 
         private static void Main() {
-            long i = -1L;
+            nint i = -1;
 
             fmt.Println("i =", i);
 
             {
-                long i__prev1 = i;
+                nint i__prev1 = i;
 
-                for (i = 0L; i < 5L; i++) {
+                for (i = 0; i < 5; i++) {
                     f(i);
 
                     {
-                        long i__prev2 = i;
+                        nint i__prev2 = i;
 
-                        for (i = 12L; i < 15L; i++) {
+                        for (i = 12; i < 15; i++) {
                             f(i);
                         }
 
@@ -242,11 +243,11 @@ static class main_package
 Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition), these are a "type definition" and a "type alias declaration".
 
 ### Type Definitions
-For Go "type definitions" the aliased type becomes a new, distinct type, however the new type and the base type are said to share the same [underlying type](https://go101.org/article/type-system-overview.html#underlying-type). Since converted code is using structs, which do not allow for inheritance, and aliased type and all base types are considered equivalent, the conversion tool will need to define implicit conversion operators for all these types. This means defining implicit conversion operators for the alias type for all underlying types down to built-in or unnamed (non-defined) type. The implicit operators will allow for interchangeably using aliased type and its base types while maintaining type distinction.
+For Go "type definitions" the aliased type becomes a new, distinct type, however the new type and the base type are said to share the same [underlying type](https://go101.org/article/type-system-overview.html#underlying-type). Since converted code is using structs, which do not allow for inheritance, and aliased type and all base types are considered equivalent, the conversion tool will need to define implicit conversion operators for all these types. This means defining implicit conversion operators for the alias type and for all underlying types down to the built-in or unnamed (non-defined) type. The implicit operators will allow for interchangeably using aliased type and its base types while maintaining type distinction.
 
-Also derived types will need to expose all properties of original type. Ideally new type will declare an "instance" of original type as a private property and just re-expose values. In the case of built-in types, e.g., [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) - each of the primary functions will need to implemented. Currently build-in types like [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) have an associated .NET interface defined, e.g., [`ISlice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs#L41) that can be implemented for this purpose - this way the new type definition will still be a distinct type but still act like the built-in base type.
+Also derived types will need to expose all properties of original type. Ideally new type will declare an "instance" of original type as a private property and just re-expose values. In the case of built-in types, e.g., [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) - each of the primary functions will need to implemented. Currently built-in types like [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) have an associated .NET interface defined, e.g., [`ISlice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs#L41) that can be implemented for this purpose - this way the new type definition will still be a distinct type but operate like the built-in base type.
 
-Note that aliased types operate similarly to type embedding when it comes to extension method function receivers, i.e., aliased type supports the extension methods of the base types. Like with embedded types this is more tricky in C# because of duck-implemented interfaces (see [interface strategies](#interfaces)), but the solution is the same, i.e., creating proxy extension functions for the aliased type for all underlying type extensions.
+Note that aliased types operate similarly to type embedding when it comes to extension method function receivers, i.e., the aliased type supports the extension methods of the base types. Like with embedded types this is more tricky in C# because of duck-implemented interfaces (see [interface strategies](#interfaces)), but the solution is the same, i.e., creating proxy extension functions for the aliased type for each of the underlying type extensions.
 
 ### Type Alias Declarations
 For Go "type alias declarations" generally <sup>[[1](#ref1)]</sup> matches aliasing in C# implemented with the `using` keyword, for example, the following Go and C# code are equivalent:
@@ -263,7 +264,7 @@ using table = go.map<@string, int>;
 
    > <small><a name="ref1"></a>[1] When using a type alias as an embedded type, Go is picky about structure matching. Weirdly, structures definitions are only considered a match when the embedded types both use the type alias, using the base type fails, see [example](https://play.golang.org/p/97lMNpTtPAy). However, this should not be a case the converter should have to consider because this is build error in Go.</small>
 
-One difference for this type of aliasing is that in C# `using` aliases are always local to a file. In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to all files needing the alias. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to code headers when package is encountered per Go `import`.
+One difference for this type of aliasing is that in C# `using` aliases are always local to a file. In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to all files needing the alias. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to code headers when package is encountered in a Go `import`.
 
 > An active [C# 10 proposal](https://github.com/dotnet/csharplang/issues/3428) includes the possibility for using "global" using implementations. This seems like it would easily take care of exported type alias declarations, however, since C# 10 is at least a year out (as of 10/26/20), some proxy implementation like is detailed above is going to be required for now.
 
@@ -505,9 +506,9 @@ func PrintValPtr(ptr *int) {
 ```
 becomes:
 ```csharp
-public static void PrintValPtr(ptr<long> _addr_ptr)
+public static void PrintValPtr(ptr<nint> _addr_ptr)
 {
-    ref long ptr = ref _addr_ptr.val;
+    ref nint ptr = ref _addr_ptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n", ptr);
     ptr++;
