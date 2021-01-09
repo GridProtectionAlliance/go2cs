@@ -53,7 +53,7 @@ In Go `nil` is the equivalent of C# `null`. Where possible converted code will u
 In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`. If there are type specific semantic use cases where this does not work, this strategy may need to be reevaluated.
 
 ## Inline Assignment Order of Operations
-All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For example the following Go code:
+All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). As an example, for the following Go code:
 
 ```go
 x, y = y, x+y
@@ -66,7 +66,7 @@ See working examples:
 * Go: https://play.golang.org/p/bOhOvo1s846
 * C#: https://dotnetfiddle.net/HfIpjz
 
-~~ Old conversion strategy:<br/>~
+~~ Old conversion strategy:<br/>~~
 ~~`var _y1 = x+y;`<br/>~~
 ~~`x = y;`<br/>~~
 ~~`y = _y1;`~~
