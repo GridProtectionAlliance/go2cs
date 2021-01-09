@@ -63,8 +63,8 @@ the equivalent C# code operates as follows:
 (x, y) = (y, x+y)
 ```
 See working examples:
-* Go: https://play.golang.org/p/bOhOvo1s846
-* C#: https://dotnetfiddle.net/HfIpjz
+* [Go Inline Assignment](https://play.golang.org/p/bOhOvo1s846)
+* [C# Inline Assignment](https://dotnetfiddle.net/HfIpjz)
 
 ~~Old conversion strategy:<br/>~~
 ~~`var _y1 = x+y;`<br/>~~
