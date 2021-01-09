@@ -66,7 +66,7 @@ See working examples:
 * Go: https://play.golang.org/p/bOhOvo1s846
 * C#: https://dotnetfiddle.net/HfIpjz
 
-~~ Old conversion strategy:<br/>~~
+~~Old conversion strategy:<br/>~~
 ~~`var _y1 = x+y;`<br/>~~
 ~~`x = y;`<br/>~~
 ~~`y = _y1;`~~
