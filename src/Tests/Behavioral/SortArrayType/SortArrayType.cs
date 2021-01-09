@@ -28,9 +28,7 @@ namespace go
 
         public static void Swap(this PeopleByShoeSize p, nint i, nint j)
         {
-            var tmp = p[i];
-            p[i] = p[j];
-            p[j] = tmp;
+            (p[i], p[j]) = (p[j], p[i]);
         }
 
         public static bool Less(this PeopleByShoeSize p, nint i, nint j)
@@ -45,9 +43,7 @@ namespace go
 
         public static void Swap(this PeopleByAge p, nint i, nint j)
         {
-            var tmp = p[i];
-            p[i] = p[j];
-            p[j] = tmp;
+            (p[i], p[j]) = (p[j], p[i]);
         }
 
         public static bool Less(this PeopleByAge p, nint i, nint j)
@@ -57,40 +53,14 @@ namespace go
 
         private static void Main()
         {
-            var people = new slice<Person>(new[] {
-                new Person(
-                    Name: "Person1",
-                    Age: 26,
-                    ShoeSize: 8F
-                ),
-                new Person(
-                    Name: "Person2",
-                    Age: 21,
-                    ShoeSize: 4F
-                ),
-                new Person(
-                    Name: "Person3",
-                    Age: 15,
-                    ShoeSize: 9F
-                ),
-                new Person(
-                    Name: "Person4",
-                    Age: 45,
-                    ShoeSize: 15F
-                ),
-                new Person(
-                    Name: "Person5",
-                    Age: 25,
-                    ShoeSize: 8.5F
-                )
-            });
+            Person people = new slice<Person>(new Person[] { {Name:"Person1",Age:26,ShoeSize:8,}, {Name:"Person2",Age:21,ShoeSize:4,}, {Name:"Person3",Age:15,ShoeSize:9,}, {Name:"Person4",Age:45,ShoeSize:15,}, {Name:"Person5",Age:25,ShoeSize:8.5,} });
 
             fmt.Println(people);
 
-            sort.Sort(sort.Interface.As((PeopleByShoeSize)people));
+            sort.Sort(PeopleByShoeSize(people));
             fmt.Println(people);
 
-            sort.Sort(sort.Interface.As((PeopleByAge)people));
+            sort.Sort(PeopleByAge(people));
             fmt.Println(people);
         }
     }

@@ -7,7 +7,7 @@
     <RootNamespace>go</RootNamespace>
     <AssemblyName>SortArrayType</AssemblyName>
     <Product>go2cs</Product>
-    <Copyright>Copyright © 2020</Copyright>
+    <Copyright>Copyright © 2021</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

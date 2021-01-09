@@ -155,12 +155,8 @@ namespace go2cs
         {
             // assignment
             //     : expressionList assign_op expressionList
-
-            // TODO: Properly handle assignment order of operations, see https://gridprotectionalliance.github.io/go2cs/ConversionStrategies.html#inline-assignment-order-of-operations
             if (ExpressionLists.TryGetValue(context.expressionList(0), out ExpressionInfo[] leftOperands) && ExpressionLists.TryGetValue(context.expressionList(1), out ExpressionInfo[] rightOperands))
             {
-                StringBuilder statement = new StringBuilder();
-
                 if (leftOperands.Length != rightOperands.Length)
                 {
                     if (leftOperands.Length > rightOperands.Length && rightOperands.Length == 1)
@@ -181,71 +177,82 @@ namespace go2cs
                 }
 
                 int length = Math.Min(leftOperands.Length, rightOperands.Length);
-               
-                for (int i = 0; i < length; i++)
+                string assignOP = context.assign_op().GetText();
+
+                if (assignOP.Equals("=") && length > 1 && leftOperands.Length == rightOperands.Length)
                 {
-                    string assignOP = context.assign_op().GetText();
-                    string leftOperandText = leftOperands[i].Text;
-                    string rightOperandText = rightOperands[i].Text;
-
-                    if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
+                    // TODO: Check for edge cases related to this tuple assignment operation, e.g., pointers, does this need "_addr_" prefix?
+                    // This handles assignment order of operations, see https://gridprotectionalliance.github.io/go2cs/ConversionStrategies.html#inline-assignment-order-of-operations
+                    m_simpleStatements[context.Parent] = $"{Spacing()}({string.Join(", ", leftOperands.Select(op => op.Text))}) {assignOP} ({string.Join(", ", rightOperands.Select(op => op.Text))});";
+                }
+                else
+                {
+                    StringBuilder statement = new StringBuilder();
+                    
+                    for (int i = 0; i < length; i++)
                     {
-                        // TODO: Need expression evaluation - cast not needed for int expressions
-                        if (!int.TryParse(rightOperands[i].Text, out int _))
-                            rightOperands[i].Text = $"(int)({rightOperands[i]})";
-                    }
+                        string leftOperandText = leftOperands[i].Text;
+                        string rightOperandText = rightOperands[i].Text;
 
-                    if (assignOP.Equals("&^="))
-                    {
-                        assignOP = " &= ";
-                        rightOperands[i].Text = $"~({rightOperands[i].Text})";
-                    }
-                    else
-                    {
-                        if (!m_variableTypes.TryGetValue(leftOperandText, out TypeInfo leftOperandType))
-                            leftOperandType = leftOperands[i].Type;
-
-                        if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
-                            rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})!";
-
-                        if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
+                        if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
                         {
-                            string targetVariable = rightOperandText.Replace(AddressPrefix, "");
+                            // TODO: Need expression evaluation - cast not needed for int expressions
+                            if (!int.TryParse(rightOperands[i].Text, out int _))
+                                rightOperands[i].Text = $"(int)({rightOperands[i]})";
+                        }
 
-                            if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && !(rightOperandType is PointerTypeInfo))
+                        if (assignOP.Equals("&^="))
+                        {
+                            assignOP = " &= ";
+                            rightOperands[i].Text = $"~({rightOperands[i].Text})";
+                        }
+                        else
+                        {
+                            if (!m_variableTypes.TryGetValue(leftOperandText, out TypeInfo leftOperandType))
+                                leftOperandType = leftOperands[i].Type;
+
+                            if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
+                                rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})!";
+
+                            if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
                             {
-                                rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref {AddressPrefix}{leftOperandText}.val";
-                                leftOperandText = $"{AddressPrefix}{leftOperandText}";
+                                string targetVariable = rightOperandText.Replace(AddressPrefix, "");
+
+                                if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && !(rightOperandType is PointerTypeInfo))
+                                {
+                                    rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref {AddressPrefix}{leftOperandText}.val";
+                                    leftOperandText = $"{AddressPrefix}{leftOperandText}";
+                                }
                             }
+
+                            if (assignOP == "=" && leftOperandType is PointerTypeInfo)
+                            {
+                                string targetVariable = rightOperandText.Replace(AddressPrefix, "");
+
+                                if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && rightOperandType is PointerTypeInfo)
+                                    rightOperandText = $"addr({targetVariable})";
+                            }
+
+                            assignOP = $" {assignOP} ";
                         }
 
-                        if (assignOP == "=" && leftOperandType is PointerTypeInfo)
+                        statement.Append($"{Spacing()}{leftOperandText}{assignOP}{rightOperandText};");
+
+                        // Since multiple assignments can be on one line, only check for comments after last assignment
+                        if (i < length - 1)
                         {
-                            string targetVariable = rightOperandText.Replace(AddressPrefix, "");
+                            statement.AppendLine();
+                        }
+                        else
+                        {
+                            statement.Append(CheckForCommentsRight(context));
 
-                            if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && rightOperandType is PointerTypeInfo)
-                                rightOperandText = $"addr({targetVariable})";
+                            if (!WroteLineFeed)
+                                statement.AppendLine();
                         }
 
-                        assignOP = $" {assignOP} ";
+                        m_simpleStatements[context.Parent] = statement.ToString();
                     }
-
-                    statement.Append($"{Spacing()}{leftOperandText}{assignOP}{rightOperandText};");
-
-                    // Since multiple assignments can be on one line, only check for comments after last assignment
-                    if (i < length - 1)
-                    {
-                        statement.AppendLine();
-                    }
-                    else
-                    {
-                        statement.Append(CheckForCommentsRight(context));
-
-                        if (!WroteLineFeed)
-                            statement.AppendLine();
-                    }
-
-                    m_simpleStatements[context.Parent] = statement.ToString();
                 }
             }
             else

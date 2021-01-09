@@ -28,9 +28,7 @@ namespace go
 
         public static void Swap(this PeopleByShoeSize p, nint i, nint j)
         {
-            var tmp = p[i];
-            p[i] = p[j];
-            p[j] = tmp;
+            (p[i], p[j]) = (p[j], p[i]);
         }
 
         public static bool Less(this PeopleByShoeSize p, nint i, nint j)
@@ -45,9 +43,7 @@ namespace go
 
         public static void Swap(this PeopleByAge p, nint i, nint j)
         {
-            var tmp = p[i];
-            p[i] = p[j];
-            p[j] = tmp;
+            (p[i], p[j]) = (p[j], p[i]);
         }
 
         public static bool Less(this PeopleByAge p, nint i, nint j)
