@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 10/26/2020 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 1/10/2021 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Topics
 
@@ -10,7 +10,7 @@
 * [The "nil" Value](#the-nil-value)
 * [Empty Interface](#empty-interface)
 * [Inline Assignment Order of Operations](#inline-assignment-order-of-operations)
-* [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing))
+* [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing)
 * [Return Tuples](#return-tuples)
 * [Slices](#slices)
 * [Type Aliasing](#type-aliasing)
