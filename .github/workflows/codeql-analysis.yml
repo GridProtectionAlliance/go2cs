@@ -49,6 +49,7 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
+    - run: dotnet clean ${{ github.workspace }}/src/go2cs && dotnet nuget locals all --clear
     - run: dotnet restore ${{ github.workspace }}/src/go2cs
     - run: dotnet build ${{ github.workspace }}/src/go2cs
     #   make bootstrap
