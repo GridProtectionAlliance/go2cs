@@ -12,6 +12,8 @@
 
 using static go.builtin;
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // IntSlice attaches the methods of Interface to []int, sorting in increasing order.
 using IntSlice = go.slice<nint>;
@@ -30,7 +32,7 @@ namespace go
         // A type, typically a collection, that satisfies sort.Interface can be
         // sorted by the routines in this package. The methods require that the
         // elements of the collection be enumerated by an integer index.
-        public partial interface Interface
+        public /*partial*/ interface Interface
         {
             nint Len();
             // Less reports whether the element with
@@ -316,6 +318,10 @@ namespace go
             var n = data.Len();
             quickSort(data, 0, n, maxDepth(n));
         }
+
+        // TODO: For every public method that accesses an interface type, build a wrapper function that handles interface type conversion
+        [MethodImpl(MethodImplOptions.AggressiveInlining)/*, DebuggerNonUserCode*/]
+        public static void Sort<TInterface>(TInterface data) where TInterface : struct => Sort(new Interface<TInterface>(data));
 
         // maxDepth returns a threshold at which quicksort should switch
         // to heapsort. It returns 2*ceil(lg(n+1)).
