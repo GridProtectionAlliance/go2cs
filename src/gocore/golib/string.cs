@@ -41,7 +41,7 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public readonly struct @string : IConvertible, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(long, rune)>, IEnumerable<char>, ICloneable
+    public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(long, rune)>, IEnumerable<char>, ICloneable
     {
         private readonly byte[] m_value;
 
@@ -132,10 +132,16 @@ namespace go
             new slice<byte>(m_value, (int)start, (int)(start + length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override string ToString() => Encoding.UTF8.GetString(Value);
+        public override string ToString() =>
+            Encoding.UTF8.GetString(Value);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(@string other) => BytesAreEqual(Value, other.Value);
+        public bool Equals(@string other) =>
+            BytesAreEqual(Value, other.Value);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CompareTo(@string other) =>
+            StringComparer.Ordinal.Compare(ToString(), other.ToString());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object? obj)
