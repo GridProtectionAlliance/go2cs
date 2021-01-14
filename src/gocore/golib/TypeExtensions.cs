@@ -119,7 +119,8 @@ namespace go
         {
             static IEnumerable<MethodInfo> getExtensionMethods(Type type)
             {
-                if (!type.IsSealed || type.IsGenericType || type.IsNested)
+                // With addition of Golang generics, type.IsGenericType is now allowable
+                if (!type.IsSealed || type.IsNested) /* || type.IsGenericType */
                     return Array.Empty<MethodInfo>();
 
                 return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
@@ -229,7 +230,24 @@ namespace go
         public static IEnumerable<MethodInfo> GetExtensionMethods(this Type targetType)
         {
             lock (s_extensionMethods)
-                return s_extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+            {
+                bool isGenericType = (targetType == typeof(ptr<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
+
+                if (isGenericType)
+                    targetType = targetType.GetGenericTypeDefinition();
+
+                bool isGenericMatch(Type methodType)
+                {
+                    if (methodType.IsGenericType)
+                        return methodType.GetGenericTypeDefinition() == targetType;
+
+                    return methodType == targetType;
+                }
+
+                return isGenericType ?
+                    s_extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
+                    s_extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+            }
         }
 
         /// <summary>
@@ -260,6 +278,17 @@ namespace go
 
             try
             {
+                if (delegateType.IsGenericType && methodInfo.IsGenericMethod)
+                {
+                    Type extensionTarget = delegateType.GetGenericArguments()[0];
+
+                    if (extensionTarget.IsGenericType)
+                        return Delegate.CreateDelegate(delegateType, methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]));
+
+                    return Delegate.CreateDelegate(delegateType, methodInfo.MakeGenericMethod(extensionTarget));
+                }
+                    
+
                 return Delegate.CreateDelegate(delegateType, methodInfo);
             }
             catch (ArgumentException)
