@@ -22,23 +22,25 @@ namespace go
 {
     public static partial class sort_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial interface Interface
-        {
-        #if NET5_0
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Interface As<T>(in T target) => 
-                (Interface<T>)target!;
+        // If all methods with interface parameters have generic overloads to auto-cast to target interface class,
+        // then these methods are not necessary
+        //[GeneratedCode("go2cs", "0.1.0.0")]
+        //public partial interface Interface
+        //{
+        //#if NET5_0
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        //    public static Interface As<T>(in T target) => 
+        //        (Interface<T>)target!;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Interface As<T>(ptr<T> target_ptr) => 
-                (Interface<T>)target_ptr;
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        //    public static Interface As<T>(ptr<T> target_ptr) => 
+        //        (Interface<T>)target_ptr;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Interface? As(object target) =>
-                typeof(Interface<>).CreateInterfaceHandler<Interface>(target);
-        #endif
-        }
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        //    public static Interface? As(object target) =>
+        //        typeof(Interface<>).CreateInterfaceHandler<Interface>(target);
+        //#endif
+        //}
 
         [GeneratedCode("go2cs", "0.1.0.0")]
         public class Interface<T> : Interface
