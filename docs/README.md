@@ -75,7 +75,7 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 
 ## Usage
 
-> Before posting an issue for usage related questions consider using the [go2cs discussions forum](https://discussions.gridprotectionalliance.org/c/gpa-products/Golang-to-C-Converter/).
+> Before posting an issue for usage related questions consider using the [go2cs discussions forum](https://github.com/GridProtectionAlliance/go2cs/discussions).
 
 1. Make sure source  application already compiles with Go (e.g., `go build`) before starting conversion. That means any needed dependencies should already be downloaded and available, e.g., with `go get`.
 
