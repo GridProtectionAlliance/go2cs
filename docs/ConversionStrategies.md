@@ -14,6 +14,7 @@
 * [Return Tuples](#return-tuples)
 * [Slices](#slices)
 * [Type Aliasing](#type-aliasing)
+* [Delegates to Value Receiver Instances](#delegates-to-value-receiver-instances)
 * [Defer / Panic / Recover](#defer--panic--recover)
 * [Expression Switch Statements](#expression-switch-statements)
 * [Type Switch Statements](#type-switch-statements)
@@ -73,7 +74,7 @@ See working examples:
 
 ## Short Variable Redeclaration (Shadowing)
 
-When using Go short variable declaration syntax, e.g., `x := 2`, as long as variable result type does not change, the variable can be redeclared. This is different than simply reusing the same variable when the redeclaration occurs in a lesser scope of the outer variable. In these cases the original value is "shadowed" with its current value held on the stack while the new variable instance is manipulated. Once the redeclared variable instance goes out of scope, the higher scoped variable will have its original value. In general, C# code conversions will handle this by holding on to previous value and restoring it's original value when shadowed usage is complete, for example, the following Go code:
+When using Go short variable declaration syntax, e.g., `x := 2`, as long as variable result type does not change, the variable can be redeclared. This is different than simply reusing the same variable when the redeclaration occurs in a lesser scope of the outer variable. In these cases the original value is "shadowed" with its current value held on the stack while the new variable instance is manipulated. Once the redeclared variable instance goes out of scope, the higher scoped variable will have its original value. Current thinking (and implementation) is that C# code conversions will handle this by holding on to previous value and restoring it's original value when shadowed usage is complete, for example, the following Go code:
 
 ```go
 package main
@@ -264,9 +265,70 @@ using table = go.map<@string, int>;
 
    > <small><a name="ref1"></a>[1] When using a type alias as an embedded type, Go is picky about structure matching. Weirdly, structures definitions are only considered a match when the embedded types both use the type alias, using the base type fails, see [example](https://play.golang.org/p/97lMNpTtPAy). However, this should not be a case the converter should have to consider because this is build error in Go.</small>
 
-One difference for this type of aliasing is that in C# `using` aliases are always local to a file. In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to all files needing the alias. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to code headers when package is encountered in a Go `import`.
+In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to ~~all files needing the alias~~ a global usings file using the new [Global Using Directive](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/GlobalUsingDirective.md) feature of C# 10. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to the global using file when package is encountered in a Go `import`.
 
-> An active [C# 10 proposal](https://github.com/dotnet/csharplang/issues/3428) includes the possibility for using "global" using implementations. This seems like it would easily take care of exported type alias declarations, however, since C# 10 is at least a year out (as of 10/26/20), some proxy implementation like is detailed above is going to be required for now.
+## Delegates to Value Receiver Instances
+
+In Go a function is basically like any other value, as such a function can be assigned to a variable without using pointer syntax. When a value-based receiver function is assigned to a  variable, the variable value maintains its own copy of the target value for function execution. The result may come as a surprise to any non Go programmer, for example:
+
+```go
+package main
+
+import "fmt"
+
+type data struct {
+    name string
+}
+
+func (d data) printName() {
+    fmt.Println("Name =", d.name)
+}
+
+func main() {
+    d := data { name: "James" }
+
+    f1 := d.printName
+
+    f1()
+    d.name = "Gretchen"
+    f1()
+}
+```
+Results in the following output ([run it on Go Playground](https://play.golang.org/p/d-A5re1dfs8)):
+```
+Name = James
+Name = James
+```
+
+This C# code needs to be implemented to "copy" the receiver target to operate in the same fashion:
+```csharp
+using fmt = go.fmt_package;
+using static go.builtin;
+
+public static partial class main_package {
+    public struct Data {
+      public string name;
+    }
+
+    public static void printName(this Data d) {
+        fmt.Println("Name =", d.name);
+    }
+
+    public static void Main() {
+        Data d = new Data { name = "James" };
+
+        // Not this: "Action f1 = () => d.printName();", but this:
+        Action f1 = CopyTarget(d, d => d.printName());
+
+        f1();
+        d.name = "Gretchen";
+        f1();
+    }
+
+	  public static Action CopyTarget<T>(T target, Action<T> receiver) where T : struct =>
+		    () => receiver(target);
+}
+```
 
 ## Defer / Panic / Recover
 Handling Go `defer / panic / recover` operations in C# requires that code conversions create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/GoFunc.cs#L63).
