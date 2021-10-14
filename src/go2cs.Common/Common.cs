@@ -244,7 +244,7 @@ namespace go2cs
 
         public static string GetRelativePathTo(this FileSystemInfo from, FileSystemInfo to)
         {
-            string getPath(FileSystemInfo fsi) => !(fsi is DirectoryInfo d) ? fsi.FullName : AddPathSuffix(d.FullName);
+            string getPath(FileSystemInfo fsi) => fsi is not DirectoryInfo d ? fsi.FullName : AddPathSuffix(d.FullName);
 
             string fromPath = getPath(from);
             string toPath = getPath(to);

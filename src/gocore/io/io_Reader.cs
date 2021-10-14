@@ -66,7 +66,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -92,7 +92,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadByRef is null)
@@ -130,14 +130,14 @@ namespace go
 
                 MethodInfo extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
                 if (s_ReadByRef is null)
                 {
                     extensionMethod = targetType.GetExtensionMethod("Read");
 
-                    if (!(extensionMethod is null))
+                    if (extensionMethod is not null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
 

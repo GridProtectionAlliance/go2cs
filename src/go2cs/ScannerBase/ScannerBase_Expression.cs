@@ -116,14 +116,14 @@ namespace go2cs
             }
             else
             {
-                if (!(context.primaryExpr() is null))
+                if (context.primaryExpr() is not null)
                 {
                     if (PrimaryExpressions.TryGetValue(context.primaryExpr(), out ExpressionInfo primaryExpression))
                         Expressions[context] = primaryExpression;
                     else
                         AddWarning(context, $"Failed to find primary expression \"{context.primaryExpr().GetText()}\" in the expression \"{context.GetText()}\"");
                 }
-                else if (!(context.unaryExpr() is null))
+                else if (context.unaryExpr() is not null)
                 {
                     if (UnaryExpressions.TryGetValue(context.unaryExpr(), out ExpressionInfo unaryExpression))
                         Expressions[context] = unaryExpression;
@@ -147,7 +147,7 @@ namespace go2cs
             {
                 UnaryExpressions[context] = primaryExpression;
             }
-            else if (!(context.expression() is null))
+            else if (context.expression() is not null)
             {
                 if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
                 {
@@ -199,7 +199,7 @@ namespace go2cs
                             unaryExpression = expression.Text;
                     }
 
-                    if (!(unaryOP is null))
+                    if (unaryOP is not null)
                         unaryExpression = $"{unaryOP}{expression}";
 
                     UnaryExpressions[context] = new ExpressionInfo
@@ -245,7 +245,7 @@ namespace go2cs
                     Type = operand.Type
                 };
             }
-            else if (!(context.conversion() is null))
+            else if (context.conversion() is not null)
             {
                 // conversion
                 //     : type '(' expression ',' ? ')'
@@ -277,7 +277,7 @@ namespace go2cs
                         FunctionInfo functionInfo = null;
                         Metadata?.Functions.TryGetValue($"{functionName}()", out functionInfo);
 
-                        if (!(functionInfo is null))
+                        if (functionInfo is not null)
                         {
                             typeInfo = functionInfo.Signature.Signature.Result[0].Type;
 
@@ -317,7 +317,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find type or sub-expression for the conversion expression in \"{context.GetText()}\"");
                 }
             }
-            else if (!(context.DOT() is null))
+            else if (context.DOT() is not null)
             {
                 // selector
                 //     : '.' IDENTIFIER
@@ -335,7 +335,7 @@ namespace go2cs
                     Type = typeInfo ?? primaryExpression?.Type
                 };
             }
-            else if (!(context.index() is null))
+            else if (context.index() is not null)
             {
                 // index
                 //     : '[' expression ']'
@@ -353,7 +353,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find index expression for \"{context.GetText()}\"");
                 }
             }
-            else if (!(context.slice() is null))
+            else if (context.slice() is not null)
             {
                 // slice
                 //     : '['((expression ? ':' expression ? ) | (expression ? ':' expression ':' expression)) ']'
@@ -443,7 +443,7 @@ namespace go2cs
                     }
                 }
             }
-            else if (!(context.typeAssertion() is null))
+            else if (context.typeAssertion() is not null)
             {
                 // typeAssertion
                 //     : '.' '(' type ')'
@@ -461,7 +461,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find type for the type assertion expression in \"{context.GetText()}\"");
                 }
             }
-            else if (!(context.arguments() is null))
+            else if (context.arguments() is not null)
             {
                 // arguments
                 //     : '('((expressionList | type(',' expressionList) ? ) '...' ? ',' ? ) ? ')'
@@ -479,12 +479,12 @@ namespace go2cs
                 // TODO: Need to lookup functions from imported libraries as well
                 Metadata?.Functions.TryGetValue($"{functionName}()", out functionInfo);
 
-                if (!(functionInfo is null))
+                if (functionInfo is not null)
                     parameters = functionInfo.Signature.Signature.Parameters;
 
                 if (ExpressionLists.TryGetValue(argumentsContext.expressionList(), out ExpressionInfo[] expressions))
                 {
-                    if (InFunction && !(CurrentFunction is null))
+                    if (InFunction && CurrentFunction is not null)
                     {
                         for (int i = 0; i < expressions.Length; i++)
                         {
@@ -492,7 +492,7 @@ namespace go2cs
                             ParameterInfo parameter = parameters?.Length > i ? parameters[i] : null;
                             CurrentFunction.Variables.TryGetValue(expression.Text, out VariableInfo variable);
 
-                            if (parameter?.Type is PointerTypeInfo && !(expression.Type is PointerTypeInfo) && !(variable?.Type is PointerTypeInfo) && !expression.Text.StartsWith(AddressPrefix, StringComparison.Ordinal))
+                            if (parameter?.Type is PointerTypeInfo && expression.Type is not PointerTypeInfo && variable?.Type is not PointerTypeInfo && !expression.Text.StartsWith(AddressPrefix, StringComparison.Ordinal))
                                 arguments.Add($"{AddressPrefix}{expression}");
                             else
                                 arguments.Add(expression.Text);
@@ -536,7 +536,7 @@ namespace go2cs
                                 }
                             }
 
-                            if (!(argType is null))
+                            if (argType is not null)
                                 break;
                             
                             if (typeInfoValue.Name.Equals(typeName))
@@ -567,7 +567,7 @@ namespace go2cs
                     {
                         TypeInfo argType = expressions?[0].Type;
 
-                        if (!(argType is PointerTypeInfo))
+                        if (argType is not PointerTypeInfo)
                         {
                             argType = expressions?[0].Type.Clone() ?? TypeInfo.VarType.Clone();
 
@@ -587,7 +587,7 @@ namespace go2cs
                         PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.Name}>({argumentList})", Type = argType };
                     }
                 }
-                else if (primaryExpression.Text == "make" && !(typeInfo is null))
+                else if (primaryExpression.Text == "make" && typeInfo is not null)
                 {
                     switch (typeInfo.TypeClass)
                     {
@@ -623,7 +623,7 @@ namespace go2cs
                 }
                 else
                 {
-                    if (!(typeInfo is null))
+                    if (typeInfo is not null)
                         argumentList = $"typeof({typeInfo.TypeName}){(string.IsNullOrEmpty(argumentList) ? "" : $", {argumentList}")}";
 
                     PrimaryExpressions[context] = new ExpressionInfo
@@ -672,7 +672,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
+            if (context.Parent.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from basic literal: \"{context.GetText()}\"");
                 return;
@@ -688,7 +688,7 @@ namespace go2cs
             //     | RUNE_LIT
             //     | STRING_LIT
 
-            if (!(context.IMAGINARY_LIT() is null))
+            if (context.IMAGINARY_LIT() is not null)
             {
                 string value = context.IMAGINARY_LIT().GetText();
                 bool endsWith_i = value.EndsWith("i");
@@ -719,7 +719,7 @@ namespace go2cs
                     };
                 }
             }
-            else if (!(context.FLOAT_LIT() is null))
+            else if (context.FLOAT_LIT() is not null)
             {
                 basicLiteral = context.GetText();
 
@@ -750,11 +750,11 @@ namespace go2cs
                     };
                 }
             }
-            else if (!(context.integer() is null))
+            else if (context.integer() is not null)
             {
                 basicLiteral = ReplaceOctalBytes(context.integer().GetText());
 
-                if (!(context.integer().RUNE_LIT() is null))
+                if (context.integer().RUNE_LIT() is not null)
                 {
                     typeInfo = new TypeInfo
                     {
@@ -797,7 +797,7 @@ namespace go2cs
                     }
                 }
             }
-            else if (!(context.RUNE_LIT() is null))
+            else if (context.RUNE_LIT() is not null)
             {
                 basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
 
@@ -810,7 +810,7 @@ namespace go2cs
                     IsConst = true
                 };
             }
-            else if (!(context.string_() is null))
+            else if (context.string_() is not null)
             {
                 basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()));
 
@@ -823,7 +823,7 @@ namespace go2cs
                     IsConst = true
                 };
             }
-            else if (!(context.NIL_LIT() is null))
+            else if (context.NIL_LIT() is not null)
             {
                 basicLiteral = "null";
                 typeInfo = TypeInfo.ObjectType;
@@ -851,7 +851,7 @@ namespace go2cs
             // compositeLit
             //    : literalType literalValue
 
-            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
+            if (context.Parent.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from composite literal: \"{context.GetText()}\"");
                 return;
@@ -860,11 +860,11 @@ namespace go2cs
             GoParser.LiteralTypeContext literalType = context.literalType();
             GoParser.LiteralValueContext literalValue = context.literalValue();
             GoParser.KeyedElementContext[] keyedElements = literalValue.elementList()?.keyedElement();
-            bool isDynamicSizedArray = !(literalType.elementType() is null);
+            bool isDynamicSizedArray = literalType.elementType() is not null;
             List<(string key, string element)> elements = new List<(string key, string element)>();
             bool hasKeyedElement = false;
 
-            if (!(keyedElements is null))
+            if (keyedElements is not null)
             {
                 foreach (GoParser.KeyedElementContext keyedElement in keyedElements)
                 {
@@ -873,7 +873,7 @@ namespace go2cs
 
                     elements.Add((key, element));
 
-                    if (!(key is null) && !hasKeyedElement)
+                    if (key is not null && !hasKeyedElement)
                         hasKeyedElement = true;
                 }
             }
@@ -881,7 +881,7 @@ namespace go2cs
             string expressionText;
             TypeInfo typeInfo;
 
-            if (!(literalType.structType() is null))
+            if (literalType.structType() is not null)
             {
                 // TODO: Need to properly handle in-line struct, see "src\Examples\Manual Tour of Go Conversions\moretypes\slice-literals"
                 expressionText = $"/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ {context.GetText()}";
@@ -893,7 +893,7 @@ namespace go2cs
                     TypeClass = TypeClass.Struct
                 };
             }
-            else if (!(literalType.arrayType() is null) || isDynamicSizedArray)
+            else if (literalType.arrayType() is not null || isDynamicSizedArray)
             {
                 if (Types.TryGetValue(literalType.arrayType()?.elementType() ?? literalType.elementType(), out typeInfo))
                 {
@@ -940,7 +940,7 @@ namespace go2cs
                     return;
                 }
             }
-            else if (!(literalType.sliceType() is null))
+            else if (literalType.sliceType() is not null)
             {
                 if (Types.TryGetValue(literalType.sliceType().elementType(), out typeInfo))
                 {
@@ -973,7 +973,7 @@ namespace go2cs
                     return;
                 }
             }
-            else if (!(literalType.mapType() is null))
+            else if (literalType.mapType() is not null)
             {
                 // TODO: Need to properly handle map literals, see "src\Examples\Manual Tour of Go Conversions\moretypes\map-literals-continued"
                 if (Types.TryGetValue(literalType.mapType().type_(), out typeInfo) && Types.TryGetValue(literalType.mapType().elementType(), out TypeInfo elementTypeInfo))
@@ -996,7 +996,7 @@ namespace go2cs
                     return;
                 }
             }
-            else if (!(literalType.typeName() is null))
+            else if (literalType.typeName() is not null)
             {
                 // TODO: Need to determine how to properly employ keyed elements here - guess is type aliases to array/slice/map would need to map back to original implementations
                 expressionText = $"new {literalType.GetText()}({RemoveSurrounding(literalValue.GetText(), "{", "}")})";
@@ -1035,7 +1035,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context.Parent.Parent is GoParser.OperandContext operandContext))
+            if (context.Parent.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from function literal: \"{context.GetText()}\"");
                 return;
@@ -1066,7 +1066,7 @@ namespace go2cs
             //     | methodExpr
             //     | '(' expression ')'
 
-            if (!(context.Parent is GoParser.OperandContext operandContext))
+            if (context.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from operand name: \"{context.GetText()}\"");
                 return;
@@ -1092,7 +1092,7 @@ namespace go2cs
             //     | methodExpr
             //     | '(' expression ')'
 
-            if (!(context.Parent is GoParser.OperandContext operandContext))
+            if (context.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from method expression: \"{context.GetText()}\"");
                 return;

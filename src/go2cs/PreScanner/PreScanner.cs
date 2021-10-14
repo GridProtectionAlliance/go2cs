@@ -159,7 +159,7 @@ namespace go2cs
             GetFilePaths(options, null, fileName, out string sourceFileName, out _, out _, out string targetFilePath);
             FolderMetadata folderMetadata = GetFolderMetadata(options, sourceFileName, targetFilePath);
 
-            if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
+            if (folderMetadata is not null && folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata fileMetadata))
             {
                 ImportQueue.UnionWith(fileMetadata.ImportAliases.Select(import => import.Value.targetImport));
                 ScanImports(CreateNewPreScanner(null, null, options, fileName), showParseTree, CreateNewPreScanner, MetadataOutOfDate, HandleSkippedScan);

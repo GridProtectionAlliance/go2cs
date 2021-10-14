@@ -380,7 +380,7 @@ namespace go2cs
                 }
             }
 
-            return !(interfaceFileMetadata is null);
+            return interfaceFileMetadata is not null;
         }
 
         private void SearchPromotedStructFields(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
@@ -464,7 +464,7 @@ namespace go2cs
                 }
             }
 
-            return !(structFileMetadata is null);
+            return structFileMetadata is not null;
         }
 
         private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)

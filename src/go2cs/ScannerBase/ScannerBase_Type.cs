@@ -49,7 +49,7 @@ namespace go2cs
         {
             TypeInfo typeInfo;
 
-            if (!(context.type_() is null))
+            if (context.type_() is not null)
             {
                 if (Types.TryGetValue(context.type_(), out typeInfo))
                     Types[context] = typeInfo;

@@ -162,7 +162,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object? obj)
         {
-            if (!(obj is complex64))
+            if (obj is not complex64)
                 return false;
 
             return this == (complex64)obj;

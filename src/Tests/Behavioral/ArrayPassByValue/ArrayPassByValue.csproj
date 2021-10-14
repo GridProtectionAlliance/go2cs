@@ -15,6 +15,7 @@
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

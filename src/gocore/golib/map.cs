@@ -97,7 +97,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetValue(TKey key, out TValue value)
         {
-            if (!(m_map is null))
+            if (m_map is not null)
                 return m_map.TryGetValue(key, out value!);
 
             value = default!;

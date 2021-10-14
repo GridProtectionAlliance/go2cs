@@ -195,7 +195,7 @@ namespace go
             if (!interfaceType.IsInterface)
                 return false;
 
-            while (!(targetType is null!))
+            while (targetType is not null!)
             {
                 if (targetType.GetInterfaces().Any(targetInterface => targetInterface == interfaceType || targetInterface.ImplementsInterface(interfaceType)))
                     return true;
@@ -443,7 +443,7 @@ namespace go
         /// <param name="value">Value to check.</param>
         /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; othwerwise, <c>false</c>.</returns>
         public static bool IsNumeric(this IConvertible? value) => 
-            !(value is null) && IsNumericType(value.GetTypeCode());
+            value is not null && IsNumericType(value.GetTypeCode());
 
         /// <summary>
         /// Determines if <paramref name="typeCode"/> is a numeric type, i.e., one of:

@@ -113,13 +113,13 @@ namespace go
         public static bool operator ==(object obj, NilType _) => obj is null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(object obj, NilType _) => !(obj is null);
+        public static bool operator !=(object obj, NilType _) => obj is not null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType _, object obj) => obj is null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(NilType _, object obj) => !(obj is null);
+        public static bool operator !=(NilType _, object obj) => obj is not null;
 
         TypeCode IConvertible.GetTypeCode() => TypeCode.DBNull;
 

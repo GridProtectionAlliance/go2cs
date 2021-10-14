@@ -1351,7 +1351,7 @@ namespace go
                 #if NET5_0
                     case (var index, T indexValue):
                     {
-                        if (!(index is null))
+                        if (index is not null)
                         {
                             if (index.TryCastAsInteger(out ulong key))
                                 values[key] = indexValue;
@@ -1388,7 +1388,7 @@ namespace go
                 #if NET5_0
                     case (var index, T indexValue):
                     {
-                        if (!(index is null))
+                        if (index is not null)
                         {
                             if (index.TryCastAsInteger(out ulong key))
                             {

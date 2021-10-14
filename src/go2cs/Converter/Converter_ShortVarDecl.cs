@@ -33,7 +33,7 @@ namespace go2cs
         private bool TryGetFunctionVariable(string identifier, out VariableInfo variable)
         {
             variable = default;
-            return InFunction && (CurrentFunction?.Variables?.TryGetValue(identifier, out variable) ?? false) && !(variable is null);
+            return InFunction && (CurrentFunction?.Variables?.TryGetValue(identifier, out variable) ?? false) && variable is not null;
         }
 
         private string OpenRedeclaredVariableBlock(GoParser.IdentifierListContext identifierList, int level)
@@ -170,7 +170,7 @@ namespace go2cs
                         statement.Append($"{identifier} = ");
                     }
 
-                    if (!(expression is null))
+                    if (expression is not null)
                     {
                         if (typeInfo?.TypeClass == TypeClass.Interface)
                             statement.Append($"{typeInfo.TypeName}.As({expression})!");

@@ -77,9 +77,9 @@ namespace go2cs
 
             m_exprSwitchExpressionLevel++;
 
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     // Any declared variable will be scoped to switch statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
@@ -188,10 +188,10 @@ namespace go2cs
             ExprSwitchStatement exprSwitchStatement = m_exprSwitchStatements.Pop();
             ExpressionInfo expression = null;
 
-            if (!(context.expression() is null) && !Expressions.TryGetValue(context.expression(), out expression))
+            if (context.expression() is not null && !Expressions.TryGetValue(context.expression(), out expression))
                 AddWarning(context, $"Failed to find expression for switch statement: {context.expression().GetText()}");
 
-            bool hasSwitchStatement = !(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null;
+            bool hasSwitchStatement = context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null;
 
             if (exprSwitchStatement.anyFallthroughs)
             {
@@ -245,12 +245,12 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing()}}}{Environment.NewLine}");
                 }
 
-                if (!(exprSwitchStatement.defaultCase is null))
+                if (exprSwitchStatement.defaultCase is not null)
                     m_targetFile.Append($"{Spacing()}// default:{FixForwardSpacing(exprSwitchStatement.defaultCase.leftComments, 1, firstIsEOLComment: true)}{exprSwitchStatement.defaultCase.block}");
 
                 m_targetFile.Append($"{Environment.NewLine}{Spacing()}{breakLabel}:;{(hasSwitchStatement ? Environment.NewLine : CheckForCommentsRight(context))}");
             }
-            else if (exprSwitchStatement.allConst && !(expression is null))
+            else if (exprSwitchStatement.allConst && expression is not null)
             {
                 // Most simple scenario when all case values are constant, a common C# switch will suffice
                 m_targetFile.Append($"{Spacing()}switch ({expression.Text}){Environment.NewLine}{Spacing()}{{{RemoveLastLineFeed(exprSwitchStatement.intraSwitchComments)}");
@@ -264,7 +264,7 @@ namespace go2cs
                     m_targetFile.Append($"{Spacing(2)}break;");
                 }
 
-                if (!(exprSwitchStatement.defaultCase is null))
+                if (exprSwitchStatement.defaultCase is not null)
                 {
                     m_targetFile.AppendLine($"{Environment.NewLine}{Spacing(1)}default:{RemoveLastLineFeed(FixForwardSpacing(exprSwitchStatement.defaultCase.leftComments, 2, firstIsEOLComment: true))}");
                     m_targetFile.Append(FixForwardSpacing(exprSwitchStatement.defaultCase.block, 2));
@@ -305,7 +305,7 @@ namespace go2cs
                     m_targetFile.Append($"){FixForwardSpacing(caseStatement.leftComments, 1, firstIsEOLComment: true)}{caseStatement.block}");
                 }
 
-                if (!(exprSwitchStatement.defaultCase is null))
+                if (exprSwitchStatement.defaultCase is not null)
                 {
                     m_targetFile.Append($"{Spacing()}else{FixForwardSpacing(exprSwitchStatement.defaultCase.leftComments, 1, firstIsEOLComment: true)}{exprSwitchStatement.defaultCase.block}");
                 }
@@ -324,7 +324,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for expression based switch statement: {context.simpleStmt().GetText()}");
 
                 // Close any locally scoped declared variable sub-block
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     // Handle restoration of previous values of any redeclared variables
                     m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_exprSwitchExpressionLevel));

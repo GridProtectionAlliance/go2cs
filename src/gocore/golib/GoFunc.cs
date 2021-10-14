@@ -89,7 +89,7 @@ namespace go
 
             try
             {
-                if (!(m_function is null))
+                if (m_function is not null)
                     result = m_function(HandleDefer, HandlePanic, HandleRecover);
             }
             catch (PanicException ex)
@@ -128,13 +128,13 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         protected void HandleFinally()
         {
-            if (!(Defers is null))
+            if (Defers is not null)
             {
                 while (Defers.Count > 0)
                     Defers.Pop()();
             }
 
-            if (!(CapturedPanic.Value is null))
+            if (CapturedPanic.Value is not null)
                 throw CapturedPanic.Value;
         }
     }

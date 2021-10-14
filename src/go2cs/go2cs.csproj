@@ -16,6 +16,7 @@
     <Copyright>Copyright © 2020</Copyright>
     <Version>0.1.0</Version>
     <DefineConstants>TRACE;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
+    <LangVersion>9</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -78,7 +78,7 @@ namespace go2cs
             }
 
             return
-                !(simpleStatement is null) &&
+                simpleStatement is not null &&
                 simpleStatement.emptyStmt() is null &&
                 forClause.children[^1] != simpleStatement;
         }
@@ -94,14 +94,14 @@ namespace go2cs
 
             if (forClause.simpleStmt().Length == 1)
                 return
-                    !(simpleStatement is null) &&
+                    simpleStatement is not null &&
                     simpleStatement.emptyStmt() is null &&
                     forClause.children[^1] == simpleStatement;
 
             simpleStatement = forClause.simpleStmt(1);
 
             return
-                !(simpleStatement is null) &&
+                simpleStatement is not null &&
                 simpleStatement.emptyStmt() is null &&
                 forClause.children[^1] == simpleStatement;
         }
@@ -115,12 +115,12 @@ namespace go2cs
 
             GoParser.ForClauseContext forClause = context.forClause();
 
-            if (!(context.expression() is null) || !(forClause is null) && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
+            if (context.expression() is not null || forClause is not null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
                 // Handle while-style statement
                 m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
             }
-            else if (!(forClause is null))
+            else if (forClause is not null)
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
@@ -128,13 +128,13 @@ namespace go2cs
                 bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement, out bool isRedeclared);
                 bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
-                    hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
-                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null));
+                    hasInitStatement && (simpleInitStatement.shortVarDecl() is not null || simpleInitStatement.assignment() is not null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() is not null || simplePostStatement.expressionStmt() is not null);
 
                 if (hasInitStatement)
                 {
                     // Any declared variable will be scoped to for statement, so create a sub-block for it
-                    if (isRedeclared || !useForStyleStatement && !(simpleInitStatement.shortVarDecl() is null))
+                    if (isRedeclared || !useForStyleStatement && simpleInitStatement.shortVarDecl() is not null)
                     {
                         m_targetFile.AppendLine($"{Spacing()}{{");
                         IndentLevel++;
@@ -144,8 +144,8 @@ namespace go2cs
                     }
                 }
 
-                if (hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
-                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null)))
+                if (hasInitStatement && (simpleInitStatement.shortVarDecl() is not null || simpleInitStatement.assignment() is not null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() is not null || simplePostStatement.expressionStmt() is not null))
                 {
                     // Use standard for-style statement for simple constructs
                     m_targetFile.AppendLine($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
@@ -172,9 +172,9 @@ namespace go2cs
 
                 GoParser.RangeClauseContext rangeClause = context.rangeClause();
 
-                if (!(rangeClause is null))
+                if (rangeClause is not null)
                 {
-                    if (!(rangeClause.identifierList() is null))
+                    if (rangeClause.identifierList() is not null)
                     {
                         GoParser.IdentifierListContext identifiers = rangeClause.identifierList();
                         bool isRedeclared = false;
@@ -214,13 +214,13 @@ namespace go2cs
 
             GoParser.ForClauseContext forClause = context.forClause();
 
-            if (!(context.expression() is null) || !(forClause is null) && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
+            if (context.expression() is not null || forClause is not null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
             {
                 Expressions.TryGetValue(context.expression() ?? forClause?.expression(), out ExpressionInfo expression);
                 m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression?.Text ?? "true");
                 m_targetFile.Append(CheckForCommentsRight(context));
             }
-            else if (!(forClause is null))
+            else if (forClause is not null)
             {
                 // forClause
                 //     : simpleStmt? ';' expression? ';' simpleStmt?
@@ -233,8 +233,8 @@ namespace go2cs
                 bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement, out bool isRedeclared);
                 bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
                 bool useForStyleStatement =
-                    hasInitStatement && (!(simpleInitStatement.shortVarDecl() is null) || !(simpleInitStatement.assignment() is null)) &&
-                    hasPostStatement && (!(simplePostStatement.incDecStmt() is null) || !(simplePostStatement.expressionStmt() is null));
+                    hasInitStatement && (simpleInitStatement.shortVarDecl() is not null || simpleInitStatement.assignment() is not null) &&
+                    hasPostStatement && (simplePostStatement.incDecStmt() is not null || simplePostStatement.expressionStmt() is not null);
 
                 if (hasInitStatement)
                 {
@@ -260,7 +260,7 @@ namespace go2cs
                     }
 
                     // Close any locally scoped declared variable sub-block
-                    if (isRedeclared || !useForStyleStatement && !(simpleInitStatement.shortVarDecl() is null))
+                    if (isRedeclared || !useForStyleStatement && simpleInitStatement.shortVarDecl() is not null)
                     {
                         // Handle restoration of previous values of any redeclared variables
                         string closeRedeclarations = CloseRedeclaredVariableBlock(simpleInitStatement.shortVarDecl().identifierList(), m_forExpressionLevel);
@@ -310,15 +310,15 @@ namespace go2cs
                 ExpressionInfo[] expressions = null;
                 string[] identifiers = null;
 
-                if (!(rangeClause is null))
+                if (rangeClause is not null)
                 {
-                    if (!(rangeClause.identifierList() is null) && !Identifiers.TryGetValue(rangeClause.identifierList(), out identifiers))
+                    if (rangeClause.identifierList() is not null && !Identifiers.TryGetValue(rangeClause.identifierList(), out identifiers))
                         AddWarning(context, $"Failed to find identifier list in range expression: {rangeClause.identifierList().GetText()}");
 
-                    if (!(rangeClause.expressionList() is null) && !ExpressionLists.TryGetValue(rangeClause.expressionList(), out expressions))
+                    if (rangeClause.expressionList() is not null && !ExpressionLists.TryGetValue(rangeClause.expressionList(), out expressions))
                         AddWarning(context, $"Failed to find expression list in range expression: {rangeClause.expressionList().GetText()}");
 
-                    if (!(expressions is null))
+                    if (expressions is not null)
                     {
                         string[] expressionTexts = expressions.Select(expr => expr.Text).ToArray();
                         m_targetFile.AppendLine();
@@ -337,7 +337,7 @@ namespace go2cs
                         m_targetFile.Replace(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel), mutable.ToString());
                     }
 
-                    if (!(identifiers is null))
+                    if (identifiers is not null)
                     {
                         bool isRedeclared = false;
 

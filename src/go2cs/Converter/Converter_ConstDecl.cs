@@ -73,7 +73,7 @@ namespace go2cs
 
             ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
 
-            if (!(expressions is null) && identifiers.Length != expressions.Length)
+            if (expressions is not null && identifiers.Length != expressions.Length)
             {
                 AddWarning(context, $"Encountered identifier to expression count mismatch in constant expression: {context.GetText()}");
                 return;

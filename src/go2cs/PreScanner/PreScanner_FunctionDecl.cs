@@ -41,8 +41,8 @@ namespace go2cs
 
             ExpressionInfo expression = null;
 
-            if (!(context.primaryExpr() is null) && !PrimaryExpressions.ContainsKey(context.primaryExpr()) ||
-                !(context.expression() is null) && !Expressions.TryGetValue(context.expression(), out expression) ||
+            if (context.primaryExpr() is not null && !PrimaryExpressions.ContainsKey(context.primaryExpr()) ||
+                context.expression() is not null && !Expressions.TryGetValue(context.expression(), out expression) ||
                 expression is null)
                 return;
 
@@ -152,7 +152,7 @@ namespace go2cs
                 if (identifier.Equals("_"))
                     continue;
 
-                if (!(expressions is null) && expressions.Length <= i)
+                if (expressions is not null && expressions.Length <= i)
                     continue;
 
                 string uniqueIdentifer = GetUniqueIdentifier(m_variables, identifiers[i]);

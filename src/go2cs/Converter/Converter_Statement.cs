@@ -41,7 +41,7 @@ namespace go2cs
         
         public override void ExitStatement(GoParser.StatementContext context)
         {
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Append($"{statement}{(LineTerminatorAhead(context.simpleStmt()) ? "" : Environment.NewLine)}");
@@ -214,11 +214,11 @@ namespace go2cs
                             if (assignOP == "=" && leftOperandType?.TypeClass == TypeClass.Interface)
                                 rightOperandText = $"{leftOperandType.TypeName}.As({rightOperandText})!";
 
-                            if (assignOP == "=" && !(leftOperandType is PointerTypeInfo) && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
+                            if (assignOP == "=" && leftOperandType is not PointerTypeInfo && rightOperandText.StartsWith(AddressPrefix, StringComparison.Ordinal))
                             {
                                 string targetVariable = rightOperandText.Replace(AddressPrefix, "");
 
-                                if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && !(rightOperandType is PointerTypeInfo))
+                                if (m_variableTypes.TryGetValue(targetVariable, out TypeInfo rightOperandType) && rightOperandType is not PointerTypeInfo)
                                 {
                                     rightOperandText = $"{rightOperandText};{Environment.NewLine}{Spacing()}{leftOperandText} = ref {AddressPrefix}{leftOperandText}.val";
                                     leftOperandText = $"{AddressPrefix}{leftOperandText}";
@@ -331,7 +331,7 @@ namespace go2cs
 
                     if (resultType?.TypeClass == TypeClass.Interface)
                         m_targetFile.Append($"{resultType.TypeName}.As({expressions[i].ToString().Trim()}{(expressions[i].ToString().Trim().Equals("null") || expressions[i].Type is PointerTypeInfo || expressions[i].Type.TypeClass == TypeClass.Interface ? "!" : "")})!");
-                    else if (resultType is PointerTypeInfo && !(expressions[i].Type is PointerTypeInfo))
+                    else if (resultType is PointerTypeInfo && expressions[i].Type is not PointerTypeInfo)
                         m_targetFile.Append($"{AddressPrefix}{expressions[i].ToString().Trim()}!");
                     else
                         m_targetFile.Append($"{expressions[i].ToString().Trim()}");
@@ -354,7 +354,7 @@ namespace go2cs
 
             bool breakHandled = false;
 
-            if (!(context.IDENTIFIER() is null))
+            if (context.IDENTIFIER() is not null)
             {
                 string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
 
@@ -390,7 +390,7 @@ namespace go2cs
 
             bool continueHandled = false;
 
-            if (!(context.IDENTIFIER() is null))
+            if (context.IDENTIFIER() is not null)
             {
                 string label = SanitizedIdentifier(context.IDENTIFIER().GetText());
 

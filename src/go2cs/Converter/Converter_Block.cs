@@ -113,7 +113,7 @@ namespace go2cs
             GoParser.StatementListContext statementListContext = context.statementList();
 
             if (statementListContext?.statement()?.Length > 0)
-                m_firstStatementIsReturn = !(statementListContext.statement(0).returnStmt() is null);
+                m_firstStatementIsReturn = statementListContext.statement(0).returnStmt() is not null;
 
             if (m_blockInnerSuffixInjection.Count > 0)
                 m_targetFile.Append(m_blockInnerSuffixInjection.Pop());

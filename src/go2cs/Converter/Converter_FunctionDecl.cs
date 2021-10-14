@@ -44,7 +44,7 @@ namespace go2cs
         {
             base.ExitUnaryExpr(context);
 
-            if (!InFunction || !(context.primaryExpr() is null) && PrimaryExpressions.ContainsKey(context.primaryExpr()) 
+            if (!InFunction || context.primaryExpr() is not null && PrimaryExpressions.ContainsKey(context.primaryExpr()) 
                 || context.expression() is null || !Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
                 return;
 
@@ -56,7 +56,7 @@ namespace go2cs
 
             ParameterInfo pointerParam = parameters.FirstOrDefault(parameter => parameter.Name.Equals(expression.Text));
                         
-            if (!(pointerParam is null) && pointerParam.Type is PointerTypeInfo pointer)
+            if (pointerParam is not null && pointerParam.Type is PointerTypeInfo pointer)
             {
                 TypeInfo targetType = pointer.TargetTypeInfo.Clone();
                 targetType.IsByRefPointer = true;

@@ -48,9 +48,9 @@ namespace go2cs
 
             m_typeSwitchExpressionLevel++;
 
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     // Any declared variable will be scoped to switch statement, so create a sub-block for it
                     m_targetFile.AppendLine($"{Spacing()}{{");
@@ -179,7 +179,7 @@ namespace go2cs
                 AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
             }
 
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), $"{statement}{Environment.NewLine}");
@@ -187,7 +187,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
 
                 // Close any locally scoped declared variable sub-block
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     // Handle restoration of previous values of any redeclared variables
                     m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_typeSwitchExpressionLevel));

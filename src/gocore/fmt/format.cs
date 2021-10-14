@@ -40,7 +40,7 @@ namespace go
             Stringer? stringer = arg as Stringer ?? typeof(Stringer<>).CreateInterfaceHandler<Stringer>(arg);;
         #endif
 
-            if (!(stringer is null))
+            if (stringer is not null)
                 return stringer.String();
 
         #if NET5_0
@@ -49,7 +49,7 @@ namespace go
             error? err = arg as error ?? typeof(error<>).CreateInterfaceHandler<error>(arg);
         #endif
 
-            if (!(err is null))
+            if (err is not null)
                 return err.Error();
 
             if (arg is bool)
@@ -69,7 +69,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Println(params object[] args)
         {
-            if (args.Length == 1 && !(args[0] is @string) && !(args[0] is string) && args[0] is IEnumerable array)
+            if (args.Length == 1 && args[0] is not @string && args[0] is not string && args[0] is IEnumerable array)
             {
                 Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString!))}]");
                 return;

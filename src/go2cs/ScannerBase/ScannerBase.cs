@@ -129,7 +129,7 @@ namespace go2cs
 
             FolderMetadata folderMetadata = GetFolderMetadata(Options, null, SourceFileName, targetFilePath);
 
-            if (!(folderMetadata is null) && folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
+            if (folderMetadata is not null && folderMetadata.Files.TryGetValue(fileName, out FileMetadata metadata))
                 Metadata = metadata;
         }
 
@@ -480,7 +480,7 @@ namespace go2cs
             if (!File.Exists(folderMetadataFileName))
                 return null;
 
-            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && !(s_currentFolderMetadata is null))
+            if (folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase) && s_currentFolderMetadata is not null)
                 return s_currentFolderMetadata;
 
             FolderMetadata folderMetadata;
@@ -543,13 +543,13 @@ namespace go2cs
             options = Options.Clone(options, options.OverwriteExistingFiles, GoRoot, targetPath);
             metadata = GetFolderMetadata(options, GoRoot, goRootImport);
 
-            if (!(metadata is null))
+            if (metadata is not null)
                 return metadata;
 
             options = Options.Clone(options, options.OverwriteExistingFiles, go2csPath, targetPath);
             metadata = GetFolderMetadata(options, go2csPath, goPathImport);
 
-            if (!(metadata is null))
+            if (metadata is not null)
                 return metadata;
 
             StringBuilder loadWarning = new StringBuilder();

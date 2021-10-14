@@ -55,7 +55,7 @@ namespace go2cs
 
         public override void ExitMethodDecl(GoParser.MethodDeclContext context)
         {
-            if (!(CurrentFunction.Signature is MethodSignature method))
+            if (CurrentFunction.Signature is not MethodSignature method)
                 throw new InvalidOperationException($"Failed to find signature metadata for method function \"{CurrentFunctionName}\".");
 
             bool hasDefer = CurrentFunction.HasDefer;

@@ -42,10 +42,10 @@ namespace go2cs
 
             m_ifExpressionLevel++;
 
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
                 // Any declared variable will be scoped to if statement, so create a sub-block for it
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     m_targetFile.AppendLine($"{Spacing()}{{");
                     IndentLevel++;
@@ -89,7 +89,7 @@ namespace go2cs
                 AddWarning(context, $"Failed to find expression for if statement: {context.GetText()}");
             }
 
-            if (!(context.simpleStmt() is null) && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
             {
                 if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
                     m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statement + Environment.NewLine);
@@ -97,7 +97,7 @@ namespace go2cs
                     AddWarning(context, $"Failed to find simple statement for if statement: {context.simpleStmt().GetText()}");
                 
                 // Close any locally scoped declared variable sub-block
-                if (!(context.simpleStmt().shortVarDecl() is null))
+                if (context.simpleStmt().shortVarDecl() is not null)
                 {
                     // Handle restoration of previous values of any redeclared variables
                     m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));

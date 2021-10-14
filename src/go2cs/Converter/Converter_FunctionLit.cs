@@ -69,7 +69,7 @@ namespace go2cs
             //     | compositeLit
             //     | functionLit
 
-            if (!(context?.Parent.Parent is GoParser.OperandContext operandContext))
+            if (context?.Parent.Parent is not GoParser.OperandContext operandContext)
             {
                 AddWarning(context, $"Could not derive parent operand context from function literal inside \"{CurrentFunctionName}\" function: \"{context?.GetText()}\"");
                 PopBlock();
