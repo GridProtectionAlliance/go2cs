@@ -50,7 +50,7 @@ namespace CommandLine.Infrastructure
 
         public static int SafeLength(this string value)
         {
-            return value == null ? 0 : value.Length;
+            return value?.Length ?? 0;
         }
 
         public static string JoinTo(this string value, params string[] others)

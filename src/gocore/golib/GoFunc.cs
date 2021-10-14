@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 
 using System;
 using System.Collections.Generic;
@@ -85,7 +86,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute()
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -162,7 +163,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -208,7 +209,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -250,7 +251,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -292,7 +293,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -334,7 +335,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -376,7 +377,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -418,7 +419,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -460,7 +461,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -502,7 +503,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -544,7 +545,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -586,7 +587,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -628,7 +629,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -670,7 +671,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -712,7 +713,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -754,7 +755,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15)
         {
-            T result = default;
+            T result = default!;
 
             try
             {
@@ -796,7 +797,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
         public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16)
         {
-            T result = default;
+            T result = default!;
 
             try
             {

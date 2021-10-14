@@ -25,6 +25,7 @@
 // ReSharper disable UnusedMemberInSuper.Global
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 
 using System;
 using System.Collections;
@@ -134,13 +135,7 @@ namespace go
         public nint Length
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (m_queue is null)
-                    return 0;
-
-                return m_queue.Count;
-            }
+            get => m_queue?.Count ?? 0;
         }
 
         public bool IsUnbuffered
@@ -161,25 +156,13 @@ namespace go
         public bool SendIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (m_queue is null)
-                    return false;
-
-                return m_queue.Count != Capacity;
-            }
+            get => m_queue is not null && m_queue.Count != Capacity;
         }
 
         public bool ReceiveIsReady
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                if (m_queue is null)
-                    return false;
-
-                return !m_queue.IsEmpty;
-            }
+            get => m_queue is not null && !m_queue.IsEmpty;
         }
 
         /// <summary>
@@ -359,7 +342,7 @@ namespace go
                 cancellationToken.ThrowIfCancellationRequested();
                 m_canTakeEvent.Reset();
 
-                if (m_queue!.TryDequeue(out T value))
+                if (m_queue!.TryDequeue(out T? value))
                 {
                     m_canAddEvent.Set();
                     return value;

@@ -190,17 +190,17 @@ namespace go
         /// otherwise, <c>false</c>.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ImplementsInterface(this Type targetType, Type interfaceType)
+        public static bool ImplementsInterface(this Type? targetType, Type interfaceType)
         {
             if (!interfaceType.IsInterface)
                 return false;
 
-            while (targetType is not null!)
+            while (targetType is not null)
             {
                 if (targetType.GetInterfaces().Any(targetInterface => targetInterface == interfaceType || targetInterface.ImplementsInterface(interfaceType)))
                     return true;
 
-                targetType = targetType.BaseType!;
+                targetType = targetType.BaseType;
             }
 
             return false;
@@ -229,6 +229,7 @@ namespace go
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<MethodInfo> GetExtensionMethods(this Type targetType)
         {
+            // TODO: Since Go restricts receiver functions (extensions in C#) to the same package, a lookup per package (namespace in C#) will be optimal here
             lock (s_extensionMethods)
             {
                 bool isGenericType = (targetType == typeof(ptr<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;

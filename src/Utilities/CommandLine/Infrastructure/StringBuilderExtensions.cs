@@ -73,7 +73,7 @@ namespace CommandLine.Infrastructure
 
         public static int SafeLength(this StringBuilder builder)
         {
-            return builder == null ? 0 : builder.Length;
+            return builder?.Length ?? 0;
         }
 
         public static StringBuilder TrimEnd(this StringBuilder builder, char c)
