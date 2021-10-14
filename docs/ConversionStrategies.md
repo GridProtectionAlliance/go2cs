@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 1/10/2021 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 10/14/2021 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Topics
 
@@ -300,7 +300,7 @@ Name = James
 Name = James
 ```
 
-This C# code needs to be implemented to "copy" the receiver target to operate in the same fashion:
+This code, as implemented in C#, needs to "copy" the receiver target in order to operate in the same fashion:
 ```csharp
 using fmt = go.fmt_package;
 using static go.builtin;
@@ -325,8 +325,8 @@ public static partial class main_package {
         f1();
     }
 
-	  public static Action CopyTarget<T>(T target, Action<T> receiver) where T : struct =>
-		    () => receiver(target);
+      public static Action CopyTarget<T>(T target, Action<T> receiver) where T : struct =>
+            () => receiver(target);
 }
 ```
 
