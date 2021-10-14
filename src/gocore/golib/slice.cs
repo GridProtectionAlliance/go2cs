@@ -56,12 +56,12 @@ namespace go
     [Serializable]
     public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
     {
-        private readonly T[] m_array;
+        private readonly T[]? m_array;
         private readonly nint m_low;
         private readonly nint m_length;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice(T[] array)
+        public slice(T[]? array)
         {
             m_array = array ?? throw new ArgumentNullException(nameof(array), "slice array reference is null.");
             m_low = 0;
@@ -72,7 +72,7 @@ namespace go
         public slice(array<T> array) : this((T[])array) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice(T[] array, nint low = 0, nint high = -1)
+        public slice(T[]? array, nint low = 0, nint high = -1)
         {
             if (array is null)
                 throw new ArgumentNullException(nameof(array), "slice array reference is null.");
@@ -116,7 +116,7 @@ namespace go
         public T[] Array
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => m_array;
+            get => m_array ?? System.Array.Empty<T>();
         }
 
         public nint Low
@@ -156,11 +156,8 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (m_array is null)
-                    throw new InvalidOperationException("slice array reference is null.");
-
-                if (index < 0 || index >= m_length)
-                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (index < 0 || index >= m_length || m_array is null)
+                    throw RuntimeErrorPanic.IndexOutOfRange(index, m_length);
 
                 return ref m_array[m_low + index];
             }
@@ -171,10 +168,7 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (m_array is null)
-                    throw new InvalidOperationException("slice array reference is null.");
-
-                if (index < 0 || index >= m_length)
+                if (index < 0 || index >= m_length || m_array is null)
                     throw RuntimeErrorPanic.IndexOutOfRange(index, m_length);
 
                 return ref m_array[m_low + index];
@@ -189,7 +183,13 @@ namespace go
 
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice<T> Slice(int start, int length) => m_array.slice(start, start + length, Capacity);
+        public slice<T> Slice(int start, int length)
+        {
+            if (m_array is null)
+                throw new InvalidOperationException("slice array reference is null.");
+
+            return m_array.slice(start, start + length, Capacity);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public nint IndexOf(in T item)
@@ -229,7 +229,7 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice<T> Clone() => Array?.slice() ?? new slice<T>();
+        public slice<T> Clone() => Array.slice();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerator<(nint, T)> GetEnumerator()
@@ -292,20 +292,20 @@ namespace go
 
         // slice<T> to ISlice comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(ISlice a, slice<T> b) => a?.Equals(b) ?? false;
+        public static bool operator ==(ISlice? a, slice<T> b) => a?.Equals(b) ?? false;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(ISlice a, slice<T> b) => !(a == b);
+        public static bool operator !=(ISlice? a, slice<T> b) => !(a == b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(slice<T> a, ISlice b) => a.Equals(b);
+        public static bool operator ==(slice<T> a, ISlice? b) => a.Equals(b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(slice<T> a, ISlice b) => !(a == b);
+        public static bool operator !=(slice<T> a, ISlice? b) => !(a == b);
 
         // slice<T> to nil comparisons
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(slice<T> slice, NilType _) => slice.Length == 0 && slice.Capacity == 0 && slice.Array is null;
+        public static bool operator ==(slice<T> slice, NilType _) => slice.Length == 0 && slice.Capacity == 0 && slice.m_array is null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(slice<T> slice, NilType nil) => !(slice == nil);
@@ -325,9 +325,9 @@ namespace go
 
         object ICloneable.Clone() => MemberwiseClone();
 
-        Array ISlice.Array => m_array;
+        Array ISlice.Array => m_array!;
 
-        ISlice? ISlice.Append(object[] elems) => Append(this, elems.Cast<T>().ToArray());
+        ISlice ISlice.Append(object[] elems) => Append(this, elems.Cast<T>().ToArray());
 
         object? IArray.this[nint index]
         {
@@ -389,7 +389,7 @@ namespace go
                 if (slice != nil && slice.m_array is null)
                     throw new InvalidOperationException("slice array reference is null.");
 
-                m_array = slice.m_array;
+                m_array = slice.m_array!;
                 m_start = slice.m_low;
                 m_end = m_start + slice.m_length;
                 m_current = m_start - 1;
@@ -429,7 +429,7 @@ namespace go
 
         #endregion
 
-        public static slice<T> From<TSource>(TSource[] array)
+        public static slice<T> From<TSource>(TSource[]? array)
         {
             if (array is null)
                 return new slice<T>(System.Array.Empty<T>());

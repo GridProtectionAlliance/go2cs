@@ -194,7 +194,7 @@ namespace go
 
         object? IArray.this[nint index]
         {
-            get => this![index];
+            get => this[index];
             set => this[index] = (T)value!;
         }
 

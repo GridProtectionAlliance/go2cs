@@ -41,9 +41,9 @@ namespace go
     /// <summary>
     /// Represents a structure that behaves like a Go string.
     /// </summary>
-    public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(long, rune)>, IEnumerable<char>, ICloneable
+    public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
     {
-        private readonly byte[] m_value;
+        private readonly byte[]? m_value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(byte[]? bytes)
@@ -75,7 +75,7 @@ namespace go
         public @string(in slice<rune> value) : this(value.ToArray()) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public @string(string value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
+        public @string(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public @string(@string value) : this(value.m_value) { }
@@ -97,29 +97,29 @@ namespace go
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (m_value is null)
-                    throw RuntimeErrorPanic.IndexOutOfRange(index, Length);
+                if (index < 0 || index >= (m_value?.Length ?? 0))
+                    throw RuntimeErrorPanic.IndexOutOfRange(index, m_value?.Length ?? 0);
 
-                return m_value[index];
+                return m_value![index];
             }
         }
 
-        public byte this[long index]
+        public byte this[nint index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (m_value is null)
-                    throw RuntimeErrorPanic.IndexOutOfRange(index, Length);
+                if (index < 0 || index >= (m_value?.Length ?? 0))
+                    throw RuntimeErrorPanic.IndexOutOfRange(index, m_value?.Length ?? 0);
 
-                return m_value[index];
+                return m_value![index];
             }
         }
 
         public byte this[ulong index]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => this[(long)index];
+            get => this[(nint)index];
         }
 
         // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
@@ -128,7 +128,7 @@ namespace go
             new slice<byte>(m_value, start, start + length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public slice<byte> Slice(long start, long length) =>
+        public slice<byte> Slice(nint start, nint length) =>
             new slice<byte>(m_value, (int)start, (int)(start + length));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +165,7 @@ namespace go
         public @string Clone() => new @string(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerator<(long, rune)> GetEnumerator()
+        public IEnumerator<(nint, rune)> GetEnumerator()
         {
             if (m_value?.Length == 0)
                 yield break;
@@ -175,7 +175,7 @@ namespace go
             char[] rune = new char[1];
             int byteCount;
 
-            for (long index = 0; index < value.Length; index += byteCount)
+            for (nint index = 0; index < value.LongLength; index += byteCount)
             {
                 byteCount = 1;
                 bool completed = Decode(decoder, value, index, byteCount, rune);
@@ -194,7 +194,7 @@ namespace go
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe bool Decode(Decoder decoder, byte[] value, long index, int byteCount, char[] rune)
+        private static unsafe bool Decode(Decoder decoder, byte[] value, nint index, int byteCount, char[] rune)
         {
             bool completed;
 
@@ -237,7 +237,7 @@ namespace go
         public static implicit operator slice<char>(@string value) => new slice<char>(((IEnumerable<char>)value).ToArray());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator byte[](@string value) => value.m_value;
+        public static explicit operator byte[](@string value) => value.m_value ?? Array.Empty<byte>();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator @string(byte[] value) => new @string(value);
