@@ -151,6 +151,11 @@ namespace go2cs
             }
         }
 
+        /// <remarks>
+        /// See related operations:
+        /// <see cref="ExitShortVarDecl(GoParser.ShortVarDeclContext)"/>
+        /// <see cref="ExitVarSpec(GoParser.VarSpecContext)"/>
+        /// </remarks>
         public override void ExitAssignment(GoParser.AssignmentContext context)
         {
             // assignment
@@ -182,7 +187,7 @@ namespace go2cs
                 if (assignOP.Equals("=") && length > 1 && leftOperands.Length == rightOperands.Length)
                 {
                     // TODO: Check for edge cases related to this tuple assignment operation, e.g., pointers, does this need "_addr_" prefix?
-                    // This handles assignment order of operations, see https://gridprotectionalliance.github.io/go2cs/ConversionStrategies.html#inline-assignment-order-of-operations
+                    // This handles assignment order of operations, see https://go2cs.net/ConversionStrategies.html#inline-assignment-order-of-operations
                     m_simpleStatements[context.Parent] = $"{Spacing()}({string.Join(", ", leftOperands.Select(op => op.Text))}) {assignOP} ({string.Join(", ", rightOperands.Select(op => op.Text))});";
                 }
                 else
@@ -200,8 +205,7 @@ namespace go2cs
                             if (!int.TryParse(rightOperands[i].Text, out int _))
                                 rightOperands[i].Text = $"(int)({rightOperands[i]})";
                         }
-
-                        if (assignOP.Equals("&^="))
+                        else if (assignOP.Equals("&^="))
                         {
                             assignOP = " &= ";
                             rightOperands[i].Text = $"~({rightOperands[i].Text})";

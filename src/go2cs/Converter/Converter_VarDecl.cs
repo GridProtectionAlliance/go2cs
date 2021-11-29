@@ -70,6 +70,11 @@ namespace go2cs
             m_targetFile.Append(CheckForCommentsRight(context));
         }
 
+        /// <remarks>
+        /// See related operations:
+        /// <see cref="ExitShortVarDecl(GoParser.ShortVarDeclContext)"/>
+        /// <see cref="ExitAssignment(GoParser.AssignmentContext)"/>
+        /// </remarks>
         public override void ExitVarSpec(GoParser.VarSpecContext context)
         {
             // varSpec

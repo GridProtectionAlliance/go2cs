@@ -102,6 +102,11 @@ namespace go2cs
             return block.ToString();
         }
 
+        /// <remarks>
+        /// See related operations:
+        /// <see cref="ExitVarSpec(GoParser.VarSpecContext)"/>
+        /// <see cref="ExitAssignment(GoParser.AssignmentContext)"/>
+        /// </remarks>
         public override void ExitShortVarDecl(GoParser.ShortVarDeclContext context)
         {
             // shortVarDecl
