@@ -311,7 +311,7 @@ namespace go
             Func<Type[], Type> getMethodType;
             List<Type> types = methodInfo.GetParameters().Select(paramInfo => paramInfo.ParameterType).ToList();
 
-            if (delegateType is null!)
+            if (delegateType is null)
             {
                 if (methodInfo.ReturnType == typeof(void))
                 {
