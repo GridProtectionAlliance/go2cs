@@ -1,6 +1,6 @@
 # Conversion Strategies
 
-> Strategies updated on 10/20/2021 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> Strategies updated on 03/03/2022 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
 
 ## Topics
 
@@ -23,6 +23,7 @@
 * [Interfaces](#interfaces)
 * [Pointers](#pointers)
 * [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)
+* [Break / Continue Labels](#break--continue-labels)
 * [Examples](#examples)
 
 ## Package Conversion
@@ -588,6 +589,69 @@ public static void PrintValPtr(ptr<nint> _addr_ptr)
     fmt.Printf("Value available at *ptr = %d\n", ptr);
     ptr++;
 }
+```
+## Break / Continue Labels
+
+In the case of break and continue labels, the Go language restricts the label to just before the enclosing operation, e.g., a `for` statement. Similar behavior can be implemented with a properly placed label and a `goto` command, for example:
+
+### Break Label
+```go
+OuterLoop:
+	for i = 0; i < n; i++ {
+		for j = 0; j < m; j++ {
+			switch a[i][j] {
+			case nil:
+				state = Error
+				break OuterLoop
+			case item:
+				state = Found
+				break OuterLoop
+			}
+		}
+	}
+```
+becomes:
+```c#
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < m; j++) {
+			switch a[i][j] {
+			case null:
+				state = Error
+				goto break_OuterLoop;
+			case item:
+				state = Found
+				goto break_OuterLoop;
+			}
+		}
+	}
+break_OuterLoop:
+```
+
+### Continue Label
+```go
+RowLoop:
+	for y, row := range rows {
+		for x, data := range row {
+			if data == endOfRow {
+				continue RowLoop
+			}
+			row[x] = data + bias(x, y)
+		}
+	}
+```
+becomes:
+```c#
+	for (int y = 0; y < len(rows); y++) {
+        var row = rows[y];
+		for (int x = 0; x < len(row); x++) {
+            var data = row[x];
+			if (data == endOfRow) {
+				goto continue_RowLoop;
+			}
+			row[x] = data + bias(x, y);
+		}
+continue_RowLoop:
+	}
 ```
 
 ## Examples
