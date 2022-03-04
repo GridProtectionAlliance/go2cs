@@ -597,61 +597,61 @@ In the case of break and continue labels, the Go language restricts the label to
 ### Break Label
 ```go
 OuterLoop:
-	for i = 0; i < n; i++ {
-		for j = 0; j < m; j++ {
-			switch a[i][j] {
-			case nil:
-				state = Error
-				break OuterLoop
-			case item:
-				state = Found
-				break OuterLoop
-			}
-		}
-	}
+    for i = 0; i < n; i++ {
+        for j = 0; j < m; j++ {
+            switch a[i][j] {
+            case nil:
+                state = Error
+                break OuterLoop
+            case item:
+                state = Found
+                break OuterLoop
+            }
+        }
+    }
 ```
 becomes:
 ```c#
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++) {
-			switch a[i][j] {
-			case null:
-				state = Error
-				goto break_OuterLoop;
-			case item:
-				state = Found
-				goto break_OuterLoop;
-			}
-		}
-	}
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            switch a[i][j] {
+            case null:
+                state = Error
+                goto break_OuterLoop;
+            case item:
+                state = Found
+                goto break_OuterLoop;
+            }
+        }
+    }
 break_OuterLoop:
 ```
 
 ### Continue Label
 ```go
 RowLoop:
-	for y, row := range rows {
-		for x, data := range row {
-			if data == endOfRow {
-				continue RowLoop
-			}
-			row[x] = data + bias(x, y)
-		}
-	}
+    for y, row := range rows {
+        for x, data := range row {
+            if data == endOfRow {
+                continue RowLoop
+            }
+            row[x] = data + bias(x, y)
+        }
+    }
 ```
 becomes:
 ```c#
-	for (int y = 0; y < len(rows); y++) {
+    for (int y = 0; y < len(rows); y++) {
         var row = rows[y];
-		for (int x = 0; x < len(row); x++) {
+        for (int x = 0; x < len(row); x++) {
             var data = row[x];
-			if (data == endOfRow) {
-				goto continue_RowLoop;
-			}
-			row[x] = data + bias(x, y);
-		}
+            if (data == endOfRow) {
+                goto continue_RowLoop;
+            }
+            row[x] = data + bias(x, y);
+        }
 continue_RowLoop:
-	}
+    }
 ```
 
 ## Examples
