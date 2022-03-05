@@ -19,23 +19,22 @@ namespace Antlr4.Runtime
     /// <remarks>This is all the parsing support code essentially; most of it is error recovery stuff.</remarks>
     public abstract class Parser : Recognizer<IToken, ParserATNSimulator>
     {
-#if !PORTABLE
         public class TraceListener : IParseTreeListener
         {
-            private readonly TextWriter Output;
 
-            public TraceListener(TextWriter output) {
-                Output = output;
+            public TraceListener(TextWriter output,Parser enclosing) {
+                _output = output;
+                _enclosing = enclosing;
             }
 
             public virtual void EnterEveryRule(ParserRuleContext ctx)
             {
-                Output.WriteLine("enter   " + this._enclosing.RuleNames[ctx.RuleIndex] + ", LT(1)=" + this._enclosing._input.LT(1).Text);
+                _output.WriteLine("enter   " + this._enclosing.RuleNames[ctx.RuleIndex] + ", LT(1)=" + this._enclosing._input.LT(1).Text);
             }
 
             public virtual void ExitEveryRule(ParserRuleContext ctx)
             {
-                Output.WriteLine("exit    " + this._enclosing.RuleNames[ctx.RuleIndex] + ", LT(1)=" + this._enclosing._input.LT(1).Text);
+                _output.WriteLine("exit    " + this._enclosing.RuleNames[ctx.RuleIndex] + ", LT(1)=" + this._enclosing._input.LT(1).Text);
             }
 
             public virtual void VisitErrorNode(IErrorNode node)
@@ -46,17 +45,18 @@ namespace Antlr4.Runtime
             {
                 ParserRuleContext parent = (ParserRuleContext)((IRuleNode)node.Parent).RuleContext;
                 IToken token = node.Symbol;
-                Output.WriteLine("consume " + token + " rule " + this._enclosing.RuleNames[parent.RuleIndex]);
+                _output.WriteLine("consume " + token + " rule " + this._enclosing.RuleNames[parent.RuleIndex]);
             }
 
             internal TraceListener(Parser _enclosing)
             {
                 this._enclosing = _enclosing;
+                _output = Console.Out;
             }
 
             private readonly Parser _enclosing;
+            private readonly TextWriter _output;
         }
-#endif
 
         public class TrimToSizeListener : IParseTreeListener
         {
@@ -131,7 +131,6 @@ namespace Antlr4.Runtime
         /// <seealso cref="BuildParseTree"/>
         private bool _buildParseTrees = true;
 
-#if !PORTABLE
         /// <summary>
         /// When
         /// <see cref="Trace"/>
@@ -147,7 +146,6 @@ namespace Antlr4.Runtime
         /// other parser methods.
         /// </summary>
         private Parser.TraceListener _tracer;
-#endif
 
         /// <summary>
         /// The list of
@@ -190,9 +188,7 @@ namespace Antlr4.Runtime
             _errHandler.Reset(this);
             _ctx = null;
             _syntaxErrors = 0;
-#if !PORTABLE
             Trace = false;
-#endif
             _precedenceStack.Clear();
             _precedenceStack.Add(0);
             ATNSimulator interpreter = Interpreter;
@@ -1144,7 +1140,6 @@ namespace Antlr4.Runtime
             return s;
         }
 
-#if !PORTABLE
         /// <summary>For debugging and other purposes.</summary>
         /// <remarks>For debugging and other purposes.</remarks>
         public virtual void DumpDFA()
@@ -1165,7 +1160,6 @@ namespace Antlr4.Runtime
                 }
             }
         }
-#endif
 
         public virtual string SourceName
         {
@@ -1212,7 +1206,6 @@ namespace Antlr4.Runtime
             }
         }
 
-#if !PORTABLE
         /// <summary>
         /// During a parse is sometimes useful to listen in on the rule entry and exit
         /// events as well as token matches.
@@ -1256,6 +1249,5 @@ namespace Antlr4.Runtime
                 }
             }
         }
-#endif
     }
 }
