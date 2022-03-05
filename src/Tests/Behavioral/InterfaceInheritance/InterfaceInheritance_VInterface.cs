@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 05 00:08:20 UTC
+//     Generated on 2022 March 05 00:41:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,7 +73,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NByPtr is null || !m_target_is_ptr)
@@ -82,9 +82,8 @@ namespace go
                     return;
                 }
 
-                s_NByPtr(m_target_ptr);
+                s_NByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void MByPtr(ptr<T> value);
@@ -98,7 +97,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MByPtr is null || !m_target_is_ptr)
@@ -107,9 +106,8 @@ namespace go
                     return;
                 }
 
-                s_MByPtr(m_target_ptr);
+                s_MByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate @string StringByPtr(ptr<T> value);
@@ -123,13 +121,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate @string ErrorByPtr(ptr<T> value);
@@ -143,16 +141,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByPtr(m_target_ptr);
+                return s_ErrorByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static V()
@@ -163,12 +161,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("N");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NByPtr = extensionMethod.CreateStaticDelegate(typeof(NByPtr)) as NByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("N");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
 
                 if (s_NByPtr is null && s_NByVal is null)
@@ -176,12 +174,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("M");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MByPtr = extensionMethod.CreateStaticDelegate(typeof(MByPtr)) as MByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("M");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
 
                 if (s_MByPtr is null && s_MByVal is null)
@@ -189,12 +187,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -202,12 +200,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Error");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
                 if (s_ErrorByPtr is null && s_ErrorByVal is null)

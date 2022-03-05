@@ -13,7 +13,7 @@
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;<#
                 
             if (ResultType == "void"){#>
@@ -25,9 +25,8 @@
                     return;
                 }
 
-                s_<#=FunctionName#>ByPtr(m_target_ptr<#=ParameterNames#>);
-                return;
-                <#
+                s_<#=FunctionName#>ByPtr(m_target_ptr!<#=ParameterNames#>);
+                return;<#
             }
             else {#>
 
@@ -35,7 +34,7 @@
                 if (s_<#=FunctionName#>ByPtr is null || !m_target_is_ptr)
                     return s_<#=FunctionName#>ByVal!(target<#=ParameterNames#>);
 
-                return s_<#=FunctionName#>ByPtr(m_target_ptr<#=ParameterNames#>);<#
+                return s_<#=FunctionName#>ByPtr(m_target_ptr!<#=ParameterNames#>);<#
             }#>
 
             }<#+

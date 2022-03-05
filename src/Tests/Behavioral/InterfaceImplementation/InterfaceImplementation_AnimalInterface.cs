@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 05 00:08:18 UTC
+//     Generated on 2022 March 05 00:41:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,13 +73,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByPtr(m_target_ptr);
+                return s_TypeByPtr(m_target_ptr!);
             }
 
             private delegate @string SwimByPtr(ptr<T> value);
@@ -93,16 +93,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SwimByPtr is null || !m_target_is_ptr)
                     return s_SwimByVal!(target);
 
-                return s_SwimByPtr(m_target_ptr);
+                return s_SwimByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Animal()
@@ -113,12 +113,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
                 if (s_TypeByPtr is null && s_TypeByVal is null)
@@ -126,12 +126,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Swim");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SwimByPtr = extensionMethod.CreateStaticDelegate(typeof(SwimByPtr)) as SwimByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Swim");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SwimByVal = extensionMethod.CreateStaticDelegate(typeof(SwimByVal)) as SwimByVal;
 
                 if (s_SwimByPtr is null && s_SwimByVal is null)

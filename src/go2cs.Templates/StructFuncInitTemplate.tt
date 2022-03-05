@@ -4,11 +4,11 @@
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("<#=FunctionName#>");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_<#=FunctionName#>ByRef = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByRef)) as <#=FunctionName#>ByRef;
 
-                    if ((object)s_<#=FunctionName#>ByRef == null)
+                    if (s_<#=FunctionName#>ByRef is null)
                         s_<#=FunctionName#>ByVal = extensionMethod.CreateStaticDelegate(typeof(<#=FunctionName#>ByVal)) as <#=FunctionName#>ByVal;
                 }<#+
 // Template Parameters

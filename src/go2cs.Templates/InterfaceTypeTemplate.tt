@@ -55,7 +55,7 @@ using go;
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,7 +85,7 @@ using go;
             }#>
 
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static <#=InterfaceName#>()

@@ -85,7 +85,7 @@ namespace go2cs.Templates
             #line 48 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
 
 
-    if (!(Imports is null))
+    if (Imports is not null)
     {
         foreach (string value in Imports)
         {

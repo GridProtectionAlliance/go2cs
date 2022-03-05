@@ -47,7 +47,7 @@
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference><#
 
-    if (!(Imports is null))
+    if (Imports is not null)
     {
         foreach (string value in Imports)
         {
