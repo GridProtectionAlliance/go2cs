@@ -93,7 +93,7 @@ namespace BehavioralTests
             if (testLegacyTarget)
             {
                 conversionTargetFile = $"{convertedProjectFile}.legacy.target";
-                Assert.IsTrue((exitCode = Exec(go2cs, $"-o -i -h -c {projectPath}")) == 0, $"go2cs failed with exit code {exitCode:N0}");
+                Assert.IsTrue((exitCode = Exec(go2cs, $"-o -i -h -c -a {projectPath}")) == 0, $"go2cs failed with exit code {exitCode:N0}");
                 Assert.IsTrue(FileMatch(convertedProjectFile, conversionTargetFile), $"Go source file converted to C# \"{convertedProjectFile}\" does not match target \"{conversionTargetFile}\"");
             }
 

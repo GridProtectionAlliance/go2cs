@@ -4,26 +4,22 @@ namespace go;
 
 public static partial class main_package {
 
-public partial interface Animal
-{
+public partial interface Animal {
     @string Type();
     @string Swim();
 }
 
-public partial struct Dog
-{
+public partial struct Dog {
     public @string Name;
     public @string Breed;
 }
 
-public partial struct Frog
-{
+public partial struct Frog {
     public @string Name;
     public @string Color;
 }
 
-private static void Main()
-{
+private static void Main() {
     ptr<Frog> f = @new<Frog>();
     ptr<Dog> d = @new<Dog>();
     ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f)!, Animal.As(d)! }), out ptr<array<Animal>> _addr_zoo);
@@ -34,8 +30,7 @@ private static void Main()
     {
         Animal a__prev1 = a;
 
-        foreach (var (_, __a) in zoo)
-        {
+        foreach (var (_, __a) in zoo) {
             a = __a;
             fmt.Println(a.Type(), "can", a.Swim());
         }
@@ -54,42 +49,36 @@ private static void Main()
     fmt.Println(vowels);
 }
 
-public static void ShowZoo(ptr<array<Animal>> _addr_zoo)
-{
+public static void ShowZoo(ptr<array<Animal>> _addr_zoo) {
     ref array<Animal> zoo = ref _addr_zoo.val;
 
     Animal a = Animal.As(null)!;
 
-    foreach (var (_, __a) in zoo)
-    {
+    foreach (var (_, __a) in zoo) {
         a = __a;
         fmt.Println(a.Type(), "can", a.Swim());
     }
 }
 
-private static @string Type(this ptr<Frog> _addr_f)
-{
+private static @string Type(this ptr<Frog> _addr_f) {
     ref Frog f = ref _addr_f.val;
 
     return "Frog";
 }
 
-private static @string Swim(this ptr<Frog> _addr_f)
-{
+private static @string Swim(this ptr<Frog> _addr_f) {
     ref Frog f = ref _addr_f.val;
 
     return "Kick";
 }
 
-private static @string Swim(this ptr<Dog> _addr_d)
-{
+private static @string Swim(this ptr<Dog> _addr_d) {
     ref Dog d = ref _addr_d.val;
 
     return "Paddle";
 }
 
-private static @string Type(this ptr<Dog> _addr_d)
-{
+private static @string Type(this ptr<Dog> _addr_d) {
     ref Dog d = ref _addr_d.val;
 
     return "Doggie";

@@ -33,7 +33,10 @@ public partial class Converter
     public override void EnterFunctionLit(GoParser.FunctionLitContext context)
     {
         PushBlock();
-        m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
+        m_targetFile.Append($"{FunctionLiteralParametersMarker} =>");
+
+        if (Options.UseAnsiBraceStyle)
+            m_targetFile.AppendLine();
     }
 
     public override void ExitFunctionLit(GoParser.FunctionLitContext context)

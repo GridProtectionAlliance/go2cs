@@ -160,6 +160,9 @@ public partial class Converter
         if (expressionList is null)
         {
             exprSwitchStatement.defaultCase.block = PopBlock(false);
+
+            if (exprSwitchStatement.defaultCase.block.TrimStart().StartsWith("{"))
+                exprSwitchStatement.defaultCase.block = $"{Spacing(1)}{exprSwitchStatement.defaultCase.block.TrimStart()}";
         }
         else
         {
@@ -172,6 +175,9 @@ public partial class Converter
             caseStatement.hasFallthrough = m_fallThrough;
             caseStatement.fallthroughComment = m_fallThroughComment;
             caseStatement.block = PopBlock(false);
+
+            if (caseStatement.block.TrimStart().StartsWith("{"))
+                caseStatement.block = $"{Spacing(1)}{caseStatement.block.TrimStart()}";
         }
 
         // Reset fallthrough flag at the end of each case clause
@@ -253,7 +259,7 @@ public partial class Converter
         else if (exprSwitchStatement.allConst && expression is not null)
         {
             // Most simple scenario when all case values are constant, a common C# switch will suffice
-            m_targetFile.Append($"{Spacing()}switch ({expression.Text}){Environment.NewLine}{Spacing()}{{{RemoveLastLineFeed(exprSwitchStatement.intraSwitchComments)}");
+            m_targetFile.Append($"{Spacing()}switch ({expression.Text}){(Options.UseAnsiBraceStyle ? $"{Environment.NewLine}{Spacing()}" : " ")}{{{RemoveLastLineFeed(exprSwitchStatement.intraSwitchComments)}");
 
             foreach (ExprCaseStatement caseStatement in exprSwitchStatement.caseStatements.Values)
             {
@@ -261,6 +267,10 @@ public partial class Converter
                     m_targetFile.AppendLine($"{Environment.NewLine}{Spacing(1)}case {caseExpr.Text}:{RemoveLastLineFeed(FixForwardSpacing(caseStatement.leftComments, 2, firstIsEOLComment: true))}");
 
                 m_targetFile.Append(FixForwardSpacing(caseStatement.block, 2));
+
+                if (!EndsWithLineFeed(caseStatement.block))
+                    m_targetFile.AppendLine();
+
                 m_targetFile.Append($"{Spacing(2)}break;");
             }
 
@@ -268,6 +278,10 @@ public partial class Converter
             {
                 m_targetFile.AppendLine($"{Environment.NewLine}{Spacing(1)}default:{RemoveLastLineFeed(FixForwardSpacing(exprSwitchStatement.defaultCase.leftComments, 2, firstIsEOLComment: true))}");
                 m_targetFile.Append(FixForwardSpacing(exprSwitchStatement.defaultCase.block, 2));
+
+                if (!EndsWithLineFeed(exprSwitchStatement.defaultCase.block))
+                    m_targetFile.AppendLine();
+
                 m_targetFile.Append($"{Spacing(2)}break;");
             }
 

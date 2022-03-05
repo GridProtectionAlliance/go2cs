@@ -37,7 +37,8 @@ private static void Main()
                 // Before statement comment
                 fmt.Println("three"); // eol comment
                 // After statement comment
-            }            break;
+            }
+            break;
         case 4: 
             // Comment before
             fmt.Println("four"); // Case 2 eol comment

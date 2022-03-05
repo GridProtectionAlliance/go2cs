@@ -4,58 +4,45 @@ namespace go;
 
 public static partial class main_package {
 
-public partial struct T1
-{
+public partial struct T1 {
     public @string name;
 }
 
-public static void M(this T1 t)
-{
+public static void M(this T1 t) {
 }
-public static void N(this T1 t)
-{
+public static void N(this T1 t) {
 }
-public static @string String(this T1 t)
-{
+public static @string String(this T1 t) {
     return "";
 }
-public static @string Error(this T1 t)
-{
+public static @string Error(this T1 t) {
     return "";
 }
 
-public partial struct T2
-{
+public partial struct T2 {
     public @string name;
 }
 
-public static void M(this T2 t)
-{
+public static void M(this T2 t) {
 }
-public static void N(this T2 t)
-{
+public static void N(this T2 t) {
 }
-public static @string String(this T2 t)
-{
+public static @string String(this T2 t) {
     return "";
 }
-public static @string Error(this T2 t)
-{
+public static @string Error(this T2 t) {
     return "";
 }
 
-public partial interface I
-{
+public partial interface I {
     void M();
 }
 
-public partial interface V : I, fmt.Stringer, error
-{
+public partial interface V : I, fmt.Stringer, error {
     void N();
 }
 
-private static void Main()
-{
+private static void Main() {
     var m = make_map<I, nint>();
     I i1 = I.As(new T1("foo"))!;
     I i2 = I.As(new T2("bar"))!;

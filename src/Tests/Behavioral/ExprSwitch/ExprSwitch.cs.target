@@ -10,19 +10,16 @@ public static partial class main_package {
 
 private static nint x = 1;
 
-private static nint getNext()
-{
+private static nint getNext() {
     x++;
     return x;
 }
 
-private static void Main()
-{
+private static void Main() {
     // Here's a basic `switch`.
     nint i = 2;
     fmt.Print("Write ", i, " as ");
-    switch (i)
-    { // Intra-switch comment
+    switch (i) { // Intra-switch comment
         case 1: // Case 1 comment
             fmt.Println("one"); /* Case 1 eol comment */
             break;
@@ -36,7 +33,8 @@ private static void Main()
                 // Before statement comment
                 fmt.Println("three"); // eol comment
                 // After statement comment
-            }            break;
+            }
+            break;
         case 4: 
             // Comment before
             fmt.Println("four"); // Case 2 eol comment

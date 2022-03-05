@@ -93,18 +93,18 @@ public partial class Converter
             using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
             {
                 writer.Write(new InterfaceTypeTemplate
-                                 {
-                                     NamespacePrefix = PackageNamespace,
-                                     NamespaceHeader = m_namespaceHeaderLegacy,
-                                     NamespaceFooter = m_namespaceFooterLegacy,
-                                     PackageName = Package,
-                                     InterfaceName = identifier,
-                                     Scope = scope,
-                                     Interface = interfaceInfo,
-                                     Functions = allFunctions,
-                                     UsingStatements = m_usingStatements
-                                 }
-                                 .TransformText());
+                {
+                    NamespacePrefix = PackageNamespace,
+                    NamespaceHeader = m_namespaceHeaderLegacy,
+                    NamespaceFooter = m_namespaceFooterLegacy,
+                    PackageName = Package,
+                    InterfaceName = identifier,
+                    Scope = scope,
+                    Interface = interfaceInfo,
+                    Functions = allFunctions,
+                    UsingStatements = m_usingStatements
+                }
+                .TransformText());
             }
 
             // Track file name associated with package
@@ -115,8 +115,17 @@ public partial class Converter
             if (inheritedInterfaces.Length > 0)
                 inheritedInterfaces = $" : {inheritedInterfaces}";
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
-            m_targetFile.AppendLine($"{Spacing()}{{");
+            m_targetFile.Append($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
+
+            if (Options.UseAnsiBraceStyle)
+            {
+                m_targetFile.AppendLine();
+                m_targetFile.AppendLine($"{Spacing()}{{");
+            }
+            else
+            {
+                m_targetFile.AppendLine(" {");
+            }
 
             foreach (FunctionSignature function in localFunctions)
             {
@@ -143,20 +152,20 @@ public partial class Converter
             using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
             {
                 writer.Write(new StructTypeTemplate
-                                 {
-                                     NamespacePrefix = PackageNamespace,
-                                     NamespaceHeader = m_namespaceHeaderLegacy,
-                                     NamespaceFooter = m_namespaceFooterLegacy,
-                                     PackageName = Package,
-                                     StructName = identifier,
-                                     Scope = scope,
-                                     StructFields = structInfo.Fields,
-                                     PromotedStructs = promotedStructs,
-                                     PromotedFunctions = promotedFunctions,
-                                     PromotedFields = promotedFields,
-                                     UsingStatements = m_usingStatements
-                                 }
-                                 .TransformText());
+                {
+                    NamespacePrefix = PackageNamespace,
+                    NamespaceHeader = m_namespaceHeaderLegacy,
+                    NamespaceFooter = m_namespaceFooterLegacy,
+                    PackageName = Package,
+                    StructName = identifier,
+                    Scope = scope,
+                    StructFields = structInfo.Fields,
+                    PromotedStructs = promotedStructs,
+                    PromotedFunctions = promotedFunctions,
+                    PromotedFields = promotedFields,
+                    UsingStatements = m_usingStatements
+                }
+                .TransformText());
             }
 
             // Track file name associated with package
@@ -181,8 +190,17 @@ public partial class Converter
                 }
             }
 
-            m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
-            m_targetFile.AppendLine($"{Spacing()}{{");
+            m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
+
+            if (Options.UseAnsiBraceStyle)
+            {
+                m_targetFile.AppendLine();
+                m_targetFile.AppendLine($"{Spacing()}{{");
+            }
+            else
+            {
+                m_targetFile.AppendLine(" {");
+            }
 
             foreach (FieldInfo field in fields)
             {
@@ -257,23 +275,33 @@ public partial class Converter
                 using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
                 {
                     writer.Write(new InheritedTypeTemplate
-                                     {
-                                         NamespacePrefix = PackageNamespace,
-                                         NamespaceHeader = m_namespaceHeaderLegacy,
-                                         NamespaceFooter = m_namespaceFooterLegacy,
-                                         PackageName = Package,
-                                         StructName = identifier,
-                                         Scope = scope,
-                                         TypeInfo = typeInfo
-                                     }
-                                     .TransformText());
+                    {
+                        NamespacePrefix = PackageNamespace,
+                        NamespaceHeader = m_namespaceHeaderLegacy,
+                        NamespaceFooter = m_namespaceFooterLegacy,
+                        PackageName = Package,
+                        StructName = identifier,
+                        Scope = scope,
+                        TypeInfo = typeInfo
+                    }
+                    .TransformText());
                 }
 
                 // Track file name associated with package
                 AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
+                m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier}");
+                
+                if (Options.UseAnsiBraceStyle)
+                {
+                    m_targetFile.AppendLine($" // : {typeInfo.TypeName}");
+                    m_targetFile.AppendLine($"{Spacing()}{{");
+                }
+                else
+                {
+                    m_targetFile.AppendLine($" {{ // : {typeInfo.TypeName}");
+                }
+
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
         }

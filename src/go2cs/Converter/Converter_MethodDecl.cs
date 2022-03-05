@@ -50,7 +50,10 @@ public partial class Converter
         m_functionExecContextMarker = string.Format(FunctionExecContextMarker, CurrentFunctionName);
         PushInnerBlockPrefix(string.Format(FunctionBlockPrefixMarker, CurrentFunctionName));
 
-        m_targetFile.AppendLine($"{Spacing()}{m_functionResultTypeMarker} {CurrentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
+        m_targetFile.Append($"{Spacing()}{m_functionResultTypeMarker} {CurrentFunctionName}{m_functionParametersMarker}{m_functionExecContextMarker}");
+
+        if (Options.UseAnsiBraceStyle)
+            m_targetFile.AppendLine();
     }
 
     public override void ExitMethodDecl(GoParser.MethodDeclContext context)

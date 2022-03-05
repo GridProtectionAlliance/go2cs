@@ -57,7 +57,10 @@ public partial class Converter
             m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
         }
 
-        m_targetFile.AppendLine($"{string.Format(IfElseBreakMarker, m_ifExpressionLevel)}{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
+        m_targetFile.Append($"{string.Format(IfElseBreakMarker, m_ifExpressionLevel)}{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
+
+        if (Options.UseAnsiBraceStyle)
+            m_targetFile.AppendLine();
 
         if (context.block().Length == 2)
         {

@@ -6,16 +6,13 @@ namespace go;
 
 public static partial class main_package {
 
-private static void Main()
-{ 
+private static void Main() { 
     // A type `switch` compares types instead of values.  You
     // can use this to discover the type of an interface
     // value.  In this example, the variable `t` will have the
     // type corresponding to its clause.
-    Action<object> whatAmI = i =>
-    {
-        switch (i.type())
-        {
+    Action<object> whatAmI = i => {
+        switch (i.type()) {
             case bool t:
                 fmt.Println("I'm a bool");
                 break;

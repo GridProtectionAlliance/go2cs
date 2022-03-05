@@ -88,7 +88,10 @@ public partial class Converter
         if (m_blockOuterPrefixInjection.Count > 0)
             m_targetFile.Append(m_blockOuterPrefixInjection.Pop());
 
-        m_targetFile.Append($"{Spacing()}{{");
+        if (Options.UseAnsiBraceStyle)
+            m_targetFile.Append($"{Spacing()}{{");
+        else
+            m_targetFile.Append(" {");
 
         if (m_blockInnerPrefixInjection.Count > 0)
             m_targetFile.Append(m_blockInnerPrefixInjection.Pop());

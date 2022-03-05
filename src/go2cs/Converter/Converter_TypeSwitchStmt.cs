@@ -63,7 +63,7 @@ public partial class Converter
             m_targetFile.Append(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel));
         }
 
-        m_targetFile.Append($"{Spacing()}switch ({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)}){Environment.NewLine}{Spacing()}{{");
+        m_targetFile.Append($"{Spacing()}switch ({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)}){(Options.UseAnsiBraceStyle ? $"{Environment.NewLine}{Spacing()}" : " ")}{{");
         IndentLevel++;
 
         m_typeSwitchDefaultCase.Push(new());

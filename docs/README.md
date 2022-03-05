@@ -41,7 +41,7 @@ Note that go2cs simple conversions currently depend on a small subset of the Go 
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
-Converted code now targets .NET 6.0 and C# 10.0. Recent updates use file-scoped namespaces and reduces indentation to better match original Go code.
+Converted code now targets .NET 6.0 and C# 10.0. Recent updates use file-scoped namespaces, reduced indentation to better match original Go code and new command line options to control code styling and allow older C# versions.
 
 Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
 
@@ -102,6 +102,7 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
 | -k | (Default: false) Skip check for "+build ignore" directive and attempt conversion anyway. |
 | -c | (Default: false) Set to target legacy compatible code, e.g., block scoped namespaces. Required for code sets prior to C# 10. |
+| -a | (Default: false) Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style. |
 | &#8209;&#8209;help | Display this help screen. |
 | &#8209;&#8209;version | Display version information. |   
 | value 0 | Required. Go source path or file name to convert. |

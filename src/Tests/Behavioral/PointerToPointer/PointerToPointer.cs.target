@@ -4,8 +4,7 @@ namespace go;
 
 public static partial class main_package {
 
-public partial struct Buffer
-{
+public partial struct Buffer {
     public slice<byte> buf;
     public nint off;
     public sbyte lastRead;
@@ -14,8 +13,7 @@ public partial struct Buffer
 private static readonly sbyte opRead = -1;
 private static readonly sbyte opInvalid = 0;
 
-private static void Main()
-{
+private static void Main() {
     ref nint a = ref heap(out ptr<nint> _addr_a);
     ptr<nint> ptr;
     ptr<ptr<nint>> pptr;
@@ -48,16 +46,14 @@ private static void Main()
     PrintValPtr2Ptr2Ptr(ppptr);
 }
 
-private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p)
-{
+private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p) {
     nint n = default;
     error err = default!;
     ref Buffer b = ref _addr_b.val;
 
     b.lastRead = opInvalid;
     b.off += n;
-    if (n > 0)
-    {
+    if (n > 0) {
         b.lastRead = opRead;
     }
     (addr(new Buffer(buf:p))).Read(p);
@@ -65,23 +61,20 @@ private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p)
     return (n, error.As(null!)!);
 }
 
-public static ptr<Buffer> NewBuffer(slice<byte> buf)
-{
+public static ptr<Buffer> NewBuffer(slice<byte> buf) {
     ptr<Buffer> b1 = default!;
 
     return addr(new Buffer(buf:buf));
 }
 
-public static void PrintValPtr(ptr<nint> _addr_ptr)
-{
+public static void PrintValPtr(ptr<nint> _addr_ptr) {
     ref nint ptr = ref _addr_ptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n", ptr);
     ptr++;
 }
 
-public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr)
-{
+public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr) {
     ref nint ptr = ref _addr_ptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n", ptr);
@@ -93,15 +86,13 @@ public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr)
     return _addr_ptr!;
 }
 
-public static void PrintValPtr2Ptr(ptr<ptr<nint>> _addr_pptr)
-{
+public static void PrintValPtr2Ptr(ptr<ptr<nint>> _addr_pptr) {
     ref ptr<nint> pptr = ref _addr_pptr.val;
 
     fmt.Printf("Value available at **pptr = %d\n", pptr.val);
 }
 
-public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<nint>>> _addr_ppptr)
-{
+public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<nint>>> _addr_ppptr) {
     ref ptr<ptr<nint>> ppptr = ref _addr_ppptr.val;
 
     fmt.Printf("Value available at ***pptr = %d\n", ppptr.val.val);

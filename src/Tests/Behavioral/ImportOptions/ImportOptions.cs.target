@@ -9,8 +9,7 @@ namespace go;
 
 public static partial class main_package {
 
-private static void Main() => func((defer, _, _) =>
-{
+private static void Main() => func((defer, _, _) => {
     fmt.Println(Int());
     var w = @implicit.NewWriter(os.Stdout, 1, 1, 1, ' ', 0);
     defer(w.Flush());

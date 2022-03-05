@@ -118,7 +118,10 @@ public partial class Converter
         if (context.expression() is not null || forClause is not null && forClause.simpleStmt()?.Length == 0 || context.children.Count < 3)
         {
             // Handle while-style statement
-            m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+            m_targetFile.Append($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+
+            if (Options.UseAnsiBraceStyle)
+                m_targetFile.AppendLine();
         }
         else if (forClause is not null)
         {
@@ -148,7 +151,11 @@ public partial class Converter
                 hasPostStatement && (simplePostStatement.incDecStmt() is not null || simplePostStatement.expressionStmt() is not null))
             {
                 // Use standard for-style statement for simple constructs
-                m_targetFile.AppendLine($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
+                m_targetFile.Append($"{Spacing()}for ({string.Format(ForInitStatementMarker, m_forExpressionLevel)}; {string.Format(ForExpressionMarker, m_forExpressionLevel)}; {string.Format(ForPostStatementMarker, m_forExpressionLevel)})");
+
+                if (Options.UseAnsiBraceStyle)
+                    m_targetFile.AppendLine();
+
                 PushInnerBlockSuffix(null);
             }
             else
@@ -162,7 +169,10 @@ public partial class Converter
                     PushInnerBlockSuffix(null);
 
                 // Use loop-style statement for more free-form for constructs
-                m_targetFile.AppendLine($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                m_targetFile.Append($"{Spacing()}while ({string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+
+                if (Options.UseAnsiBraceStyle)
+                    m_targetFile.AppendLine();
             }
         }
         else
@@ -200,7 +210,11 @@ public partial class Converter
                     }
                 }
 
-                m_targetFile.AppendLine($"{Spacing()}foreach ({string.Format(ForRangeExpressionsMarker, m_forExpressionLevel)} in {string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+                m_targetFile.Append($"{Spacing()}foreach ({string.Format(ForRangeExpressionsMarker, m_forExpressionLevel)} in {string.Format(ForExpressionMarker, m_forExpressionLevel)})");
+
+                if (Options.UseAnsiBraceStyle)
+                    m_targetFile.AppendLine();
+
                 PushInnerBlockPrefix(string.Format(ForRangeBlockMutableExpressionsMarker, m_forExpressionLevel));
                 PushInnerBlockSuffix(null);
             }

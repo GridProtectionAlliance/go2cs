@@ -4,12 +4,10 @@ namespace go;
 
 public static partial class main_package {
 
-private static void Main()
-{
+private static void Main() {
     nint i = 0;
 
-    while (i < 10)
-    { 
+    while (i < 10) { 
         // Inner comment
         f(i); // Call function
         // Increment i
@@ -20,12 +18,10 @@ private static void Main()
     fmt.Println("i =", i);
     fmt.Println();
 
-    for (i = 0; i < 10; i++)
-    {
+    for (i = 0; i < 10; i++) {
         f(i);
 
-        for (nint j = 0; j < 3; j++)
-        {
+        for (nint j = 0; j < 3; j++) {
             f(i + j);
         }
         fmt.Println();
@@ -37,16 +33,14 @@ private static void Main()
     {
         nint i__prev1 = i;
 
-        for (i = 0; i < 5; i++)
-        { 
+        for (i = 0; i < 5; i++) { 
             // a
             f(i); // b
 
             {
                 nint i__prev2 = i;
 
-                for (i = 12; i < 15; i++)
-                {
+                for (i = 12; i < 15; i++) {
                     f(i);
                 }
 
@@ -62,13 +56,11 @@ private static void Main()
     fmt.Println("i =", i);
     fmt.Println();
 
-    while (true)
-    {
+    while (true) {
         i++;
         f(i);
 
-        if (i > 12)
-        {
+        if (i > 12) {
             break;
         }
     }
@@ -77,8 +69,7 @@ private static void Main()
     fmt.Println("i =", i);
 }
 
-private static void f(nint y)
-{
+private static void f(nint y) {
     fmt.Print(y);
 }
 

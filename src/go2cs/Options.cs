@@ -79,6 +79,9 @@ public class Options
     [Option('c', Required = false, Default = false, HelpText = "Set to target legacy compatible code, e.g., block scoped namespaces and per-file static \"go.builtin\" using. Required for code sets prior to C# 10.")]
     public bool WriteLegacyCompatibleCode { get; }
 
+    [Option('a', Required = false, Default = false, HelpText = "Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style.")]
+    public bool UseAnsiBraceStyle { get; }
+
     [Value(0, Required = true, HelpText = "Go source path or file name to convert.")]
     public string SourcePath { get; }
 
@@ -105,6 +108,7 @@ public class Options
         string targetGoSrcPath,
         bool skipBuildIgnoreDirectiveCheck,
         bool writeLegacyCompatibleCode,
+        bool useAnsiBraceStyle,
         string sourcePath,
         string targetPath,
         string rootSourcePath,
@@ -129,6 +133,7 @@ public class Options
         TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
         SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
         WriteLegacyCompatibleCode = writeLegacyCompatibleCode;
+        UseAnsiBraceStyle = useAnsiBraceStyle;
         SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
         TargetPath = targetPath is null ? null : Environment.ExpandEnvironmentVariables(targetPath);
         RootSourcePath = rootSourcePath ?? SourcePath ?? string.Empty;
@@ -154,6 +159,7 @@ public class Options
             options.TargetGoSrcPath, 
             options.SkipBuildIgnoreDirectiveCheck,
             options.WriteLegacyCompatibleCode,
+            options.UseAnsiBraceStyle,
             sourcePath, 
             targetPath,
             options.RootSourcePath,

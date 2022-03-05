@@ -4,8 +4,7 @@ namespace go;
 
 public static partial class main_package {
 
-private static void Main()
-{
+private static void Main() {
     ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> _addr_a);
 
     a[0] = "Hello";
@@ -30,8 +29,7 @@ private static void Main()
 }
 
 // Arrays are passed by value (a full copy)
-private static void test(array<@string> a)
-{
+private static void test(array<@string> a) {
     a = a.Clone();
  
     // Update to array will be local
@@ -40,8 +38,7 @@ private static void test(array<@string> a)
     fmt.Println(a[0], a[1]);
 }
 
-private static void test2(ptr<array<@string>> _addr_a)
-{
+private static void test2(ptr<array<@string>> _addr_a) {
     ref array<@string> a = ref _addr_a.val;
 
     fmt.Println(a[0], a[1]);
@@ -49,8 +46,7 @@ private static void test2(ptr<array<@string>> _addr_a)
     fmt.Println(a[0], a[1]);
 }
 
-private static void test3(slice<@string> a)
-{
+private static void test3(slice<@string> a) {
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye";
     fmt.Println(a[0], a[1]);
