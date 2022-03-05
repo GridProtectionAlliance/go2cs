@@ -24,58 +24,57 @@
 using go2cs.Metadata;
 using System.Collections.Generic;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    // Stack handlers:
+    //  functionDecl (optional)
+    //  function (required)
+    //  methodDecl (optional)
+    //  methodSpec (optional)
+    //  functionType (required)
+    protected readonly ParseTreeValues<Signature> Signatures = new ParseTreeValues<Signature>();
+    protected List<ParameterInfo> Result;
+
+    public override void EnterSignature(GoParser.SignatureContext context)
     {
-        // Stack handlers:
-        //  functionDecl (optional)
-        //  function (required)
-        //  methodDecl (optional)
-        //  methodSpec (optional)
-        //  functionType (required)
-        protected readonly ParseTreeValues<Signature> Signatures = new ParseTreeValues<Signature>();
-        protected List<ParameterInfo> Result;
-
-        public override void EnterSignature(GoParser.SignatureContext context)
+        Result = new(new[]
         {
-            Result = new List<ParameterInfo>(new[]
+            new ParameterInfo
             {
-                new ParameterInfo
+                Name = string.Empty,
+                Type = TypeInfo.VoidType,
+                IsVariadic = false
+            }
+        });
+    }
+
+    public override void ExitSignature(GoParser.SignatureContext context)
+    {
+        Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
+        Signatures[context] = new()
+        {
+            Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
+            Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
+        };
+    }
+
+    public override void ExitResult(GoParser.ResultContext context)
+    {
+        //result
+        //  : parameters
+        //  | type
+        if (!Parameters.TryGetValue(context.parameters(), out Result))
+        {
+            if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+            {
+                Result = new(new[] { new ParameterInfo
                 {
-                    Name = "",
-                    Type = TypeInfo.VoidType,
+                    Name = string.Empty,
+                    Type = typeInfo,
                     IsVariadic = false
-                }
-            });
-        }
-
-        public override void ExitSignature(GoParser.SignatureContext context)
-        {
-            Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
-            Signatures[context] = new Signature
-            {
-                Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
-                Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
-            };
-        }
-
-        public override void ExitResult(GoParser.ResultContext context)
-        {
-            //result
-            //  : parameters
-            //  | type
-            if (!Parameters.TryGetValue(context.parameters(), out Result))
-            {
-                if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
-                {
-                    Result = new List<ParameterInfo>(new[] { new ParameterInfo
-                    {
-                        Name = "",
-                        Type = typeInfo,
-                        IsVariadic = false
-                    }});
-                }
+                }});
             }
         }
     }

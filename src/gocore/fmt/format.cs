@@ -26,64 +26,55 @@ using System.Collections;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace go
+namespace go;
+
+// This is a simple proxy for the fmt package for testing...
+public static partial class fmt_package
 {
-    // This is a simple proxy for the fmt package for testing...
-    public static partial class fmt_package
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static @string ToString(object arg)
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static @string ToString(object arg)
-        {
-        #if NET5_0
-            Stringer? stringer = arg as Stringer ?? Stringer.As(arg);
-        #else
-            Stringer? stringer = arg as Stringer ?? typeof(Stringer<>).CreateInterfaceHandler<Stringer>(arg);;
-        #endif
+        Stringer? stringer = arg as Stringer ?? Stringer.As(arg);
 
-            if (stringer is not null)
-                return stringer.String();
+        if (stringer is not null)
+            return stringer.String();
 
-        #if NET5_0
-            error? err = arg as error ?? error.As(arg);
-        #else
-            error? err = arg as error ?? typeof(error<>).CreateInterfaceHandler<error>(arg);
-        #endif
+        error? err = arg as error ?? error.As(arg);
 
-            if (err is not null)
-                return err.Error();
+        if (err is not null)
+            return err.Error();
 
-            if (arg is bool)
-                return arg.ToString()!.ToLowerInvariant();
+        if (arg is bool)
+            return arg.ToString()!.ToLowerInvariant();
 
-            return arg?.ToString() ?? "<nil>";
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Print(params object[] args) =>
-            Console.Write(string.Join(" ", args.Select(ToString)));
-
-        /// <summary>
-        /// Formats arguments in an implementation-specific way and writes the result to console along with a new line.
-        /// </summary>
-        /// <param name="args">Arguments to display.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Println(params object[] args)
-        {
-            if (args.Length == 1 && args[0] is not @string && args[0] is not string && args[0] is IEnumerable array)
-            {
-                Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString!))}]");
-                return;
-            }
-
-            Console.WriteLine(string.Join(" ", args.Select(ToString)));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Printf(@string format, params object[] args) =>
-            Console.Write(Sprintf(format, args));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string Sprintf(@string format, params object[] args) =>
-            string.Format(format, args.Select(arg => (object)ToString(arg)).ToArray());
+        return arg?.ToString() ?? "<nil>";
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Print(params object[] args) =>
+        Console.Write(string.Join(" ", args.Select(ToString)));
+
+    /// <summary>
+    /// Formats arguments in an implementation-specific way and writes the result to console along with a new line.
+    /// </summary>
+    /// <param name="args">Arguments to display.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Println(params object[] args)
+    {
+        if (args.Length == 1 && args[0] is not @string && args[0] is not string && args[0] is IEnumerable array)
+        {
+            Console.WriteLine($"[{string.Join(" ", array.Cast<object>().Select(ToString!))}]");
+            return;
+        }
+
+        Console.WriteLine(string.Join(" ", args.Select(ToString)));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Printf(@string format, params object[] args) =>
+        Console.Write(Sprintf(format, args));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string Sprintf(@string format, params object[] args) =>
+        string.Format(format, args.Select(arg => (object)ToString(arg)).ToArray());
 }

@@ -26,71 +26,71 @@ using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    public string PackageUsing { get; private set; }
+
+    public string PackageNamespace { get; private set; }
+
+    public string[] PackageNamespaces { get; private set; }
+
+    private string m_packageLevelComments;
+
+    public override void EnterPackageClause(GoParser.PackageClauseContext context)
     {
-        public string PackageUsing { get; private set; }
+        base.EnterPackageClause(context);
 
-        public string PackageNamespace { get; private set; }
+        // Go package clause is the first keyword encountered - cache details that
+        // will be written out after imports. C# import statements (i.e., usings)
+        // typically occur before namespace and class definitions
+        string[] paths = PackageImport.Split('/').Select(SanitizedIdentifier).ToArray();
+        string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 
-        public string[] PackageNamespaces { get; private set; }
+        PackageUsing = $"{Package} = {packageNamespace}{ClassSuffix}";
+        PackageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
 
-        private string m_packageLevelComments;
+        // Track file name associated with package
+        AddFileToPackage(Package, TargetFileName, PackageNamespace);
 
-        public override void EnterPackageClause(GoParser.PackageClauseContext context)
+        // Define namespaces
+        List<string> packageNamespaces = new List<string> { RootNamespace };
+
+        if (paths.Length > 1)
         {
-            base.EnterPackageClause(context);
-
-            // Go package clause is the first keyword encountered - cache details that
-            // will be written out after imports. C# import statements (i.e., usings)
-            // typically occur before namespace and class definitions
-            string[] paths = PackageImport.Split('/').Select(SanitizedIdentifier).ToArray();
-            string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
-
-            PackageUsing = $"{Package} = {packageNamespace}{ClassSuffix}";
-            PackageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
-
-            // Track file name associated with package
-            AddFileToPackage(Package, TargetFileName, PackageNamespace);
-
-            // Define namespaces
-            List<string> packageNamespaces = new List<string> { RootNamespace };
-
-            if (paths.Length > 1)
-            {
-                packageNamespaces.AddRange(paths);
-                packageNamespaces.RemoveAt(packageNamespaces.Count - 1);
-            }
-
-            PackageNamespaces = packageNamespaces.ToArray();
-
-            string headerLevelComments = CheckForCommentsLeft(context);
-            m_packageLevelComments = CheckForCommentsRight(context);
-
-            if (!string.IsNullOrWhiteSpace(headerLevelComments))
-            {
-                if (m_targetFile.Length == 0)
-                    headerLevelComments = headerLevelComments.TrimStart();
-
-                m_targetFile.Append(headerLevelComments);
-
-                if (!EndsWithLineFeed(headerLevelComments))
-                    m_targetFile.AppendLine();
-            }
-
-            if (!Options.ExcludeHeaderComments)
-            {
-                m_targetFile.AppendLine($"// package {Package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
-
-                if (!PackageImport.Equals("main"))
-                    m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
-
-                m_targetFile.AppendLine($"// Original source: {SourceFileName}");
-            }
-
-            // Add commonly required using statements
-            RequiredUsings.Add("static go.builtin");
+            packageNamespaces.AddRange(paths);
+            packageNamespaces.RemoveAt(packageNamespaces.Count - 1);
         }
+
+        PackageNamespaces = packageNamespaces.ToArray();
+
+        string headerLevelComments = CheckForCommentsLeft(context);
+        m_packageLevelComments = CheckForCommentsRight(context);
+
+        if (!string.IsNullOrWhiteSpace(headerLevelComments))
+        {
+            if (m_targetFile.Length == 0)
+                headerLevelComments = headerLevelComments.TrimStart();
+
+            m_targetFile.Append(headerLevelComments);
+
+            if (!EndsWithLineFeed(headerLevelComments))
+                m_targetFile.AppendLine();
+        }
+
+        if (!Options.ExcludeHeaderComments)
+        {
+            m_targetFile.AppendLine($"// package {Package} -- go2cs converted at {DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC");
+
+            if (!PackageImport.Equals("main"))
+                m_targetFile.AppendLine($"// import \"{PackageImport}\" ==> using {PackageUsing}");
+
+            m_targetFile.AppendLine($"// Original source: {SourceFileName}");
+        }
+
+        // Add commonly required using statements
+        if (Options.WriteLegacyCompatibleCode)
+            RequiredUsings.Add("static go.builtin");
     }
 }

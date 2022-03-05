@@ -23,18 +23,17 @@
 
 using static go2cs.Common;
 
-namespace go2cs
-{
-    public partial class ScannerBase
-    {
-        public override void EnterImportSpec(GoParser.ImportSpecContext context)
-        {
-            // Remove quotes from package name
-            CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().string_().GetText()));
+namespace go2cs;
 
-            // Add package to import queue
-            ImportQueue.Add(CurrentImportPath);
-            Imports.Add(CurrentImportPath.Replace('/', '.'));
-        }
+public partial class ScannerBase
+{
+    public override void EnterImportSpec(GoParser.ImportSpecContext context)
+    {
+        // Remove quotes from package name
+        CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().string_().GetText()));
+
+        // Add package to import queue
+        ImportQueue.Add(CurrentImportPath);
+        Imports.Add(CurrentImportPath.Replace('/', '.'));
     }
 }

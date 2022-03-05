@@ -24,33 +24,32 @@
 using System.Collections.Generic;
 using go2cs.Metadata;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    // Stack handlers:
+    //  constSpec (optional)
+    //  varSpec (optional)
+    //  assignment (required)
+    //  shortValDecl (required)
+    //  returnStmt (optional)
+    //  exprSwitchCase (optional)
+    //  recvStmt (optional)
+    //  rangeClause (optional)
+    //  arguments (optional)
+    protected readonly ParseTreeValues<ExpressionInfo[]> ExpressionLists = new ParseTreeValues<ExpressionInfo[]>();
+
+    public override void ExitExpressionList(GoParser.ExpressionListContext context)
     {
-        // Stack handlers:
-        //  constSpec (optional)
-        //  varSpec (optional)
-        //  assignment (required)
-        //  shortValDecl (required)
-        //  returnStmt (optional)
-        //  exprSwitchCase (optional)
-        //  recvStmt (optional)
-        //  rangeClause (optional)
-        //  arguments (optional)
-        protected readonly ParseTreeValues<ExpressionInfo[]> ExpressionLists = new ParseTreeValues<ExpressionInfo[]>();
+        List<ExpressionInfo> expressions = new List<ExpressionInfo>();
 
-        public override void ExitExpressionList(GoParser.ExpressionListContext context)
+        for (int i = 0; i < context.expression().Length; i++)
         {
-            List<ExpressionInfo> expressions = new List<ExpressionInfo>();
-
-            for (int i = 0; i < context.expression().Length; i++)
-            {
-                if (Expressions.TryGetValue(context.expression(i), out ExpressionInfo expression))
-                    expressions.Add(expression);
-            }
-
-            ExpressionLists[context] = expressions.ToArray();
+            if (Expressions.TryGetValue(context.expression(i), out ExpressionInfo expression))
+                expressions.Add(expression);
         }
+
+        ExpressionLists[context] = expressions.ToArray();
     }
 }

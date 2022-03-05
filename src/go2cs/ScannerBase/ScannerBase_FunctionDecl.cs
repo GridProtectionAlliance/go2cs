@@ -24,29 +24,28 @@
 using go2cs.Metadata;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
     {
-        public override void EnterFunctionDecl(GoParser.FunctionDeclContext context)
-        {
-            InFunction = true;
-            OriginalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
-            CurrentFunctionName = SanitizedIdentifier(OriginalFunctionName);
+        InFunction = true;
+        OriginalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
+        CurrentFunctionName = SanitizedIdentifier(OriginalFunctionName);
 
-            string functionSignature = FunctionSignature.Generate(OriginalFunctionName);
+        string functionSignature = FunctionSignature.Generate(OriginalFunctionName);
 
-            FunctionInfo currentFunction = null;
-            Metadata?.Functions.TryGetValue(functionSignature, out currentFunction);
-            CurrentFunction = currentFunction;
-        }
+        FunctionInfo currentFunction = null;
+        Metadata?.Functions.TryGetValue(functionSignature, out currentFunction);
+        CurrentFunction = currentFunction;
+    }
 
-        public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
-        {
-            CurrentFunction = null;
-            CurrentFunctionName = null;
-            OriginalFunctionName = null;
-            InFunction = false;
-        }
+    public override void ExitFunctionDecl(GoParser.FunctionDeclContext context)
+    {
+        CurrentFunction = null;
+        CurrentFunctionName = null;
+        OriginalFunctionName = null;
+        InFunction = false;
     }
 }

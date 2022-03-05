@@ -27,180 +27,179 @@ using System.Collections.Generic;
 using System.Text;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
+    public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
+    public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
+
+    private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
+    private int m_typeSwitchExpressionLevel;
+
+    public override void EnterTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
     {
-        public const string TypeSwitchExpressionMarker = ">>MARKER:TYPESWITCH_LEVEL_{0}<<";
-        public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
-        public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
+        // typeSwitchStmt
+        //     : 'switch' (simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
 
-        private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
-        private int m_typeSwitchExpressionLevel;
+        // typeSwitchGuard
+        //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
 
-        public override void EnterTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
+        m_typeSwitchExpressionLevel++;
+
+        if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
         {
-            // typeSwitchStmt
-            //     : 'switch' (simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
-
-            // typeSwitchGuard
-            //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
-
-            m_typeSwitchExpressionLevel++;
-
-            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
+            if (context.simpleStmt().shortVarDecl() is not null)
             {
-                if (context.simpleStmt().shortVarDecl() is not null)
-                {
-                    // Any declared variable will be scoped to switch statement, so create a sub-block for it
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                    IndentLevel++;
+                // Any declared variable will be scoped to switch statement, so create a sub-block for it
+                m_targetFile.AppendLine($"{Spacing()}{{");
+                IndentLevel++;
 
-                    // Handle storing of current values of any redeclared variables
-                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_typeSwitchExpressionLevel));
-                }
-
-                m_targetFile.Append(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel));
+                // Handle storing of current values of any redeclared variables
+                m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_typeSwitchExpressionLevel));
             }
 
-            m_targetFile.Append($"{Spacing()}switch ({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)}){Environment.NewLine}{Spacing()}{{");
-            IndentLevel++;
-
-            m_typeSwitchDefaultCase.Push(new StringBuilder());
+            m_targetFile.Append(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel));
         }
 
-        public override void EnterTypeCaseClause(GoParser.TypeCaseClauseContext context)
+        m_targetFile.Append($"{Spacing()}switch ({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)}){Environment.NewLine}{Spacing()}{{");
+        IndentLevel++;
+
+        m_typeSwitchDefaultCase.Push(new());
+    }
+
+    public override void EnterTypeCaseClause(GoParser.TypeCaseClauseContext context)
+    {
+        // typeCaseClause
+        //     : typeSwitchCase ':' statementList
+
+        // typeSwitchCase
+        //     : 'case' typeList | 'default'
+
+        // typeList
+        //     : type ( ',' type )*
+
+        if (context.typeSwitchCase().typeList() is null)
         {
-            // typeCaseClause
-            //     : typeSwitchCase ':' statementList
+            GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
+            string identifier = parent == null ? string.Empty : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? string.Empty;
 
-            // typeSwitchCase
-            //     : 'case' typeList | 'default'
+            m_typeSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}default:{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
 
-            // typeList
-            //     : type ( ',' type )*
-
-            if (context.typeSwitchCase().typeList() is null)
-            {
-                GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
-                string identifier = parent == null ? "" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "";
-
-                m_typeSwitchDefaultCase.Peek().Append($"{Environment.NewLine}{Spacing()}default:{Environment.NewLine}{Spacing()}{{{Environment.NewLine}");
-
-                if (!string.IsNullOrEmpty(identifier))
-                    m_typeSwitchDefaultCase.Peek().Append($"{Spacing(1)}var {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};{Environment.NewLine}");
-            }
-            else
-                m_targetFile.Append($"{Environment.NewLine}{Spacing()}case {string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)}{Environment.NewLine}");
+            if (!string.IsNullOrEmpty(identifier))
+                m_typeSwitchDefaultCase.Peek().Append($"{Spacing(1)}var {identifier} = {string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)};{Environment.NewLine}");
+        }
+        else
+            m_targetFile.Append($"{Environment.NewLine}{Spacing()}case {string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel)}{Environment.NewLine}");
             
-            IndentLevel++;
+        IndentLevel++;
 
-            PushBlock();
-        }
+        PushBlock();
+    }
 
-        public override void ExitTypeCaseClause(GoParser.TypeCaseClauseContext context)
+    public override void ExitTypeCaseClause(GoParser.TypeCaseClauseContext context)
+    {
+        // typeCaseClause
+        //     : typeSwitchCase ':' statementList
+
+        // typeSwitchCase
+        //     : 'case' typeList | 'default'
+
+        // typeList
+        //     : type ( ',' type )*
+
+        IndentLevel--;
+
+        if (context.typeSwitchCase().typeList() is null)
         {
-            // typeCaseClause
-            //     : typeSwitchCase ':' statementList
+            m_typeSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing(1)}break;{Environment.NewLine}{Spacing()}}}");
+        }
+        else
+        {
+            string caseBlock = $"{PopBlock(false)}{Spacing(1)}break;";
+            m_targetFile.Append(caseBlock);
 
-            // typeSwitchCase
-            //     : 'case' typeList | 'default'
+            GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
+            string identifier = parent == null ? "_" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "_";
 
-            // typeList
-            //     : type ( ',' type )*
+            GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
+            StringBuilder caseTypeExpressions = new StringBuilder();
+            HashSet<string> typeNames = new HashSet<string>();
 
-            IndentLevel--;
-
-            if (context.typeSwitchCase().typeList() is null)
+            for (int i = 0; i < typeList.type_().Length; i++)
             {
-                m_typeSwitchDefaultCase.Peek().Append($"{PopBlock(false)}{Spacing(1)}break;{Environment.NewLine}{Spacing()}}}");
-            }
-            else
-            {
-                string caseBlock = $"{PopBlock(false)}{Spacing(1)}break;";
-                m_targetFile.Append(caseBlock);
-
-                GoParser.TypeSwitchStmtContext parent = context.Parent as GoParser.TypeSwitchStmtContext;
-                string identifier = parent == null ? "_" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "_";
-
-                GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
-                StringBuilder caseTypeExpressions = new StringBuilder();
-                HashSet<string> typeNames = new HashSet<string>();
-
-                for (int i = 0; i < typeList.type_().Length; i++)
+                if (Types.TryGetValue(typeList.type_(i), out TypeInfo typeInfo))
                 {
-                    if (Types.TryGetValue(typeList.type_(i), out TypeInfo typeInfo))
+                    string typeName = typeInfo.TypeName;
+
+                    if (typeNames.Add(typeName))
                     {
-                        string typeName = typeInfo.TypeName;
+                        string caseExpression = i > 0 ? $"{Environment.NewLine}{caseBlock}{Environment.NewLine}{Spacing()}case " : string.Empty;
 
-                        if (typeNames.Add(typeName))
-                        {
-                            string caseExpression = i > 0 ? $"{Environment.NewLine}{caseBlock}{Environment.NewLine}{Spacing()}case " : "";
-
-                            if (typeName.Equals("nil", StringComparison.Ordinal))
-                                caseTypeExpressions.Append($"{caseExpression}null:");
-                            else
-                                caseTypeExpressions.Append($"{caseExpression}{typeName} {identifier}:");
-                        }
+                        if (typeName.Equals("nil", StringComparison.Ordinal))
+                            caseTypeExpressions.Append($"{caseExpression}null:");
                         else
-                        {
-                            AddWarning(typeList, $"Skipped duplicate type info (from C# perspective) for type switch case statement: {typeList.GetText()}");
-                        }
+                            caseTypeExpressions.Append($"{caseExpression}{typeName} {identifier}:");
                     }
                     else
                     {
-                        AddWarning(typeList, $"Failed to find type info for type switch case statement: {typeList.GetText()}");
+                        AddWarning(typeList, $"Skipped duplicate type info (from C# perspective) for type switch case statement: {typeList.GetText()}");
                     }
                 }
-
-                // Replace type switch case type marker
-                m_targetFile.Replace(string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel), caseTypeExpressions.ToString());
-            }
-        }
-
-        public override void ExitTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
-        {
-            // typeSwitchStmt
-            //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
-
-            // typeSwitchGuard
-            //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
-
-            // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
-            m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()}{CheckForCommentsRight(context)}");
-
-            if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out ExpressionInfo expression))
-            {
-                // Replace type switch expression marker
-                m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), $"{expression.Text}.type()");
-            }
-            else
-            {
-                AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
-            }
-
-            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
-            {
-                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
-                    m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), $"{statement}{Environment.NewLine}");
                 else
-                    AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
-
-                // Close any locally scoped declared variable sub-block
-                if (context.simpleStmt().shortVarDecl() is not null)
                 {
-                    // Handle restoration of previous values of any redeclared variables
-                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_typeSwitchExpressionLevel));
-
-                    IndentLevel--;
-                    m_targetFile.AppendLine();
-                    m_targetFile.Append($"{Spacing()}}}");
+                    AddWarning(typeList, $"Failed to find type info for type switch case statement: {typeList.GetText()}");
                 }
             }
 
-            IndentLevel--;
-            m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
-            m_typeSwitchExpressionLevel--;
+            // Replace type switch case type marker
+            m_targetFile.Replace(string.Format(TypeSwitchCaseTypeMarker, m_typeSwitchExpressionLevel), caseTypeExpressions.ToString());
         }
+    }
+
+    public override void ExitTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
+    {
+        // typeSwitchStmt
+        //     : 'switch'(simpleStmt ';') ? typeSwitchGuard '{' typeCaseClause * '}'
+
+        // typeSwitchGuard
+        //     : ( IDENTIFIER ':=' )? primaryExpr '.' '(' 'type' ')'
+
+        // Default case always needs to be last case clause in SwitchExpression - Go allows its declaration anywhere
+        m_targetFile.Append($"{m_typeSwitchDefaultCase.Pop()}{CheckForCommentsRight(context)}");
+
+        if (PrimaryExpressions.TryGetValue(context.typeSwitchGuard().primaryExpr(), out ExpressionInfo expression))
+        {
+            // Replace type switch expression marker
+            m_targetFile.Replace(string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel), $"{expression.Text}.type()");
+        }
+        else
+        {
+            AddWarning(context, $"Failed to find primary expression for type switch statement: {context.typeSwitchGuard().GetText()}");
+        }
+
+        if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
+        {
+            if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                m_targetFile.Replace(string.Format(TypeSwitchStatementMarker, m_typeSwitchExpressionLevel), $"{statement}{Environment.NewLine}");
+            else
+                AddWarning(context, $"Failed to find simple statement for type switch statement: {context.simpleStmt().GetText()}");
+
+            // Close any locally scoped declared variable sub-block
+            if (context.simpleStmt().shortVarDecl() is not null)
+            {
+                // Handle restoration of previous values of any redeclared variables
+                m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_typeSwitchExpressionLevel));
+
+                IndentLevel--;
+                m_targetFile.AppendLine();
+                m_targetFile.Append($"{Spacing()}}}");
+            }
+        }
+
+        IndentLevel--;
+        m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
+        m_typeSwitchExpressionLevel--;
     }
 }

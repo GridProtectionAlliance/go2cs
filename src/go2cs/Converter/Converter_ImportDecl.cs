@@ -27,97 +27,96 @@ using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    private bool m_firstImportSpec = true;
+    private string m_lastImportSpecComment;
+    private string m_lastEolImportSpecComment = string.Empty;
+    private readonly HashSet<string> m_usingStatements = new HashSet<string>(StringComparer.Ordinal);
+
+    public override void EnterImportDecl(GoParser.ImportDeclContext context)
     {
-        private bool m_firstImportSpec = true;
-        private string m_lastImportSpecComment;
-        private string m_lastEolImportSpecComment = "";
-        private readonly HashSet<string> m_usingStatements = new HashSet<string>(StringComparer.Ordinal);
-
-        public override void EnterImportDecl(GoParser.ImportDeclContext context)
+        if (!string.IsNullOrWhiteSpace(m_packageLevelComments))
         {
-            if (!string.IsNullOrWhiteSpace(m_packageLevelComments))
-            {
-                m_targetFile.Append(m_packageLevelComments.TrimStart());
+            m_targetFile.Append(m_packageLevelComments.TrimStart());
 
-                if (!EndsWithLineFeed(m_packageLevelComments))
-                    m_targetFile.AppendLine();
-            }
-
-            m_usingStatements.UnionWith(RequiredUsings.Select(usingType => $"using {usingType};"));
+            if (!EndsWithLineFeed(m_packageLevelComments))
+                m_targetFile.AppendLine();
         }
 
-        public override void EnterImportSpec(GoParser.ImportSpecContext context)
+        m_usingStatements.UnionWith(RequiredUsings.Select(usingType => $"using {usingType};"));
+    }
+
+    public override void EnterImportSpec(GoParser.ImportSpecContext context)
+    {
+        // Base class parses current import package path
+        base.EnterImportSpec(context);
+
+        if (!m_firstImportSpec)
         {
-            // Base class parses current import package path
-            base.EnterImportSpec(context);
-
-            if (!m_firstImportSpec)
+            if (!string.IsNullOrEmpty(m_lastImportSpecComment))
             {
-                if (!string.IsNullOrEmpty(m_lastImportSpecComment))
-                {
-                    m_targetFile.Append(m_lastImportSpecComment);
+                m_targetFile.Append(m_lastImportSpecComment);
 
-                    if (!EndsWithLineFeed(m_lastImportSpecComment))
-                        m_targetFile.AppendLine();
-                }
-                else if (!WroteLineFeed)
-                {
+                if (!EndsWithLineFeed(m_lastImportSpecComment))
                     m_targetFile.AppendLine();
-                }
             }
-
-            KeyValuePair<string, (string targetImport, string targetUsing)> importAlias = ImportAliases.FirstOrDefault(import => import.Value.targetImport.Equals(CurrentImportPath));
-
-            if (!string.IsNullOrEmpty(importAlias.Key))
+            else if (!WroteLineFeed)
             {
-                string alias = importAlias.Key;
-                string targetUsing = importAlias.Value.targetUsing;
-                string targetImport = importAlias.Value.targetImport;
-                string usingStatement;
-
-                if (alias.StartsWith("static ", StringComparison.Ordinal))
-                    usingStatement = $"using {alias};";
-                else
-                    usingStatement = $"using {alias} = {targetUsing};";
-
-                m_targetFile.Append(usingStatement);
-                m_usingStatements.Add(usingStatement);
-
-                FolderMetadata metadata = LoadImportMetadata(Options, targetImport, out string warning);
-
-                if (metadata is null)
-                    AddWarning(context, warning);
-                else
-                    ImportMetadata[targetImport] = metadata;
+                m_targetFile.AppendLine();
             }
+        }
+
+        KeyValuePair<string, (string targetImport, string targetUsing)> importAlias = ImportAliases.FirstOrDefault(import => import.Value.targetImport.Equals(CurrentImportPath));
+
+        if (!string.IsNullOrEmpty(importAlias.Key))
+        {
+            string alias = importAlias.Key;
+            string targetUsing = importAlias.Value.targetUsing;
+            string targetImport = importAlias.Value.targetImport;
+            string usingStatement;
+
+            if (alias.StartsWith("static ", StringComparison.Ordinal))
+                usingStatement = $"using {alias};";
             else
-            {
-                m_targetFile.Append($"//using {RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}; // ?? metadata not found");
-                AddWarning(context, $"Could not find import metadata for \"{CurrentImportPath}\"");
-            }
+                usingStatement = $"using {alias} = {targetUsing};";
 
-            m_lastImportSpecComment = CheckForCommentsRight(context);
-            m_lastEolImportSpecComment = CheckForEndOfLineComment(context);
+            m_targetFile.Append(usingStatement);
+            m_usingStatements.Add(usingStatement);
 
-            // Check for comments on lines in-between imports
-            if (!m_lastImportSpecComment.Equals(m_lastEolImportSpecComment))
-            {
-                if (m_lastImportSpecComment.StartsWith(m_lastEolImportSpecComment))
-                    m_lastImportSpecComment = m_lastImportSpecComment.Substring(m_lastEolImportSpecComment.Length);
-            }
+            FolderMetadata metadata = LoadImportMetadata(Options, targetImport, out string warning);
 
-            if (!string.IsNullOrEmpty(m_lastEolImportSpecComment))
-                m_targetFile.Append(m_lastEolImportSpecComment);
+            if (metadata is null)
+                AddWarning(context, warning);
+            else
+                ImportMetadata[targetImport] = metadata;
         }
-
-        public override void ExitImportSpec(GoParser.ImportSpecContext context)
+        else
         {
-            // There can be only one... first import spec
-            if (m_firstImportSpec)
-                m_firstImportSpec = false;
+            m_targetFile.Append($"//using {RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}; // ?? metadata not found");
+            AddWarning(context, $"Could not find import metadata for \"{CurrentImportPath}\"");
         }
+
+        m_lastImportSpecComment = CheckForCommentsRight(context);
+        m_lastEolImportSpecComment = CheckForEndOfLineComment(context);
+
+        // Check for comments on lines in-between imports
+        if (!m_lastImportSpecComment.Equals(m_lastEolImportSpecComment))
+        {
+            if (m_lastImportSpecComment.StartsWith(m_lastEolImportSpecComment))
+                m_lastImportSpecComment = m_lastImportSpecComment.Substring(m_lastEolImportSpecComment.Length);
+        }
+
+        if (!string.IsNullOrEmpty(m_lastEolImportSpecComment))
+            m_targetFile.Append(m_lastEolImportSpecComment);
+    }
+
+    public override void ExitImportSpec(GoParser.ImportSpecContext context)
+    {
+        // There can be only one... first import spec
+        if (m_firstImportSpec)
+            m_firstImportSpec = false;
     }
 }

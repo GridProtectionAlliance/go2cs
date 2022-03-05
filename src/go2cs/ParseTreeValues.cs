@@ -24,29 +24,28 @@
 using System.Collections.Generic;
 using Antlr4.Runtime.Tree;
 
-namespace go2cs
-{
-    public class ParseTreeValues<T> : Dictionary<IParseTree, T>
-    {
-        /// <summary>Gets the value associated with the specified key.</summary>
-        /// <param name="key">The key of the value to get.</param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key,
-        /// if the key is found; otherwise, the default value for the type of the
-        /// <paramref name="value" /> parameter. This parameter is passed uninitialized.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the <see cref="Dictionary{TKey, TValue}" /> contains an element with the specified key; otherwise, <c>false</c>.
-        /// </returns>
-        public new bool TryGetValue(IParseTree key, out T value)
-        {
-            if (key is null)
-            {
-                value = default;
-                return false;
-            }
+namespace go2cs;
 
-            return base.TryGetValue(key, out value);
+public class ParseTreeValues<T> : Dictionary<IParseTree, T>
+{
+    /// <summary>Gets the value associated with the specified key.</summary>
+    /// <param name="key">The key of the value to get.</param>
+    /// <param name="value">
+    /// When this method returns, contains the value associated with the specified key,
+    /// if the key is found; otherwise, the default value for the type of the
+    /// <paramref name="value" /> parameter. This parameter is passed uninitialized.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the <see cref="Dictionary{TKey, TValue}" /> contains an element with the specified key; otherwise, <c>false</c>.
+    /// </returns>
+    public new bool TryGetValue(IParseTree key, out T value)
+    {
+        if (key is null)
+        {
+            value = default;
+            return false;
         }
+
+        return base.TryGetValue(key, out value);
     }
 }

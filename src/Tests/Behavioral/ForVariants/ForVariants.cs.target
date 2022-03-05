@@ -1,86 +1,85 @@
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go
+namespace go;
+
+public static partial class main_package {
+
+private static void Main()
 {
-    public static partial class main_package
+    nint i = 0;
+
+    while (i < 10)
+    { 
+        // Inner comment
+        f(i); // Call function
+        // Increment i
+        i++; // Post i comment
+    } // Post for comment
+
+    fmt.Println();
+    fmt.Println("i =", i);
+    fmt.Println();
+
+    for (i = 0; i < 10; i++)
     {
-        private static void Main()
+        f(i);
+
+        for (nint j = 0; j < 3; j++)
         {
-            nint i = 0;
+            f(i + j);
+        }
+        fmt.Println();
+    }
 
-            while (i < 10)
-            { 
-                // Inner comment
-                f(i); // Call function
-                // Increment i
-                i++; // Post i comment
-            } // Post for comment
+    fmt.Println("i =", i);
+    fmt.Println();
 
-            fmt.Println();
-            fmt.Println("i =", i);
-            fmt.Println();
+    {
+        nint i__prev1 = i;
 
-            for (i = 0; i < 10; i++)
+        for (i = 0; i < 5; i++)
+        { 
+            // a
+            f(i); // b
+
             {
-                f(i);
+                nint i__prev2 = i;
 
-                for (nint j = 0; j < 3; j++)
+                for (i = 12; i < 15; i++)
                 {
-                    f(i + j);
-                }
-                fmt.Println();
-            }
-
-            fmt.Println("i =", i);
-            fmt.Println();
-
-            {
-                nint i__prev1 = i;
-
-                for (i = 0; i < 5; i++)
-                { 
-                    // a
-                    f(i); // b
-
-                    {
-                        nint i__prev2 = i;
-
-                        for (i = 12; i < 15; i++)
-                        {
-                            f(i);
-                        }
-
-                        i = i__prev2;
-                    } //c
-                    fmt.Println();
+                    f(i);
                 }
 
-                i = i__prev1;
-            } //d
-
+                i = i__prev2;
+            } //c
             fmt.Println();
-            fmt.Println("i =", i);
-            fmt.Println();
-
-            while (true)
-            {
-                i++;
-                f(i);
-
-                if (i > 12)
-                {
-                    break;
-                }
-            }
-
-            fmt.Println();
-            fmt.Println("i =", i);
         }
 
-        private static void f(nint y)
+        i = i__prev1;
+    } //d
+
+    fmt.Println();
+    fmt.Println("i =", i);
+    fmt.Println();
+
+    while (true)
+    {
+        i++;
+        f(i);
+
+        if (i > 12)
         {
-            fmt.Print(y);
+            break;
         }
     }
+
+    fmt.Println();
+    fmt.Println("i =", i);
 }
+
+private static void f(nint y)
+{
+    fmt.Print(y);
+}
+
+} // end main_package

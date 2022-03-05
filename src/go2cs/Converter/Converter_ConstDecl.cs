@@ -24,90 +24,89 @@
 using go2cs.Metadata;
 using System;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    private int m_iota;
+    private int m_constIdentifierCount;
+    private bool m_constMultipleDeclaration;
+
+    public override void EnterConstDecl(GoParser.ConstDeclContext context)
     {
-        private int m_iota;
-        private int m_constIdentifierCount;
-        private bool m_constMultipleDeclaration;
+        // constDecl
+        //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
 
-        public override void EnterConstDecl(GoParser.ConstDeclContext context)
+        m_constIdentifierCount = 0;
+        m_constMultipleDeclaration = context.children.Count > 2;
+        m_iota = 0;
+    }
+
+    public override void ExitConstDecl(GoParser.ConstDeclContext context)
+    {
+        // constDecl
+        //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
+
+        if (m_constMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
         {
-            // constDecl
-            //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
-
-            m_constIdentifierCount = 0;
-            m_constMultipleDeclaration = context.children.Count > 2;
-            m_iota = 0;
+            string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
+            m_targetFile.Clear();
+            m_targetFile.Append(removedLineFeed);
         }
 
-        public override void ExitConstDecl(GoParser.ConstDeclContext context)
+        m_targetFile.Append(CheckForCommentsRight(context));
+    }
+
+    public override void ExitConstSpec(GoParser.ConstSpecContext context)
+    {
+        // constSpec
+        //     : identifierList ( type ? '=' expressionList ) ?
+
+        if (m_constIdentifierCount == 0 && m_constMultipleDeclaration)
+            m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
+
+        if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
         {
-            // constDecl
-            //     : 'const' ( constSpec | '(' ( constSpec eos )* ')' )
-
-            if (m_constMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
-            {
-                string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
-                m_targetFile.Clear();
-                m_targetFile.Append(removedLineFeed);
-            }
-
-            m_targetFile.Append(CheckForCommentsRight(context));
+            AddWarning(context, $"No identifiers specified in constant expression: {context.GetText()}");
+            return;
         }
 
-        public override void ExitConstSpec(GoParser.ConstSpecContext context)
+        ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
+
+        if (expressions is not null && identifiers.Length != expressions.Length)
         {
-            // constSpec
-            //     : identifierList ( type ? '=' expressionList ) ?
-
-            if (m_constIdentifierCount == 0 && m_constMultipleDeclaration)
-                m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
-
-            if (!Identifiers.TryGetValue(context.identifierList(), out string[] identifiers))
-            {
-                AddWarning(context, $"No identifiers specified in constant expression: {context.GetText()}");
-                return;
-            }
-
-            ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions);
-
-            if (expressions is not null && identifiers.Length != expressions.Length)
-            {
-                AddWarning(context, $"Encountered identifier to expression count mismatch in constant expression: {context.GetText()}");
-                return;
-            }
-
-            Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
-
-            string type = typeInfo?.TypeName;
-            int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
-
-            for (int i = 0; i < identifiers.Length; i++)
-            {
-                string identifier = identifiers[i];
-                string expression = expressions?[i].Text ?? $"{m_iota++}";
-                string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
-                string castAs = "";
-
-                // TODO: Check if constant needs cast
-                //if (!typeName.Equals("var") && !(type?.Equals(expressions?[i].Type.TypeName) ?? false))
-                //    castAs = $"({typeName})";
-
-                if (InFunction)
-                    m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {castAs}{expression};");
-                else
-                    m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {castAs}{expression};");
-
-                // Since multiple specifications can be on one line, only check for comments after last specification
-                if (i < length - 1)
-                    m_targetFile.AppendLine();
-                else
-                    m_targetFile.Append(CheckForCommentsRight(context));
-            }
-
-            m_constIdentifierCount++;
+            AddWarning(context, $"Encountered identifier to expression count mismatch in constant expression: {context.GetText()}");
+            return;
         }
+
+        Types.TryGetValue(context.type_(), out TypeInfo typeInfo);
+
+        string type = typeInfo?.TypeName;
+        int length = Math.Min(identifiers.Length, expressions?.Length ?? int.MaxValue);
+
+        for (int i = 0; i < identifiers.Length; i++)
+        {
+            string identifier = identifiers[i];
+            string expression = expressions?[i].Text ?? $"{m_iota++}";
+            string typeName = type ?? expressions?[i].Type.TypeName ?? "var";
+            string castAs = string.Empty;
+
+            // TODO: Check if constant needs cast
+            //if (!typeName.Equals("var") && !(type?.Equals(expressions?[i].Type.TypeName) ?? false))
+            //    castAs = $"({typeName})";
+
+            if (InFunction)
+                m_targetFile.Append($"{Spacing()}const {typeName} {identifier} = {castAs}{expression};");
+            else
+                m_targetFile.Append($"{Spacing()}{(char.IsUpper(identifier[0]) ? "public" : "private")} static readonly {typeName} {identifier} = {castAs}{expression};");
+
+            // Since multiple specifications can be on one line, only check for comments after last specification
+            if (i < length - 1)
+                m_targetFile.AppendLine();
+            else
+                m_targetFile.Append(CheckForCommentsRight(context));
+        }
+
+        m_constIdentifierCount++;
     }
 }

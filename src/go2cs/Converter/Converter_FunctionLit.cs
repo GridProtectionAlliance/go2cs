@@ -24,131 +24,130 @@
 using go2cs.Metadata;
 using System;
 
-namespace go2cs
-{
-    public partial class Converter
-    {
-        public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLIT_PARAMETERS<<";
+namespace go2cs;
 
-        public override void EnterFunctionLit(GoParser.FunctionLitContext context)
+public partial class Converter
+{
+    public const string FunctionLiteralParametersMarker = ">>MARKER:FUNCTIONLIT_PARAMETERS<<";
+
+    public override void EnterFunctionLit(GoParser.FunctionLitContext context)
+    {
+        PushBlock();
+        m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
+    }
+
+    public override void ExitFunctionLit(GoParser.FunctionLitContext context)
+    {
+        // functionLit
+        //     : 'func' function
+
+        string parametersSignature = "()";
+
+        if (Signatures.TryGetValue(context?.signature(), out Signature signature))
         {
-            PushBlock();
-            m_targetFile.AppendLine($"{FunctionLiteralParametersMarker} =>");
+            parametersSignature = signature.GenerateParameterNameList();
+
+            if (signature.Parameters.Length != 1)
+                parametersSignature = $"({parametersSignature})";
+        }
+        else
+        {
+            AddWarning(context, $"Failed to find signature for function literal inside \"{CurrentFunctionName}\" function");
         }
 
-        public override void ExitFunctionLit(GoParser.FunctionLitContext context)
+        // Replace marker for function literal
+        m_targetFile.Replace(FunctionLiteralParametersMarker, parametersSignature);
+
+        // operand
+        //     : literal
+        //     | operandName
+        //     | methodExpr
+        //     | '(' expression ')'
+
+        // literal
+        //     : basicLit
+        //     | compositeLit
+        //     | functionLit
+
+        if (context?.Parent.Parent is not GoParser.OperandContext operandContext)
         {
-            // functionLit
-            //     : 'func' function
+            AddWarning(context, $"Could not derive parent operand context from function literal inside \"{CurrentFunctionName}\" function: \"{context?.GetText()}\"");
+            PopBlock();
+            return;
+        }
 
-            string parametersSignature = "()";
+        string lambdaExpression = PopBlock(false);
 
-            if (Signatures.TryGetValue(context?.signature(), out Signature signature))
+        // Simplify lambda expressions that consist of a single return statement
+        if (m_firstStatementIsReturn)
+        {
+            int index = lambdaExpression.IndexOf("=>", StringComparison.Ordinal);
+
+            if (index > -1)
             {
-                parametersSignature = signature.GenerateParameterNameList();
-
-                if (signature.Parameters.Length != 1)
-                    parametersSignature = $"({parametersSignature})";
-            }
-            else
-            {
-                AddWarning(context, $"Failed to find signature for function literal inside \"{CurrentFunctionName}\" function");
-            }
-
-            // Replace marker for function literal
-            m_targetFile.Replace(FunctionLiteralParametersMarker, parametersSignature);
-
-            // operand
-            //     : literal
-            //     | operandName
-            //     | methodExpr
-            //     | '(' expression ')'
-
-            // literal
-            //     : basicLit
-            //     | compositeLit
-            //     | functionLit
-
-            if (context?.Parent.Parent is not GoParser.OperandContext operandContext)
-            {
-                AddWarning(context, $"Could not derive parent operand context from function literal inside \"{CurrentFunctionName}\" function: \"{context?.GetText()}\"");
-                PopBlock();
-                return;
-            }
-
-            string lambdaExpression = PopBlock(false);
-
-            // Simplify lambda expressions that consist of a single return statement
-            if (m_firstStatementIsReturn)
-            {
-                int index = lambdaExpression.IndexOf("=>", StringComparison.Ordinal);
+                string startBlock = $"{{{Environment.NewLine}";
+                    
+                index = lambdaExpression.IndexOf(startBlock, index, StringComparison.Ordinal);
 
                 if (index > -1)
                 {
-                    string startBlock = $"{{{Environment.NewLine}";
-                    
-                    index = lambdaExpression.IndexOf(startBlock, index, StringComparison.Ordinal);
+                    string parameters = lambdaExpression.Substring(0, index).Trim();
 
-                    if (index > -1)
-                    {
-                        string parameters = lambdaExpression.Substring(0, index).Trim();
+                    lambdaExpression = lambdaExpression.Substring(index + startBlock.Length).Trim();
 
-                        lambdaExpression = lambdaExpression.Substring(index + startBlock.Length).Trim();
+                    if (lambdaExpression.StartsWith("return ", StringComparison.Ordinal))
+                        lambdaExpression = lambdaExpression.Substring(7).Trim();
 
-                        if (lambdaExpression.StartsWith("return ", StringComparison.Ordinal))
-                            lambdaExpression = lambdaExpression.Substring(7).Trim();
+                    if (lambdaExpression.EndsWith("}", StringComparison.Ordinal))
+                        lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
 
-                        if (lambdaExpression.EndsWith("}", StringComparison.Ordinal))
-                            lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
+                    if (lambdaExpression.EndsWith(";", StringComparison.Ordinal))
+                        lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
 
-                        if (lambdaExpression.EndsWith(";", StringComparison.Ordinal))
-                            lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
-
-                        lambdaExpression = $"{parameters} {lambdaExpression}";
-                    }
+                    lambdaExpression = $"{parameters} {lambdaExpression}";
                 }
             }
+        }
 
-            RequiredUsings.Add("System");
+        RequiredUsings.Add("System");
 
-            string typeList = signature.GenerateParameterTypeList();
-            string resultSignature = signature.GenerateResultSignature();
-            string typeName, fullTypeName;
+        string typeList = signature.GenerateParameterTypeList();
+        string resultSignature = signature.GenerateResultSignature();
+        string typeName, fullTypeName;
 
-            if (resultSignature == "void")
+        if (resultSignature == "void")
+        {
+            if (string.IsNullOrEmpty(typeList))
             {
-                if (string.IsNullOrEmpty(typeList))
-                {
-                    typeName = "Action";
-                    fullTypeName = "System.Action";
-                }
-                else
-                {
-                    typeName = $"Action<{typeList}>";
-                    fullTypeName = $"System.Action<{typeList}>";
-                }
+                typeName = "Action";
+                fullTypeName = "System.Action";
             }
             else
             {
-                if (!string.IsNullOrEmpty(typeList))
-                    typeList = $"{typeList}, ";
-
-                typeName = $"Func<{typeList}{resultSignature}>";
-                fullTypeName = $"System.Func<{typeList}{resultSignature}>";
+                typeName = $"Action<{typeList}>";
+                fullTypeName = $"System.Action<{typeList}>";
             }
-
-            // Update expression operand (managed in ScannerBase_Expression.cs)
-            Operands[operandContext] = new ExpressionInfo
-            {
-                Text = lambdaExpression,
-                Type = new TypeInfo
-                {
-                    Name = parametersSignature,
-                    TypeName = typeName,
-                    FullTypeName = fullTypeName,
-                    TypeClass = TypeClass.Function
-                }
-            };
         }
+        else
+        {
+            if (!string.IsNullOrEmpty(typeList))
+                typeList = $"{typeList}, ";
+
+            typeName = $"Func<{typeList}{resultSignature}>";
+            fullTypeName = $"System.Func<{typeList}{resultSignature}>";
+        }
+
+        // Update expression operand (managed in ScannerBase_Expression.cs)
+        Operands[operandContext] = new()
+        {
+            Text = lambdaExpression,
+            Type = new()
+            {
+                Name = parametersSignature,
+                TypeName = typeName,
+                FullTypeName = fullTypeName,
+                TypeClass = TypeClass.Function
+            }
+        };
     }
 }

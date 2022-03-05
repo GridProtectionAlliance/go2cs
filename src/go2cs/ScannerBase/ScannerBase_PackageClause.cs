@@ -24,56 +24,55 @@
 using System.IO;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    public string Package { get; private set; }
+
+    public string PackageImport { get; private set; }
+
+    public override void EnterPackageClause(GoParser.PackageClauseContext context)
     {
-        public string Package { get; private set; }
+        Package = SanitizedIdentifier(context.IDENTIFIER()?.GetText()) ?? string.Empty;
 
-        public string PackageImport { get; private set; }
-
-        public override void EnterPackageClause(GoParser.PackageClauseContext context)
+        if (Package.Equals("main"))
         {
-            Package = SanitizedIdentifier(context.IDENTIFIER()?.GetText()) ?? "";
+            PackageImport = Package;
+        }
+        else
+        {
+            // Define package import path
+            PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
+            PackageImport = PackageImport.Replace(GoRoot, string.Empty);
+            PackageImport = PackageImport.Replace(GoPath, string.Empty);
 
-            if (Package.Equals("main"))
+            while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
+                PackageImport = PackageImport.Substring(1);
+
+            while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
+                PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
+
+            int lastSlash;
+
+            if (Path.IsPathRooted(PackageImport))
             {
-                PackageImport = Package;
+                // File converted was outside %GOPATH% and %GOROOT%
+                lastSlash = PackageImport.LastIndexOf('\\');
+
+                if (lastSlash > -1)
+                    PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
             }
-            else
+
+            PackageImport = $"{PackageImport.Replace('\\', '/')}";
+
+            lastSlash = PackageImport.LastIndexOf('/');
+            string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
+
+            if (!package.Equals(Package))
             {
-                // Define package import path
-                PackageImport = Path.GetDirectoryName(SourceFileName) ?? Package;
-                PackageImport = PackageImport.Replace(GoRoot, "");
-                PackageImport = PackageImport.Replace(GoPath, "");
-
-                while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(1);
-
-                while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                    PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
-
-                int lastSlash;
-
-                if (Path.IsPathRooted(PackageImport))
-                {
-                    // File converted was outside %GOPATH% and %GOROOT%
-                    lastSlash = PackageImport.LastIndexOf('\\');
-
-                    if (lastSlash > -1)
-                        PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
-                }
-
-                PackageImport = $"{PackageImport.Replace('\\', '/')}";
-
-                lastSlash = PackageImport.LastIndexOf('/');
-                string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
-
-                if (!package.Equals(Package))
-                {
-                    AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
-                    PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
-                }
+                AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
+                PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
             }
         }
     }

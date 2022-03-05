@@ -1,6 +1,5 @@
 ﻿using System;
 using go;
-using static go.builtin;
 using sort = go.sort_package;
 
 namespace ConstraintTests

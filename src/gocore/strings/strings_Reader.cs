@@ -23,42 +23,41 @@
 
 using System.Runtime.CompilerServices;
 
-namespace go
+namespace go;
+
+public static partial class strings_package
 {
-    public static partial class strings_package
+    public partial struct Reader
     {
-        public partial struct Reader
+        public Reader((@string, nint, int) i) :
+            this(i.Item1, i.Item2)
+        { }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Reader(@string s = default, nint i = default, int prevRune = default)
         {
-            public Reader((@string, nint, int) i) :
-                this(i.Item1, i.Item2)
-            { }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Reader(@string s = default, nint i = default, int prevRune = default)
-            {
-                this.s = s;
-                this.i = i;
-                this.prevRune = prevRune;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public override string ToString() => $"{{{s}}} {{{i}}} {{{prevRune}}}";
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator Reader((@string, nint, int) value) => new Reader(value);
-
-            // Person to nil comparisons
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Reader obj, NilType _) => obj.Equals(default(Reader));
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Reader obj, NilType nil) => !(obj == nil);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, Reader obj) => obj == nil;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, Reader obj) => obj != nil;
+            this.s = s;
+            this.i = i;
+            this.prevRune = prevRune;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override string ToString() => $"{{{s}}} {{{i}}} {{{prevRune}}}";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Reader((@string, nint, int) value) => new Reader(value);
+
+        // Person to nil comparisons
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Reader obj, NilType _) => obj.Equals(default(Reader));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Reader obj, NilType nil) => !(obj == nil);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, Reader obj) => obj == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, Reader obj) => obj != nil;
     }
 }

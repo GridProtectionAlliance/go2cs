@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Linq;
 using go;
-using static go.builtin;
 
 namespace ConstraintTests
 {

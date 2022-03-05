@@ -24,33 +24,32 @@
 using System.Linq;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class PreScanner
 {
-    public partial class PreScanner
+    public override void EnterImportSpec(GoParser.ImportSpecContext context)
     {
-        public override void EnterImportSpec(GoParser.ImportSpecContext context)
-        {
-            // Base class parses current import package path
-            base.EnterImportSpec(context);
+        // Base class parses current import package path
+        base.EnterImportSpec(context);
 
-            string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
-            bool useStatic = alternateName is null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
+        string alternateName = SanitizedIdentifier(context.IDENTIFIER()?.GetText());
+        bool useStatic = alternateName is null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
 
-            int lastSlash = CurrentImportPath.LastIndexOf('/');
-            string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
+        int lastSlash = CurrentImportPath.LastIndexOf('/');
+        string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
 
-            string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
+        string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
 
-            string alias;
+        string alias;
 
-            if (useStatic)
-                alias = $"static {targetUsing}";
-            else if (alternateName?.Equals("_") ?? false)
-                alias = $"_{packageName}_";
-            else
-                alias = alternateName ?? packageName;
+        if (useStatic)
+            alias = $"static {targetUsing}";
+        else if (alternateName?.Equals("_") ?? false)
+            alias = $"_{packageName}_";
+        else
+            alias = alternateName ?? packageName;
 
-            m_importAliases[alias] = (CurrentImportPath, targetUsing);
-        }
+        m_importAliases[alias] = (CurrentImportPath, targetUsing);
     }
 }

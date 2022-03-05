@@ -1,6 +1,5 @@
 using fmt = go.fmt_package;
 using sort = go.sort_package;
-using static go.builtin;
 
 namespace go
 {

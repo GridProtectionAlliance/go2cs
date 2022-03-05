@@ -24,94 +24,93 @@
 using go2cs.Metadata;
 using System;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
+    public const string IfElseBreakMarker = ">>MARKER:IFELSEBREAK_LEVEL_{0}<<";
+    public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
+    public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
+
+    private int m_ifExpressionLevel;
+
+    public override void EnterIfStmt(GoParser.IfStmtContext context)
     {
-        public const string IfElseMarker = ">>MARKER:IFELSE_LEVEL_{0}<<";
-        public const string IfElseBreakMarker = ">>MARKER:IFELSEBREAK_LEVEL_{0}<<";
-        public const string IfExpressionMarker = ">>MARKER:IFEXPR_LEVEL_{0}<<";
-        public const string IfStatementMarker = ">>MARKER:IFSTATEMENT_LEVEL_{0}<<";
+        // ifStmt
+        //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
 
-        private int m_ifExpressionLevel;
+        m_ifExpressionLevel++;
 
-        public override void EnterIfStmt(GoParser.IfStmtContext context)
+        if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
         {
-            // ifStmt
-            //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
-
-            m_ifExpressionLevel++;
-
-            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
+            // Any declared variable will be scoped to if statement, so create a sub-block for it
+            if (context.simpleStmt().shortVarDecl() is not null)
             {
-                // Any declared variable will be scoped to if statement, so create a sub-block for it
-                if (context.simpleStmt().shortVarDecl() is not null)
-                {
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                    IndentLevel++;
+                m_targetFile.AppendLine($"{Spacing()}{{");
+                IndentLevel++;
 
-                    // Handle storing of current values of any redeclared variables
-                    m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
-                }
-
-                m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
+                // Handle storing of current values of any redeclared variables
+                m_targetFile.Append(OpenRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
             }
 
-            m_targetFile.AppendLine($"{string.Format(IfElseBreakMarker, m_ifExpressionLevel)}{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
-
-            if (context.block().Length == 2)
-            {
-                PushOuterBlockSuffix(null);  // For current block
-                PushOuterBlockSuffix($"{Environment.NewLine}{Spacing()}else{(LineTerminatorAhead(context.block(0)) ? "" : Environment.NewLine)}");
-            }
-            else
-            {
-                PushOuterBlockSuffix(null);  // For current block
-            }
+            m_targetFile.Append(string.Format(IfStatementMarker, m_ifExpressionLevel));
         }
 
-        public override void ExitIfStmt(GoParser.IfStmtContext context)
+        m_targetFile.AppendLine($"{string.Format(IfElseBreakMarker, m_ifExpressionLevel)}{Spacing()}{string.Format(IfElseMarker, m_ifExpressionLevel)}if ({string.Format(IfExpressionMarker, m_ifExpressionLevel)})");
+
+        if (context.block().Length == 2)
         {
-            // ifStmt
-            //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
+            PushOuterBlockSuffix(null); // For current block
+            PushOuterBlockSuffix($"{Environment.NewLine}{Spacing()}else{(LineTerminatorAhead(context.block(0)) ? string.Empty : Environment.NewLine)}");
+        }
+        else
+        {
+            PushOuterBlockSuffix(null); // For current block
+        }
+    }
 
-            if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
-            {
-                bool isElseIf = context.Parent is GoParser.IfStmtContext;
+    public override void ExitIfStmt(GoParser.IfStmtContext context)
+    {
+        // ifStmt
+        //     : 'if '(simpleStmt ';') ? expression block ( 'else' ( ifStmt | block ) ) ?
 
-                // Replace if markers
-                m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression.Text);
-                m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf ? Environment.NewLine : "");
-                m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), isElseIf ? "else " : "");
-            }
+        if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
+        {
+            bool isElseIf = context.Parent is GoParser.IfStmtContext;
+
+            // Replace if markers
+            m_targetFile.Replace(string.Format(IfExpressionMarker, m_ifExpressionLevel), expression.Text);
+            m_targetFile.Replace(string.Format(IfElseBreakMarker, m_ifExpressionLevel), isElseIf ? Environment.NewLine : string.Empty);
+            m_targetFile.Replace(string.Format(IfElseMarker, m_ifExpressionLevel), isElseIf ? "else " : string.Empty);
+        }
+        else
+        {
+            AddWarning(context, $"Failed to find expression for if statement: {context.GetText()}");
+        }
+
+        if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
+        {
+            if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
+                m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statement + Environment.NewLine);
             else
-            {
-                AddWarning(context, $"Failed to find expression for if statement: {context.GetText()}");
-            }
-
-            if (context.simpleStmt() is not null && context.simpleStmt().emptyStmt() is null)
-            {
-                if (m_simpleStatements.TryGetValue(context.simpleStmt(), out string statement))
-                    m_targetFile.Replace(string.Format(IfStatementMarker, m_ifExpressionLevel), statement + Environment.NewLine);
-                else
-                    AddWarning(context, $"Failed to find simple statement for if statement: {context.simpleStmt().GetText()}");
+                AddWarning(context, $"Failed to find simple statement for if statement: {context.simpleStmt().GetText()}");
                 
-                // Close any locally scoped declared variable sub-block
-                if (context.simpleStmt().shortVarDecl() is not null)
-                {
-                    // Handle restoration of previous values of any redeclared variables
-                    m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
+            // Close any locally scoped declared variable sub-block
+            if (context.simpleStmt().shortVarDecl() is not null)
+            {
+                // Handle restoration of previous values of any redeclared variables
+                m_targetFile.Append(CloseRedeclaredVariableBlock(context.simpleStmt().shortVarDecl().identifierList(), m_ifExpressionLevel));
 
-                    IndentLevel--;
-                    m_targetFile.AppendLine();
-                    m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
-                }
-            }
-
-            if (!EndsWithLineFeed(m_targetFile.ToString()))
+                IndentLevel--;
                 m_targetFile.AppendLine();
-
-            m_ifExpressionLevel--;
+                m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
+            }
         }
+
+        if (!EndsWithLineFeed(m_targetFile.ToString()))
+            m_targetFile.AppendLine();
+
+        m_ifExpressionLevel--;
     }
 }

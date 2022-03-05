@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>fmt_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
@@ -23,7 +23,7 @@
     <Nullable>enable</Nullable>
     <NoWarn>660;661;1701;1702;IDE1006</NoWarn>
     <Version>0.1.0</Version>
-    <LangVersion>9</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.UIntPtr" Alias="uintptr" />
+
     <ProjectReference Include="..\golib\golib.csproj" /> <!--Condition="'$(Configuration)'=='Debug'"-->
     <!--<PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />-->
   </ItemGroup>

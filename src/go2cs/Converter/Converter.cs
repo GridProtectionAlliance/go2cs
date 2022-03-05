@@ -33,236 +33,237 @@ using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
 
-namespace go2cs
+namespace go2cs;
+
+/// <summary>
+/// Represents a converter used to convert Go source code to C#.
+/// </summary>
+public partial class Converter : ScannerBase
 {
-    /// <summary>
-    /// Represents a converter used to convert Go source code to C#.
-    /// </summary>
-    public partial class Converter : ScannerBase
+    public const string StandardLibrary = "GoStandardLibrary";
+    private const string UsingsMarker = ">>MARKER:USINGS<<";
+    private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
+
+    private StringBuilder m_targetFile = new StringBuilder();
+
+    public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases { get; }
+
+    public Dictionary<string, FolderMetadata> ImportMetadata { get; }
+
+    public Converter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
     {
-        public const string StandardLibrary = "GoStandardLibrary";
-        private const string UsingsMarker = ">>MARKER:USINGS<<";
-        private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
+        if (Metadata is null)
+            throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
-        private StringBuilder m_targetFile = new StringBuilder();
+        ImportAliases = Metadata.ImportAliases;
+        ImportMetadata = new(StringComparer.Ordinal);
+    }
 
-        public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases { get; }
+    public override void Scan(bool showParseTree)
+    {
+        // Base class walks parse tree
+        base.Scan(showParseTree);
 
-        public Dictionary<string, FolderMetadata> ImportMetadata { get; }
+        if (!WroteLineFeed)
+            m_targetFile.AppendLine();
 
-        public Converter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName) : base(tokenStream, parser, options, fileName)
-        {
-            if (Metadata is null)
-                throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
+        // Close class and namespaces as begun during Converter_TopLevelDecl visit
+        m_targetFile.AppendLine($"{Environment.NewLine}}} // end {Package}{ClassSuffix}");
 
-            ImportAliases = Metadata.ImportAliases;
-            ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
-        }
-
-        public override void Scan(bool showParseTree)
-        {
-            // Base class walks parse tree
-            base.Scan(showParseTree);
-
-            if (!WroteLineFeed)
-                m_targetFile.AppendLine();
-
-            // Close class and namespaces as begun during Converter_TopLevelDecl visit
-            m_targetFile.AppendLine($"{Spacing(indentLevel: 1)}}}");
+        if (!string.IsNullOrEmpty(m_namespaceFooter))
             m_targetFile.AppendLine(m_namespaceFooter);
 
-            string targetFile = m_targetFile.ToString();
+        string targetFile = m_targetFile.ToString();
 
-            // Find usings marker
-            int index = targetFile.IndexOf(UsingsMarker, StringComparison.Ordinal);
+        // Find usings marker
+        int index = targetFile.IndexOf(UsingsMarker, StringComparison.Ordinal);
 
-            // Insert required usings
-            if (index > -1 && RequiredUsings.Count > 0)
-                targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, RequiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
+        // Insert required usings
+        if (index > -1 && RequiredUsings.Count > 0)
+            targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, RequiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
 
-            // Remove code markers
-            targetFile = targetFile.Replace(UsingsMarker, "");
-            targetFile = targetFile.Replace(UnsafeMarker, UsesUnsafePointers ? "unsafe " : "");
+        // Remove code markers
+        targetFile = targetFile.Replace(UsingsMarker, string.Empty);
+        targetFile = targetFile.Replace(UnsafeMarker, UsesUnsafePointers ? "unsafe " : string.Empty);
 
-            using StreamWriter writer = File.CreateText(TargetFileName);
-            writer.Write(targetFile);
-        }
+        using StreamWriter writer = File.CreateText(TargetFileName);
+        writer.Write(targetFile);
+    }
 
-        protected override void BeforeScan()
-        {
-            Console.WriteLine($"Converting from{Environment.NewLine}    \"{SourceFileName}\" to{Environment.NewLine}    \"{TargetFileName}\"...");
-        }
+    protected override void BeforeScan()
+    {
+        Console.WriteLine($"Converting from{Environment.NewLine}    \"{SourceFileName}\" to{Environment.NewLine}    \"{TargetFileName}\"...");
+    }
 
-        protected override void AfterScan()
-        {
-            if (!PackageImport.Equals("main"))
-                Console.WriteLine($"        import \"{PackageImport}\" ==> using {PackageUsing}");
+    protected override void AfterScan()
+    {
+        if (!PackageImport.Equals("main"))
+            Console.WriteLine($"        import \"{PackageImport}\" ==> using {PackageUsing}");
 
-            Console.WriteLine("    Finished.");
-        }
+        Console.WriteLine("    Finished.");
+    }
 
-        protected override void SkippingScan()
-        {
-            Console.WriteLine($"Skipping convert for{Environment.NewLine}    \"{SourceFileName}\", target{Environment.NewLine}    \"{TargetFileName}\" already exists.");
-        }
+    protected override void SkippingScan()
+    {
+        Console.WriteLine($"Skipping convert for{Environment.NewLine}    \"{SourceFileName}\", target{Environment.NewLine}    \"{TargetFileName}\" already exists.");
+    }
 
-        protected override void SkippingImport(string import)
-        {
-            Console.WriteLine($"Skipping convert for Go standard library import package \"{import}\".");
-            Console.WriteLine();
-        }
+    protected override void SkippingImport(string import)
+    {
+        Console.WriteLine($"Skipping convert for Go standard library import package \"{import}\".");
+        Console.WriteLine();
+    }
 
-        private static readonly HashSet<string> s_mainPackageFiles;
-        private static readonly Dictionary<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> s_packageInfo;
+    private static readonly HashSet<string> s_mainPackageFiles;
+    private static readonly Dictionary<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> s_packageInfo;
 
-        static Converter()
-        {
-            s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            s_packageInfo = new Dictionary<string, Dictionary<string, (string, HashSet<string>)>>(StringComparer.OrdinalIgnoreCase);
-        }
+    static Converter()
+    {
+        s_mainPackageFiles = new(StringComparer.OrdinalIgnoreCase);
+        s_packageInfo = new Dictionary<string, Dictionary<string, (string, HashSet<string>)>>(StringComparer.OrdinalIgnoreCase);
+    }
 
-        public static void Convert(Options options)
-        {
-            if (options.OnlyUpdateMetadata)
-                return;
+    public static void Convert(Options options)
+    {
+        if (options.OnlyUpdateMetadata)
+            return;
 
-            ResetScanner();
-            Scan(options, options.ShowParseTree, CreateNewConverter);
-            WriteProjectFiles(options);
-        }
+        ResetScanner();
+        Scan(options, options.ShowParseTree, CreateNewConverter);
+        WriteProjectFiles(options);
+    }
 
-        private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
-        {
-            return new Converter(tokenStream, parser, options, fileName);
-        }
+    private static ScannerBase CreateNewConverter(BufferedTokenStream tokenStream, GoParser parser, Options options, string fileName)
+    {
+        return new Converter(tokenStream, parser, options, fileName);
+    }
 
-        private static void WriteProjectFiles(Options options)
-        {
-        #if !DEBUG
+    private static void WriteProjectFiles(Options options)
+    {
+    #if !DEBUG
             try
             {
-        #endif
-                // Map of package names to list of package path and file names
-                Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData;
+    #endif
+        // Map of package names to list of package path and file names
+        Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData;
 
-                // Process import packages - these become shared projects
-                groupedPackageData = CreateGroupedPackageData();
+        // Process import packages - these become shared projects
+        groupedPackageData = CreateGroupedPackageData();
 
-                // Process packages with "main" functions - these become standard projects
-                ProcessMainProjectPackages(options);
+        // Process packages with "main" functions - these become standard projects
+        ProcessMainProjectPackages(options);
 
-                if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
-                    ProcessStandardLibraryPackages(options, groupedPackageData);
-        #if !DEBUG
+        if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
+            ProcessStandardLibraryPackages(options, groupedPackageData);
+    #if !DEBUG
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to write project files: {ex.Message}");
             }
-        #endif
-        }
+    #endif
+    }
 
-        private static Dictionary<string, List<(string, string[])>> CreateGroupedPackageData()
+    private static Dictionary<string, List<(string, string[])>> CreateGroupedPackageData()
+    {
+        Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
+
+        foreach (KeyValuePair<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> kvp in s_packageInfo)
         {
-            Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
+            string packagePath = kvp.Key;
 
-            foreach (KeyValuePair<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> kvp in s_packageInfo)
+            // Depending on the scope of the conversion, the same package name may exist in multiple paths
+            foreach (KeyValuePair<string, (string nameSpace, HashSet<string> fileNames)> fileGroup in kvp.Value)
             {
-                string packagePath = kvp.Key;
+                string package = fileGroup.Key;
+                string[] packageFileNames = fileGroup.Value.fileNames.ToArray();
 
-                // Depending on the scope of the conversion, the same package name may exist in multiple paths
-                foreach (KeyValuePair<string, (string nameSpace, HashSet<string> fileNames)> fileGroup in kvp.Value)
-                {
-                    string package = fileGroup.Key;
-                    string[] packageFileNames = fileGroup.Value.fileNames.ToArray();
-
-                    List<(string, string[])> groupPackageData = groupedPackageData.GetOrAdd(package, _ => new List<(string, string[])>());
-                    groupPackageData.Add((packagePath, packageFileNames));
-                }
-            }
-
-            return groupedPackageData;
-        }
-
-        private static void ProcessMainProjectPackages(Options options)
-        {
-            foreach (string mainPackageFile in s_mainPackageFiles)
-            {
-                string mainPackageFileName = Path.GetFileName(mainPackageFile) ?? "";
-                string mainPackagePath = Path.GetDirectoryName(mainPackageFile) ?? "";
-                string assemblyName = Path.GetFileNameWithoutExtension(mainPackageFileName);
-
-                FolderMetadata folderMetadata = GetFolderMetadata(options, null, mainPackageFile);
-                string sourceFileName = Path.Combine(Path.GetDirectoryName(mainPackageFile) ?? "", $"{Path.GetFileNameWithoutExtension(mainPackageFile)}.go");
-
-                if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
-                    throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
-
-                string mainProjectFile = Path.Combine(mainPackagePath, $"{assemblyName}.csproj");
-                string mainProjectFileContent = new MainProjectTemplate
-                {
-                    AssemblyName = assemblyName,
-                    Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
-                }.TransformText();
-
-                // Build main project file
-                if (File.Exists(mainProjectFile) && GetMD5HashFromFile(mainProjectFile) == GetMD5HashFromString(mainProjectFileContent))
-                    continue;
-
-                using StreamWriter writer = File.CreateText(mainProjectFile);
-                writer.Write(mainProjectFileContent);
+                List<(string, string[])> groupPackageData = groupedPackageData.GetOrAdd(package, _ => new List<(string, string[])>());
+                groupPackageData.Add((packagePath, packageFileNames));
             }
         }
 
-        private static void ProcessStandardLibraryPackages(Options options, Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData)
+        return groupedPackageData;
+    }
+
+    private static void ProcessMainProjectPackages(Options options)
+    {
+        foreach (string mainPackageFile in s_mainPackageFiles)
         {
-            foreach (KeyValuePair<string, List<(string path, string[] fileNames)>> packageData in groupedPackageData)
+            string mainPackageFileName = Path.GetFileName(mainPackageFile) ?? string.Empty;
+            string mainPackagePath = Path.GetDirectoryName(mainPackageFile) ?? string.Empty;
+            string assemblyName = Path.GetFileNameWithoutExtension(mainPackageFileName);
+
+            FolderMetadata folderMetadata = GetFolderMetadata(options, null, mainPackageFile);
+            string sourceFileName = Path.Combine(Path.GetDirectoryName(mainPackageFile) ?? string.Empty, $"{Path.GetFileNameWithoutExtension(mainPackageFile)}.go");
+
+            if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
+                throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
+
+            string mainProjectFile = Path.Combine(mainPackagePath, $"{assemblyName}.csproj");
+            string mainProjectFileContent = new MainProjectTemplate
             {
-                foreach ((string path, string[] fileNames) rootPackage in packageData.Value.Where(info => info.path.StartsWith(GoRoot)))
+                AssemblyName = assemblyName,
+                Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
+            }.TransformText();
+
+            // Build main project file
+            if (File.Exists(mainProjectFile) && GetMD5HashFromFile(mainProjectFile) == GetMD5HashFromString(mainProjectFileContent))
+                continue;
+
+            using StreamWriter writer = File.CreateText(mainProjectFile);
+            writer.Write(mainProjectFileContent);
+        }
+    }
+
+    private static void ProcessStandardLibraryPackages(Options options, Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData)
+    {
+        foreach (KeyValuePair<string, List<(string path, string[] fileNames)>> packageData in groupedPackageData)
+        {
+            foreach ((string path, string[] fileNames) rootPackage in packageData.Value.Where(info => info.path.StartsWith(GoRoot)))
+            {
+                foreach (string fileName in rootPackage.fileNames)
                 {
-                    foreach (string fileName in rootPackage.fileNames)
+                    if (fileName.EndsWith("_test.go"))
+                        continue;
+
+                    string assemblyName = packageData.Key;
+                    string libraryProjectFile = Path.Combine(rootPackage.path, $"{assemblyName}.csproj");
+
+                    FolderMetadata folderMetadata = GetFolderMetadata(options, null, fileName);
+                    string sourceFileName = Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, $"{Path.GetFileNameWithoutExtension(fileName)}.go");
+
+                    if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
+                        throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
+
+                    string libraryProjectFileContent = new LibraryProjectTemplate
                     {
-                        if (fileName.EndsWith("_test.go"))
-                            continue;
+                        AssemblyName = assemblyName,
+                        Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
+                    }.TransformText();
 
-                        string assemblyName = packageData.Key;
-                        string libraryProjectFile = Path.Combine(rootPackage.path, $"{assemblyName}.csproj");
+                    // Build library project file
+                    if (File.Exists(libraryProjectFile) && GetMD5HashFromFile(libraryProjectFile) == GetMD5HashFromString(libraryProjectFileContent))
+                        continue;
 
-                        FolderMetadata folderMetadata = GetFolderMetadata(options, null, fileName);
-                        string sourceFileName = Path.Combine(Path.GetDirectoryName(fileName) ?? "", $"{Path.GetFileNameWithoutExtension(fileName)}.go");
-
-                        if (folderMetadata is null || !folderMetadata.Files.TryGetValue(sourceFileName, out FileMetadata metadata))
-                            throw new InvalidOperationException($"Failed to load metadata for \"{sourceFileName}\" - file conversion canceled.");
-
-                        string libraryProjectFileContent = new LibraryProjectTemplate
-                        {
-                            AssemblyName = assemblyName,
-                            Imports = metadata.ImportAliases.Select(kvp => kvp.Value.targetImport)
-                        }.TransformText();
-
-                        // Build library project file
-                        if (File.Exists(libraryProjectFile) && GetMD5HashFromFile(libraryProjectFile) == GetMD5HashFromString(libraryProjectFileContent))
-                            continue;
-
-                        using StreamWriter writer = File.CreateText(libraryProjectFile);
-                        writer.Write(libraryProjectFileContent);
-                    }
+                    using StreamWriter writer = File.CreateText(libraryProjectFile);
+                    writer.Write(libraryProjectFileContent);
                 }
             }
         }
+    }
 
-        private string GetPackageNamespace(string packageImport)
-        {
-            string[] paths = packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
-            return $"{RootNamespace}.{string.Join(".", paths)}{ClassSuffix}";
-        }
+    private string GetPackageNamespace(string packageImport)
+    {
+        string[] paths = packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
+        return $"{RootNamespace}.{string.Join(".", paths)}{ClassSuffix}";
+    }
 
-        private static void AddFileToPackage(string package, string fileName, string nameSpace)
-        {
-            // Since the same package name may exist at multiple paths, we track details by path
-            Dictionary<string, (string, HashSet<string>)> packageInfo = s_packageInfo.GetOrAdd(Path.GetDirectoryName(fileName), _ => new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal));
-            (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
-            fileGroup.fileNames.Add(fileName);
-        }
+    private static void AddFileToPackage(string package, string fileName, string nameSpace)
+    {
+        // Since the same package name may exist at multiple paths, we track details by path
+        Dictionary<string, (string, HashSet<string>)> packageInfo = s_packageInfo.GetOrAdd(Path.GetDirectoryName(fileName), _ => new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal));
+        (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new(StringComparer.OrdinalIgnoreCase)));
+        fileGroup.fileNames.Add(fileName);
     }
 }

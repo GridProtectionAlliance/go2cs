@@ -4,17 +4,16 @@ using _file_ = go.path.file_package;
 using static go.math.rand_package;
 using os = go.os_package;
 using @implicit = go.text.tabwriter_package;
-using static go.builtin;
 
-namespace go
+namespace go;
+
+public static partial class main_package {
+
+private static void Main() => func((defer, _, _) =>
 {
-    public static partial class main_package
-    {
-        private static void Main() => func((defer, _, __) =>
-        {
-            fmt.Println(Int());
-            var w = @implicit.NewWriter(os.Stdout, 1, 1, 1, ' ', 0);
-            defer(w.Flush());
-        });
-    }
-}
+    fmt.Println(Int());
+    var w = @implicit.NewWriter(os.Stdout, 1, 1, 1, ' ', 0);
+    defer(w.Flush());
+});
+
+} // end main_package

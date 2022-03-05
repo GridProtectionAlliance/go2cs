@@ -23,18 +23,17 @@
 
 using CommandLine;
 
-namespace go2cs
+namespace go2cs;
+
+public class Arguments
 {
-    public class Arguments
-    {
-        private readonly ParserResult<Options> m_parserResult;
+    private readonly ParserResult<Options> m_parserResult;
 
-        private Arguments(ParserResult<Options> parserResult) => m_parserResult = parserResult;
+    private Arguments(ParserResult<Options> parserResult) => m_parserResult = parserResult;
 
-        public Options ParsedOptions => (m_parserResult as Parsed<Options>)?.Value;
+    public Options ParsedOptions => (m_parserResult as Parsed<Options>)?.Value;
 
-        public bool ParseSuccess => m_parserResult.Tag == ParserResultType.Parsed;
+    public bool ParseSuccess => m_parserResult.Tag == ParserResultType.Parsed;
 
-        public static Arguments Parse(string[] args) => new Arguments(Parser.Default.ParseArguments<Options>(args));
-    }
+    public static Arguments Parse(string[] args) => new Arguments(Parser.Default.ParseArguments<Options>(args));
 }

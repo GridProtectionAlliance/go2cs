@@ -25,108 +25,107 @@ using go2cs.Metadata;
 using System.Collections.Generic;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    // Stack handlers:
+    //  receiver (required)
+    //  signature (required)
+    //  result (optional)
+    protected readonly ParseTreeValues<List<ParameterInfo>> Parameters = new ParseTreeValues<List<ParameterInfo>>();
+
+    private readonly ParseTreeValues<List<ParameterInfo>> m_parameterDeclarations = new ParseTreeValues<List<ParameterInfo>>();
+
+    public override void ExitParameters(GoParser.ParametersContext context)
     {
-        // Stack handlers:
-        //  receiver (required)
-        //  signature (required)
-        //  result (optional)
-        protected readonly ParseTreeValues<List<ParameterInfo>> Parameters = new ParseTreeValues<List<ParameterInfo>>();
+        List<ParameterInfo> parameters = new List<ParameterInfo>();
 
-        private readonly ParseTreeValues<List<ParameterInfo>> m_parameterDeclarations = new ParseTreeValues<List<ParameterInfo>>();
-
-        public override void ExitParameters(GoParser.ParametersContext context)
+        for (int i = 0; i < context.parameterDecl().Length; i++)
         {
-            List<ParameterInfo> parameters = new List<ParameterInfo>();
-
-            for (int i = 0; i < context.parameterDecl().Length; i++)
-            {
-                if (m_parameterDeclarations.TryGetValue(context.parameterDecl(i), out List<ParameterInfo> parameterDeclarations))
-                    parameters.AddRange(parameterDeclarations);
-            }
-
-            Parameters[context] = parameters;
+            if (m_parameterDeclarations.TryGetValue(context.parameterDecl(i), out List<ParameterInfo> parameterDeclarations))
+                parameters.AddRange(parameterDeclarations);
         }
 
-        public override void ExitParameterDecl(GoParser.ParameterDeclContext context)
+        Parameters[context] = parameters;
+    }
+
+    public override void ExitParameterDecl(GoParser.ParameterDeclContext context)
+    {
+        List<ParameterInfo> parameters = new List<ParameterInfo>();
+
+        Identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
+
+        // Check for variadic expression
+        bool hasVariadicParameter = context.GetText().Contains("...");
+
+        if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+            typeInfo = TypeInfo.ObjectType;
+
+        if (identifiers is not null)
         {
-            List<ParameterInfo> parameters = new List<ParameterInfo>();
-
-            Identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
-
-            // Check for variadic expression
-            bool hasVariadicParameter = context.GetText().Contains("...");
-
-            if (!Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
-                typeInfo = TypeInfo.ObjectType;
-
-            if (identifiers is not null)
+            for (int i = 0; i < identifiers.Length; i++)
             {
-                for (int i = 0; i < identifiers.Length; i++)
+                string identifier = SanitizedIdentifier(identifiers[i]);
+
+                // Check for unnamed parameters
+                if (string.IsNullOrWhiteSpace(identifier))
+                    identifier = $"_p{parameters.Count}";
+
+                if (i == identifiers.Length - 1 && hasVariadicParameter)
                 {
-                    string identifier = SanitizedIdentifier(identifiers[i]);
+                    TypeInfo variadicType = ConvertByRefToBasicPointer(typeInfo.Clone());
 
-                    // Check for unnamed parameters
-                    if (string.IsNullOrWhiteSpace(identifier))
-                        identifier = $"_p{parameters.Count}";
-
-                    if (i == identifiers.Length - 1 && hasVariadicParameter)
+                    if (variadicType.TypeClass != TypeClass.Array)
                     {
-                        TypeInfo variadicType = ConvertByRefToBasicPointer(typeInfo.Clone());
-
-                        if (variadicType.TypeClass != TypeClass.Array)
-                        {
-                            variadicType.TypeClass = TypeClass.Array;
-                            variadicType.TypeName += "[]";
-                            variadicType.FullTypeName += "[]";
-                        }
-
-                        parameters.Add(new ParameterInfo
-                        {
-                            Name = identifier,
-                            Type = variadicType,
-                            IsVariadic = true,                            
-                        });
+                        variadicType.TypeClass = TypeClass.Array;
+                        variadicType.TypeName += "[]";
+                        variadicType.FullTypeName += "[]";
                     }
-                    else
+
+                    parameters.Add(new()
                     {
-                        parameters.Add(new ParameterInfo
-                        {
-                            Name = identifier,
-                            Type = typeInfo,
-                            IsVariadic = false
-                        });
-                    }
+                        Name = identifier,
+                        Type = variadicType,
+                        IsVariadic = true,                            
+                    });
+                }
+                else
+                {
+                    parameters.Add(new()
+                    {
+                        Name = identifier,
+                        Type = typeInfo,
+                        IsVariadic = false
+                    });
                 }
             }
-            else if (hasVariadicParameter)
-            {
-                string identifier = $"_p{parameters.Count}";
-
-                // Unnamed variadic parameter
-                parameters.Add(new ParameterInfo
-                {
-                    Name = identifier,
-                    Type = ConvertByRefToBasicPointer(typeInfo),
-                    IsVariadic = true
-                });
-            }
-            else
-            {
-                string identifier = $"_p{parameters.Count}";
-
-                // Unnamed parameter
-                parameters.Add(new ParameterInfo
-                {
-                    Name = identifier,
-                    Type = typeInfo,
-                    IsVariadic = false
-                });
-            }
-
-            m_parameterDeclarations[context] = parameters;
         }
+        else if (hasVariadicParameter)
+        {
+            string identifier = $"_p{parameters.Count}";
+
+            // Unnamed variadic parameter
+            parameters.Add(new()
+            {
+                Name = identifier,
+                Type = ConvertByRefToBasicPointer(typeInfo),
+                IsVariadic = true
+            });
+        }
+        else
+        {
+            string identifier = $"_p{parameters.Count}";
+
+            // Unnamed parameter
+            parameters.Add(new()
+            {
+                Name = identifier,
+                Type = typeInfo,
+                IsVariadic = false
+            });
+        }
+
+        m_parameterDeclarations[context] = parameters;
     }
 }

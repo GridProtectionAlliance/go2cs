@@ -26,33 +26,32 @@
 using System;
 using System.Diagnostics;
 
-namespace go
+namespace go;
+
+/// <summary>
+/// Represents an exception for the "panic" keyword.
+/// </summary>
+[DebuggerNonUserCode]
+public class PanicException : Exception
 {
-    /// <summary>
-    /// Represents an exception for the "panic" keyword.
-    /// </summary>
-    [DebuggerNonUserCode]
-    public class PanicException : Exception
-    {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public object State { get; }
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public object State { get; }
 
-        public PanicException(object state) :
-            this(state, default!) { }
+    public PanicException(object state) :
+        this(state, default!) { }
 
-        public PanicException(object state, Exception innerException) :
-            base(state?.ToString() ?? "nil", innerException) => State = state!;
-    }
+    public PanicException(object state, Exception innerException) :
+        base(state?.ToString() ?? "nil", innerException) => State = state!;
+}
 
-    /// <summary>
-    /// Represents common runtime error messages thrown in Go environment.
-    /// </summary>
-    public static class RuntimeErrorPanic
-    {
-        private const string NilPointerDereferenceMessage = "runtime error: invalid memory address or nil pointer dereference";
-        public static PanicException NilPointerDereference() => new PanicException(NilPointerDereferenceMessage);
+/// <summary>
+/// Represents common runtime error messages thrown in Go environment.
+/// </summary>
+public static class RuntimeErrorPanic
+{
+    private const string NilPointerDereferenceMessage = "runtime error: invalid memory address or nil pointer dereference";
+    public static PanicException NilPointerDereference() => new PanicException(NilPointerDereferenceMessage);
 
-        private const string IndexOutOfRangeMessage = "runtime error: index out of range [{0}] with length {1}";
-        public static PanicException IndexOutOfRange(long index, long length) => new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
-    }
+    private const string IndexOutOfRangeMessage = "runtime error: index out of range [{0}] with length {1}";
+    public static PanicException IndexOutOfRange(long index, long length) => new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
 }

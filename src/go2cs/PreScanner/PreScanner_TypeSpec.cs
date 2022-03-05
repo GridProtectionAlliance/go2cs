@@ -24,30 +24,29 @@
 using go2cs.Metadata;
 using System.Collections.Generic;
 
-namespace go2cs
-{
-    public partial class PreScanner
-    {
-        public override void ExitTypeSpec(GoParser.TypeSpecContext context)
-        {
-            string identifier = context.IDENTIFIER().GetText();
+namespace go2cs;
 
-            if (m_interfaceMethods.TryGetValue(context.type_()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
+public partial class PreScanner
+{
+    public override void ExitTypeSpec(GoParser.TypeSpecContext context)
+    {
+        string identifier = context.IDENTIFIER().GetText();
+
+        if (m_interfaceMethods.TryGetValue(context.type_()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
+        {
+            m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new()
             {
-                m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new InterfaceInfo
-                {
-                    Name = identifier,
-                    Methods = methods.ToArray()
-                });
-            }
-            else if (m_structFields.TryGetValue(context.type_()?.typeLit()?.structType(), out List<FieldInfo> fields))
+                Name = identifier,
+                Methods = methods.ToArray()
+            });
+        }
+        else if (m_structFields.TryGetValue(context.type_()?.typeLit()?.structType(), out List<FieldInfo> fields))
+        {
+            m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new()
             {
-                m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new StructInfo
-                {
-                    Name = identifier,
-                    Fields = fields.ToArray()
-                });
-            }
+                Name = identifier,
+                Fields = fields.ToArray()
+            });
         }
     }
 }

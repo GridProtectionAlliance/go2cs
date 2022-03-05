@@ -83,13 +83,21 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckPointerToPointerResult() => CheckProjectAgainstTarget("PointerToPointer");
 
-        private void CheckProjectAgainstTarget(string targetProject)
+        private void CheckProjectAgainstTarget(string targetProject, bool testLegacyTarget = true)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");
             string convertedProjectFile = $@"{projectPath}\{targetProject}.cs";
-            string conversionTargetFile = $"{convertedProjectFile}.target";
+            string conversionTargetFile;
             int exitCode;
 
+            if (testLegacyTarget)
+            {
+                conversionTargetFile = $"{convertedProjectFile}.legacy.target";
+                Assert.IsTrue((exitCode = Exec(go2cs, $"-o -i -h -c {projectPath}")) == 0, $"go2cs failed with exit code {exitCode:N0}");
+                Assert.IsTrue(FileMatch(convertedProjectFile, conversionTargetFile), $"Go source file converted to C# \"{convertedProjectFile}\" does not match target \"{conversionTargetFile}\"");
+            }
+
+            conversionTargetFile = $"{convertedProjectFile}.target";
             Assert.IsTrue((exitCode = Exec(go2cs, $"-o -i -h {projectPath}")) == 0, $"go2cs failed with exit code {exitCode:N0}");
             Assert.IsTrue(FileMatch(convertedProjectFile, conversionTargetFile), $"Go source file converted to C# \"{convertedProjectFile}\" does not match target \"{conversionTargetFile}\"");
         }

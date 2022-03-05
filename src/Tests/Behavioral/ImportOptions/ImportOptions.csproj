@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>ImportOptions</AssemblyName>
     <Product>go2cs</Product>
-    <Copyright>Copyright © 2020</Copyright>
+    <Copyright>Copyright © 2022</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -17,7 +17,26 @@
     <Version>0.1.0</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
   <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.UIntPtr" Alias="uintptr" />
+
     <Reference Include="golib">
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>

@@ -41,7 +41,7 @@ Note that go2cs simple conversions currently depend on a small subset of the Go 
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
-Converted code now targets .NET 5.0 and C# 9.0.
+Converted code now targets .NET 6.0 and C# 10.0. Recent updates use file-scoped namespaces and reduces indentation to better match original Go code.
 
 Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
 
@@ -66,6 +66,8 @@ go2cs -o -i C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue
 This will convert Go code to C#. You can then build and run both the Go and C# versions and compare results.
 
 > **Debugging with Visual Studio:** After running the `deploy-gocore.bat` script you can run conversion code from within Visual Studio by right-clicking on the go2cs project, selecting "Properties" then clicking on the "Debug" tab. In the "Application arguments:" text box you can enter the command line test parameters, e.g., `-o -i -h C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue`. When the active solution configuration targets "Debug" you can run the go2cs project to convert Go code, then run converted code.
+
+> **Debugging Note:** Keep in mind that you have local `gocore` source code and a copy of the source in the `GOPATH`. Compiled versions of converted code will reference the `gocore` code copy in the `GOPATH` folder. If you encounter an exception in `gocore` while debugging, Visual Studio will be displaying the code in the `GOPATH` folder. Any code changes you make might make will then be in the `GOPATH` folder instead of your local folder and be lost at the next run of the `deploy-gocore.bat` script.
 
 ## Installation
 
@@ -98,6 +100,8 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 | -r | (Default: false) Set to recursively convert source files in subdirectories when a Go source path is specified. |
 | -m | (Default: false) Set to force update of pre-scan metadata. |
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
+| -k | (Default: false) Skip check for "+build ignore" directive and attempt conversion anyway. |
+| -c | (Default: false) Set to target legacy compatible code, e.g., block scoped namespaces. Required for code sets prior to C# 10. |
 | &#8209;&#8209;help | Display this help screen. |
 | &#8209;&#8209;version | Display version information. |   
 | value 0 | Required. Go source path or file name to convert. |

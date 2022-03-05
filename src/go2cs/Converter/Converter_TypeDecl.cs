@@ -32,447 +32,446 @@ using static go2cs.Common;
 
 #pragma warning disable SCS0018 // Path traversal
 
-namespace go2cs
+namespace go2cs;
+
+public partial class Converter
 {
-    public partial class Converter
+    // TODO: Consider strongly typing sub-function type declarations with function name prefix declared directly prior to function definition - sub-function type declarations are syntactically invalid in C#
+
+    private int m_typeIdentifierCount;
+    private bool m_typeMultipleDeclaration;
+
+    public override void EnterTypeDecl(GoParser.TypeDeclContext context)
     {
-        // TODO: Consider strongly typing sub-function type declarations with function name prefix declared directly prior to function definition - sub-function type declarations are syntactically invalid in C#
+        // typeDecl
+        //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
 
-        private int m_typeIdentifierCount;
-        private bool m_typeMultipleDeclaration;
+        m_typeIdentifierCount = 0;
+        m_typeMultipleDeclaration = context.children.Count > 2;
+    }
 
-        public override void EnterTypeDecl(GoParser.TypeDeclContext context)
+    public override void ExitTypeDecl(GoParser.TypeDeclContext context)
+    {
+        // typeDecl
+        //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
+
+        if (m_typeMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
         {
-            // typeDecl
-            //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
-
-            m_typeIdentifierCount = 0;
-            m_typeMultipleDeclaration = context.children.Count > 2;
+            string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
+            m_targetFile.Clear();
+            m_targetFile.Append(removedLineFeed);
         }
+    }
 
-        public override void ExitTypeDecl(GoParser.TypeDeclContext context)
+    public override void ExitTypeSpec(GoParser.TypeSpecContext context)
+    {
+        // typeSpec
+        //     : IDENTIFIER type
+
+        string originalIdentifier = context.IDENTIFIER().GetText();
+        string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
+        string target = Path.GetFileNameWithoutExtension(TargetFileName);
+        string identifier = SanitizedIdentifier(originalIdentifier);
+
+        // TODO: Sub-function strategy, declare directly prior to function using PushBlock / PopBlock operations and a new replacement marker
+        if (InFunction)
+            AddWarning(context, $"Type specification made from within function \"{CurrentFunctionName}\" - this is will not compile in C#");
+
+        if (m_typeIdentifierCount == 0 && m_typeMultipleDeclaration)
+            m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
+
+        if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
         {
-            // typeDecl
-            //     : 'type' ( typeSpec | '(' ( typeSpec eos )* ')' )
+            // Handle interface type declaration
+            string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Interface")}.cs");
 
-            if (m_typeMultipleDeclaration && EndsWithLineFeed(m_targetFile.ToString()))
+            FunctionSignature[] localFunctions = interfaceInfo.GetLocalMethods().ToArray();
+            List<FunctionSignature> allFunctions = localFunctions.ToList();
+
+            RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allFunctions);
+
+            using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
             {
-                string removedLineFeed = RemoveLastLineFeed(m_targetFile.ToString());
-                m_targetFile.Clear();
-                m_targetFile.Append(removedLineFeed);
+                writer.Write(new InterfaceTypeTemplate
+                                 {
+                                     NamespacePrefix = PackageNamespace,
+                                     NamespaceHeader = m_namespaceHeaderLegacy,
+                                     NamespaceFooter = m_namespaceFooterLegacy,
+                                     PackageName = Package,
+                                     InterfaceName = identifier,
+                                     Scope = scope,
+                                     Interface = interfaceInfo,
+                                     Functions = allFunctions,
+                                     UsingStatements = m_usingStatements
+                                 }
+                                 .TransformText());
             }
+
+            // Track file name associated with package
+            AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);
+
+            string inheritedInterfaces = interfaceInfo.GenerateInheritedInterfaceList();
+
+            if (inheritedInterfaces.Length > 0)
+                inheritedInterfaces = $" : {inheritedInterfaces}";
+
+            m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
+            m_targetFile.AppendLine($"{Spacing()}{{");
+
+            foreach (FunctionSignature function in localFunctions)
+            {
+                m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature()});{(string.IsNullOrWhiteSpace(function.Comments) ? Environment.NewLine : $" {function.Comments.TrimStart()}")}");
+            }
+
+            m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
         }
-
-        public override void ExitTypeSpec(GoParser.TypeSpecContext context)
+        else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
         {
-            // typeSpec
-            //     : IDENTIFIER type
+            // Handle struct type declaration
+            string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
 
-            string originalIdentifier = context.IDENTIFIER().GetText();
-            string scope = char.IsUpper(originalIdentifier[0]) ? "public" : "private";
-            string target = Path.GetFileNameWithoutExtension(TargetFileName);
-            string identifier = SanitizedIdentifier(originalIdentifier);
+            Dictionary<string, List<FunctionSignature>> promotedFunctions = new Dictionary<string, List<FunctionSignature>>(StringComparer.Ordinal);
+            HashSet<string> inheritedTypeNames = new HashSet<string>(StringComparer.Ordinal);
 
-            // TODO: Sub-function strategy, declare directly prior to function using PushBlock / PopBlock operations and a new replacement marker
-            if (InFunction)
-                AddWarning(context, $"Type specification made from within function \"{CurrentFunctionName}\" - this is will not compile in C#");
+            RecurseInheritedInterfaces(context, originalIdentifier, structInfo, promotedFunctions, inheritedTypeNames);
 
-            if (m_typeIdentifierCount == 0 && m_typeMultipleDeclaration)
-                m_targetFile.Append(RemoveFirstLineFeed(CheckForCommentsLeft(context)));
+            Dictionary<string, List<FieldInfo>> promotedFields = new Dictionary<string, List<FieldInfo>>(StringComparer.Ordinal);
+            HashSet<string> promotedStructs = new HashSet<string>(StringComparer.Ordinal);
 
-            if (Metadata.Interfaces.TryGetValue(originalIdentifier, out InterfaceInfo interfaceInfo))
+            SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
+
+            using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
             {
-                // Handle interface type declaration
-                string ancillaryInterfaceFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Interface")}.cs");
-
-                FunctionSignature[] localFunctions = interfaceInfo.GetLocalMethods().ToArray();
-                List<FunctionSignature> allFunctions = localFunctions.ToList();
-
-                RecurseInheritedInterfaces(context, originalIdentifier, interfaceInfo, allFunctions);
-
-                using (StreamWriter writer = File.CreateText(ancillaryInterfaceFileName))
-                {
-                    writer.Write(new InterfaceTypeTemplate
-                    {
-                        NamespacePrefix = PackageNamespace,
-                        NamespaceHeader = m_namespaceHeader,
-                        NamespaceFooter = m_namespaceFooter,
-                        PackageName = Package,
-                        InterfaceName = identifier,
-                        Scope = scope,
-                        Interface = interfaceInfo,
-                        Functions = allFunctions,
-                        UsingStatements = m_usingStatements
-                    }
-                    .TransformText());
-                }
-
-                // Track file name associated with package
-                AddFileToPackage(Package, ancillaryInterfaceFileName, PackageNamespace);
-
-                string inheritedInterfaces = interfaceInfo.GenerateInheritedInterfaceList();
-
-                if (inheritedInterfaces.Length > 0)
-                    inheritedInterfaces = $" : {inheritedInterfaces}";
-
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial interface {identifier}{inheritedInterfaces}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
-
-                foreach (FunctionSignature function in localFunctions)
-                {
-                    m_targetFile.Append($"{Spacing(1)}{function.Signature.GenerateResultSignature()} {SanitizedIdentifier(function.Name)}({function.Signature.GenerateParametersSignature()});{(string.IsNullOrWhiteSpace(function.Comments) ? Environment.NewLine : $" {function.Comments.TrimStart()}")}");
-                }
-
-                m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
+                writer.Write(new StructTypeTemplate
+                                 {
+                                     NamespacePrefix = PackageNamespace,
+                                     NamespaceHeader = m_namespaceHeaderLegacy,
+                                     NamespaceFooter = m_namespaceFooterLegacy,
+                                     PackageName = Package,
+                                     StructName = identifier,
+                                     Scope = scope,
+                                     StructFields = structInfo.Fields,
+                                     PromotedStructs = promotedStructs,
+                                     PromotedFunctions = promotedFunctions,
+                                     PromotedFields = promotedFields,
+                                     UsingStatements = m_usingStatements
+                                 }
+                                 .TransformText());
             }
-            else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
+
+            // Track file name associated with package
+            AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
+
+            List<FieldInfo> fields = new List<FieldInfo>();
+
+            foreach (FieldInfo field in structInfo.Fields)
             {
-                // Handle struct type declaration
-                string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
-
-                Dictionary<string, List<FunctionSignature>> promotedFunctions = new Dictionary<string, List<FunctionSignature>>(StringComparer.Ordinal);
-                HashSet<string> inheritedTypeNames = new HashSet<string>(StringComparer.Ordinal);
-
-                RecurseInheritedInterfaces(context, originalIdentifier, structInfo, promotedFunctions, inheritedTypeNames);
-
-                Dictionary<string, List<FieldInfo>> promotedFields = new Dictionary<string, List<FieldInfo>>(StringComparer.Ordinal);
-                HashSet<string> promotedStructs = new HashSet<string>(StringComparer.Ordinal);
-
-                SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
-
-                using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
+                if (field.IsPromoted && !inheritedTypeNames.Contains(field.Name))
                 {
-                    writer.Write(new StructTypeTemplate
+                    FieldInfo promotedStruct = field.Clone();
+
+                    promotedStruct.Type.TypeName = $"ref {promotedStruct.Type.Name}";
+                    promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type is PointerTypeInfo ? "ptr" : "val")}";
+
+                    fields.Add(promotedStruct);
+                }
+                else
+                {
+                    fields.Add(field);
+                }
+            }
+
+            m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
+            m_targetFile.AppendLine($"{Spacing()}{{");
+
+            foreach (FieldInfo field in fields)
+            {
+                StringBuilder fieldDecl = new StringBuilder();
+
+                if (!string.IsNullOrWhiteSpace(field.Description))
+                {
+                    string description = field.Description.Trim();
+
+                    if (description.Length > 2)
                     {
-                        NamespacePrefix = PackageNamespace,
-                        NamespaceHeader = m_namespaceHeader,
-                        NamespaceFooter = m_namespaceFooter,
-                        PackageName = Package,
-                        StructName = identifier,
-                        Scope = scope,
-                        StructFields = structInfo.Fields,
-                        PromotedStructs = promotedStructs,
-                        PromotedFunctions = promotedFunctions,
-                        PromotedFields = promotedFields,
-                        UsingStatements = m_usingStatements
+                        RequiredUsings.Add("System.ComponentModel");
+                        fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
                     }
-                    .TransformText());
                 }
 
-                // Track file name associated with package
-                AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
+                fieldDecl.Append($"{Spacing(1)}public {field.Type.TypeName} {field.Name};{(string.IsNullOrWhiteSpace(field.Comments) ? Environment.NewLine : $" {field.Comments.TrimStart()}")}");
+                m_targetFile.Append(fieldDecl);
+            }
 
-                List<FieldInfo> fields = new List<FieldInfo>();
+            m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
+        }
+        else if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
+        {
+            if (typeInfo.TypeClass == TypeClass.Function)
+            {
+                RequiredUsings.Decrement("System");
 
-                foreach (FieldInfo field in structInfo.Fields)
+                // Handle delegate type declaration
+                string signature = typeInfo.TypeName;
+
+                if (signature.Equals("Action", StringComparison.Ordinal))
                 {
-                    if (field.IsPromoted && !inheritedTypeNames.Contains(field.Name))
+                    m_targetFile.Append($"{Spacing()}public delegate void {identifier}();");
+                    m_targetFile.Append(CheckForCommentsRight(context));
+                }
+                else if (signature.StartsWith("Action<", StringComparison.Ordinal))
+                {
+                    signature = RemoveSurrounding(signature.Substring(6), "<", ">");
+                    m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
+                    m_targetFile.Append(CheckForCommentsRight(context));
+                }
+                else if (signature.StartsWith("Func<", StringComparison.Ordinal))
+                {
+                    signature = RemoveSurrounding(signature.Substring(4), "<", ">");
+                    string[] parts = signature.Split(',');
+
+                    if (parts.Length > 0)
                     {
-                        FieldInfo promotedStruct = field.Clone();
+                        string result = parts[^1];
+                        signature = string.Join(", ", parts.Take(parts.Length - 1));
 
-                        promotedStruct.Type.TypeName = $"ref {promotedStruct.Type.Name}";
-                        promotedStruct.Name = $"{promotedStruct.Name} => ref {promotedStruct.Name}_{(promotedStruct.Type is PointerTypeInfo ? "ptr" : "val")}";
-
-                        fields.Add(promotedStruct);
+                        m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");
+                        m_targetFile.Append(CheckForCommentsRight(context));
                     }
                     else
                     {
-                        fields.Add(field);
+                        AddWarning(context, $"Could not determine function based delegate signature from \"{signature}\"");
                     }
                 }
-
-                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
-                m_targetFile.AppendLine($"{Spacing()}{{");
-
-                foreach (FieldInfo field in fields)
+                else
                 {
-                    StringBuilder fieldDecl = new StringBuilder();
+                    AddWarning(context, $"Could not determine delegate signature from \"{signature}\"");
+                }
+            }
+            else
+            {
+                // Handle named type declaration, e.g., "type MyFloat float64"
+                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)})")}.cs");
 
-                    if (!string.IsNullOrWhiteSpace(field.Description))
-                    {
-                        string description = field.Description.Trim();
-
-                        if (description.Length > 2)
-                        {
-                            RequiredUsings.Add("System.ComponentModel");
-                            fieldDecl.AppendLine($"{Spacing(1)}[Description({description})]");
-                        }
-                    }
-
-                    fieldDecl.Append($"{Spacing(1)}public {field.Type.TypeName} {field.Name};{(string.IsNullOrWhiteSpace(field.Comments) ? Environment.NewLine : $" {field.Comments.TrimStart()}")}");
-                    m_targetFile.Append(fieldDecl);
+                // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
+                using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                {
+                    writer.Write(new InheritedTypeTemplate
+                                     {
+                                         NamespacePrefix = PackageNamespace,
+                                         NamespaceHeader = m_namespaceHeaderLegacy,
+                                         NamespaceFooter = m_namespaceFooterLegacy,
+                                         PackageName = Package,
+                                         StructName = identifier,
+                                         Scope = scope,
+                                         TypeInfo = typeInfo
+                                     }
+                                     .TransformText());
                 }
 
+                // Track file name associated with package
+                AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
+
+                m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
+                m_targetFile.AppendLine($"{Spacing()}{{");
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
-            else if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
-            {
-                if (typeInfo.TypeClass == TypeClass.Function)
-                {
-                    RequiredUsings.Decrement("System");
-
-                    // Handle delegate type declaration
-                    string signature = typeInfo.TypeName;
-
-                    if (signature.Equals("Action", StringComparison.Ordinal))
-                    {
-                        m_targetFile.Append($"{Spacing()}public delegate void {identifier}();");
-                        m_targetFile.Append(CheckForCommentsRight(context));
-                    }
-                    else if (signature.StartsWith("Action<", StringComparison.Ordinal))
-                    {
-                        signature = RemoveSurrounding(signature.Substring(6), "<", ">");
-                        m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
-                        m_targetFile.Append(CheckForCommentsRight(context));
-                    }
-                    else if (signature.StartsWith("Func<", StringComparison.Ordinal))
-                    {
-                        signature = RemoveSurrounding(signature.Substring(4), "<", ">");
-                        string[] parts = signature.Split(',');
-
-                        if (parts.Length > 0)
-                        {
-                            string result = parts[^1];
-                            signature = string.Join(", ", parts.Take(parts.Length - 1));
-
-                            m_targetFile.Append($"{Spacing()}public delegate {result} {identifier}({signature});");
-                            m_targetFile.Append(CheckForCommentsRight(context));
-                        }
-                        else
-                        {
-                            AddWarning(context, $"Could not determine function based delegate signature from \"{signature}\"");
-                        }
-                    }
-                    else
-                    {
-                        AddWarning(context, $"Could not determine delegate signature from \"{signature}\"");
-                    }
-                }
-                else
-                {
-                    // Handle named type declaration, e.g., "type MyFloat float64"
-                    string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)})")}.cs");
-
-                    // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
-                    using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
-                    {
-                        writer.Write(new InheritedTypeTemplate
-                        {
-                            NamespacePrefix = PackageNamespace,
-                            NamespaceHeader = m_namespaceHeader,
-                            NamespaceFooter = m_namespaceFooter,
-                            PackageName = Package,
-                            StructName = identifier,
-                            Scope = scope,
-                            TypeInfo = typeInfo
-                        }
-                        .TransformText());
-                    }
-
-                    // Track file name associated with package
-                    AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
-
-                    m_targetFile.AppendLine($"{Spacing()}{scope} partial struct {identifier} // : {typeInfo.TypeName}");
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                    m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
-                }
-            }
-
-            m_typeIdentifierCount++;
         }
 
-        private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
+        m_typeIdentifierCount++;
+    }
+
+    private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, InterfaceInfo interfaceInfo, List<FunctionSignature> functions, List<string> inheritedTypeNames = null, bool useFullTypeName = false)
+    {
+        foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
         {
-            foreach (string interfaceName in interfaceInfo.GetInheritedInterfaceNames())
+            if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
             {
-                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
+                inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
+                functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
+                RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
+            }
+            else
+            {
+                AddWarning(context, $"Failed to find metadata for promoted interface \"{interfaceName}\" declared in \"{identifier}\" interface type.");
+            }
+        }
+    }
+
+    private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FunctionSignature>> fieldFunctions, HashSet<string> inheritedTypeNames = null, bool useFullTypeName = false)
+    {
+        foreach (FieldInfo field in structInfo.GetAnonymousFields())
+        {
+            string interfaceName = field.Type.TypeName;
+
+            if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
+            {
+                inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
+                List<FunctionSignature> functions = fieldFunctions.GetOrAdd(field.Name, name => new());
+                functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
+                RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
+            }
+        }
+    }
+
+    private bool TryFindInheritedInterfaceInfo(string interfaceName, out InterfaceInfo interfaceInfo, out string shortTypeName, out string fullTypeName)
+    {
+        interfaceInfo = default;
+        shortTypeName = SanitizedIdentifier(interfaceName);
+        fullTypeName = default;
+
+        // Handle built-in error interface as a special case
+        if (interfaceName.Equals("error", StringComparison.Ordinal))
+        {
+            interfaceInfo = InterfaceInfo.error();
+            fullTypeName = "go.builtin.error";
+            return true;
+        }
+
+        if (Metadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
+        {
+            fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
+            return true;
+        }
+
+        string[] qualifiedIdentifierParts = interfaceName.Split('.');
+
+        if (qualifiedIdentifierParts.Length == 2)
+        {
+            string alias = qualifiedIdentifierParts[0];
+            string identifier = qualifiedIdentifierParts[1];
+
+            if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
+            {
+                if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
                 {
-                    inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
-                    functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
-                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
-                }
-                else
-                {
-                    AddWarning(context, $"Failed to find metadata for promoted interface \"{interfaceName}\" declared in \"{identifier}\" interface type.");
+                    if (TryFindIntefaceInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out interfaceInfo))
+                    {
+                        fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
+                        return true;
+                    }
                 }
             }
         }
 
-        private void RecurseInheritedInterfaces(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, Dictionary<string, List<FunctionSignature>> fieldFunctions, HashSet<string> inheritedTypeNames = null, bool useFullTypeName = false)
+        foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
         {
-            foreach (FieldInfo field in structInfo.GetAnonymousFields())
+            if (TryFindIntefaceInfo(importMetadata.Value, interfaceName, out FileMetadata fileMetadata, out interfaceInfo))
             {
-                string interfaceName = field.Type.TypeName;
-
-                if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
-                {
-                    inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
-                    List<FunctionSignature> functions = fieldFunctions.GetOrAdd(field.Name, name => new List<FunctionSignature>());
-                    functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
-                    RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
-                }
-            }
-        }
-
-        private bool TryFindInheritedInterfaceInfo(string interfaceName, out InterfaceInfo interfaceInfo, out string shortTypeName, out string fullTypeName)
-        {
-            interfaceInfo = default;
-            shortTypeName = SanitizedIdentifier(interfaceName);
-            fullTypeName = default;
-
-            // Handle built-in error interface as a special case
-            if (interfaceName.Equals("error", StringComparison.Ordinal))
-            {
-                interfaceInfo = InterfaceInfo.error();
-                fullTypeName = "go.builtin.error";
+                fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
                 return true;
             }
+        }
 
-            if (Metadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
+        return false;
+    }
+
+    private bool TryFindIntefaceInfo(FolderMetadata folderMetadata, string interfaceName, out FileMetadata interfaceFileMetadata, out InterfaceInfo interfaceInfo)
+    {
+        interfaceInfo = default;
+        interfaceFileMetadata = null;
+
+        foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
+        {
+            if (fileMetadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
             {
-                fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
-                return true;
+                interfaceFileMetadata = fileMetadata;
+                break;
             }
+        }
 
-            string[] qualifiedIdentifierParts = interfaceName.Split('.');
+        return interfaceFileMetadata is not null;
+    }
 
-            if (qualifiedIdentifierParts.Length == 2)
+    private void SearchPromotedStructFields(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
+    {
+        foreach (FieldInfo field in structInfo.GetAnonymousFields())
+        {
+            // If type is a known interface, skip ahead
+            if (inheritedTypeNames.Contains(field.Name))
+                continue;
+
+            string structName = field.Type.TypeName;
+
+            if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
             {
-                string alias = qualifiedIdentifierParts[0];
-                string identifier = qualifiedIdentifierParts[1];
+                promotedStructTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
+                List<FieldInfo> fields = promotedFields.GetOrAdd(field.Name, name => new());
+                fields.AddRange(promotedStructInfo.GetLocalFields());                   
+            }
+            else
+            {
+                AddWarning(context, $"Failed to find metadata for promoted struct or interface \"{structName}\" declared in \"{identifier}\" struct type.");
+            }
+        }
+    }
 
-                if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
+    private bool TryFindPromotedStructInfo(string structName, out StructInfo structInfo, out string shortTypeName, out string fullTypeName)
+    {
+        structInfo = default;
+        shortTypeName = SanitizedIdentifier(structName);
+        fullTypeName = default;
+
+        if (Metadata.Structs.TryGetValue(structName, out structInfo))
+        {
+            fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
+            return true;
+        }
+
+        string[] qualifiedIdentifierParts = structName.Split('.');
+
+        if (qualifiedIdentifierParts.Length == 2)
+        {
+            string alias = qualifiedIdentifierParts[0];
+            string identifier = qualifiedIdentifierParts[1];
+
+            if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
+            {
+                if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
                 {
-                    if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
+                    if (TryFindStructInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out structInfo))
                     {
-                        if (TryFindIntefaceInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out interfaceInfo))
-                        {
-                            fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
-                            return true;
-                        }
+                        fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
+                        return true;
                     }
                 }
             }
-
-            foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
-            {
-                if (TryFindIntefaceInfo(importMetadata.Value, interfaceName, out FileMetadata fileMetadata, out interfaceInfo))
-                {
-                    fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
-                    return true;
-                }
-            }
-
-            return false;
         }
 
-        private bool TryFindIntefaceInfo(FolderMetadata folderMetadata, string interfaceName, out FileMetadata interfaceFileMetadata, out InterfaceInfo interfaceInfo)
+        foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
         {
-            interfaceInfo = default;
-            interfaceFileMetadata = null;
-
-            foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
+            if (TryFindStructInfo(importMetadata.Value, structName, out FileMetadata fileMetadata, out structInfo))
             {
-                if (fileMetadata.Interfaces.TryGetValue(interfaceName, out interfaceInfo))
-                {
-                    interfaceFileMetadata = fileMetadata;
-                    break;
-                }
-            }
-
-            return interfaceFileMetadata is not null;
-        }
-
-        private void SearchPromotedStructFields(GoParser.TypeSpecContext context, string identifier, StructInfo structInfo, HashSet<string> inheritedTypeNames, Dictionary<string, List<FieldInfo>> promotedFields, HashSet<string> promotedStructTypeNames = null, bool useFullTypeName = false)
-        {
-            foreach (FieldInfo field in structInfo.GetAnonymousFields())
-            {
-                // If type is a known interface, skip ahead
-                if (inheritedTypeNames.Contains(field.Name))
-                    continue;
-
-                string structName = field.Type.TypeName;
-
-                if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
-                {
-                    promotedStructTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
-                    List<FieldInfo> fields = promotedFields.GetOrAdd(field.Name, name => new List<FieldInfo>());
-                    fields.AddRange(promotedStructInfo.GetLocalFields());                   
-                }
-                else
-                {
-                    AddWarning(context, $"Failed to find metadata for promoted struct or interface \"{structName}\" declared in \"{identifier}\" struct type.");
-                }
-            }
-        }
-
-        private bool TryFindPromotedStructInfo(string structName, out StructInfo structInfo, out string shortTypeName, out string fullTypeName)
-        {
-            structInfo = default;
-            shortTypeName = SanitizedIdentifier(structName);
-            fullTypeName = default;
-
-            if (Metadata.Structs.TryGetValue(structName, out structInfo))
-            {
-                fullTypeName = $"{GetPackageNamespace(PackageImport)}.{shortTypeName}";
+                fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
                 return true;
             }
-
-            string[] qualifiedIdentifierParts = structName.Split('.');
-
-            if (qualifiedIdentifierParts.Length == 2)
-            {
-                string alias = qualifiedIdentifierParts[0];
-                string identifier = qualifiedIdentifierParts[1];
-
-                if (ImportAliases.TryGetValue(alias, out (string targetImport, string targetUsing) import))
-                {
-                    if (ImportMetadata.TryGetValue(import.targetImport, out FolderMetadata folderMetadata))
-                    {
-                        if (TryFindStructInfo(folderMetadata, identifier, out FileMetadata fileMetadata, out structInfo))
-                        {
-                            fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{SanitizedIdentifier(identifier)}";
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            foreach (KeyValuePair<string, FolderMetadata> importMetadata in ImportMetadata)
-            {
-                if (TryFindStructInfo(importMetadata.Value, structName, out FileMetadata fileMetadata, out structInfo))
-                {
-                    fullTypeName = $"{GetPackageNamespace(fileMetadata.PackageImport)}.{shortTypeName}";
-                    return true;
-                }
-            }
-
-            return false;
         }
 
-        private bool TryFindStructInfo(FolderMetadata folderMetadata, string structName, out FileMetadata structFileMetadata, out StructInfo structInfo)
+        return false;
+    }
+
+    private bool TryFindStructInfo(FolderMetadata folderMetadata, string structName, out FileMetadata structFileMetadata, out StructInfo structInfo)
+    {
+        structInfo = default;
+        structFileMetadata = null;
+
+        foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
         {
-            structInfo = default;
-            structFileMetadata = null;
-
-            foreach (FileMetadata fileMetadata in folderMetadata.Files.Values)
+            if (fileMetadata.Structs.TryGetValue(structName, out structInfo))
             {
-                if (fileMetadata.Structs.TryGetValue(structName, out structInfo))
-                {
-                    structFileMetadata = fileMetadata;
-                    break;
-                }
+                structFileMetadata = fileMetadata;
+                break;
             }
-
-            return structFileMetadata is not null;
         }
 
-        private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)
-        {
-            if (inheritedTypeNames is null || inheritedTypeNames.Count == 0)
-                return "";
+        return structFileMetadata is not null;
+    }
 
-            return $" : {string.Join(", ", inheritedTypeNames)}";
-        }
+    private string GetInheritedTypeList(HashSet<string> inheritedTypeNames)
+    {
+        if (inheritedTypeNames is null || inheritedTypeNames.Count == 0)
+            return string.Empty;
+
+        return $" : {string.Join(", ", inheritedTypeNames)}";
     }
 }

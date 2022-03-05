@@ -18,8 +18,6 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using complex128 = System.Numerics.Complex;
 
 namespace go
 {

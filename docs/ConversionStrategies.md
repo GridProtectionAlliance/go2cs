@@ -117,7 +117,6 @@ would be converted to C# as:
 
 ```csharp
 using fmt = go.fmt_package;
-using static go.builtin;
 
 namespace go
 {
@@ -224,7 +223,6 @@ would be converted to C# as:
 using go;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
-using static go.builtin;
 
 static class main_package
 {
@@ -315,7 +313,6 @@ Name = James
 This code, as implemented in C#, needs to "copy" the receiver target in order to operate in the same fashion:
 ```csharp
 using fmt = go.fmt_package;
-using static go.builtin;
 
 public static partial class main_package {
     public struct Data {
@@ -382,7 +379,6 @@ func g(i int) {
 The Go code gets converted into C# code like the following:
 ```csharp
 using fmt = go.fmt_package;
-using static go.builtin;
 
 public static partial class main_package
 {
@@ -469,7 +465,6 @@ would be converted to C# as:
 ```csharp
 using go;
 using fmt = go.fmt_package;
-using static go.builtin;
 
 static class main_package
 {

@@ -27,209 +27,205 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using static go.io_package;
 
 #pragma warning disable IDE0044, CS8618
 
-namespace go
+namespace go;
+
+public static partial class io_package
 {
-    public static partial class io_package
+    /// <summary>
+    /// The Reader interface type wraps the basic Read method.
+    /// </summary>
+    public partial interface Reader : IFormattable
     {
-        /// <summary>
-        /// The Reader interface type wraps the basic Read method.
-        /// </summary>
-        public partial interface Reader : IFormattable
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static Reader As<T>(ref T target) =>
+            (Reader<T>)target!;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static Reader As<T>(ptr<T> target_ptr) =>
+            (Reader<T>)target_ptr;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static Reader? As(object target) =>
+            typeof(Reader<>).CreateInterfaceHandler<Reader>(target);
+    }
+
+    public class Reader<T> : Reader
+    {
+        private T m_target;
+        private readonly ptr<T>? m_target_ptr;
+        private readonly bool m_target_is_ptr;
+
+        public ref T Target
         {
-        #if NET5_0
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Reader As<T>(ref T target) =>
-                (Reader<T>)target!;
+            get
+            {
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    return ref m_target_ptr.val;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Reader As<T>(ptr<T> target_ptr) =>
-                (Reader<T>)target_ptr;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static Reader? As(object target) =>
-                typeof(Reader<>).CreateInterfaceHandler<Reader>(target);
-        #endif
+                return ref m_target;
+            }
         }
 
-        public class Reader<T> : Reader
+        public Reader(in T target) => m_target = target;
+
+        public Reader(ptr<T> target_ptr)
         {
-            private T m_target;
-            private readonly ptr<T>? m_target_ptr;
-            private readonly bool m_target_is_ptr;
+            m_target_ptr = target_ptr;
+            m_target_is_ptr = true;
+        }
 
-            public ref T Target
+        private delegate (int, error) ReadByRef(ref T value, in slice<byte> p);
+        private delegate (int, error) ReadByVal(T value, in slice<byte> p);
+
+        private static readonly ReadByRef? s_ReadByRef;
+        private static readonly ReadByVal? s_ReadByVal;
+
+        [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public (int, error) Read(in slice<byte> p)
+        {
+            T target = m_target;
+
+            if (m_target_is_ptr && m_target_ptr is not null)
+                target = m_target_ptr.val;
+
+            if (s_ReadByRef is null)
+                return s_ReadByVal!(target, p);
+
+            return s_ReadByRef(ref target, p);
+        }
+
+        public string ToString(string? format, IFormatProvider? _)
+        {
+            switch (format)
             {
-                get
+                case "T":
                 {
-                    if (m_target_is_ptr && m_target_ptr is not null)
-                        return ref m_target_ptr.val;
-
-                    return ref m_target;
+                    string typeName = GetGoTypeName<T>().Replace("_package+", ".");
+                    return m_target_is_ptr ? $"*{typeName}" : typeName;
                 }
-            }
-
-            public Reader(in T target) => m_target = target;
-
-            public Reader(ptr<T> target_ptr)
-            {
-                m_target_ptr = target_ptr;
-                m_target_is_ptr = true;
-            }
-
-            private delegate (int, error) ReadByRef(ref T value, in slice<byte> p);
-            private delegate (int, error) ReadByVal(T value, in slice<byte> p);
-
-            private static readonly ReadByRef? s_ReadByRef;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (int, error) Read(in slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && m_target_ptr is not null)
-                    target = m_target_ptr.val;
-
-                if (s_ReadByRef is null)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByRef(ref target, p);
-            }
-
-            public string ToString(string? format, IFormatProvider? _)
-            {
-                switch (format)
+                case "v":
                 {
-                    case "T":
-                        {
-                            string typeName = GetGoTypeName<T>().Replace("_package+", ".");
-                            return m_target_is_ptr ? $"*{typeName}" : typeName;
-                        }
-                    case "v":
-                        {
-                            if (m_target_is_ptr)
-                                return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
+                    if (m_target_is_ptr)
+                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
 
-                            return m_target?.ToString() ?? "<nil>";
-                        }
-                    default:
-                        return ToString() ?? "<nil>";
+                    return m_target?.ToString() ?? "<nil>";
                 }
+                default:
+                    return ToString() ?? "<nil>";
             }
+        }
 
-            [DebuggerStepperBoundary]
-            static Reader()
+        [DebuggerStepperBoundary]
+        static Reader()
+        {
+            Type targetType = typeof(T);
+            Type targetTypeByRef = targetType.MakeByRefType();
+
+            MethodInfo extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+
+            if (extensionMethod is not null)
+                s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
+
+            if (s_ReadByRef is null)
             {
-                Type targetType = typeof(T);
-                Type targetTypeByRef = targetType.MakeByRefType();
-
-                MethodInfo extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+                extensionMethod = targetType.GetExtensionMethod("Read");
 
                 if (extensionMethod is not null)
-                    s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
-
-                if (s_ReadByRef is null)
-                {
-                    extensionMethod = targetType.GetExtensionMethod("Read");
-
-                    if (extensionMethod is not null)
-                        s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-                }
-
-                if (s_ReadByRef is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Reader.Read method", new Exception("Read"));
+                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator Reader<T>(in ptr<T> target_ptr) => new Reader<T>(target_ptr);
+            if (s_ReadByRef is null && s_ReadByVal is null)
+                throw new NotImplementedException($"{targetType.FullName} does not implement Reader.Read method", new Exception("Read"));
+        }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-            public static explicit operator Reader<T>(in T target) => new Reader<T>(target);
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static explicit operator Reader<T>(in ptr<T> target_ptr) => new Reader<T>(target_ptr);
 
-            // Enable comparisons between nil and Reader<T> interface instance
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(Reader<T> value, NilType _) => Activator.CreateInstance<Reader<T>>().Equals(value);
+        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        public static explicit operator Reader<T>(in T target) => new Reader<T>(target);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(Reader<T> value, NilType nil) => !(value == nil);
+        // Enable comparisons between nil and Reader<T> interface instance
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Reader<T> value, NilType _) => Activator.CreateInstance<Reader<T>>().Equals(value);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, Reader<T> value) => value == nil;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Reader<T> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, Reader<T> value) => value != nil;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(NilType nil, Reader<T> value) => value == nil;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(NilType nil, Reader<T> value) => value != nil;
+    }
+}
+
+public static class ReaderExtensions
+{
+    private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+    public static T _<T>(this Reader target)
+    {
+        try
+        {
+            return ((Reader<T>)target).Target;
+        }
+        catch (NotImplementedException ex)
+        {
+            throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(typeof(T))}: missing method {ex.InnerException?.Message}", ex);
         }
     }
 
-    public static class ReaderExtensions
+    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+    public static bool _<T>(this Reader target, out T result)
     {
-        private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static T _<T>(this Reader target)
+        try
         {
-            try
-            {
-                return ((Reader<T>)target).Target;
-            }
-            catch (NotImplementedException ex)
-            {
-                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(typeof(T))}: missing method {ex.InnerException?.Message}", ex);
-            }
+            result = target._<T>();
+            return true;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool _<T>(this Reader target, out T result)
+        catch (PanicException)
         {
-            try
-            {
-                result = target._<T>();
-                return true;
-            }
-            catch (PanicException)
-            {
-                result = default!;
-                return false;
-            }
+            result = default!;
+            return false;
         }
+    }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static object? _(this Reader target, Type type)
+    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+    public static object? _(this Reader target, Type type)
+    {
+        try
         {
-            try
-            {
-                MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(Reader<>).GetExplicitGenericConversionOperator(type));
+            MethodInfo conversionOperator = s_conversionOperators.GetOrAdd(type, _ => typeof(Reader<>).GetExplicitGenericConversionOperator(type));
 
-                if (conversionOperator is null)
-                    throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
+            if (conversionOperator is null)
+                throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
 
-                dynamic? result = conversionOperator.Invoke(null, new object[] { target });
-                return result?.Target;
-            }
-            catch (NotImplementedException ex)
-            {
-                throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(type)}: missing method {ex.InnerException?.Message}");
-            }
+            dynamic? result = conversionOperator.Invoke(null, new object[] { target });
+            return result?.Target;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static bool _(this Reader target, Type type, out object? result)
+        catch (NotImplementedException ex)
         {
-            try
-            {
-                result = target._(type);
-                return true;
-            }
-            catch (PanicException)
-            {
-                result = type.IsValueType ? Activator.CreateInstance(type) : null;
-                return false;
-            }
+            throw new PanicException($"interface conversion: {GetGoTypeName(target.GetType())} is not {GetGoTypeName(type)}: missing method {ex.InnerException?.Message}");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+    public static bool _(this Reader target, Type type, out object? result)
+    {
+        try
+        {
+            result = target._(type);
+            return true;
+        }
+        catch (PanicException)
+        {
+            result = type.IsValueType ? Activator.CreateInstance(type) : null;
+            return false;
         }
     }
 }

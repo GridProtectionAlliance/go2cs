@@ -24,45 +24,44 @@
 using go2cs.Metadata;
 using static go2cs.Common;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    public override void EnterMethodDecl(GoParser.MethodDeclContext context)
     {
-        public override void EnterMethodDecl(GoParser.MethodDeclContext context)
+        InFunction = true;
+        OriginalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
+        CurrentFunctionName = SanitizedIdentifier(OriginalFunctionName);
+
+        GoParser.ParameterDeclContext[] receiverParameters = context.receiver().parameters().parameterDecl();
+        string receiverTypeName;
+
+        if (receiverParameters.Length > 0)
         {
-            InFunction = true;
-            OriginalFunctionName = context.IDENTIFIER()?.GetText() ?? "_";
-            CurrentFunctionName = SanitizedIdentifier(OriginalFunctionName);
+            receiverTypeName = receiverParameters[0].type_().GetText();
 
-            GoParser.ParameterDeclContext[] receiverParameters = context.receiver().parameters().parameterDecl();
-            string receiverTypeName;
-
-            if (receiverParameters.Length > 0)
-            {
-                receiverTypeName = receiverParameters[0].type_().GetText();
-
-                // Receiver does not need to handle pointer-to-pointer look ups
-                if (receiverTypeName.StartsWith("*"))
-                    receiverTypeName = $"ptr<{receiverTypeName.Substring(1)}>";
-            }
-            else
-            {
-                receiverTypeName = "object";
-            }
-
-            string functionSignature = FunctionSignature.Generate(OriginalFunctionName, new[] { receiverTypeName });
-
-            FunctionInfo currentFunction = null;
-            Metadata?.Functions.TryGetValue(functionSignature, out currentFunction);
-            CurrentFunction = currentFunction;
+            // Receiver does not need to handle pointer-to-pointer look ups
+            if (receiverTypeName.StartsWith("*"))
+                receiverTypeName = $"ptr<{receiverTypeName.Substring(1)}>";
+        }
+        else
+        {
+            receiverTypeName = "object";
         }
 
-        public override void ExitMethodDecl(GoParser.MethodDeclContext context)
-        {
-            CurrentFunction = null;
-            CurrentFunctionName = null;
-            OriginalFunctionName = null;
-            InFunction = false;
-        }
+        string functionSignature = FunctionSignature.Generate(OriginalFunctionName, new[] { receiverTypeName });
+
+        FunctionInfo currentFunction = null;
+        Metadata?.Functions.TryGetValue(functionSignature, out currentFunction);
+        CurrentFunction = currentFunction;
+    }
+
+    public override void ExitMethodDecl(GoParser.MethodDeclContext context)
+    {
+        CurrentFunction = null;
+        CurrentFunctionName = null;
+        OriginalFunctionName = null;
+        InFunction = false;
     }
 }

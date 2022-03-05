@@ -23,55 +23,55 @@
 
 using System;
 
-namespace go2cs
+namespace go2cs;
+
+class Program
 {
-    class Program
+    static int Main(string[] args)
     {
-        static int Main(string[] args)
-        {
-            DateTime startTime = DateTime.UtcNow;
-            Arguments arguments = Arguments.Parse(args);
-            Options options = arguments.ParsedOptions;
-            int exitCode = 1;
+        DateTime startTime = DateTime.UtcNow;
+        Arguments arguments = Arguments.Parse(args);
+        Options options = arguments.ParsedOptions;
+        int exitCode = 1;
 
-            if (arguments.ParseSuccess)
-                exitCode = RunConversion(options);
+        if (arguments.ParseSuccess)
+            exitCode = RunConversion(options);
             
-            if (exitCode == 0)
+        if (exitCode == 0)
+        {
+            Console.WriteLine($"Conversion complete for: go2cs {string.Join(" ", args)}");
+            Console.WriteLine();
+            Console.WriteLine($"Updated {PreScanner.TotalMetadataUpdates:N0} metadata files, {PreScanner.TotalUpToDateMetadata:N0} already up-to-date");
+
+            if (!options.OnlyUpdateMetadata)
             {
-                Console.WriteLine($"Conversion complete for: go2cs {string.Join(" ", args)}");
-                Console.WriteLine();
-                Console.WriteLine($"Updated {PreScanner.TotalMetadataUpdates:N0} metadata files, {PreScanner.TotalUpToDateMetadata:N0} already up-to-date");
+                Console.WriteLine($"Converted {ScannerBase.TotalProcessedFiles:N0} Go files to C# with {ScannerBase.TotalWarnings:N0} total warnings");
 
-                if (!options.OnlyUpdateMetadata)
-                {
-                    Console.WriteLine($"Converted {ScannerBase.TotalProcessedFiles:N0} Go files to C# with {ScannerBase.TotalWarnings:N0} total warnings");
+                if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && ScannerBase.TotalSkippedFiles > 0)
+                    Console.WriteLine($"Skipped {ScannerBase.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
 
-                    if ((!options.OverwriteExistingFiles || !options.OverwriteExistingPackages) && ScannerBase.TotalSkippedFiles > 0)
-                        Console.WriteLine($"Skipped {ScannerBase.TotalSkippedFiles:N0} already converted files (-o or -i option not set)");
-
-                    if (!options.ConvertStandardLibrary && ScannerBase.TotalSkippedPackages > 0)
-                        Console.WriteLine($"Skipped conversion of {ScannerBase.TotalSkippedPackages:N0} standard library packages (-s option not set)");
-                }
-
-                Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
+                if (!options.ConvertStandardLibrary && ScannerBase.TotalSkippedPackages > 0)
+                    Console.WriteLine($"Skipped conversion of {ScannerBase.TotalSkippedPackages:N0} standard library packages (-s option not set)");
             }
 
-            return exitCode;
+            Console.WriteLine($"Processing time: {DateTime.UtcNow - startTime}");
         }
 
-        private static int RunConversion(Options options)
-        {
-            int exitCode = 0;
+        return exitCode;
+    }
 
-        #if !DEBUG
+    private static int RunConversion(Options options)
+    {
+        int exitCode = 0;
+
+    #if !DEBUG
             try
             {
-        #endif
-                Common.RestoreResources(options.TargetGoSrcPath);
-                PreScanner.Scan(options);
-                Converter.Convert(options);
-        #if !DEBUG
+    #endif
+        Common.RestoreResources(options.TargetGoSrcPath);
+        PreScanner.Scan(options);
+        Converter.Convert(options);
+    #if !DEBUG
             }
             catch (TypeInitializationException ex)
             {
@@ -83,9 +83,8 @@ namespace go2cs
                 Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.Message}");
                 exitCode = 3;
             }
-        #endif
+    #endif
 
-            return exitCode;
-        }
+        return exitCode;
     }
 }

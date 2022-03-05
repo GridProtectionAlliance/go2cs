@@ -23,28 +23,27 @@
 
 using System.Collections.Generic;
 
-namespace go2cs
+namespace go2cs;
+
+public partial class ScannerBase
 {
-    public partial class ScannerBase
+    // Stack handlers:
+    //  constDecl (required)
+    //  varDecl (required)
+    //  shortVarDecl (required)
+    //  recvStmt (optional)
+    //  rangeClause (optional)
+    //  parameterDecl (optional)
+    //  fieldDecl (optional)
+    protected readonly ParseTreeValues<string[]> Identifiers = new ParseTreeValues<string[]>();
+
+    public override void EnterIdentifierList(GoParser.IdentifierListContext context)
     {
-        // Stack handlers:
-        //  constDecl (required)
-        //  varDecl (required)
-        //  shortVarDecl (required)
-        //  recvStmt (optional)
-        //  rangeClause (optional)
-        //  parameterDecl (optional)
-        //  fieldDecl (optional)
-        protected readonly ParseTreeValues<string[]> Identifiers = new ParseTreeValues<string[]>();
+        List<string> identifers = new List<string>();
 
-        public override void EnterIdentifierList(GoParser.IdentifierListContext context)
-        {
-            List<string> identifers = new List<string>();
+        for (int i = 0; i < context.IDENTIFIER().Length; i++)
+            identifers.Add(context.IDENTIFIER(i).GetText());
 
-            for (int i = 0; i < context.IDENTIFIER().Length; i++)
-                identifers.Add(context.IDENTIFIER(i).GetText());
-
-            Identifiers[context] = identifers.ToArray();
-        }
+        Identifiers[context] = identifers.ToArray();
     }
 }
