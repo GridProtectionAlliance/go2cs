@@ -107,7 +107,7 @@ public partial class ScannerBase
         if (context is null)
             return string.Empty;
 
-        StringBuilder comments = new StringBuilder();
+        StringBuilder comments = new();
         IList<IToken> lineCommentChannel = TokenStream.GetHiddenTokensToRight(context.Stop.TokenIndex, TokenConstants.HiddenChannel);
 
         if (lineCommentChannel?.Count > 0)
@@ -208,7 +208,7 @@ public partial class ScannerBase
     private string CheckForComments(int tokenIndex, Func<int, IList<IToken>> getHiddenTokens, int offsetLevel, int indentLevel)
     {
         IList<IToken> hiddenTokens = getHiddenTokens(tokenIndex) ?? new List<IToken>();
-        StringBuilder comments = new StringBuilder();
+        StringBuilder comments = new();
         int firstComment = -1;
         string hiddenText, hiddenTrimmed;
 
@@ -273,7 +273,7 @@ public partial class ScannerBase
     {
         string forwardSpacing = Spacing(offsetLevel, indentLevel);
         string[] lines = source.Split(NewLineDelimeters, StringSplitOptions.None);
-        List<string> fixedLines = new List<string>();
+        List<string> fixedLines = new();
         string[] workLines;
 
         if (firstIsEOLComment)

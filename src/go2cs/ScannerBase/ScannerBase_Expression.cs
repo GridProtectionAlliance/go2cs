@@ -52,12 +52,12 @@ public partial class ScannerBase
     //  slice (optional)
     //  expression (optional)
     //  conversion (required)
-    protected readonly ParseTreeValues<ExpressionInfo> Expressions = new ParseTreeValues<ExpressionInfo>();
-    protected readonly ParseTreeValues<ExpressionInfo> UnaryExpressions = new ParseTreeValues<ExpressionInfo>();
-    protected readonly ParseTreeValues<ExpressionInfo> PrimaryExpressions = new ParseTreeValues<ExpressionInfo>();
-    protected readonly ParseTreeValues<ExpressionInfo> Operands = new ParseTreeValues<ExpressionInfo>();
+    protected readonly ParseTreeValues<ExpressionInfo> Expressions = new();
+    protected readonly ParseTreeValues<ExpressionInfo> UnaryExpressions = new();
+    protected readonly ParseTreeValues<ExpressionInfo> PrimaryExpressions = new();
+    protected readonly ParseTreeValues<ExpressionInfo> Operands = new();
 
-    private static readonly HashSet<string> s_comparisionOperands = new HashSet<string>
+    private static readonly HashSet<string> s_comparisionOperands = new()
     {
         "==", "!=", "<", "<=", ">=", "&&", "||"
     };
@@ -353,12 +353,12 @@ public partial class ScannerBase
                 AddWarning(context, $"Failed to find index expression for \"{context.GetText()}\"");
             }
         }
-        else if (context.slice() is not null)
+        else if (context.slice_() is not null)
         {
             // slice
             //     : '['((expression ? ':' expression ? ) | (expression ? ':' expression ':' expression)) ']'
 
-            GoParser.SliceContext sliceContext = context.slice();
+            GoParser.Slice_Context sliceContext = context.slice_();
 
             if (sliceContext.children.Count == 3)
             {
@@ -467,7 +467,7 @@ public partial class ScannerBase
             //     : '('((expressionList | type(',' expressionList) ? ) '...' ? ',' ? ) ? ')'
 
             GoParser.ArgumentsContext argumentsContext = context.arguments();
-            List<string> arguments = new List<string>();
+            List<string> arguments = new();
 
             Types.TryGetValue(argumentsContext.type_(), out TypeInfo typeInfo);
 
@@ -589,37 +589,29 @@ public partial class ScannerBase
             }
             else if (primaryExpression.Text == "make" && typeInfo is not null)
             {
-                switch (typeInfo.TypeClass)
+                PrimaryExpressions[context] = typeInfo.TypeClass switch
                 {
-                    case TypeClass.Slice:
-                        PrimaryExpressions[context] = new()
-                        {
-                            Text = $"make_slice<{RemoveSurrounding(typeInfo.TypeName, "slice<", ">")}>({argumentList})",
-                            Type = primaryExpression.Type
-                        };
-                        break;
-                    case TypeClass.Map:
-                        PrimaryExpressions[context] = new()
-                        {
-                            Text = $"make_map<{RemoveSurrounding(typeInfo.TypeName, "map<", ">")}>({argumentList})",
-                            Type = primaryExpression.Type
-                        };
-                        break;
-                    case TypeClass.Channel:
-                        PrimaryExpressions[context] = new()
-                        {
-                            Text = $"make_channel<{RemoveSurrounding(typeInfo.TypeName, "channel<", ">")}>({argumentList})",
-                            Type = primaryExpression.Type
-                        };
-                        break;
-                    default:
-                        PrimaryExpressions[context] = new()
-                        {
-                            Text = $"{primaryExpression}<{typeInfo.TypeName}>({argumentList})",
-                            Type = primaryExpression.Type
-                        };
-                        break;
-                }
+                    TypeClass.Slice => new()
+                    {
+                        Text = $"make_slice<{RemoveSurrounding(typeInfo.TypeName, "slice<", ">")}>({argumentList})",
+                        Type = primaryExpression.Type
+                    },
+                    TypeClass.Map => new()
+                    {
+                        Text = $"make_map<{RemoveSurrounding(typeInfo.TypeName, "map<", ">")}>({argumentList})",
+                        Type = primaryExpression.Type
+                    },
+                    TypeClass.Channel => new()
+                    {
+                        Text = $"make_channel<{RemoveSurrounding(typeInfo.TypeName, "channel<", ">")}>({argumentList})",
+                        Type = primaryExpression.Type
+                    },
+                    _ => new()
+                    {
+                        Text = $"{primaryExpression}<{typeInfo.TypeName}>({argumentList})",
+                        Type = primaryExpression.Type
+                    },
+                };
             }
             else
             {
@@ -692,7 +684,7 @@ public partial class ScannerBase
         {
             string value = context.IMAGINARY_LIT().GetText();
             bool endsWith_i = value.EndsWith("i");
-            value = endsWith_i ? value.Substring(0, value.Length - 1) : value;
+            value = endsWith_i ? value[..^1] : value;
 
             if (float.TryParse(value, out _))
             {
@@ -861,7 +853,7 @@ public partial class ScannerBase
         GoParser.LiteralValueContext literalValue = context.literalValue();
         GoParser.KeyedElementContext[] keyedElements = literalValue.elementList()?.keyedElement();
         bool isDynamicSizedArray = literalType.elementType() is not null;
-        List<(string key, string element)> elements = new List<(string key, string element)>();
+        List<(string key, string element)> elements = new();
         bool hasKeyedElement = false;
 
         if (keyedElements is not null)

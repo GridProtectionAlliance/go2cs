@@ -34,7 +34,7 @@ public partial class ScannerBase
     //  methodDecl (optional)
     //  methodSpec (optional)
     //  functionType (required)
-    protected readonly ParseTreeValues<Signature> Signatures = new ParseTreeValues<Signature>();
+    protected readonly ParseTreeValues<Signature> Signatures = new();
     protected List<ParameterInfo> Result;
 
     public override void EnterSignature(GoParser.SignatureContext context)

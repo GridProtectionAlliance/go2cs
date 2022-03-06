@@ -43,7 +43,7 @@ public partial class ScannerBase
     //  typeAssertion (required)
     //  arguments (optional)
     //  conversion (required)
-    protected readonly ParseTreeValues<TypeInfo> Types = new ParseTreeValues<TypeInfo>();
+    protected readonly ParseTreeValues<TypeInfo> Types = new();
 
     public override void ExitType_(GoParser.Type_Context context)
     {

@@ -44,7 +44,7 @@ public partial class Converter : ScannerBase
     private const string UsingsMarker = ">>MARKER:USINGS<<";
     private const string UnsafeMarker = ">>MARKER:UNSAFE<<";
 
-    private StringBuilder m_targetFile = new StringBuilder();
+    private StringBuilder m_targetFile = new();
 
     public Dictionary<string, (string targetImport, string targetUsing)> ImportAliases { get; }
 
@@ -166,7 +166,7 @@ public partial class Converter : ScannerBase
 
     private static Dictionary<string, List<(string, string[])>> CreateGroupedPackageData()
     {
-        Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new Dictionary<string, List<(string, string[])>>(StringComparer.Ordinal);
+        Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData = new(StringComparer.Ordinal);
 
         foreach (KeyValuePair<string, Dictionary<string, (string nameSpace, HashSet<string> fileNames)>> kvp in s_packageInfo)
         {

@@ -141,7 +141,7 @@ namespace BehavioralTests
             return process.ExitCode;
         }
 
-        private bool FileMatch(string file1, string file2)
+        private static bool FileMatch(string file1, string file2)
         {
             FileStream fileStream1 = new FileStream(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
             FileStream fileStream2 = new FileStream(file2, FileMode.Open, FileAccess.Read, FileShare.Read);

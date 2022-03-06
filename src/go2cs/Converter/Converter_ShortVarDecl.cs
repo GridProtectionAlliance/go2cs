@@ -53,7 +53,7 @@ public partial class Converter
             }
         }
 
-        StringBuilder block = new StringBuilder();
+        StringBuilder block = new();
         bool addNewLine = false;
 
         foreach (string identifier in identifiers)
@@ -76,7 +76,7 @@ public partial class Converter
         if (identifierList is null)
             return string.Empty;
 
-        StringBuilder block = new StringBuilder();
+        StringBuilder block = new();
 
         if (Identifiers.TryGetValue(identifierList, out string[] identifiers))
         {
@@ -116,7 +116,7 @@ public partial class Converter
 
         if (Identifiers.TryGetValue(identifierList, out string[] identifiers) && ExpressionLists.TryGetValue(context.expressionList(), out ExpressionInfo[] expressions))
         {
-            StringBuilder statement = new StringBuilder();
+            StringBuilder statement = new();
 
             if (identifiers.Length != expressions.Length)
             {

@@ -29,12 +29,12 @@ namespace go2cs;
 
 public partial class PreScanner
 {
-    private readonly ParseTreeValues<List<FieldInfo>> m_structFields = new ParseTreeValues<List<FieldInfo>>();
-    private readonly ParseTreeValues<List<FunctionSignature>> m_interfaceMethods = new ParseTreeValues<List<FunctionSignature>>();
+    private readonly ParseTreeValues<List<FieldInfo>> m_structFields = new();
+    private readonly ParseTreeValues<List<FunctionSignature>> m_interfaceMethods = new();
 
     public override void ExitStructType(GoParser.StructTypeContext context)
     {
-        List<FieldInfo> fields = new List<FieldInfo>();
+        List<FieldInfo> fields = new();
 
         for (int i = 0; i < context.fieldDecl().Length; i++)
         {
@@ -103,7 +103,7 @@ public partial class PreScanner
 
     public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
     {
-        List<FunctionSignature> methods = new List<FunctionSignature>();
+        List<FunctionSignature> methods = new();
 
         for (int i = 0; i < context.methodSpec().Length; i++)
         {

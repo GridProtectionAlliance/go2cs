@@ -89,7 +89,7 @@ public partial class Converter
             if (!initialDeclComments.Equals(m_lastEolImportSpecComment))
             {
                 if (initialDeclComments.StartsWith(m_lastEolImportSpecComment))
-                    initialDeclComments = initialDeclComments.Substring(m_lastEolImportSpecComment.Length);
+                    initialDeclComments = initialDeclComments[m_lastEolImportSpecComment.Length..];
 
                 m_targetFile.Append(RemoveFirstDuplicateLineFeed(RemoveLastDuplicateLineFeed(initialDeclComments)));
             }

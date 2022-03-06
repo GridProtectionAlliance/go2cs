@@ -35,5 +35,5 @@ public class Arguments
 
     public bool ParseSuccess => m_parserResult.Tag == ParserResultType.Parsed;
 
-    public static Arguments Parse(string[] args) => new Arguments(Parser.Default.ParseArguments<Options>(args));
+    public static Arguments Parse(string[] args) => new(Parser.Default.ParseArguments<Options>(args));
 }

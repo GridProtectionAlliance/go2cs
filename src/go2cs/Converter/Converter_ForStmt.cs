@@ -337,7 +337,7 @@ public partial class Converter
                     string[] expressionTexts = expressions.Select(expr => expr.Text).ToArray();
                     m_targetFile.AppendLine();
 
-                    StringBuilder mutable = new StringBuilder();
+                    StringBuilder mutable = new();
 
                     for (int i = 0; i < expressionTexts.Length; i++)
                     {
@@ -376,7 +376,7 @@ public partial class Converter
                         m_targetFile.AppendLine();
                         m_targetFile.AppendLine($"{Spacing()}}}{Environment.NewLine}");
 
-                        StringBuilder mutable = new StringBuilder();
+                        StringBuilder mutable = new();
 
                         for (int i = 0; i < identifiers.Length; i++)
                         {

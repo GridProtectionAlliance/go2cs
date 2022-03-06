@@ -44,7 +44,7 @@ public partial class Converter
 
     private class ExprSwitchStatement
     {
-        public readonly ParseTreeValues<ExprCaseStatement> caseStatements = new ParseTreeValues<ExprCaseStatement>();
+        public readonly ParseTreeValues<ExprCaseStatement> caseStatements = new();
         public ExprCaseStatement defaultCase;
         public string intraSwitchComments;
 
@@ -54,7 +54,7 @@ public partial class Converter
 
     public const string ExprSwitchStatementMarker = ">>MARKER:EXPRSWITCHSTATEMENT_LEVEL_{0}<<";
 
-    private readonly Stack<ExprSwitchStatement> m_exprSwitchStatements = new Stack<ExprSwitchStatement>();
+    private readonly Stack<ExprSwitchStatement> m_exprSwitchStatements = new();
     private int m_exprSwitchExpressionLevel;
     private int m_exprSwitchBreakCounter;
         
@@ -92,7 +92,7 @@ public partial class Converter
             m_targetFile.Append(string.Format(ExprSwitchStatementMarker, m_exprSwitchExpressionLevel));
         }
 
-        ExprSwitchStatement exprSwitchStatement = new ExprSwitchStatement();
+        ExprSwitchStatement exprSwitchStatement = new();
 
         foreach (IParseTree child in context.children)
         {

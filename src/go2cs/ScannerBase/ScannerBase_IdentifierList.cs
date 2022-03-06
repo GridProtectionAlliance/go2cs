@@ -35,11 +35,11 @@ public partial class ScannerBase
     //  rangeClause (optional)
     //  parameterDecl (optional)
     //  fieldDecl (optional)
-    protected readonly ParseTreeValues<string[]> Identifiers = new ParseTreeValues<string[]>();
+    protected readonly ParseTreeValues<string[]> Identifiers = new();
 
     public override void EnterIdentifierList(GoParser.IdentifierListContext context)
     {
-        List<string> identifers = new List<string>();
+        List<string> identifers = new();
 
         for (int i = 0; i < context.IDENTIFIER().Length; i++)
             identifers.Add(context.IDENTIFIER(i).GetText());

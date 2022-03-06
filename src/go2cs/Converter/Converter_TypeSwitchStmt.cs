@@ -35,7 +35,7 @@ public partial class Converter
     public const string TypeSwitchCaseTypeMarker = ">>MARKER:TYPESWITCHCASE_LEVEL_{0}<<";
     public const string TypeSwitchStatementMarker = ">>MARKER:TYPESWITCHSTATEMENT_LEVEL_{0}<<";
 
-    private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new Stack<StringBuilder>();
+    private readonly Stack<StringBuilder> m_typeSwitchDefaultCase = new();
     private int m_typeSwitchExpressionLevel;
 
     public override void EnterTypeSwitchStmt(GoParser.TypeSwitchStmtContext context)
@@ -124,8 +124,8 @@ public partial class Converter
             string identifier = parent == null ? "_" : SanitizedIdentifier(parent.typeSwitchGuard().IDENTIFIER()?.GetText()) ?? "_";
 
             GoParser.TypeListContext typeList = context.typeSwitchCase().typeList();
-            StringBuilder caseTypeExpressions = new StringBuilder();
-            HashSet<string> typeNames = new HashSet<string>();
+            StringBuilder caseTypeExpressions = new();
+            HashSet<string> typeNames = new();
 
             for (int i = 0; i < typeList.type_().Length; i++)
             {

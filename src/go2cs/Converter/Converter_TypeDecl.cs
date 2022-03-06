@@ -139,13 +139,13 @@ public partial class Converter
             // Handle struct type declaration
             string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
 
-            Dictionary<string, List<FunctionSignature>> promotedFunctions = new Dictionary<string, List<FunctionSignature>>(StringComparer.Ordinal);
-            HashSet<string> inheritedTypeNames = new HashSet<string>(StringComparer.Ordinal);
+            Dictionary<string, List<FunctionSignature>> promotedFunctions = new(StringComparer.Ordinal);
+            HashSet<string> inheritedTypeNames = new(StringComparer.Ordinal);
 
             RecurseInheritedInterfaces(context, originalIdentifier, structInfo, promotedFunctions, inheritedTypeNames);
 
-            Dictionary<string, List<FieldInfo>> promotedFields = new Dictionary<string, List<FieldInfo>>(StringComparer.Ordinal);
-            HashSet<string> promotedStructs = new HashSet<string>(StringComparer.Ordinal);
+            Dictionary<string, List<FieldInfo>> promotedFields = new(StringComparer.Ordinal);
+            HashSet<string> promotedStructs = new(StringComparer.Ordinal);
 
             SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
 
@@ -171,7 +171,7 @@ public partial class Converter
             // Track file name associated with package
             AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
 
-            List<FieldInfo> fields = new List<FieldInfo>();
+            List<FieldInfo> fields = new();
 
             foreach (FieldInfo field in structInfo.Fields)
             {
@@ -204,7 +204,7 @@ public partial class Converter
 
             foreach (FieldInfo field in fields)
             {
-                StringBuilder fieldDecl = new StringBuilder();
+                StringBuilder fieldDecl = new();
 
                 if (!string.IsNullOrWhiteSpace(field.Description))
                 {

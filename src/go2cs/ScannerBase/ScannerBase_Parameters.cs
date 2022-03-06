@@ -33,13 +33,13 @@ public partial class ScannerBase
     //  receiver (required)
     //  signature (required)
     //  result (optional)
-    protected readonly ParseTreeValues<List<ParameterInfo>> Parameters = new ParseTreeValues<List<ParameterInfo>>();
+    protected readonly ParseTreeValues<List<ParameterInfo>> Parameters = new();
 
-    private readonly ParseTreeValues<List<ParameterInfo>> m_parameterDeclarations = new ParseTreeValues<List<ParameterInfo>>();
+    private readonly ParseTreeValues<List<ParameterInfo>> m_parameterDeclarations = new();
 
     public override void ExitParameters(GoParser.ParametersContext context)
     {
-        List<ParameterInfo> parameters = new List<ParameterInfo>();
+        List<ParameterInfo> parameters = new();
 
         for (int i = 0; i < context.parameterDecl().Length; i++)
         {
@@ -52,7 +52,7 @@ public partial class ScannerBase
 
     public override void ExitParameterDecl(GoParser.ParameterDeclContext context)
     {
-        List<ParameterInfo> parameters = new List<ParameterInfo>();
+        List<ParameterInfo> parameters = new();
 
         Identifiers.TryGetValue(context.identifierList(), out string[] identifiers);
 

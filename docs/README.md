@@ -3,13 +3,16 @@
 
 Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
 
-![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
+> _Code QL results temporarily removed until GitHub supports .NET 6.0_
+<!-- ![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg) -->
 
 ## News
 
-* Recent example usages of `go2cs` allow the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) and [Godot](https://godotengine.org/) game engine platforms. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and [GodotGo](https://github.com/ritchiecarroll/GodotGo) projects.
+* Project has been updated to use .NET 6.0 / C# 10
 
-* Project has been updated to use .NET 5.0 and supports [publishing as a self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained).
+* Code conversions now better match original Go code styling
+
+* Recent example usages of `go2cs` allow the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) and [Godot](https://godotengine.org/) game engine platforms. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and [GodotGo](https://github.com/ritchiecarroll/GodotGo) projects.
 
 ## Goals
 

@@ -33,11 +33,11 @@ namespace go2cs;
 
 public partial class Converter
 {
-    private readonly ParseTreeValues<string> m_simpleStatements = new ParseTreeValues<string>();
-    private readonly ParseTreeValues<TypeInfo> m_elementTypes = new ParseTreeValues<TypeInfo>();
-    private readonly Dictionary<string, bool> m_labels = new Dictionary<string, bool>(StringComparer.Ordinal);
-    private readonly Stack<HashSet<string>> m_blockLabeledContinues = new Stack<HashSet<string>>();
-    private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new Stack<HashSet<string>>();
+    private readonly ParseTreeValues<string> m_simpleStatements = new();
+    private readonly ParseTreeValues<TypeInfo> m_elementTypes = new();
+    private readonly Dictionary<string, bool> m_labels = new(StringComparer.Ordinal);
+    private readonly Stack<HashSet<string>> m_blockLabeledContinues = new();
+    private readonly Stack<HashSet<string>> m_blockLabeledBreaks = new();
         
     public override void ExitStatement(GoParser.StatementContext context)
     {
@@ -92,7 +92,7 @@ public partial class Converter
 
         if (Expressions.TryGetValue(context.expression(0), out ExpressionInfo channel) && Expressions.TryGetValue(context.expression(1), out ExpressionInfo value))
         {
-            StringBuilder statement = new StringBuilder();
+            StringBuilder statement = new();
 
             statement.Append($"{Spacing()}{channel}.Send({value});{CheckForCommentsRight(context)}");
 
@@ -114,7 +114,7 @@ public partial class Converter
 
         if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
         {
-            StringBuilder statement = new StringBuilder();
+            StringBuilder statement = new();
 
             statement.Append($"{Spacing()}{expression};{CheckForCommentsRight(context)}");
 
@@ -136,7 +136,7 @@ public partial class Converter
 
         if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
         {
-            StringBuilder statement = new StringBuilder();
+            StringBuilder statement = new();
 
             statement.Append($"{Spacing()}{expression}{context.children[1].GetText()};{CheckForCommentsRight(context)}");
 
@@ -192,7 +192,7 @@ public partial class Converter
             }
             else
             {
-                StringBuilder statement = new StringBuilder();
+                StringBuilder statement = new();
                     
                 for (int i = 0; i < length; i++)
                 {

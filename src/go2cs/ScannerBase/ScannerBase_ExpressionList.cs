@@ -38,11 +38,11 @@ public partial class ScannerBase
     //  recvStmt (optional)
     //  rangeClause (optional)
     //  arguments (optional)
-    protected readonly ParseTreeValues<ExpressionInfo[]> ExpressionLists = new ParseTreeValues<ExpressionInfo[]>();
+    protected readonly ParseTreeValues<ExpressionInfo[]> ExpressionLists = new();
 
     public override void ExitExpressionList(GoParser.ExpressionListContext context)
     {
-        List<ExpressionInfo> expressions = new List<ExpressionInfo>();
+        List<ExpressionInfo> expressions = new();
 
         for (int i = 0; i < context.expression().Length; i++)
         {

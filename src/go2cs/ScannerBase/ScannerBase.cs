@@ -59,11 +59,11 @@ public abstract partial class ScannerBase : GoParserBaseListener
     public const string ClassSuffix = "_package";
     public const string AddressPrefix = "_addr_";
 
-    private readonly List<string> m_warnings = new List<string>();
+    private readonly List<string> m_warnings = new();
 
-    protected readonly DependencyCounter RequiredUsings = new DependencyCounter();
+    protected readonly DependencyCounter RequiredUsings = new();
 
-    private static readonly Regex s_buildDirective = new Regex(@"^\s*\/\/\s*\+build", RegexOptions.Singleline | RegexOptions.Compiled);
+    private static readonly Regex s_buildDirective = new(@"^\s*\/\/\s*\+build", RegexOptions.Singleline | RegexOptions.Compiled);
 
     protected sealed class ParserErrorListener : IAntlrErrorListener<IToken>
     {
@@ -141,7 +141,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
             Console.WriteLine(sourceTree.ToStringTree(Parser));
 
         // Walk parsed source tree to start visiting nodes
-        ParseTreeWalker walker = new ParseTreeWalker();
+        ParseTreeWalker walker = new();
         walker.Walk(this, sourceTree);
     }
 
@@ -296,7 +296,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
                 int index = line.IndexOf("+build", StringComparison.Ordinal);
 
-                HashSet<string> directives = new HashSet<string>(line.Substring(index + 6).Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
+                HashSet<string> directives = new(line.Substring(index + 6).Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
 
                 if (directives.Contains("ignore"))
                 {
@@ -330,9 +330,9 @@ public abstract partial class ScannerBase : GoParserBaseListener
         using (StreamReader reader = File.OpenText(fileName))
             inputStream = new(reader);
 
-        GoLexer lexer = new GoLexer(inputStream);
-        CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        GoParser parser = new GoParser(tokenStream);
+        GoLexer lexer = new(inputStream);
+        CommonTokenStream tokenStream = new(lexer);
+        GoParser parser = new(tokenStream);
         ScannerBase scanner;
 
     #if !DEBUG
@@ -510,7 +510,8 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
     protected static JsonSerializerOptions GetSerializationOptions()
     {
-        JsonSerializerOptions options = new JsonSerializerOptions { IncludeFields = true };
+        JsonSerializerOptions options = new()
+        { IncludeFields = true };
 
         options.SetupExtensions();            
         DiscriminatorConventionRegistry registry = options.GetDiscriminatorConventionRegistry();
@@ -552,7 +553,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
         if (metadata is not null)
             return metadata;
 
-        StringBuilder loadWarning = new StringBuilder();
+        StringBuilder loadWarning = new();
 
         loadWarning.AppendLine($"WARNING: Failed to locate package metadata for \"{targetImport}\" import at either:");
         loadWarning.AppendLine($"    {GetFolderMetadataFileName(options, GoRoot, goRootImport)} (from -g Go source target path)");

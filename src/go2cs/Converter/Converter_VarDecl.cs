@@ -30,8 +30,8 @@ namespace go2cs;
 
 public partial class Converter
 {
-    private readonly ParseTreeValues<string> m_variableIdentifiers = new ParseTreeValues<string>();
-    private readonly Dictionary<string, TypeInfo> m_variableTypes = new Dictionary<string, TypeInfo>();
+    private readonly ParseTreeValues<string> m_variableIdentifiers = new();
+    private readonly Dictionary<string, TypeInfo> m_variableTypes = new();
     private int m_varIdentifierCount;
     private bool m_varMultipleDeclaration;
 

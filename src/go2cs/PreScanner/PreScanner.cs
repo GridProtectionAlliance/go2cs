@@ -42,10 +42,10 @@ namespace go2cs;
 /// </remarks>
 public partial class PreScanner :ScannerBase
 {
-    private readonly Dictionary<string, (string targetImport, string targetUsing)> m_importAliases = new Dictionary<string, (string targetImport, string targetUsing)>(StringComparer.Ordinal);
-    private readonly Dictionary<string, InterfaceInfo> m_interfaces = new Dictionary<string, InterfaceInfo>(StringComparer.Ordinal);
-    private readonly Dictionary<string, StructInfo> m_structs = new Dictionary<string, StructInfo>(StringComparer.Ordinal);
-    private readonly Dictionary<string, FunctionInfo> m_functions = new Dictionary<string, FunctionInfo>(StringComparer.Ordinal);
+    private readonly Dictionary<string, (string targetImport, string targetUsing)> m_importAliases = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, InterfaceInfo> m_interfaces = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, StructInfo> m_structs = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, FunctionInfo> m_functions = new(StringComparer.Ordinal);
 
     public string FolderMetadataFileName { get; }
 

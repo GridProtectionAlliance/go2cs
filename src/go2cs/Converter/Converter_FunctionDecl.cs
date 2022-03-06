@@ -137,9 +137,9 @@ public partial class Converter
 
         if (!signatureOnly)
         {
-            StringBuilder resultParameters = new StringBuilder();
-            StringBuilder arrayClones = new StringBuilder();
-            StringBuilder implicitPointers = new StringBuilder();
+            StringBuilder resultParameters = new();
+            StringBuilder arrayClones = new();
+            StringBuilder implicitPointers = new();
 
             foreach (ParameterInfo parameter in signature.Result)
             {
@@ -179,7 +179,7 @@ public partial class Converter
 
                 blockPrefix += implicitPointers.ToString();
 
-                StringBuilder updatedSignature = new StringBuilder();
+                StringBuilder updatedSignature = new();
                 bool initialParam = true;
 
                 foreach (ParameterInfo parameter in signature.Parameters)
@@ -206,7 +206,7 @@ public partial class Converter
 
         if (useFuncExecutionContext)
         {
-            Stack<string> unusedNames = new Stack<string>(new[] { Options.WriteLegacyCompatibleCode ? "__" : "_", "_" });
+            Stack<string> unusedNames = new(new[] { Options.WriteLegacyCompatibleCode ? "__" : "_", "_" });
             m_targetFile.Replace(m_functionExecContextMarker, $" => func(({(hasDefer ? "defer" : unusedNames.Pop())}, {(hasPanic ? "panic" : unusedNames.Pop())}, {(hasRecover ? "recover" : unusedNames.Pop())}) =>");
         }
         else

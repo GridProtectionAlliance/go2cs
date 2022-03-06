@@ -49,13 +49,14 @@ public partial class Converter
         string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 
         PackageUsing = $"{Package} = {packageNamespace}{ClassSuffix}";
-        PackageNamespace = packageNamespace.Substring(0, packageNamespace.LastIndexOf('.'));
+        PackageNamespace = packageNamespace[..packageNamespace.LastIndexOf('.')];
 
         // Track file name associated with package
         AddFileToPackage(Package, TargetFileName, PackageNamespace);
 
         // Define namespaces
-        List<string> packageNamespaces = new List<string> { RootNamespace };
+        List<string> packageNamespaces = new()
+        { RootNamespace };
 
         if (paths.Length > 1)
         {

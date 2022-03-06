@@ -30,7 +30,7 @@ namespace go2cs;
 
 public partial class PreScanner
 {
-    private readonly Dictionary<string, VariableInfo> m_variables = new Dictionary<string, VariableInfo>(StringComparer.Ordinal);
+    private readonly Dictionary<string, VariableInfo> m_variables = new(StringComparer.Ordinal);
     private bool m_hasDefer;
     private bool m_hasPanic;
     private bool m_hasRecover;

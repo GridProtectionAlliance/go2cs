@@ -1,12 +1,11 @@
-#define ANTLR_STANDARD
-
-using Antlr4.Runtime;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using static GoLexer;
+using Antlr4.Runtime;
 
-// ReSharper disable once CheckNamespace
+// JRC: Code cleaned up compared to posted base class
+// ReSharper disable InconsistentNaming
+#pragma warning disable CA1050 // Declare types in namespaces
+
 public abstract class GoParserBase : Parser
 {
     protected GoParserBase(ITokenStream input)
@@ -14,12 +13,10 @@ public abstract class GoParserBase : Parser
     {
     }
 
-#if ANTLR_STANDARD
     protected GoParserBase(ITokenStream input, TextWriter output, TextWriter errorOutput)
         : base(input, output, errorOutput)
     {
     }
-#endif
 
     /// <summary>
     /// Returns `true` if on the current index of the parser's
@@ -30,46 +27,38 @@ public abstract class GoParserBase : Parser
     protected bool lineTerminatorAhead()
     {
         // Get the token ahead of the current index.
-        int possibleIndexEosToken = CurrentToken.TokenIndex - 1;
+        int offset = 1;
+        int possibleIndexEosToken = CurrentToken.TokenIndex - offset;
 
         if (possibleIndexEosToken == -1)
-        {
             return true;
-        }
 
         IToken ahead = tokenStream.Get(possibleIndexEosToken);
-        if (ahead.Channel != Lexer.Hidden)
-        {
-            // We're only interested in tokens on the HIDDEN channel.
-            return false;
-        }
 
-        if (ahead.Type == TERMINATOR)
+        while (ahead.Channel == Lexer.Hidden)
         {
-            // There is definitely a line terminator ahead.
-            return true;
-        }
-
-        if (ahead.Type == WS)
-        {
-            // Get the token ahead of the current whitespaces.
-            possibleIndexEosToken = CurrentToken.TokenIndex - 2;
-
-            if (possibleIndexEosToken == -1)
+            switch (ahead.Type)
             {
-                return true;
-            }
+                case GoLexer.TERMINATOR:
+                    return true;
+                case GoLexer.WS:
+                    possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
+                    ahead = tokenStream.Get(possibleIndexEosToken);
+                    break;
+                case GoLexer.COMMENT:
+                case GoLexer.LINE_COMMENT:
+                {
+                    if (ahead.Text.Contains('\r') || ahead.Text.Contains('\n'))
+                        return true;
 
-            ahead = tokenStream.Get(possibleIndexEosToken);
+                    possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
+                    ahead = tokenStream.Get(possibleIndexEosToken);
+                    break;
+                }
+            }
         }
 
-        // Get the token's text and type.
-        String text = ahead.Text;
-        int type = ahead.Type;
-
-        // Check if the token is, or contains a line terminator.
-        return type == COMMENT && (text.Contains("\r") || text.Contains("\n")) ||
-               type == TERMINATOR;
+        return false;
     }
 
     /// <summary>
@@ -81,14 +70,12 @@ public abstract class GoParserBase : Parser
         BufferedTokenStream stream = (BufferedTokenStream)tokenStream;
         IList<IToken> tokens = stream.GetHiddenTokensToLeft(LT(stream, tokenOffset).TokenIndex);
 
-        if (tokens is null)
-        {
+        if (tokens == null)
             return true;
-        }
 
         foreach (IToken token in tokens)
         {
-            if (token.Text.Contains("\n"))
+            if (token.Text.Contains('\n'))
                 return false;
         }
 
@@ -106,7 +93,7 @@ public abstract class GoParserBase : Parser
         int leftParams = 1;
         int rightParams = 0;
 
-        if (LT(stream, tokenOffset).Type == L_PAREN)
+        if (LT(stream, tokenOffset).Type == GoLexer.L_PAREN)
         {
             // Scan past parameters
             while (leftParams != rightParams)
@@ -114,13 +101,14 @@ public abstract class GoParserBase : Parser
                 tokenOffset++;
                 int tokenType = LT(stream, tokenOffset).Type;
 
-                if (tokenType == L_PAREN)
+                switch (tokenType)
                 {
-                    leftParams++;
-                }
-                else if (tokenType == R_PAREN)
-                {
-                    rightParams++;
+                    case GoLexer.L_PAREN:
+                        leftParams++;
+                        break;
+                    case GoLexer.R_PAREN:
+                        rightParams++;
+                        break;
                 }
             }
 
@@ -131,29 +119,11 @@ public abstract class GoParserBase : Parser
         return true;
     }
 
-    protected bool checkPreviousTokenText(string text)
-    {
-        return LT(tokenStream, 1).Text?.Equals(text) ?? false;
-    }
+    protected bool checkPreviousTokenText(string text) => 
+        LT(tokenStream, 1).Text?.Equals(text) ?? false;
 
-    private IToken LT(ITokenStream stream, int k)
-    {
-    #if ANTLR_STANDARD
-        return stream.LT(k);
-    #else
-        return stream.Lt(k);
-    #endif
-    }
+    private static IToken LT(ITokenStream stream, int k) => 
+        stream.LT(k);
 
-    private ITokenStream tokenStream
-    {
-        get
-        {
-        #if ANTLR_STANDARD
-            return TokenStream;
-        #else
-            return _input;
-        #endif
-        }
-    }
+    private ITokenStream tokenStream => TokenStream;
 }

@@ -34,7 +34,7 @@ public partial class Converter
     private bool m_firstImportSpec = true;
     private string m_lastImportSpecComment;
     private string m_lastEolImportSpecComment = string.Empty;
-    private readonly HashSet<string> m_usingStatements = new HashSet<string>(StringComparer.Ordinal);
+    private readonly HashSet<string> m_usingStatements = new(StringComparer.Ordinal);
 
     public override void EnterImportDecl(GoParser.ImportDeclContext context)
     {
