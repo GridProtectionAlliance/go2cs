@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:06 UTC
+//     Generated on 2022 March 06 22:16:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
+using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
 using sync = go.sync_package;
@@ -54,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,16 +80,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_writeBuffersByPtr is null || !m_target_is_ptr)
                     return s_writeBuffersByVal!(target, _p0);
 
-                return s_writeBuffersByPtr(m_target_ptr, _p0);
+                return s_writeBuffersByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static buffersWriter()
@@ -100,12 +100,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("writeBuffers");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeBuffersByPtr = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByPtr)) as writeBuffersByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("writeBuffers");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeBuffersByVal = extensionMethod.CreateStaticDelegate(typeof(writeBuffersByVal)) as writeBuffersByVal;
 
                 if (s_writeBuffersByPtr is null && s_writeBuffersByVal is null)

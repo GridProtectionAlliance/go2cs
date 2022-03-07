@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:46 UTC
+//     Generated on 2022 March 06 23:22:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,16 +13,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using archive = go.cmd.@internal.archive_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using log = go.log_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -56,7 +53,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -82,13 +79,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate error StatByPtr(ptr<T> value);
@@ -102,13 +99,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target);
 
-                return s_StatByPtr(m_target_ptr);
+                return s_StatByPtr(m_target_ptr!);
             }
 
             private delegate error ReadByPtr(ptr<T> value, slice<byte> _p0);
@@ -122,13 +119,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, _p0);
 
-                return s_ReadByPtr(m_target_ptr, _p0);
+                return s_ReadByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error CloseByPtr(ptr<T> value);
@@ -142,16 +139,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static FileLike()
@@ -162,12 +159,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -175,12 +172,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)
@@ -188,12 +185,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
                 if (s_ReadByPtr is null && s_ReadByVal is null)
@@ -201,12 +198,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)

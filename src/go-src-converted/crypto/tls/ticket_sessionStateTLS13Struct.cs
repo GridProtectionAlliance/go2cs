@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:03 UTC
+//     Generated on 2022 March 06 22:21:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:30 UTC
+//     Generated on 2022 March 06 22:30:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.cutoff = default;
             }
 
-            public leftCheat(long delta = default, @string cutoff = default)
+            public leftCheat(nint delta = default, @string cutoff = default)
             {
                 this.delta = delta;
                 this.cutoff = cutoff;

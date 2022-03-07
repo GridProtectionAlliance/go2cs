@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:16 UTC
+//     Generated on 2022 March 06 22:47:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using obj = go.cmd.@internal.obj_package;
+using @base = go.cmd.compile.@internal.@base_package;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -36,21 +36,19 @@ namespace @internal
                 this.Receiver = default;
                 this.Results = default;
                 this.Params = default;
-                this.Nname = default;
+                this.TParams = default;
                 this.pkg = default;
                 this.Argwid = default;
-                this.Outnamed = default;
             }
 
-            public Func(ref ptr<Type> Receiver = default, ref ptr<Type> Results = default, ref ptr<Type> Params = default, ref ptr<Node> Nname = default, ref ptr<Pkg> pkg = default, long Argwid = default, bool Outnamed = default)
+            public Func(ref ptr<Type> Receiver = default, ref ptr<Type> Results = default, ref ptr<Type> Params = default, ref ptr<Type> TParams = default, ref ptr<Pkg> pkg = default, long Argwid = default)
             {
                 this.Receiver = Receiver;
                 this.Results = Results;
                 this.Params = Params;
-                this.Nname = Nname;
+                this.TParams = TParams;
                 this.pkg = pkg;
                 this.Argwid = Argwid;
-                this.Outnamed = Outnamed;
             }
 
             // Enable comparisons between nil and Func struct
@@ -73,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(ref value.Receiver, ref value.Results, ref value.Params, ref value.Nname, ref value.pkg, value.Argwid, value.Outnamed);
+            return new Func(ref value.Receiver, ref value.Results, ref value.Params, ref value.TParams, ref value.pkg, value.Argwid);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:02 UTC
+//     Generated on 2022 March 06 23:26:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using http = go.net.http_package;
 using os = go.os_package;
@@ -60,7 +59,7 @@ namespace mod
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,13 +85,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SignedByPtr is null || !m_target_is_ptr)
                     return s_SignedByVal!(target, ctx);
 
-                return s_SignedByPtr(m_target_ptr, ctx);
+                return s_SignedByPtr(m_target_ptr!, ctx);
             }
 
             private delegate (slice<byte>, error) ReadRecordsByPtr(ptr<T> value, context.Context ctx, long id, long n);
@@ -106,13 +105,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadRecordsByPtr is null || !m_target_is_ptr)
                     return s_ReadRecordsByVal!(target, ctx, id, n);
 
-                return s_ReadRecordsByPtr(m_target_ptr, ctx, id, n);
+                return s_ReadRecordsByPtr(m_target_ptr!, ctx, id, n);
             }
 
             private delegate (slice<byte>, error) LookupByPtr(ptr<T> value, context.Context ctx, module.Version m);
@@ -126,13 +125,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LookupByPtr is null || !m_target_is_ptr)
                     return s_LookupByVal!(target, ctx, m);
 
-                return s_LookupByPtr(m_target_ptr, ctx, m);
+                return s_LookupByPtr(m_target_ptr!, ctx, m);
             }
 
             private delegate (slice<byte>, error) ReadTileDataByPtr(ptr<T> value, context.Context ctx, tlog.Tile t);
@@ -146,16 +145,16 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadTileDataByPtr is null || !m_target_is_ptr)
                     return s_ReadTileDataByVal!(target, ctx, t);
 
-                return s_ReadTileDataByPtr(m_target_ptr, ctx, t);
+                return s_ReadTileDataByPtr(m_target_ptr!, ctx, t);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ServerOps()
@@ -166,12 +165,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Signed");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SignedByPtr = extensionMethod.CreateStaticDelegate(typeof(SignedByPtr)) as SignedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Signed");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SignedByVal = extensionMethod.CreateStaticDelegate(typeof(SignedByVal)) as SignedByVal;
 
                 if (s_SignedByPtr is null && s_SignedByVal is null)
@@ -179,12 +178,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRecords");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRecordsByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRecordsByPtr)) as ReadRecordsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadRecords");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRecordsByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRecordsByVal)) as ReadRecordsByVal;
 
                 if (s_ReadRecordsByPtr is null && s_ReadRecordsByVal is null)
@@ -192,12 +191,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Lookup");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LookupByPtr = extensionMethod.CreateStaticDelegate(typeof(LookupByPtr)) as LookupByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Lookup");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LookupByVal = extensionMethod.CreateStaticDelegate(typeof(LookupByVal)) as LookupByVal;
 
                 if (s_LookupByPtr is null && s_LookupByVal is null)
@@ -205,12 +204,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadTileData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadTileDataByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadTileDataByPtr)) as ReadTileDataByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadTileData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadTileDataByVal = extensionMethod.CreateStaticDelegate(typeof(ReadTileDataByVal)) as ReadTileDataByVal;
 
                 if (s_ReadTileDataByPtr is null && s_ReadTileDataByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:48 UTC
+//     Generated on 2022 March 06 23:23:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using http = go.net.http_package;

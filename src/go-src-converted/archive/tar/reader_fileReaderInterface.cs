@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:03 UTC
+//     Generated on 2022 March 06 22:31:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
@@ -55,7 +53,7 @@ namespace archive
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,36 +79,16 @@ namespace archive
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteToByPtr is null || !m_target_is_ptr)
                     return s_WriteToByVal!(target, _p0);
 
-                return s_WriteToByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-
-            private static readonly ReadByPtr? s_ReadByPtr;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByPtr is null || !m_target_is_ptr)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByPtr(m_target_ptr, p);
+                return s_WriteToByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static fileReader()
@@ -121,29 +99,16 @@ namespace archive
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteToByPtr)) as WriteToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
 
                 if (s_WriteToByPtr is null && s_WriteToByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileReader.WriteTo method", new Exception("WriteTo"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-
-                if (s_ReadByPtr is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement fileReader.Read method", new Exception("Read"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

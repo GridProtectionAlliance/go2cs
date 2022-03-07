@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:41 UTC
+//     Generated on 2022 March 06 23:16:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using time = go.time_package;
 using go;
 
@@ -42,10 +41,12 @@ namespace @internal
                 this.Dir = default;
                 this.GoMod = default;
                 this.GoVersion = default;
+                this.Retracted = default;
+                this.Deprecated = default;
                 this.Error = default;
             }
 
-            public ModulePublic(@string Path = default, @string Version = default, slice<@string> Versions = default, ref ptr<ModulePublic> Replace = default, ref ptr<time.Time> Time = default, ref ptr<ModulePublic> Update = default, bool Main = default, bool Indirect = default, @string Dir = default, @string GoMod = default, @string GoVersion = default, ref ptr<ModuleError> Error = default)
+            public ModulePublic(@string Path = default, @string Version = default, slice<@string> Versions = default, ref ptr<ModulePublic> Replace = default, ref ptr<time.Time> Time = default, ref ptr<ModulePublic> Update = default, bool Main = default, bool Indirect = default, @string Dir = default, @string GoMod = default, @string GoVersion = default, slice<@string> Retracted = default, @string Deprecated = default, ref ptr<ModuleError> Error = default)
             {
                 this.Path = Path;
                 this.Version = Version;
@@ -58,6 +59,8 @@ namespace @internal
                 this.Dir = Dir;
                 this.GoMod = GoMod;
                 this.GoVersion = GoVersion;
+                this.Retracted = Retracted;
+                this.Deprecated = Deprecated;
                 this.Error = Error;
             }
 
@@ -81,7 +84,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ModulePublic ModulePublic_cast(dynamic value)
         {
-            return new ModulePublic(value.Path, value.Version, value.Versions, ref value.Replace, ref value.Time, ref value.Update, value.Main, value.Indirect, value.Dir, value.GoMod, value.GoVersion, ref value.Error);
+            return new ModulePublic(value.Path, value.Version, value.Versions, ref value.Replace, ref value.Time, ref value.Update, value.Main, value.Indirect, value.Dir, value.GoMod, value.GoVersion, value.Retracted, value.Deprecated, ref value.Error);
         }
     }
 }}}}

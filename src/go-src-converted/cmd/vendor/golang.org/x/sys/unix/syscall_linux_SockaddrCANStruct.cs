@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:43 UTC
+//     Generated on 2022 March 06 23:27:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
@@ -42,7 +41,7 @@ namespace sys
                 this.raw = default;
             }
 
-            public SockaddrCAN(long Ifindex = default, uint RxID = default, uint TxID = default, RawSockaddrCAN raw = default)
+            public SockaddrCAN(nint Ifindex = default, uint RxID = default, uint TxID = default, RawSockaddrCAN raw = default)
             {
                 this.Ifindex = Ifindex;
                 this.RxID = RxID;

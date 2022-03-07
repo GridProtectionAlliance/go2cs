@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build amd64 && solaris
 // +build amd64,solaris
 
-// package syscall -- go2cs converted at 2020 October 09 05:04:21 UTC
+// package syscall -- go2cs converted at 2022 March 06 22:29:48 UTC
 // import "syscall" ==> using syscall = go.syscall_package
-// Original source: C:\Go\src\syscall\zsysnum_solaris_amd64.go
+// Original source: C:\Program Files\Go\src\syscall\zsysnum_solaris_amd64.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class syscall_package
-    {
-        // TODO(aram): remove these before Go 1.3.
-        public static readonly long SYS_EXECVE = (long)59L;
-        public static readonly long SYS_FCNTL = (long)62L;
+namespace go;
 
-    }
-}
+public static partial class syscall_package {
+
+    // TODO(aram): remove these before Go 1.3.
+public static readonly nint SYS_EXECVE = 59;
+public static readonly nint SYS_FCNTL = 62;
+
+
+} // end syscall_package

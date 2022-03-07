@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:34 UTC
+//     Generated on 2022 March 06 23:23:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using template = go.html.template_package;
@@ -52,14 +51,16 @@ namespace @internal
                 this.options = default;
                 this.help = default;
                 this.templates = default;
+                this.settingsFile = default;
             }
 
-            public webInterface(ref ptr<profile.Profile> prof = default, ref ptr<plugin.Options> options = default, map<@string, @string> help = default, ref ptr<template.Template> templates = default)
+            public webInterface(ref ptr<profile.Profile> prof = default, ref ptr<plugin.Options> options = default, map<@string, @string> help = default, ref ptr<template.Template> templates = default, @string settingsFile = default)
             {
                 this.prof = prof;
                 this.options = options;
                 this.help = help;
                 this.templates = templates;
+                this.settingsFile = settingsFile;
             }
 
             // Enable comparisons between nil and webInterface struct
@@ -82,7 +83,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static webInterface webInterface_cast(dynamic value)
         {
-            return new webInterface(ref value.prof, ref value.options, value.help, ref value.templates);
+            return new webInterface(ref value.prof, ref value.options, value.help, ref value.templates, value.settingsFile);
         }
     }
 }}}}}}}

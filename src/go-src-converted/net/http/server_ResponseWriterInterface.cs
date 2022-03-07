@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:02 UTC
+//     Generated on 2022 March 06 22:23:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -21,8 +20,8 @@ using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
@@ -71,7 +70,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,67 +85,67 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) HeaderByPtr(ptr<T> value);
-            private delegate (long, error) HeaderByVal(T value);
+            private delegate (nint, error) HeaderByPtr(ptr<T> value);
+            private delegate (nint, error) HeaderByVal(T value);
 
             private static readonly HeaderByPtr? s_HeaderByPtr;
             private static readonly HeaderByVal? s_HeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Header()
+            public (nint, error) Header()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HeaderByPtr is null || !m_target_is_ptr)
                     return s_HeaderByVal!(target);
 
-                return s_HeaderByPtr(m_target_ptr);
+                return s_HeaderByPtr(m_target_ptr!);
             }
 
-            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> _p0);
-            private delegate (long, error) WriteByVal(T value, slice<byte> _p0);
+            private delegate (nint, error) WriteByPtr(ptr<T> value, slice<byte> _p0);
+            private delegate (nint, error) WriteByVal(T value, slice<byte> _p0);
 
             private static readonly WriteByPtr? s_WriteByPtr;
             private static readonly WriteByVal? s_WriteByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> _p0)
+            public (nint, error) Write(slice<byte> _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, _p0);
 
-                return s_WriteByPtr(m_target_ptr, _p0);
+                return s_WriteByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate (long, error) WriteHeaderByPtr(ptr<T> value, long statusCode);
-            private delegate (long, error) WriteHeaderByVal(T value, long statusCode);
+            private delegate (nint, error) WriteHeaderByPtr(ptr<T> value, nint statusCode);
+            private delegate (nint, error) WriteHeaderByVal(T value, nint statusCode);
 
             private static readonly WriteHeaderByPtr? s_WriteHeaderByPtr;
             private static readonly WriteHeaderByVal? s_WriteHeaderByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) WriteHeader(long statusCode)
+            public (nint, error) WriteHeader(nint statusCode)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteHeaderByPtr is null || !m_target_is_ptr)
                     return s_WriteHeaderByVal!(target, statusCode);
 
-                return s_WriteHeaderByPtr(m_target_ptr, statusCode);
+                return s_WriteHeaderByPtr(m_target_ptr!, statusCode);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ResponseWriter()
@@ -157,12 +156,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Header");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(HeaderByPtr)) as HeaderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Header");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeaderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderByVal)) as HeaderByVal;
 
                 if (s_HeaderByPtr is null && s_HeaderByVal is null)
@@ -170,12 +169,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
                 if (s_WriteByPtr is null && s_WriteByVal is null)
@@ -183,12 +182,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteHeader");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteHeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByPtr)) as WriteHeaderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteHeader");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(WriteHeaderByVal)) as WriteHeaderByVal;
 
                 if (s_WriteHeaderByPtr is null && s_WriteHeaderByVal is null)

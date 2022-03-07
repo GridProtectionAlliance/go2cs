@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:16 UTC
+//     Generated on 2022 March 06 22:23:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using gzip = go.compress.gzip_package;
 using list = go.container.list_package;
@@ -24,6 +23,7 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using os = go.os_package;
@@ -76,7 +76,7 @@ namespace net
                 this.mutateHeaderFunc = default;
             }
 
-            public persistConn(RoundTripper alt = default, ref ptr<Transport> t = default, connectMethodKey cacheKey = default, net.Conn conn = default, ref ptr<tls.ConnectionState> tlsState = default, ref ptr<bufio.Reader> br = default, ref ptr<bufio.Writer> bw = default, long nwrite = default, channel<requestAndChan> reqch = default, channel<writeRequest> writech = default, channel<object> closech = default, bool isProxy = default, bool sawEOF = default, long readLimit = default, channel<error> writeErrCh = default, channel<object> writeLoopDone = default, time.Time idleAt = default, ref ptr<time.Timer> idleTimer = default, sync.Mutex mu = default, long numExpectedResponses = default, error closed = default, error canceledErr = default, bool broken = default, bool reused = default, Action<Header> mutateHeaderFunc = default)
+            public persistConn(RoundTripper alt = default, ref ptr<Transport> t = default, connectMethodKey cacheKey = default, net.Conn conn = default, ref ptr<tls.ConnectionState> tlsState = default, ref ptr<bufio.Reader> br = default, ref ptr<bufio.Writer> bw = default, long nwrite = default, channel<requestAndChan> reqch = default, channel<writeRequest> writech = default, channel<object> closech = default, bool isProxy = default, bool sawEOF = default, long readLimit = default, channel<error> writeErrCh = default, channel<object> writeLoopDone = default, time.Time idleAt = default, ref ptr<time.Timer> idleTimer = default, sync.Mutex mu = default, nint numExpectedResponses = default, error closed = default, error canceledErr = default, bool broken = default, bool reused = default, Action<Header> mutateHeaderFunc = default)
             {
                 this.alt = alt;
                 this.t = t;

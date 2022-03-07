@@ -50,7 +50,7 @@ If the Go program is started with either SIGHUP or SIGINT ignored
 If the Go program is started with a non-empty signal mask, that will
 generally be honored. However, some signals are explicitly unblocked:
 the synchronous signals, SIGILL, SIGTRAP, SIGSTKFLT, SIGCHLD, SIGPROF,
-and, on GNU/Linux, signals 32 (SIGCANCEL) and 33 (SIGSETXID)
+and, on Linux, signals 32 (SIGCANCEL) and 33 (SIGSETXID)
 (SIGCANCEL and SIGSETXID are used internally by glibc). Subprocesses
 started by os.Exec, or by the os/exec package, will inherit the
 modified signal mask.
@@ -129,9 +129,7 @@ If the non-Go code installs any signal handlers, it must use the
 SA_ONSTACK flag with sigaction. Failing to do so is likely to cause
 the program to crash if the signal is received. Go programs routinely
 run with a limited stack, and therefore set up an alternate signal
-stack. Also, the Go standard library expects that any signal handlers
-will use the SA_RESTART flag. Failing to do so may cause some library
-calls to return "interrupted system call" errors.
+stack.
 
 If the non-Go code installs a signal handler for any of the
 synchronous signals (SIGBUS, SIGFPE, SIGSEGV), then it should record
@@ -178,7 +176,7 @@ will initialize signals at global constructor time.  For
 shared library is loaded.
 
 If the Go runtime sees an existing signal handler for the SIGCANCEL or
-SIGSETXID signals (which are used only on GNU/Linux), it will turn on
+SIGSETXID signals (which are used only on Linux), it will turn on
 the SA_ONSTACK flag and otherwise keep the signal handler.
 
 For the synchronous signals and SIGPIPE, the Go runtime will install a
@@ -226,8 +224,8 @@ Notify with a syscall.Note will cause that value to be sent on the
 channel when that string is posted as a note.
 
 */
-// package signal -- go2cs converted at 2020 October 09 05:00:58 UTC
+// package signal -- go2cs converted at 2022 March 06 22:14:25 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
-// Original source: C:\Go\src\os\signal\doc.go
-    }
+// Original source: C:\Program Files\Go\src\os\signal\doc.go
 
+} // end signal_package

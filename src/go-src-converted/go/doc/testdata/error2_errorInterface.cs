@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:11 UTC
+//     Generated on 2022 March 06 22:41:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -75,16 +75,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ErrorByPtr is null || !m_target_is_ptr)
                     return s_ErrorByVal!(target);
 
-                return s_ErrorByPtr(m_target_ptr);
+                return s_ErrorByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static error()
@@ -95,12 +95,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Error");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
                 if (s_ErrorByPtr is null && s_ErrorByVal is null)

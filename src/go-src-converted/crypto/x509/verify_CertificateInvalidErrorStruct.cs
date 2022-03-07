@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:00 UTC
+//     Generated on 2022 March 06 22:19:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using net = go.net_package;
 using url = go.net.url_package;
-using os = go.os_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;

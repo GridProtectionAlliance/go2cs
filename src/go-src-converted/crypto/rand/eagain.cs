@@ -2,50 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package rand -- go2cs converted at 2020 October 09 04:53:01 UTC
+// package rand -- go2cs converted at 2022 March 06 22:17:16 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
-// Original source: C:\Go\src\crypto\rand\eagain.go
-using os = go.os_package;
+// Original source: C:\Program Files\Go\src\crypto\rand\eagain.go
+using fs = go.io.fs_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace crypto
-{
-    public static partial class rand_package
+namespace go.crypto;
+
+public static partial class rand_package {
+
+private static void init() {
+    isEAGAIN = unixIsEAGAIN;
+}
+
+// unixIsEAGAIN reports whether err is a syscall.EAGAIN wrapped in a PathError.
+// See golang.org/issue/9205
+private static bool unixIsEAGAIN(error err) {
     {
-        private static void init()
-        {
-            isEAGAIN = unixIsEAGAIN;
-        }
+        ptr<fs.PathError> (pe, ok) = err._<ptr<fs.PathError>>();
 
-        // unixIsEAGAIN reports whether err is a syscall.EAGAIN wrapped in a PathError.
-        // See golang.org/issue/9205
-        private static bool unixIsEAGAIN(error err)
-        {
+        if (ok) {
             {
-                ptr<os.PathError> (pe, ok) = err._<ptr<os.PathError>>();
+                syscall.Errno (errno, ok) = pe.Err._<syscall.Errno>();
 
-                if (ok)
-                {
-                    {
-                        syscall.Errno (errno, ok) = pe.Err._<syscall.Errno>();
-
-                        if (ok && errno == syscall.EAGAIN)
-                        {
-                            return true;
-                        }
-
-                    }
-
+                if (ok && errno == syscall.EAGAIN) {
+                    return true;
                 }
 
             }
 
-            return false;
-
         }
     }
-}}
+
+    return false;
+
+}
+
+} // end rand_package

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:22 UTC
+//     Generated on 2022 March 06 22:17:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace math
         {
             // Value of the RoundingMode struct
             private readonly byte m_value;
-
+            
             public RoundingMode(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and RoundingMode struct

@@ -2,84 +2,64 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:00:51 UTC
-// Original source: C:\Go\src\runtime\testdata\testprog\syscalls_linux.go
+// package main -- go2cs converted at 2022 March 06 22:26:08 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprog\syscalls_linux.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static long gettid()
-        {
-            return syscall.Gettid();
-        }
+namespace go;
 
-        private static (bool, bool) tidExists(long tid)
-        {
-            bool exists = default;
-            bool supported = default;
+public static partial class main_package {
 
-            var (stat, err) = ioutil.ReadFile(fmt.Sprintf("/proc/self/task/%d/stat", tid));
-            if (os.IsNotExist(err))
-            {
-                return (false, true);
-            } 
-            // Check if it's a zombie thread.
-            var state = bytes.Fields(stat)[2L];
-            return (!(len(state) == 1L && state[0L] == 'Z'), true);
+private static nint gettid() {
+    return syscall.Gettid();
+}
 
-        }
+private static (bool, bool) tidExists(nint tid) {
+    bool exists = default;
+    bool supported = default;
 
-        private static (@string, error) getcwd()
-        {
-            @string _p0 = default;
-            error _p0 = default!;
+    var (stat, err) = os.ReadFile(fmt.Sprintf("/proc/self/task/%d/stat", tid));
+    if (os.IsNotExist(err)) {
+        return (false, true);
+    }
+    var state = bytes.Fields(stat)[2];
+    return (!(len(state) == 1 && state[0] == 'Z'), true);
 
-            if (!syscall.ImplementsGetwd)
-            {
-                return ("", error.As(null!)!);
-            } 
-            // Use the syscall to get the current working directory.
-            // This is imperative for checking for OS thread state
-            // after an unshare since os.Getwd might just check the
-            // environment, or use some other mechanism.
-            array<byte> buf = new array<byte>(4096L);
-            var (n, err) = syscall.Getcwd(buf[..]);
-            if (err != null)
-            {
-                return ("", error.As(err)!);
-            } 
-            // Subtract one for null terminator.
-            return (string(buf[..n - 1L]), error.As(null!)!);
+}
 
-        }
+private static (@string, error) getcwd() {
+    @string _p0 = default;
+    error _p0 = default!;
 
-        private static error unshareFs()
-        {
-            var err = syscall.Unshare(syscall.CLONE_FS);
-            if (err != null)
-            {
-                syscall.Errno (errno, ok) = err._<syscall.Errno>();
-                if (ok && errno == syscall.EPERM)
-                {
-                    return error.As(errNotPermitted)!;
-                }
+    if (!syscall.ImplementsGetwd) {
+        return ("", error.As(null!)!);
+    }
+    array<byte> buf = new array<byte>(4096);
+    var (n, err) = syscall.Getcwd(buf[..]);
+    if (err != null) {
+        return ("", error.As(err)!);
+    }
+    return (string(buf[..(int)n - 1]), error.As(null!)!);
 
-            }
+}
 
-            return error.As(err)!;
-
-        }
-
-        private static error chdir(@string path)
-        {
-            return error.As(syscall.Chdir(path))!;
+private static error unshareFs() {
+    var err = syscall.Unshare(syscall.CLONE_FS);
+    if (err != null) {
+        syscall.Errno (errno, ok) = err._<syscall.Errno>();
+        if (ok && errno == syscall.EPERM) {
+            return error.As(errNotPermitted)!;
         }
     }
+    return error.As(err)!;
+
 }
+
+private static error chdir(@string path) {
+    return error.As(syscall.Chdir(path))!;
+}
+
+} // end main_package

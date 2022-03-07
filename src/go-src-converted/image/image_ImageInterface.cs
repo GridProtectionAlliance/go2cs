@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:42 UTC
+//     Generated on 2022 March 06 23:35:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using color = go.image.color_package;
 
 #nullable enable
@@ -48,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,13 +73,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ColorModelByPtr is null || !m_target_is_ptr)
                     return s_ColorModelByVal!(target);
 
-                return s_ColorModelByPtr(m_target_ptr);
+                return s_ColorModelByPtr(m_target_ptr!);
             }
 
             private delegate color.Color BoundsByPtr(ptr<T> value);
@@ -94,36 +93,36 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BoundsByPtr is null || !m_target_is_ptr)
                     return s_BoundsByVal!(target);
 
-                return s_BoundsByPtr(m_target_ptr);
+                return s_BoundsByPtr(m_target_ptr!);
             }
 
-            private delegate color.Color AtByPtr(ptr<T> value, long x, long y);
-            private delegate color.Color AtByVal(T value, long x, long y);
+            private delegate color.Color AtByPtr(ptr<T> value, nint x, nint y);
+            private delegate color.Color AtByVal(T value, nint x, nint y);
 
             private static readonly AtByPtr? s_AtByPtr;
             private static readonly AtByVal? s_AtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public color.Color At(long x, long y)
+            public color.Color At(nint x, nint y)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AtByPtr is null || !m_target_is_ptr)
                     return s_AtByVal!(target, x, y);
 
-                return s_AtByPtr(m_target_ptr, x, y);
+                return s_AtByPtr(m_target_ptr!, x, y);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Image()
@@ -134,12 +133,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ColorModel");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColorModelByPtr = extensionMethod.CreateStaticDelegate(typeof(ColorModelByPtr)) as ColorModelByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ColorModel");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColorModelByVal = extensionMethod.CreateStaticDelegate(typeof(ColorModelByVal)) as ColorModelByVal;
 
                 if (s_ColorModelByPtr is null && s_ColorModelByVal is null)
@@ -147,12 +146,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Bounds");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BoundsByPtr = extensionMethod.CreateStaticDelegate(typeof(BoundsByPtr)) as BoundsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Bounds");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BoundsByVal = extensionMethod.CreateStaticDelegate(typeof(BoundsByVal)) as BoundsByVal;
 
                 if (s_BoundsByPtr is null && s_BoundsByVal is null)
@@ -160,12 +159,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("At");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AtByPtr = extensionMethod.CreateStaticDelegate(typeof(AtByPtr)) as AtByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("At");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AtByVal = extensionMethod.CreateStaticDelegate(typeof(AtByVal)) as AtByVal;
 
                 if (s_AtByPtr is null && s_AtByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:41 UTC
+//     Generated on 2022 March 06 22:15:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace net
                 this.PathMTU = default;
             }
 
-            public RouteMetrics(long PathMTU = default)
+            public RouteMetrics(nint PathMTU = default)
             {
                 this.PathMTU = PathMTU;
             }

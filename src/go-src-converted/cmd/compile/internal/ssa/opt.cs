@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 09 05:25:24 UTC
+// package ssa -- go2cs converted at 2022 March 06 22:50:42 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
-// Original source: C:\Go\src\cmd\compile\internal\ssa\opt.go
+// Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\opt.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace compile {
-namespace @internal
-{
-    public static partial class ssa_package
-    {
-        // machine-independent optimization
-        private static void opt(ptr<Func> _addr_f)
-        {
-            ref Func f = ref _addr_f.val;
+namespace go.cmd.compile.@internal;
 
-            applyRewrite(f, rewriteBlockgeneric, rewriteValuegeneric);
-        }
-    }
-}}}}
+public static partial class ssa_package {
+
+    // machine-independent optimization
+private static void opt(ptr<Func> _addr_f) {
+    ref Func f = ref _addr_f.val;
+
+    applyRewrite(f, rewriteBlockgeneric, rewriteValuegeneric, removeDeadValues);
+}
+
+} // end ssa_package

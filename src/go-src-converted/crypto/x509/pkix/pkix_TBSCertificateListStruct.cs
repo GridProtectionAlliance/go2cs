@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:52 UTC
+//     Generated on 2022 March 06 22:19:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using asn1 = go.encoding.asn1_package;
 using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
@@ -44,7 +43,7 @@ namespace x509
                 this.Extensions = default;
             }
 
-            public TBSCertificateList(asn1.RawContent Raw = default, long Version = default, AlgorithmIdentifier Signature = default, RDNSequence Issuer = default, time.Time ThisUpdate = default, time.Time NextUpdate = default, slice<RevokedCertificate> RevokedCertificates = default, slice<Extension> Extensions = default)
+            public TBSCertificateList(asn1.RawContent Raw = default, nint Version = default, AlgorithmIdentifier Signature = default, RDNSequence Issuer = default, time.Time ThisUpdate = default, time.Time NextUpdate = default, slice<RevokedCertificate> RevokedCertificates = default, slice<Extension> Extensions = default)
             {
                 this.Raw = Raw;
                 this.Version = Version;

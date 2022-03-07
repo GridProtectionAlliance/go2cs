@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:21 UTC
+//     Generated on 2022 March 06 23:15:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the funcLitFinder struct
             private readonly token.Pos m_value;
-
+            
             public funcLitFinder(token.Pos value) => m_value = value;
 
             // Enable implicit conversions between token.Pos and funcLitFinder struct

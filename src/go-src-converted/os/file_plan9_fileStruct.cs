@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:12 UTC
+//     Generated on 2022 March 06 22:13:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using poll = go.@internal.poll_package;
 using io = go.io_package;
 using runtime = go.runtime_package;
@@ -37,7 +36,7 @@ namespace go
                 this.appendMode = default;
             }
 
-            public file(long fd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool appendMode = default)
+            public file(nint fd = default, @string name = default, ref ptr<dirInfo> dirinfo = default, bool appendMode = default)
             {
                 this.fd = fd;
                 this.name = name;

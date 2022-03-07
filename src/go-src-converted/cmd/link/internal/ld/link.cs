@@ -28,9 +28,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 09 05:50:01 UTC
+// package ld -- go2cs converted at 2022 March 06 23:21:48 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
-// Original source: C:\Go\src\cmd\link\internal\ld\link.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\ld\link.go
 using bufio = go.bufio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -38,119 +38,147 @@ using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using elf = go.debug.elf_package;
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class ld_package
-    {
-        public partial struct Shlib
-        {
-            public @string Path;
-            public slice<byte> Hash;
-            public slice<@string> Deps;
-            public ptr<elf.File> File;
+namespace go.cmd.link.@internal;
+
+public static partial class ld_package {
+
+public partial struct Shlib {
+    public @string Path;
+    public slice<byte> Hash;
+    public slice<@string> Deps;
+    public ptr<elf.File> File;
+}
+
+// Link holds the context for writing object code from a compiler
+// or for reading that input into the linker.
+public partial struct Link {
+    public ref Target Target => ref Target_val;
+    public ref ErrorReporter ErrorReporter => ref ErrorReporter_val;
+    public ref ArchSyms ArchSyms => ref ArchSyms_val;
+    public channel<nint> outSem; // limits the number of output writers
+    public ptr<OutBuf> Out;
+    public nint version; // current version number for static/file-local symbols
+
+    public nint Debugvlog;
+    public ptr<bufio.Writer> Bso;
+    public bool Loaded; // set after all inputs have been loaded as symbols
+
+    public bool compressDWARF;
+    public slice<@string> Libdir;
+    public slice<ptr<sym.Library>> Library;
+    public map<@string, ptr<sym.Library>> LibraryByPkg;
+    public slice<Shlib> Shlibs;
+    public slice<loader.Sym> Textp;
+    public loader.Sym Moduledata;
+    public map<@string, @string> PackageFile;
+    public map<@string, @string> PackageShlib;
+    public slice<loader.Sym> tramps; // trampolines
+
+    public slice<ptr<sym.CompilationUnit>> compUnits; // DWARF compilation units
+    public ptr<sym.CompilationUnit> runtimeCU; // One of the runtime CUs, the last one seen.
+
+    public ptr<loader.Loader> loader;
+    public slice<cgodata> cgodata; // cgo directives to load, three strings are args for loadcgo
+
+    public slice<loader.Sym> datap;
+    public slice<loader.Sym> dynexp; // Elf symtab variables.
+    public nint numelfsym; // starts at 0, 1 is reserved
+
+// These are symbols that created and written by the linker.
+// Rather than creating a symbol, and writing all its data into the heap,
+// you can create a symbol, and just a generation function will be called
+// after the symbol's been created in the output mmap.
+    public map<loader.Sym, generatorFunc> generatorSyms;
+}
+
+private partial struct cgodata {
+    public @string file;
+    public @string pkg;
+    public slice<slice<@string>> directives;
+}
+
+// The smallest possible offset from the hardware stack pointer to a local
+// variable on the stack. Architectures that use a link register save its value
+// on the stack in the function prologue and so always have a pointer between
+// the hardware stack pointer and the local variable area.
+private static long FixedFrameSize(this ptr<Link> _addr_ctxt) {
+    ref Link ctxt = ref _addr_ctxt.val;
+
+
+    if (ctxt.Arch.Family == sys.AMD64 || ctxt.Arch.Family == sys.I386) 
+        return 0;
+    else if (ctxt.Arch.Family == sys.PPC64) 
+        // PIC code on ppc64le requires 32 bytes of stack, and it's easier to
+        // just use that much stack always on ppc64x.
+        return int64(4 * ctxt.Arch.PtrSize);
+    else 
+        return int64(ctxt.Arch.PtrSize);
+    
+}
+
+private static void Logf(this ptr<Link> _addr_ctxt, @string format, params object[] args) {
+    args = args.Clone();
+    ref Link ctxt = ref _addr_ctxt.val;
+
+    fmt.Fprintf(ctxt.Bso, format, args);
+    ctxt.Bso.Flush();
+}
+
+private static void addImports(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_l, @string pn) {
+    ref Link ctxt = ref _addr_ctxt.val;
+    ref sym.Library l = ref _addr_l.val;
+
+    var pkg = objabi.PathToPrefix(l.Pkg);
+    foreach (var (_, imp) in l.Autolib) {
+        var lib = addlib(ctxt, pkg, pn, imp.Pkg, imp.Fingerprint);
+        if (lib != null) {
+            l.Imports = append(l.Imports, lib);
         }
+    }    l.Autolib = null;
 
-        // Link holds the context for writing object code from a compiler
-        // or for reading that input into the linker.
-        public partial struct Link
-        {
-            public ref Target Target => ref Target_val;
-            public ref ErrorReporter ErrorReporter => ref ErrorReporter_val;
-            public ref ArchSyms ArchSyms => ref ArchSyms_val;
-            public channel<long> outSem; // limits the number of output writers
-            public ptr<OutBuf> Out;
-            public ptr<sym.Symbols> Syms;
-            public long Debugvlog;
-            public ptr<bufio.Writer> Bso;
-            public bool Loaded; // set after all inputs have been loaded as symbols
+}
 
-            public bool compressDWARF;
-            public slice<@string> Libdir;
-            public slice<ptr<sym.Library>> Library;
-            public map<@string, ptr<sym.Library>> LibraryByPkg;
-            public slice<Shlib> Shlibs;
-            public slice<ptr<sym.Symbol>> Textp;
-            public slice<loader.Sym> Textp2;
-            public long NumFilesyms;
-            public ptr<sym.Symbol> Moduledata;
-            public loader.Sym Moduledata2;
-            public map<@string, @string> PackageFile;
-            public map<@string, @string> PackageShlib;
-            public slice<loader.Sym> tramps; // trampolines
+// Allocate a new version (i.e. symbol namespace).
+private static nint IncVersion(this ptr<Link> _addr_ctxt) {
+    ref Link ctxt = ref _addr_ctxt.val;
 
-            public slice<ptr<sym.CompilationUnit>> compUnits; // DWARF compilation units
-            public ptr<sym.CompilationUnit> runtimeCU; // One of the runtime CUs, the last one seen.
+    ctxt.version++;
+    return ctxt.version - 1;
+}
 
-            public ptr<loader.Loader> loader;
-            public slice<cgodata> cgodata; // cgo directives to load, three strings are args for loadcgo
+// returns the maximum version number
+private static nint MaxVersion(this ptr<Link> _addr_ctxt) {
+    ref Link ctxt = ref _addr_ctxt.val;
 
-            public map<@string, bool> cgo_export_static;
-            public map<@string, bool> cgo_export_dynamic;
-            public slice<ptr<sym.Symbol>> datap;
-            public slice<loader.Sym> datap2;
-            public slice<loader.Sym> dynexp2; // Elf symtab variables.
-            public long numelfsym; // starts at 0, 1 is reserved
-            public long elfbind;
-        }
+    return ctxt.version;
+}
 
-        private partial struct cgodata
-        {
-            public @string file;
-            public @string pkg;
-            public slice<slice<@string>> directives;
-        }
+// generatorFunc is a convenience type.
+// Linker created symbols that are large, and shouldn't really live in the
+// heap can define a generator function, and their bytes can be generated
+// directly in the output mmap.
+//
+// Generator symbols shouldn't grow the symbol size, and might be called in
+// parallel in the future.
+//
+// Generator Symbols have their Data set to the mmapped area when the
+// generator is called.
+public delegate void generatorFunc(ptr<Link>, loader.Sym);
 
-        // The smallest possible offset from the hardware stack pointer to a local
-        // variable on the stack. Architectures that use a link register save its value
-        // on the stack in the function prologue and so always have a pointer between
-        // the hardware stack pointer and the local variable area.
-        private static long FixedFrameSize(this ptr<Link> _addr_ctxt)
-        {
-            ref Link ctxt = ref _addr_ctxt.val;
+// createGeneratorSymbol is a convenience method for creating a generator
+// symbol.
+private static loader.Sym createGeneratorSymbol(this ptr<Link> _addr_ctxt, @string name, nint version, sym.SymKind t, long size, generatorFunc gen) {
+    ref Link ctxt = ref _addr_ctxt.val;
 
+    var ldr = ctxt.loader;
+    var s = ldr.LookupOrCreateSym(name, version);
+    ldr.SetIsGeneratedSym(s, true);
+    var sb = ldr.MakeSymbolUpdater(s);
+    sb.SetType(t);
+    sb.SetSize(size);
+    ctxt.generatorSyms[s] = gen;
+    return s;
+}
 
-            if (ctxt.Arch.Family == sys.AMD64 || ctxt.Arch.Family == sys.I386) 
-                return 0L;
-            else if (ctxt.Arch.Family == sys.PPC64) 
-                // PIC code on ppc64le requires 32 bytes of stack, and it's easier to
-                // just use that much stack always on ppc64x.
-                return int64(4L * ctxt.Arch.PtrSize);
-            else 
-                return int64(ctxt.Arch.PtrSize);
-            
-        }
-
-        private static void Logf(this ptr<Link> _addr_ctxt, @string format, params object[] args)
-        {
-            args = args.Clone();
-            ref Link ctxt = ref _addr_ctxt.val;
-
-            fmt.Fprintf(ctxt.Bso, format, args);
-            ctxt.Bso.Flush();
-        }
-
-        private static void addImports(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_l, @string pn)
-        {
-            ref Link ctxt = ref _addr_ctxt.val;
-            ref sym.Library l = ref _addr_l.val;
-
-            var pkg = objabi.PathToPrefix(l.Pkg);
-            foreach (var (_, imp) in l.Autolib)
-            {
-                var lib = addlib(ctxt, pkg, pn, imp.Pkg, imp.Fingerprint);
-                if (lib != null)
-                {
-                    l.Imports = append(l.Imports, lib);
-                }
-
-            }
-            l.Autolib = null;
-
-        }
-    }
-}}}}
+} // end ld_package

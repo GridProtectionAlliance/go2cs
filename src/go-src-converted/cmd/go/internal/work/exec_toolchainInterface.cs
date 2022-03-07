@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:18 UTC
+//     Generated on 2022 March 06 23:17:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,18 +13,19 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
+using exec = go.@internal.execabs_package;
 using lazyregexp = go.@internal.lazyregexp_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using log = go.log_package;
 using rand = go.math.rand_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using regexp = go.regexp_package;
 using runtime = go.runtime_package;
@@ -35,8 +36,11 @@ using time = go.time_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
 using load = go.cmd.go.@internal.load_package;
+using modload = go.cmd.go.@internal.modload_package;
 using str = go.cmd.go.@internal.str_package;
+using trace = go.cmd.go.@internal.trace_package;
 using go;
 
 #nullable enable
@@ -74,7 +78,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -89,24 +93,24 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate @string gcByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
-            private delegate @string gcByVal(T value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
+            private delegate @string gcByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, slice<byte> embedcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
+            private delegate @string gcByVal(T value, ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, slice<byte> embedcfg, @string symabis, bool asmhdr, slice<@string> gofiles);
 
             private static readonly gcByPtr? s_gcByPtr;
             private static readonly gcByVal? s_gcByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string gc(ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, @string symabis, bool asmhdr, slice<@string> gofiles)
+            public @string gc(ptr<Builder> b, ptr<Action> a, @string archive, slice<byte> importcfg, slice<byte> embedcfg, @string symabis, bool asmhdr, slice<@string> gofiles)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_gcByPtr is null || !m_target_is_ptr)
-                    return s_gcByVal!(target, b, a, archive, importcfg, symabis, asmhdr, gofiles);
+                    return s_gcByVal!(target, b, a, archive, importcfg, embedcfg, symabis, asmhdr, gofiles);
 
-                return s_gcByPtr(m_target_ptr, b, a, archive, importcfg, symabis, asmhdr, gofiles);
+                return s_gcByPtr(m_target_ptr!, b, a, archive, importcfg, embedcfg, symabis, asmhdr, gofiles);
             }
 
             private delegate @string ccByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string ofile, @string cfile);
@@ -120,13 +124,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ccByPtr is null || !m_target_is_ptr)
                     return s_ccByVal!(target, b, a, ofile, cfile);
 
-                return s_ccByPtr(m_target_ptr, b, a, ofile, cfile);
+                return s_ccByPtr(m_target_ptr!, b, a, ofile, cfile);
             }
 
             private delegate @string asmByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
@@ -140,13 +144,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_asmByPtr is null || !m_target_is_ptr)
                     return s_asmByVal!(target, b, a, sfiles);
 
-                return s_asmByPtr(m_target_ptr, b, a, sfiles);
+                return s_asmByPtr(m_target_ptr!, b, a, sfiles);
             }
 
             private delegate @string symabisByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, slice<@string> sfiles);
@@ -160,13 +164,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_symabisByPtr is null || !m_target_is_ptr)
                     return s_symabisByVal!(target, b, a, sfiles);
 
-                return s_symabisByPtr(m_target_ptr, b, a, sfiles);
+                return s_symabisByPtr(m_target_ptr!, b, a, sfiles);
             }
 
             private delegate @string packByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> a, @string afile, slice<@string> ofiles);
@@ -180,13 +184,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_packByPtr is null || !m_target_is_ptr)
                     return s_packByVal!(target, b, a, afile, ofiles);
 
-                return s_packByPtr(m_target_ptr, b, a, afile, ofiles);
+                return s_packByPtr(m_target_ptr!, b, a, afile, ofiles);
             }
 
             private delegate @string ldByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, @string @out, @string importcfg, @string mainpkg);
@@ -200,13 +204,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ldByPtr is null || !m_target_is_ptr)
                     return s_ldByVal!(target, b, root, @out, importcfg, mainpkg);
 
-                return s_ldByPtr(m_target_ptr, b, root, @out, importcfg, mainpkg);
+                return s_ldByPtr(m_target_ptr!, b, root, @out, importcfg, mainpkg);
             }
 
             private delegate @string ldSharedByPtr(ptr<T> value, ptr<Builder> b, ptr<Action> root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions);
@@ -220,13 +224,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ldSharedByPtr is null || !m_target_is_ptr)
                     return s_ldSharedByVal!(target, b, root, toplevelactions, @out, importcfg, allactions);
 
-                return s_ldSharedByPtr(m_target_ptr, b, root, toplevelactions, @out, importcfg, allactions);
+                return s_ldSharedByPtr(m_target_ptr!, b, root, toplevelactions, @out, importcfg, allactions);
             }
 
             private delegate @string compilerByPtr(ptr<T> value);
@@ -240,13 +244,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_compilerByPtr is null || !m_target_is_ptr)
                     return s_compilerByVal!(target);
 
-                return s_compilerByPtr(m_target_ptr);
+                return s_compilerByPtr(m_target_ptr!);
             }
 
             private delegate @string linkerByPtr(ptr<T> value);
@@ -260,16 +264,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_linkerByPtr is null || !m_target_is_ptr)
                     return s_linkerByVal!(target);
 
-                return s_linkerByPtr(m_target_ptr);
+                return s_linkerByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static toolchain()
@@ -280,12 +284,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("gc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_gcByPtr = extensionMethod.CreateStaticDelegate(typeof(gcByPtr)) as gcByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("gc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_gcByVal = extensionMethod.CreateStaticDelegate(typeof(gcByVal)) as gcByVal;
 
                 if (s_gcByPtr is null && s_gcByVal is null)
@@ -293,12 +297,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("cc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ccByPtr = extensionMethod.CreateStaticDelegate(typeof(ccByPtr)) as ccByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("cc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ccByVal = extensionMethod.CreateStaticDelegate(typeof(ccByVal)) as ccByVal;
 
                 if (s_ccByPtr is null && s_ccByVal is null)
@@ -306,12 +310,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("asm");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_asmByPtr = extensionMethod.CreateStaticDelegate(typeof(asmByPtr)) as asmByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("asm");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_asmByVal = extensionMethod.CreateStaticDelegate(typeof(asmByVal)) as asmByVal;
 
                 if (s_asmByPtr is null && s_asmByVal is null)
@@ -319,12 +323,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("symabis");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_symabisByPtr = extensionMethod.CreateStaticDelegate(typeof(symabisByPtr)) as symabisByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("symabis");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_symabisByVal = extensionMethod.CreateStaticDelegate(typeof(symabisByVal)) as symabisByVal;
 
                 if (s_symabisByPtr is null && s_symabisByVal is null)
@@ -332,12 +336,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("pack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_packByPtr = extensionMethod.CreateStaticDelegate(typeof(packByPtr)) as packByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("pack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_packByVal = extensionMethod.CreateStaticDelegate(typeof(packByVal)) as packByVal;
 
                 if (s_packByPtr is null && s_packByVal is null)
@@ -345,12 +349,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ld");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ldByPtr = extensionMethod.CreateStaticDelegate(typeof(ldByPtr)) as ldByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ld");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ldByVal = extensionMethod.CreateStaticDelegate(typeof(ldByVal)) as ldByVal;
 
                 if (s_ldByPtr is null && s_ldByVal is null)
@@ -358,12 +362,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ldShared");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ldSharedByPtr = extensionMethod.CreateStaticDelegate(typeof(ldSharedByPtr)) as ldSharedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ldShared");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ldSharedByVal = extensionMethod.CreateStaticDelegate(typeof(ldSharedByVal)) as ldSharedByVal;
 
                 if (s_ldSharedByPtr is null && s_ldSharedByVal is null)
@@ -371,12 +375,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("compiler");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_compilerByPtr = extensionMethod.CreateStaticDelegate(typeof(compilerByPtr)) as compilerByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("compiler");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_compilerByVal = extensionMethod.CreateStaticDelegate(typeof(compilerByVal)) as compilerByVal;
 
                 if (s_compilerByPtr is null && s_compilerByVal is null)
@@ -384,12 +388,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("linker");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_linkerByPtr = extensionMethod.CreateStaticDelegate(typeof(linkerByPtr)) as linkerByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("linker");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_linkerByVal = extensionMethod.CreateStaticDelegate(typeof(linkerByVal)) as linkerByVal;
 
                 if (s_linkerByPtr is null && s_linkerByVal is null)

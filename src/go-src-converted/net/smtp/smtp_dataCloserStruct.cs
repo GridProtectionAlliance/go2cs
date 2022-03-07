@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:41 UTC
+//     Generated on 2022 March 06 22:25:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using tls = go.crypto.tls_package;
 using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
@@ -32,52 +31,12 @@ namespace net
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
         private partial struct dataCloser
-        {
-            // WriteCloser.Write function promotion
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
-
-            private static readonly WriteByVal s_WriteByVal;
-            private static readonly WriteByRef s_WriteByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? WriteCloser?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-
-            // WriteCloser.Close function promotion
-            private delegate error CloseByVal(T value);
-            private delegate error CloseByRef(ref T value);
-
-            private static readonly CloseByVal s_CloseByVal;
-            private static readonly CloseByRef s_CloseByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Close() => s_CloseByRef?.Invoke(ref this) ?? s_CloseByVal?.Invoke(this) ?? WriteCloser?.Close() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-            
+        {            
             [DebuggerStepperBoundary]
             static dataCloser()
             {
                 Type targetType = typeof(dataCloser);
                 MethodInfo extensionMethod;
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
-
-                    if ((object)s_WriteByRef == null)
-                        s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-                }
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Close");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
-
-                    if ((object)s_CloseByRef == null)
-                        s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-                }
             }
 
             // Constructors

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:41 UTC
+//     Generated on 2022 March 06 22:19:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
@@ -21,9 +20,10 @@ using hmac = go.crypto.hmac_package;
 using rc4 = go.crypto.rc4_package;
 using sha1 = go.crypto.sha1_package;
 using sha256 = go.crypto.sha256_package;
-using x509 = go.crypto.x509_package;
 using fmt = go.fmt_package;
 using hash = go.hash_package;
+using cpu = go.@internal.cpu_package;
+using runtime = go.runtime_package;
 using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
 using go;
 

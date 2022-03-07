@@ -4,33 +4,27 @@
 
 // This file contains tests for the rangeloop checker.
 
-// package rangeloop -- go2cs converted at 2020 October 09 06:05:12 UTC
+// package rangeloop -- go2cs converted at 2022 March 06 23:35:21 UTC
 // import "cmd/vet/testdata/rangeloop" ==> using rangeloop = go.cmd.vet.testdata.rangeloop_package
-// Original source: C:\Go\src\cmd\vet\testdata\rangeloop\rangeloop.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\rangeloop\rangeloop.go
 
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class rangeloop_package
-    {
-        public static void RangeLoopTests()
-        {
-            slice<long> s = default;
-            foreach (var (i, v) in s)
-            {
-                go_(() => () =>
-                {
-                    println(i); // ERROR "loop variable i captured by func literal"
-                    println(v); // ERROR "loop variable v captured by func literal"
-                }());
 
-            }
-        }
+namespace go.cmd.vet.testdata;
+
+public static partial class rangeloop_package {
+
+public static void RangeLoopTests() {
+    slice<nint> s = default;
+    foreach (var (i, v) in s) {
+        go_(() => () => {
+            println(i); // ERROR "loop variable i captured by func literal"
+            println(v); // ERROR "loop variable v captured by func literal"
+        }());
+
     }
-}}}}
+}
+
+} // end rangeloop_package

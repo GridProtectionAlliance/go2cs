@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:31 UTC
+//     Generated on 2022 March 06 23:31:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using path = go.path_package;
@@ -55,7 +54,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -70,47 +69,47 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ToPositionByPtr(ptr<T> value, long offset);
-            private delegate (long, error) ToPositionByVal(T value, long offset);
+            private delegate (nint, error) ToPositionByPtr(ptr<T> value, nint offset);
+            private delegate (nint, error) ToPositionByVal(T value, nint offset);
 
             private static readonly ToPositionByPtr? s_ToPositionByPtr;
             private static readonly ToPositionByVal? s_ToPositionByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) ToPosition(long offset)
+            public (nint, error) ToPosition(nint offset)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ToPositionByPtr is null || !m_target_is_ptr)
                     return s_ToPositionByVal!(target, offset);
 
-                return s_ToPositionByPtr(m_target_ptr, offset);
+                return s_ToPositionByPtr(m_target_ptr!, offset);
             }
 
-            private delegate (long, error) ToOffsetByPtr(ptr<T> value, long line, long col);
-            private delegate (long, error) ToOffsetByVal(T value, long line, long col);
+            private delegate (nint, error) ToOffsetByPtr(ptr<T> value, nint line, nint col);
+            private delegate (nint, error) ToOffsetByVal(T value, nint line, nint col);
 
             private static readonly ToOffsetByPtr? s_ToOffsetByPtr;
             private static readonly ToOffsetByVal? s_ToOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) ToOffset(long line, long col)
+            public (nint, error) ToOffset(nint line, nint col)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ToOffsetByPtr is null || !m_target_is_ptr)
                     return s_ToOffsetByVal!(target, line, col);
 
-                return s_ToOffsetByPtr(m_target_ptr, line, col);
+                return s_ToOffsetByPtr(m_target_ptr!, line, col);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Converter()
@@ -121,12 +120,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ToPosition");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ToPositionByPtr = extensionMethod.CreateStaticDelegate(typeof(ToPositionByPtr)) as ToPositionByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ToPosition");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ToPositionByVal = extensionMethod.CreateStaticDelegate(typeof(ToPositionByVal)) as ToPositionByVal;
 
                 if (s_ToPositionByPtr is null && s_ToPositionByVal is null)
@@ -134,12 +133,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ToOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ToOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(ToOffsetByPtr)) as ToOffsetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ToOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ToOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(ToOffsetByVal)) as ToOffsetByVal;
 
                 if (s_ToOffsetByPtr is null && s_ToOffsetByVal is null)

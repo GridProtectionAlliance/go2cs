@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:11 UTC
+//     Generated on 2022 March 06 22:47:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using io = go.io_package;
 using log = go.log_package;
 using url = go.net.url_package;
@@ -27,6 +26,7 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using unicode = go.unicode_package;
 using go;
 
 #nullable enable
@@ -48,7 +48,7 @@ namespace @internal
                 this.Character = default;
             }
 
-            public Position(ulong Line = default, ulong Character = default)
+            public Position(nuint Line = default, nuint Character = default)
             {
                 this.Line = Line;
                 this.Character = Character;

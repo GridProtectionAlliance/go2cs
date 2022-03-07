@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:24 UTC
+//     Generated on 2022 March 06 22:20:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using crypto = go.crypto_package;
 using hmac = go.crypto.hmac_package;
 using rsa = go.crypto.rsa_package;
@@ -37,6 +37,7 @@ namespace crypto
             public clientHandshakeStateTLS13(NilType _)
             {
                 this.c = default;
+                this.ctx = default;
                 this.serverHello = default;
                 this.hello = default;
                 this.ecdheParams = default;
@@ -52,9 +53,10 @@ namespace crypto
                 this.trafficSecret = default;
             }
 
-            public clientHandshakeStateTLS13(ref ptr<Conn> c = default, ref ptr<serverHelloMsg> serverHello = default, ref ptr<clientHelloMsg> hello = default, ecdheParameters ecdheParams = default, ref ptr<ClientSessionState> session = default, slice<byte> earlySecret = default, slice<byte> binderKey = default, ref ptr<certificateRequestMsgTLS13> certReq = default, bool usingPSK = default, bool sentDummyCCS = default, ref ptr<cipherSuiteTLS13> suite = default, hash.Hash transcript = default, slice<byte> masterSecret = default, slice<byte> trafficSecret = default)
+            public clientHandshakeStateTLS13(ref ptr<Conn> c = default, context.Context ctx = default, ref ptr<serverHelloMsg> serverHello = default, ref ptr<clientHelloMsg> hello = default, ecdheParameters ecdheParams = default, ref ptr<ClientSessionState> session = default, slice<byte> earlySecret = default, slice<byte> binderKey = default, ref ptr<certificateRequestMsgTLS13> certReq = default, bool usingPSK = default, bool sentDummyCCS = default, ref ptr<cipherSuiteTLS13> suite = default, hash.Hash transcript = default, slice<byte> masterSecret = default, slice<byte> trafficSecret = default)
             {
                 this.c = c;
+                this.ctx = ctx;
                 this.serverHello = serverHello;
                 this.hello = hello;
                 this.ecdheParams = ecdheParams;
@@ -90,7 +92,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static clientHandshakeStateTLS13 clientHandshakeStateTLS13_cast(dynamic value)
         {
-            return new clientHandshakeStateTLS13(ref value.c, ref value.serverHello, ref value.hello, value.ecdheParams, ref value.session, value.earlySecret, value.binderKey, ref value.certReq, value.usingPSK, value.sentDummyCCS, ref value.suite, value.transcript, value.masterSecret, value.trafficSecret);
+            return new clientHandshakeStateTLS13(ref value.c, value.ctx, ref value.serverHello, ref value.hello, value.ecdheParams, ref value.session, value.earlySecret, value.binderKey, ref value.certReq, value.usingPSK, value.sentDummyCCS, ref value.suite, value.transcript, value.masterSecret, value.trafficSecret);
         }
     }
 }}

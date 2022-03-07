@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:34 UTC
+//     Generated on 2022 March 06 23:19:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using go;
 
@@ -53,7 +52,7 @@ namespace sumdb
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadOnlyByPtr is null || !m_target_is_ptr)
                     return s_ReadOnlyByVal!(target, ctx, f);
 
-                return s_ReadOnlyByPtr(m_target_ptr, ctx, f);
+                return s_ReadOnlyByPtr(m_target_ptr!, ctx, f);
             }
 
             private delegate error ReadWriteByPtr(ptr<T> value, context.Context ctx, Func<context.Context, Transaction, error> f);
@@ -99,16 +98,16 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadWriteByPtr is null || !m_target_is_ptr)
                     return s_ReadWriteByVal!(target, ctx, f);
 
-                return s_ReadWriteByPtr(m_target_ptr, ctx, f);
+                return s_ReadWriteByPtr(m_target_ptr!, ctx, f);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Storage()
@@ -119,12 +118,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadOnly");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadOnlyByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadOnlyByPtr)) as ReadOnlyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadOnly");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadOnlyByVal = extensionMethod.CreateStaticDelegate(typeof(ReadOnlyByVal)) as ReadOnlyByVal;
 
                 if (s_ReadOnlyByPtr is null && s_ReadOnlyByVal is null)
@@ -132,12 +131,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadWrite");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadWriteByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadWriteByPtr)) as ReadWriteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadWrite");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadWriteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadWriteByVal)) as ReadWriteByVal;
 
                 if (s_ReadWriteByPtr is null && s_ReadWriteByVal is null)

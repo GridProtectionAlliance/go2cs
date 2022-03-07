@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:08 UTC
+//     Generated on 2022 March 06 23:32:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using constant = go.go.constant_package;
@@ -62,7 +61,7 @@ namespace @internal
                 this.read = default;
             }
 
-            public importer(map<@string, ptr<types.Package>> imports = default, slice<byte> data = default, @string importpath = default, slice<byte> buf = default, long version = default, slice<@string> strList = default, slice<@string> pathList = default, slice<ptr<types.Package>> pkgList = default, slice<types.Type> typList = default, slice<ptr<types.Interface>> interfaceList = default, bool trackAllTypes = default, bool posInfoFormat = default, @string prevFile = default, long prevLine = default, fakeFileSet fake = default, bool debugFormat = default, long read = default)
+            public importer(map<@string, ptr<types.Package>> imports = default, slice<byte> data = default, @string importpath = default, slice<byte> buf = default, nint version = default, slice<@string> strList = default, slice<@string> pathList = default, slice<ptr<types.Package>> pkgList = default, slice<types.Type> typList = default, slice<ptr<types.Interface>> interfaceList = default, bool trackAllTypes = default, bool posInfoFormat = default, @string prevFile = default, nint prevLine = default, fakeFileSet fake = default, bool debugFormat = default, nint read = default)
             {
                 this.imports = imports;
                 this.data = data;

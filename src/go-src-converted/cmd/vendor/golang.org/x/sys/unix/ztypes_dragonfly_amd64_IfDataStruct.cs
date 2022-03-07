@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:30 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,6 @@ namespace sys
                 this.Hdrlen = default;
                 this.Recvquota = default;
                 this.Xmitquota = default;
-                this._ = default;
                 this.Mtu = default;
                 this.Metric = default;
                 this.Link_state = default;
@@ -59,7 +58,7 @@ namespace sys
                 this.Lastchange = default;
             }
 
-            public IfData(byte Type = default, byte Physical = default, byte Addrlen = default, byte Hdrlen = default, byte Recvquota = default, byte Xmitquota = default, array<byte> _ = default, ulong Mtu = default, ulong Metric = default, ulong Link_state = default, ulong Baudrate = default, ulong Ipackets = default, ulong Ierrors = default, ulong Opackets = default, ulong Oerrors = default, ulong Collisions = default, ulong Ibytes = default, ulong Obytes = default, ulong Imcasts = default, ulong Omcasts = default, ulong Iqdrops = default, ulong Noproto = default, ulong Hwassist = default, ulong Oqdrops = default, Timeval Lastchange = default)
+            public IfData(byte Type = default, byte Physical = default, byte Addrlen = default, byte Hdrlen = default, byte Recvquota = default, byte Xmitquota = default, ulong Mtu = default, ulong Metric = default, ulong Link_state = default, ulong Baudrate = default, ulong Ipackets = default, ulong Ierrors = default, ulong Opackets = default, ulong Oerrors = default, ulong Collisions = default, ulong Ibytes = default, ulong Obytes = default, ulong Imcasts = default, ulong Omcasts = default, ulong Iqdrops = default, ulong Noproto = default, ulong Hwassist = default, ulong Oqdrops = default, Timeval Lastchange = default)
             {
                 this.Type = Type;
                 this.Physical = Physical;
@@ -67,7 +66,6 @@ namespace sys
                 this.Hdrlen = Hdrlen;
                 this.Recvquota = Recvquota;
                 this.Xmitquota = Xmitquota;
-                this._ = _;
                 this.Mtu = Mtu;
                 this.Metric = Metric;
                 this.Link_state = Link_state;
@@ -108,7 +106,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static IfData IfData_cast(dynamic value)
         {
-            return new IfData(value.Type, value.Physical, value.Addrlen, value.Hdrlen, value.Recvquota, value.Xmitquota, value._, value.Mtu, value.Metric, value.Link_state, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Noproto, value.Hwassist, value.Oqdrops, value.Lastchange);
+            return new IfData(value.Type, value.Physical, value.Addrlen, value.Hdrlen, value.Recvquota, value.Xmitquota, value.Mtu, value.Metric, value.Link_state, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Noproto, value.Hwassist, value.Oqdrops, value.Lastchange);
         }
     }
 }}}}}}

@@ -22,7 +22,7 @@ For usage information, please see:
     go help testflag
     go tool cover -help
 */
-// package main -- go2cs converted at 2020 October 09 05:44:21 UTC
-// Original source: C:\Go\src\cmd\cover\doc.go
-    }
+// package main -- go2cs converted at 2022 March 06 23:15:08 UTC
+// Original source: C:\Program Files\Go\src\cmd\cover\doc.go
 
+} // end main_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:30 UTC
+//     Generated on 2022 March 06 23:16:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,20 +12,19 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sha256 = go.crypto.sha256_package;
 using hex = go.encoding.hex_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using time = go.time_package;
-using renameio = go.cmd.go.@internal.renameio_package;
+using lockedfile = go.cmd.go.@internal.lockedfile_package;
 using go;
 
 #nullable enable

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:01 UTC
+//     Generated on 2022 March 06 22:12:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using oserror = go.@internal.oserror_package;
 using poll = go.@internal.poll_package;
+using fs = go.io.fs_package;
 
 #nullable enable
 

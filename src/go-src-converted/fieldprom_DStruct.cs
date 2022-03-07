@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace go
                 this.m_CRef = new ptr<C>(new C(nil));
             }
 
-            public D(long a = default, C C = default)
+            public D(nint a = default, C C = default)
             {
                 this.a = a;
                 this.m_CRef = new ptr<C>(C);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:43 UTC
+//     Generated on 2022 March 06 23:35:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using color = go.image.color_package;
 
 #nullable enable
@@ -36,7 +35,7 @@ namespace go
                 this.Rect = default;
             }
 
-            public YCbCr(slice<byte> Y = default, slice<byte> Cb = default, slice<byte> Cr = default, long YStride = default, long CStride = default, YCbCrSubsampleRatio SubsampleRatio = default, Rectangle Rect = default)
+            public YCbCr(slice<byte> Y = default, slice<byte> Cb = default, slice<byte> Cr = default, nint YStride = default, nint CStride = default, YCbCrSubsampleRatio SubsampleRatio = default, Rectangle Rect = default)
             {
                 this.Y = Y;
                 this.Cb = Cb;

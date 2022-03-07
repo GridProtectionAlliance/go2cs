@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:20 UTC
+//     Generated on 2022 March 06 23:31:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace analysis
         {
             // Value of the Result struct
             private readonly checker.TestAnalyzerResult m_value;
-
+            
             public Result(checker.TestAnalyzerResult value) => m_value = value;
 
             // Enable implicit conversions between checker.TestAnalyzerResult and Result struct

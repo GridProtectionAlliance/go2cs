@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:42 UTC
+//     Generated on 2022 March 06 22:24:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,16 +73,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnmarshalTextByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalTextByVal!(target, text);
 
-                return s_UnmarshalTextByPtr(m_target_ptr, text);
+                return s_UnmarshalTextByPtr(m_target_ptr!, text);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static TextUnmarshaler()
@@ -93,12 +93,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalText");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalTextByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByPtr)) as UnmarshalTextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnmarshalText");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalTextByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalTextByVal)) as UnmarshalTextByVal;
 
                 if (s_UnmarshalTextByPtr is null && s_UnmarshalTextByVal is null)

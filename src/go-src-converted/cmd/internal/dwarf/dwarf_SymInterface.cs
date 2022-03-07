@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:22:46 UTC
+//     Generated on 2022 March 06 22:46:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,15 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
-using exec = go.os.exec_package;
+using buildcfg = go.@internal.buildcfg_package;
+using exec = go.@internal.execabs_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using objabi = go.cmd.@internal.objabi_package;
 using go;
 
 #nullable enable
@@ -58,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,16 +84,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LengthByPtr is null || !m_target_is_ptr)
                     return s_LengthByVal!(target, dwarfContext);
 
-                return s_LengthByPtr(m_target_ptr, dwarfContext);
+                return s_LengthByPtr(m_target_ptr!, dwarfContext);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Sym()
@@ -104,12 +104,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Length");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LengthByPtr = extensionMethod.CreateStaticDelegate(typeof(LengthByPtr)) as LengthByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Length");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LengthByVal = extensionMethod.CreateStaticDelegate(typeof(LengthByVal)) as LengthByVal;
 
                 if (s_LengthByPtr is null && s_LengthByVal is null)

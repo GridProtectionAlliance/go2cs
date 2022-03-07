@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:24 UTC
+//     Generated on 2022 March 06 23:32:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -62,7 +61,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -88,13 +87,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate error UsageByPtr(ptr<T> value);
@@ -108,13 +107,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UsageByPtr is null || !m_target_is_ptr)
                     return s_UsageByVal!(target);
 
-                return s_UsageByPtr(m_target_ptr);
+                return s_UsageByPtr(m_target_ptr!);
             }
 
             private delegate error ShortHelpByPtr(ptr<T> value);
@@ -128,13 +127,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ShortHelpByPtr is null || !m_target_is_ptr)
                     return s_ShortHelpByVal!(target);
 
-                return s_ShortHelpByPtr(m_target_ptr);
+                return s_ShortHelpByPtr(m_target_ptr!);
             }
 
             private delegate error DetailedHelpByPtr(ptr<T> value, ptr<flag.FlagSet> _p0);
@@ -148,13 +147,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DetailedHelpByPtr is null || !m_target_is_ptr)
                     return s_DetailedHelpByVal!(target, _p0);
 
-                return s_DetailedHelpByPtr(m_target_ptr, _p0);
+                return s_DetailedHelpByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error RunByPtr(ptr<T> value, context.Context ctx, params @string[] args);
@@ -168,16 +167,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RunByPtr is null || !m_target_is_ptr)
                     return s_RunByVal!(target, ctx, args);
 
-                return s_RunByPtr(m_target_ptr, ctx, args);
+                return s_RunByPtr(m_target_ptr!, ctx, args);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Application()
@@ -188,12 +187,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -201,12 +200,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Usage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UsageByPtr = extensionMethod.CreateStaticDelegate(typeof(UsageByPtr)) as UsageByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Usage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UsageByVal = extensionMethod.CreateStaticDelegate(typeof(UsageByVal)) as UsageByVal;
 
                 if (s_UsageByPtr is null && s_UsageByVal is null)
@@ -214,12 +213,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ShortHelp");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ShortHelpByPtr = extensionMethod.CreateStaticDelegate(typeof(ShortHelpByPtr)) as ShortHelpByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ShortHelp");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ShortHelpByVal = extensionMethod.CreateStaticDelegate(typeof(ShortHelpByVal)) as ShortHelpByVal;
 
                 if (s_ShortHelpByPtr is null && s_ShortHelpByVal is null)
@@ -227,12 +226,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("DetailedHelp");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DetailedHelpByPtr = extensionMethod.CreateStaticDelegate(typeof(DetailedHelpByPtr)) as DetailedHelpByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("DetailedHelp");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DetailedHelpByVal = extensionMethod.CreateStaticDelegate(typeof(DetailedHelpByVal)) as DetailedHelpByVal;
 
                 if (s_DetailedHelpByPtr is null && s_DetailedHelpByVal is null)
@@ -240,12 +239,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Run");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RunByPtr = extensionMethod.CreateStaticDelegate(typeof(RunByPtr)) as RunByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Run");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RunByVal = extensionMethod.CreateStaticDelegate(typeof(RunByVal)) as RunByVal;
 
                 if (s_RunByPtr is null && s_RunByVal is null)

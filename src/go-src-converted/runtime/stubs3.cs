@@ -2,23 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !plan9
-// +build !solaris
-// +build !freebsd
-// +build !darwin
-// +build !aix
+//go:build !aix && !darwin && !freebsd && !openbsd && !plan9 && !solaris
+// +build !aix,!darwin,!freebsd,!openbsd,!plan9,!solaris
 
-// package runtime -- go2cs converted at 2020 October 09 04:48:47 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:11:59 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\stubs3.go
+// Original source: C:\Program Files\Go\src\runtime\stubs3.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static long nanotime1()
-;
-    }
-}
+namespace go;
+
+public static partial class runtime_package {
+
+private static long nanotime1();
+
+} // end runtime_package

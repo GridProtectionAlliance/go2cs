@@ -28,117 +28,112 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 October 09 05:08:52 UTC
+// package objabi -- go2cs converted at 2022 March 06 22:32:23 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
-// Original source: C:\Go\src\cmd\internal\objabi\head.go
+// Original source: C:\Program Files\Go\src\cmd\internal\objabi\head.go
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace @internal
-{
-    public static partial class objabi_package
-    {
-        // HeadType is the executable header type.
-        public partial struct HeadType // : byte
-        {
-        }
+namespace go.cmd.@internal;
 
-        public static readonly HeadType Hunknown = (HeadType)iota;
-        public static readonly var Hdarwin = 0;
-        public static readonly var Hdragonfly = 1;
-        public static readonly var Hfreebsd = 2;
-        public static readonly var Hjs = 3;
-        public static readonly var Hlinux = 4;
-        public static readonly var Hnetbsd = 5;
-        public static readonly var Hopenbsd = 6;
-        public static readonly var Hplan9 = 7;
-        public static readonly var Hsolaris = 8;
-        public static readonly var Hwindows = 9;
-        public static readonly var Haix = 10;
+public static partial class objabi_package {
+
+    // HeadType is the executable header type.
+public partial struct HeadType { // : byte
+}
+
+public static readonly HeadType Hunknown = iota;
+public static readonly var Hdarwin = 0;
+public static readonly var Hdragonfly = 1;
+public static readonly var Hfreebsd = 2;
+public static readonly var Hjs = 3;
+public static readonly var Hlinux = 4;
+public static readonly var Hnetbsd = 5;
+public static readonly var Hopenbsd = 6;
+public static readonly var Hplan9 = 7;
+public static readonly var Hsolaris = 8;
+public static readonly var Hwindows = 9;
+public static readonly var Haix = 10;
 
 
-        private static error Set(this ptr<HeadType> _addr_h, @string s)
-        {
-            ref HeadType h = ref _addr_h.val;
+private static error Set(this ptr<HeadType> _addr_h, @string s) {
+    ref HeadType h = ref _addr_h.val;
 
-            switch (s)
-            {
-                case "aix": 
-                    h.val = Haix;
-                    break;
-                case "darwin": 
-                    h.val = Hdarwin;
-                    break;
-                case "dragonfly": 
-                    h.val = Hdragonfly;
-                    break;
-                case "freebsd": 
-                    h.val = Hfreebsd;
-                    break;
-                case "js": 
-                    h.val = Hjs;
-                    break;
-                case "linux": 
+    switch (s) {
+        case "aix": 
+            h.val = Haix;
+            break;
+        case "darwin": 
 
-                case "android": 
-                    h.val = Hlinux;
-                    break;
-                case "netbsd": 
-                    h.val = Hnetbsd;
-                    break;
-                case "openbsd": 
-                    h.val = Hopenbsd;
-                    break;
-                case "plan9": 
-                    h.val = Hplan9;
-                    break;
-                case "illumos": 
+        case "ios": 
+            h.val = Hdarwin;
+            break;
+        case "dragonfly": 
+            h.val = Hdragonfly;
+            break;
+        case "freebsd": 
+            h.val = Hfreebsd;
+            break;
+        case "js": 
+            h.val = Hjs;
+            break;
+        case "linux": 
 
-                case "solaris": 
-                    h.val = Hsolaris;
-                    break;
-                case "windows": 
-                    h.val = Hwindows;
-                    break;
-                default: 
-                    return error.As(fmt.Errorf("invalid headtype: %q", s))!;
-                    break;
-            }
-            return error.As(null!)!;
+        case "android": 
+            h.val = Hlinux;
+            break;
+        case "netbsd": 
+            h.val = Hnetbsd;
+            break;
+        case "openbsd": 
+            h.val = Hopenbsd;
+            break;
+        case "plan9": 
+            h.val = Hplan9;
+            break;
+        case "illumos": 
 
-        }
-
-        private static @string String(this ptr<HeadType> _addr_h)
-        {
-            ref HeadType h = ref _addr_h.val;
-
-
-            if (h.val == Haix) 
-                return "aix";
-            else if (h.val == Hdarwin) 
-                return "darwin";
-            else if (h.val == Hdragonfly) 
-                return "dragonfly";
-            else if (h.val == Hfreebsd) 
-                return "freebsd";
-            else if (h.val == Hjs) 
-                return "js";
-            else if (h.val == Hlinux) 
-                return "linux";
-            else if (h.val == Hnetbsd) 
-                return "netbsd";
-            else if (h.val == Hopenbsd) 
-                return "openbsd";
-            else if (h.val == Hplan9) 
-                return "plan9";
-            else if (h.val == Hsolaris) 
-                return "solaris";
-            else if (h.val == Hwindows) 
-                return "windows";
-                        return fmt.Sprintf("HeadType(%d)", h.val);
-
-        }
+        case "solaris": 
+            h.val = Hsolaris;
+            break;
+        case "windows": 
+            h.val = Hwindows;
+            break;
+        default: 
+            return error.As(fmt.Errorf("invalid headtype: %q", s))!;
+            break;
     }
-}}}
+    return error.As(null!)!;
+
+}
+
+private static @string String(this ptr<HeadType> _addr_h) {
+    ref HeadType h = ref _addr_h.val;
+
+
+    if (h.val == Haix) 
+        return "aix";
+    else if (h.val == Hdarwin) 
+        return "darwin";
+    else if (h.val == Hdragonfly) 
+        return "dragonfly";
+    else if (h.val == Hfreebsd) 
+        return "freebsd";
+    else if (h.val == Hjs) 
+        return "js";
+    else if (h.val == Hlinux) 
+        return "linux";
+    else if (h.val == Hnetbsd) 
+        return "netbsd";
+    else if (h.val == Hopenbsd) 
+        return "openbsd";
+    else if (h.val == Hplan9) 
+        return "plan9";
+    else if (h.val == Hsolaris) 
+        return "solaris";
+    else if (h.val == Hwindows) 
+        return "windows";
+        return fmt.Sprintf("HeadType(%d)", h.val);
+
+}
+
+} // end objabi_package

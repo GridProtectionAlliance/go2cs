@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:49 UTC
+//     Generated on 2022 March 06 22:50:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
 using fmt = go.fmt_package;
 using go;
@@ -39,7 +39,7 @@ namespace @internal
                 this.SplitOffset = default;
             }
 
-            public LocalSlot(GCNode N = default, ref ptr<types.Type> Type = default, long Off = default, ref ptr<LocalSlot> SplitOf = default, long SplitOffset = default)
+            public LocalSlot(ref ptr<ir.Name> N = default, ref ptr<types.Type> Type = default, long Off = default, ref ptr<LocalSlot> SplitOf = default, long SplitOffset = default)
             {
                 this.N = N;
                 this.Type = Type;
@@ -68,7 +68,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static LocalSlot LocalSlot_cast(dynamic value)
         {
-            return new LocalSlot(value.N, ref value.Type, value.Off, ref value.SplitOf, value.SplitOffset);
+            return new LocalSlot(ref value.N, ref value.Type, value.Off, ref value.SplitOf, value.SplitOffset);
         }
     }
 }}}}

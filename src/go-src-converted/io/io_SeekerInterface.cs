@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:25 UTC
+//     Generated on 2022 March 06 22:12:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using sync = go.sync_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -48,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -63,27 +63,27 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
-            private delegate (long, error) SeekByVal(T value, long offset, long whence);
+            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, nint whence);
+            private delegate (long, error) SeekByVal(T value, long offset, nint whence);
 
             private static readonly SeekByPtr? s_SeekByPtr;
             private static readonly SeekByVal? s_SeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Seek(long offset, long whence)
+            public (long, error) Seek(long offset, nint whence)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SeekByPtr is null || !m_target_is_ptr)
                     return s_SeekByVal!(target, offset, whence);
 
-                return s_SeekByPtr(m_target_ptr, offset, whence);
+                return s_SeekByPtr(m_target_ptr!, offset, whence);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Seeker()
@@ -94,12 +94,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Seek");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SeekByPtr = extensionMethod.CreateStaticDelegate(typeof(SeekByPtr)) as SeekByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Seek");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
 
                 if (s_SeekByPtr is null && s_SeekByVal is null)

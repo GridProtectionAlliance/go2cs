@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:51 UTC
+//     Generated on 2022 March 06 22:23:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using tls = go.crypto.tls_package;
 using x509 = go.crypto.x509_package;
 using flag = go.flag_package;
@@ -21,7 +20,7 @@ using fmt = go.fmt_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
-using @internal = go.net.http.@internal_package;
+using testcert = go.net.http.@internal.testcert_package;
 using os = go.os_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -62,7 +61,7 @@ namespace http
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -88,7 +87,7 @@ namespace http
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseIdleConnectionsByPtr is null || !m_target_is_ptr)
@@ -97,12 +96,11 @@ namespace http
                     return;
                 }
 
-                s_CloseIdleConnectionsByPtr(m_target_ptr);
+                s_CloseIdleConnectionsByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static closeIdleTransport()
@@ -113,12 +111,12 @@ namespace http
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseIdleConnections");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseIdleConnectionsByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByPtr)) as CloseIdleConnectionsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CloseIdleConnections");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseIdleConnectionsByVal = extensionMethod.CreateStaticDelegate(typeof(CloseIdleConnectionsByVal)) as CloseIdleConnectionsByVal;
 
                 if (s_CloseIdleConnectionsByPtr is null && s_CloseIdleConnectionsByVal is null)

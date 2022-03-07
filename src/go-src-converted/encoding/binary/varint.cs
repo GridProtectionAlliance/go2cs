@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package binary -- go2cs converted at 2020 October 09 04:49:48 UTC
+// package binary -- go2cs converted at 2022 March 06 22:14:40 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
-// Original source: C:\Go\src\encoding\binary\varint.go
+// Original source: C:\Program Files\Go\src\encoding\binary\varint.go
 // This file implements "varint" encoding of 64-bit integers.
 // The encoding is:
 // - unsigned integers are serialized 7 bits at a time, starting with the
@@ -27,163 +27,137 @@
 
 using errors = go.errors_package;
 using io = go.io_package;
-using static go.builtin;
 
-namespace go {
-namespace encoding
-{
-    public static partial class binary_package
-    {
-        // MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
-        public static readonly long MaxVarintLen16 = (long)3L;
-        public static readonly long MaxVarintLen32 = (long)5L;
-        public static readonly long MaxVarintLen64 = (long)10L;
+namespace go.encoding;
+
+public static partial class binary_package {
+
+    // MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
+public static readonly nint MaxVarintLen16 = 3;
+public static readonly nint MaxVarintLen32 = 5;
+public static readonly nint MaxVarintLen64 = 10;
 
 
-        // PutUvarint encodes a uint64 into buf and returns the number of bytes written.
-        // If the buffer is too small, PutUvarint will panic.
-        public static long PutUvarint(slice<byte> buf, ulong x)
-        {
-            long i = 0L;
-            while (x >= 0x80UL)
-            {
-                buf[i] = byte(x) | 0x80UL;
-                x >>= 7L;
-                i++;
-            }
-
-            buf[i] = byte(x);
-            return i + 1L;
-
-        }
-
-        // Uvarint decodes a uint64 from buf and returns that value and the
-        // number of bytes read (> 0). If an error occurred, the value is 0
-        // and the number of bytes n is <= 0 meaning:
-        //
-        //     n == 0: buf too small
-        //     n  < 0: value larger than 64 bits (overflow)
-        //             and -n is the number of bytes read
-        //
-        public static (ulong, long) Uvarint(slice<byte> buf)
-        {
-            ulong _p0 = default;
-            long _p0 = default;
-
-            ulong x = default;
-            ulong s = default;
-            foreach (var (i, b) in buf)
-            {
-                if (b < 0x80UL)
-                {
-                    if (i > 9L || i == 9L && b > 1L)
-                    {
-                        return (0L, -(i + 1L)); // overflow
-                    }
-
-                    return (x | uint64(b) << (int)(s), i + 1L);
-
-                }
-
-                x |= uint64(b & 0x7fUL) << (int)(s);
-                s += 7L;
-
-            }
-            return (0L, 0L);
-
-        }
-
-        // PutVarint encodes an int64 into buf and returns the number of bytes written.
-        // If the buffer is too small, PutVarint will panic.
-        public static long PutVarint(slice<byte> buf, long x)
-        {
-            var ux = uint64(x) << (int)(1L);
-            if (x < 0L)
-            {
-                ux = ~ux;
-            }
-
-            return PutUvarint(buf, ux);
-
-        }
-
-        // Varint decodes an int64 from buf and returns that value and the
-        // number of bytes read (> 0). If an error occurred, the value is 0
-        // and the number of bytes n is <= 0 with the following meaning:
-        //
-        //     n == 0: buf too small
-        //     n  < 0: value larger than 64 bits (overflow)
-        //             and -n is the number of bytes read
-        //
-        public static (long, long) Varint(slice<byte> buf)
-        {
-            long _p0 = default;
-            long _p0 = default;
-
-            var (ux, n) = Uvarint(buf); // ok to continue in presence of error
-            var x = int64(ux >> (int)(1L));
-            if (ux & 1L != 0L)
-            {
-                x = ~x;
-            }
-
-            return (x, n);
-
-        }
-
-        private static var overflow = errors.New("binary: varint overflows a 64-bit integer");
-
-        // ReadUvarint reads an encoded unsigned integer from r and returns it as a uint64.
-        public static (ulong, error) ReadUvarint(io.ByteReader r)
-        {
-            ulong _p0 = default;
-            error _p0 = default!;
-
-            ulong x = default;
-            ulong s = default;
-            for (long i = 0L; i < MaxVarintLen64; i++)
-            {
-                var (b, err) = r.ReadByte();
-                if (err != null)
-                {
-                    return (x, error.As(err)!);
-                }
-
-                if (b < 0x80UL)
-                {
-                    if (i == 9L && b > 1L)
-                    {
-                        return (x, error.As(overflow)!);
-                    }
-
-                    return (x | uint64(b) << (int)(s), error.As(null!)!);
-
-                }
-
-                x |= uint64(b & 0x7fUL) << (int)(s);
-                s += 7L;
-
-            }
-
-            return (x, error.As(overflow)!);
-
-        }
-
-        // ReadVarint reads an encoded signed integer from r and returns it as an int64.
-        public static (long, error) ReadVarint(io.ByteReader r)
-        {
-            long _p0 = default;
-            error _p0 = default!;
-
-            var (ux, err) = ReadUvarint(r); // ok to continue in presence of error
-            var x = int64(ux >> (int)(1L));
-            if (ux & 1L != 0L)
-            {
-                x = ~x;
-            }
-
-            return (x, error.As(err)!);
-
-        }
+// PutUvarint encodes a uint64 into buf and returns the number of bytes written.
+// If the buffer is too small, PutUvarint will panic.
+public static nint PutUvarint(slice<byte> buf, ulong x) {
+    nint i = 0;
+    while (x >= 0x80) {
+        buf[i] = byte(x) | 0x80;
+        x>>=7;
+        i++;
     }
-}}
+    buf[i] = byte(x);
+    return i + 1;
+}
+
+// Uvarint decodes a uint64 from buf and returns that value and the
+// number of bytes read (> 0). If an error occurred, the value is 0
+// and the number of bytes n is <= 0 meaning:
+//
+//     n == 0: buf too small
+//     n  < 0: value larger than 64 bits (overflow)
+//             and -n is the number of bytes read
+//
+public static (ulong, nint) Uvarint(slice<byte> buf) {
+    ulong _p0 = default;
+    nint _p0 = default;
+
+    ulong x = default;
+    nuint s = default;
+    foreach (var (i, b) in buf) {
+        if (i == MaxVarintLen64) { 
+            // Catch byte reads past MaxVarintLen64.
+            // See issue https://golang.org/issues/41185
+            return (0, -(i + 1)); // overflow
+        }
+        if (b < 0x80) {
+            if (i == MaxVarintLen64 - 1 && b > 1) {
+                return (0, -(i + 1)); // overflow
+            }
+
+            return (x | uint64(b) << (int)(s), i + 1);
+
+        }
+        x |= uint64(b & 0x7f) << (int)(s);
+        s += 7;
+
+    }    return (0, 0);
+
+}
+
+// PutVarint encodes an int64 into buf and returns the number of bytes written.
+// If the buffer is too small, PutVarint will panic.
+public static nint PutVarint(slice<byte> buf, long x) {
+    var ux = uint64(x) << 1;
+    if (x < 0) {
+        ux = ~ux;
+    }
+    return PutUvarint(buf, ux);
+
+}
+
+// Varint decodes an int64 from buf and returns that value and the
+// number of bytes read (> 0). If an error occurred, the value is 0
+// and the number of bytes n is <= 0 with the following meaning:
+//
+//     n == 0: buf too small
+//     n  < 0: value larger than 64 bits (overflow)
+//             and -n is the number of bytes read
+//
+public static (long, nint) Varint(slice<byte> buf) {
+    long _p0 = default;
+    nint _p0 = default;
+
+    var (ux, n) = Uvarint(buf); // ok to continue in presence of error
+    var x = int64(ux >> 1);
+    if (ux & 1 != 0) {
+        x = ~x;
+    }
+    return (x, n);
+
+}
+
+private static var overflow = errors.New("binary: varint overflows a 64-bit integer");
+
+// ReadUvarint reads an encoded unsigned integer from r and returns it as a uint64.
+public static (ulong, error) ReadUvarint(io.ByteReader r) {
+    ulong _p0 = default;
+    error _p0 = default!;
+
+    ulong x = default;
+    nuint s = default;
+    for (nint i = 0; i < MaxVarintLen64; i++) {
+        var (b, err) = r.ReadByte();
+        if (err != null) {
+            return (x, error.As(err)!);
+        }
+        if (b < 0x80) {
+            if (i == MaxVarintLen64 - 1 && b > 1) {
+                return (x, error.As(overflow)!);
+            }
+            return (x | uint64(b) << (int)(s), error.As(null!)!);
+        }
+        x |= uint64(b & 0x7f) << (int)(s);
+        s += 7;
+
+    }
+    return (x, error.As(overflow)!);
+
+}
+
+// ReadVarint reads an encoded signed integer from r and returns it as an int64.
+public static (long, error) ReadVarint(io.ByteReader r) {
+    long _p0 = default;
+    error _p0 = default!;
+
+    var (ux, err) = ReadUvarint(r); // ok to continue in presence of error
+    var x = int64(ux >> 1);
+    if (ux & 1 != 0) {
+        x = ~x;
+    }
+    return (x, error.As(err)!);
+
+}
+
+} // end binary_package

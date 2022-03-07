@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:22 UTC
+//     Generated on 2022 March 06 22:30:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using sync = go.sync_package;
 
@@ -49,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -64,47 +63,47 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReplaceByPtr(ptr<T> value, @string s);
-            private delegate (long, error) ReplaceByVal(T value, @string s);
+            private delegate (nint, error) ReplaceByPtr(ptr<T> value, @string s);
+            private delegate (nint, error) ReplaceByVal(T value, @string s);
 
             private static readonly ReplaceByPtr? s_ReplaceByPtr;
             private static readonly ReplaceByVal? s_ReplaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Replace(@string s)
+            public (nint, error) Replace(@string s)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReplaceByPtr is null || !m_target_is_ptr)
                     return s_ReplaceByVal!(target, s);
 
-                return s_ReplaceByPtr(m_target_ptr, s);
+                return s_ReplaceByPtr(m_target_ptr!, s);
             }
 
-            private delegate (long, error) WriteStringByPtr(ptr<T> value, io.Writer w, @string s);
-            private delegate (long, error) WriteStringByVal(T value, io.Writer w, @string s);
+            private delegate (nint, error) WriteStringByPtr(ptr<T> value, io.Writer w, @string s);
+            private delegate (nint, error) WriteStringByVal(T value, io.Writer w, @string s);
 
             private static readonly WriteStringByPtr? s_WriteStringByPtr;
             private static readonly WriteStringByVal? s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) WriteString(io.Writer w, @string s)
+            public (nint, error) WriteString(io.Writer w, @string s)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteStringByPtr is null || !m_target_is_ptr)
                     return s_WriteStringByVal!(target, w, s);
 
-                return s_WriteStringByPtr(m_target_ptr, w, s);
+                return s_WriteStringByPtr(m_target_ptr!, w, s);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static replacer()
@@ -115,12 +114,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Replace");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReplaceByPtr = extensionMethod.CreateStaticDelegate(typeof(ReplaceByPtr)) as ReplaceByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Replace");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReplaceByVal = extensionMethod.CreateStaticDelegate(typeof(ReplaceByVal)) as ReplaceByVal;
 
                 if (s_ReplaceByPtr is null && s_ReplaceByVal is null)
@@ -128,12 +127,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteStringByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteStringByPtr)) as WriteStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteStringByVal = extensionMethod.CreateStaticDelegate(typeof(WriteStringByVal)) as WriteStringByVal;
 
                 if (s_WriteStringByPtr is null && s_WriteStringByVal is null)

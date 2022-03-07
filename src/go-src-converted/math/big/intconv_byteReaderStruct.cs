@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:30 UTC
+//     Generated on 2022 March 06 22:17:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -29,64 +28,64 @@ namespace math
         private partial struct byteReader
         {
             // ScanState.ReadRune function promotion
-            private delegate (long, error) ReadRuneByVal(T value);
-            private delegate (long, error) ReadRuneByRef(ref T value);
+            private delegate (nint, error) ReadRuneByVal(T value);
+            private delegate (nint, error) ReadRuneByRef(ref T value);
 
             private static readonly ReadRuneByVal s_ReadRuneByVal;
             private static readonly ReadRuneByRef s_ReadRuneByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) ReadRune() => s_ReadRuneByRef?.Invoke(ref this) ?? s_ReadRuneByVal?.Invoke(this) ?? ScanState?.ReadRune() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) ReadRune() => s_ReadRuneByRef?.Invoke(ref this) ?? s_ReadRuneByVal?.Invoke(this) ?? ScanState?.ReadRune() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ScanState.UnreadRune function promotion
-            private delegate (long, error) UnreadRuneByVal(T value);
-            private delegate (long, error) UnreadRuneByRef(ref T value);
+            private delegate (nint, error) UnreadRuneByVal(T value);
+            private delegate (nint, error) UnreadRuneByRef(ref T value);
 
             private static readonly UnreadRuneByVal s_UnreadRuneByVal;
             private static readonly UnreadRuneByRef s_UnreadRuneByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) UnreadRune() => s_UnreadRuneByRef?.Invoke(ref this) ?? s_UnreadRuneByVal?.Invoke(this) ?? ScanState?.UnreadRune() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) UnreadRune() => s_UnreadRuneByRef?.Invoke(ref this) ?? s_UnreadRuneByVal?.Invoke(this) ?? ScanState?.UnreadRune() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ScanState.SkipSpace function promotion
-            private delegate (long, error) SkipSpaceByVal(T value);
-            private delegate (long, error) SkipSpaceByRef(ref T value);
+            private delegate (nint, error) SkipSpaceByVal(T value);
+            private delegate (nint, error) SkipSpaceByRef(ref T value);
 
             private static readonly SkipSpaceByVal s_SkipSpaceByVal;
             private static readonly SkipSpaceByRef s_SkipSpaceByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) SkipSpace() => s_SkipSpaceByRef?.Invoke(ref this) ?? s_SkipSpaceByVal?.Invoke(this) ?? ScanState?.SkipSpace() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) SkipSpace() => s_SkipSpaceByRef?.Invoke(ref this) ?? s_SkipSpaceByVal?.Invoke(this) ?? ScanState?.SkipSpace() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ScanState.Token function promotion
-            private delegate (long, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
-            private delegate (long, error) TokenByRef(ref T value, bool skipSpace, Func<int, bool> f);
+            private delegate (nint, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
+            private delegate (nint, error) TokenByRef(ref T value, bool skipSpace, Func<int, bool> f);
 
             private static readonly TokenByVal s_TokenByVal;
             private static readonly TokenByRef s_TokenByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Token(bool skipSpace, Func<int, bool> f) => s_TokenByRef?.Invoke(ref this, skipSpace, f) ?? s_TokenByVal?.Invoke(this, skipSpace, f) ?? ScanState?.Token(skipSpace, f) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Token(bool skipSpace, Func<int, bool> f) => s_TokenByRef?.Invoke(ref this, skipSpace, f) ?? s_TokenByVal?.Invoke(this, skipSpace, f) ?? ScanState?.Token(skipSpace, f) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ScanState.Width function promotion
-            private delegate (long, error) WidthByVal(T value);
-            private delegate (long, error) WidthByRef(ref T value);
+            private delegate (nint, error) WidthByVal(T value);
+            private delegate (nint, error) WidthByRef(ref T value);
 
             private static readonly WidthByVal s_WidthByVal;
             private static readonly WidthByRef s_WidthByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Width() => s_WidthByRef?.Invoke(ref this) ?? s_WidthByVal?.Invoke(this) ?? ScanState?.Width() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Width() => s_WidthByRef?.Invoke(ref this) ?? s_WidthByVal?.Invoke(this) ?? ScanState?.Width() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ScanState.Read function promotion
-            private delegate (long, error) ReadByVal(T value, slice<byte> buf);
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> buf);
+            private delegate (nint, error) ReadByVal(T value, slice<byte> buf);
+            private delegate (nint, error) ReadByRef(ref T value, slice<byte> buf);
 
             private static readonly ReadByVal s_ReadByVal;
             private static readonly ReadByRef s_ReadByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> buf) => s_ReadByRef?.Invoke(ref this, buf) ?? s_ReadByVal?.Invoke(this, buf) ?? ScanState?.Read(buf) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Read(slice<byte> buf) => s_ReadByRef?.Invoke(ref this, buf) ?? s_ReadByVal?.Invoke(this, buf) ?? ScanState?.Read(buf) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static byteReader()
@@ -96,61 +95,61 @@ namespace math
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("ReadRune");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByRef)) as ReadRuneByRef;
 
-                    if ((object)s_ReadRuneByRef == null)
+                    if (s_ReadRuneByRef is null)
                         s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("UnreadRune");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_UnreadRuneByRef = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByRef)) as UnreadRuneByRef;
 
-                    if ((object)s_UnreadRuneByRef == null)
+                    if (s_UnreadRuneByRef is null)
                         s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SkipSpace");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SkipSpaceByRef = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByRef)) as SkipSpaceByRef;
 
-                    if ((object)s_SkipSpaceByRef == null)
+                    if (s_SkipSpaceByRef is null)
                         s_SkipSpaceByVal = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByVal)) as SkipSpaceByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Token");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_TokenByRef = extensionMethod.CreateStaticDelegate(typeof(TokenByRef)) as TokenByRef;
 
-                    if ((object)s_TokenByRef == null)
+                    if (s_TokenByRef is null)
                         s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Width");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WidthByRef = extensionMethod.CreateStaticDelegate(typeof(WidthByRef)) as WidthByRef;
 
-                    if ((object)s_WidthByRef == null)
+                    if (s_WidthByRef is null)
                         s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
-                    if ((object)s_ReadByRef == null)
+                    if (s_ReadByRef is null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
             }

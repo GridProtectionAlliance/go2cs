@@ -1,3 +1,7 @@
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 /*
 
 Package analysis defines the interface between a modular static
@@ -121,13 +125,14 @@ package being analyzed, and provides operations to the Run function for
 reporting diagnostics and other information back to the driver.
 
     type Pass struct {
-        Fset       *token.FileSet
-        Files      []*ast.File
-        OtherFiles []string
-        Pkg        *types.Package
-        TypesInfo  *types.Info
-        ResultOf   map[*Analyzer]interface{}
-        Report     func(Diagnostic)
+        Fset         *token.FileSet
+        Files        []*ast.File
+        OtherFiles   []string
+        IgnoredFiles []string
+        Pkg          *types.Package
+        TypesInfo    *types.Info
+        ResultOf     map[*Analyzer]interface{}
+        Report       func(Diagnostic)
         ...
     }
 
@@ -138,6 +143,12 @@ The OtherFiles field provides the names, but not the contents, of non-Go
 files such as assembly that are part of this package. See the "asmdecl"
 or "buildtags" analyzers for examples of loading non-Go files and reporting
 diagnostics against them.
+
+The IgnoredFiles field provides the names, but not the contents,
+of ignored Go and non-Go source files that are not part of this package
+with the current build configuration but may be part of other build
+configurations. See the "buildtags" analyzer for an example of loading
+and checking IgnoredFiles.
 
 The ResultOf field provides the results computed by the analyzers
 required by this one, as expressed in its Analyzer.Requires field. The
@@ -307,8 +318,8 @@ A tool that provides multiple analyzers can use multichecker in a
 similar way, giving it the list of Analyzers.
 
 */
-// package analysis -- go2cs converted at 2020 October 09 06:01:15 UTC
+// package analysis -- go2cs converted at 2022 March 06 23:31:07 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis" ==> using analysis = go.cmd.vendor.golang.org.x.tools.go.analysis_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\doc.go
-    }
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\doc.go
 
+} // end analysis_package

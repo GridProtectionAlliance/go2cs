@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:25 UTC
+//     Generated on 2022 March 06 23:24:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -28,7 +30,7 @@ namespace arm
         {
             // Value of the Op struct
             private readonly ushort m_value;
-
+            
             public Op(ushort value) => m_value = value;
 
             // Enable implicit conversions between ushort and Op struct

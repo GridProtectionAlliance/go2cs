@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:00 UTC
+//     Generated on 2022 March 06 23:18:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
@@ -42,12 +41,14 @@ namespace @internal
             {
                 this.Explicit = default;
                 this.Replacement = default;
+                this.GoVersion = default;
             }
 
-            public vendorMetadata(bool Explicit = default, module.Version Replacement = default)
+            public vendorMetadata(bool Explicit = default, module.Version Replacement = default, @string GoVersion = default)
             {
                 this.Explicit = Explicit;
                 this.Replacement = Replacement;
+                this.GoVersion = GoVersion;
             }
 
             // Enable comparisons between nil and vendorMetadata struct
@@ -70,7 +71,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static vendorMetadata vendorMetadata_cast(dynamic value)
         {
-            return new vendorMetadata(value.Explicit, value.Replacement);
+            return new vendorMetadata(value.Explicit, value.Replacement, value.GoVersion);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:22 UTC
+//     Generated on 2022 March 06 22:43:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -39,11 +38,11 @@ namespace text
 
             public ref @string Filename => ref m_PositionRef.Value.Filename;
 
-            public ref long Offset => ref m_PositionRef.Value.Offset;
+            public ref nint Offset => ref m_PositionRef.Value.Offset;
 
-            public ref long Line => ref m_PositionRef.Value.Line;
+            public ref nint Line => ref m_PositionRef.Value.Line;
 
-            public ref long Column => ref m_PositionRef.Value.Column;
+            public ref nint Column => ref m_PositionRef.Value.Column;
 
             // Constructors
             public Scanner(NilType _)
@@ -69,7 +68,7 @@ namespace text
                 this.m_PositionRef = new ptr<Position>(new Position(nil));
             }
 
-            public Scanner(io.Reader src = default, array<byte> srcBuf = default, long srcPos = default, long srcEnd = default, long srcBufOffset = default, long line = default, long column = default, long lastLineLen = default, long lastCharLen = default, bytes.Buffer tokBuf = default, long tokPos = default, long tokEnd = default, int ch = default, Action<ptr<Scanner>, @string> Error = default, long ErrorCount = default, ulong Mode = default, ulong Whitespace = default, Func<int, long, bool> IsIdentRune = default, Position Position = default)
+            public Scanner(io.Reader src = default, array<byte> srcBuf = default, nint srcPos = default, nint srcEnd = default, nint srcBufOffset = default, nint line = default, nint column = default, nint lastLineLen = default, nint lastCharLen = default, bytes.Buffer tokBuf = default, nint tokPos = default, nint tokEnd = default, int ch = default, Action<ptr<Scanner>, @string> Error = default, nint ErrorCount = default, nuint Mode = default, ulong Whitespace = default, Func<int, nint, bool> IsIdentRune = default, Position Position = default)
             {
                 this.src = src;
                 this.srcBuf = srcBuf;

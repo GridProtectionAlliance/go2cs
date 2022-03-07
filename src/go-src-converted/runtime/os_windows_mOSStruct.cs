@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:38 UTC
+//     Generated on 2022 March 06 22:10:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -33,15 +32,17 @@ namespace go
                 this.thread = default;
                 this.waitsema = default;
                 this.resumesema = default;
+                this.highResTimer = default;
                 this.preemptExtLock = default;
             }
 
-            public mOS(mutex threadLock = default, System.UIntPtr thread = default, System.UIntPtr waitsema = default, System.UIntPtr resumesema = default, uint preemptExtLock = default)
+            public mOS(mutex threadLock = default, System.UIntPtr thread = default, System.UIntPtr waitsema = default, System.UIntPtr resumesema = default, System.UIntPtr highResTimer = default, uint preemptExtLock = default)
             {
                 this.threadLock = threadLock;
                 this.thread = thread;
                 this.waitsema = waitsema;
                 this.resumesema = resumesema;
+                this.highResTimer = highResTimer;
                 this.preemptExtLock = preemptExtLock;
             }
 
@@ -65,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mOS mOS_cast(dynamic value)
         {
-            return new mOS(value.threadLock, value.thread, value.waitsema, value.resumesema, value.preemptExtLock);
+            return new mOS(value.threadLock, value.thread, value.waitsema, value.resumesema, value.highResTimer, value.preemptExtLock);
         }
     }
 }

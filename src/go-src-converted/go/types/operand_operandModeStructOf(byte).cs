@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:34 UTC
+//     Generated on 2022 March 06 22:42:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace go
         {
             // Value of the operandMode struct
             private readonly byte m_value;
-
+            
             public operandMode(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and operandMode struct

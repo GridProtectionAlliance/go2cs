@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:05 UTC
+//     Generated on 2022 March 06 22:17:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace syscall
         {
             // Value of the @ref struct
             private readonly ulong m_value;
-
+            
             public @ref(ulong value) => m_value = value;
 
             // Enable implicit conversions between ulong and @ref struct

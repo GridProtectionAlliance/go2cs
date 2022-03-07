@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:57:50 UTC
+//     Generated on 2022 March 06 22:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -21,11 +20,11 @@ using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using mime = go.mime_package;
 using multipart = go.mime.multipart_package;
 using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strconv = go.strconv_package;
@@ -71,7 +70,7 @@ namespace net
                 this.ctx = default;
             }
 
-            public Request(@string Method = default, ref ptr<url.URL> URL = default, @string Proto = default, long ProtoMajor = default, long ProtoMinor = default, Header Header = default, io.ReadCloser Body = default, Func<(io.ReadCloser, error)> GetBody = default, long ContentLength = default, slice<@string> TransferEncoding = default, bool Close = default, @string Host = default, url.Values Form = default, url.Values PostForm = default, ref ptr<multipart.Form> MultipartForm = default, Header Trailer = default, @string RemoteAddr = default, @string RequestURI = default, ref ptr<tls.ConnectionState> TLS = default, channel<object> Cancel = default, ref ptr<Response> Response = default, context.Context ctx = default)
+            public Request(@string Method = default, ref ptr<url.URL> URL = default, @string Proto = default, nint ProtoMajor = default, nint ProtoMinor = default, Header Header = default, io.ReadCloser Body = default, Func<(io.ReadCloser, error)> GetBody = default, long ContentLength = default, slice<@string> TransferEncoding = default, bool Close = default, @string Host = default, url.Values Form = default, url.Values PostForm = default, ref ptr<multipart.Form> MultipartForm = default, Header Trailer = default, @string RemoteAddr = default, @string RequestURI = default, ref ptr<tls.ConnectionState> TLS = default, channel<object> Cancel = default, ref ptr<Response> Response = default, context.Context ctx = default)
             {
                 this.Method = Method;
                 this.URL = URL;

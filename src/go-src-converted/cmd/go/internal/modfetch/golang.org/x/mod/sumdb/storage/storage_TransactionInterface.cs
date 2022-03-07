@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:34 UTC
+//     Generated on 2022 March 06 23:19:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using go;
 
@@ -53,7 +52,7 @@ namespace sumdb
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadValueByPtr is null || !m_target_is_ptr)
                     return s_ReadValueByVal!(target, ctx, key);
 
-                return s_ReadValueByPtr(m_target_ptr, ctx, key);
+                return s_ReadValueByPtr(m_target_ptr!, ctx, key);
             }
 
             private delegate error ReadValuesByPtr(ptr<T> value, context.Context ctx, slice<@string> keys);
@@ -99,13 +98,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadValuesByPtr is null || !m_target_is_ptr)
                     return s_ReadValuesByVal!(target, ctx, keys);
 
-                return s_ReadValuesByPtr(m_target_ptr, ctx, keys);
+                return s_ReadValuesByPtr(m_target_ptr!, ctx, keys);
             }
 
             private delegate error BufferWritesByPtr(ptr<T> value, slice<Write> writes);
@@ -119,16 +118,16 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BufferWritesByPtr is null || !m_target_is_ptr)
                     return s_BufferWritesByVal!(target, writes);
 
-                return s_BufferWritesByPtr(m_target_ptr, writes);
+                return s_BufferWritesByPtr(m_target_ptr!, writes);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Transaction()
@@ -139,12 +138,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadValueByPtr)) as ReadValueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadValueByVal = extensionMethod.CreateStaticDelegate(typeof(ReadValueByVal)) as ReadValueByVal;
 
                 if (s_ReadValueByPtr is null && s_ReadValueByVal is null)
@@ -152,12 +151,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadValues");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadValuesByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadValuesByPtr)) as ReadValuesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadValues");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadValuesByVal = extensionMethod.CreateStaticDelegate(typeof(ReadValuesByVal)) as ReadValuesByVal;
 
                 if (s_ReadValuesByPtr is null && s_ReadValuesByVal is null)
@@ -165,12 +164,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("BufferWrites");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BufferWritesByPtr = extensionMethod.CreateStaticDelegate(typeof(BufferWritesByPtr)) as BufferWritesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("BufferWrites");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BufferWritesByVal = extensionMethod.CreateStaticDelegate(typeof(BufferWritesByVal)) as BufferWritesByVal;
 
                 if (s_BufferWritesByPtr is null && s_BufferWritesByVal is null)

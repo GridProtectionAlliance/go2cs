@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:04 UTC
+//     Generated on 2022 March 06 23:18:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,14 +13,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sha256 = go.crypto.sha256_package;
 using fmt = go.fmt_package;
+using exec = go.@internal.execabs_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -66,7 +65,7 @@ namespace modfetch
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -92,13 +91,13 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TagsByPtr is null || !m_target_is_ptr)
                     return s_TagsByVal!(target, prefix);
 
-                return s_TagsByPtr(m_target_ptr, prefix);
+                return s_TagsByPtr(m_target_ptr!, prefix);
             }
 
             private delegate (bool, error) StatByPtr(ptr<T> value, @string rev);
@@ -112,13 +111,13 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target, rev);
 
-                return s_StatByPtr(m_target_ptr, rev);
+                return s_StatByPtr(m_target_ptr!, rev);
             }
 
             private delegate (bool, error) LatestByPtr(ptr<T> value);
@@ -132,13 +131,13 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LatestByPtr is null || !m_target_is_ptr)
                     return s_LatestByVal!(target);
 
-                return s_LatestByPtr(m_target_ptr);
+                return s_LatestByPtr(m_target_ptr!);
             }
 
             private delegate (bool, error) ReadFileByPtr(ptr<T> value, @string rev, @string file, long maxSize);
@@ -152,13 +151,13 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadFileByPtr is null || !m_target_is_ptr)
                     return s_ReadFileByVal!(target, rev, file, maxSize);
 
-                return s_ReadFileByPtr(m_target_ptr, rev, file, maxSize);
+                return s_ReadFileByPtr(m_target_ptr!, rev, file, maxSize);
             }
 
             private delegate (bool, error) ReadFileRevsByPtr(ptr<T> value, slice<@string> revs, @string file, long maxSize);
@@ -172,13 +171,13 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadFileRevsByPtr is null || !m_target_is_ptr)
                     return s_ReadFileRevsByVal!(target, revs, file, maxSize);
 
-                return s_ReadFileRevsByPtr(m_target_ptr, revs, file, maxSize);
+                return s_ReadFileRevsByPtr(m_target_ptr!, revs, file, maxSize);
             }
 
             private delegate (bool, error) ReadZipByPtr(ptr<T> value, @string rev, @string subdir, long maxSize);
@@ -192,33 +191,33 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadZipByPtr is null || !m_target_is_ptr)
                     return s_ReadZipByVal!(target, rev, subdir, maxSize);
 
-                return s_ReadZipByPtr(m_target_ptr, rev, subdir, maxSize);
+                return s_ReadZipByPtr(m_target_ptr!, rev, subdir, maxSize);
             }
 
-            private delegate (bool, error) RecentTagByPtr(ptr<T> value, @string rev, @string prefix, @string major);
-            private delegate (bool, error) RecentTagByVal(T value, @string rev, @string prefix, @string major);
+            private delegate (bool, error) RecentTagByPtr(ptr<T> value, @string rev, @string prefix, Func<@string, bool> allowed);
+            private delegate (bool, error) RecentTagByVal(T value, @string rev, @string prefix, Func<@string, bool> allowed);
 
             private static readonly RecentTagByPtr? s_RecentTagByPtr;
             private static readonly RecentTagByVal? s_RecentTagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (bool, error) RecentTag(@string rev, @string prefix, @string major)
+            public (bool, error) RecentTag(@string rev, @string prefix, Func<@string, bool> allowed)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RecentTagByPtr is null || !m_target_is_ptr)
-                    return s_RecentTagByVal!(target, rev, prefix, major);
+                    return s_RecentTagByVal!(target, rev, prefix, allowed);
 
-                return s_RecentTagByPtr(m_target_ptr, rev, prefix, major);
+                return s_RecentTagByPtr(m_target_ptr!, rev, prefix, allowed);
             }
 
             private delegate (bool, error) DescendsFromByPtr(ptr<T> value, @string rev, @string tag);
@@ -232,16 +231,16 @@ namespace modfetch
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DescendsFromByPtr is null || !m_target_is_ptr)
                     return s_DescendsFromByVal!(target, rev, tag);
 
-                return s_DescendsFromByPtr(m_target_ptr, rev, tag);
+                return s_DescendsFromByPtr(m_target_ptr!, rev, tag);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Repo()
@@ -252,12 +251,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Tags");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TagsByPtr = extensionMethod.CreateStaticDelegate(typeof(TagsByPtr)) as TagsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Tags");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TagsByVal = extensionMethod.CreateStaticDelegate(typeof(TagsByVal)) as TagsByVal;
 
                 if (s_TagsByPtr is null && s_TagsByVal is null)
@@ -265,12 +264,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)
@@ -278,12 +277,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Latest");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LatestByPtr = extensionMethod.CreateStaticDelegate(typeof(LatestByPtr)) as LatestByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Latest");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LatestByVal = extensionMethod.CreateStaticDelegate(typeof(LatestByVal)) as LatestByVal;
 
                 if (s_LatestByPtr is null && s_LatestByVal is null)
@@ -291,12 +290,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadFile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFileByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadFileByPtr)) as ReadFileByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadFile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFileByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFileByVal)) as ReadFileByVal;
 
                 if (s_ReadFileByPtr is null && s_ReadFileByVal is null)
@@ -304,12 +303,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadFileRevs");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFileRevsByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadFileRevsByPtr)) as ReadFileRevsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadFileRevs");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFileRevsByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFileRevsByVal)) as ReadFileRevsByVal;
 
                 if (s_ReadFileRevsByPtr is null && s_ReadFileRevsByVal is null)
@@ -317,12 +316,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadZip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadZipByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadZipByPtr)) as ReadZipByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadZip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadZipByVal = extensionMethod.CreateStaticDelegate(typeof(ReadZipByVal)) as ReadZipByVal;
 
                 if (s_ReadZipByPtr is null && s_ReadZipByVal is null)
@@ -330,12 +329,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RecentTag");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecentTagByPtr = extensionMethod.CreateStaticDelegate(typeof(RecentTagByPtr)) as RecentTagByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RecentTag");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecentTagByVal = extensionMethod.CreateStaticDelegate(typeof(RecentTagByVal)) as RecentTagByVal;
 
                 if (s_RecentTagByPtr is null && s_RecentTagByVal is null)
@@ -343,12 +342,12 @@ namespace modfetch
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("DescendsFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DescendsFromByPtr = extensionMethod.CreateStaticDelegate(typeof(DescendsFromByPtr)) as DescendsFromByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("DescendsFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DescendsFromByVal = extensionMethod.CreateStaticDelegate(typeof(DescendsFromByVal)) as DescendsFromByVal;
 
                 if (s_DescendsFromByPtr is null && s_DescendsFromByVal is null)

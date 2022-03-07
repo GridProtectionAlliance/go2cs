@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:43 UTC
+//     Generated on 2022 March 06 22:18:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
 using binary = go.encoding.binary_package;
@@ -53,7 +52,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -68,27 +67,27 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate (AEAD, error) NewGCMByPtr(ptr<T> value, long nonceSize, long tagSize);
-            private delegate (AEAD, error) NewGCMByVal(T value, long nonceSize, long tagSize);
+            private delegate (AEAD, error) NewGCMByPtr(ptr<T> value, nint nonceSize, nint tagSize);
+            private delegate (AEAD, error) NewGCMByVal(T value, nint nonceSize, nint tagSize);
 
             private static readonly NewGCMByPtr? s_NewGCMByPtr;
             private static readonly NewGCMByVal? s_NewGCMByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (AEAD, error) NewGCM(long nonceSize, long tagSize)
+            public (AEAD, error) NewGCM(nint nonceSize, nint tagSize)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NewGCMByPtr is null || !m_target_is_ptr)
                     return s_NewGCMByVal!(target, nonceSize, tagSize);
 
-                return s_NewGCMByPtr(m_target_ptr, nonceSize, tagSize);
+                return s_NewGCMByPtr(m_target_ptr!, nonceSize, tagSize);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static gcmAble()
@@ -99,12 +98,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NewGCM");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NewGCMByPtr = extensionMethod.CreateStaticDelegate(typeof(NewGCMByPtr)) as NewGCMByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NewGCM");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NewGCMByVal = extensionMethod.CreateStaticDelegate(typeof(NewGCMByVal)) as NewGCMByVal;
 
                 if (s_NewGCMByPtr is null && s_NewGCMByVal is null)

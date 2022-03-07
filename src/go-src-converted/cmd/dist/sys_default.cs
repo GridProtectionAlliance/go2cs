@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !windows
 // +build !windows
 
-// package main -- go2cs converted at 2020 October 09 05:44:35 UTC
-// Original source: C:\Go\src\cmd\dist\sys_default.go
+// package main -- go2cs converted at 2022 March 06 23:15:22 UTC
+// Original source: C:\Program Files\Go\src\cmd\dist\sys_default.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void sysinit()
-        {
-        }
-    }
+namespace go;
+
+public static partial class main_package {
+
+private static void sysinit() {
 }
+
+} // end main_package

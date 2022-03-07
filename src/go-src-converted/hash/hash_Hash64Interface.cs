@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:06 UTC
+//     Generated on 2022 March 06 22:14:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 
 #nullable enable
@@ -48,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,116 +73,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Sum64ByPtr is null || !m_target_is_ptr)
                     return s_Sum64ByVal!(target);
 
-                return s_Sum64ByPtr(m_target_ptr);
-            }
-
-            private delegate long SumByPtr(ptr<T> value, slice<byte> b);
-            private delegate long SumByVal(T value, slice<byte> b);
-
-            private static readonly SumByPtr? s_SumByPtr;
-            private static readonly SumByVal? s_SumByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Sum(slice<byte> b)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SumByPtr is null || !m_target_is_ptr)
-                    return s_SumByVal!(target, b);
-
-                return s_SumByPtr(m_target_ptr, b);
-            }
-
-            private delegate long ResetByPtr(ptr<T> value);
-            private delegate long ResetByVal(T value);
-
-            private static readonly ResetByPtr? s_ResetByPtr;
-            private static readonly ResetByVal? s_ResetByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Reset()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ResetByPtr is null || !m_target_is_ptr)
-                    return s_ResetByVal!(target);
-
-                return s_ResetByPtr(m_target_ptr);
-            }
-
-            private delegate long SizeByPtr(ptr<T> value);
-            private delegate long SizeByVal(T value);
-
-            private static readonly SizeByPtr? s_SizeByPtr;
-            private static readonly SizeByVal? s_SizeByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Size()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SizeByPtr is null || !m_target_is_ptr)
-                    return s_SizeByVal!(target);
-
-                return s_SizeByPtr(m_target_ptr);
-            }
-
-            private delegate long BlockSizeByPtr(ptr<T> value);
-            private delegate long BlockSizeByVal(T value);
-
-            private static readonly BlockSizeByPtr? s_BlockSizeByPtr;
-            private static readonly BlockSizeByVal? s_BlockSizeByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long BlockSize()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_BlockSizeByPtr is null || !m_target_is_ptr)
-                    return s_BlockSizeByVal!(target);
-
-                return s_BlockSizeByPtr(m_target_ptr);
-            }
-
-            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-
-            private static readonly WriteByPtr? s_WriteByPtr;
-            private static readonly WriteByVal? s_WriteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WriteByPtr is null || !m_target_is_ptr)
-                    return s_WriteByVal!(target, p);
-
-                return s_WriteByPtr(m_target_ptr, p);
+                return s_Sum64ByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Hash64()
@@ -194,81 +93,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Sum64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Sum64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Sum64ByPtr)) as Sum64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Sum64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Sum64ByVal = extensionMethod.CreateStaticDelegate(typeof(Sum64ByVal)) as Sum64ByVal;
 
                 if (s_Sum64ByPtr is null && s_Sum64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.Sum64 method", new Exception("Sum64"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Sum");
-
-                if (!(extensionMethod is null))
-                    s_SumByPtr = extensionMethod.CreateStaticDelegate(typeof(SumByPtr)) as SumByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Sum");
-
-                if (!(extensionMethod is null))
-                    s_SumByVal = extensionMethod.CreateStaticDelegate(typeof(SumByVal)) as SumByVal;
-
-                if (s_SumByPtr is null && s_SumByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.Sum method", new Exception("Sum"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Reset");
-
-                if (!(extensionMethod is null))
-                    s_ResetByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetByPtr)) as ResetByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Reset");
-
-                if (!(extensionMethod is null))
-                    s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
-
-                if (s_ResetByPtr is null && s_ResetByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.Reset method", new Exception("Reset"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
-
-                if (!(extensionMethod is null))
-                    s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Size");
-
-                if (!(extensionMethod is null))
-                    s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
-
-                if (s_SizeByPtr is null && s_SizeByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.Size method", new Exception("Size"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("BlockSize");
-
-                if (!(extensionMethod is null))
-                    s_BlockSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByPtr)) as BlockSizeByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("BlockSize");
-
-                if (!(extensionMethod is null))
-                    s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
-
-                if (s_BlockSizeByPtr is null && s_BlockSizeByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.BlockSize method", new Exception("BlockSize"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-
-                if (s_WriteByPtr is null && s_WriteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Hash64.Write method", new Exception("Write"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

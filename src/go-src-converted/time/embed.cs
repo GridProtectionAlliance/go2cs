@@ -5,10 +5,11 @@
 // This file is used with build tag timetzdata to embed tzdata into
 // the binary.
 
+//go:build timetzdata
 // +build timetzdata
 
-// package time -- go2cs converted at 2020 October 09 04:45:18 UTC
+// package time -- go2cs converted at 2022 March 06 22:08:03 UTC
 // import "time" ==> using time = go.time_package
-// Original source: C:\Go\src\time\embed.go
-using _tzdata_ = go.time.tzdata_package;    }
-
+// Original source: C:\Program Files\Go\src\time\embed.go
+using _tzdata_ = go.time.tzdata_package;
+} // end time_package

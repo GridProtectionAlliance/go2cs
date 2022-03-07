@@ -2,34 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build linux && gccgo && arm
 // +build linux,gccgo,arm
 
-// package unix -- go2cs converted at 2020 October 09 05:56:49 UTC
+// package unix -- go2cs converted at 2022 March 06 23:27:07 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_gccgo_arm.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_gccgo_arm.go
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        private static (long, syscall.Errno) seek(long fd, long offset, long whence)
-        {
-            long _p0 = default;
-            syscall.Errno _p0 = default;
+namespace go.cmd.vendor.golang.org.x.sys;
 
-            ref long newoffset = ref heap(out ptr<long> _addr_newoffset);
-            var offsetLow = uint32(offset & 0xffffffffUL);
-            var offsetHigh = uint32((offset >> (int)(32L)) & 0xffffffffUL);
-            var (_, _, err) = Syscall6(SYS__LLSEEK, uintptr(fd), uintptr(offsetHigh), uintptr(offsetLow), uintptr(@unsafe.Pointer(_addr_newoffset)), uintptr(whence), 0L);
-            return (newoffset, err);
-        }
-    }
-}}}}}}
+public static partial class unix_package {
+
+private static (long, syscall.Errno) seek(nint fd, long offset, nint whence) {
+    long _p0 = default;
+    syscall.Errno _p0 = default;
+
+    ref long newoffset = ref heap(out ptr<long> _addr_newoffset);
+    var offsetLow = uint32(offset & 0xffffffff);
+    var offsetHigh = uint32((offset >> 32) & 0xffffffff);
+    var (_, _, err) = Syscall6(SYS__LLSEEK, uintptr(fd), uintptr(offsetHigh), uintptr(offsetLow), uintptr(@unsafe.Pointer(_addr_newoffset)), uintptr(whence), 0);
+    return (newoffset, err);
+}
+
+} // end unix_package

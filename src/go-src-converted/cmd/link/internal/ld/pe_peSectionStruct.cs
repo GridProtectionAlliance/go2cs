@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:24 UTC
+//     Generated on 2022 March 06 23:22:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
@@ -20,6 +19,7 @@ using sym = go.cmd.link.@internal.sym_package;
 using pe = go.debug.pe_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -52,7 +52,7 @@ namespace @internal
                 this.characteristics = default;
             }
 
-            public peSection(@string name = default, @string shortName = default, long index = default, uint virtualSize = default, uint virtualAddress = default, uint sizeOfRawData = default, uint pointerToRawData = default, uint pointerToRelocations = default, ushort numberOfRelocations = default, uint characteristics = default)
+            public peSection(@string name = default, @string shortName = default, nint index = default, uint virtualSize = default, uint virtualAddress = default, uint sizeOfRawData = default, uint pointerToRawData = default, uint pointerToRelocations = default, ushort numberOfRelocations = default, uint characteristics = default)
             {
                 this.name = name;
                 this.shortName = shortName;

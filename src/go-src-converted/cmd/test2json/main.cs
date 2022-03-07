@@ -6,7 +6,7 @@
 //
 // Usage:
 //
-//    go tool test2json [-p pkg] [-t] [./pkg.test -test.v]
+//    go tool test2json [-p pkg] [-t] [./pkg.test -test.v [-test.paniconexit0]]
 //
 // Test2json runs the given test command and converts its output to JSON;
 // with no command specified, test2json expects test output on standard input.
@@ -17,6 +17,10 @@
 // The -p flag sets the package reported in each test event.
 //
 // The -t flag requests that time stamps be added to each test event.
+//
+// The test must be invoked with -test.v. Additionally passing
+// -test.paniconexit0 will cause test2json to exit with a non-zero
+// status if one of the tests being run calls os.Exit(0).
 //
 // Note that test2json is only intended for converting a single test
 // binary's output. To convert the output of a "go test" command,
@@ -77,93 +81,79 @@
 // by a final event with Action == "bench" or "fail".
 // Benchmarks have no events with Action == "run", "pause", or "cont".
 //
-// package main -- go2cs converted at 2020 October 09 05:52:48 UTC
-// Original source: C:\Go\src\cmd\test2json\main.go
+// package main -- go2cs converted at 2022 March 06 23:22:41 UTC
+// Original source: C:\Program Files\Go\src\cmd\test2json\main.go
 using flag = go.flag_package;
 using fmt = go.fmt_package;
+using exec = go.@internal.execabs_package;
 using io = go.io_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 
 using test2json = go.cmd.@internal.test2json_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static var flagP = flag.String("p", "", "report `pkg` as the package being tested in each event");        private static var flagT = flag.Bool("t", false, "include timestamps in events");
+namespace go;
 
-        private static void usage()
-        {
-            fmt.Fprintf(os.Stderr, "usage: go tool test2json [-p pkg] [-t] [./pkg.test -test.v]\n");
-            os.Exit(2L);
-        }
+public static partial class main_package {
 
-        private static void Main() => func((defer, _, __) =>
-        {
-            flag.Usage = usage;
-            flag.Parse();
+private static var flagP = flag.String("p", "", "report `pkg` as the package being tested in each event");private static var flagT = flag.Bool("t", false, "include timestamps in events");
 
-            test2json.Mode mode = default;
-            if (flagT.val)
-            {
-                mode |= test2json.Timestamp;
-            }
+private static void usage() {
+    fmt.Fprintf(os.Stderr, "usage: go tool test2json [-p pkg] [-t] [./pkg.test -test.v]\n");
+    os.Exit(2);
+}
 
-            var c = test2json.NewConverter(os.Stdout, flagP.val, mode);
-            defer(c.Close());
+private static void Main() => func((defer, _, _) => {
+    flag.Usage = usage;
+    flag.Parse();
 
-            if (flag.NArg() == 0L)
-            {
-                io.Copy(c, os.Stdin);
+    test2json.Mode mode = default;
+    if (flagT.val) {
+        mode |= test2json.Timestamp;
+    }
+    var c = test2json.NewConverter(os.Stdout, flagP.val, mode);
+    defer(c.Close());
+
+    if (flag.NArg() == 0) {
+        io.Copy(c, os.Stdin);
+    }
+    else
+ {
+        var args = flag.Args();
+        var cmd = exec.Command(args[0], args[(int)1..]);
+        ptr<countWriter> w = addr(new countWriter(0,c));
+        cmd.Stdout = w;
+        cmd.Stderr = w;
+        var err = cmd.Run();
+        if (err != null) {
+            if (w.n > 0) { 
+                // Assume command printed why it failed.
             }
             else
-            {
-                var args = flag.Args();
-                var cmd = exec.Command(args[0L], args[1L..]);
-                ptr<countWriter> w = addr(new countWriter(0,c));
-                cmd.Stdout = w;
-                cmd.Stderr = w;
-                var err = cmd.Run();
-                if (err != null)
-                {
-                    if (w.n > 0L)
-                    { 
-                        // Assume command printed why it failed.
-                    }
-                    else
-                    {
-                        fmt.Fprintf(c, "test2json: %v\n", err);
-                    }
-
-                }
-
-                c.Exited(err);
-                if (err != null)
-                {
-                    c.Close();
-                    os.Exit(1L);
-                }
-
+ {
+                fmt.Fprintf(c, "test2json: %v\n", err);
             }
 
-        });
-
-        private partial struct countWriter
-        {
-            public long n;
-            public io.Writer w;
         }
-
-        private static (long, error) Write(this ptr<countWriter> _addr_w, slice<byte> b)
-        {
-            long _p0 = default;
-            error _p0 = default!;
-            ref countWriter w = ref _addr_w.val;
-
-            w.n += int64(len(b));
-            return w.w.Write(b);
+        c.Exited(err);
+        if (err != null) {
+            c.Close();
+            os.Exit(1);
         }
     }
+});
+
+private partial struct countWriter {
+    public long n;
+    public io.Writer w;
 }
+
+private static (nint, error) Write(this ptr<countWriter> _addr_w, slice<byte> b) {
+    nint _p0 = default;
+    error _p0 = default!;
+    ref countWriter w = ref _addr_w.val;
+
+    w.n += int64(len(b));
+    return w.w.Write(b);
+}
+
+} // end main_package

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:13 UTC
+//     Generated on 2022 March 06 22:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace syscall
         {
             // Value of the TokenType struct
             private readonly uint m_value;
-
+            
             public TokenType(uint value) => m_value = value;
 
             // Enable implicit conversions between uint and TokenType struct

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:49 UTC
+//     Generated on 2022 March 06 22:18:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using cipher = go.crypto.cipher_package;
 using subtle = go.crypto.subtle_package;
 using binary = go.encoding.binary_package;
@@ -39,7 +38,7 @@ namespace crypto
                 this.tagSize = default;
             }
 
-            public gcmAsm(ref ptr<aesCipherAsm> cipher = default, slice<uint> ks = default, array<byte> productTable = default, long nonceSize = default, long tagSize = default)
+            public gcmAsm(ref ptr<aesCipherAsm> cipher = default, slice<uint> ks = default, array<byte> productTable = default, nint nonceSize = default, nint tagSize = default)
             {
                 this.cipher = cipher;
                 this.ks = ks;

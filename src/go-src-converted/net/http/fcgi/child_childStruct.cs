@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:47 UTC
+//     Generated on 2022 March 06 22:23:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,18 +12,15 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using net = go.net_package;
 using http = go.net.http_package;
 using cgi = go.net.http.cgi_package;
 using os = go.os_package;
 using strings = go.strings_package;
-using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
@@ -43,15 +40,13 @@ namespace http
             {
                 this.conn = default;
                 this.handler = default;
-                this.mu = default;
                 this.requests = default;
             }
 
-            public child(ref ptr<conn> conn = default, http.Handler handler = default, sync.Mutex mu = default, map<ushort, ptr<request>> requests = default)
+            public child(ref ptr<conn> conn = default, http.Handler handler = default, map<ushort, ptr<request>> requests = default)
             {
                 this.conn = conn;
                 this.handler = handler;
-                this.mu = mu;
                 this.requests = requests;
             }
 
@@ -75,7 +70,7 @@ namespace http
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static child child_cast(dynamic value)
         {
-            return new child(ref value.conn, value.handler, value.mu, value.requests);
+            return new child(ref value.conn, value.handler, value.requests);
         }
     }
 }}}

@@ -2,30 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 09 04:47:30 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\os_linux_s390x.go
+// Original source: C:\Program Files\Go\src\runtime\os_linux_s390x.go
 using cpu = go.@internal.cpu_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
- 
-        // bit masks taken from bits/hwcap.h
-        private static readonly long _HWCAP_S390_VX = (long)2048L; // vector facility
+namespace go;
 
-        private static void archauxv(System.UIntPtr tag, System.UIntPtr val)
-        {
+public static partial class runtime_package {
 
-            if (tag == _AT_HWCAP) // CPU capability bit flags
-                cpu.S390X.HasVX = val & _HWCAP_S390_VX != 0L;
-            
-        }
+private static void archauxv(System.UIntPtr tag, System.UIntPtr val) {
 
-        private static void osArchInit()
-        {
-        }
-    }
+    if (tag == _AT_HWCAP) 
+        cpu.HWCap = uint(val);
+    
 }
+
+private static void osArchInit() {
+}
+
+} // end runtime_package

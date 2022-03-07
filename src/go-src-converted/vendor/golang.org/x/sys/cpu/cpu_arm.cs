@@ -2,56 +2,55 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cpu -- go2cs converted at 2020 October 09 06:07:53 UTC
+// package cpu -- go2cs converted at 2022 March 06 23:38:19 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
-// Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_arm.go
-
-using static go.builtin;
-
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class cpu_package
-    {
-        private static readonly long cacheLineSize = (long)32L;
-
-        // HWCAP/HWCAP2 bits.
-        // These are specific to Linux.
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu_arm.go
 
 
-        // HWCAP/HWCAP2 bits.
-        // These are specific to Linux.
-        private static readonly long hwcap_SWP = (long)1L << (int)(0L);
-        private static readonly long hwcap_HALF = (long)1L << (int)(1L);
-        private static readonly long hwcap_THUMB = (long)1L << (int)(2L);
-        private static readonly long hwcap_26BIT = (long)1L << (int)(3L);
-        private static readonly long hwcap_FAST_MULT = (long)1L << (int)(4L);
-        private static readonly long hwcap_FPA = (long)1L << (int)(5L);
-        private static readonly long hwcap_VFP = (long)1L << (int)(6L);
-        private static readonly long hwcap_EDSP = (long)1L << (int)(7L);
-        private static readonly long hwcap_JAVA = (long)1L << (int)(8L);
-        private static readonly long hwcap_IWMMXT = (long)1L << (int)(9L);
-        private static readonly long hwcap_CRUNCH = (long)1L << (int)(10L);
-        private static readonly long hwcap_THUMBEE = (long)1L << (int)(11L);
-        private static readonly long hwcap_NEON = (long)1L << (int)(12L);
-        private static readonly long hwcap_VFPv3 = (long)1L << (int)(13L);
-        private static readonly long hwcap_VFPv3D16 = (long)1L << (int)(14L);
-        private static readonly long hwcap_TLS = (long)1L << (int)(15L);
-        private static readonly long hwcap_VFPv4 = (long)1L << (int)(16L);
-        private static readonly long hwcap_IDIVA = (long)1L << (int)(17L);
-        private static readonly long hwcap_IDIVT = (long)1L << (int)(18L);
-        private static readonly long hwcap_VFPD32 = (long)1L << (int)(19L);
-        private static readonly long hwcap_LPAE = (long)1L << (int)(20L);
-        private static readonly long hwcap_EVTSTRM = (long)1L << (int)(21L);
+namespace go.vendor.golang.org.x.sys;
 
-        private static readonly long hwcap2_AES = (long)1L << (int)(0L);
-        private static readonly long hwcap2_PMULL = (long)1L << (int)(1L);
-        private static readonly long hwcap2_SHA1 = (long)1L << (int)(2L);
-        private static readonly long hwcap2_SHA2 = (long)1L << (int)(3L);
-        private static readonly long hwcap2_CRC32 = (long)1L << (int)(4L);
+public static partial class cpu_package {
 
-    }
-}}}}}
+private static readonly nint cacheLineSize = 32;
+
+// HWCAP/HWCAP2 bits.
+// These are specific to Linux.
+
+
+// HWCAP/HWCAP2 bits.
+// These are specific to Linux.
+private static readonly nint hwcap_SWP = 1 << 0;
+private static readonly nint hwcap_HALF = 1 << 1;
+private static readonly nint hwcap_THUMB = 1 << 2;
+private static readonly nint hwcap_26BIT = 1 << 3;
+private static readonly nint hwcap_FAST_MULT = 1 << 4;
+private static readonly nint hwcap_FPA = 1 << 5;
+private static readonly nint hwcap_VFP = 1 << 6;
+private static readonly nint hwcap_EDSP = 1 << 7;
+private static readonly nint hwcap_JAVA = 1 << 8;
+private static readonly nint hwcap_IWMMXT = 1 << 9;
+private static readonly nint hwcap_CRUNCH = 1 << 10;
+private static readonly nint hwcap_THUMBEE = 1 << 11;
+private static readonly nint hwcap_NEON = 1 << 12;
+private static readonly nint hwcap_VFPv3 = 1 << 13;
+private static readonly nint hwcap_VFPv3D16 = 1 << 14;
+private static readonly nint hwcap_TLS = 1 << 15;
+private static readonly nint hwcap_VFPv4 = 1 << 16;
+private static readonly nint hwcap_IDIVA = 1 << 17;
+private static readonly nint hwcap_IDIVT = 1 << 18;
+private static readonly nint hwcap_VFPD32 = 1 << 19;
+private static readonly nint hwcap_LPAE = 1 << 20;
+private static readonly nint hwcap_EVTSTRM = 1 << 21;
+
+private static readonly nint hwcap2_AES = 1 << 0;
+private static readonly nint hwcap2_PMULL = 1 << 1;
+private static readonly nint hwcap2_SHA1 = 1 << 2;
+private static readonly nint hwcap2_SHA2 = 1 << 3;
+private static readonly nint hwcap2_CRC32 = 1 << 4;
+
+
+private static void initOptions() {
+    options = new slice<option>(new option[] { {Name:"pmull",Feature:&ARM.HasPMULL}, {Name:"sha1",Feature:&ARM.HasSHA1}, {Name:"sha2",Feature:&ARM.HasSHA2}, {Name:"swp",Feature:&ARM.HasSWP}, {Name:"thumb",Feature:&ARM.HasTHUMB}, {Name:"thumbee",Feature:&ARM.HasTHUMBEE}, {Name:"tls",Feature:&ARM.HasTLS}, {Name:"vfp",Feature:&ARM.HasVFP}, {Name:"vfpd32",Feature:&ARM.HasVFPD32}, {Name:"vfpv3",Feature:&ARM.HasVFPv3}, {Name:"vfpv3d16",Feature:&ARM.HasVFPv3D16}, {Name:"vfpv4",Feature:&ARM.HasVFPv4}, {Name:"half",Feature:&ARM.HasHALF}, {Name:"26bit",Feature:&ARM.Has26BIT}, {Name:"fastmul",Feature:&ARM.HasFASTMUL}, {Name:"fpa",Feature:&ARM.HasFPA}, {Name:"edsp",Feature:&ARM.HasEDSP}, {Name:"java",Feature:&ARM.HasJAVA}, {Name:"iwmmxt",Feature:&ARM.HasIWMMXT}, {Name:"crunch",Feature:&ARM.HasCRUNCH}, {Name:"neon",Feature:&ARM.HasNEON}, {Name:"idivt",Feature:&ARM.HasIDIVT}, {Name:"idiva",Feature:&ARM.HasIDIVA}, {Name:"lpae",Feature:&ARM.HasLPAE}, {Name:"evtstrm",Feature:&ARM.HasEVTSTRM}, {Name:"aes",Feature:&ARM.HasAES}, {Name:"crc32",Feature:&ARM.HasCRC32} });
+}
+
+} // end cpu_package

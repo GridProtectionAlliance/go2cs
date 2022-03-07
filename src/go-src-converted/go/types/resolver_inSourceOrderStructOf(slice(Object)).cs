@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:36 UTC
+//     Generated on 2022 March 06 22:42:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,40 @@ namespace go
     public static partial class types_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct inSourceOrder
+        private partial struct inSourceOrder : ISlice
         {
             // Value of the inSourceOrder struct
             private readonly slice<Object> m_value;
+            
+            public Array Array => ((ISlice)m_value).Array;
+
+            public nint Low => ((ISlice)m_value).Low;
+
+            public nint High => ((ISlice)m_value).High;
+
+            public nint Capacity => ((ISlice)m_value).Capacity;
+
+            public nint Available => ((ISlice)m_value).Available;
+
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+            
+            public ref Object this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+            
+            public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public inSourceOrder(slice<Object> value) => m_value = value;
 

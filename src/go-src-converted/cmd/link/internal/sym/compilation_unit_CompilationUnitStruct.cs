@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:53 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using dwarf = go.cmd.@internal.dwarf_package;
 using go;
 
@@ -31,40 +30,32 @@ namespace @internal
             // Constructors
             public CompilationUnit(NilType _)
             {
-                this.Pkg = default;
                 this.Lib = default;
-                this.Consts = default;
+                this.PclnIndex = default;
                 this.PCs = default;
                 this.DWInfo = default;
+                this.FileTable = default;
+                this.Consts = default;
                 this.FuncDIEs = default;
+                this.VarDIEs = default;
                 this.AbsFnDIEs = default;
                 this.RangeSyms = default;
                 this.Textp = default;
-                this.DWARFFileTable = default;
-                this.Consts2 = default;
-                this.FuncDIEs2 = default;
-                this.AbsFnDIEs2 = default;
-                this.RangeSyms2 = default;
-                this.Textp2 = default;
             }
 
-            public CompilationUnit(@string Pkg = default, ref ptr<Library> Lib = default, ref ptr<Symbol> Consts = default, slice<dwarf.Range> PCs = default, ref ptr<dwarf.DWDie> DWInfo = default, slice<ptr<Symbol>> FuncDIEs = default, slice<ptr<Symbol>> AbsFnDIEs = default, slice<ptr<Symbol>> RangeSyms = default, slice<ptr<Symbol>> Textp = default, slice<@string> DWARFFileTable = default, LoaderSym Consts2 = default, slice<LoaderSym> FuncDIEs2 = default, slice<LoaderSym> AbsFnDIEs2 = default, slice<LoaderSym> RangeSyms2 = default, slice<LoaderSym> Textp2 = default)
+            public CompilationUnit(ref ptr<Library> Lib = default, nint PclnIndex = default, slice<dwarf.Range> PCs = default, ref ptr<dwarf.DWDie> DWInfo = default, slice<@string> FileTable = default, LoaderSym Consts = default, slice<LoaderSym> FuncDIEs = default, slice<LoaderSym> VarDIEs = default, slice<LoaderSym> AbsFnDIEs = default, slice<LoaderSym> RangeSyms = default, slice<LoaderSym> Textp = default)
             {
-                this.Pkg = Pkg;
                 this.Lib = Lib;
-                this.Consts = Consts;
+                this.PclnIndex = PclnIndex;
                 this.PCs = PCs;
                 this.DWInfo = DWInfo;
+                this.FileTable = FileTable;
+                this.Consts = Consts;
                 this.FuncDIEs = FuncDIEs;
+                this.VarDIEs = VarDIEs;
                 this.AbsFnDIEs = AbsFnDIEs;
                 this.RangeSyms = RangeSyms;
                 this.Textp = Textp;
-                this.DWARFFileTable = DWARFFileTable;
-                this.Consts2 = Consts2;
-                this.FuncDIEs2 = FuncDIEs2;
-                this.AbsFnDIEs2 = AbsFnDIEs2;
-                this.RangeSyms2 = RangeSyms2;
-                this.Textp2 = Textp2;
             }
 
             // Enable comparisons between nil and CompilationUnit struct
@@ -87,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CompilationUnit CompilationUnit_cast(dynamic value)
         {
-            return new CompilationUnit(value.Pkg, ref value.Lib, ref value.Consts, value.PCs, ref value.DWInfo, value.FuncDIEs, value.AbsFnDIEs, value.RangeSyms, value.Textp, value.DWARFFileTable, value.Consts2, value.FuncDIEs2, value.AbsFnDIEs2, value.RangeSyms2, value.Textp2);
+            return new CompilationUnit(ref value.Lib, value.PclnIndex, value.PCs, ref value.DWInfo, value.FileTable, value.Consts, value.FuncDIEs, value.VarDIEs, value.AbsFnDIEs, value.RangeSyms, value.Textp);
         }
     }
 }}}}

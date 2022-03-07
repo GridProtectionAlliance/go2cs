@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:54 UTC
+//     Generated on 2022 March 06 23:18:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,20 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using context = go.context_package;
 using errors = go.errors_package;
-using fmt = go.fmt_package;
 using os = go.os_package;
-using filepath = go.path.filepath_package;
 using sort = go.sort_package;
-using sync = go.sync_package;
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
 using modfetch = go.cmd.go.@internal.modfetch_package;
-using mvs = go.cmd.go.@internal.mvs_package;
-using par = go.cmd.go.@internal.par_package;
-using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;
@@ -45,16 +36,12 @@ namespace @internal
             // Constructors
             public mvsReqs(NilType _)
             {
-                this.buildList = default;
-                this.cache = default;
-                this.versions = default;
+                this.roots = default;
             }
 
-            public mvsReqs(slice<module.Version> buildList = default, par.Cache cache = default, sync.Map versions = default)
+            public mvsReqs(slice<module.Version> roots = default)
             {
-                this.buildList = buildList;
-                this.cache = cache;
-                this.versions = versions;
+                this.roots = roots;
             }
 
             // Enable comparisons between nil and mvsReqs struct
@@ -77,7 +64,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mvsReqs mvsReqs_cast(dynamic value)
         {
-            return new mvsReqs(value.buildList, value.cache, value.versions);
+            return new mvsReqs(value.roots);
         }
     }
 }}}}

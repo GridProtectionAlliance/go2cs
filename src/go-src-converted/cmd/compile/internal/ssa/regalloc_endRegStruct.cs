@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:25:44 UTC
+//     Generated on 2022 March 06 22:51:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using @base = go.cmd.compile.@internal.@base_package;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using bits = go.math.bits_package;
 using @unsafe = go.@unsafe_package;
 using go;

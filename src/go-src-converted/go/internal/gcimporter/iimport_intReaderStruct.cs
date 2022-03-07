@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:44 UTC
+//     Generated on 2022 March 06 23:32:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
@@ -20,6 +20,7 @@ using constant = go.go.constant_package;
 using token = go.go.token_package;
 using types = go.go.types_package;
 using io = go.io_package;
+using big = go.math.big_package;
 using sort = go.sort_package;
 using go;
 
@@ -41,7 +42,7 @@ namespace @internal
                 this.path = default;
             }
 
-            public intReader(ref ptr<bytes.Reader> Reader> = default, @string path = default)
+            public intReader(ref ptr<bufio.Reader> Reader> = default, @string path = default)
             {
                 this.Reader> = Reader>;
                 this.path = path;

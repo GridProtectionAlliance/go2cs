@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:51 UTC
+//     Generated on 2022 March 06 23:37:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -44,7 +43,7 @@ namespace http2
                 this.firstField = default;
             }
 
-            public Decoder(dynamicTable dynTab = default, Action<HeaderField> emit = default, bool emitEnabled = default, long maxStrLen = default, slice<byte> buf = default, bytes.Buffer saveBuf = default, bool firstField = default)
+            public Decoder(dynamicTable dynTab = default, Action<HeaderField> emit = default, bool emitEnabled = default, nint maxStrLen = default, slice<byte> buf = default, bytes.Buffer saveBuf = default, bool firstField = default)
             {
                 this.dynTab = dynTab;
                 this.emit = emit;

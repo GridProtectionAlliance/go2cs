@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:36 UTC
+//     Generated on 2022 March 06 23:22:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
+using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using bits = go.math.bits_package;
 using filepath = go.path.filepath_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -44,16 +45,18 @@ namespace @internal
                 this.file = default;
                 this.csectAux = default;
                 this.csectSymNb = default;
-                this.csectSize = default;
+                this.csectVAStart = default;
+                this.csectVAEnd = default;
             }
 
-            public xcoffSymSrcFile(@string name = default, ref ptr<XcoffSymEnt64> file = default, ref ptr<XcoffAuxCSect64> csectAux = default, ulong csectSymNb = default, long csectSize = default)
+            public xcoffSymSrcFile(@string name = default, ref ptr<XcoffSymEnt64> file = default, ref ptr<XcoffAuxCSect64> csectAux = default, ulong csectSymNb = default, long csectVAStart = default, long csectVAEnd = default)
             {
                 this.name = name;
                 this.file = file;
                 this.csectAux = csectAux;
                 this.csectSymNb = csectSymNb;
-                this.csectSize = csectSize;
+                this.csectVAStart = csectVAStart;
+                this.csectVAEnd = csectVAEnd;
             }
 
             // Enable comparisons between nil and xcoffSymSrcFile struct
@@ -76,7 +79,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static xcoffSymSrcFile xcoffSymSrcFile_cast(dynamic value)
         {
-            return new xcoffSymSrcFile(value.name, ref value.file, ref value.csectAux, value.csectSymNb, value.csectSize);
+            return new xcoffSymSrcFile(value.name, ref value.file, ref value.csectAux, value.csectSymNb, value.csectVAStart, value.csectVAEnd);
         }
     }
 }}}}

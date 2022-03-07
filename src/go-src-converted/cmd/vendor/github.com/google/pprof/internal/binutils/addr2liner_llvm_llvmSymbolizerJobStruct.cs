@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:19 UTC
+//     Generated on 2022 March 06 23:23:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -44,13 +43,15 @@ namespace @internal
                 this.cmd = default;
                 this.@in = default;
                 this.@out = default;
+                this.symType = default;
             }
 
-            public llvmSymbolizerJob(ref ptr<exec.Cmd> cmd = default, io.WriteCloser @in = default, ref ptr<bufio.Reader> @out = default)
+            public llvmSymbolizerJob(ref ptr<exec.Cmd> cmd = default, io.WriteCloser @in = default, ref ptr<bufio.Reader> @out = default, @string symType = default)
             {
                 this.cmd = cmd;
                 this.@in = @in;
                 this.@out = @out;
+                this.symType = symType;
             }
 
             // Enable comparisons between nil and llvmSymbolizerJob struct
@@ -73,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static llvmSymbolizerJob llvmSymbolizerJob_cast(dynamic value)
         {
-            return new llvmSymbolizerJob(ref value.cmd, value.@in, ref value.@out);
+            return new llvmSymbolizerJob(ref value.cmd, value.@in, ref value.@out, value.symType);
         }
     }
 }}}}}}}

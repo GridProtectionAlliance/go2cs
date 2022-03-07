@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:20 UTC
+//     Generated on 2022 March 06 22:25:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
@@ -59,7 +58,7 @@ namespace encoding
                 this.unmarshalDepth = default;
             }
 
-            public Decoder(bool Strict = default, slice<@string> AutoClose = default, map<@string, @string> Entity = default, Func<@string, io.Reader, (io.Reader, error)> CharsetReader = default, @string DefaultSpace = default, io.ByteReader r = default, TokenReader t = default, bytes.Buffer buf = default, ref ptr<bytes.Buffer> saved = default, ref ptr<stack> stk = default, ref ptr<stack> free = default, bool needClose = default, Name toClose = default, Token nextToken = default, long nextByte = default, map<@string, @string> ns = default, error err = default, long line = default, long offset = default, long unmarshalDepth = default)
+            public Decoder(bool Strict = default, slice<@string> AutoClose = default, map<@string, @string> Entity = default, Func<@string, io.Reader, (io.Reader, error)> CharsetReader = default, @string DefaultSpace = default, io.ByteReader r = default, TokenReader t = default, bytes.Buffer buf = default, ref ptr<bytes.Buffer> saved = default, ref ptr<stack> stk = default, ref ptr<stack> free = default, bool needClose = default, Name toClose = default, Token nextToken = default, nint nextByte = default, map<@string, @string> ns = default, error err = default, nint line = default, long offset = default, nint unmarshalDepth = default)
             {
                 this.Strict = Strict;
                 this.AutoClose = AutoClose;

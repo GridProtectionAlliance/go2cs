@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:04 UTC
+//     Generated on 2022 March 06 23:31:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
@@ -55,7 +54,7 @@ namespace @internal
                 this.indent = default;
             }
 
-            public exporter(ref ptr<token.FileSet> fset = default, bytes.Buffer @out = default, map<@string, long> strIndex = default, map<ptr<types.Package>, long> pkgIndex = default, map<types.Type, long> typIndex = default, bool posInfoFormat = default, @string prevFile = default, long prevLine = default, long written = default, long indent = default)
+            public exporter(ref ptr<token.FileSet> fset = default, bytes.Buffer @out = default, map<@string, nint> strIndex = default, map<ptr<types.Package>, nint> pkgIndex = default, map<types.Type, nint> typIndex = default, bool posInfoFormat = default, @string prevFile = default, nint prevLine = default, nint written = default, nint indent = default)
             {
                 this.fset = fset;
                 this.@out = @out;

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:29 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace sys
         {
             // Value of the _Socklen struct
             private readonly uint m_value;
-
+            
             public _Socklen(uint value) => m_value = value;
 
             // Enable implicit conversions between uint and _Socklen struct

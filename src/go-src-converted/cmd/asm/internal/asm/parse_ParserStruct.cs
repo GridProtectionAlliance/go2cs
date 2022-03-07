@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:09 UTC
+//     Generated on 2022 March 06 22:46:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
@@ -48,6 +47,7 @@ namespace @internal
                 this.lineNum = default;
                 this.errorLine = default;
                 this.errorCount = default;
+                this.sawCode = default;
                 this.pc = default;
                 this.input = default;
                 this.inputPos = default;
@@ -61,15 +61,17 @@ namespace @internal
                 this.lastProg = default;
                 this.dataAddr = default;
                 this.isJump = default;
+                this.compilingRuntime = default;
                 this.errorWriter = default;
             }
 
-            public Parser(lex.TokenReader lex = default, long lineNum = default, long errorLine = default, long errorCount = default, long pc = default, slice<lex.Token> input = default, long inputPos = default, slice<@string> pendingLabels = default, map<@string, ptr<obj.Prog>> labels = default, slice<Patch> toPatch = default, slice<obj.Addr> addr = default, ref ptr<arch.Arch> arch = default, ref ptr<obj.Link> ctxt = default, ref ptr<obj.Prog> firstProg = default, ref ptr<obj.Prog> lastProg = default, map<@string, long> dataAddr = default, bool isJump = default, io.Writer errorWriter = default)
+            public Parser(lex.TokenReader lex = default, nint lineNum = default, nint errorLine = default, nint errorCount = default, bool sawCode = default, long pc = default, slice<lex.Token> input = default, nint inputPos = default, slice<@string> pendingLabels = default, map<@string, ptr<obj.Prog>> labels = default, slice<Patch> toPatch = default, slice<obj.Addr> addr = default, ref ptr<arch.Arch> arch = default, ref ptr<obj.Link> ctxt = default, ref ptr<obj.Prog> firstProg = default, ref ptr<obj.Prog> lastProg = default, map<@string, long> dataAddr = default, bool isJump = default, bool compilingRuntime = default, io.Writer errorWriter = default)
             {
                 this.lex = lex;
                 this.lineNum = lineNum;
                 this.errorLine = errorLine;
                 this.errorCount = errorCount;
+                this.sawCode = sawCode;
                 this.pc = pc;
                 this.input = input;
                 this.inputPos = inputPos;
@@ -83,6 +85,7 @@ namespace @internal
                 this.lastProg = lastProg;
                 this.dataAddr = dataAddr;
                 this.isJump = isJump;
+                this.compilingRuntime = compilingRuntime;
                 this.errorWriter = errorWriter;
             }
 
@@ -106,7 +109,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Parser Parser_cast(dynamic value)
         {
-            return new Parser(value.lex, value.lineNum, value.errorLine, value.errorCount, value.pc, value.input, value.inputPos, value.pendingLabels, value.labels, value.toPatch, value.addr, ref value.arch, ref value.ctxt, ref value.firstProg, ref value.lastProg, value.dataAddr, value.isJump, value.errorWriter);
+            return new Parser(value.lex, value.lineNum, value.errorLine, value.errorCount, value.sawCode, value.pc, value.input, value.inputPos, value.pendingLabels, value.labels, value.toPatch, value.addr, ref value.arch, ref value.ctxt, ref value.firstProg, ref value.lastProg, value.dataAddr, value.isJump, value.compilingRuntime, value.errorWriter);
         }
     }
 }}}}

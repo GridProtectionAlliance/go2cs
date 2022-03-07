@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:56 UTC
+//     Generated on 2022 March 06 22:50:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,12 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
+using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using fmt = go.fmt_package;
+using strings = go.strings_package;
 using go;
 
 #nullable enable
@@ -53,7 +56,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -68,47 +71,55 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate @string StringByPtr(ptr<T> value);
-            private delegate @string StringByVal(T value);
-
-            private static readonly StringByPtr? s_StringByPtr;
-            private static readonly StringByVal? s_StringByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string String()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_StringByPtr is null || !m_target_is_ptr)
-                    return s_StringByVal!(target);
-
-                return s_StringByPtr(m_target_ptr);
-            }
-
-            private delegate @string CanBeAnSSASymByPtr(ptr<T> value);
-            private delegate @string CanBeAnSSASymByVal(T value);
+            private delegate void CanBeAnSSASymByPtr(ptr<T> value);
+            private delegate void CanBeAnSSASymByVal(T value);
 
             private static readonly CanBeAnSSASymByPtr? s_CanBeAnSSASymByPtr;
             private static readonly CanBeAnSSASymByVal? s_CanBeAnSSASymByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string CanBeAnSSASym()
+            public void CanBeAnSSASym()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CanBeAnSSASymByPtr is null || !m_target_is_ptr)
-                    return s_CanBeAnSSASymByVal!(target);
+                {
+                    s_CanBeAnSSASymByVal!(target);
+                    return;
+                }
 
-                return s_CanBeAnSSASymByPtr(m_target_ptr);
+                s_CanBeAnSSASymByPtr(m_target_ptr!);
+                return;
+            }
+
+            private delegate void CanBeAnSSAAuxByPtr(ptr<T> value);
+            private delegate void CanBeAnSSAAuxByVal(T value);
+
+            private static readonly CanBeAnSSAAuxByPtr? s_CanBeAnSSAAuxByPtr;
+            private static readonly CanBeAnSSAAuxByVal? s_CanBeAnSSAAuxByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public void CanBeAnSSAAux()
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    target = m_target_ptr.val;
+
+                if (s_CanBeAnSSAAuxByPtr is null || !m_target_is_ptr)
+                {
+                    s_CanBeAnSSAAuxByVal!(target);
+                    return;
+                }
+
+                s_CanBeAnSSAAuxByPtr(m_target_ptr!);
+                return;
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Sym()
@@ -117,31 +128,31 @@ namespace @internal
                 Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
 
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-
-                if (s_StringByPtr is null && s_StringByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Sym.String method", new Exception("String"));
-
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CanBeAnSSASym");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CanBeAnSSASymByPtr = extensionMethod.CreateStaticDelegate(typeof(CanBeAnSSASymByPtr)) as CanBeAnSSASymByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CanBeAnSSASym");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CanBeAnSSASymByVal = extensionMethod.CreateStaticDelegate(typeof(CanBeAnSSASymByVal)) as CanBeAnSSASymByVal;
 
                 if (s_CanBeAnSSASymByPtr is null && s_CanBeAnSSASymByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Sym.CanBeAnSSASym method", new Exception("CanBeAnSSASym"));
+
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("CanBeAnSSAAux");
+
+                if (extensionMethod is not null)
+                    s_CanBeAnSSAAuxByPtr = extensionMethod.CreateStaticDelegate(typeof(CanBeAnSSAAuxByPtr)) as CanBeAnSSAAuxByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("CanBeAnSSAAux");
+
+                if (extensionMethod is not null)
+                    s_CanBeAnSSAAuxByVal = extensionMethod.CreateStaticDelegate(typeof(CanBeAnSSAAuxByVal)) as CanBeAnSSAAuxByVal;
+
+                if (s_CanBeAnSSAAuxByPtr is null && s_CanBeAnSSAAuxByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Sym.CanBeAnSSAAux method", new Exception("CanBeAnSSAAux"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

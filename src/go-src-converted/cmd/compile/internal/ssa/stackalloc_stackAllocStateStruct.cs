@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:39:36 UTC
+//     Generated on 2022 March 06 23:08:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
@@ -48,7 +48,7 @@ namespace @internal
                 this.nSelfInterfere = default;
             }
 
-            public stackAllocState(ref ptr<Func> f = default, slice<slice<ID>> live = default, slice<stackValState> values = default, slice<slice<ID>> interfere = default, slice<LocalSlot> names = default, slice<long> slots = default, slice<bool> used = default, int nArgSlot = default, int nNotNeed = default, int nNamedSlot = default, int nReuse = default, int nAuto = default, int nSelfInterfere = default)
+            public stackAllocState(ref ptr<Func> f = default, slice<slice<ID>> live = default, slice<stackValState> values = default, slice<slice<ID>> interfere = default, slice<LocalSlot> names = default, slice<nint> slots = default, slice<bool> used = default, int nArgSlot = default, int nNotNeed = default, int nNamedSlot = default, int nReuse = default, int nAuto = default, int nSelfInterfere = default)
             {
                 this.f = f;
                 this.live = live;

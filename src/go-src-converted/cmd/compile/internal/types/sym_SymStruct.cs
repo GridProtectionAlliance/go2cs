@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:13 UTC
+//     Generated on 2022 March 06 22:47:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using @base = go.cmd.compile.@internal.@base_package;
 using obj = go.cmd.@internal.obj_package;
 using src = go.cmd.@internal.src_package;
 using unicode = go.unicode_package;
@@ -34,7 +34,6 @@ namespace @internal
             // Constructors
             public Sym(NilType _)
             {
-                this.Importdef = default;
                 this.Linkname = default;
                 this.Pkg = default;
                 this.Name = default;
@@ -42,13 +41,10 @@ namespace @internal
                 this.Block = default;
                 this.Lastlineno = default;
                 this.flags = default;
-                this.Label = default;
-                this.Origpkg = default;
             }
 
-            public Sym(ref ptr<Pkg> Importdef = default, @string Linkname = default, ref ptr<Pkg> Pkg = default, @string Name = default, ref ptr<Node> Def = default, int Block = default, src.XPos Lastlineno = default, bitset8 flags = default, ref ptr<Node> Label = default, ref ptr<Pkg> Origpkg = default)
+            public Sym(@string Linkname = default, ref ptr<Pkg> Pkg = default, @string Name = default, Object Def = default, int Block = default, src.XPos Lastlineno = default, bitset8 flags = default)
             {
-                this.Importdef = Importdef;
                 this.Linkname = Linkname;
                 this.Pkg = Pkg;
                 this.Name = Name;
@@ -56,8 +52,6 @@ namespace @internal
                 this.Block = Block;
                 this.Lastlineno = Lastlineno;
                 this.flags = flags;
-                this.Label = Label;
-                this.Origpkg = Origpkg;
             }
 
             // Enable comparisons between nil and Sym struct
@@ -80,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Sym Sym_cast(dynamic value)
         {
-            return new Sym(ref value.Importdef, value.Linkname, ref value.Pkg, value.Name, ref value.Def, value.Block, value.Lastlineno, value.flags, ref value.Label, ref value.Origpkg);
+            return new Sym(value.Linkname, ref value.Pkg, value.Name, value.Def, value.Block, value.Lastlineno, value.flags);
         }
     }
 }}}}

@@ -12,35 +12,31 @@
 // with the arguments shown above followed by the command to run.
 // This program will check whether it is expected to run the cover
 // program, and if so replace it with /path/to/testcover.
-// package main -- go2cs converted at 2020 October 09 05:44:26 UTC
-// Original source: C:\Go\src\cmd\cover\testdata\toolexec.go
+// package main -- go2cs converted at 2022 March 06 23:15:13 UTC
+// Original source: C:\Program Files\Go\src\cmd\cover\testdata\toolexec.go
+using exec = go.@internal.execabs_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using strings = go.strings_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
+namespace go;
+
+public static partial class main_package {
+
+private static void Main() {
+    if (strings.HasSuffix(strings.TrimSuffix(os.Args[2], ".exe"), "cover")) {
+        os.Args[2] = os.Args[1];
+    }
+    var cmd = exec.Command(os.Args[2], os.Args[(int)3..]);
+    cmd.Stdout = os.Stdout;
+    cmd.Stderr = os.Stderr;
     {
-        private static void Main()
-        {
-            if (strings.HasSuffix(strings.TrimSuffix(os.Args[2L], ".exe"), "cover"))
-            {
-                os.Args[2L] = os.Args[1L];
-            }
-            var cmd = exec.Command(os.Args[2L], os.Args[3L..]);
-            cmd.Stdout = os.Stdout;
-            cmd.Stderr = os.Stderr;
-            {
-                var err = cmd.Run();
+        var err = cmd.Run();
 
-                if (err != null)
-                {
-                    os.Exit(1L);
-                }
-            }
-
+        if (err != null) {
+            os.Exit(1);
         }
     }
+
 }
+
+} // end main_package

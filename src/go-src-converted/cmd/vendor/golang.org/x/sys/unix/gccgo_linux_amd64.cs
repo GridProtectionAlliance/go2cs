@@ -2,40 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build gccgo && linux && amd64
 // +build gccgo,linux,amd64
 
-// package unix -- go2cs converted at 2020 October 09 05:56:16 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:35 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\gccgo_linux_amd64.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\gccgo_linux_amd64.go
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        //extern gettimeofday
-        private static int realGettimeofday(ptr<Timeval> _p0, ptr<byte> _p0)
-;
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        private static syscall.Errno gettimeofday(ptr<Timeval> _addr_tv)
-        {
-            syscall.Errno err = default;
-            ref Timeval tv = ref _addr_tv.val;
+public static partial class unix_package {
 
-            var r = realGettimeofday(_addr_tv, _addr_null);
-            if (r < 0L)
-            {>>MARKER:FUNCTION_realGettimeofday_BLOCK_PREFIX<<
-                return syscall.GetErrno();
-            }
+    //extern gettimeofday
+private static int realGettimeofday(ptr<Timeval> _p0, ptr<byte> _p0);
 
-            return 0L;
+private static syscall.Errno gettimeofday(ptr<Timeval> _addr_tv) {
+    syscall.Errno err = default;
+    ref Timeval tv = ref _addr_tv.val;
 
-        }
+    var r = realGettimeofday(_addr_tv, _addr_null);
+    if (r < 0) {>>MARKER:FUNCTION_realGettimeofday_BLOCK_PREFIX<<
+        return syscall.GetErrno();
     }
-}}}}}}
+    return 0;
+
+}
+
+} // end unix_package

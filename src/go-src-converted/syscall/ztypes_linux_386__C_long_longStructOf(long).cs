@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:04:25 UTC
+//     Generated on 2022 March 06 22:29:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the _C_long_long struct
             private readonly long m_value;
-
+            
             public _C_long_long(long value) => m_value = value;
 
             // Enable implicit conversions between long and _C_long_long struct

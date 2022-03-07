@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ColumnsByPtr is null || !m_target_is_ptr)
                     return s_ColumnsByVal!(target);
 
-                return s_ColumnsByPtr(m_target_ptr);
+                return s_ColumnsByPtr(m_target_ptr!);
             }
 
             private delegate error CloseByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
 
             private delegate error NextByPtr(ptr<T> value, slice<Value> dest);
@@ -119,16 +118,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target, dest);
 
-                return s_NextByPtr(m_target_ptr, dest);
+                return s_NextByPtr(m_target_ptr!, dest);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Rows()
@@ -139,12 +138,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Columns");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColumnsByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnsByPtr)) as ColumnsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Columns");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColumnsByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnsByVal)) as ColumnsByVal;
 
                 if (s_ColumnsByPtr is null && s_ColumnsByVal is null)
@@ -152,12 +151,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)
@@ -165,12 +164,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
                 if (s_NextByPtr is null && s_NextByVal is null)

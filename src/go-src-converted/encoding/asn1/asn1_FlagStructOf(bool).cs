@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:48 UTC
+//     Generated on 2022 March 06 22:19:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace encoding
         {
             // Value of the Flag struct
             private readonly bool m_value;
-
+            
             public Flag(bool value) => m_value = value;
 
             // Enable implicit conversions between bool and Flag struct

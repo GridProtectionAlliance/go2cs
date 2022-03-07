@@ -2,68 +2,61 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 09 05:07:45 UTC
+// package math -- go2cs converted at 2022 March 06 22:31:09 UTC
 // import "math" ==> using math = go.math_package
-// Original source: C:\Go\src\math\mod.go
+// Original source: C:\Program Files\Go\src\math\mod.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class math_package
-    {
-        /*
-            Floating-point mod function.
-        */
+namespace go;
 
-        // Mod returns the floating-point remainder of x/y.
-        // The magnitude of the result is less than y and its
-        // sign agrees with that of x.
-        //
-        // Special cases are:
-        //    Mod(±Inf, y) = NaN
-        //    Mod(NaN, y) = NaN
-        //    Mod(x, 0) = NaN
-        //    Mod(x, ±Inf) = x
-        //    Mod(x, NaN) = NaN
-        public static double Mod(double x, double y)
-;
+public static partial class math_package {
 
-        private static double mod(double x, double y)
-        {
-            if (y == 0L || IsInf(x, 0L) || IsNaN(x) || IsNaN(y))
-            {>>MARKER:FUNCTION_Mod_BLOCK_PREFIX<<
-                return NaN();
-            }
+    /*
+        Floating-point mod function.
+    */
 
-            y = Abs(y);
-
-            var (yfr, yexp) = Frexp(y);
-            var r = x;
-            if (x < 0L)
-            {
-                r = -x;
-            }
-
-            while (r >= y)
-            {
-                var (rfr, rexp) = Frexp(r);
-                if (rfr < yfr)
-                {
-                    rexp = rexp - 1L;
-                }
-
-                r = r - Ldexp(y, rexp - yexp);
-
-            }
-
-            if (x < 0L)
-            {
-                r = -r;
-            }
-
-            return r;
-
-        }
+    // Mod returns the floating-point remainder of x/y.
+    // The magnitude of the result is less than y and its
+    // sign agrees with that of x.
+    //
+    // Special cases are:
+    //    Mod(±Inf, y) = NaN
+    //    Mod(NaN, y) = NaN
+    //    Mod(x, 0) = NaN
+    //    Mod(x, ±Inf) = x
+    //    Mod(x, NaN) = NaN
+public static double Mod(double x, double y) {
+    if (haveArchMod) {
+        return archMod(x, y);
     }
+    return mod(x, y);
+
 }
+
+private static double mod(double x, double y) {
+    if (y == 0 || IsInf(x, 0) || IsNaN(x) || IsNaN(y)) {
+        return NaN();
+    }
+    y = Abs(y);
+
+    var (yfr, yexp) = Frexp(y);
+    var r = x;
+    if (x < 0) {
+        r = -x;
+    }
+    while (r >= y) {
+        var (rfr, rexp) = Frexp(r);
+        if (rfr < yfr) {
+            rexp = rexp - 1;
+        }
+        r = r - Ldexp(y, rexp - yexp);
+
+    }
+    if (x < 0) {
+        r = -r;
+    }
+    return r;
+
+}
+
+} // end math_package

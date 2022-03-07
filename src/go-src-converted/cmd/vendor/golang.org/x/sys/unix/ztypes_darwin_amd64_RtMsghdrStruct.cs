@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:28 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,6 @@ namespace sys
                 this.Version = default;
                 this.Type = default;
                 this.Index = default;
-                this._ = default;
                 this.Flags = default;
                 this.Addrs = default;
                 this.Pid = default;
@@ -47,13 +46,12 @@ namespace sys
                 this.Rmx = default;
             }
 
-            public RtMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, ushort Index = default, array<byte> _ = default, int Flags = default, int Addrs = default, int Pid = default, int Seq = default, int Errno = default, int Use = default, uint Inits = default, RtMetrics Rmx = default)
+            public RtMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, ushort Index = default, int Flags = default, int Addrs = default, int Pid = default, int Seq = default, int Errno = default, int Use = default, uint Inits = default, RtMetrics Rmx = default)
             {
                 this.Msglen = Msglen;
                 this.Version = Version;
                 this.Type = Type;
                 this.Index = Index;
-                this._ = _;
                 this.Flags = Flags;
                 this.Addrs = Addrs;
                 this.Pid = Pid;
@@ -84,7 +82,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RtMsghdr RtMsghdr_cast(dynamic value)
         {
-            return new RtMsghdr(value.Msglen, value.Version, value.Type, value.Index, value._, value.Flags, value.Addrs, value.Pid, value.Seq, value.Errno, value.Use, value.Inits, value.Rmx);
+            return new RtMsghdr(value.Msglen, value.Version, value.Type, value.Index, value.Flags, value.Addrs, value.Pid, value.Seq, value.Errno, value.Use, value.Inits, value.Rmx);
         }
     }
 }}}}}}

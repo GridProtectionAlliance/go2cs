@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:52 UTC
+//     Generated on 2022 March 06 22:22:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -59,13 +58,11 @@ namespace net
             public http2clientConnIdleState(NilType _)
             {
                 this.canTakeNewRequest = default;
-                this.freshConn = default;
             }
 
-            public http2clientConnIdleState(bool canTakeNewRequest = default, bool freshConn = default)
+            public http2clientConnIdleState(bool canTakeNewRequest = default)
             {
                 this.canTakeNewRequest = canTakeNewRequest;
-                this.freshConn = freshConn;
             }
 
             // Enable comparisons between nil and http2clientConnIdleState struct
@@ -88,7 +85,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2clientConnIdleState http2clientConnIdleState_cast(dynamic value)
         {
-            return new http2clientConnIdleState(value.canTakeNewRequest, value.freshConn);
+            return new http2clientConnIdleState(value.canTakeNewRequest);
         }
     }
 }}

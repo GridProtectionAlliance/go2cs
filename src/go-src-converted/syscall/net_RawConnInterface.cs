@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:24 UTC
+//     Generated on 2022 March 06 22:26:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,13 +73,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ControlByPtr is null || !m_target_is_ptr)
                     return s_ControlByVal!(target, f);
 
-                return s_ControlByPtr(m_target_ptr, f);
+                return s_ControlByPtr(m_target_ptr!, f);
             }
 
             private delegate error ReadByPtr(ptr<T> value, Func<System.UIntPtr, bool> f);
@@ -93,13 +93,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, f);
 
-                return s_ReadByPtr(m_target_ptr, f);
+                return s_ReadByPtr(m_target_ptr!, f);
             }
 
             private delegate error WriteByPtr(ptr<T> value, Func<System.UIntPtr, bool> f);
@@ -113,16 +113,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, f);
 
-                return s_WriteByPtr(m_target_ptr, f);
+                return s_WriteByPtr(m_target_ptr!, f);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static RawConn()
@@ -133,12 +133,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Control");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ControlByPtr = extensionMethod.CreateStaticDelegate(typeof(ControlByPtr)) as ControlByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Control");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ControlByVal = extensionMethod.CreateStaticDelegate(typeof(ControlByVal)) as ControlByVal;
 
                 if (s_ControlByPtr is null && s_ControlByVal is null)
@@ -146,12 +146,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
                 if (s_ReadByPtr is null && s_ReadByVal is null)
@@ -159,12 +159,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
                 if (s_WriteByPtr is null && s_WriteByVal is null)

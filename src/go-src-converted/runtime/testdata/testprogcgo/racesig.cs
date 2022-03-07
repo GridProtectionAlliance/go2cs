@@ -4,8 +4,8 @@
 
 // +build linux,amd64 freebsd,amd64
 
-// package main -- go2cs converted at 2020 October 09 05:01:02 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\racesig.go
+// package main -- go2cs converted at 2022 March 06 22:26:17 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\racesig.go
 // Test that an external C thread that is calling malloc can be hit
 // with SIGCHLD signals. This used to fail when built with the race
 // detector, because in that case the signal handler would indirectly
@@ -151,33 +151,30 @@ void runRaceSignalThread() {
 using fmt = go.fmt_package;
 using os = go.os_package;
 using time = go.time_package;
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoRaceSignal", CgoRaceSignal);
-        }
 
-        public static void CgoRaceSignal()
-        { 
-            // The failure symptom is that the program hangs because of a
-            // deadlock in malloc, so set an alarm.
-            go_(() => () =>
-            {
-                time.Sleep(5L * time.Second);
-                fmt.Println("Hung for 5 seconds");
-                os.Exit(1L);
-            }());
+namespace go;
 
-            C.runRaceSignalThread();
-            fmt.Println("OK");
+public static partial class main_package {
 
-        }
-    }
+private static void init() {
+    register("CgoRaceSignal", CgoRaceSignal);
 }
+
+public static void CgoRaceSignal() { 
+    // The failure symptom is that the program hangs because of a
+    // deadlock in malloc, so set an alarm.
+    go_(() => () => {
+        time.Sleep(5 * time.Second);
+        fmt.Println("Hung for 5 seconds");
+        os.Exit(1);
+    }());
+
+    C.runRaceSignalThread();
+    fmt.Println("OK");
+
+}
+
+} // end main_package

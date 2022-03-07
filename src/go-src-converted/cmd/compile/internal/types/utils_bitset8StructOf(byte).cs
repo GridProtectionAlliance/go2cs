@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:17 UTC
+//     Generated on 2022 March 06 22:48:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -25,7 +27,7 @@ namespace @internal
         {
             // Value of the bitset8 struct
             private readonly byte m_value;
-
+            
             public bitset8(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and bitset8 struct

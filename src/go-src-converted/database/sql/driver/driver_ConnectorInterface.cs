@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:18 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ConnectByPtr is null || !m_target_is_ptr)
                     return s_ConnectByVal!(target, _p0);
 
-                return s_ConnectByPtr(m_target_ptr, _p0);
+                return s_ConnectByPtr(m_target_ptr!, _p0);
             }
 
             private delegate Driver DriverByPtr(ptr<T> value);
@@ -99,16 +98,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DriverByPtr is null || !m_target_is_ptr)
                     return s_DriverByVal!(target);
 
-                return s_DriverByPtr(m_target_ptr);
+                return s_DriverByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Connector()
@@ -119,12 +118,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Connect");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConnectByPtr = extensionMethod.CreateStaticDelegate(typeof(ConnectByPtr)) as ConnectByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Connect");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConnectByVal = extensionMethod.CreateStaticDelegate(typeof(ConnectByVal)) as ConnectByVal;
 
                 if (s_ConnectByPtr is null && s_ConnectByVal is null)
@@ -132,12 +131,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Driver");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DriverByPtr = extensionMethod.CreateStaticDelegate(typeof(DriverByPtr)) as DriverByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Driver");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DriverByVal = extensionMethod.CreateStaticDelegate(typeof(DriverByVal)) as DriverByVal;
 
                 if (s_DriverByPtr is null && s_DriverByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:42 UTC
+//     Generated on 2022 March 06 22:42:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using sort = go.sort_package;
+using fmt = go.fmt_package;
+using token = go.go.token_package;
+using atomic = go.sync.atomic_package;
 using go;
 
 #nullable enable
@@ -29,6 +30,8 @@ namespace go
             // Constructors
             public Signature(NilType _)
             {
+                this.rparams = default;
+                this.tparams = default;
                 this.scope = default;
                 this.recv = default;
                 this.@params = default;
@@ -36,8 +39,10 @@ namespace go
                 this.variadic = default;
             }
 
-            public Signature(ref ptr<Scope> scope = default, ref ptr<Var> recv = default, ref ptr<Tuple> @params = default, ref ptr<Tuple> results = default, bool variadic = default)
+            public Signature(slice<ptr<TypeName>> rparams = default, slice<ptr<TypeName>> tparams = default, ref ptr<Scope> scope = default, ref ptr<Var> recv = default, ref ptr<Tuple> @params = default, ref ptr<Tuple> results = default, bool variadic = default)
             {
+                this.rparams = rparams;
+                this.tparams = tparams;
                 this.scope = scope;
                 this.recv = recv;
                 this.@params = @params;
@@ -65,7 +70,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Signature Signature_cast(dynamic value)
         {
-            return new Signature(ref value.scope, ref value.recv, ref value.@params, ref value.results, value.variadic);
+            return new Signature(value.rparams, value.tparams, ref value.scope, ref value.recv, ref value.@params, ref value.results, value.variadic);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:23 UTC
+//     Generated on 2022 March 06 23:16:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using elf = go.debug.elf_package;
 using macho = go.debug.macho_package;
@@ -59,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,13 +84,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
 
             private delegate ulong ReadDataByPtr(ptr<T> value, ulong addr, ulong size);
@@ -105,13 +104,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadDataByPtr is null || !m_target_is_ptr)
                     return s_ReadDataByVal!(target, addr, size);
 
-                return s_ReadDataByPtr(m_target_ptr, addr, size);
+                return s_ReadDataByPtr(m_target_ptr!, addr, size);
             }
 
             private delegate ulong DataStartByPtr(ptr<T> value);
@@ -125,16 +124,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DataStartByPtr is null || !m_target_is_ptr)
                     return s_DataStartByVal!(target);
 
-                return s_DataStartByPtr(m_target_ptr);
+                return s_DataStartByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static exe()
@@ -145,12 +144,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)
@@ -158,12 +157,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadDataByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadDataByPtr)) as ReadDataByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadDataByVal = extensionMethod.CreateStaticDelegate(typeof(ReadDataByVal)) as ReadDataByVal;
 
                 if (s_ReadDataByPtr is null && s_ReadDataByVal is null)
@@ -171,12 +170,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("DataStart");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DataStartByPtr = extensionMethod.CreateStaticDelegate(typeof(DataStartByPtr)) as DataStartByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("DataStart");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DataStartByVal = extensionMethod.CreateStaticDelegate(typeof(DataStartByVal)) as DataStartByVal;
 
                 if (s_DataStartByPtr is null && s_DataStartByVal is null)

@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2020 October 09 04:52:22 UTC
+// package net -- go2cs converted at 2022 March 06 22:16:40 UTC
 // import "net" ==> using net = go.net_package
-// Original source: C:\Go\src\net\sock_plan9.go
+// Original source: C:\Program Files\Go\src\net\sock_plan9.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class net_package
-    {
-        private static long maxListenerBacklog()
-        { 
-            // /sys/include/ape/sys/socket.h:/SOMAXCONN
-            return 5L;
+namespace go;
 
-        }
-    }
+public static partial class net_package {
+
+private static nint maxListenerBacklog() { 
+    // /sys/include/ape/sys/socket.h:/SOMAXCONN
+    return 5;
+
 }
+
+} // end net_package

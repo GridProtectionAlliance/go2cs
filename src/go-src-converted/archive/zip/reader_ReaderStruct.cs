@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:09 UTC
+//     Generated on 2022 March 06 22:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
+using path = go.path_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
@@ -40,14 +44,18 @@ namespace archive
                 this.File = default;
                 this.Comment = default;
                 this.decompressors = default;
+                this.fileListOnce = default;
+                this.fileList = default;
             }
 
-            public Reader(io.ReaderAt r = default, slice<ptr<File>> File = default, @string Comment = default, map<ushort, Decompressor> decompressors = default)
+            public Reader(io.ReaderAt r = default, slice<ptr<File>> File = default, @string Comment = default, map<ushort, Decompressor> decompressors = default, sync.Once fileListOnce = default, slice<fileListEntry> fileList = default)
             {
                 this.r = r;
                 this.File = File;
                 this.Comment = Comment;
                 this.decompressors = decompressors;
+                this.fileListOnce = fileListOnce;
+                this.fileList = fileList;
             }
 
             // Enable comparisons between nil and Reader struct
@@ -70,7 +78,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Reader Reader_cast(dynamic value)
         {
-            return new Reader(value.r, value.File, value.Comment, value.decompressors);
+            return new Reader(value.r, value.File, value.Comment, value.decompressors, value.fileListOnce, value.fileList);
         }
     }
 }}

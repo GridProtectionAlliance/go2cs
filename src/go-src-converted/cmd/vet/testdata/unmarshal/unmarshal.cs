@@ -4,28 +4,22 @@
 
 // This file contains tests for the unmarshal checker.
 
-// package unmarshal -- go2cs converted at 2020 October 09 06:05:12 UTC
+// package unmarshal -- go2cs converted at 2022 March 06 23:35:21 UTC
 // import "cmd/vet/testdata/unmarshal" ==> using unmarshal = go.cmd.vet.testdata.unmarshal_package
-// Original source: C:\Go\src\cmd\vet\testdata\unmarshal\unmarshal.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\unmarshal\unmarshal.go
 using json = go.encoding.json_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class unmarshal_package
-    {
-        private static void _()
-        {
-            private partial struct t
-            {
-                public long a;
-            }
-            t v = default;
+namespace go.cmd.vet.testdata;
 
-            json.Unmarshal(new slice<byte>(new byte[] {  }), v); // ERROR "call of Unmarshal passes non-pointer as second argument"
-        }
+public static partial class unmarshal_package {
+
+private static void _() {
+    private partial struct t {
+        public nint a;
     }
-}}}}
+    t v = default;
+
+    json.Unmarshal(new slice<byte>(new byte[] {  }), v); // ERROR "call of Unmarshal passes non-pointer as second argument"
+}
+
+} // end unmarshal_package

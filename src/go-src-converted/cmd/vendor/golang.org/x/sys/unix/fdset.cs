@@ -2,57 +2,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
+//go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
+// +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
-// package unix -- go2cs converted at 2020 October 09 05:56:16 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:34 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\fdset.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\fdset.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Set adds fd to the set fds.
-        private static void Set(this ptr<FdSet> _addr_fds, long fd)
-        {
-            ref FdSet fds = ref _addr_fds.val;
+namespace go.cmd.vendor.golang.org.x.sys;
 
-            fds.Bits[fd / NFDBITS] |= (1L << (int)((uintptr(fd) % NFDBITS)));
-        }
+public static partial class unix_package {
 
-        // Clear removes fd from the set fds.
-        private static void Clear(this ptr<FdSet> _addr_fds, long fd)
-        {
-            ref FdSet fds = ref _addr_fds.val;
+    // Set adds fd to the set fds.
+private static void Set(this ptr<FdSet> _addr_fds, nint fd) {
+    ref FdSet fds = ref _addr_fds.val;
 
-            fds.Bits[fd / NFDBITS] &= (1L << (int)((uintptr(fd) % NFDBITS)));
-        }
+    fds.Bits[fd / NFDBITS] |= (1 << (int)((uintptr(fd) % NFDBITS)));
+}
 
-        // IsSet returns whether fd is in the set fds.
-        private static bool IsSet(this ptr<FdSet> _addr_fds, long fd)
-        {
-            ref FdSet fds = ref _addr_fds.val;
+// Clear removes fd from the set fds.
+private static void Clear(this ptr<FdSet> _addr_fds, nint fd) {
+    ref FdSet fds = ref _addr_fds.val;
 
-            return fds.Bits[fd / NFDBITS] & (1L << (int)((uintptr(fd) % NFDBITS))) != 0L;
-        }
+    fds.Bits[fd / NFDBITS] &= (1 << (int)((uintptr(fd) % NFDBITS)));
+}
 
-        // Zero clears the set fds.
-        private static void Zero(this ptr<FdSet> _addr_fds)
-        {
-            ref FdSet fds = ref _addr_fds.val;
+// IsSet returns whether fd is in the set fds.
+private static bool IsSet(this ptr<FdSet> _addr_fds, nint fd) {
+    ref FdSet fds = ref _addr_fds.val;
 
-            foreach (var (i) in fds.Bits)
-            {
-                fds.Bits[i] = 0L;
-            }
+    return fds.Bits[fd / NFDBITS] & (1 << (int)((uintptr(fd) % NFDBITS))) != 0;
+}
 
-        }
+// Zero clears the set fds.
+private static void Zero(this ptr<FdSet> _addr_fds) {
+    ref FdSet fds = ref _addr_fds.val;
+
+    foreach (var (i) in fds.Bits) {
+        fds.Bits[i] = 0;
     }
-}}}}}}
+}
+
+} // end unix_package

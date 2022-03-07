@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:00 UTC
+//     Generated on 2022 March 06 22:25:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using encoding = go.encoding_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -58,7 +57,7 @@ namespace encoding
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,13 +83,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_idByPtr is null || !m_target_is_ptr)
                     return s_idByVal!(target);
 
-                return s_idByPtr(m_target_ptr);
+                return s_idByPtr(m_target_ptr!);
             }
 
             private delegate @string setIdByPtr(ptr<T> value, typeId id);
@@ -104,13 +103,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setIdByPtr is null || !m_target_is_ptr)
                     return s_setIdByVal!(target, id);
 
-                return s_setIdByPtr(m_target_ptr, id);
+                return s_setIdByPtr(m_target_ptr!, id);
             }
 
             private delegate @string nameByPtr(ptr<T> value);
@@ -124,13 +123,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_nameByPtr is null || !m_target_is_ptr)
                     return s_nameByVal!(target);
 
-                return s_nameByPtr(m_target_ptr);
+                return s_nameByPtr(m_target_ptr!);
             }
 
             private delegate @string stringByPtr(ptr<T> value);
@@ -144,13 +143,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_stringByPtr is null || !m_target_is_ptr)
                     return s_stringByVal!(target);
 
-                return s_stringByPtr(m_target_ptr);
+                return s_stringByPtr(m_target_ptr!);
             }
 
             private delegate @string safeStringByPtr(ptr<T> value, map<typeId, bool> seen);
@@ -164,16 +163,16 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_safeStringByPtr is null || !m_target_is_ptr)
                     return s_safeStringByVal!(target, seen);
 
-                return s_safeStringByPtr(m_target_ptr, seen);
+                return s_safeStringByPtr(m_target_ptr!, seen);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static gobType()
@@ -184,12 +183,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("id");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_idByPtr = extensionMethod.CreateStaticDelegate(typeof(idByPtr)) as idByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("id");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_idByVal = extensionMethod.CreateStaticDelegate(typeof(idByVal)) as idByVal;
 
                 if (s_idByPtr is null && s_idByVal is null)
@@ -197,12 +196,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setIdByPtr = extensionMethod.CreateStaticDelegate(typeof(setIdByPtr)) as setIdByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setIdByVal = extensionMethod.CreateStaticDelegate(typeof(setIdByVal)) as setIdByVal;
 
                 if (s_setIdByPtr is null && s_setIdByVal is null)
@@ -210,12 +209,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_nameByPtr = extensionMethod.CreateStaticDelegate(typeof(nameByPtr)) as nameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_nameByVal = extensionMethod.CreateStaticDelegate(typeof(nameByVal)) as nameByVal;
 
                 if (s_nameByPtr is null && s_nameByVal is null)
@@ -223,12 +222,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("string");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_stringByPtr = extensionMethod.CreateStaticDelegate(typeof(stringByPtr)) as stringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("string");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_stringByVal = extensionMethod.CreateStaticDelegate(typeof(stringByVal)) as stringByVal;
 
                 if (s_stringByPtr is null && s_stringByVal is null)
@@ -236,12 +235,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("safeString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_safeStringByPtr = extensionMethod.CreateStaticDelegate(typeof(safeStringByPtr)) as safeStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("safeString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_safeStringByVal = extensionMethod.CreateStaticDelegate(typeof(safeStringByVal)) as safeStringByVal;
 
                 if (s_safeStringByPtr is null && s_safeStringByVal is null)

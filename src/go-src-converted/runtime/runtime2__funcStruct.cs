@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:09 UTC
+//     Generated on 2022 March 06 22:11:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -38,12 +36,14 @@ namespace go
                 this.pcfile = default;
                 this.pcln = default;
                 this.npcdata = default;
+                this.cuOffset = default;
                 this.funcID = default;
+                this.flag = default;
                 this._ = default;
                 this.nfuncdata = default;
             }
 
-            public _func(System.UIntPtr entry = default, int nameoff = default, int args = default, uint deferreturn = default, int pcsp = default, int pcfile = default, int pcln = default, int npcdata = default, funcID funcID = default, array<sbyte> _ = default, byte nfuncdata = default)
+            public _func(System.UIntPtr entry = default, int nameoff = default, int args = default, uint deferreturn = default, uint pcsp = default, uint pcfile = default, uint pcln = default, uint npcdata = default, uint cuOffset = default, funcID funcID = default, funcFlag flag = default, array<byte> _ = default, byte nfuncdata = default)
             {
                 this.entry = entry;
                 this.nameoff = nameoff;
@@ -53,7 +53,9 @@ namespace go
                 this.pcfile = pcfile;
                 this.pcln = pcln;
                 this.npcdata = npcdata;
+                this.cuOffset = cuOffset;
                 this.funcID = funcID;
+                this.flag = flag;
                 this._ = _;
                 this.nfuncdata = nfuncdata;
             }
@@ -78,7 +80,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static _func _func_cast(dynamic value)
         {
-            return new _func(value.entry, value.nameoff, value.args, value.deferreturn, value.pcsp, value.pcfile, value.pcln, value.npcdata, value.funcID, value._, value.nfuncdata);
+            return new _func(value.entry, value.nameoff, value.args, value.deferreturn, value.pcsp, value.pcfile, value.pcln, value.npcdata, value.cuOffset, value.funcID, value.flag, value._, value.nfuncdata);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:52 UTC
+//     Generated on 2022 March 06 22:17:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using big = go.math.big_package;
 using sync = go.sync_package;
@@ -52,7 +51,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,13 +77,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ParamsByPtr is null || !m_target_is_ptr)
                     return s_ParamsByVal!(target);
 
-                return s_ParamsByPtr(m_target_ptr);
+                return s_ParamsByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<big.Int>, ptr<big.Int>) IsOnCurveByPtr(ptr<T> value, ptr<big.Int> x, ptr<big.Int> y);
@@ -98,13 +97,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_IsOnCurveByPtr is null || !m_target_is_ptr)
                     return s_IsOnCurveByVal!(target, x, y);
 
-                return s_IsOnCurveByPtr(m_target_ptr, x, y);
+                return s_IsOnCurveByPtr(m_target_ptr!, x, y);
             }
 
             private delegate (ptr<big.Int>, ptr<big.Int>) AddByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2);
@@ -118,13 +117,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddByPtr is null || !m_target_is_ptr)
                     return s_AddByVal!(target, x1, y1, x2, y2);
 
-                return s_AddByPtr(m_target_ptr, x1, y1, x2, y2);
+                return s_AddByPtr(m_target_ptr!, x1, y1, x2, y2);
             }
 
             private delegate (ptr<big.Int>, ptr<big.Int>) DoubleByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1);
@@ -138,13 +137,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DoubleByPtr is null || !m_target_is_ptr)
                     return s_DoubleByVal!(target, x1, y1);
 
-                return s_DoubleByPtr(m_target_ptr, x1, y1);
+                return s_DoubleByPtr(m_target_ptr!, x1, y1);
             }
 
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarMultByPtr(ptr<T> value, ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k);
@@ -158,13 +157,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ScalarMultByPtr is null || !m_target_is_ptr)
                     return s_ScalarMultByVal!(target, x1, y1, k);
 
-                return s_ScalarMultByPtr(m_target_ptr, x1, y1, k);
+                return s_ScalarMultByPtr(m_target_ptr!, x1, y1, k);
             }
 
             private delegate (ptr<big.Int>, ptr<big.Int>) ScalarBaseMultByPtr(ptr<T> value, slice<byte> k);
@@ -178,16 +177,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ScalarBaseMultByPtr is null || !m_target_is_ptr)
                     return s_ScalarBaseMultByVal!(target, k);
 
-                return s_ScalarBaseMultByPtr(m_target_ptr, k);
+                return s_ScalarBaseMultByPtr(m_target_ptr!, k);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Curve()
@@ -198,12 +197,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Params");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParamsByPtr = extensionMethod.CreateStaticDelegate(typeof(ParamsByPtr)) as ParamsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Params");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParamsByVal = extensionMethod.CreateStaticDelegate(typeof(ParamsByVal)) as ParamsByVal;
 
                 if (s_ParamsByPtr is null && s_ParamsByVal is null)
@@ -211,12 +210,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("IsOnCurve");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsOnCurveByPtr = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByPtr)) as IsOnCurveByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("IsOnCurve");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsOnCurveByVal = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByVal)) as IsOnCurveByVal;
 
                 if (s_IsOnCurveByPtr is null && s_IsOnCurveByVal is null)
@@ -224,12 +223,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Add");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddByPtr = extensionMethod.CreateStaticDelegate(typeof(AddByPtr)) as AddByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Add");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddByVal = extensionMethod.CreateStaticDelegate(typeof(AddByVal)) as AddByVal;
 
                 if (s_AddByPtr is null && s_AddByVal is null)
@@ -237,12 +236,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Double");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoubleByPtr = extensionMethod.CreateStaticDelegate(typeof(DoubleByPtr)) as DoubleByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Double");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoubleByVal = extensionMethod.CreateStaticDelegate(typeof(DoubleByVal)) as DoubleByVal;
 
                 if (s_DoubleByPtr is null && s_DoubleByVal is null)
@@ -250,12 +249,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ScalarMult");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScalarMultByPtr = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByPtr)) as ScalarMultByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ScalarMult");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScalarMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByVal)) as ScalarMultByVal;
 
                 if (s_ScalarMultByPtr is null && s_ScalarMultByVal is null)
@@ -263,12 +262,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ScalarBaseMult");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScalarBaseMultByPtr = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByPtr)) as ScalarBaseMultByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ScalarBaseMult");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScalarBaseMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByVal)) as ScalarBaseMultByVal;
 
                 if (s_ScalarBaseMultByPtr is null && s_ScalarBaseMultByVal is null)

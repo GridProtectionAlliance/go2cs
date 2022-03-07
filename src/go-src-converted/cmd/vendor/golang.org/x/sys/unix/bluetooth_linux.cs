@@ -4,45 +4,39 @@
 
 // Bluetooth sockets and messages
 
-// package unix -- go2cs converted at 2020 October 09 05:56:11 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:29 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\bluetooth_linux.go
-
-using static go.builtin;
-
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Bluetooth Protocols
-        public static readonly long BTPROTO_L2CAP = (long)0L;
-        public static readonly long BTPROTO_HCI = (long)1L;
-        public static readonly long BTPROTO_SCO = (long)2L;
-        public static readonly long BTPROTO_RFCOMM = (long)3L;
-        public static readonly long BTPROTO_BNEP = (long)4L;
-        public static readonly long BTPROTO_CMTP = (long)5L;
-        public static readonly long BTPROTO_HIDP = (long)6L;
-        public static readonly long BTPROTO_AVDTP = (long)7L;
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\bluetooth_linux.go
 
 
-        public static readonly long HCI_CHANNEL_RAW = (long)0L;
-        public static readonly long HCI_CHANNEL_USER = (long)1L;
-        public static readonly long HCI_CHANNEL_MONITOR = (long)2L;
-        public static readonly long HCI_CHANNEL_CONTROL = (long)3L;
-        public static readonly long HCI_CHANNEL_LOGGING = (long)4L;
+namespace go.cmd.vendor.golang.org.x.sys;
+
+public static partial class unix_package {
+
+    // Bluetooth Protocols
+public static readonly nint BTPROTO_L2CAP = 0;
+public static readonly nint BTPROTO_HCI = 1;
+public static readonly nint BTPROTO_SCO = 2;
+public static readonly nint BTPROTO_RFCOMM = 3;
+public static readonly nint BTPROTO_BNEP = 4;
+public static readonly nint BTPROTO_CMTP = 5;
+public static readonly nint BTPROTO_HIDP = 6;
+public static readonly nint BTPROTO_AVDTP = 7;
 
 
-        // Socketoption Level
-        public static readonly ulong SOL_BLUETOOTH = (ulong)0x112UL;
-        public static readonly ulong SOL_HCI = (ulong)0x0UL;
-        public static readonly ulong SOL_L2CAP = (ulong)0x6UL;
-        public static readonly ulong SOL_RFCOMM = (ulong)0x12UL;
-        public static readonly ulong SOL_SCO = (ulong)0x11UL;
+public static readonly nint HCI_CHANNEL_RAW = 0;
+public static readonly nint HCI_CHANNEL_USER = 1;
+public static readonly nint HCI_CHANNEL_MONITOR = 2;
+public static readonly nint HCI_CHANNEL_CONTROL = 3;
+public static readonly nint HCI_CHANNEL_LOGGING = 4;
 
-    }
-}}}}}}
+
+// Socketoption Level
+public static readonly nuint SOL_BLUETOOTH = 0x112;
+public static readonly nuint SOL_HCI = 0x0;
+public static readonly nuint SOL_L2CAP = 0x6;
+public static readonly nuint SOL_RFCOMM = 0x12;
+public static readonly nuint SOL_SCO = 0x11;
+
+
+} // end unix_package

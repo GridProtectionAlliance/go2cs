@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:20 UTC
+//     Generated on 2022 March 06 22:21:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,10 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using mime = go.mime_package;
 using multipart = go.mime.multipart_package;
 using textproto = go.net.textproto_package;
@@ -63,7 +63,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,107 +78,47 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (os.FileInfo, error) ReaddirByPtr(ptr<T> value, long count);
-            private delegate (os.FileInfo, error) ReaddirByVal(T value, long count);
+            private delegate (fs.FileInfo, error) ReaddirByPtr(ptr<T> value, nint count);
+            private delegate (fs.FileInfo, error) ReaddirByVal(T value, nint count);
 
             private static readonly ReaddirByPtr? s_ReaddirByPtr;
             private static readonly ReaddirByVal? s_ReaddirByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (os.FileInfo, error) Readdir(long count)
+            public (fs.FileInfo, error) Readdir(nint count)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReaddirByPtr is null || !m_target_is_ptr)
                     return s_ReaddirByVal!(target, count);
 
-                return s_ReaddirByPtr(m_target_ptr, count);
+                return s_ReaddirByPtr(m_target_ptr!, count);
             }
 
-            private delegate (os.FileInfo, error) StatByPtr(ptr<T> value);
-            private delegate (os.FileInfo, error) StatByVal(T value);
+            private delegate (fs.FileInfo, error) StatByPtr(ptr<T> value);
+            private delegate (fs.FileInfo, error) StatByVal(T value);
 
             private static readonly StatByPtr? s_StatByPtr;
             private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (os.FileInfo, error) Stat()
+            public (fs.FileInfo, error) Stat()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target);
 
-                return s_StatByPtr(m_target_ptr);
-            }
-
-            private delegate error CloseByPtr(ptr<T> value);
-            private delegate error CloseByVal(T value);
-
-            private static readonly CloseByPtr? s_CloseByPtr;
-            private static readonly CloseByVal? s_CloseByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Close()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_CloseByPtr is null || !m_target_is_ptr)
-                    return s_CloseByVal!(target);
-
-                return s_CloseByPtr(m_target_ptr);
-            }
-
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-
-            private static readonly ReadByPtr? s_ReadByPtr;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByPtr is null || !m_target_is_ptr)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByPtr(m_target_ptr, p);
-            }
-
-            private delegate (long, error) SeekByPtr(ptr<T> value, long offset, long whence);
-            private delegate (long, error) SeekByVal(T value, long offset, long whence);
-
-            private static readonly SeekByPtr? s_SeekByPtr;
-            private static readonly SeekByVal? s_SeekByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Seek(long offset, long whence)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SeekByPtr is null || !m_target_is_ptr)
-                    return s_SeekByVal!(target, offset, whence);
-
-                return s_SeekByPtr(m_target_ptr, offset, whence);
+                return s_StatByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static File()
@@ -189,12 +129,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Readdir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReaddirByPtr = extensionMethod.CreateStaticDelegate(typeof(ReaddirByPtr)) as ReaddirByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Readdir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReaddirByVal = extensionMethod.CreateStaticDelegate(typeof(ReaddirByVal)) as ReaddirByVal;
 
                 if (s_ReaddirByPtr is null && s_ReaddirByVal is null)
@@ -202,55 +142,16 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement File.Stat method", new Exception("Stat"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-
-                if (s_CloseByPtr is null && s_CloseByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement File.Close method", new Exception("Close"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-
-                if (s_ReadByPtr is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement File.Read method", new Exception("Read"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seek");
-
-                if (!(extensionMethod is null))
-                    s_SeekByPtr = extensionMethod.CreateStaticDelegate(typeof(SeekByPtr)) as SeekByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Seek");
-
-                if (!(extensionMethod is null))
-                    s_SeekByVal = extensionMethod.CreateStaticDelegate(typeof(SeekByVal)) as SeekByVal;
-
-                if (s_SeekByPtr is null && s_SeekByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement File.Seek method", new Exception("Seek"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace sql
         {
             // Value of the RowsAffected struct
             private readonly long m_value;
-
+            
             public RowsAffected(long value) => m_value = value;
 
             // Enable implicit conversions between long and RowsAffected struct

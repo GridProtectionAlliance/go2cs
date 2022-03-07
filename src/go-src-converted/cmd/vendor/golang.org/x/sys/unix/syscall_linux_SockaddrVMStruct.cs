@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:43 UTC
+//     Generated on 2022 March 06 23:27:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
@@ -38,13 +37,15 @@ namespace sys
             {
                 this.CID = default;
                 this.Port = default;
+                this.Flags = default;
                 this.raw = default;
             }
 
-            public SockaddrVM(uint CID = default, uint Port = default, RawSockaddrVM raw = default)
+            public SockaddrVM(uint CID = default, uint Port = default, byte Flags = default, RawSockaddrVM raw = default)
             {
                 this.CID = CID;
                 this.Port = Port;
+                this.Flags = Flags;
                 this.raw = raw;
             }
 
@@ -68,7 +69,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static SockaddrVM SockaddrVM_cast(dynamic value)
         {
-            return new SockaddrVM(value.CID, value.Port, value.raw);
+            return new SockaddrVM(value.CID, value.Port, value.Flags, value.raw);
         }
     }
 }}}}}}

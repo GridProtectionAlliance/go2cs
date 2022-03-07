@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:32 UTC
+//     Generated on 2022 March 06 22:14:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
                 this.LatinOffset = default;
             }
 
-            public RangeTable(slice<Range16> R16 = default, slice<Range32> R32 = default, long LatinOffset = default)
+            public RangeTable(slice<Range16> R16 = default, slice<Range32> R32 = default, nint LatinOffset = default)
             {
                 this.R16 = R16;
                 this.R32 = R32;

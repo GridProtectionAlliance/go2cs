@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:36 UTC
+//     Generated on 2022 March 06 23:22:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -17,10 +19,28 @@ namespace go
     public static partial class main_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct T
+        public partial struct T : IArray
         {
             // Value of the T struct
             private readonly array<@string> m_value;
+            
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+
+            public ref @string this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public T(array<@string> value) => m_value = value;
 

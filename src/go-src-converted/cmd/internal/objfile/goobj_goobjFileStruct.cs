@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:44 UTC
+//     Generated on 2022 March 06 22:32:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using archive = go.cmd.@internal.archive_package;
 using goobj = go.cmd.@internal.goobj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -20,6 +20,7 @@ using dwarf = go.debug.dwarf_package;
 using gosym = go.debug.gosym_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using io = go.io_package;
 using os = go.os_package;
 using go;
 
@@ -38,13 +39,17 @@ namespace @internal
             public goobjFile(NilType _)
             {
                 this.goobj = default;
+                this.r = default;
                 this.f = default;
+                this.arch = default;
             }
 
-            public goobjFile(ref ptr<goobj.Package> goobj = default, ref ptr<os.File> f = default)
+            public goobjFile(ref ptr<archive.GoObj> goobj = default, ref ptr<goobj.Reader> r = default, ref ptr<os.File> f = default, ref ptr<sys.Arch> arch = default)
             {
                 this.goobj = goobj;
+                this.r = r;
                 this.f = f;
+                this.arch = arch;
             }
 
             // Enable comparisons between nil and goobjFile struct
@@ -67,7 +72,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static goobjFile goobjFile_cast(dynamic value)
         {
-            return new goobjFile(ref value.goobj, ref value.f);
+            return new goobjFile(ref value.goobj, ref value.r, ref value.f, ref value.arch);
         }
     }
 }}}

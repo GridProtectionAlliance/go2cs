@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:31 UTC
+//     Generated on 2022 March 06 22:42:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using token = go.go.token_package;
 using go;
 
 #nullable enable
@@ -34,7 +34,7 @@ namespace go
                 this.multiples = default;
             }
 
-            public embeddedType(Type typ = default, slice<long> index = default, bool indirect = default, bool multiples = default)
+            public embeddedType(Type typ = default, slice<nint> index = default, bool indirect = default, bool multiples = default)
             {
                 this.typ = typ;
                 this.index = index;

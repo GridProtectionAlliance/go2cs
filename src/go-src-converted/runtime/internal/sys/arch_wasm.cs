@@ -2,28 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 09 04:45:29 UTC
+// package sys -- go2cs converted at 2022 March 06 22:08:17 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
-// Original source: C:\Go\src\runtime\internal\sys\arch_wasm.go
-
-using static go.builtin;
-
-namespace go {
-namespace runtime {
-namespace @internal
-{
-    public static partial class sys_package
-    {
-        public static readonly var ArchFamily = WASM;
-        public static readonly var BigEndian = false;
-        public static readonly long DefaultPhysPageSize = (long)65536L;
-        public static readonly long PCQuantum = (long)1L;
-        public static readonly long Int64Align = (long)8L;
-        public static readonly long MinFrameSize = (long)0L;
+// Original source: C:\Program Files\Go\src\runtime\internal\sys\arch_wasm.go
 
 
-        public partial struct Uintreg // : ulong
-        {
-        }
-    }
-}}}
+namespace go.runtime.@internal;
+
+public static partial class sys_package {
+
+private static readonly var _ArchFamily = WASM;
+private static readonly nint _DefaultPhysPageSize = 65536;
+private static readonly nint _PCQuantum = 1;
+private static readonly nint _MinFrameSize = 0;
+private static readonly var _StackAlign = PtrSize;
+
+
+} // end sys_package

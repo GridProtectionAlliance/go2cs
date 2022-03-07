@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:52 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -26,7 +25,6 @@ using log = go.log_package;
 using bits = go.math.bits_package;
 using os = go.os_package;
 using sort = go.sort_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -52,7 +50,7 @@ namespace @internal
                 this.ParentPC = default;
             }
 
-            public InlTreeNode(int Parent = default, Sym File = default, int Line = default, Sym Func = default, int ParentPC = default)
+            public InlTreeNode(int Parent = default, goobj.CUFileIndex File = default, int Line = default, Sym Func = default, int ParentPC = default)
             {
                 this.Parent = Parent;
                 this.File = File;

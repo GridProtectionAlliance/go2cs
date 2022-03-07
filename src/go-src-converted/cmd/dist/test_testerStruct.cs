@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:43 UTC
+//     Generated on 2022 March 06 23:15:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -62,7 +61,7 @@ namespace go
                 this.worklist = default;
             }
 
-            public tester(bool race = default, bool listMode = default, bool rebuild = default, bool failed = default, bool keepGoing = default, bool compileOnly = default, @string runRxStr = default, ref ptr<regexp.Regexp> runRx = default, bool runRxWant = default, slice<@string> runNames = default, @string banner = default, @string lastHeading = default, bool cgoEnabled = default, bool partial = default, bool haveTime = default, slice<distTest> tests = default, long timeoutScale = default, slice<ptr<work>> worklist = default)
+            public tester(bool race = default, bool listMode = default, bool rebuild = default, bool failed = default, bool keepGoing = default, bool compileOnly = default, @string runRxStr = default, ref ptr<regexp.Regexp> runRx = default, bool runRxWant = default, slice<@string> runNames = default, @string banner = default, @string lastHeading = default, bool cgoEnabled = default, bool partial = default, bool haveTime = default, slice<distTest> tests = default, nint timeoutScale = default, slice<ptr<work>> worklist = default)
             {
                 this.race = race;
                 this.listMode = listMode;

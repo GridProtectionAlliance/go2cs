@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:36 UTC
+//     Generated on 2022 March 06 22:47:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace go
         {
             // Value of the whiteSpace struct
             private readonly byte m_value;
-
+            
             public whiteSpace(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and whiteSpace struct

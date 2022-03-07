@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
@@ -54,7 +53,7 @@ namespace pkg
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,16 +79,16 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Namer()
@@ -100,12 +99,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)

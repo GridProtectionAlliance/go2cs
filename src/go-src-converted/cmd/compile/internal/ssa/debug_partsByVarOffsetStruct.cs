@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:36 UTC
+//     Generated on 2022 March 06 22:49:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,15 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
+using types = go.cmd.compile.@internal.types_package;
 using dwarf = go.cmd.@internal.dwarf_package;
 using obj = go.cmd.@internal.obj_package;
+using src = go.cmd.@internal.src_package;
 using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using bits = go.math.bits_package;
 using sort = go.sort_package;
 using strings = go.strings_package;

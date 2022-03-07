@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:02 UTC
+//     Generated on 2022 March 06 23:36:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using zlib = go.compress.zlib_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
@@ -52,7 +51,7 @@ namespace image
                 this.transparent = default;
             }
 
-            public decoder(io.Reader r = default, image.Image img = default, hash.Hash32 crc = default, long width = default, long height = default, long depth = default, color.Palette palette = default, long cb = default, long stage = default, uint idatLength = default, array<byte> tmp = default, long interlace = default, bool useTransparent = default, array<byte> transparent = default)
+            public decoder(io.Reader r = default, image.Image img = default, hash.Hash32 crc = default, nint width = default, nint height = default, nint depth = default, color.Palette palette = default, nint cb = default, nint stage = default, uint idatLength = default, array<byte> tmp = default, nint interlace = default, bool useTransparent = default, array<byte> transparent = default)
             {
                 this.r = r;
                 this.img = img;

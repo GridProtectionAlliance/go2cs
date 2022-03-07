@@ -4,44 +4,38 @@
 
 // +build !linux
 
-// package main -- go2cs converted at 2020 October 09 05:00:51 UTC
-// Original source: C:\Go\src\runtime\testdata\testprog\syscalls_none.go
+// package main -- go2cs converted at 2022 March 06 22:26:08 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprog\syscalls_none.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static long gettid()
-        {
-            return 0L;
-        }
+namespace go;
 
-        private static (bool, bool) tidExists(long tid)
-        {
-            bool exists = default;
-            bool supported = default;
+public static partial class main_package {
 
-            return (false, false);
-        }
-
-        private static (@string, error) getcwd()
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-
-            return ("", error.As(null!)!);
-        }
-
-        private static error unshareFs()
-        {
-            return error.As(null!)!;
-        }
-
-        private static error chdir(@string path)
-        {
-            return error.As(null!)!;
-        }
-    }
+private static nint gettid() {
+    return 0;
 }
+
+private static (bool, bool) tidExists(nint tid) {
+    bool exists = default;
+    bool supported = default;
+
+    return (false, false);
+}
+
+private static (@string, error) getcwd() {
+    @string _p0 = default;
+    error _p0 = default!;
+
+    return ("", error.As(null!)!);
+}
+
+private static error unshareFs() {
+    return error.As(null!)!;
+}
+
+private static error chdir(@string path) {
+    return error.As(null!)!;
+}
+
+} // end main_package

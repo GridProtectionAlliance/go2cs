@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
 using strconv = go.strconv_package;
@@ -54,7 +53,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,16 +79,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ConvertValueByPtr is null || !m_target_is_ptr)
                     return s_ConvertValueByVal!(target, v);
 
-                return s_ConvertValueByPtr(m_target_ptr, v);
+                return s_ConvertValueByPtr(m_target_ptr!, v);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ValueConverter()
@@ -100,12 +99,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ConvertValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConvertValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByPtr)) as ConvertValueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ConvertValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConvertValueByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertValueByVal)) as ConvertValueByVal;
 
                 if (s_ConvertValueByPtr is null && s_ConvertValueByVal is null)

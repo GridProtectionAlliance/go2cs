@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:29 UTC
+//     Generated on 2022 March 06 22:15:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
@@ -41,7 +40,7 @@ namespace go
                 this.resolv = default;
             }
 
-            public conf(bool forceCgoLookupHost = default, bool netGo = default, bool netCgo = default, bool hasMDNSAllow = default, @string goos = default, long dnsDebugLevel = default, ref ptr<nssConf> nss = default, ref ptr<dnsConfig> resolv = default)
+            public conf(bool forceCgoLookupHost = default, bool netGo = default, bool netCgo = default, bool hasMDNSAllow = default, @string goos = default, nint dnsDebugLevel = default, ref ptr<nssConf> nss = default, ref ptr<dnsConfig> resolv = default)
             {
                 this.forceCgoLookupHost = forceCgoLookupHost;
                 this.netGo = netGo;

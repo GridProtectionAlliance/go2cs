@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:16 UTC
+//     Generated on 2022 March 06 22:26:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using itoa = go.@internal.itoa_package;
 using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
 
@@ -47,7 +47,7 @@ namespace go
                 this.AmbientCaps = default;
             }
 
-            public SysProcAttr(@string Chroot = default, ref ptr<Credential> Credential = default, bool Ptrace = default, bool Setsid = default, bool Setpgid = default, bool Setctty = default, bool Noctty = default, long Ctty = default, bool Foreground = default, long Pgid = default, Signal Pdeathsig = default, System.UIntPtr Cloneflags = default, System.UIntPtr Unshareflags = default, slice<SysProcIDMap> UidMappings = default, slice<SysProcIDMap> GidMappings = default, bool GidMappingsEnableSetgroups = default, slice<System.UIntPtr> AmbientCaps = default)
+            public SysProcAttr(@string Chroot = default, ref ptr<Credential> Credential = default, bool Ptrace = default, bool Setsid = default, bool Setpgid = default, bool Setctty = default, bool Noctty = default, nint Ctty = default, bool Foreground = default, nint Pgid = default, Signal Pdeathsig = default, System.UIntPtr Cloneflags = default, System.UIntPtr Unshareflags = default, slice<SysProcIDMap> UidMappings = default, slice<SysProcIDMap> GidMappings = default, bool GidMappingsEnableSetgroups = default, slice<System.UIntPtr> AmbientCaps = default)
             {
                 this.Chroot = Chroot;
                 this.Credential = Credential;

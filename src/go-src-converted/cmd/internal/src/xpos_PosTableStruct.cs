@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:22 UTC
+//     Generated on 2022 March 06 22:31:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
                 this.nameMap = default;
             }
 
-            public PosTable(slice<ptr<PosBase>> baseList = default, map<ptr<PosBase>, long> indexMap = default, map<@string, long> nameMap = default)
+            public PosTable(slice<ptr<PosBase>> baseList = default, map<ptr<PosBase>, nint> indexMap = default, map<@string, nint> nameMap = default)
             {
                 this.baseList = baseList;
                 this.indexMap = indexMap;

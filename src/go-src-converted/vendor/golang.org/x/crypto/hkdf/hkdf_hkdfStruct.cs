@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:32 UTC
+//     Generated on 2022 March 06 23:36:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using hmac = go.crypto.hmac_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
@@ -43,7 +42,7 @@ namespace crypto
                 this.buf = default;
             }
 
-            public hkdf(hash.Hash expander = default, long size = default, slice<byte> info = default, byte counter = default, slice<byte> prev = default, slice<byte> buf = default)
+            public hkdf(hash.Hash expander = default, nint size = default, slice<byte> info = default, byte counter = default, slice<byte> prev = default, slice<byte> buf = default)
             {
                 this.expander = expander;
                 this.size = size;

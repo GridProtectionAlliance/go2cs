@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:51 UTC
+//     Generated on 2022 March 06 23:21:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -30,16 +29,15 @@ using elf = go.debug.elf_package;
 using macho = go.debug.macho_package;
 using base64 = go.encoding.base64_package;
 using binary = go.encoding.binary_package;
-using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
+using exec = go.@internal.execabs_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
-using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using go;
@@ -64,6 +62,7 @@ namespace @internal
                 this.Minalign = default;
                 this.Dwarfregsp = default;
                 this.Dwarfreglr = default;
+                this.TrampLimit = default;
                 this.Androiddynld = default;
                 this.Linuxdynld = default;
                 this.Freebsddynld = default;
@@ -71,34 +70,38 @@ namespace @internal
                 this.Openbsddynld = default;
                 this.Dragonflydynld = default;
                 this.Solarisdynld = default;
+                this.CodePad = default;
+                this.Plan9Magic = default;
+                this.Plan9_64Bit = default;
                 this.Adddynrel = default;
-                this.Adddynrel2 = default;
                 this.Archinit = default;
                 this.Archreloc = default;
-                this.Archreloc2 = default;
                 this.Archrelocvariant = default;
                 this.Trampoline = default;
                 this.Asmb = default;
                 this.Asmb2 = default;
+                this.Extreloc = default;
                 this.Elfreloc1 = default;
-                this.Elfreloc2 = default;
+                this.ElfrelocSize = default;
                 this.Elfsetupplt = default;
                 this.Gentext = default;
-                this.Gentext2 = default;
                 this.Machoreloc1 = default;
+                this.MachorelocSize = default;
                 this.PEreloc1 = default;
                 this.Xcoffreloc1 = default;
+                this.GenSymsLate = default;
                 this.TLSIEtoLE = default;
                 this.AssignAddress = default;
             }
 
-            public Arch(long Funcalign = default, long Maxalign = default, long Minalign = default, long Dwarfregsp = default, long Dwarfreglr = default, @string Androiddynld = default, @string Linuxdynld = default, @string Freebsddynld = default, @string Netbsddynld = default, @string Openbsddynld = default, @string Dragonflydynld = default, @string Solarisdynld = default, Func<ptr<Target>, ptr<loader.Loader>, ptr<ArchSyms>, ptr<sym.Symbol>, ptr<sym.Reloc>, bool> Adddynrel = default, Func<ptr<Target>, ptr<loader.Loader>, ptr<ArchSyms>, loader.Sym, loader.Reloc2, long, bool> Adddynrel2 = default, Action<ptr<Link>> Archinit = default, Func<ptr<Target>, ptr<ArchSyms>, ptr<sym.Reloc>, ptr<sym.Symbol>, long, (long, bool)> Archreloc = default, Func<ptr<Target>, ptr<loader.Loader>, ptr<ArchSyms>, loader.Reloc2, ptr<loader.ExtReloc>, loader.Sym, long, (long, bool, bool)> Archreloc2 = default, Func<ptr<Target>, ptr<ArchSyms>, ptr<sym.Reloc>, ptr<sym.Symbol>, long, long> Archrelocvariant = default, Action<ptr<Link>, ptr<loader.Loader>, long, loader.Sym, loader.Sym> Trampoline = default, Action<ptr<Link>, ptr<loader.Loader>> Asmb = default, Action<ptr<Link>> Asmb2 = default, Func<ptr<Link>, ptr<sym.Reloc>, long, bool> Elfreloc1 = default, Func<ptr<Link>, ptr<loader.Loader>, loader.Sym, loader.ExtRelocView, long, bool> Elfreloc2 = default, Action<ptr<Link>, ptr<loader.SymbolBuilder>, ptr<loader.SymbolBuilder>, loader.Sym> Elfsetupplt = default, Action<ptr<Link>> Gentext = default, Action<ptr<Link>, ptr<loader.Loader>> Gentext2 = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<sym.Symbol>, ptr<sym.Reloc>, long, bool> Machoreloc1 = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<sym.Symbol>, ptr<sym.Reloc>, long, bool> PEreloc1 = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<sym.Symbol>, ptr<sym.Reloc>, long, bool> Xcoffreloc1 = default, Action<slice<byte>, long, long> TLSIEtoLE = default, Func<ptr<loader.Loader>, ptr<sym.Section>, long, loader.Sym, ulong, bool, (ptr<sym.Section>, long, ulong)> AssignAddress = default)
+            public Arch(nint Funcalign = default, nint Maxalign = default, nint Minalign = default, nint Dwarfregsp = default, nint Dwarfreglr = default, ulong TrampLimit = default, @string Androiddynld = default, @string Linuxdynld = default, @string Freebsddynld = default, @string Netbsddynld = default, @string Openbsddynld = default, @string Dragonflydynld = default, @string Solarisdynld = default, slice<byte> CodePad = default, uint Plan9Magic = default, bool Plan9_64Bit = default, Func<ptr<Target>, ptr<loader.Loader>, ptr<ArchSyms>, loader.Sym, loader.Reloc, nint, bool> Adddynrel = default, Action<ptr<Link>> Archinit = default, Func<ptr<Target>, ptr<loader.Loader>, ptr<ArchSyms>, loader.Reloc, loader.Sym, long, (long, nint, bool)> Archreloc = default, Func<ptr<Target>, ptr<loader.Loader>, loader.Reloc, sym.RelocVariant, loader.Sym, long, slice<byte>, long> Archrelocvariant = default, Action<ptr<Link>, ptr<loader.Loader>, nint, loader.Sym, loader.Sym> Trampoline = default, Action<ptr<Link>, ptr<loader.Loader>> Asmb = default, Action<ptr<Link>, ptr<loader.Loader>> Asmb2 = default, Func<ptr<Target>, ptr<loader.Loader>, loader.Reloc, loader.Sym, (loader.ExtReloc, bool)> Extreloc = default, Func<ptr<Link>, ptr<OutBuf>, ptr<loader.Loader>, loader.Sym, loader.ExtReloc, nint, long, bool> Elfreloc1 = default, uint ElfrelocSize = default, Action<ptr<Link>, ptr<loader.SymbolBuilder>, ptr<loader.SymbolBuilder>, loader.Sym> Elfsetupplt = default, Action<ptr<Link>, ptr<loader.Loader>> Gentext = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<loader.Loader>, loader.Sym, loader.ExtReloc, long, bool> Machoreloc1 = default, uint MachorelocSize = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<loader.Loader>, loader.Sym, loader.ExtReloc, long, bool> PEreloc1 = default, Func<ptr<sys.Arch>, ptr<OutBuf>, ptr<loader.Loader>, loader.Sym, loader.ExtReloc, long, bool> Xcoffreloc1 = default, Action<ptr<Link>, ptr<loader.Loader>> GenSymsLate = default, Action<slice<byte>, nint, nint> TLSIEtoLE = default, Func<ptr<loader.Loader>, ptr<sym.Section>, nint, loader.Sym, ulong, bool, (ptr<sym.Section>, nint, ulong)> AssignAddress = default)
             {
                 this.Funcalign = Funcalign;
                 this.Maxalign = Maxalign;
                 this.Minalign = Minalign;
                 this.Dwarfregsp = Dwarfregsp;
                 this.Dwarfreglr = Dwarfreglr;
+                this.TrampLimit = TrampLimit;
                 this.Androiddynld = Androiddynld;
                 this.Linuxdynld = Linuxdynld;
                 this.Freebsddynld = Freebsddynld;
@@ -106,23 +109,26 @@ namespace @internal
                 this.Openbsddynld = Openbsddynld;
                 this.Dragonflydynld = Dragonflydynld;
                 this.Solarisdynld = Solarisdynld;
+                this.CodePad = CodePad;
+                this.Plan9Magic = Plan9Magic;
+                this.Plan9_64Bit = Plan9_64Bit;
                 this.Adddynrel = Adddynrel;
-                this.Adddynrel2 = Adddynrel2;
                 this.Archinit = Archinit;
                 this.Archreloc = Archreloc;
-                this.Archreloc2 = Archreloc2;
                 this.Archrelocvariant = Archrelocvariant;
                 this.Trampoline = Trampoline;
                 this.Asmb = Asmb;
                 this.Asmb2 = Asmb2;
+                this.Extreloc = Extreloc;
                 this.Elfreloc1 = Elfreloc1;
-                this.Elfreloc2 = Elfreloc2;
+                this.ElfrelocSize = ElfrelocSize;
                 this.Elfsetupplt = Elfsetupplt;
                 this.Gentext = Gentext;
-                this.Gentext2 = Gentext2;
                 this.Machoreloc1 = Machoreloc1;
+                this.MachorelocSize = MachorelocSize;
                 this.PEreloc1 = PEreloc1;
                 this.Xcoffreloc1 = Xcoffreloc1;
+                this.GenSymsLate = GenSymsLate;
                 this.TLSIEtoLE = TLSIEtoLE;
                 this.AssignAddress = AssignAddress;
             }
@@ -147,7 +153,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Arch Arch_cast(dynamic value)
         {
-            return new Arch(value.Funcalign, value.Maxalign, value.Minalign, value.Dwarfregsp, value.Dwarfreglr, value.Androiddynld, value.Linuxdynld, value.Freebsddynld, value.Netbsddynld, value.Openbsddynld, value.Dragonflydynld, value.Solarisdynld, value.Adddynrel, value.Adddynrel2, value.Archinit, value.Archreloc, value.Archreloc2, value.Archrelocvariant, value.Trampoline, value.Asmb, value.Asmb2, value.Elfreloc1, value.Elfreloc2, value.Elfsetupplt, value.Gentext, value.Gentext2, value.Machoreloc1, value.PEreloc1, value.Xcoffreloc1, value.TLSIEtoLE, value.AssignAddress);
+            return new Arch(value.Funcalign, value.Maxalign, value.Minalign, value.Dwarfregsp, value.Dwarfreglr, value.TrampLimit, value.Androiddynld, value.Linuxdynld, value.Freebsddynld, value.Netbsddynld, value.Openbsddynld, value.Dragonflydynld, value.Solarisdynld, value.CodePad, value.Plan9Magic, value.Plan9_64Bit, value.Adddynrel, value.Archinit, value.Archreloc, value.Archrelocvariant, value.Trampoline, value.Asmb, value.Asmb2, value.Extreloc, value.Elfreloc1, value.ElfrelocSize, value.Elfsetupplt, value.Gentext, value.Machoreloc1, value.MachorelocSize, value.PEreloc1, value.Xcoffreloc1, value.GenSymsLate, value.TLSIEtoLE, value.AssignAddress);
         }
     }
 }}}}

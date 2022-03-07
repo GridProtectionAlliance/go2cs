@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:48 UTC
+//     Generated on 2022 March 06 23:36:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using lzw = go.compress.lzw_package;
 using errors = go.errors_package;
@@ -53,7 +52,7 @@ namespace image
                 this.tmp = default;
             }
 
-            public decoder(reader r = default, @string vers = default, long width = default, long height = default, long loopCount = default, long delayTime = default, byte backgroundIndex = default, byte disposalMethod = default, byte imageFields = default, byte transparentIndex = default, bool hasTransparentIndex = default, color.Palette globalColorTable = default, slice<long> delay = default, slice<byte> disposal = default, slice<ptr<image.Paletted>> image = default, array<byte> tmp = default)
+            public decoder(reader r = default, @string vers = default, nint width = default, nint height = default, nint loopCount = default, nint delayTime = default, byte backgroundIndex = default, byte disposalMethod = default, byte imageFields = default, byte transparentIndex = default, bool hasTransparentIndex = default, color.Palette globalColorTable = default, slice<nint> delay = default, slice<byte> disposal = default, slice<ptr<image.Paletted>> image = default, array<byte> tmp = default)
             {
                 this.r = r;
                 this.vers = vers;

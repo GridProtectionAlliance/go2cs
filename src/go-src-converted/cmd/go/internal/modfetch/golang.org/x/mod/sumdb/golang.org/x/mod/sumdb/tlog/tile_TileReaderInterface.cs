@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:31 UTC
+//     Generated on 2022 March 06 23:19:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -55,7 +54,7 @@ namespace sumdb
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,13 +80,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HeightByPtr is null || !m_target_is_ptr)
                     return s_HeightByVal!(target);
 
-                return s_HeightByPtr(m_target_ptr);
+                return s_HeightByPtr(m_target_ptr!);
             }
 
             private delegate (slice<slice<byte>>, error) ReadTilesByPtr(ptr<T> value, slice<Tile> tiles);
@@ -101,13 +100,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadTilesByPtr is null || !m_target_is_ptr)
                     return s_ReadTilesByVal!(target, tiles);
 
-                return s_ReadTilesByPtr(m_target_ptr, tiles);
+                return s_ReadTilesByPtr(m_target_ptr!, tiles);
             }
 
             private delegate (slice<slice<byte>>, error) SaveTilesByPtr(ptr<T> value, slice<Tile> tiles, slice<slice<byte>> data);
@@ -121,16 +120,16 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SaveTilesByPtr is null || !m_target_is_ptr)
                     return s_SaveTilesByVal!(target, tiles, data);
 
-                return s_SaveTilesByPtr(m_target_ptr, tiles, data);
+                return s_SaveTilesByPtr(m_target_ptr!, tiles, data);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static TileReader()
@@ -141,12 +140,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Height");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeightByPtr = extensionMethod.CreateStaticDelegate(typeof(HeightByPtr)) as HeightByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Height");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeightByVal = extensionMethod.CreateStaticDelegate(typeof(HeightByVal)) as HeightByVal;
 
                 if (s_HeightByPtr is null && s_HeightByVal is null)
@@ -154,12 +153,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadTiles");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadTilesByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadTilesByPtr)) as ReadTilesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadTiles");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadTilesByVal = extensionMethod.CreateStaticDelegate(typeof(ReadTilesByVal)) as ReadTilesByVal;
 
                 if (s_ReadTilesByPtr is null && s_ReadTilesByVal is null)
@@ -167,12 +166,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SaveTiles");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SaveTilesByPtr = extensionMethod.CreateStaticDelegate(typeof(SaveTilesByPtr)) as SaveTilesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SaveTiles");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SaveTilesByVal = extensionMethod.CreateStaticDelegate(typeof(SaveTilesByVal)) as SaveTilesByVal;
 
                 if (s_SaveTilesByPtr is null && s_SaveTilesByVal is null)

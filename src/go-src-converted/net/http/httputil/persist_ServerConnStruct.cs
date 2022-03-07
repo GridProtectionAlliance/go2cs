@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:58 UTC
+//     Generated on 2022 March 06 22:24:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -48,7 +47,7 @@ namespace http
                 this.pipe = default;
             }
 
-            public ServerConn(sync.Mutex mu = default, net.Conn c = default, ref ptr<bufio.Reader> r = default, error re = default, error we = default, io.ReadCloser lastbody = default, long nread = default, long nwritten = default, map<ptr<http.Request>, ulong> pipereq = default, textproto.Pipeline pipe = default)
+            public ServerConn(sync.Mutex mu = default, net.Conn c = default, ref ptr<bufio.Reader> r = default, error re = default, error we = default, io.ReadCloser lastbody = default, nint nread = default, nint nwritten = default, map<ptr<http.Request>, nuint> pipereq = default, textproto.Pipeline pipe = default)
             {
                 this.mu = mu;
                 this.c = c;

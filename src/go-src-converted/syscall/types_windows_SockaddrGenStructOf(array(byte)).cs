@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:02:04 UTC
+//     Generated on 2022 March 06 22:27:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -17,10 +19,28 @@ namespace go
     public static partial class syscall_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct SockaddrGen
+        public partial struct SockaddrGen : IArray
         {
             // Value of the SockaddrGen struct
             private readonly array<byte> m_value;
+            
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+
+            public ref byte this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public SockaddrGen(array<byte> value) => m_value = value;
 

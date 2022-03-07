@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:19 UTC
+//     Generated on 2022 March 06 22:15:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using io = go.io_package;
 using bits = go.math.bits_package;
@@ -54,7 +53,7 @@ namespace compress
                 this.copyDist = default;
             }
 
-            public decompressor(Reader r = default, long roffset = default, uint b = default, ulong nb = default, huffmanDecoder h1 = default, huffmanDecoder h2 = default, ref ptr<array<long>> bits = default, ref ptr<array<long>> codebits = default, dictDecoder dict = default, array<byte> buf = default, Action<ptr<decompressor>> step = default, long stepState = default, bool final = default, error err = default, slice<byte> toRead = default, ref ptr<huffmanDecoder> hl = default, ref ptr<huffmanDecoder> hd = default, long copyLen = default, long copyDist = default)
+            public decompressor(Reader r = default, long roffset = default, uint b = default, nuint nb = default, huffmanDecoder h1 = default, huffmanDecoder h2 = default, ref ptr<array<nint>> bits = default, ref ptr<array<nint>> codebits = default, dictDecoder dict = default, array<byte> buf = default, Action<ptr<decompressor>> step = default, nint stepState = default, bool final = default, error err = default, slice<byte> toRead = default, ref ptr<huffmanDecoder> hl = default, ref ptr<huffmanDecoder> hd = default, nint copyLen = default, nint copyDist = default)
             {
                 this.r = r;
                 this.roffset = roffset;

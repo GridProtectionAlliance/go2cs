@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -47,14 +46,14 @@ namespace pprof
             public (slice<Inst>, error) Open(@string file, ulong start, ulong limit, ulong offset) => s_OpenByRef?.Invoke(ref this, file, start, limit, offset) ?? s_OpenByVal?.Invoke(this, file, start, limit, offset) ?? ObjTool?.Open(file, start, limit, offset) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ObjTool.Disasm function promotion
-            private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end);
-            private delegate (slice<Inst>, error) DisasmByRef(ref T value, @string file, ulong start, ulong end);
+            private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end, bool intelSyntax);
+            private delegate (slice<Inst>, error) DisasmByRef(ref T value, @string file, ulong start, ulong end, bool intelSyntax);
 
             private static readonly DisasmByVal s_DisasmByVal;
             private static readonly DisasmByRef s_DisasmByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<Inst>, error) Disasm(@string file, ulong start, ulong end) => s_DisasmByRef?.Invoke(ref this, file, start, end) ?? s_DisasmByVal?.Invoke(this, file, start, end) ?? ObjTool?.Disasm(file, start, end) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (slice<Inst>, error) Disasm(@string file, ulong start, ulong end, bool intelSyntax) => s_DisasmByRef?.Invoke(ref this, file, start, end, intelSyntax) ?? s_DisasmByVal?.Invoke(this, file, start, end, intelSyntax) ?? ObjTool?.Disasm(file, start, end, intelSyntax) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static internalObjTool()
@@ -64,21 +63,21 @@ namespace pprof
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Open");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_OpenByRef = extensionMethod.CreateStaticDelegate(typeof(OpenByRef)) as OpenByRef;
 
-                    if ((object)s_OpenByRef == null)
+                    if (s_OpenByRef is null)
                         s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Disasm");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_DisasmByRef = extensionMethod.CreateStaticDelegate(typeof(DisasmByRef)) as DisasmByRef;
 
-                    if ((object)s_DisasmByRef == null)
+                    if (s_DisasmByRef is null)
                         s_DisasmByVal = extensionMethod.CreateStaticDelegate(typeof(DisasmByVal)) as DisasmByVal;
                 }
             }

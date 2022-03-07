@@ -2,25 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2020 October 09 05:48:58 UTC
+// package riscv64 -- go2cs converted at 2022 March 06 23:20:38 UTC
 // import "cmd/link/internal/riscv64" ==> using riscv64 = go.cmd.link.@internal.riscv64_package
-// Original source: C:\Go\src\cmd\link\internal\riscv64\l.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\riscv64\l.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class riscv64_package
-    {
-        private static readonly long maxAlign = (long)32L; // max data alignment
-        private static readonly long minAlign = (long)1L;
-        private static readonly long funcAlign = (long)8L;
+namespace go.cmd.link.@internal;
 
-        private static readonly long dwarfRegLR = (long)1L;
-        private static readonly long dwarfRegSP = (long)2L;
+public static partial class riscv64_package {
 
-    }
-}}}}
+private static readonly nint maxAlign = 32; // max data alignment
+private static readonly nint minAlign = 1;
+private static readonly nint funcAlign = 8;
+
+private static readonly nint dwarfRegLR = 1;
+private static readonly nint dwarfRegSP = 2;
+
+
+} // end riscv64_package

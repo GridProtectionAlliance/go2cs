@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:03 UTC
+//     Generated on 2022 March 06 22:46:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using scanner = go.text.scanner_package;
 using src = go.cmd.@internal.src_package;
 using go;
@@ -38,7 +37,7 @@ namespace @internal
                 this.pos = default;
             }
 
-            public Slice(slice<Token> tokens = default, ref ptr<src.PosBase> @base = default, long line = default, long pos = default)
+            public Slice(slice<Token> tokens = default, ref ptr<src.PosBase> @base = default, nint line = default, nint pos = default)
             {
                 this.tokens = tokens;
                 this.@base = @base;

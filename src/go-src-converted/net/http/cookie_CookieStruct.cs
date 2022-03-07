@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:17 UTC
+//     Generated on 2022 March 06 22:21:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using log = go.log_package;
 using net = go.net_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -48,7 +48,7 @@ namespace net
                 this.Unparsed = default;
             }
 
-            public Cookie(@string Name = default, @string Value = default, @string Path = default, @string Domain = default, time.Time Expires = default, @string RawExpires = default, long MaxAge = default, bool Secure = default, bool HttpOnly = default, SameSite SameSite = default, @string Raw = default, slice<@string> Unparsed = default)
+            public Cookie(@string Name = default, @string Value = default, @string Path = default, @string Domain = default, time.Time Expires = default, @string RawExpires = default, nint MaxAge = default, bool Secure = default, bool HttpOnly = default, SameSite SameSite = default, @string Raw = default, slice<@string> Unparsed = default)
             {
                 this.Name = Name;
                 this.Value = Value;

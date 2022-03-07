@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:55 UTC
+//     Generated on 2022 March 06 23:21:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -68,7 +67,7 @@ namespace @internal
                 this.shstrndx = default;
             }
 
-            public ElfObj(ref ptr<bio.Reader> f = default, long @base = default, long length = default, long is64 = default, @string name = default, binary.ByteOrder e = default, slice<ElfSect> sect = default, ulong nsect = default, long nsymtab = default, ref ptr<ElfSect> symtab = default, ref ptr<ElfSect> symstr = default, uint type_ = default, uint machine = default, uint version = default, ulong entry = default, ulong phoff = default, ulong shoff = default, uint flags = default, uint ehsize = default, uint phentsize = default, uint phnum = default, uint shentsize = default, uint shnum = default, uint shstrndx = default)
+            public ElfObj(ref ptr<bio.Reader> f = default, long @base = default, long length = default, nint is64 = default, @string name = default, binary.ByteOrder e = default, slice<ElfSect> sect = default, nuint nsect = default, nint nsymtab = default, ref ptr<ElfSect> symtab = default, ref ptr<ElfSect> symstr = default, uint type_ = default, uint machine = default, uint version = default, ulong entry = default, ulong phoff = default, ulong shoff = default, uint flags = default, uint ehsize = default, uint phentsize = default, uint phnum = default, uint shentsize = default, uint shnum = default, uint shstrndx = default)
             {
                 this.f = f;
                 this.@base = @base;

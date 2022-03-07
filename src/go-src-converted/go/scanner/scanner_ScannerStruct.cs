@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:00 UTC
+//     Generated on 2022 March 06 22:42:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using token = go.go.token_package;
@@ -48,7 +47,7 @@ namespace go
                 this.ErrorCount = default;
             }
 
-            public Scanner(ref ptr<token.File> file = default, @string dir = default, slice<byte> src = default, ErrorHandler err = default, Mode mode = default, int ch = default, long offset = default, long rdOffset = default, long lineOffset = default, bool insertSemi = default, long ErrorCount = default)
+            public Scanner(ref ptr<token.File> file = default, @string dir = default, slice<byte> src = default, ErrorHandler err = default, Mode mode = default, int ch = default, nint offset = default, nint rdOffset = default, nint lineOffset = default, bool insertSemi = default, nint ErrorCount = default)
             {
                 this.file = file;
                 this.dir = dir;

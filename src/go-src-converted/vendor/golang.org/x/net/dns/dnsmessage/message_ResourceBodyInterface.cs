@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:47 UTC
+//     Generated on 2022 March 06 23:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using go;
 
@@ -54,7 +53,7 @@ namespace dns
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -69,24 +68,24 @@ namespace dns
                 m_target_is_ptr = true;
             }
 
-            private delegate @string packByPtr(ptr<T> value, slice<byte> msg, map<@string, long> compression, long compressionOff);
-            private delegate @string packByVal(T value, slice<byte> msg, map<@string, long> compression, long compressionOff);
+            private delegate @string packByPtr(ptr<T> value, slice<byte> msg, map<@string, nint> compression, nint compressionOff);
+            private delegate @string packByVal(T value, slice<byte> msg, map<@string, nint> compression, nint compressionOff);
 
             private static readonly packByPtr? s_packByPtr;
             private static readonly packByVal? s_packByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string pack(slice<byte> msg, map<@string, long> compression, long compressionOff)
+            public @string pack(slice<byte> msg, map<@string, nint> compression, nint compressionOff)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_packByPtr is null || !m_target_is_ptr)
                     return s_packByVal!(target, msg, compression, compressionOff);
 
-                return s_packByPtr(m_target_ptr, msg, compression, compressionOff);
+                return s_packByPtr(m_target_ptr!, msg, compression, compressionOff);
             }
 
             private delegate @string realTypeByPtr(ptr<T> value);
@@ -100,13 +99,13 @@ namespace dns
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_realTypeByPtr is null || !m_target_is_ptr)
                     return s_realTypeByVal!(target);
 
-                return s_realTypeByPtr(m_target_ptr);
+                return s_realTypeByPtr(m_target_ptr!);
             }
 
             private delegate @string GoStringByPtr(ptr<T> value);
@@ -120,16 +119,16 @@ namespace dns
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GoStringByPtr is null || !m_target_is_ptr)
                     return s_GoStringByVal!(target);
 
-                return s_GoStringByPtr(m_target_ptr);
+                return s_GoStringByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ResourceBody()
@@ -140,12 +139,12 @@ namespace dns
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("pack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_packByPtr = extensionMethod.CreateStaticDelegate(typeof(packByPtr)) as packByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("pack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_packByVal = extensionMethod.CreateStaticDelegate(typeof(packByVal)) as packByVal;
 
                 if (s_packByPtr is null && s_packByVal is null)
@@ -153,12 +152,12 @@ namespace dns
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("realType");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_realTypeByPtr = extensionMethod.CreateStaticDelegate(typeof(realTypeByPtr)) as realTypeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("realType");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_realTypeByVal = extensionMethod.CreateStaticDelegate(typeof(realTypeByVal)) as realTypeByVal;
 
                 if (s_realTypeByPtr is null && s_realTypeByVal is null)
@@ -166,12 +165,12 @@ namespace dns
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("GoString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoStringByPtr = extensionMethod.CreateStaticDelegate(typeof(GoStringByPtr)) as GoStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("GoString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoStringByVal = extensionMethod.CreateStaticDelegate(typeof(GoStringByVal)) as GoStringByVal;
 
                 if (s_GoStringByPtr is null && s_GoStringByVal is null)

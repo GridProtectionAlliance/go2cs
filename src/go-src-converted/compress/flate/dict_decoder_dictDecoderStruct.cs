@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:14 UTC
+//     Generated on 2022 March 06 22:15:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace compress
                 this.full = default;
             }
 
-            public dictDecoder(slice<byte> hist = default, long wrPos = default, long rdPos = default, bool full = default)
+            public dictDecoder(slice<byte> hist = default, nint wrPos = default, nint rdPos = default, bool full = default)
             {
                 this.hist = hist;
                 this.wrPos = wrPos;

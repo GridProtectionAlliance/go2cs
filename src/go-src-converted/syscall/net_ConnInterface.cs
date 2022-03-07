@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:24 UTC
+//     Generated on 2022 March 06 22:26:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,16 +73,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SyscallConnByPtr is null || !m_target_is_ptr)
                     return s_SyscallConnByVal!(target);
 
-                return s_SyscallConnByPtr(m_target_ptr);
+                return s_SyscallConnByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Conn()
@@ -93,12 +93,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SyscallConn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SyscallConnByPtr = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByPtr)) as SyscallConnByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SyscallConn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SyscallConnByVal = extensionMethod.CreateStaticDelegate(typeof(SyscallConnByVal)) as SyscallConnByVal;
 
                 if (s_SyscallConnByPtr is null && s_SyscallConnByVal is null)

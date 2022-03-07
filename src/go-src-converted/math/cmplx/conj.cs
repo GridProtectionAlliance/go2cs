@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2020 October 09 05:07:48 UTC
+// package cmplx -- go2cs converted at 2022 March 06 22:31:12 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
-// Original source: C:\Go\src\math\cmplx\conj.go
+// Original source: C:\Program Files\Go\src\math\cmplx\conj.go
 
-using static go.builtin;
 
-namespace go {
-namespace math
-{
-    public static partial class cmplx_package
-    {
-        // Conj returns the complex conjugate of x.
-        public static System.Numerics.Complex128 Conj(System.Numerics.Complex128 x)
-        {
-            return complex(real(x), -imag(x));
-        }
-    }
-}}
+namespace go.math;
+
+public static partial class cmplx_package {
+
+    // Conj returns the complex conjugate of x.
+public static System.Numerics.Complex128 Conj(System.Numerics.Complex128 x) {
+    return complex(real(x), -imag(x));
+}
+
+} // end cmplx_package

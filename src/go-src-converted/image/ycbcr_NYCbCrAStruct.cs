@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:43 UTC
+//     Generated on 2022 March 06 23:35:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using color = go.image.color_package;
 
 #nullable enable
@@ -36,9 +35,9 @@ namespace go
 
             public ref slice<byte> Cr => ref m_YCbCrRef.Value.Cr;
 
-            public ref long YStride => ref m_YCbCrRef.Value.YStride;
+            public ref nint YStride => ref m_YCbCrRef.Value.YStride;
 
-            public ref long CStride => ref m_YCbCrRef.Value.CStride;
+            public ref nint CStride => ref m_YCbCrRef.Value.CStride;
 
             public ref YCbCrSubsampleRatio SubsampleRatio => ref m_YCbCrRef.Value.SubsampleRatio;
 
@@ -52,7 +51,7 @@ namespace go
                 this.AStride = default;
             }
 
-            public NYCbCrA(YCbCr YCbCr = default, slice<byte> A = default, long AStride = default)
+            public NYCbCrA(YCbCr YCbCr = default, slice<byte> A = default, nint AStride = default)
             {
                 this.m_YCbCrRef = new ptr<YCbCr>(YCbCr);
                 this.A = A;

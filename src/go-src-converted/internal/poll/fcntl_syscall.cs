@@ -2,32 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build dragonfly || freebsd || linux || netbsd || openbsd
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package poll -- go2cs converted at 2020 October 09 04:51:01 UTC
+// package poll -- go2cs converted at 2022 March 06 22:12:57 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
-// Original source: C:\Go\src\internal\poll\fcntl_syscall.go
+// Original source: C:\Program Files\Go\src\internal\poll\fcntl_syscall.go
 using unix = go.@internal.syscall.unix_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace @internal
-{
-    public static partial class poll_package
-    {
-        private static (long, error) fcntl(long fd, long cmd, long arg)
-        {
-            long _p0 = default;
-            error _p0 = default!;
+namespace go.@internal;
 
-            var (r, _, e) = syscall.Syscall(unix.FcntlSyscall, uintptr(fd), uintptr(cmd), uintptr(arg));
-            if (e != 0L)
-            {
-                return (int(r), error.As(syscall.Errno(e))!);
-            }
-            return (int(r), error.As(null!)!);
+public static partial class poll_package {
 
-        }
+private static (nint, error) fcntl(nint fd, nint cmd, nint arg) {
+    nint _p0 = default;
+    error _p0 = default!;
+
+    var (r, _, e) = syscall.Syscall(unix.FcntlSyscall, uintptr(fd), uintptr(cmd), uintptr(arg));
+    if (e != 0) {
+        return (int(r), error.As(syscall.Errno(e))!);
     }
-}}
+    return (int(r), error.As(null!)!);
+
+}
+
+} // end poll_package

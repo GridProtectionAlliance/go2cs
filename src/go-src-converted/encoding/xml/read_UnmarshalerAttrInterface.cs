@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:15 UTC
+//     Generated on 2022 March 06 22:25:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using errors = go.errors_package;
@@ -56,7 +55,7 @@ namespace encoding
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -82,16 +81,16 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnmarshalXMLAttrByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalXMLAttrByVal!(target, attr);
 
-                return s_UnmarshalXMLAttrByPtr(m_target_ptr, attr);
+                return s_UnmarshalXMLAttrByPtr(m_target_ptr!, attr);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static UnmarshalerAttr()
@@ -102,12 +101,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalXMLAttr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalXMLAttrByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByPtr)) as UnmarshalXMLAttrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnmarshalXMLAttr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalXMLAttrByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalXMLAttrByVal)) as UnmarshalXMLAttrByVal;
 
                 if (s_UnmarshalXMLAttrByPtr is null && s_UnmarshalXMLAttrByVal is null)

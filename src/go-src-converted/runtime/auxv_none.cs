@@ -2,28 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !linux
-// +build !darwin
-// +build !dragonfly
-// +build !freebsd
-// +build !netbsd
-// +build !openbsd !arm64
-// +build !solaris
+//go:build !linux && !darwin && !dragonfly && !freebsd && !netbsd && !solaris
+// +build !linux,!darwin,!dragonfly,!freebsd,!netbsd,!solaris
 
-// package runtime -- go2cs converted at 2020 October 09 04:45:34 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:08:20 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\auxv_none.go
+// Original source: C:\Program Files\Go\src\runtime\auxv_none.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static void sysargs(int argc, ptr<ptr<byte>> _addr_argv)
-        {
-            ref ptr<byte> argv = ref _addr_argv.val;
+namespace go;
 
-        }
-    }
+public static partial class runtime_package {
+
+private static void sysargs(int argc, ptr<ptr<byte>> _addr_argv) {
+    ref ptr<byte> argv = ref _addr_argv.val;
+
 }
+
+} // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
@@ -36,9 +35,9 @@ namespace pkg
 
             private ref S S_val => ref m_SRef.Value;
 
-            public ref ptr<long> Public => ref m_SRef.Value.Public;
+            public ref ptr<nint> Public => ref m_SRef.Value.Public;
 
-            public ref ptr<long> @private => ref m_SRef.Value.@private;
+            public ref ptr<nint> @private => ref m_SRef.Value.@private;
 
             public ref Time PublicTime => ref m_SRef.Value.PublicTime;
 

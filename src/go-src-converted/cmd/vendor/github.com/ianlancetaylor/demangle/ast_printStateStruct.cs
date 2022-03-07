@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:11 UTC
+//     Generated on 2022 March 06 23:24:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -41,7 +39,7 @@ namespace ianlancetaylor
                 this.printing = default;
             }
 
-            public printState(bool tparams = default, bytes.Buffer buf = default, byte last = default, slice<AST> inner = default, slice<AST> printing = default)
+            public printState(bool tparams = default, strings.Builder buf = default, byte last = default, slice<AST> inner = default, slice<AST> printing = default)
             {
                 this.tparams = tparams;
                 this.buf = buf;

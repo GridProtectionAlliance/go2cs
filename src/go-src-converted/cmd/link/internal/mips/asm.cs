@@ -28,283 +28,169 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips -- go2cs converted at 2020 October 09 05:48:25 UTC
+// package mips -- go2cs converted at 2022 March 06 23:20:07 UTC
 // import "cmd/link/internal/mips" ==> using mips = go.cmd.link.@internal.mips_package
-// Original source: C:\Go\src\cmd\link\internal\mips\asm.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\mips\asm.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using ld = go.cmd.link.@internal.ld_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using sync = go.sync_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class mips_package
-    {
-        private static void gentext2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-            ref loader.Loader ldr = ref _addr_ldr.val;
+namespace go.cmd.link.@internal;
 
-            return ;
-        }
+public static partial class mips_package {
 
-        private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Symbol> _addr_s, ptr<sym.Reloc> _addr_r)
-        {
-            ref ld.Target target = ref _addr_target.val;
-            ref loader.Loader ldr = ref _addr_ldr.val;
-            ref ld.ArchSyms syms = ref _addr_syms.val;
-            ref sym.Symbol s = ref _addr_s.val;
-            ref sym.Reloc r = ref _addr_r.val;
+private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr) {
+    ref ld.Link ctxt = ref _addr_ctxt.val;
+    ref loader.Loader ldr = ref _addr_ldr.val;
 
-            log.Fatalf("adddynrel not implemented");
+    return ;
+}
+
+private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
+    ref ld.Link ctxt = ref _addr_ctxt.val;
+    ref ld.OutBuf @out = ref _addr_@out.val;
+    ref loader.Loader ldr = ref _addr_ldr.val;
+
+    @out.Write32(uint32(sectoff));
+
+    var elfsym = ld.ElfSymForReloc(ctxt, r.Xsym);
+
+    if (r.Type == objabi.R_ADDR || r.Type == objabi.R_DWARFSECREF) 
+        if (r.Size != 4) {
             return false;
         }
+        @out.Write32(uint32(elf.R_MIPS_32) | uint32(elfsym) << 8);
+    else if (r.Type == objabi.R_ADDRMIPS) 
+        @out.Write32(uint32(elf.R_MIPS_LO16) | uint32(elfsym) << 8);
+    else if (r.Type == objabi.R_ADDRMIPSU) 
+        @out.Write32(uint32(elf.R_MIPS_HI16) | uint32(elfsym) << 8);
+    else if (r.Type == objabi.R_ADDRMIPSTLS) 
+        @out.Write32(uint32(elf.R_MIPS_TLS_TPREL_LO16) | uint32(elfsym) << 8);
+    else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
+        @out.Write32(uint32(elf.R_MIPS_26) | uint32(elfsym) << 8);
+    else 
+        return false;
+        return true;
 
-        private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<sym.Reloc> _addr_r, long sectoff)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-            ref sym.Reloc r = ref _addr_r.val;
+}
 
-            ctxt.Out.Write32(uint32(sectoff));
+private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic) {
+    ref ld.Link ctxt = ref _addr_ctxt.val;
+    ref loader.SymbolBuilder plt = ref _addr_plt.val;
+    ref loader.SymbolBuilder gotplt = ref _addr_gotplt.val;
 
-            var elfsym = ld.ElfSymForReloc(ctxt, r.Xsym);
+    return ;
+}
 
-            if (r.Type == objabi.R_ADDR || r.Type == objabi.R_DWARFSECREF) 
-                if (r.Siz != 4L)
-                {
-                    return false;
-                }
+private static bool machoreloc1(ptr<sys.Arch> _addr__p0, ptr<ld.OutBuf> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Sym _p0, loader.ExtReloc _p0, long _p0) {
+    ref sys.Arch _p0 = ref _addr__p0.val;
+    ref ld.OutBuf _p0 = ref _addr__p0.val;
+    ref loader.Loader _p0 = ref _addr__p0.val;
 
-                ctxt.Out.Write32(uint32(elf.R_MIPS_32) | uint32(elfsym) << (int)(8L));
-            else if (r.Type == objabi.R_ADDRMIPS) 
-                ctxt.Out.Write32(uint32(elf.R_MIPS_LO16) | uint32(elfsym) << (int)(8L));
-            else if (r.Type == objabi.R_ADDRMIPSU) 
-                ctxt.Out.Write32(uint32(elf.R_MIPS_HI16) | uint32(elfsym) << (int)(8L));
-            else if (r.Type == objabi.R_ADDRMIPSTLS) 
-                ctxt.Out.Write32(uint32(elf.R_MIPS_TLS_TPREL_LO16) | uint32(elfsym) << (int)(8L));
-            else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
-                ctxt.Out.Write32(uint32(elf.R_MIPS_26) | uint32(elfsym) << (int)(8L));
-            else 
-                return false;
-                        return true;
+    return false;
+}
 
-        }
+private static long applyrel(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _addr_ldr, objabi.RelocType rt, int off, loader.Sym s, long val, long t) {
+    ref sys.Arch arch = ref _addr_arch.val;
+    ref loader.Loader ldr = ref _addr_ldr.val;
 
-        private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-            ref loader.SymbolBuilder plt = ref _addr_plt.val;
-            ref loader.SymbolBuilder gotplt = ref _addr_gotplt.val;
+    var o = uint32(val);
 
-            return ;
-        }
+    if (rt == objabi.R_ADDRMIPS || rt == objabi.R_ADDRMIPSTLS) 
+        return int64(o & 0xffff0000 | uint32(t) & 0xffff);
+    else if (rt == objabi.R_ADDRMIPSU) 
+        return int64(o & 0xffff0000 | uint32((t + (1 << 15)) >> 16) & 0xffff);
+    else if (rt == objabi.R_CALLMIPS || rt == objabi.R_JMPMIPS) 
+        return int64(o & 0xfc000000 | uint32(t >> 2) & ~0xfc000000);
+    else 
+        return val;
+    
+}
 
-        private static bool machoreloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out, ptr<sym.Symbol> _addr_s, ptr<sym.Reloc> _addr_r, long sectoff)
-        {
-            ref sys.Arch arch = ref _addr_arch.val;
-            ref ld.OutBuf @out = ref _addr_@out.val;
-            ref sym.Symbol s = ref _addr_s.val;
-            ref sym.Reloc r = ref _addr_r.val;
+private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Reloc r, loader.Sym s, long val) {
+    long o = default;
+    nint nExtReloc = default;
+    bool ok = default;
+    ref ld.Target target = ref _addr_target.val;
+    ref loader.Loader ldr = ref _addr_ldr.val;
+    ref ld.ArchSyms syms = ref _addr_syms.val;
 
-            return false;
-        }
+    var rs = r.Sym();
+    rs = ldr.ResolveABIAlias(rs);
+    if (target.IsExternal()) {
 
-        private static long applyrel(ptr<sys.Arch> _addr_arch, ptr<sym.Reloc> _addr_r, ptr<sym.Symbol> _addr_s, long val, long t)
-        {
-            ref sys.Arch arch = ref _addr_arch.val;
-            ref sym.Reloc r = ref _addr_r.val;
-            ref sym.Symbol s = ref _addr_s.val;
-
-            var o = arch.ByteOrder.Uint32(s.P[r.Off..]);
-
-            if (r.Type == objabi.R_ADDRMIPS || r.Type == objabi.R_ADDRMIPSTLS) 
-                return int64(o & 0xffff0000UL | uint32(t) & 0xffffUL);
-            else if (r.Type == objabi.R_ADDRMIPSU) 
-                return int64(o & 0xffff0000UL | uint32((t + (1L << (int)(15L))) >> (int)(16L)) & 0xffffUL);
-            else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
-                return int64(o & 0xfc000000UL | uint32(t >> (int)(2L)) & ~0xfc000000UL);
-            else 
-                return val;
-            
-        }
-
-        private static (long, bool) archreloc(ptr<ld.Target> _addr_target, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Reloc> _addr_r, ptr<sym.Symbol> _addr_s, long val)
-        {
-            long _p0 = default;
-            bool _p0 = default;
-            ref ld.Target target = ref _addr_target.val;
-            ref ld.ArchSyms syms = ref _addr_syms.val;
-            ref sym.Reloc r = ref _addr_r.val;
-            ref sym.Symbol s = ref _addr_s.val;
-
-            if (target.IsExternal())
-            {
-
-                if (r.Type == objabi.R_ADDRMIPS || r.Type == objabi.R_ADDRMIPSU) 
-                    r.Done = false; 
-
-                    // set up addend for eventual relocation via outer symbol.
-                    var rs = r.Sym;
-                    r.Xadd = r.Add;
-                    while (rs.Outer != null)
-                    {
-                        r.Xadd += ld.Symaddr(rs) - ld.Symaddr(rs.Outer);
-                        rs = rs.Outer;
-                    }
-
-
-                    if (rs.Type != sym.SHOSTOBJ && rs.Type != sym.SDYNIMPORT && rs.Sect == null)
-                    {
-                        ld.Errorf(s, "missing section for %s", rs.Name);
-                    }
-
-                    r.Xsym = rs;
-                    return (applyrel(_addr_target.Arch, _addr_r, _addr_s, val, r.Xadd), true);
-                else if (r.Type == objabi.R_ADDRMIPSTLS || r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
-                    r.Done = false;
-                    r.Xsym = r.Sym;
-                    r.Xadd = r.Add;
-                    return (applyrel(_addr_target.Arch, _addr_r, _addr_s, val, r.Add), true);
-                else 
-                    return (val, false);
-                
-            }
-
-
-            if (r.Type == objabi.R_CONST) 
-                return (r.Add, true);
-            else if (r.Type == objabi.R_GOTOFF) 
-                return (ld.Symaddr(r.Sym) + r.Add - ld.Symaddr(syms.GOT), true);
-            else if (r.Type == objabi.R_ADDRMIPS || r.Type == objabi.R_ADDRMIPSU) 
-                var t = ld.Symaddr(r.Sym) + r.Add;
-                return (applyrel(_addr_target.Arch, _addr_r, _addr_s, val, t), true);
-            else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
-                t = ld.Symaddr(r.Sym) + r.Add;
-
-                if (t & 3L != 0L)
-                {
-                    ld.Errorf(s, "direct call is not aligned: %s %x", r.Sym.Name, t);
-                } 
-
-                // check if target address is in the same 256 MB region as the next instruction
-                if ((s.Value + int64(r.Off) + 4L) & 0xf0000000UL != (t & 0xf0000000UL))
-                {
-                    ld.Errorf(s, "direct call too far: %s %x", r.Sym.Name, t);
-                }
-
-                return (applyrel(_addr_target.Arch, _addr_r, _addr_s, val, t), true);
-            else if (r.Type == objabi.R_ADDRMIPSTLS) 
-                // thread pointer is at 0x7000 offset from the start of TLS data area
-                t = ld.Symaddr(r.Sym) + r.Add - 0x7000UL;
-                if (t < -32768L || t >= 32678L)
-                {
-                    ld.Errorf(s, "TLS offset out of range %d", t);
-                }
-
-                return (applyrel(_addr_target.Arch, _addr_r, _addr_s, val, t), true);
-                        return (val, false);
-
-        }
-
-        private static long archrelocvariant(ptr<ld.Target> _addr_target, ptr<ld.ArchSyms> _addr_syms, ptr<sym.Reloc> _addr_r, ptr<sym.Symbol> _addr_s, long t)
-        {
-            ref ld.Target target = ref _addr_target.val;
-            ref ld.ArchSyms syms = ref _addr_syms.val;
-            ref sym.Reloc r = ref _addr_r.val;
-            ref sym.Symbol s = ref _addr_s.val;
-
-            return -1L;
-        }
-
-        private static void asmb(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr__)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-            ref loader.Loader _ = ref _addr__.val;
-
-            if (ctxt.IsELF)
-            {
-                ld.Asmbelfsetup();
-            }
-
-            ref sync.WaitGroup wg = ref heap(out ptr<sync.WaitGroup> _addr_wg);
-            var sect = ld.Segtext.Sections[0L];
-            var offset = sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff;
-            ld.WriteParallel(_addr_wg, ld.Codeblk, ctxt, offset, sect.Vaddr, sect.Length);
-
-            foreach (var (_, __sect) in ld.Segtext.Sections[1L..])
-            {
-                sect = __sect;
-                offset = sect.Vaddr - ld.Segtext.Vaddr + ld.Segtext.Fileoff;
-                ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, offset, sect.Vaddr, sect.Length);
-            }
-
-            if (ld.Segrodata.Filelen > 0L)
-            {
-                ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, ld.Segrodata.Fileoff, ld.Segrodata.Vaddr, ld.Segrodata.Filelen);
-            }
-
-            ld.WriteParallel(_addr_wg, ld.Datblk, ctxt, ld.Segdata.Fileoff, ld.Segdata.Vaddr, ld.Segdata.Filelen);
-
-            ld.WriteParallel(_addr_wg, ld.Dwarfblk, ctxt, ld.Segdwarf.Fileoff, ld.Segdwarf.Vaddr, ld.Segdwarf.Filelen);
-            wg.Wait();
-
-        }
-
-        private static void asmb2(ptr<ld.Link> _addr_ctxt)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
- 
-            /* output symbol table */
-            ld.Symsize = 0L;
-
-            ld.Lcsize = 0L;
-            var symo = uint32(0L);
-            if (!ld.FlagS.val)
-            {
-                if (!ctxt.IsELF)
-                {
-                    ld.Errorf(null, "unsupported executable format");
-                }
-
-                symo = uint32(ld.Segdwarf.Fileoff + ld.Segdwarf.Filelen);
-                symo = uint32(ld.Rnd(int64(symo), int64(ld.FlagRound.val)));
-
-                ctxt.Out.SeekSet(int64(symo));
-                ld.Asmelfsym(ctxt);
-                ctxt.Out.Write(ld.Elfstrdat);
-
-                if (ctxt.LinkMode == ld.LinkExternal)
-                {
-                    ld.Elfemitreloc(ctxt);
-                }
-
-            }
-
-            ctxt.Out.SeekSet(0L);
-
-            if (ctxt.HeadType == objabi.Hlinux) 
-                ld.Asmbelf(ctxt, int64(symo));
-            else 
-                ld.Errorf(null, "unsupported operating system");
-                        if (ld.FlagC.val)
-            {
-                fmt.Printf("textsize=%d\n", ld.Segtext.Filelen);
-                fmt.Printf("datsize=%d\n", ld.Segdata.Filelen);
-                fmt.Printf("bsssize=%d\n", ld.Segdata.Length - ld.Segdata.Filelen);
-                fmt.Printf("symsize=%d\n", ld.Symsize);
-                fmt.Printf("lcsize=%d\n", ld.Lcsize);
-                fmt.Printf("total=%d\n", ld.Segtext.Filelen + ld.Segdata.Length + uint64(ld.Symsize) + uint64(ld.Lcsize));
-            }
-
-        }
+        if (r.Type() == objabi.R_ADDRMIPS || r.Type() == objabi.R_ADDRMIPSU) 
+            // set up addend for eventual relocation via outer symbol.
+            var (_, off) = ld.FoldSubSymbolOffset(ldr, rs);
+            var xadd = r.Add() + off;
+            return (applyrel(_addr_target.Arch, _addr_ldr, r.Type(), r.Off(), s, val, xadd), 1, true);
+        else if (r.Type() == objabi.R_ADDRMIPSTLS || r.Type() == objabi.R_CALLMIPS || r.Type() == objabi.R_JMPMIPS) 
+            return (applyrel(_addr_target.Arch, _addr_ldr, r.Type(), r.Off(), s, val, r.Add()), 1, true);
+        else 
+            return (val, 0, false);
+        
     }
-}}}}
+    const var isOk = true;
+
+    const nint noExtReloc = 0;
+
+    {
+        var rt = r.Type();
+
+
+        if (rt == objabi.R_ADDRMIPS || rt == objabi.R_ADDRMIPSU) 
+            var t = ldr.SymValue(rs) + r.Add();
+            return (applyrel(_addr_target.Arch, _addr_ldr, rt, r.Off(), s, val, t), noExtReloc, isOk);
+        else if (rt == objabi.R_CALLMIPS || rt == objabi.R_JMPMIPS) 
+            t = ldr.SymValue(rs) + r.Add();
+
+            if (t & 3 != 0) {
+                ldr.Errorf(s, "direct call is not aligned: %s %x", ldr.SymName(rs), t);
+            } 
+
+            // check if target address is in the same 256 MB region as the next instruction
+            if ((ldr.SymValue(s) + int64(r.Off()) + 4) & 0xf0000000 != (t & 0xf0000000)) {
+                ldr.Errorf(s, "direct call too far: %s %x", ldr.SymName(rs), t);
+            }
+
+            return (applyrel(_addr_target.Arch, _addr_ldr, rt, r.Off(), s, val, t), noExtReloc, isOk);
+        else if (rt == objabi.R_ADDRMIPSTLS) 
+            // thread pointer is at 0x7000 offset from the start of TLS data area
+            t = ldr.SymValue(rs) + r.Add() - 0x7000;
+            if (t < -32768 || t >= 32678) {
+                ldr.Errorf(s, "TLS offset out of range %d", t);
+            }
+            return (applyrel(_addr_target.Arch, _addr_ldr, rt, r.Off(), s, val, t), noExtReloc, isOk);
+
+    }
+
+    return (val, 0, false);
+
+}
+
+private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
+    ref ld.Target _p0 = ref _addr__p0.val;
+    ref loader.Loader _p0 = ref _addr__p0.val;
+
+    return -1;
+}
+
+private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, loader.Reloc r, loader.Sym s) {
+    loader.ExtReloc _p0 = default;
+    bool _p0 = default;
+    ref ld.Target target = ref _addr_target.val;
+    ref loader.Loader ldr = ref _addr_ldr.val;
+
+
+    if (r.Type() == objabi.R_ADDRMIPS || r.Type() == objabi.R_ADDRMIPSU) 
+        return (ld.ExtrelocViaOuterSym(ldr, r, s), true);
+    else if (r.Type() == objabi.R_ADDRMIPSTLS || r.Type() == objabi.R_CALLMIPS || r.Type() == objabi.R_JMPMIPS) 
+        return (ld.ExtrelocSimple(ldr, r), true);
+        return (new loader.ExtReloc(), false);
+
+}
+
+} // end mips_package

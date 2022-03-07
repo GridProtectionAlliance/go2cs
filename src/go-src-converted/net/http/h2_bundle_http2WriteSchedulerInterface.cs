@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:54 UTC
+//     Generated on 2022 March 06 22:22:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -105,13 +104,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OpenStreamByPtr is null || !m_target_is_ptr)
                     return s_OpenStreamByVal!(target, streamID, options);
 
-                return s_OpenStreamByPtr(m_target_ptr, streamID, options);
+                return s_OpenStreamByPtr(m_target_ptr!, streamID, options);
             }
 
             private delegate (http2FrameWriteRequest, bool) CloseStreamByPtr(ptr<T> value, uint streamID);
@@ -125,13 +124,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseStreamByPtr is null || !m_target_is_ptr)
                     return s_CloseStreamByVal!(target, streamID);
 
-                return s_CloseStreamByPtr(m_target_ptr, streamID);
+                return s_CloseStreamByPtr(m_target_ptr!, streamID);
             }
 
             private delegate (http2FrameWriteRequest, bool) AdjustStreamByPtr(ptr<T> value, uint streamID, http2PriorityParam priority);
@@ -145,13 +144,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AdjustStreamByPtr is null || !m_target_is_ptr)
                     return s_AdjustStreamByVal!(target, streamID, priority);
 
-                return s_AdjustStreamByPtr(m_target_ptr, streamID, priority);
+                return s_AdjustStreamByPtr(m_target_ptr!, streamID, priority);
             }
 
             private delegate (http2FrameWriteRequest, bool) PushByPtr(ptr<T> value, http2FrameWriteRequest wr);
@@ -165,13 +164,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PushByPtr is null || !m_target_is_ptr)
                     return s_PushByVal!(target, wr);
 
-                return s_PushByPtr(m_target_ptr, wr);
+                return s_PushByPtr(m_target_ptr!, wr);
             }
 
             private delegate (http2FrameWriteRequest, bool) PopByPtr(ptr<T> value);
@@ -185,16 +184,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PopByPtr is null || !m_target_is_ptr)
                     return s_PopByVal!(target);
 
-                return s_PopByPtr(m_target_ptr);
+                return s_PopByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2WriteScheduler()
@@ -205,12 +204,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("OpenStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByPtr)) as OpenStreamByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("OpenStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenStreamByVal = extensionMethod.CreateStaticDelegate(typeof(OpenStreamByVal)) as OpenStreamByVal;
 
                 if (s_OpenStreamByPtr is null && s_OpenStreamByVal is null)
@@ -218,12 +217,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByPtr)) as CloseStreamByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CloseStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseStreamByVal = extensionMethod.CreateStaticDelegate(typeof(CloseStreamByVal)) as CloseStreamByVal;
 
                 if (s_CloseStreamByPtr is null && s_CloseStreamByVal is null)
@@ -231,12 +230,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AdjustStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AdjustStreamByPtr = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByPtr)) as AdjustStreamByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AdjustStream");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AdjustStreamByVal = extensionMethod.CreateStaticDelegate(typeof(AdjustStreamByVal)) as AdjustStreamByVal;
 
                 if (s_AdjustStreamByPtr is null && s_AdjustStreamByVal is null)
@@ -244,12 +243,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
                 if (s_PushByPtr is null && s_PushByVal is null)
@@ -257,12 +256,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pop");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PopByPtr = extensionMethod.CreateStaticDelegate(typeof(PopByPtr)) as PopByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pop");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
 
                 if (s_PopByPtr is null && s_PopByVal is null)

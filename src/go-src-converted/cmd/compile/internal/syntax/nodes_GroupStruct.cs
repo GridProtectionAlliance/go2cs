@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,12 +30,12 @@ namespace @internal
             // Constructors
             public Group(NilType _)
             {
-                this.dummy = default;
+                this._ = default;
             }
 
-            public Group(long dummy = default)
+            public Group(nint _ = default)
             {
-                this.dummy = dummy;
+                this._ = _;
             }
 
             // Enable comparisons between nil and Group struct
@@ -58,7 +58,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Group Group_cast(dynamic value)
         {
-            return new Group(value.dummy);
+            return new Group(value._);
         }
     }
 }}}}

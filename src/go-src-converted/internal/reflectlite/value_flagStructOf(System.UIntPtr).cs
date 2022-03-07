@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:18 UTC
+//     Generated on 2022 March 06 22:12:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace @internal
         {
             // Value of the flag struct
             private readonly System.UIntPtr m_value;
-
+            
             public flag(System.UIntPtr value) => m_value = value;
 
             // Enable implicit conversions between System.UIntPtr and flag struct

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:47 UTC
+//     Generated on 2022 March 06 23:19:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -29,6 +28,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
+using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 
@@ -59,27 +60,27 @@ namespace go
 
             public ref bool done => ref m_commonRef.Value.done;
 
-            public ref Action cleanup => ref m_commonRef.Value.cleanup;
+            public ref slice<Action> cleanups => ref m_commonRef.Value.cleanups;
 
             public ref @string cleanupName => ref m_commonRef.Value.cleanupName;
 
             public ref slice<System.UIntPtr> cleanupPc => ref m_commonRef.Value.cleanupPc;
 
-            public ref bool chatty => ref m_commonRef.Value.chatty;
+            public ref bool finished => ref m_commonRef.Value.finished;
+
+            public ref ptr<chattyPrinter> chatty => ref m_commonRef.Value.chatty;
 
             public ref bool bench => ref m_commonRef.Value.bench;
 
-            public ref bool finished => ref m_commonRef.Value.finished;
-
             public ref int hasSub => ref m_commonRef.Value.hasSub;
 
-            public ref long raceErrors => ref m_commonRef.Value.raceErrors;
+            public ref nint raceErrors => ref m_commonRef.Value.raceErrors;
 
             public ref @string runner => ref m_commonRef.Value.runner;
 
             public ref ptr<common> parent => ref m_commonRef.Value.parent;
 
-            public ref long level => ref m_commonRef.Value.level;
+            public ref nint level => ref m_commonRef.Value.level;
 
             public ref slice<System.UIntPtr> creator => ref m_commonRef.Value.creator;
 
@@ -95,7 +96,7 @@ namespace go
 
             public ref slice<ptr<T>> sub => ref m_commonRef.Value.sub;
 
-            public ref sync.Once tempDirOnce => ref m_commonRef.Value.tempDirOnce;
+            public ref sync.Mutex tempDirMu => ref m_commonRef.Value.tempDirMu;
 
             public ref @string tempDir => ref m_commonRef.Value.tempDir;
 
@@ -108,13 +109,15 @@ namespace go
             {
                 this.m_commonRef = new ptr<common>(new common(nil));
                 this.isParallel = default;
+                this.isEnvSet = default;
                 this.context = default;
             }
 
-            public T(common common = default, bool isParallel = default, ref ptr<testContext> context = default)
+            public T(common common = default, bool isParallel = default, bool isEnvSet = default, ref ptr<testContext> context = default)
             {
                 this.m_commonRef = new ptr<common>(common);
                 this.isParallel = isParallel;
+                this.isEnvSet = isEnvSet;
                 this.context = context;
             }
 
@@ -138,7 +141,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static T T_cast(dynamic value)
         {
-            return new T(value.common, value.isParallel, ref value.context);
+            return new T(value.common, value.isParallel, value.isEnvSet, ref value.context);
         }
     }
 }

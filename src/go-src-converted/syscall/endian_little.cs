@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 //
+//go:build 386 || amd64 || arm || arm64 || ppc64le || mips64le || mipsle || riscv64 || wasm
 // +build 386 amd64 arm arm64 ppc64le mips64le mipsle riscv64 wasm
 
-// package syscall -- go2cs converted at 2020 October 09 05:01:10 UTC
+// package syscall -- go2cs converted at 2022 March 06 22:26:25 UTC
 // import "syscall" ==> using syscall = go.syscall_package
-// Original source: C:\Go\src\syscall\endian_little.go
+// Original source: C:\Program Files\Go\src\syscall\endian_little.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class syscall_package
-    {
-        private static readonly var isBigEndian = false;
+namespace go;
 
-    }
-}
+public static partial class syscall_package {
+
+private static readonly var isBigEndian = false;
+
+
+} // end syscall_package

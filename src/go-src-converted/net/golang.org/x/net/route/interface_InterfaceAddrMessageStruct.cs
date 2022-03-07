@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:37 UTC
+//     Generated on 2022 March 06 22:15:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace net
                 this.raw = default;
             }
 
-            public InterfaceAddrMessage(long Version = default, long Type = default, long Flags = default, long Index = default, slice<Addr> Addrs = default, slice<byte> raw = default)
+            public InterfaceAddrMessage(nint Version = default, nint Type = default, nint Flags = default, nint Index = default, slice<Addr> Addrs = default, slice<byte> raw = default)
             {
                 this.Version = Version;
                 this.Type = Type;

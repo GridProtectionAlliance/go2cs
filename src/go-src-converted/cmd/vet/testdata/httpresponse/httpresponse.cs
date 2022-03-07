@@ -1,37 +1,32 @@
-// package httpresponse -- go2cs converted at 2020 October 09 06:05:08 UTC
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// package httpresponse -- go2cs converted at 2022 March 06 23:35:18 UTC
 // import "cmd/vet/testdata/httpresponse" ==> using httpresponse = go.cmd.vet.testdata.httpresponse_package
-// Original source: C:\Go\src\cmd\vet\testdata\httpresponse\httpresponse.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\httpresponse\httpresponse.go
 using log = go.log_package;
 using http = go.net.http_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class httpresponse_package
-    {
-        private static void goodHTTPGet() => func((defer, _, __) =>
-        {
-            var (res, err) = http.Get("http://foo.com");
-            if (err != null)
-            {
-                log.Fatal(err);
-            }
-            defer(res.Body.Close());
+namespace go.cmd.vet.testdata;
 
-        });
+public static partial class httpresponse_package {
 
-        private static void badHTTPGet() => func((defer, _, __) =>
-        {
-            var (res, err) = http.Get("http://foo.com");
-            defer(res.Body.Close()); // ERROR "using res before checking for errors"
-            if (err != null)
-            {
-                log.Fatal(err);
-            }
-
-        });
+private static void goodHTTPGet() => func((defer, _, _) => {
+    var (res, err) = http.Get("http://foo.com");
+    if (err != null) {
+        log.Fatal(err);
     }
-}}}}
+    defer(res.Body.Close());
+
+});
+
+private static void badHTTPGet() => func((defer, _, _) => {
+    var (res, err) = http.Get("http://foo.com");
+    defer(res.Body.Close()); // ERROR "using res before checking for errors"
+    if (err != null) {
+        log.Fatal(err);
+    }
+});
+
+} // end httpresponse_package

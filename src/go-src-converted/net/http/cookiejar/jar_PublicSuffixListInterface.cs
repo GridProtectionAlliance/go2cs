@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:45 UTC
+//     Generated on 2022 March 06 22:23:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,11 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using ascii = go.net.http.@internal.ascii_package;
 using url = go.net.url_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
@@ -59,7 +59,7 @@ namespace http
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,13 +85,13 @@ namespace http
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PublicSuffixByPtr is null || !m_target_is_ptr)
                     return s_PublicSuffixByVal!(target, domain);
 
-                return s_PublicSuffixByPtr(m_target_ptr, domain);
+                return s_PublicSuffixByPtr(m_target_ptr!, domain);
             }
 
             private delegate @string StringByPtr(ptr<T> value);
@@ -105,16 +105,16 @@ namespace http
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static PublicSuffixList()
@@ -125,12 +125,12 @@ namespace http
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PublicSuffix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicSuffixByPtr = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByPtr)) as PublicSuffixByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PublicSuffix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicSuffixByVal = extensionMethod.CreateStaticDelegate(typeof(PublicSuffixByVal)) as PublicSuffixByVal;
 
                 if (s_PublicSuffixByPtr is null && s_PublicSuffixByVal is null)
@@ -138,12 +138,12 @@ namespace http
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)

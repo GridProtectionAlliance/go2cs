@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:50 UTC
+//     Generated on 2022 March 06 22:14:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
@@ -36,7 +35,7 @@ namespace go
 
             public ref sync.Mutex mu => ref m_cancelCtxRef.Value.mu;
 
-            public ref channel<object> done => ref m_cancelCtxRef.Value.done;
+            public ref atomic.Value done => ref m_cancelCtxRef.Value.done;
 
             public ref error err => ref m_cancelCtxRef.Value.err;
 

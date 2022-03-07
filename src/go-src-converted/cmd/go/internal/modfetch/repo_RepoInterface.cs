@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:23 UTC
+//     Generated on 2022 March 06 23:18:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,20 +13,18 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
-using sort = go.sort_package;
 using strconv = go.strconv_package;
 using time = go.time_package;
 using cfg = go.cmd.go.@internal.cfg_package;
-using get = go.cmd.go.@internal.get_package;
 using codehost = go.cmd.go.@internal.modfetch.codehost_package;
 using par = go.cmd.go.@internal.par_package;
-using str = go.cmd.go.@internal.str_package;
+using vcs = go.cmd.go.@internal.vcs_package;
 using web = go.cmd.go.@internal.web_package;
-using semver = go.golang.org.x.mod.semver_package;
+using module = go.golang.org.x.mod.module_package;
 using go;
 
 #nullable enable
@@ -64,7 +62,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -90,13 +88,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ModulePathByPtr is null || !m_target_is_ptr)
                     return s_ModulePathByVal!(target);
 
-                return s_ModulePathByPtr(m_target_ptr);
+                return s_ModulePathByPtr(m_target_ptr!);
             }
 
             private delegate error VersionsByPtr(ptr<T> value, @string prefix);
@@ -110,13 +108,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_VersionsByPtr is null || !m_target_is_ptr)
                     return s_VersionsByVal!(target, prefix);
 
-                return s_VersionsByPtr(m_target_ptr, prefix);
+                return s_VersionsByPtr(m_target_ptr!, prefix);
             }
 
             private delegate error StatByPtr(ptr<T> value, @string rev);
@@ -130,13 +128,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target, rev);
 
-                return s_StatByPtr(m_target_ptr, rev);
+                return s_StatByPtr(m_target_ptr!, rev);
             }
 
             private delegate error LatestByPtr(ptr<T> value);
@@ -150,13 +148,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LatestByPtr is null || !m_target_is_ptr)
                     return s_LatestByVal!(target);
 
-                return s_LatestByPtr(m_target_ptr);
+                return s_LatestByPtr(m_target_ptr!);
             }
 
             private delegate error GoModByPtr(ptr<T> value, @string version);
@@ -170,13 +168,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GoModByPtr is null || !m_target_is_ptr)
                     return s_GoModByVal!(target, version);
 
-                return s_GoModByPtr(m_target_ptr, version);
+                return s_GoModByPtr(m_target_ptr!, version);
             }
 
             private delegate error ZipByPtr(ptr<T> value, io.Writer dst, @string version);
@@ -190,16 +188,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ZipByPtr is null || !m_target_is_ptr)
                     return s_ZipByVal!(target, dst, version);
 
-                return s_ZipByPtr(m_target_ptr, dst, version);
+                return s_ZipByPtr(m_target_ptr!, dst, version);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Repo()
@@ -210,12 +208,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ModulePath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ModulePathByPtr = extensionMethod.CreateStaticDelegate(typeof(ModulePathByPtr)) as ModulePathByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ModulePath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ModulePathByVal = extensionMethod.CreateStaticDelegate(typeof(ModulePathByVal)) as ModulePathByVal;
 
                 if (s_ModulePathByPtr is null && s_ModulePathByVal is null)
@@ -223,12 +221,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Versions");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_VersionsByPtr = extensionMethod.CreateStaticDelegate(typeof(VersionsByPtr)) as VersionsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Versions");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_VersionsByVal = extensionMethod.CreateStaticDelegate(typeof(VersionsByVal)) as VersionsByVal;
 
                 if (s_VersionsByPtr is null && s_VersionsByVal is null)
@@ -236,12 +234,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)
@@ -249,12 +247,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Latest");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LatestByPtr = extensionMethod.CreateStaticDelegate(typeof(LatestByPtr)) as LatestByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Latest");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LatestByVal = extensionMethod.CreateStaticDelegate(typeof(LatestByVal)) as LatestByVal;
 
                 if (s_LatestByPtr is null && s_LatestByVal is null)
@@ -262,12 +260,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("GoMod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoModByPtr = extensionMethod.CreateStaticDelegate(typeof(GoModByPtr)) as GoModByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("GoMod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoModByVal = extensionMethod.CreateStaticDelegate(typeof(GoModByVal)) as GoModByVal;
 
                 if (s_GoModByPtr is null && s_GoModByVal is null)
@@ -275,12 +273,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Zip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ZipByPtr = extensionMethod.CreateStaticDelegate(typeof(ZipByPtr)) as ZipByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Zip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ZipByVal = extensionMethod.CreateStaticDelegate(typeof(ZipByVal)) as ZipByVal;
 
                 if (s_ZipByPtr is null && s_ZipByVal is null)

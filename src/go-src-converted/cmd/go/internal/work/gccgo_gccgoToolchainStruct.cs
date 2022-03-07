@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:23 UTC
+//     Generated on 2022 March 06 23:17:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
+using exec = go.@internal.execabs_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
 using load = go.cmd.go.@internal.load_package;
 using str = go.cmd.go.@internal.str_package;
+using pkgpath = go.cmd.@internal.pkgpath_package;
 using go;
 
 #nullable enable

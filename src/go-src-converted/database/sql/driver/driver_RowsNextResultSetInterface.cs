@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HasNextResultSetByPtr is null || !m_target_is_ptr)
                     return s_HasNextResultSetByVal!(target);
 
-                return s_HasNextResultSetByPtr(m_target_ptr);
+                return s_HasNextResultSetByPtr(m_target_ptr!);
             }
 
             private delegate error NextResultSetByPtr(ptr<T> value);
@@ -99,76 +98,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NextResultSetByPtr is null || !m_target_is_ptr)
                     return s_NextResultSetByVal!(target);
 
-                return s_NextResultSetByPtr(m_target_ptr);
-            }
-
-            private delegate error ColumnsByPtr(ptr<T> value);
-            private delegate error ColumnsByVal(T value);
-
-            private static readonly ColumnsByPtr? s_ColumnsByPtr;
-            private static readonly ColumnsByVal? s_ColumnsByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Columns()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ColumnsByPtr is null || !m_target_is_ptr)
-                    return s_ColumnsByVal!(target);
-
-                return s_ColumnsByPtr(m_target_ptr);
-            }
-
-            private delegate error CloseByPtr(ptr<T> value);
-            private delegate error CloseByVal(T value);
-
-            private static readonly CloseByPtr? s_CloseByPtr;
-            private static readonly CloseByVal? s_CloseByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Close()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_CloseByPtr is null || !m_target_is_ptr)
-                    return s_CloseByVal!(target);
-
-                return s_CloseByPtr(m_target_ptr);
-            }
-
-            private delegate error NextByPtr(ptr<T> value, slice<Value> dest);
-            private delegate error NextByVal(T value, slice<Value> dest);
-
-            private static readonly NextByPtr? s_NextByPtr;
-            private static readonly NextByVal? s_NextByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Next(slice<Value> dest)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_NextByPtr is null || !m_target_is_ptr)
-                    return s_NextByVal!(target, dest);
-
-                return s_NextByPtr(m_target_ptr, dest);
+                return s_NextResultSetByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static RowsNextResultSet()
@@ -179,12 +118,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("HasNextResultSet");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HasNextResultSetByPtr = extensionMethod.CreateStaticDelegate(typeof(HasNextResultSetByPtr)) as HasNextResultSetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("HasNextResultSet");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HasNextResultSetByVal = extensionMethod.CreateStaticDelegate(typeof(HasNextResultSetByVal)) as HasNextResultSetByVal;
 
                 if (s_HasNextResultSetByPtr is null && s_HasNextResultSetByVal is null)
@@ -192,55 +131,16 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NextResultSet");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextResultSetByPtr = extensionMethod.CreateStaticDelegate(typeof(NextResultSetByPtr)) as NextResultSetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NextResultSet");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextResultSetByVal = extensionMethod.CreateStaticDelegate(typeof(NextResultSetByVal)) as NextResultSetByVal;
 
                 if (s_NextResultSetByPtr is null && s_NextResultSetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsNextResultSet.NextResultSet method", new Exception("NextResultSet"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Columns");
-
-                if (!(extensionMethod is null))
-                    s_ColumnsByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnsByPtr)) as ColumnsByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Columns");
-
-                if (!(extensionMethod is null))
-                    s_ColumnsByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnsByVal)) as ColumnsByVal;
-
-                if (s_ColumnsByPtr is null && s_ColumnsByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsNextResultSet.Columns method", new Exception("Columns"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-
-                if (s_CloseByPtr is null && s_CloseByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsNextResultSet.Close method", new Exception("Close"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
-
-                if (!(extensionMethod is null))
-                    s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Next");
-
-                if (!(extensionMethod is null))
-                    s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
-
-                if (s_NextByPtr is null && s_NextByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsNextResultSet.Next method", new Exception("Next"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:48 UTC
+//     Generated on 2022 March 06 22:21:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -94,67 +93,27 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate long LenByPtr(ptr<T> value);
-            private delegate long LenByVal(T value);
+            private delegate nint LenByPtr(ptr<T> value);
+            private delegate nint LenByVal(T value);
 
             private static readonly LenByPtr? s_LenByPtr;
             private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Len()
+            public nint Len()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByPtr(m_target_ptr);
-            }
-
-            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-
-            private static readonly WriteByPtr? s_WriteByPtr;
-            private static readonly WriteByVal? s_WriteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WriteByPtr is null || !m_target_is_ptr)
-                    return s_WriteByVal!(target, p);
-
-                return s_WriteByPtr(m_target_ptr, p);
-            }
-
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-
-            private static readonly ReadByPtr? s_ReadByPtr;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByPtr is null || !m_target_is_ptr)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByPtr(m_target_ptr, p);
+                return s_LenByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2pipeBuffer()
@@ -165,42 +124,16 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
                 if (s_LenByPtr is null && s_LenByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Len method", new Exception("Len"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-
-                if (s_WriteByPtr is null && s_WriteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Write method", new Exception("Write"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-
-                if (s_ReadByPtr is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement http2pipeBuffer.Read method", new Exception("Read"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

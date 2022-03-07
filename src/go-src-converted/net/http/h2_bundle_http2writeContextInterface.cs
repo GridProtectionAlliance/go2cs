@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:53 UTC
+//     Generated on 2022 March 06 22:22:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -105,13 +104,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FramerByPtr is null || !m_target_is_ptr)
                     return s_FramerByVal!(target);
 
-                return s_FramerByPtr(m_target_ptr);
+                return s_FramerByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) FlushByPtr(ptr<T> value);
@@ -125,13 +124,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FlushByPtr is null || !m_target_is_ptr)
                     return s_FlushByVal!(target);
 
-                return s_FlushByPtr(m_target_ptr);
+                return s_FlushByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) CloseConnByPtr(ptr<T> value);
@@ -145,13 +144,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseConnByPtr is null || !m_target_is_ptr)
                     return s_CloseConnByVal!(target);
 
-                return s_CloseConnByPtr(m_target_ptr);
+                return s_CloseConnByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<hpack.Encoder>, ptr<bytes.Buffer>) HeaderEncoderByPtr(ptr<T> value);
@@ -165,16 +164,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HeaderEncoderByPtr is null || !m_target_is_ptr)
                     return s_HeaderEncoderByVal!(target);
 
-                return s_HeaderEncoderByPtr(m_target_ptr);
+                return s_HeaderEncoderByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2writeContext()
@@ -185,12 +184,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Framer");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FramerByPtr = extensionMethod.CreateStaticDelegate(typeof(FramerByPtr)) as FramerByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Framer");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FramerByVal = extensionMethod.CreateStaticDelegate(typeof(FramerByVal)) as FramerByVal;
 
                 if (s_FramerByPtr is null && s_FramerByVal is null)
@@ -198,12 +197,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
                 if (s_FlushByPtr is null && s_FlushByVal is null)
@@ -211,12 +210,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CloseConn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseConnByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseConnByPtr)) as CloseConnByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CloseConn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseConnByVal = extensionMethod.CreateStaticDelegate(typeof(CloseConnByVal)) as CloseConnByVal;
 
                 if (s_CloseConnByPtr is null && s_CloseConnByVal is null)
@@ -224,12 +223,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("HeaderEncoder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeaderEncoderByPtr = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByPtr)) as HeaderEncoderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("HeaderEncoder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HeaderEncoderByVal = extensionMethod.CreateStaticDelegate(typeof(HeaderEncoderByVal)) as HeaderEncoderByVal;
 
                 if (s_HeaderEncoderByPtr is null && s_HeaderEncoderByVal is null)

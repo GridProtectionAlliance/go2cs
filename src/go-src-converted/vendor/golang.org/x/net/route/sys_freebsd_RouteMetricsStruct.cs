@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:52 UTC
+//     Generated on 2022 March 06 23:38:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
 using go;
@@ -36,7 +35,7 @@ namespace net
                 this.PathMTU = default;
             }
 
-            public RouteMetrics(long PathMTU = default)
+            public RouteMetrics(nint PathMTU = default)
             {
                 this.PathMTU = PathMTU;
             }

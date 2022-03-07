@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:08:25 UTC
+//     Generated on 2022 March 06 23:38:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -42,7 +41,7 @@ namespace unicode
                 this.err = default;
             }
 
-            public normReader(reorderBuffer rb = default, io.Reader r = default, slice<byte> inbuf = default, slice<byte> outbuf = default, long bufStart = default, long lastBoundary = default, error err = default)
+            public normReader(reorderBuffer rb = default, io.Reader r = default, slice<byte> inbuf = default, slice<byte> outbuf = default, nint bufStart = default, nint lastBoundary = default, error err = default)
             {
                 this.rb = rb;
                 this.r = r;

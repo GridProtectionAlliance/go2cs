@@ -2,81 +2,111 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build 386 || amd64 || amd64p32
 // +build 386 amd64 amd64p32
 
-// package cpu -- go2cs converted at 2020 October 09 06:07:55 UTC
+// package cpu -- go2cs converted at 2022 March 06 23:38:21 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
-// Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_x86.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu_x86.go
+using runtime = go.runtime_package;
 
-using static go.builtin;
+namespace go.vendor.golang.org.x.sys;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class cpu_package
-    {
-        private static readonly long cacheLineSize = (long)64L;
+public static partial class cpu_package {
+
+private static readonly nint cacheLineSize = 64;
 
 
 
-        private static void init()
-        {
-            Initialized = true;
+private static void initOptions() {
+    options = new slice<option>(new option[] { {Name:"adx",Feature:&X86.HasADX}, {Name:"aes",Feature:&X86.HasAES}, {Name:"avx",Feature:&X86.HasAVX}, {Name:"avx2",Feature:&X86.HasAVX2}, {Name:"avx512",Feature:&X86.HasAVX512}, {Name:"avx512f",Feature:&X86.HasAVX512F}, {Name:"avx512cd",Feature:&X86.HasAVX512CD}, {Name:"avx512er",Feature:&X86.HasAVX512ER}, {Name:"avx512pf",Feature:&X86.HasAVX512PF}, {Name:"avx512vl",Feature:&X86.HasAVX512VL}, {Name:"avx512bw",Feature:&X86.HasAVX512BW}, {Name:"avx512dq",Feature:&X86.HasAVX512DQ}, {Name:"avx512ifma",Feature:&X86.HasAVX512IFMA}, {Name:"avx512vbmi",Feature:&X86.HasAVX512VBMI}, {Name:"avx512vnniw",Feature:&X86.HasAVX5124VNNIW}, {Name:"avx5124fmaps",Feature:&X86.HasAVX5124FMAPS}, {Name:"avx512vpopcntdq",Feature:&X86.HasAVX512VPOPCNTDQ}, {Name:"avx512vpclmulqdq",Feature:&X86.HasAVX512VPCLMULQDQ}, {Name:"avx512vnni",Feature:&X86.HasAVX512VNNI}, {Name:"avx512gfni",Feature:&X86.HasAVX512GFNI}, {Name:"avx512vaes",Feature:&X86.HasAVX512VAES}, {Name:"avx512vbmi2",Feature:&X86.HasAVX512VBMI2}, {Name:"avx512bitalg",Feature:&X86.HasAVX512BITALG}, {Name:"avx512bf16",Feature:&X86.HasAVX512BF16}, {Name:"bmi1",Feature:&X86.HasBMI1}, {Name:"bmi2",Feature:&X86.HasBMI2}, {Name:"erms",Feature:&X86.HasERMS}, {Name:"fma",Feature:&X86.HasFMA}, {Name:"osxsave",Feature:&X86.HasOSXSAVE}, {Name:"pclmulqdq",Feature:&X86.HasPCLMULQDQ}, {Name:"popcnt",Feature:&X86.HasPOPCNT}, {Name:"rdrand",Feature:&X86.HasRDRAND}, {Name:"rdseed",Feature:&X86.HasRDSEED}, {Name:"sse3",Feature:&X86.HasSSE3}, {Name:"sse41",Feature:&X86.HasSSE41}, {Name:"sse42",Feature:&X86.HasSSE42}, {Name:"ssse3",Feature:&X86.HasSSSE3}, {Name:"sse2",Feature:&X86.HasSSE2,Required:runtime.GOARCH=="amd64"} });
+}
 
-            var (maxID, _, _, _) = cpuid(0L, 0L);
+private static void archInit() {
+    Initialized = true;
 
-            if (maxID < 1L)
-            {
-                return ;
-            }
+    var (maxID, _, _, _) = cpuid(0, 0);
 
-            var (_, _, ecx1, edx1) = cpuid(1L, 0L);
-            X86.HasSSE2 = isSet(26L, edx1);
+    if (maxID < 1) {
+        return ;
+    }
+    var (_, _, ecx1, edx1) = cpuid(1, 0);
+    X86.HasSSE2 = isSet(26, edx1);
 
-            X86.HasSSE3 = isSet(0L, ecx1);
-            X86.HasPCLMULQDQ = isSet(1L, ecx1);
-            X86.HasSSSE3 = isSet(9L, ecx1);
-            X86.HasFMA = isSet(12L, ecx1);
-            X86.HasSSE41 = isSet(19L, ecx1);
-            X86.HasSSE42 = isSet(20L, ecx1);
-            X86.HasPOPCNT = isSet(23L, ecx1);
-            X86.HasAES = isSet(25L, ecx1);
-            X86.HasOSXSAVE = isSet(27L, ecx1);
-            X86.HasRDRAND = isSet(30L, ecx1);
+    X86.HasSSE3 = isSet(0, ecx1);
+    X86.HasPCLMULQDQ = isSet(1, ecx1);
+    X86.HasSSSE3 = isSet(9, ecx1);
+    X86.HasFMA = isSet(12, ecx1);
+    X86.HasSSE41 = isSet(19, ecx1);
+    X86.HasSSE42 = isSet(20, ecx1);
+    X86.HasPOPCNT = isSet(23, ecx1);
+    X86.HasAES = isSet(25, ecx1);
+    X86.HasOSXSAVE = isSet(27, ecx1);
+    X86.HasRDRAND = isSet(30, ecx1);
 
-            var osSupportsAVX = false; 
-            // For XGETBV, OSXSAVE bit is required and sufficient.
-            if (X86.HasOSXSAVE)
-            {
-                var (eax, _) = xgetbv(); 
-                // Check if XMM and YMM registers have OS support.
-                osSupportsAVX = isSet(1L, eax) && isSet(2L, eax);
+    bool osSupportsAVX = default;    bool osSupportsAVX512 = default; 
+    // For XGETBV, OSXSAVE bit is required and sufficient.
+ 
+    // For XGETBV, OSXSAVE bit is required and sufficient.
+    if (X86.HasOSXSAVE) {
+        var (eax, _) = xgetbv(); 
+        // Check if XMM and YMM registers have OS support.
+        osSupportsAVX = isSet(1, eax) && isSet(2, eax);
 
-            }
-
-            X86.HasAVX = isSet(28L, ecx1) && osSupportsAVX;
-
-            if (maxID < 7L)
-            {
-                return ;
-            }
-
-            var (_, ebx7, _, _) = cpuid(7L, 0L);
-            X86.HasBMI1 = isSet(3L, ebx7);
-            X86.HasAVX2 = isSet(5L, ebx7) && osSupportsAVX;
-            X86.HasBMI2 = isSet(8L, ebx7);
-            X86.HasERMS = isSet(9L, ebx7);
-            X86.HasRDSEED = isSet(18L, ebx7);
-            X86.HasADX = isSet(19L, ebx7);
+        if (runtime.GOOS == "darwin") { 
+            // Check darwin commpage for AVX512 support. Necessary because:
+            // https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/osfmk/i386/fpu.c#L175-L201
+            osSupportsAVX512 = osSupportsAVX && darwinSupportsAVX512();
 
         }
+        else
+ { 
+            // Check if OPMASK and ZMM registers have OS support.
+            osSupportsAVX512 = osSupportsAVX && isSet(5, eax) && isSet(6, eax) && isSet(7, eax);
 
-        private static bool isSet(ulong bitpos, uint value)
-        {
-            return value & (1L << (int)(bitpos)) != 0L;
         }
     }
-}}}}}
+    X86.HasAVX = isSet(28, ecx1) && osSupportsAVX;
+
+    if (maxID < 7) {
+        return ;
+    }
+    var (_, ebx7, ecx7, edx7) = cpuid(7, 0);
+    X86.HasBMI1 = isSet(3, ebx7);
+    X86.HasAVX2 = isSet(5, ebx7) && osSupportsAVX;
+    X86.HasBMI2 = isSet(8, ebx7);
+    X86.HasERMS = isSet(9, ebx7);
+    X86.HasRDSEED = isSet(18, ebx7);
+    X86.HasADX = isSet(19, ebx7);
+
+    X86.HasAVX512 = isSet(16, ebx7) && osSupportsAVX512; // Because avx-512 foundation is the core required extension
+    if (X86.HasAVX512) {
+        X86.HasAVX512F = true;
+        X86.HasAVX512CD = isSet(28, ebx7);
+        X86.HasAVX512ER = isSet(27, ebx7);
+        X86.HasAVX512PF = isSet(26, ebx7);
+        X86.HasAVX512VL = isSet(31, ebx7);
+        X86.HasAVX512BW = isSet(30, ebx7);
+        X86.HasAVX512DQ = isSet(17, ebx7);
+        X86.HasAVX512IFMA = isSet(21, ebx7);
+        X86.HasAVX512VBMI = isSet(1, ecx7);
+        X86.HasAVX5124VNNIW = isSet(2, edx7);
+        X86.HasAVX5124FMAPS = isSet(3, edx7);
+        X86.HasAVX512VPOPCNTDQ = isSet(14, ecx7);
+        X86.HasAVX512VPCLMULQDQ = isSet(10, ecx7);
+        X86.HasAVX512VNNI = isSet(11, ecx7);
+        X86.HasAVX512GFNI = isSet(8, ecx7);
+        X86.HasAVX512VAES = isSet(9, ecx7);
+        X86.HasAVX512VBMI2 = isSet(6, ecx7);
+        X86.HasAVX512BITALG = isSet(12, ecx7);
+
+        var (eax71, _, _, _) = cpuid(7, 1);
+        X86.HasAVX512BF16 = isSet(5, eax71);
+    }
+}
+
+private static bool isSet(nuint bitpos, uint value) {
+    return value & (1 << (int)(bitpos)) != 0;
+}
+
+} // end cpu_package

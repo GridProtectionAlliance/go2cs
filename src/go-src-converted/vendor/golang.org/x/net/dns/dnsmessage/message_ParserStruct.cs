@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:47 UTC
+//     Generated on 2022 March 06 23:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using go;
 
@@ -42,7 +41,7 @@ namespace dns
                 this.resHeader = default;
             }
 
-            public Parser(slice<byte> msg = default, header header = default, section section = default, long off = default, long index = default, bool resHeaderValid = default, ResourceHeader resHeader = default)
+            public Parser(slice<byte> msg = default, header header = default, section section = default, nint off = default, nint index = default, bool resHeaderValid = default, ResourceHeader resHeader = default)
             {
                 this.msg = msg;
                 this.header = header;

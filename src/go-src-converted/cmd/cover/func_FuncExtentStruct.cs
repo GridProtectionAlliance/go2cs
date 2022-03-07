@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:22 UTC
+//     Generated on 2022 March 06 23:15:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using json = go.encoding.json_package;
@@ -21,14 +20,15 @@ using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
+using exec = go.@internal.execabs_package;
 using io = go.io_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using path = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
 using tabwriter = go.text.tabwriter_package;
+using cover = go.golang.org.x.tools.cover_package;
 
 #nullable enable
 
@@ -49,7 +49,7 @@ namespace go
                 this.endCol = default;
             }
 
-            public FuncExtent(@string name = default, long startLine = default, long startCol = default, long endLine = default, long endCol = default)
+            public FuncExtent(@string name = default, nint startLine = default, nint startCol = default, nint endLine = default, nint endCol = default)
             {
                 this.name = name;
                 this.startLine = startLine;

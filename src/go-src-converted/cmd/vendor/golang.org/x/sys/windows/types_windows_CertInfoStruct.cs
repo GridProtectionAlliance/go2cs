@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:58 UTC
+//     Generated on 2022 March 06 23:30:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using net = go.net_package;
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
@@ -35,7 +34,36 @@ namespace sys
             // Constructors
             public CertInfo(NilType _)
             {
+                this.Version = default;
+                this.SerialNumber = default;
+                this.SignatureAlgorithm = default;
+                this.Issuer = default;
+                this.NotBefore = default;
+                this.NotAfter = default;
+                this.Subject = default;
+                this.SubjectPublicKeyInfo = default;
+                this.IssuerUniqueId = default;
+                this.SubjectUniqueId = default;
+                this.CountExtensions = default;
+                this.Extensions = default;
             }
+
+            public CertInfo(uint Version = default, CryptIntegerBlob SerialNumber = default, CryptAlgorithmIdentifier SignatureAlgorithm = default, CertNameBlob Issuer = default, Filetime NotBefore = default, Filetime NotAfter = default, CertNameBlob Subject = default, CertPublicKeyInfo SubjectPublicKeyInfo = default, CryptBitBlob IssuerUniqueId = default, CryptBitBlob SubjectUniqueId = default, uint CountExtensions = default, ref ptr<CertExtension> Extensions = default)
+            {
+                this.Version = Version;
+                this.SerialNumber = SerialNumber;
+                this.SignatureAlgorithm = SignatureAlgorithm;
+                this.Issuer = Issuer;
+                this.NotBefore = NotBefore;
+                this.NotAfter = NotAfter;
+                this.Subject = Subject;
+                this.SubjectPublicKeyInfo = SubjectPublicKeyInfo;
+                this.IssuerUniqueId = IssuerUniqueId;
+                this.SubjectUniqueId = SubjectUniqueId;
+                this.CountExtensions = CountExtensions;
+                this.Extensions = Extensions;
+            }
+
             // Enable comparisons between nil and CertInfo struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(CertInfo value, NilType nil) => value.Equals(default(CertInfo));
@@ -56,7 +84,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CertInfo CertInfo_cast(dynamic value)
         {
-            return new CertInfo();
+            return new CertInfo(value.Version, value.SerialNumber, value.SignatureAlgorithm, value.Issuer, value.NotBefore, value.NotAfter, value.Subject, value.SubjectPublicKeyInfo, value.IssuerUniqueId, value.SubjectUniqueId, value.CountExtensions, ref value.Extensions);
         }
     }
 }}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:12 UTC
+//     Generated on 2022 March 06 22:47:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using fmt = go.fmt_package;
@@ -41,11 +40,10 @@ namespace @internal
                 this.Syms = default;
                 this.Pathsym = default;
                 this.Height = default;
-                this.Imported = default;
                 this.Direct = default;
             }
 
-            public Pkg(@string Path = default, @string Name = default, @string Prefix = default, map<@string, ptr<Sym>> Syms = default, ref ptr<obj.LSym> Pathsym = default, long Height = default, bool Imported = default, bool Direct = default)
+            public Pkg(@string Path = default, @string Name = default, @string Prefix = default, map<@string, ptr<Sym>> Syms = default, ref ptr<obj.LSym> Pathsym = default, nint Height = default, bool Direct = default)
             {
                 this.Path = Path;
                 this.Name = Name;
@@ -53,7 +51,6 @@ namespace @internal
                 this.Syms = Syms;
                 this.Pathsym = Pathsym;
                 this.Height = Height;
-                this.Imported = Imported;
                 this.Direct = Direct;
             }
 
@@ -77,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Pkg Pkg_cast(dynamic value)
         {
-            return new Pkg(value.Path, value.Name, value.Prefix, value.Syms, ref value.Pathsym, value.Height, value.Imported, value.Direct);
+            return new Pkg(value.Path, value.Name, value.Prefix, value.Syms, ref value.Pathsym, value.Height, value.Direct);
         }
     }
 }}}}

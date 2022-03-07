@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:27 UTC
+//     Generated on 2022 March 06 22:49:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,12 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using buildcfg = go.@internal.buildcfg_package;
 using go;
 
 #nullable enable
@@ -55,7 +56,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -70,427 +71,227 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate bool CanSSAByPtr(ptr<T> value, ptr<types.Type> t);
-            private delegate bool CanSSAByVal(T value, ptr<types.Type> t);
+            private delegate @string CanSSAByPtr(ptr<T> value, ptr<types.Type> t);
+            private delegate @string CanSSAByVal(T value, ptr<types.Type> t);
 
             private static readonly CanSSAByPtr? s_CanSSAByPtr;
             private static readonly CanSSAByVal? s_CanSSAByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool CanSSA(ptr<types.Type> t)
+            public @string CanSSA(ptr<types.Type> t)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CanSSAByPtr is null || !m_target_is_ptr)
                     return s_CanSSAByVal!(target, t);
 
-                return s_CanSSAByPtr(m_target_ptr, t);
+                return s_CanSSAByPtr(m_target_ptr!, t);
             }
 
-            private delegate bool StringDataByPtr(ptr<T> value, @string _p0);
-            private delegate bool StringDataByVal(T value, @string _p0);
+            private delegate @string StringDataByPtr(ptr<T> value, @string _p0);
+            private delegate @string StringDataByVal(T value, @string _p0);
 
             private static readonly StringDataByPtr? s_StringDataByPtr;
             private static readonly StringDataByVal? s_StringDataByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool StringData(@string _p0)
+            public @string StringData(@string _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringDataByPtr is null || !m_target_is_ptr)
                     return s_StringDataByVal!(target, _p0);
 
-                return s_StringDataByPtr(m_target_ptr, _p0);
+                return s_StringDataByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate bool AutoByPtr(ptr<T> value, src.XPos _p0, ptr<types.Type> _p0);
-            private delegate bool AutoByVal(T value, src.XPos _p0, ptr<types.Type> _p0);
+            private delegate @string AutoByPtr(ptr<T> value, src.XPos _p0, ptr<types.Type> _p0);
+            private delegate @string AutoByVal(T value, src.XPos _p0, ptr<types.Type> _p0);
 
             private static readonly AutoByPtr? s_AutoByPtr;
             private static readonly AutoByVal? s_AutoByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Auto(src.XPos _p0, ptr<types.Type> _p0)
+            public @string Auto(src.XPos _p0, ptr<types.Type> _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AutoByPtr is null || !m_target_is_ptr)
                     return s_AutoByVal!(target, _p0, _p0);
 
-                return s_AutoByPtr(m_target_ptr, _p0, _p0);
+                return s_AutoByPtr(m_target_ptr!, _p0, _p0);
             }
 
-            private delegate bool SplitStringByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitStringByVal(T value, LocalSlot _p0);
+            private delegate @string SplitSlotByPtr(ptr<T> value, ptr<LocalSlot> parent, @string suffix, long offset, ptr<types.Type> t);
+            private delegate @string SplitSlotByVal(T value, ptr<LocalSlot> parent, @string suffix, long offset, ptr<types.Type> t);
 
-            private static readonly SplitStringByPtr? s_SplitStringByPtr;
-            private static readonly SplitStringByVal? s_SplitStringByVal;
+            private static readonly SplitSlotByPtr? s_SplitSlotByPtr;
+            private static readonly SplitSlotByVal? s_SplitSlotByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitString(LocalSlot _p0)
+            public @string SplitSlot(ptr<LocalSlot> parent, @string suffix, long offset, ptr<types.Type> t)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
-                if (s_SplitStringByPtr is null || !m_target_is_ptr)
-                    return s_SplitStringByVal!(target, _p0);
+                if (s_SplitSlotByPtr is null || !m_target_is_ptr)
+                    return s_SplitSlotByVal!(target, parent, suffix, offset, t);
 
-                return s_SplitStringByPtr(m_target_ptr, _p0);
+                return s_SplitSlotByPtr(m_target_ptr!, parent, suffix, offset, t);
             }
 
-            private delegate bool SplitInterfaceByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitInterfaceByVal(T value, LocalSlot _p0);
-
-            private static readonly SplitInterfaceByPtr? s_SplitInterfaceByPtr;
-            private static readonly SplitInterfaceByVal? s_SplitInterfaceByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitInterface(LocalSlot _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitInterfaceByPtr is null || !m_target_is_ptr)
-                    return s_SplitInterfaceByVal!(target, _p0);
-
-                return s_SplitInterfaceByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate bool SplitSliceByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitSliceByVal(T value, LocalSlot _p0);
-
-            private static readonly SplitSliceByPtr? s_SplitSliceByPtr;
-            private static readonly SplitSliceByVal? s_SplitSliceByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitSlice(LocalSlot _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitSliceByPtr is null || !m_target_is_ptr)
-                    return s_SplitSliceByVal!(target, _p0);
-
-                return s_SplitSliceByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate bool SplitComplexByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitComplexByVal(T value, LocalSlot _p0);
-
-            private static readonly SplitComplexByPtr? s_SplitComplexByPtr;
-            private static readonly SplitComplexByVal? s_SplitComplexByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitComplex(LocalSlot _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitComplexByPtr is null || !m_target_is_ptr)
-                    return s_SplitComplexByVal!(target, _p0);
-
-                return s_SplitComplexByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate bool SplitStructByPtr(ptr<T> value, LocalSlot _p0, long _p0);
-            private delegate bool SplitStructByVal(T value, LocalSlot _p0, long _p0);
-
-            private static readonly SplitStructByPtr? s_SplitStructByPtr;
-            private static readonly SplitStructByVal? s_SplitStructByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitStruct(LocalSlot _p0, long _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitStructByPtr is null || !m_target_is_ptr)
-                    return s_SplitStructByVal!(target, _p0, _p0);
-
-                return s_SplitStructByPtr(m_target_ptr, _p0, _p0);
-            }
-
-            private delegate bool SplitArrayByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitArrayByVal(T value, LocalSlot _p0);
-
-            private static readonly SplitArrayByPtr? s_SplitArrayByPtr;
-            private static readonly SplitArrayByVal? s_SplitArrayByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitArray(LocalSlot _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitArrayByPtr is null || !m_target_is_ptr)
-                    return s_SplitArrayByVal!(target, _p0);
-
-                return s_SplitArrayByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate bool SplitInt64ByPtr(ptr<T> value, LocalSlot _p0);
-            private delegate bool SplitInt64ByVal(T value, LocalSlot _p0);
-
-            private static readonly SplitInt64ByPtr? s_SplitInt64ByPtr;
-            private static readonly SplitInt64ByVal? s_SplitInt64ByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SplitInt64(LocalSlot _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SplitInt64ByPtr is null || !m_target_is_ptr)
-                    return s_SplitInt64ByVal!(target, _p0);
-
-                return s_SplitInt64ByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate bool DerefItabByPtr(ptr<T> value, ptr<obj.LSym> sym, long offset);
-            private delegate bool DerefItabByVal(T value, ptr<obj.LSym> sym, long offset);
+            private delegate @string DerefItabByPtr(ptr<T> value, ptr<obj.LSym> sym, long offset);
+            private delegate @string DerefItabByVal(T value, ptr<obj.LSym> sym, long offset);
 
             private static readonly DerefItabByPtr? s_DerefItabByPtr;
             private static readonly DerefItabByVal? s_DerefItabByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool DerefItab(ptr<obj.LSym> sym, long offset)
+            public @string DerefItab(ptr<obj.LSym> sym, long offset)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DerefItabByPtr is null || !m_target_is_ptr)
                     return s_DerefItabByVal!(target, sym, offset);
 
-                return s_DerefItabByPtr(m_target_ptr, sym, offset);
+                return s_DerefItabByPtr(m_target_ptr!, sym, offset);
             }
 
-            private delegate bool LineByPtr(ptr<T> value, src.XPos _p0);
-            private delegate bool LineByVal(T value, src.XPos _p0);
+            private delegate @string LineByPtr(ptr<T> value, src.XPos _p0);
+            private delegate @string LineByVal(T value, src.XPos _p0);
 
             private static readonly LineByPtr? s_LineByPtr;
             private static readonly LineByVal? s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Line(src.XPos _p0)
+            public @string Line(src.XPos _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LineByPtr is null || !m_target_is_ptr)
                     return s_LineByVal!(target, _p0);
 
-                return s_LineByPtr(m_target_ptr, _p0);
+                return s_LineByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate bool AllocFrameByPtr(ptr<T> value, ptr<Func> f);
-            private delegate bool AllocFrameByVal(T value, ptr<Func> f);
+            private delegate @string AllocFrameByPtr(ptr<T> value, ptr<Func> f);
+            private delegate @string AllocFrameByVal(T value, ptr<Func> f);
 
             private static readonly AllocFrameByPtr? s_AllocFrameByPtr;
             private static readonly AllocFrameByVal? s_AllocFrameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool AllocFrame(ptr<Func> f)
+            public @string AllocFrame(ptr<Func> f)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AllocFrameByPtr is null || !m_target_is_ptr)
                     return s_AllocFrameByVal!(target, f);
 
-                return s_AllocFrameByPtr(m_target_ptr, f);
+                return s_AllocFrameByPtr(m_target_ptr!, f);
             }
 
-            private delegate bool SyslookByPtr(ptr<T> value, @string _p0);
-            private delegate bool SyslookByVal(T value, @string _p0);
+            private delegate @string SyslookByPtr(ptr<T> value, @string _p0);
+            private delegate @string SyslookByVal(T value, @string _p0);
 
             private static readonly SyslookByPtr? s_SyslookByPtr;
             private static readonly SyslookByVal? s_SyslookByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Syslook(@string _p0)
+            public @string Syslook(@string _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SyslookByPtr is null || !m_target_is_ptr)
                     return s_SyslookByVal!(target, _p0);
 
-                return s_SyslookByPtr(m_target_ptr, _p0);
+                return s_SyslookByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate bool UseWriteBarrierByPtr(ptr<T> value);
-            private delegate bool UseWriteBarrierByVal(T value);
+            private delegate @string UseWriteBarrierByPtr(ptr<T> value);
+            private delegate @string UseWriteBarrierByVal(T value);
 
             private static readonly UseWriteBarrierByPtr? s_UseWriteBarrierByPtr;
             private static readonly UseWriteBarrierByVal? s_UseWriteBarrierByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool UseWriteBarrier()
+            public @string UseWriteBarrier()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UseWriteBarrierByPtr is null || !m_target_is_ptr)
                     return s_UseWriteBarrierByVal!(target);
 
-                return s_UseWriteBarrierByPtr(m_target_ptr);
+                return s_UseWriteBarrierByPtr(m_target_ptr!);
             }
 
-            private delegate bool SetWBPosByPtr(ptr<T> value, src.XPos pos);
-            private delegate bool SetWBPosByVal(T value, src.XPos pos);
+            private delegate @string SetWBPosByPtr(ptr<T> value, src.XPos pos);
+            private delegate @string SetWBPosByVal(T value, src.XPos pos);
 
             private static readonly SetWBPosByPtr? s_SetWBPosByPtr;
             private static readonly SetWBPosByVal? s_SetWBPosByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool SetWBPos(src.XPos pos)
+            public @string SetWBPos(src.XPos pos)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetWBPosByPtr is null || !m_target_is_ptr)
                     return s_SetWBPosByVal!(target, pos);
 
-                return s_SetWBPosByPtr(m_target_ptr, pos);
+                return s_SetWBPosByPtr(m_target_ptr!, pos);
             }
 
-            private delegate bool LogfByPtr(ptr<T> value, @string _p0, params object _p0);
-            private delegate bool LogfByVal(T value, @string _p0, params object _p0);
+            private delegate @string MyImportPathByPtr(ptr<T> value);
+            private delegate @string MyImportPathByVal(T value);
 
-            private static readonly LogfByPtr? s_LogfByPtr;
-            private static readonly LogfByVal? s_LogfByVal;
+            private static readonly MyImportPathByPtr? s_MyImportPathByPtr;
+            private static readonly MyImportPathByVal? s_MyImportPathByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Logf(@string _p0, params object _p0)
+            public @string MyImportPath()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
-                if (s_LogfByPtr is null || !m_target_is_ptr)
-                    return s_LogfByVal!(target, _p0, _p0);
+                if (s_MyImportPathByPtr is null || !m_target_is_ptr)
+                    return s_MyImportPathByVal!(target);
 
-                return s_LogfByPtr(m_target_ptr, _p0, _p0);
-            }
-
-            private delegate bool LogByPtr(ptr<T> value);
-            private delegate bool LogByVal(T value);
-
-            private static readonly LogByPtr? s_LogByPtr;
-            private static readonly LogByVal? s_LogByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Log()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_LogByPtr is null || !m_target_is_ptr)
-                    return s_LogByVal!(target);
-
-                return s_LogByPtr(m_target_ptr);
-            }
-
-            private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
-            private delegate bool FatalfByVal(T value, src.XPos pos, @string msg, params object[] args);
-
-            private static readonly FatalfByPtr? s_FatalfByPtr;
-            private static readonly FatalfByVal? s_FatalfByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Fatalf(src.XPos pos, @string msg, params object[] args)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_FatalfByPtr is null || !m_target_is_ptr)
-                    return s_FatalfByVal!(target, pos, msg, args);
-
-                return s_FatalfByPtr(m_target_ptr, pos, msg, args);
-            }
-
-            private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
-            private delegate bool WarnlByVal(T value, src.XPos pos, @string fmt_, params object[] args);
-
-            private static readonly WarnlByPtr? s_WarnlByPtr;
-            private static readonly WarnlByVal? s_WarnlByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Warnl(src.XPos pos, @string fmt_, params object[] args)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WarnlByPtr is null || !m_target_is_ptr)
-                    return s_WarnlByVal!(target, pos, fmt_, args);
-
-                return s_WarnlByPtr(m_target_ptr, pos, fmt_, args);
-            }
-
-            private delegate bool Debug_checknilByPtr(ptr<T> value);
-            private delegate bool Debug_checknilByVal(T value);
-
-            private static readonly Debug_checknilByPtr? s_Debug_checknilByPtr;
-            private static readonly Debug_checknilByVal? s_Debug_checknilByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Debug_checknil()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_Debug_checknilByPtr is null || !m_target_is_ptr)
-                    return s_Debug_checknilByVal!(target);
-
-                return s_Debug_checknilByPtr(m_target_ptr);
+                return s_MyImportPathByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Frontend()
@@ -501,12 +302,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CanSSA");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CanSSAByPtr = extensionMethod.CreateStaticDelegate(typeof(CanSSAByPtr)) as CanSSAByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CanSSA");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CanSSAByVal = extensionMethod.CreateStaticDelegate(typeof(CanSSAByVal)) as CanSSAByVal;
 
                 if (s_CanSSAByPtr is null && s_CanSSAByVal is null)
@@ -514,12 +315,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StringData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringDataByPtr = extensionMethod.CreateStaticDelegate(typeof(StringDataByPtr)) as StringDataByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StringData");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringDataByVal = extensionMethod.CreateStaticDelegate(typeof(StringDataByVal)) as StringDataByVal;
 
                 if (s_StringDataByPtr is null && s_StringDataByVal is null)
@@ -527,116 +328,38 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Auto");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AutoByPtr = extensionMethod.CreateStaticDelegate(typeof(AutoByPtr)) as AutoByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Auto");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AutoByVal = extensionMethod.CreateStaticDelegate(typeof(AutoByVal)) as AutoByVal;
 
                 if (s_AutoByPtr is null && s_AutoByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Auto method", new Exception("Auto"));
 
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitString");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitSlot");
 
-                if (!(extensionMethod is null))
-                    s_SplitStringByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitStringByPtr)) as SplitStringByPtr;
+                if (extensionMethod is not null)
+                    s_SplitSlotByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitSlotByPtr)) as SplitSlotByPtr;
 
-                extensionMethod = targetType.GetExtensionMethod("SplitString");
+                extensionMethod = targetType.GetExtensionMethod("SplitSlot");
 
-                if (!(extensionMethod is null))
-                    s_SplitStringByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStringByVal)) as SplitStringByVal;
+                if (extensionMethod is not null)
+                    s_SplitSlotByVal = extensionMethod.CreateStaticDelegate(typeof(SplitSlotByVal)) as SplitSlotByVal;
 
-                if (s_SplitStringByPtr is null && s_SplitStringByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitString method", new Exception("SplitString"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitInterface");
-
-                if (!(extensionMethod is null))
-                    s_SplitInterfaceByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByPtr)) as SplitInterfaceByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitInterface");
-
-                if (!(extensionMethod is null))
-                    s_SplitInterfaceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInterfaceByVal)) as SplitInterfaceByVal;
-
-                if (s_SplitInterfaceByPtr is null && s_SplitInterfaceByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitInterface method", new Exception("SplitInterface"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitSlice");
-
-                if (!(extensionMethod is null))
-                    s_SplitSliceByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByPtr)) as SplitSliceByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitSlice");
-
-                if (!(extensionMethod is null))
-                    s_SplitSliceByVal = extensionMethod.CreateStaticDelegate(typeof(SplitSliceByVal)) as SplitSliceByVal;
-
-                if (s_SplitSliceByPtr is null && s_SplitSliceByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitSlice method", new Exception("SplitSlice"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitComplex");
-
-                if (!(extensionMethod is null))
-                    s_SplitComplexByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByPtr)) as SplitComplexByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitComplex");
-
-                if (!(extensionMethod is null))
-                    s_SplitComplexByVal = extensionMethod.CreateStaticDelegate(typeof(SplitComplexByVal)) as SplitComplexByVal;
-
-                if (s_SplitComplexByPtr is null && s_SplitComplexByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitComplex method", new Exception("SplitComplex"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitStruct");
-
-                if (!(extensionMethod is null))
-                    s_SplitStructByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitStructByPtr)) as SplitStructByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitStruct");
-
-                if (!(extensionMethod is null))
-                    s_SplitStructByVal = extensionMethod.CreateStaticDelegate(typeof(SplitStructByVal)) as SplitStructByVal;
-
-                if (s_SplitStructByPtr is null && s_SplitStructByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitStruct method", new Exception("SplitStruct"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitArray");
-
-                if (!(extensionMethod is null))
-                    s_SplitArrayByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByPtr)) as SplitArrayByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitArray");
-
-                if (!(extensionMethod is null))
-                    s_SplitArrayByVal = extensionMethod.CreateStaticDelegate(typeof(SplitArrayByVal)) as SplitArrayByVal;
-
-                if (s_SplitArrayByPtr is null && s_SplitArrayByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitArray method", new Exception("SplitArray"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("SplitInt64");
-
-                if (!(extensionMethod is null))
-                    s_SplitInt64ByPtr = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByPtr)) as SplitInt64ByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("SplitInt64");
-
-                if (!(extensionMethod is null))
-                    s_SplitInt64ByVal = extensionMethod.CreateStaticDelegate(typeof(SplitInt64ByVal)) as SplitInt64ByVal;
-
-                if (s_SplitInt64ByPtr is null && s_SplitInt64ByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitInt64 method", new Exception("SplitInt64"));
+                if (s_SplitSlotByPtr is null && s_SplitSlotByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SplitSlot method", new Exception("SplitSlot"));
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("DerefItab");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DerefItabByPtr = extensionMethod.CreateStaticDelegate(typeof(DerefItabByPtr)) as DerefItabByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("DerefItab");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DerefItabByVal = extensionMethod.CreateStaticDelegate(typeof(DerefItabByVal)) as DerefItabByVal;
 
                 if (s_DerefItabByPtr is null && s_DerefItabByVal is null)
@@ -644,12 +367,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Line");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LineByPtr = extensionMethod.CreateStaticDelegate(typeof(LineByPtr)) as LineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Line");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
 
                 if (s_LineByPtr is null && s_LineByVal is null)
@@ -657,12 +380,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AllocFrame");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AllocFrameByPtr = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByPtr)) as AllocFrameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AllocFrame");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AllocFrameByVal = extensionMethod.CreateStaticDelegate(typeof(AllocFrameByVal)) as AllocFrameByVal;
 
                 if (s_AllocFrameByPtr is null && s_AllocFrameByVal is null)
@@ -670,12 +393,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Syslook");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SyslookByPtr = extensionMethod.CreateStaticDelegate(typeof(SyslookByPtr)) as SyslookByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Syslook");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SyslookByVal = extensionMethod.CreateStaticDelegate(typeof(SyslookByVal)) as SyslookByVal;
 
                 if (s_SyslookByPtr is null && s_SyslookByVal is null)
@@ -683,12 +406,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UseWriteBarrier");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UseWriteBarrierByPtr = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByPtr)) as UseWriteBarrierByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UseWriteBarrier");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UseWriteBarrierByVal = extensionMethod.CreateStaticDelegate(typeof(UseWriteBarrierByVal)) as UseWriteBarrierByVal;
 
                 if (s_UseWriteBarrierByPtr is null && s_UseWriteBarrierByVal is null)
@@ -696,81 +419,29 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetWBPos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetWBPosByPtr = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByPtr)) as SetWBPosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetWBPos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetWBPosByVal = extensionMethod.CreateStaticDelegate(typeof(SetWBPosByVal)) as SetWBPosByVal;
 
                 if (s_SetWBPosByPtr is null && s_SetWBPosByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.SetWBPos method", new Exception("SetWBPos"));
 
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("MyImportPath");
 
-                if (!(extensionMethod is null))
-                    s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
+                if (extensionMethod is not null)
+                    s_MyImportPathByPtr = extensionMethod.CreateStaticDelegate(typeof(MyImportPathByPtr)) as MyImportPathByPtr;
 
-                extensionMethod = targetType.GetExtensionMethod("Logf");
+                extensionMethod = targetType.GetExtensionMethod("MyImportPath");
 
-                if (!(extensionMethod is null))
-                    s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
+                if (extensionMethod is not null)
+                    s_MyImportPathByVal = extensionMethod.CreateStaticDelegate(typeof(MyImportPathByVal)) as MyImportPathByVal;
 
-                if (s_LogfByPtr is null && s_LogfByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Logf method", new Exception("Logf"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Log");
-
-                if (!(extensionMethod is null))
-                    s_LogByPtr = extensionMethod.CreateStaticDelegate(typeof(LogByPtr)) as LogByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Log");
-
-                if (!(extensionMethod is null))
-                    s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
-
-                if (s_LogByPtr is null && s_LogByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Log method", new Exception("Log"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Fatalf");
-
-                if (!(extensionMethod is null))
-                    s_FatalfByPtr = extensionMethod.CreateStaticDelegate(typeof(FatalfByPtr)) as FatalfByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Fatalf");
-
-                if (!(extensionMethod is null))
-                    s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
-
-                if (s_FatalfByPtr is null && s_FatalfByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Fatalf method", new Exception("Fatalf"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Warnl");
-
-                if (!(extensionMethod is null))
-                    s_WarnlByPtr = extensionMethod.CreateStaticDelegate(typeof(WarnlByPtr)) as WarnlByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Warnl");
-
-                if (!(extensionMethod is null))
-                    s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
-
-                if (s_WarnlByPtr is null && s_WarnlByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Warnl method", new Exception("Warnl"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Debug_checknil");
-
-                if (!(extensionMethod is null))
-                    s_Debug_checknilByPtr = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByPtr)) as Debug_checknilByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
-
-                if (!(extensionMethod is null))
-                    s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
-
-                if (s_Debug_checknilByPtr is null && s_Debug_checknilByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.Debug_checknil method", new Exception("Debug_checknil"));
+                if (s_MyImportPathByPtr is null && s_MyImportPathByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Frontend.MyImportPath method", new Exception("MyImportPath"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

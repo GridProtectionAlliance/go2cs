@@ -2,173 +2,166 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modconv -- go2cs converted at 2020 October 09 05:46:39 UTC
+// package modconv -- go2cs converted at 2022 March 06 23:18:10 UTC
 // import "cmd/go/internal/modconv" ==> using modconv = go.cmd.go.@internal.modconv_package
-// Original source: C:\Go\src\cmd\go\internal\modconv\convert.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\modconv\convert.go
 using fmt = go.fmt_package;
 using os = go.os_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
-using sync = go.sync_package;
 
 using @base = go.cmd.go.@internal.@base_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using par = go.cmd.go.@internal.par_package;
 
 using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
-using static go.builtin;
 using System;
+using System.Threading;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class modconv_package
+
+namespace go.cmd.go.@internal;
+
+public static partial class modconv_package {
+
+    // ConvertLegacyConfig converts legacy config to modfile.
+    // The file argument is slash-delimited.
+public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file, slice<byte> data, Func<@string, @string, (module.Version, error)> queryPackage) => func((defer, _, _) => {
+    ref modfile.File f = ref _addr_f.val;
+
+    var i = strings.LastIndex(file, "/");
+    nint j = -2;
+    if (i >= 0) {
+        j = strings.LastIndex(file[..(int)i], "/");
+    }
+    var convert = Converters[file[(int)i + 1..]];
+    if (convert == null && j != -2) {
+        convert = Converters[file[(int)j + 1..]];
+    }
+    if (convert == null) {
+        return error.As(fmt.Errorf("unknown legacy config file %s", file))!;
+    }
+    var (mf, err) = convert(file, data);
+    if (err != null) {
+        return error.As(fmt.Errorf("parsing %s: %v", file, err))!;
+    }
+    var versions = make_slice<module.Version>(len(mf.Require));
+    var replace = make_map<@string, ptr<modfile.Replace>>();
+
     {
-        // ConvertLegacyConfig converts legacy config to modfile.
-        // The file argument is slash-delimited.
-        public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file, slice<byte> data)
-        {
-            ref modfile.File f = ref _addr_f.val;
+        var r__prev1 = r;
 
-            var i = strings.LastIndex(file, "/");
-            long j = -2L;
-            if (i >= 0L)
-            {
-                j = strings.LastIndex(file[..i], "/");
-            }
-            var convert = Converters[file[i + 1L..]];
-            if (convert == null && j != -2L)
-            {
-                convert = Converters[file[j + 1L..]];
-            }
-            if (convert == null)
-            {
-                return error.As(fmt.Errorf("unknown legacy config file %s", file))!;
-            }
-            var (mf, err) = convert(file, data);
-            if (err != null)
-            {
-                return error.As(fmt.Errorf("parsing %s: %v", file, err))!;
-            }
-            par.Work work = default;            sync.Mutex mu = default;            var need = make_map<@string, @string>();            var replace = make_map<@string, ptr<modfile.Replace>>();
+        foreach (var (_, __r) in mf.Replace) {
+            r = __r;
+            replace[r.New.Path] = r;
+            replace[r.Old.Path] = r;
+        }
+        r = r__prev1;
+    }
 
-            {
-                var r__prev1 = r;
+    private partial struct token {
+    }
+    var sem = make_channel<token>(runtime.GOMAXPROCS(0));
+    {
+        var i__prev1 = i;
+        var r__prev1 = r;
 
-                foreach (var (_, __r) in mf.Replace)
-                {
-                    r = __r;
-                    replace[r.New.Path] = r;
-                    replace[r.Old.Path] = r;
+        foreach (var (__i, __r) in mf.Require) {
+            i = __i;
+            r = __r;
+            var m = r.Mod;
+            if (m.Path == "") {
+                continue;
+            }
+            {
+                var re__prev1 = re;
+
+                var (re, ok) = replace[m.Path];
+
+                if (ok) {
+                    m = re.New;
                 }
-                r = r__prev1;
+                re = re__prev1;
+
             }
 
-            {
-                var r__prev1 = r;
-
-                foreach (var (_, __r) in mf.Require)
-                {
-                    r = __r;
-                    var m = r.Mod;
-                    if (m.Path == "")
-                    {
-                        continue;
-                    }
-                    {
-                        var re__prev1 = re;
-
-                        var (re, ok) = replace[m.Path];
-
-                        if (ok)
-                        {
-                            work.Add(re.New);
-                            continue;
-                        }
-                        re = re__prev1;
-
-                    }
-
-                    work.Add(r.Mod);
-
-                }
-                r = r__prev1;
-            }
-
-            work.Do(10L, item =>
-            {
-                module.Version r = item._<module.Version>();
-                var (repo, info, err) = modfetch.ImportRepoRev(r.Path, r.Version);
-                if (err != null)
-                {
-                    fmt.Fprintf(os.Stderr, "go: converting %s: stat %s@%s: %v\n", @base.ShortPath(file), r.Path, r.Version, err);
+            sem.Send(new token());
+            go_(() => (i, m) => {
+                defer(() => {
+                    sem.Receive();
+                }());
+                var (version, err) = queryPackage(m.Path, m.Version);
+                if (err != null) {
+                    fmt.Fprintf(os.Stderr, "go: converting %s: stat %s@%s: %v\n", @base.ShortPath(file), m.Path, m.Version, err);
                     return ;
                 }
-                mu.Lock();
-                var path = repo.ModulePath(); 
-                // Don't use semver.Max here; need to preserve +incompatible suffix.
-                {
-                    var (v, ok) = need[path];
+                versions[i] = version;
 
-                    if (!ok || semver.Compare(v, info.Version) < 0L)
-                    {
-                        need[path] = info.Version;
-                    }
-                }
-
-                mu.Unlock();
-
-            });
-
-            slice<@string> paths = default;
-            {
-                var path__prev1 = path;
-
-                foreach (var (__path) in need)
-                {
-                    path = __path;
-                    paths = append(paths, path);
-                }
-                path = path__prev1;
-            }
-
-            sort.Strings(paths);
-            {
-                var path__prev1 = path;
-
-                foreach (var (_, __path) in paths)
-                {
-                    path = __path;
-                    {
-                        var re__prev1 = re;
-
-                        (re, ok) = replace[path];
-
-                        if (ok)
-                        {
-                            var err = f.AddReplace(re.Old.Path, re.Old.Version, path, need[path]);
-                            if (err != null)
-                            {
-                                return error.As(fmt.Errorf("add replace: %v", err))!;
-                            }
-                        }
-                        re = re__prev1;
-
-                    }
-
-                    f.AddNewRequire(path, need[path], false);
-
-                }
-                path = path__prev1;
-            }
-
-            f.Cleanup();
-            return error.As(null!)!;
+            }(i, m));
 
         }
+        i = i__prev1;
+        r = r__prev1;
     }
-}}}}
+
+    for (var n = cap(sem); n > 0; n--) {
+        sem.Send(new token());
+    }
+
+    map need = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
+    foreach (var (_, v) in versions) {
+        if (v.Path == "") {
+            continue;
+        }
+        {
+            var (needv, ok) = need[v.Path];
+
+            if (!ok || semver.Compare(needv, v.Version) < 0) {
+                need[v.Path] = v.Version;
+            }
+        }
+
+    }    var paths = make_slice<@string>(0, len(need));
+    {
+        var path__prev1 = path;
+
+        foreach (var (__path) in need) {
+            path = __path;
+            paths = append(paths, path);
+        }
+        path = path__prev1;
+    }
+
+    sort.Strings(paths);
+    {
+        var path__prev1 = path;
+
+        foreach (var (_, __path) in paths) {
+            path = __path;
+            {
+                var re__prev1 = re;
+
+                (re, ok) = replace[path];
+
+                if (ok) {
+                    var err = f.AddReplace(re.Old.Path, re.Old.Version, path, need[path]);
+                    if (err != null) {
+                        return error.As(fmt.Errorf("add replace: %v", err))!;
+                    }
+                }
+                re = re__prev1;
+
+            }
+
+            f.AddNewRequire(path, need[path], false);
+
+        }
+        path = path__prev1;
+    }
+
+    f.Cleanup();
+    return error.As(null!)!;
+
+});
+
+} // end modconv_package

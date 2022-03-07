@@ -4,27 +4,21 @@
 
 // This file contains the code to check canonical methods.
 
-// package method -- go2cs converted at 2020 October 09 06:05:09 UTC
+// package method -- go2cs converted at 2022 March 06 23:35:18 UTC
 // import "cmd/vet/testdata/method" ==> using method = go.cmd.vet.testdata.method_package
-// Original source: C:\Go\src\cmd\vet\testdata\method\method.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\method\method.go
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class method_package
-    {
-        public partial struct MethodTest // : long
-        {
-        }
+namespace go.cmd.vet.testdata;
 
-        private static void Scan(this ptr<MethodTest> _addr_t, fmt.ScanState x, byte c)
-        {
-            ref MethodTest t = ref _addr_t.val;
+public static partial class method_package {
+
+public partial struct MethodTest { // : nint
+}
+
+private static void Scan(this ptr<MethodTest> _addr_t, fmt.ScanState x, byte c) {
+    ref MethodTest t = ref _addr_t.val;
  // ERROR "should have signature Scan\(fmt\.ScanState, rune\) error"
-        }
-    }
-}}}}
+}
+
+} // end method_package

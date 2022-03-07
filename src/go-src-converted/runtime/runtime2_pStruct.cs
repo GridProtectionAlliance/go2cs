@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:09 UTC
+//     Generated on 2022 March 06 22:11:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -57,25 +55,24 @@ namespace go
                 this.palloc = default;
                 this._ = default;
                 this.timer0When = default;
+                this.timerModifiedEarliest = default;
                 this.gcAssistTime = default;
                 this.gcFractionalMarkTime = default;
-                this.gcBgMarkWorker = default;
                 this.gcMarkWorkerMode = default;
                 this.gcMarkWorkerStartTime = default;
                 this.gcw = default;
                 this.wbBuf = default;
                 this.runSafePointFn = default;
+                this.statsSeq = default;
                 this.timersLock = default;
                 this.timers = default;
                 this.numTimers = default;
-                this.adjustTimers = default;
                 this.deletedTimers = default;
                 this.timerRaceCtx = default;
                 this.preempt = default;
-                this.pad = default;
             }
 
-            public p(int id = default, uint status = default, puintptr link = default, uint schedtick = default, uint syscalltick = default, sysmontick sysmontick = default, muintptr m = default, ref ptr<mcache> mcache = default, pageCache pcache = default, System.UIntPtr raceprocctx = default, array<slice<ptr<_defer>>> deferpool = default, array<array<ptr<_defer>>> deferpoolbuf = default, ulong goidcache = default, ulong goidcacheend = default, uint runqhead = default, uint runqtail = default, array<guintptr> runq = default, guintptr runnext = default, slice<ptr<sudog>> sudogcache = default, array<ptr<sudog>> sudogbuf = default, traceBufPtr tracebuf = default, bool traceSweep = default, System.UIntPtr traceSwept = default, System.UIntPtr traceReclaimed = default, persistentAlloc palloc = default, uint _ = default, ulong timer0When = default, long gcAssistTime = default, long gcFractionalMarkTime = default, guintptr gcBgMarkWorker = default, gcMarkWorkerMode gcMarkWorkerMode = default, long gcMarkWorkerStartTime = default, gcWork gcw = default, wbBuf wbBuf = default, uint runSafePointFn = default, mutex timersLock = default, slice<ptr<timer>> timers = default, uint numTimers = default, uint adjustTimers = default, uint deletedTimers = default, System.UIntPtr timerRaceCtx = default, bool preempt = default, cpu.CacheLinePad pad = default)
+            public p(int id = default, uint status = default, puintptr link = default, uint schedtick = default, uint syscalltick = default, sysmontick sysmontick = default, muintptr m = default, ref ptr<mcache> mcache = default, pageCache pcache = default, System.UIntPtr raceprocctx = default, array<slice<ptr<_defer>>> deferpool = default, array<array<ptr<_defer>>> deferpoolbuf = default, ulong goidcache = default, ulong goidcacheend = default, uint runqhead = default, uint runqtail = default, array<guintptr> runq = default, guintptr runnext = default, slice<ptr<sudog>> sudogcache = default, array<ptr<sudog>> sudogbuf = default, traceBufPtr tracebuf = default, bool traceSweep = default, System.UIntPtr traceSwept = default, System.UIntPtr traceReclaimed = default, persistentAlloc palloc = default, uint _ = default, ulong timer0When = default, ulong timerModifiedEarliest = default, long gcAssistTime = default, long gcFractionalMarkTime = default, gcMarkWorkerMode gcMarkWorkerMode = default, long gcMarkWorkerStartTime = default, gcWork gcw = default, wbBuf wbBuf = default, uint runSafePointFn = default, uint statsSeq = default, mutex timersLock = default, slice<ptr<timer>> timers = default, uint numTimers = default, uint deletedTimers = default, System.UIntPtr timerRaceCtx = default, bool preempt = default)
             {
                 this.id = id;
                 this.status = status;
@@ -104,22 +101,21 @@ namespace go
                 this.palloc = palloc;
                 this._ = _;
                 this.timer0When = timer0When;
+                this.timerModifiedEarliest = timerModifiedEarliest;
                 this.gcAssistTime = gcAssistTime;
                 this.gcFractionalMarkTime = gcFractionalMarkTime;
-                this.gcBgMarkWorker = gcBgMarkWorker;
                 this.gcMarkWorkerMode = gcMarkWorkerMode;
                 this.gcMarkWorkerStartTime = gcMarkWorkerStartTime;
                 this.gcw = gcw;
                 this.wbBuf = wbBuf;
                 this.runSafePointFn = runSafePointFn;
+                this.statsSeq = statsSeq;
                 this.timersLock = timersLock;
                 this.timers = timers;
                 this.numTimers = numTimers;
-                this.adjustTimers = adjustTimers;
                 this.deletedTimers = deletedTimers;
                 this.timerRaceCtx = timerRaceCtx;
                 this.preempt = preempt;
-                this.pad = pad;
             }
 
             // Enable comparisons between nil and p struct
@@ -142,7 +138,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static p p_cast(dynamic value)
         {
-            return new p(value.id, value.status, value.link, value.schedtick, value.syscalltick, value.sysmontick, value.m, ref value.mcache, value.pcache, value.raceprocctx, value.deferpool, value.deferpoolbuf, value.goidcache, value.goidcacheend, value.runqhead, value.runqtail, value.runq, value.runnext, value.sudogcache, value.sudogbuf, value.tracebuf, value.traceSweep, value.traceSwept, value.traceReclaimed, value.palloc, value._, value.timer0When, value.gcAssistTime, value.gcFractionalMarkTime, value.gcBgMarkWorker, value.gcMarkWorkerMode, value.gcMarkWorkerStartTime, value.gcw, value.wbBuf, value.runSafePointFn, value.timersLock, value.timers, value.numTimers, value.adjustTimers, value.deletedTimers, value.timerRaceCtx, value.preempt, value.pad);
+            return new p(value.id, value.status, value.link, value.schedtick, value.syscalltick, value.sysmontick, value.m, ref value.mcache, value.pcache, value.raceprocctx, value.deferpool, value.deferpoolbuf, value.goidcache, value.goidcacheend, value.runqhead, value.runqtail, value.runq, value.runnext, value.sudogcache, value.sudogbuf, value.tracebuf, value.traceSweep, value.traceSwept, value.traceReclaimed, value.palloc, value._, value.timer0When, value.timerModifiedEarliest, value.gcAssistTime, value.gcFractionalMarkTime, value.gcMarkWorkerMode, value.gcMarkWorkerStartTime, value.gcw, value.wbBuf, value.runSafePointFn, value.statsSeq, value.timersLock, value.timers, value.numTimers, value.deletedTimers, value.timerRaceCtx, value.preempt);
         }
     }
 }

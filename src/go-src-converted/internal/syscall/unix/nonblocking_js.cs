@@ -2,26 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build js && wasm
 // +build js,wasm
 
-// package unix -- go2cs converted at 2020 October 09 04:50:59 UTC
+// package unix -- go2cs converted at 2022 March 06 22:12:55 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
-// Original source: C:\Go\src\internal\syscall\unix\nonblocking_js.go
+// Original source: C:\Program Files\Go\src\internal\syscall\unix\nonblocking_js.go
 
-using static go.builtin;
 
-namespace go {
-namespace @internal {
-namespace syscall
-{
-    public static partial class unix_package
-    {
-        public static (bool, error) IsNonblock(long fd)
-        {
-            bool nonblocking = default;
-            error err = default!;
+namespace go.@internal.syscall;
 
-            return (false, error.As(null!)!);
-        }
-    }
-}}}
+public static partial class unix_package {
+
+public static (bool, error) IsNonblock(nint fd) {
+    bool nonblocking = default;
+    error err = default!;
+
+    return (false, error.As(null!)!);
+}
+
+} // end unix_package

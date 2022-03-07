@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:55 UTC
+//     Generated on 2022 March 06 22:25:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using encoding = go.encoding_package;
 using binary = go.encoding.binary_package;
 using math = go.math_package;
@@ -42,7 +41,7 @@ namespace encoding
                 this.next = default;
             }
 
-            public encoderState(ref ptr<Encoder> enc = default, ref ptr<encBuffer> b = default, bool sendZero = default, long fieldnum = default, array<byte> buf = default, ref ptr<encoderState> next = default)
+            public encoderState(ref ptr<Encoder> enc = default, ref ptr<encBuffer> b = default, bool sendZero = default, nint fieldnum = default, array<byte> buf = default, ref ptr<encoderState> next = default)
             {
                 this.enc = enc;
                 this.b = b;

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:08 UTC
+//     Generated on 2022 March 06 22:12:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the typeOff struct
             private readonly int m_value;
-
+            
             public typeOff(int value) => m_value = value;
 
             // Enable implicit conversions between int and typeOff struct

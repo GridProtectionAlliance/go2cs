@@ -6,122 +6,107 @@
 // that returns multiple types.
 // See golang.org/issue/12839.
 // (See also golang.org/issue/27928.)
-// package issue12839 -- go2cs converted at 2020 October 09 05:19:11 UTC
+// package issue12839 -- go2cs converted at 2022 March 06 22:41:35 UTC
 // import "go/doc.issue12839" ==> using issue12839 = go.go.doc.issue12839_package
-// Original source: C:\Go\src\go\doc\testdata\issue12839.go
+// Original source: C:\Program Files\Go\src\go\doc\testdata\issue12839.go
 using p = go.p_package;
-using static go.builtin;
 
-namespace go {
-namespace go
-{
-    public static partial class issue12839_package
-    {
-        public partial struct T1
-        {
-        }
+namespace go.go;
 
-        public partial struct T2
-        {
-        }
+public static partial class issue12839_package {
 
-        public static @string hello(this T1 t)
-        {
-            return "hello";
-        }
+public partial struct T1 {
+}
 
-        // F1 should not be associated with T1
-        public static (ptr<T1>, ptr<T2>) F1()
-        {
-            ptr<T1> _p0 = default!;
-            ptr<T2> _p0 = default!;
+public partial struct T2 {
+}
 
-            return (addr(new T1()), addr(new T2()));
-        }
+public static @string hello(this T1 t) {
+    return "hello";
+}
 
-        // F2 should be associated with T1
-        public static (T1, T1, T1) F2()
-        {
-            T1 a = default;
-            T1 b = default;
-            T1 c = default;
+// F1 should not be associated with T1
+public static (ptr<T1>, ptr<T2>) F1() {
+    ptr<T1> _p0 = default!;
+    ptr<T2> _p0 = default!;
 
-            return (new T1(), new T1(), new T1());
-        }
+    return (addr(new T1()), addr(new T2()));
+}
 
-        // F3 should be associated with T1 because b.T3 is from a different package
-        public static (T1, p.T3) F3()
-        {
-            T1 a = default;
-            p.T3 b = default;
+// F2 should be associated with T1
+public static (T1, T1, T1) F2() {
+    T1 a = default;
+    T1 b = default;
+    T1 c = default;
 
-            return (new T1(), new p.T3());
-        }
+    return (new T1(), new T1(), new T1());
+}
 
-        // F4 should not be associated with a type (same as F1)
-        public static (T1, T2) F4()
-        {
-            T1 a = default;
-            T2 b = default;
+// F3 should be associated with T1 because b.T3 is from a different package
+public static (T1, p.T3) F3() {
+    T1 a = default;
+    p.T3 b = default;
 
-            return (new T1(), new T2());
-        }
+    return (new T1(), new p.T3());
+}
 
-        // F5 should be associated with T1.
-        public static (T1, error) F5()
-        {
-            T1 _p0 = default;
-            error _p0 = default!;
+// F4 should not be associated with a type (same as F1)
+public static (T1, T2) F4() {
+    T1 a = default;
+    T2 b = default;
 
-            return (new T1(), error.As(null!)!);
-        }
+    return (new T1(), new T2());
+}
 
-        // F6 should be associated with T1.
-        public static (ptr<T1>, error) F6()
-        {
-            ptr<T1> _p0 = default!;
-            error _p0 = default!;
+// F5 should be associated with T1.
+public static (T1, error) F5() {
+    T1 _p0 = default;
+    error _p0 = default!;
 
-            return (addr(new T1()), error.As(null!)!);
-        }
+    return (new T1(), error.As(null!)!);
+}
 
-        // F7 should be associated with T1.
-        public static (T1, @string) F7()
-        {
-            T1 _p0 = default;
-            @string _p0 = default;
+// F6 should be associated with T1.
+public static (ptr<T1>, error) F6() {
+    ptr<T1> _p0 = default!;
+    error _p0 = default!;
 
-            return (new T1(), null);
-        }
+    return (addr(new T1()), error.As(null!)!);
+}
 
-        // F8 should be associated with T1.
-        public static (long, T1, @string) F8()
-        {
-            long _p0 = default;
-            T1 _p0 = default;
-            @string _p0 = default;
+// F7 should be associated with T1.
+public static (T1, @string) F7() {
+    T1 _p0 = default;
+    @string _p0 = default;
 
-            return (0L, new T1(), null);
-        }
+    return (new T1(), null);
+}
 
-        // F9 should not be associated with T1.
-        public static (long, T1, T2) F9()
-        {
-            long _p0 = default;
-            T1 _p0 = default;
-            T2 _p0 = default;
+// F8 should be associated with T1.
+public static (nint, T1, @string) F8() {
+    nint _p0 = default;
+    T1 _p0 = default;
+    @string _p0 = default;
 
-            return (0L, new T1(), new T2());
-        }
+    return (0, new T1(), null);
+}
 
-        // F10 should not be associated with T1.
-        public static (T1, T2, error) F10()
-        {
-            T1 _p0 = default;
-            T2 _p0 = default;
-            error _p0 = default!;
+// F9 should not be associated with T1.
+public static (nint, T1, T2) F9() {
+    nint _p0 = default;
+    T1 _p0 = default;
+    T2 _p0 = default;
 
-            return (new T1(), new T2(), error.As(null!)!);
-        }
-    }
-}}
+    return (0, new T1(), new T2());
+}
+
+// F10 should not be associated with T1.
+public static (T1, T2, error) F10() {
+    T1 _p0 = default;
+    T2 _p0 = default;
+    error _p0 = default!;
+
+    return (new T1(), new T2(), error.As(null!)!);
+}
+
+} // end issue12839_package

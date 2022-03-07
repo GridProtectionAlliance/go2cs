@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:57 UTC
+//     Generated on 2022 March 06 23:38:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -47,7 +46,7 @@ namespace text
                 this.transformComplete = default;
             }
 
-            public Reader(io.Reader r = default, Transformer t = default, error err = default, slice<byte> dst = default, long dst0 = default, long dst1 = default, slice<byte> src = default, long src0 = default, long src1 = default, bool transformComplete = default)
+            public Reader(io.Reader r = default, Transformer t = default, error err = default, slice<byte> dst = default, nint dst0 = default, nint dst1 = default, slice<byte> src = default, nint src0 = default, nint src1 = default, bool transformComplete = default)
             {
                 this.r = r;
                 this.t = t;

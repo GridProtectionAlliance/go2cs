@@ -12,101 +12,84 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-// package driver -- go2cs converted at 2020 October 09 05:53:29 UTC
+// package driver -- go2cs converted at 2022 March 06 23:23:27 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\flags.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\flags.go
 using flag = go.flag_package;
 using strings = go.strings_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace @internal
-{
-    public static partial class driver_package
-    {
-        // GoFlags implements the plugin.FlagSet interface.
-        public partial struct GoFlags
-        {
-            public slice<@string> UsageMsgs;
-        }
 
-        // Bool implements the plugin.FlagSet interface.
-        private static ptr<bool> Bool(this ptr<GoFlags> _addr__p0, @string o, bool d, @string c)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
-            return _addr_flag.Bool(o, d, c)!;
-        }
+public static partial class driver_package {
 
-        // Int implements the plugin.FlagSet interface.
-        private static ptr<long> Int(this ptr<GoFlags> _addr__p0, @string o, long d, @string c)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+    // GoFlags implements the plugin.FlagSet interface.
+public partial struct GoFlags {
+    public slice<@string> UsageMsgs;
+}
 
-            return _addr_flag.Int(o, d, c)!;
-        }
+// Bool implements the plugin.FlagSet interface.
+private static ptr<bool> Bool(this ptr<GoFlags> _addr__p0, @string o, bool d, @string c) {
+    ref GoFlags _p0 = ref _addr__p0.val;
 
-        // Float64 implements the plugin.FlagSet interface.
-        private static ptr<double> Float64(this ptr<GoFlags> _addr__p0, @string o, double d, @string c)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+    return _addr_flag.Bool(o, d, c)!;
+}
 
-            return _addr_flag.Float64(o, d, c)!;
-        }
+// Int implements the plugin.FlagSet interface.
+private static ptr<nint> Int(this ptr<GoFlags> _addr__p0, @string o, nint d, @string c) {
+    ref GoFlags _p0 = ref _addr__p0.val;
 
-        // String implements the plugin.FlagSet interface.
-        private static ptr<@string> String(this ptr<GoFlags> _addr__p0, @string o, @string d, @string c)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+    return _addr_flag.Int(o, d, c)!;
+}
 
-            return _addr_flag.String(o, d, c)!;
-        }
+// Float64 implements the plugin.FlagSet interface.
+private static ptr<double> Float64(this ptr<GoFlags> _addr__p0, @string o, double d, @string c) {
+    ref GoFlags _p0 = ref _addr__p0.val;
 
-        // StringList implements the plugin.FlagSet interface.
-        private static ptr<slice<ptr<@string>>> StringList(this ptr<GoFlags> _addr__p0, @string o, @string d, @string c)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+    return _addr_flag.Float64(o, d, c)!;
+}
 
-            return addr(new slice<ptr<@string>>(new ptr<@string>[] { flag.String(o,d,c) }));
-        }
+// String implements the plugin.FlagSet interface.
+private static ptr<@string> String(this ptr<GoFlags> _addr__p0, @string o, @string d, @string c) {
+    ref GoFlags _p0 = ref _addr__p0.val;
 
-        // ExtraUsage implements the plugin.FlagSet interface.
-        private static @string ExtraUsage(this ptr<GoFlags> _addr_f)
-        {
-            ref GoFlags f = ref _addr_f.val;
+    return _addr_flag.String(o, d, c)!;
+}
 
-            return strings.Join(f.UsageMsgs, "\n");
-        }
+// StringList implements the plugin.FlagSet interface.
+private static ptr<slice<ptr<@string>>> StringList(this ptr<GoFlags> _addr__p0, @string o, @string d, @string c) {
+    ref GoFlags _p0 = ref _addr__p0.val;
 
-        // AddExtraUsage implements the plugin.FlagSet interface.
-        private static void AddExtraUsage(this ptr<GoFlags> _addr_f, @string eu)
-        {
-            ref GoFlags f = ref _addr_f.val;
+    return addr(new slice<ptr<@string>>(new ptr<@string>[] { flag.String(o,d,c) }));
+}
 
-            f.UsageMsgs = append(f.UsageMsgs, eu);
-        }
+// ExtraUsage implements the plugin.FlagSet interface.
+private static @string ExtraUsage(this ptr<GoFlags> _addr_f) {
+    ref GoFlags f = ref _addr_f.val;
 
-        // Parse implements the plugin.FlagSet interface.
-        private static slice<@string> Parse(this ptr<GoFlags> _addr__p0, Action usage)
-        {
-            ref GoFlags _p0 = ref _addr__p0.val;
+    return strings.Join(f.UsageMsgs, "\n");
+}
 
-            flag.Usage = usage;
-            flag.Parse();
-            var args = flag.Args();
-            if (len(args) == 0L)
-            {
-                usage();
-            }
+// AddExtraUsage implements the plugin.FlagSet interface.
+private static void AddExtraUsage(this ptr<GoFlags> _addr_f, @string eu) {
+    ref GoFlags f = ref _addr_f.val;
 
-            return args;
+    f.UsageMsgs = append(f.UsageMsgs, eu);
+}
 
-        }
+// Parse implements the plugin.FlagSet interface.
+private static slice<@string> Parse(this ptr<GoFlags> _addr__p0, Action usage) {
+    ref GoFlags _p0 = ref _addr__p0.val;
+
+    flag.Usage = usage;
+    flag.Parse();
+    var args = flag.Args();
+    if (len(args) == 0) {
+        usage();
     }
-}}}}}}}
+    return args;
+
+}
+
+} // end driver_package

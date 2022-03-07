@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:38 UTC
+//     Generated on 2022 March 06 22:25:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 using sync = go.sync_package;
@@ -40,7 +39,7 @@ namespace go
                 this.infos = default;
             }
 
-            public File(ref ptr<FileSet> set = default, @string name = default, long @base = default, long size = default, sync.Mutex mutex = default, slice<long> lines = default, slice<lineInfo> infos = default)
+            public File(ref ptr<FileSet> set = default, @string name = default, nint @base = default, nint size = default, sync.Mutex mutex = default, slice<nint> lines = default, slice<lineInfo> infos = default)
             {
                 this.set = set;
                 this.name = name;

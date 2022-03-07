@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:17 UTC
+//     Generated on 2022 March 06 22:20:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,14 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using cipher = go.crypto.cipher_package;
 using subtle = go.crypto.subtle_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using hash = go.hash_package;
 using io = go.io_package;
 using net = go.net_package;
 using sync = go.sync_package;
@@ -54,19 +55,19 @@ namespace crypto
                 this.version = default;
                 this.mac = default;
                 this.seq = default;
-                this.additionalData = default;
+                this.scratchBuf = default;
                 this.nextMac = default;
                 this.trafficSecret = default;
             }
 
-            public halfConn(sync.Mutex Mutex = default, error err = default, ushort version = default, macFunction mac = default, array<byte> seq = default, array<byte> additionalData = default, macFunction nextMac = default, slice<byte> trafficSecret = default)
+            public halfConn(sync.Mutex Mutex = default, error err = default, ushort version = default, hash.Hash mac = default, array<byte> seq = default, array<byte> scratchBuf = default, hash.Hash nextMac = default, slice<byte> trafficSecret = default)
             {
                 this.m_MutexRef = new ptr<sync.Mutex>(Mutex);
                 this.err = err;
                 this.version = version;
                 this.mac = mac;
                 this.seq = seq;
-                this.additionalData = additionalData;
+                this.scratchBuf = scratchBuf;
                 this.nextMac = nextMac;
                 this.trafficSecret = trafficSecret;
             }
@@ -91,7 +92,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static halfConn halfConn_cast(dynamic value)
         {
-            return new halfConn(value.Mutex, value.err, value.version, value.mac, value.seq, value.additionalData, value.nextMac, value.trafficSecret);
+            return new halfConn(value.Mutex, value.err, value.version, value.mac, value.seq, value.scratchBuf, value.nextMac, value.trafficSecret);
         }
     }
 }}

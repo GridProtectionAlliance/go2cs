@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -60,7 +59,7 @@ namespace pprof
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,33 +85,33 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
-            private delegate error BaseByPtr(ptr<T> value);
-            private delegate error BaseByVal(T value);
+            private delegate error ObjAddrByPtr(ptr<T> value, ulong addr);
+            private delegate error ObjAddrByVal(T value, ulong addr);
 
-            private static readonly BaseByPtr? s_BaseByPtr;
-            private static readonly BaseByVal? s_BaseByVal;
+            private static readonly ObjAddrByPtr? s_ObjAddrByPtr;
+            private static readonly ObjAddrByVal? s_ObjAddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Base()
+            public error ObjAddr(ulong addr)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
-                if (s_BaseByPtr is null || !m_target_is_ptr)
-                    return s_BaseByVal!(target);
+                if (s_ObjAddrByPtr is null || !m_target_is_ptr)
+                    return s_ObjAddrByVal!(target, addr);
 
-                return s_BaseByPtr(m_target_ptr);
+                return s_ObjAddrByPtr(m_target_ptr!, addr);
             }
 
             private delegate error BuildIDByPtr(ptr<T> value);
@@ -126,13 +125,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BuildIDByPtr is null || !m_target_is_ptr)
                     return s_BuildIDByVal!(target);
 
-                return s_BuildIDByPtr(m_target_ptr);
+                return s_BuildIDByPtr(m_target_ptr!);
             }
 
             private delegate error SourceLineByPtr(ptr<T> value, ulong addr);
@@ -146,13 +145,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SourceLineByPtr is null || !m_target_is_ptr)
                     return s_SourceLineByVal!(target, addr);
 
-                return s_SourceLineByPtr(m_target_ptr, addr);
+                return s_SourceLineByPtr(m_target_ptr!, addr);
             }
 
             private delegate error SymbolsByPtr(ptr<T> value, ptr<regexp.Regexp> r, ulong addr);
@@ -166,13 +165,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SymbolsByPtr is null || !m_target_is_ptr)
                     return s_SymbolsByVal!(target, r, addr);
 
-                return s_SymbolsByPtr(m_target_ptr, r, addr);
+                return s_SymbolsByPtr(m_target_ptr!, r, addr);
             }
 
             private delegate error CloseByPtr(ptr<T> value);
@@ -186,16 +185,16 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ObjFile()
@@ -206,38 +205,38 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Name method", new Exception("Name"));
 
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Base");
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("ObjAddr");
 
-                if (!(extensionMethod is null))
-                    s_BaseByPtr = extensionMethod.CreateStaticDelegate(typeof(BaseByPtr)) as BaseByPtr;
+                if (extensionMethod is not null)
+                    s_ObjAddrByPtr = extensionMethod.CreateStaticDelegate(typeof(ObjAddrByPtr)) as ObjAddrByPtr;
 
-                extensionMethod = targetType.GetExtensionMethod("Base");
+                extensionMethod = targetType.GetExtensionMethod("ObjAddr");
 
-                if (!(extensionMethod is null))
-                    s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
+                if (extensionMethod is not null)
+                    s_ObjAddrByVal = extensionMethod.CreateStaticDelegate(typeof(ObjAddrByVal)) as ObjAddrByVal;
 
-                if (s_BaseByPtr is null && s_BaseByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.Base method", new Exception("Base"));
+                if (s_ObjAddrByPtr is null && s_ObjAddrByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement ObjFile.ObjAddr method", new Exception("ObjAddr"));
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("BuildID");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BuildIDByPtr = extensionMethod.CreateStaticDelegate(typeof(BuildIDByPtr)) as BuildIDByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("BuildID");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BuildIDByVal = extensionMethod.CreateStaticDelegate(typeof(BuildIDByVal)) as BuildIDByVal;
 
                 if (s_BuildIDByPtr is null && s_BuildIDByVal is null)
@@ -245,12 +244,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SourceLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SourceLineByPtr = extensionMethod.CreateStaticDelegate(typeof(SourceLineByPtr)) as SourceLineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SourceLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SourceLineByVal = extensionMethod.CreateStaticDelegate(typeof(SourceLineByVal)) as SourceLineByVal;
 
                 if (s_SourceLineByPtr is null && s_SourceLineByVal is null)
@@ -258,12 +257,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Symbols");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SymbolsByPtr = extensionMethod.CreateStaticDelegate(typeof(SymbolsByPtr)) as SymbolsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Symbols");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SymbolsByVal = extensionMethod.CreateStaticDelegate(typeof(SymbolsByVal)) as SymbolsByVal;
 
                 if (s_SymbolsByPtr is null && s_SymbolsByVal is null)
@@ -271,12 +270,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)

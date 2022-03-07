@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:55 UTC
+//     Generated on 2022 March 06 22:22:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -71,7 +70,7 @@ namespace net
                 this.queuePool = default;
             }
 
-            public http2priorityWriteScheduler(http2priorityNode root = default, map<uint, ptr<http2priorityNode>> nodes = default, uint maxID = default, slice<ptr<http2priorityNode>> closedNodes = default, slice<ptr<http2priorityNode>> idleNodes = default, long maxClosedNodesInTree = default, long maxIdleNodesInTree = default, int writeThrottleLimit = default, bool enableWriteThrottle = default, slice<ptr<http2priorityNode>> tmp = default, http2writeQueuePool queuePool = default)
+            public http2priorityWriteScheduler(http2priorityNode root = default, map<uint, ptr<http2priorityNode>> nodes = default, uint maxID = default, slice<ptr<http2priorityNode>> closedNodes = default, slice<ptr<http2priorityNode>> idleNodes = default, nint maxClosedNodesInTree = default, nint maxIdleNodesInTree = default, int writeThrottleLimit = default, bool enableWriteThrottle = default, slice<ptr<http2priorityNode>> tmp = default, http2writeQueuePool queuePool = default)
             {
                 this.root = root;
                 this.nodes = nodes;

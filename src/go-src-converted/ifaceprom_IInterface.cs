@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,13 +73,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_oneByPtr is null || !m_target_is_ptr)
                     return s_oneByVal!(target);
 
-                return s_oneByPtr(m_target_ptr);
+                return s_oneByPtr(m_target_ptr!);
             }
 
             private delegate @string twoByPtr(ptr<T> value);
@@ -93,16 +93,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_twoByPtr is null || !m_target_is_ptr)
                     return s_twoByVal!(target);
 
-                return s_twoByPtr(m_target_ptr);
+                return s_twoByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static I()
@@ -113,12 +113,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("one");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_oneByPtr = extensionMethod.CreateStaticDelegate(typeof(oneByPtr)) as oneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("one");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_oneByVal = extensionMethod.CreateStaticDelegate(typeof(oneByVal)) as oneByVal;
 
                 if (s_oneByPtr is null && s_oneByVal is null)
@@ -126,12 +126,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("two");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_twoByPtr = extensionMethod.CreateStaticDelegate(typeof(twoByPtr)) as twoByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("two");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_twoByVal = extensionMethod.CreateStaticDelegate(typeof(twoByVal)) as twoByVal;
 
                 if (s_twoByPtr is null && s_twoByVal is null)

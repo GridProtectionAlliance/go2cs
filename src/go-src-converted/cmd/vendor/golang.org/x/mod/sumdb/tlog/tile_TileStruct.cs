@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:07 UTC
+//     Generated on 2022 March 06 23:26:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -42,7 +41,7 @@ namespace sumdb
                 this.W = default;
             }
 
-            public Tile(long H = default, long L = default, long N = default, long W = default)
+            public Tile(nint H = default, nint L = default, long N = default, nint W = default)
             {
                 this.H = H;
                 this.L = L;

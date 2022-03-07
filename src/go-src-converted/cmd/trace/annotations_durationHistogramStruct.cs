@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:55 UTC
+//     Generated on 2022 March 06 23:22:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using template = go.html.template_package;
@@ -45,7 +44,7 @@ namespace go
                 this.MaxBucket = default;
             }
 
-            public durationHistogram(long Count = default, slice<long> Buckets = default, long MinBucket = default, long MaxBucket = default)
+            public durationHistogram(nint Count = default, slice<nint> Buckets = default, nint MinBucket = default, nint MaxBucket = default)
             {
                 this.Count = Count;
                 this.Buckets = Buckets;

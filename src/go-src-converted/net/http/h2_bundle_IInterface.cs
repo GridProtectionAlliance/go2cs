@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:51 UTC
+//     Generated on 2022 March 06 22:22:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -105,16 +104,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_doKeepAlivesByPtr is null || !m_target_is_ptr)
                     return s_doKeepAlivesByVal!(target);
 
-                return s_doKeepAlivesByPtr(m_target_ptr);
+                return s_doKeepAlivesByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static I()
@@ -125,12 +124,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("doKeepAlives");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_doKeepAlivesByPtr = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByPtr)) as doKeepAlivesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("doKeepAlives");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_doKeepAlivesByVal = extensionMethod.CreateStaticDelegate(typeof(doKeepAlivesByVal)) as doKeepAlivesByVal;
 
                 if (s_doKeepAlivesByPtr is null && s_doKeepAlivesByVal is null)

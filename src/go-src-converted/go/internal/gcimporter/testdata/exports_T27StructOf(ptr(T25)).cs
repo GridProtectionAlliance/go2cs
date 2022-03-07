@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:45 UTC
+//     Generated on 2022 March 06 23:32:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace @internal
         {
             // Value of the T27 struct
             private readonly ptr<T25> m_value;
-
+            
             public T27(ptr<T25> value) => m_value = value;
 
             // Enable implicit conversions between ptr<T25> and T27 struct

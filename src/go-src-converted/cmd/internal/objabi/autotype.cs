@@ -28,22 +28,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 October 09 05:08:46 UTC
+// package objabi -- go2cs converted at 2022 March 06 22:32:20 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
-// Original source: C:\Go\src\cmd\internal\objabi\autotype.go
+// Original source: C:\Program Files\Go\src\cmd\internal\objabi\autotype.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace @internal
-{
-    public static partial class objabi_package
-    {
-        // Auto.name
-        public static readonly long A_AUTO = (long)1L + iota;
-        public static readonly var A_PARAM = 0;
-        public static readonly var A_DELETED_AUTO = 1;
+namespace go.cmd.@internal;
 
-    }
-}}}
+public static partial class objabi_package {
+
+    // Auto.name
+public static readonly nint A_AUTO = 1 + iota;
+public static readonly var A_PARAM = 0;
+public static readonly var A_DELETED_AUTO = 1;
+
+
+} // end objabi_package

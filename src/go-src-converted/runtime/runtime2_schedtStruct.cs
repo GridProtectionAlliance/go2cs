@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:09 UTC
+//     Generated on 2022 March 06 22:11:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -57,6 +55,7 @@ namespace go
                 this.stopnote = default;
                 this.sysmonwait = default;
                 this.sysmonnote = default;
+                this.sysmonStarting = default;
                 this.safePointFn = default;
                 this.safePointWait = default;
                 this.safePointNote = default;
@@ -64,9 +63,11 @@ namespace go
                 this.procresizetime = default;
                 this.totaltime = default;
                 this.sysmonlock = default;
+                this._ = default;
+                this.timeToRun = default;
             }
 
-            public schedt(ulong goidgen = default, ulong lastpoll = default, ulong pollUntil = default, mutex @lock = default, muintptr midle = default, int nmidle = default, int nmidlelocked = default, long mnext = default, int maxmcount = default, int nmsys = default, long nmfreed = default, uint ngsys = default, puintptr pidle = default, uint npidle = default, uint nmspinning = default, gQueue runq = default, int runqsize = default, mutex sudoglock = default, ref ptr<sudog> sudogcache = default, mutex deferlock = default, array<ptr<_defer>> deferpool = default, ref ptr<m> freem = default, uint gcwaiting = default, int stopwait = default, note stopnote = default, uint sysmonwait = default, note sysmonnote = default, Action<ptr<p>> safePointFn = default, int safePointWait = default, note safePointNote = default, int profilehz = default, long procresizetime = default, long totaltime = default, mutex sysmonlock = default)
+            public schedt(ulong goidgen = default, ulong lastpoll = default, ulong pollUntil = default, mutex @lock = default, muintptr midle = default, int nmidle = default, int nmidlelocked = default, long mnext = default, int maxmcount = default, int nmsys = default, long nmfreed = default, uint ngsys = default, puintptr pidle = default, uint npidle = default, uint nmspinning = default, gQueue runq = default, int runqsize = default, mutex sudoglock = default, ref ptr<sudog> sudogcache = default, mutex deferlock = default, array<ptr<_defer>> deferpool = default, ref ptr<m> freem = default, uint gcwaiting = default, int stopwait = default, note stopnote = default, uint sysmonwait = default, note sysmonnote = default, uint sysmonStarting = default, Action<ptr<p>> safePointFn = default, int safePointWait = default, note safePointNote = default, int profilehz = default, long procresizetime = default, long totaltime = default, mutex sysmonlock = default, uint _ = default, timeHistogram timeToRun = default)
             {
                 this.goidgen = goidgen;
                 this.lastpoll = lastpoll;
@@ -95,6 +96,7 @@ namespace go
                 this.stopnote = stopnote;
                 this.sysmonwait = sysmonwait;
                 this.sysmonnote = sysmonnote;
+                this.sysmonStarting = sysmonStarting;
                 this.safePointFn = safePointFn;
                 this.safePointWait = safePointWait;
                 this.safePointNote = safePointNote;
@@ -102,6 +104,8 @@ namespace go
                 this.procresizetime = procresizetime;
                 this.totaltime = totaltime;
                 this.sysmonlock = sysmonlock;
+                this._ = _;
+                this.timeToRun = timeToRun;
             }
 
             // Enable comparisons between nil and schedt struct
@@ -124,7 +128,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static schedt schedt_cast(dynamic value)
         {
-            return new schedt(value.goidgen, value.lastpoll, value.pollUntil, value.@lock, value.midle, value.nmidle, value.nmidlelocked, value.mnext, value.maxmcount, value.nmsys, value.nmfreed, value.ngsys, value.pidle, value.npidle, value.nmspinning, value.runq, value.runqsize, value.sudoglock, ref value.sudogcache, value.deferlock, value.deferpool, ref value.freem, value.gcwaiting, value.stopwait, value.stopnote, value.sysmonwait, value.sysmonnote, value.safePointFn, value.safePointWait, value.safePointNote, value.profilehz, value.procresizetime, value.totaltime, value.sysmonlock);
+            return new schedt(value.goidgen, value.lastpoll, value.pollUntil, value.@lock, value.midle, value.nmidle, value.nmidlelocked, value.mnext, value.maxmcount, value.nmsys, value.nmfreed, value.ngsys, value.pidle, value.npidle, value.nmspinning, value.runq, value.runqsize, value.sudoglock, ref value.sudogcache, value.deferlock, value.deferpool, ref value.freem, value.gcwaiting, value.stopwait, value.stopnote, value.sysmonwait, value.sysmonnote, value.sysmonStarting, value.safePointFn, value.safePointWait, value.safePointNote, value.profilehz, value.procresizetime, value.totaltime, value.sysmonlock, value._, value.timeToRun);
         }
     }
 }

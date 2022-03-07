@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:11 UTC
+//     Generated on 2022 March 06 23:35:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -21,10 +23,28 @@ namespace testdata
     public static partial class print_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct stringerarray
+        private partial struct stringerarray : IArray
         {
             // Value of the stringerarray struct
             private readonly array<double> m_value;
+            
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+
+            public ref double this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public stringerarray(array<double> value) => m_value = value;
 

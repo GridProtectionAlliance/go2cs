@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:20 UTC
+//     Generated on 2022 March 06 22:15:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flate = go.compress.flate_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -46,7 +45,7 @@ namespace compress
                 this.err = default;
             }
 
-            public Writer(Header Header = default, io.Writer w = default, long level = default, bool wroteHeader = default, ref ptr<flate.Writer> compressor = default, uint digest = default, uint size = default, bool closed = default, array<byte> buf = default, error err = default)
+            public Writer(Header Header = default, io.Writer w = default, nint level = default, bool wroteHeader = default, ref ptr<flate.Writer> compressor = default, uint digest = default, uint size = default, bool closed = default, array<byte> buf = default, error err = default)
             {
                 this.Header = Header;
                 this.w = w;

@@ -6,70 +6,52 @@
 // description of the interface that each architecture-specific file
 // implements.
 
-// package crc32 -- go2cs converted at 2020 October 09 04:50:07 UTC
+// package crc32 -- go2cs converted at 2022 March 06 22:14:54 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
-// Original source: C:\Go\src\hash\crc32\crc32_arm64.go
+// Original source: C:\Program Files\Go\src\hash\crc32\crc32_arm64.go
 using cpu = go.@internal.cpu_package;
-using static go.builtin;
 
-namespace go {
-namespace hash
-{
-    public static partial class crc32_package
-    {
-        private static uint castagnoliUpdate(uint crc, slice<byte> p)
-;
-        private static uint ieeeUpdate(uint crc, slice<byte> p)
-;
+namespace go.hash;
 
-        private static bool archAvailableCastagnoli()
-        {
-            return cpu.ARM64.HasCRC32;
-        }
+public static partial class crc32_package {
 
-        private static void archInitCastagnoli() => func((_, panic, __) =>
-        {
-            if (!cpu.ARM64.HasCRC32)
-            {>>MARKER:FUNCTION_ieeeUpdate_BLOCK_PREFIX<<
-                panic("arch-specific crc32 instruction for Catagnoli not available");
-            }
+private static uint castagnoliUpdate(uint crc, slice<byte> p);
+private static uint ieeeUpdate(uint crc, slice<byte> p);
 
-        });
+private static bool archAvailableCastagnoli() {
+    return cpu.ARM64.HasCRC32;
+}
 
-        private static uint archUpdateCastagnoli(uint crc, slice<byte> p) => func((_, panic, __) =>
-        {
-            if (!cpu.ARM64.HasCRC32)
-            {>>MARKER:FUNCTION_castagnoliUpdate_BLOCK_PREFIX<<
-                panic("arch-specific crc32 instruction for Castagnoli not available");
-            }
-
-            return ~castagnoliUpdate(~crc, p);
-
-        });
-
-        private static bool archAvailableIEEE()
-        {
-            return cpu.ARM64.HasCRC32;
-        }
-
-        private static void archInitIEEE() => func((_, panic, __) =>
-        {
-            if (!cpu.ARM64.HasCRC32)
-            {
-                panic("arch-specific crc32 instruction for IEEE not available");
-            }
-
-        });
-
-        private static uint archUpdateIEEE(uint crc, slice<byte> p) => func((_, panic, __) =>
-        {
-            if (!cpu.ARM64.HasCRC32)
-            {
-                panic("arch-specific crc32 instruction for IEEE not available");
-            }
-
-            return ~ieeeUpdate(~crc, p);
-
-        });
+private static void archInitCastagnoli() => func((_, panic, _) => {
+    if (!cpu.ARM64.HasCRC32) {>>MARKER:FUNCTION_ieeeUpdate_BLOCK_PREFIX<<
+        panic("arch-specific crc32 instruction for Catagnoli not available");
     }
-}}
+});
+
+private static uint archUpdateCastagnoli(uint crc, slice<byte> p) => func((_, panic, _) => {
+    if (!cpu.ARM64.HasCRC32) {>>MARKER:FUNCTION_castagnoliUpdate_BLOCK_PREFIX<<
+        panic("arch-specific crc32 instruction for Castagnoli not available");
+    }
+    return ~castagnoliUpdate(~crc, p);
+
+});
+
+private static bool archAvailableIEEE() {
+    return cpu.ARM64.HasCRC32;
+}
+
+private static void archInitIEEE() => func((_, panic, _) => {
+    if (!cpu.ARM64.HasCRC32) {
+        panic("arch-specific crc32 instruction for IEEE not available");
+    }
+});
+
+private static uint archUpdateIEEE(uint crc, slice<byte> p) => func((_, panic, _) => {
+    if (!cpu.ARM64.HasCRC32) {
+        panic("arch-specific crc32 instruction for IEEE not available");
+    }
+    return ~ieeeUpdate(~crc, p);
+
+});
+
+} // end crc32_package

@@ -1,5 +1,5 @@
-// package empty -- go2cs converted at 2020 October 09 05:44:52 UTC
+// package empty -- go2cs converted at 2022 March 06 23:15:42 UTC
 // import "cmd/doc/testdata/nested/empty" ==> using empty = go.cmd.doc.testdata.nested.empty_package
-// Original source: C:\Go\src\cmd\doc\testdata\nested\empty\empty.go
-    }
+// Original source: C:\Program Files\Go\src\cmd\doc\testdata\nested\empty\empty.go
 
+} // end empty_package

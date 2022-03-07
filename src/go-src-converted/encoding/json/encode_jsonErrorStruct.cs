@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:06 UTC
+//     Generated on 2022 March 06 22:25:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
@@ -55,11 +54,11 @@ namespace encoding
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
 
-                    if ((object)s_ErrorByRef == null)
+                    if (s_ErrorByRef is null)
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
             }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:11 UTC
+//     Generated on 2022 March 06 22:11:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 
 #nullable enable
@@ -29,18 +29,12 @@ namespace go
             {
                 this.c = default;
                 this.elem = default;
-                this.kind = default;
-                this.pc = default;
-                this.releasetime = default;
             }
 
-            public scase(ref ptr<hchan> c = default, unsafe.Pointer elem = default, ushort kind = default, System.UIntPtr pc = default, long releasetime = default)
+            public scase(ref ptr<hchan> c = default, unsafe.Pointer elem = default)
             {
                 this.c = c;
                 this.elem = elem;
-                this.kind = kind;
-                this.pc = pc;
-                this.releasetime = releasetime;
             }
 
             // Enable comparisons between nil and scase struct
@@ -63,7 +57,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static scase scase_cast(dynamic value)
         {
-            return new scase(ref value.c, value.elem, value.kind, value.pc, value.releasetime);
+            return new scase(ref value.c, value.elem);
         }
     }
 }

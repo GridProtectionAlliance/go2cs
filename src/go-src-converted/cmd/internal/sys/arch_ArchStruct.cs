@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:46 UTC
+//     Generated on 2022 March 06 22:32:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using go;
 
@@ -36,9 +35,10 @@ namespace @internal
                 this.PtrSize = default;
                 this.RegSize = default;
                 this.MinLC = default;
+                this.Alignment = default;
             }
 
-            public Arch(@string Name = default, ArchFamily Family = default, binary.ByteOrder ByteOrder = default, long PtrSize = default, long RegSize = default, long MinLC = default)
+            public Arch(@string Name = default, ArchFamily Family = default, binary.ByteOrder ByteOrder = default, nint PtrSize = default, nint RegSize = default, nint MinLC = default, sbyte Alignment = default)
             {
                 this.Name = Name;
                 this.Family = Family;
@@ -46,6 +46,7 @@ namespace @internal
                 this.PtrSize = PtrSize;
                 this.RegSize = RegSize;
                 this.MinLC = MinLC;
+                this.Alignment = Alignment;
             }
 
             // Enable comparisons between nil and Arch struct
@@ -68,7 +69,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Arch Arch_cast(dynamic value)
         {
-            return new Arch(value.Name, value.Family, value.ByteOrder, value.PtrSize, value.RegSize, value.MinLC);
+            return new Arch(value.Name, value.Family, value.ByteOrder, value.PtrSize, value.RegSize, value.MinLC, value.Alignment);
         }
     }
 }}}

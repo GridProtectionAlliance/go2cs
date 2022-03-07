@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:37 UTC
+//     Generated on 2022 March 06 23:18:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
-using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using par = go.cmd.go.@internal.par_package;
 using module = go.golang.org.x.mod.module_package;
 using go;
@@ -35,44 +32,24 @@ namespace @internal
         private partial struct @override
         {
             // Reqs.Required function promotion
-            private delegate (module.Version, error) RequiredByVal(T value, module.Version m);
-            private delegate (module.Version, error) RequiredByRef(ref T value, module.Version m);
+            private delegate @string RequiredByVal(T value, module.Version m);
+            private delegate @string RequiredByRef(ref T value, module.Version m);
 
             private static readonly RequiredByVal s_RequiredByVal;
             private static readonly RequiredByRef s_RequiredByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Required(module.Version m) => s_RequiredByRef?.Invoke(ref this, m) ?? s_RequiredByVal?.Invoke(this, m) ?? Reqs?.Required(m) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public @string Required(module.Version m) => s_RequiredByRef?.Invoke(ref this, m) ?? s_RequiredByVal?.Invoke(this, m) ?? Reqs?.Required(m) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // Reqs.Max function promotion
-            private delegate (module.Version, error) MaxByVal(T value, @string v1, @string v2);
-            private delegate (module.Version, error) MaxByRef(ref T value, @string v1, @string v2);
+            private delegate @string MaxByVal(T value, @string v1, @string v2);
+            private delegate @string MaxByRef(ref T value, @string v1, @string v2);
 
             private static readonly MaxByVal s_MaxByVal;
             private static readonly MaxByRef s_MaxByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Max(@string v1, @string v2) => s_MaxByRef?.Invoke(ref this, v1, v2) ?? s_MaxByVal?.Invoke(this, v1, v2) ?? Reqs?.Max(v1, v2) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-
-            // Reqs.Upgrade function promotion
-            private delegate (module.Version, error) UpgradeByVal(T value, module.Version m);
-            private delegate (module.Version, error) UpgradeByRef(ref T value, module.Version m);
-
-            private static readonly UpgradeByVal s_UpgradeByVal;
-            private static readonly UpgradeByRef s_UpgradeByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Upgrade(module.Version m) => s_UpgradeByRef?.Invoke(ref this, m) ?? s_UpgradeByVal?.Invoke(this, m) ?? Reqs?.Upgrade(m) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
-
-            // Reqs.Previous function promotion
-            private delegate (module.Version, error) PreviousByVal(T value, module.Version m);
-            private delegate (module.Version, error) PreviousByRef(ref T value, module.Version m);
-
-            private static readonly PreviousByVal s_PreviousByVal;
-            private static readonly PreviousByRef s_PreviousByRef;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Previous(module.Version m) => s_PreviousByRef?.Invoke(ref this, m) ?? s_PreviousByVal?.Invoke(this, m) ?? Reqs?.Previous(m) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public @string Max(@string v1, @string v2) => s_MaxByRef?.Invoke(ref this, v1, v2) ?? s_MaxByVal?.Invoke(this, v1, v2) ?? Reqs?.Max(v1, v2) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static @override()
@@ -82,42 +59,22 @@ namespace @internal
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Required");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_RequiredByRef = extensionMethod.CreateStaticDelegate(typeof(RequiredByRef)) as RequiredByRef;
 
-                    if ((object)s_RequiredByRef == null)
+                    if (s_RequiredByRef is null)
                         s_RequiredByVal = extensionMethod.CreateStaticDelegate(typeof(RequiredByVal)) as RequiredByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Max");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_MaxByRef = extensionMethod.CreateStaticDelegate(typeof(MaxByRef)) as MaxByRef;
 
-                    if ((object)s_MaxByRef == null)
+                    if (s_MaxByRef is null)
                         s_MaxByVal = extensionMethod.CreateStaticDelegate(typeof(MaxByVal)) as MaxByVal;
-                }
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Upgrade");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_UpgradeByRef = extensionMethod.CreateStaticDelegate(typeof(UpgradeByRef)) as UpgradeByRef;
-
-                    if ((object)s_UpgradeByRef == null)
-                        s_UpgradeByVal = extensionMethod.CreateStaticDelegate(typeof(UpgradeByVal)) as UpgradeByVal;
-                }
-                
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Previous");
-
-                if ((object)extensionMethod != null)
-                {
-                    s_PreviousByRef = extensionMethod.CreateStaticDelegate(typeof(PreviousByRef)) as PreviousByRef;
-
-                    if ((object)s_PreviousByRef == null)
-                        s_PreviousByVal = extensionMethod.CreateStaticDelegate(typeof(PreviousByVal)) as PreviousByVal;
                 }
             }
 

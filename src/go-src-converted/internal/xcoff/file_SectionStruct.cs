@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:42 UTC
+//     Generated on 2022 March 06 22:41:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using dwarf = go.debug.dwarf_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
@@ -33,14 +32,14 @@ namespace @internal
         public partial struct Section
         {
             // ReaderAt.ReadAt function promotion
-            private delegate (long, error) ReadAtByVal(T value, slice<byte> p, long off);
-            private delegate (long, error) ReadAtByRef(ref T value, slice<byte> p, long off);
+            private delegate (nint, error) ReadAtByVal(T value, slice<byte> p, long off);
+            private delegate (nint, error) ReadAtByRef(ref T value, slice<byte> p, long off);
 
             private static readonly ReadAtByVal s_ReadAtByVal;
             private static readonly ReadAtByRef s_ReadAtByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) ReadAt(slice<byte> p, long off) => s_ReadAtByRef?.Invoke(ref this, p, off) ?? s_ReadAtByVal?.Invoke(this, p, off) ?? ReaderAt?.ReadAt(p, off) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) ReadAt(slice<byte> p, long off) => s_ReadAtByRef?.Invoke(ref this, p, off) ?? s_ReadAtByVal?.Invoke(this, p, off) ?? ReaderAt?.ReadAt(p, off) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // SectionHeader structure promotion - sourced from value copy
             private readonly ptr<SectionHeader> m_SectionHeaderRef;
@@ -67,11 +66,11 @@ namespace @internal
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("ReadAt");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadAtByRef = extensionMethod.CreateStaticDelegate(typeof(ReadAtByRef)) as ReadAtByRef;
 
-                    if ((object)s_ReadAtByRef == null)
+                    if (s_ReadAtByRef is null)
                         s_ReadAtByVal = extensionMethod.CreateStaticDelegate(typeof(ReadAtByVal)) as ReadAtByVal;
                 }
             }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:46 UTC
+//     Generated on 2022 March 06 23:38:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,13 +78,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint16ByPtr is null || !m_target_is_ptr)
                     return s_Uint16ByVal!(target, _p0);
 
-                return s_Uint16ByPtr(m_target_ptr, _p0);
+                return s_Uint16ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate ulong Uint32ByPtr(ptr<T> value, slice<byte> _p0);
@@ -98,13 +98,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint32ByPtr is null || !m_target_is_ptr)
                     return s_Uint32ByVal!(target, _p0);
 
-                return s_Uint32ByPtr(m_target_ptr, _p0);
+                return s_Uint32ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate ulong PutUint16ByPtr(ptr<T> value, slice<byte> _p0, ushort _p0);
@@ -118,13 +118,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutUint16ByPtr is null || !m_target_is_ptr)
                     return s_PutUint16ByVal!(target, _p0, _p0);
 
-                return s_PutUint16ByPtr(m_target_ptr, _p0, _p0);
+                return s_PutUint16ByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate ulong PutUint32ByPtr(ptr<T> value, slice<byte> _p0, uint _p0);
@@ -138,13 +138,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutUint32ByPtr is null || !m_target_is_ptr)
                     return s_PutUint32ByVal!(target, _p0, _p0);
 
-                return s_PutUint32ByPtr(m_target_ptr, _p0, _p0);
+                return s_PutUint32ByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate ulong Uint64ByPtr(ptr<T> value, slice<byte> _p0);
@@ -158,16 +158,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint64ByPtr is null || !m_target_is_ptr)
                     return s_Uint64ByVal!(target, _p0);
 
-                return s_Uint64ByPtr(m_target_ptr, _p0);
+                return s_Uint64ByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static binaryByteOrder()
@@ -178,12 +178,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint16ByPtr)) as Uint16ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint16ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint16ByVal)) as Uint16ByVal;
 
                 if (s_Uint16ByPtr is null && s_Uint16ByVal is null)
@@ -191,12 +191,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint32ByPtr)) as Uint32ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint32ByVal)) as Uint32ByVal;
 
                 if (s_Uint32ByPtr is null && s_Uint32ByVal is null)
@@ -204,12 +204,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByPtr)) as PutUint16ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PutUint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint16ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByVal)) as PutUint16ByVal;
 
                 if (s_PutUint16ByPtr is null && s_PutUint16ByVal is null)
@@ -217,12 +217,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByPtr)) as PutUint32ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PutUint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint32ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByVal)) as PutUint32ByVal;
 
                 if (s_PutUint32ByPtr is null && s_PutUint32ByVal is null)
@@ -230,12 +230,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint64ByPtr)) as Uint64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
 
                 if (s_Uint64ByPtr is null && s_Uint64ByVal is null)

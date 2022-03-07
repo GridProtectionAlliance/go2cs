@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:14 UTC
+//     Generated on 2022 March 06 22:16:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using syscall = go.syscall_package;
 
 #nullable enable
@@ -48,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,13 +73,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_familyByPtr is null || !m_target_is_ptr)
                     return s_familyByVal!(target);
 
-                return s_familyByPtr(m_target_ptr);
+                return s_familyByPtr(m_target_ptr!);
             }
 
             private delegate sockaddr isWildcardByPtr(ptr<T> value);
@@ -94,33 +93,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_isWildcardByPtr is null || !m_target_is_ptr)
                     return s_isWildcardByVal!(target);
 
-                return s_isWildcardByPtr(m_target_ptr);
+                return s_isWildcardByPtr(m_target_ptr!);
             }
 
-            private delegate sockaddr sockaddrByPtr(ptr<T> value, long family);
-            private delegate sockaddr sockaddrByVal(T value, long family);
+            private delegate sockaddr sockaddrByPtr(ptr<T> value, nint family);
+            private delegate sockaddr sockaddrByVal(T value, nint family);
 
             private static readonly sockaddrByPtr? s_sockaddrByPtr;
             private static readonly sockaddrByVal? s_sockaddrByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public sockaddr sockaddr(long family)
+            public sockaddr sockaddr(nint family)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_sockaddrByPtr is null || !m_target_is_ptr)
                     return s_sockaddrByVal!(target, family);
 
-                return s_sockaddrByPtr(m_target_ptr, family);
+                return s_sockaddrByPtr(m_target_ptr!, family);
             }
 
             private delegate sockaddr toLocalByPtr(ptr<T> value, @string net);
@@ -134,16 +133,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_toLocalByPtr is null || !m_target_is_ptr)
                     return s_toLocalByVal!(target, net);
 
-                return s_toLocalByPtr(m_target_ptr, net);
+                return s_toLocalByPtr(m_target_ptr!, net);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static sockaddr()
@@ -154,12 +153,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("family");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_familyByPtr = extensionMethod.CreateStaticDelegate(typeof(familyByPtr)) as familyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("family");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_familyByVal = extensionMethod.CreateStaticDelegate(typeof(familyByVal)) as familyByVal;
 
                 if (s_familyByPtr is null && s_familyByVal is null)
@@ -167,12 +166,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("isWildcard");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isWildcardByPtr = extensionMethod.CreateStaticDelegate(typeof(isWildcardByPtr)) as isWildcardByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("isWildcard");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isWildcardByVal = extensionMethod.CreateStaticDelegate(typeof(isWildcardByVal)) as isWildcardByVal;
 
                 if (s_isWildcardByPtr is null && s_isWildcardByVal is null)
@@ -180,12 +179,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("sockaddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sockaddrByPtr = extensionMethod.CreateStaticDelegate(typeof(sockaddrByPtr)) as sockaddrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("sockaddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sockaddrByVal = extensionMethod.CreateStaticDelegate(typeof(sockaddrByVal)) as sockaddrByVal;
 
                 if (s_sockaddrByPtr is null && s_sockaddrByVal is null)
@@ -193,12 +192,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("toLocal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_toLocalByPtr = extensionMethod.CreateStaticDelegate(typeof(toLocalByPtr)) as toLocalByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("toLocal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_toLocalByVal = extensionMethod.CreateStaticDelegate(typeof(toLocalByVal)) as toLocalByVal;
 
                 if (s_toLocalByPtr is null && s_toLocalByVal is null)

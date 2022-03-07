@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,12 +44,11 @@ namespace sys
                 this.Mtim = default;
                 this.Ctim = default;
                 this.Blksize = default;
-                this._ = default;
                 this.Blocks = default;
                 this.Fstype = default;
             }
 
-            public Stat_t(ulong Dev = default, ulong Ino = default, uint Mode = default, uint Nlink = default, uint Uid = default, uint Gid = default, ulong Rdev = default, long Size = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, int Blksize = default, array<byte> _ = default, long Blocks = default, array<sbyte> Fstype = default)
+            public Stat_t(ulong Dev = default, ulong Ino = default, uint Mode = default, uint Nlink = default, uint Uid = default, uint Gid = default, ulong Rdev = default, long Size = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, int Blksize = default, long Blocks = default, array<sbyte> Fstype = default)
             {
                 this.Dev = Dev;
                 this.Ino = Ino;
@@ -63,7 +62,6 @@ namespace sys
                 this.Mtim = Mtim;
                 this.Ctim = Ctim;
                 this.Blksize = Blksize;
-                this._ = _;
                 this.Blocks = Blocks;
                 this.Fstype = Fstype;
             }
@@ -88,7 +86,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Stat_t Stat_t_cast(dynamic value)
         {
-            return new Stat_t(value.Dev, value.Ino, value.Mode, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Size, value.Atim, value.Mtim, value.Ctim, value.Blksize, value._, value.Blocks, value.Fstype);
+            return new Stat_t(value.Dev, value.Ino, value.Mode, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Size, value.Atim, value.Mtim, value.Ctim, value.Blksize, value.Blocks, value.Fstype);
         }
     }
 }}}}}}

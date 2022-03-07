@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:25 UTC
+//     Generated on 2022 March 06 22:14:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -54,7 +53,7 @@ namespace encoding
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,13 +79,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint16ByPtr is null || !m_target_is_ptr)
                     return s_Uint16ByVal!(target, _p0);
 
-                return s_Uint16ByPtr(m_target_ptr, _p0);
+                return s_Uint16ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string Uint32ByPtr(ptr<T> value, slice<byte> _p0);
@@ -100,13 +99,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint32ByPtr is null || !m_target_is_ptr)
                     return s_Uint32ByVal!(target, _p0);
 
-                return s_Uint32ByPtr(m_target_ptr, _p0);
+                return s_Uint32ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string Uint64ByPtr(ptr<T> value, slice<byte> _p0);
@@ -120,13 +119,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint64ByPtr is null || !m_target_is_ptr)
                     return s_Uint64ByVal!(target, _p0);
 
-                return s_Uint64ByPtr(m_target_ptr, _p0);
+                return s_Uint64ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string PutUint16ByPtr(ptr<T> value, slice<byte> _p0, ushort _p0);
@@ -140,13 +139,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutUint16ByPtr is null || !m_target_is_ptr)
                     return s_PutUint16ByVal!(target, _p0, _p0);
 
-                return s_PutUint16ByPtr(m_target_ptr, _p0, _p0);
+                return s_PutUint16ByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate @string PutUint32ByPtr(ptr<T> value, slice<byte> _p0, uint _p0);
@@ -160,13 +159,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutUint32ByPtr is null || !m_target_is_ptr)
                     return s_PutUint32ByVal!(target, _p0, _p0);
 
-                return s_PutUint32ByPtr(m_target_ptr, _p0, _p0);
+                return s_PutUint32ByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate @string PutUint64ByPtr(ptr<T> value, slice<byte> _p0, ulong _p0);
@@ -180,13 +179,13 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutUint64ByPtr is null || !m_target_is_ptr)
                     return s_PutUint64ByVal!(target, _p0, _p0);
 
-                return s_PutUint64ByPtr(m_target_ptr, _p0, _p0);
+                return s_PutUint64ByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate @string StringByPtr(ptr<T> value);
@@ -200,16 +199,16 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ByteOrder()
@@ -220,12 +219,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint16ByPtr)) as Uint16ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint16ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint16ByVal)) as Uint16ByVal;
 
                 if (s_Uint16ByPtr is null && s_Uint16ByVal is null)
@@ -233,12 +232,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint32ByPtr)) as Uint32ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint32ByVal)) as Uint32ByVal;
 
                 if (s_Uint32ByPtr is null && s_Uint32ByVal is null)
@@ -246,12 +245,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint64ByPtr)) as Uint64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
 
                 if (s_Uint64ByPtr is null && s_Uint64ByVal is null)
@@ -259,12 +258,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint16ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByPtr)) as PutUint16ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PutUint16");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint16ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint16ByVal)) as PutUint16ByVal;
 
                 if (s_PutUint16ByPtr is null && s_PutUint16ByVal is null)
@@ -272,12 +271,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByPtr)) as PutUint32ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PutUint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint32ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint32ByVal)) as PutUint32ByVal;
 
                 if (s_PutUint32ByPtr is null && s_PutUint32ByVal is null)
@@ -285,12 +284,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PutUint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByPtr)) as PutUint64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PutUint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutUint64ByVal = extensionMethod.CreateStaticDelegate(typeof(PutUint64ByVal)) as PutUint64ByVal;
 
                 if (s_PutUint64ByPtr is null && s_PutUint64ByVal is null)
@@ -298,12 +297,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:55 UTC
+//     Generated on 2022 March 06 23:36:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using image = go.image_package;
 using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
@@ -55,7 +54,7 @@ namespace image
                 this.tmp = default;
             }
 
-            public decoder(io.Reader r = default, bits bits = default, long width = default, long height = default, ref ptr<image.Gray> img1 = default, ref ptr<image.YCbCr> img3 = default, slice<byte> blackPix = default, long blackStride = default, long ri = default, long nComp = default, bool baseline = default, bool progressive = default, bool jfif = default, bool adobeTransformValid = default, byte adobeTransform = default, ushort eobRun = default, array<component> comp = default, array<slice<block>> progCoeffs = default, array<array<huffman>> huff = default, array<block> quant = default, array<byte> tmp = default)
+            public decoder(io.Reader r = default, bits bits = default, nint width = default, nint height = default, ref ptr<image.Gray> img1 = default, ref ptr<image.YCbCr> img3 = default, slice<byte> blackPix = default, nint blackStride = default, nint ri = default, nint nComp = default, bool baseline = default, bool progressive = default, bool jfif = default, bool adobeTransformValid = default, byte adobeTransform = default, ushort eobRun = default, array<component> comp = default, array<slice<block>> progCoeffs = default, array<array<huffman>> huff = default, array<block> quant = default, array<byte> tmp = default)
             {
                 this.r = r;
                 this.bits = bits;

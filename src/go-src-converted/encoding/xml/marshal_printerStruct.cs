@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:13 UTC
+//     Generated on 2022 March 06 22:25:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using encoding = go.encoding_package;
@@ -50,7 +49,7 @@ namespace encoding
                 this.tags = default;
             }
 
-            public printer(ref ptr<bufio.Writer> Writer> = default, ref ptr<Encoder> encoder = default, long seq = default, @string indent = default, @string prefix = default, long depth = default, bool indentedIn = default, bool putNewline = default, map<@string, @string> attrNS = default, map<@string, @string> attrPrefix = default, slice<@string> prefixes = default, slice<Name> tags = default)
+            public printer(ref ptr<bufio.Writer> Writer> = default, ref ptr<Encoder> encoder = default, nint seq = default, @string indent = default, @string prefix = default, nint depth = default, bool indentedIn = default, bool putNewline = default, map<@string, @string> attrNS = default, map<@string, @string> attrPrefix = default, slice<@string> prefixes = default, slice<Name> tags = default)
             {
                 this.Writer> = Writer>;
                 this.encoder = encoder;

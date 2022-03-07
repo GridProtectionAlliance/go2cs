@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:28 UTC
+//     Generated on 2022 March 06 23:16:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using url = go.net.url_package;
-using os = go.os_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
@@ -48,7 +46,7 @@ namespace @internal
                 this.errorDetail = default;
             }
 
-            public Response(@string URL = default, @string Status = default, long StatusCode = default, map<@string, slice<@string>> Header = default, io.ReadCloser Body = default, error fileErr = default, errorDetailBuffer errorDetail = default)
+            public Response(@string URL = default, @string Status = default, nint StatusCode = default, map<@string, slice<@string>> Header = default, io.ReadCloser Body = default, error fileErr = default, errorDetailBuffer errorDetail = default)
             {
                 this.URL = URL;
                 this.Status = Status;

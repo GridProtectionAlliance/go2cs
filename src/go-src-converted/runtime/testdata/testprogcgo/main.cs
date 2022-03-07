@@ -2,55 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:01:01 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\main.go
+// package main -- go2cs converted at 2022 March 06 22:26:15 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\main.go
 using os = go.os_package;
-using static go.builtin;
 using System;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static map cmds = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, Action>{};
 
-        private static void register(@string name, Action f) => func((_, panic, __) =>
-        {
-            if (cmds[name] != null)
-            {
-                panic("duplicate registration: " + name);
-            }
+namespace go;
 
-            cmds[name] = f;
+public static partial class main_package {
 
-        });
+private static map cmds = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, Action>{};
 
-        private static void registerInit(@string name, Action f)
-        {
-            if (len(os.Args) >= 2L && os.Args[1L] == name)
-            {
-                f();
-            }
+private static void register(@string name, Action f) => func((_, panic, _) => {
+    if (cmds[name] != null) {
+        panic("duplicate registration: " + name);
+    }
+    cmds[name] = f;
 
-        }
+});
 
-        private static void Main()
-        {
-            if (len(os.Args) < 2L)
-            {
-                println("usage: " + os.Args[0L] + " name-of-test");
-                return ;
-            }
-
-            var f = cmds[os.Args[1L]];
-            if (f == null)
-            {
-                println("unknown function: " + os.Args[1L]);
-                return ;
-            }
-
-            f();
-
-        }
+private static void registerInit(@string name, Action f) {
+    if (len(os.Args) >= 2 && os.Args[1] == name) {
+        f();
     }
 }
+
+private static void Main() {
+    if (len(os.Args) < 2) {
+        println("usage: " + os.Args[0] + " name-of-test");
+        return ;
+    }
+    var f = cmds[os.Args[1]];
+    if (f == null) {
+        println("unknown function: " + os.Args[1]);
+        return ;
+    }
+    f();
+
+}
+
+} // end main_package

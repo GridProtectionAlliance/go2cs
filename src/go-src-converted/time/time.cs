@@ -73,1843 +73,1632 @@
 // clock reading if present. If t != u because of different monotonic clock readings,
 // that difference will be visible when printing t.String() and u.String().
 //
-// package time -- go2cs converted at 2020 October 09 05:06:09 UTC
+// package time -- go2cs converted at 2022 March 06 22:30:14 UTC
 // import "time" ==> using time = go.time_package
-// Original source: C:\Go\src\time\time.go
+// Original source: C:\Program Files\Go\src\time\time.go
 using errors = go.errors_package;
 using _@unsafe_ = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class time_package
-    {
-        // A Time represents an instant in time with nanosecond precision.
-        //
-        // Programs using times should typically store and pass them as values,
-        // not pointers. That is, time variables and struct fields should be of
-        // type time.Time, not *time.Time.
-        //
-        // A Time value can be used by multiple goroutines simultaneously except
-        // that the methods GobDecode, UnmarshalBinary, UnmarshalJSON and
-        // UnmarshalText are not concurrency-safe.
-        //
-        // Time instants can be compared using the Before, After, and Equal methods.
-        // The Sub method subtracts two instants, producing a Duration.
-        // The Add method adds a Time and a Duration, producing a Time.
-        //
-        // The zero value of type Time is January 1, year 1, 00:00:00.000000000 UTC.
-        // As this time is unlikely to come up in practice, the IsZero method gives
-        // a simple way of detecting a time that has not been initialized explicitly.
-        //
-        // Each Time has associated with it a Location, consulted when computing the
-        // presentation form of the time, such as in the Format, Hour, and Year methods.
-        // The methods Local, UTC, and In return a Time with a specific location.
-        // Changing the location in this way changes only the presentation; it does not
-        // change the instant in time being denoted and therefore does not affect the
-        // computations described in earlier paragraphs.
-        //
-        // Representations of a Time value saved by the GobEncode, MarshalBinary,
-        // MarshalJSON, and MarshalText methods store the Time.Location's offset, but not
-        // the location name. They therefore lose information about Daylight Saving Time.
-        //
-        // In addition to the required “wall clock” reading, a Time may contain an optional
-        // reading of the current process's monotonic clock, to provide additional precision
-        // for comparison or subtraction.
-        // See the “Monotonic Clocks” section in the package documentation for details.
-        //
-        // Note that the Go == operator compares not just the time instant but also the
-        // Location and the monotonic clock reading. Therefore, Time values should not
-        // be used as map or database keys without first guaranteeing that the
-        // identical Location has been set for all values, which can be achieved
-        // through use of the UTC or Local method, and that the monotonic clock reading
-        // has been stripped by setting t = t.Round(0). In general, prefer t.Equal(u)
-        // to t == u, since t.Equal uses the most accurate comparison available and
-        // correctly handles the case when only one of its arguments has a monotonic
-        // clock reading.
-        //
-        public partial struct Time
-        {
-            public ulong wall;
-            public long ext; // loc specifies the Location that should be used to
+namespace go;
+
+public static partial class time_package {
+
+    // A Time represents an instant in time with nanosecond precision.
+    //
+    // Programs using times should typically store and pass them as values,
+    // not pointers. That is, time variables and struct fields should be of
+    // type time.Time, not *time.Time.
+    //
+    // A Time value can be used by multiple goroutines simultaneously except
+    // that the methods GobDecode, UnmarshalBinary, UnmarshalJSON and
+    // UnmarshalText are not concurrency-safe.
+    //
+    // Time instants can be compared using the Before, After, and Equal methods.
+    // The Sub method subtracts two instants, producing a Duration.
+    // The Add method adds a Time and a Duration, producing a Time.
+    //
+    // The zero value of type Time is January 1, year 1, 00:00:00.000000000 UTC.
+    // As this time is unlikely to come up in practice, the IsZero method gives
+    // a simple way of detecting a time that has not been initialized explicitly.
+    //
+    // Each Time has associated with it a Location, consulted when computing the
+    // presentation form of the time, such as in the Format, Hour, and Year methods.
+    // The methods Local, UTC, and In return a Time with a specific location.
+    // Changing the location in this way changes only the presentation; it does not
+    // change the instant in time being denoted and therefore does not affect the
+    // computations described in earlier paragraphs.
+    //
+    // Representations of a Time value saved by the GobEncode, MarshalBinary,
+    // MarshalJSON, and MarshalText methods store the Time.Location's offset, but not
+    // the location name. They therefore lose information about Daylight Saving Time.
+    //
+    // In addition to the required “wall clock” reading, a Time may contain an optional
+    // reading of the current process's monotonic clock, to provide additional precision
+    // for comparison or subtraction.
+    // See the “Monotonic Clocks” section in the package documentation for details.
+    //
+    // Note that the Go == operator compares not just the time instant but also the
+    // Location and the monotonic clock reading. Therefore, Time values should not
+    // be used as map or database keys without first guaranteeing that the
+    // identical Location has been set for all values, which can be achieved
+    // through use of the UTC or Local method, and that the monotonic clock reading
+    // has been stripped by setting t = t.Round(0). In general, prefer t.Equal(u)
+    // to t == u, since t.Equal uses the most accurate comparison available and
+    // correctly handles the case when only one of its arguments has a monotonic
+    // clock reading.
+    //
+public partial struct Time {
+    public ulong wall;
+    public long ext; // loc specifies the Location that should be used to
 // determine the minute, hour, month, day, and year
 // that correspond to this Time.
 // The nil location means UTC.
 // All UTC times are represented with loc==nil, never loc==&utcLoc.
-            public ptr<Location> loc;
-        }
+    public ptr<Location> loc;
+}
 
-        private static readonly long hasMonotonic = (long)1L << (int)(63L);
-        private static readonly var maxWall = wallToInternal + (1L << (int)(33L) - 1L); // year 2157
-        private static readonly var minWall = wallToInternal; // year 1885
-        private static readonly long nsecMask = (long)1L << (int)(30L) - 1L;
-        private static readonly long nsecShift = (long)30L;
+private static readonly nint hasMonotonic = 1 << 63;
+private static readonly var maxWall = wallToInternal + (1 << 33 - 1); // year 2157
+private static readonly var minWall = wallToInternal; // year 1885
+private static readonly nint nsecMask = 1 << 30 - 1;
+private static readonly nint nsecShift = 30;
 
 
-        // These helpers for manipulating the wall and monotonic clock readings
-        // take pointer receivers, even when they don't modify the time,
-        // to make them cheaper to call.
+// These helpers for manipulating the wall and monotonic clock readings
+// take pointer receivers, even when they don't modify the time,
+// to make them cheaper to call.
 
-        // nsec returns the time's nanoseconds.
-        private static int nsec(this ptr<Time> _addr_t)
-        {
-            ref Time t = ref _addr_t.val;
+// nsec returns the time's nanoseconds.
+private static int nsec(this ptr<Time> _addr_t) {
+    ref Time t = ref _addr_t.val;
 
-            return int32(t.wall & nsecMask);
-        }
+    return int32(t.wall & nsecMask);
+}
 
-        // sec returns the time's seconds since Jan 1 year 1.
-        private static long sec(this ptr<Time> _addr_t)
-        {
-            ref Time t = ref _addr_t.val;
+// sec returns the time's seconds since Jan 1 year 1.
+private static long sec(this ptr<Time> _addr_t) {
+    ref Time t = ref _addr_t.val;
 
-            if (t.wall & hasMonotonic != 0L)
-            {
-                return wallToInternal + int64(t.wall << (int)(1L) >> (int)((nsecShift + 1L)));
-            }
+    if (t.wall & hasMonotonic != 0) {
+        return wallToInternal + int64(t.wall << 1 >> (int)((nsecShift + 1)));
+    }
+    return t.ext;
 
-            return t.ext;
+}
 
-        }
+// unixSec returns the time's seconds since Jan 1 1970 (Unix time).
+private static long unixSec(this ptr<Time> _addr_t) {
+    ref Time t = ref _addr_t.val;
 
-        // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
-        private static long unixSec(this ptr<Time> _addr_t)
-        {
-            ref Time t = ref _addr_t.val;
+    return t.sec() + internalToUnix;
+}
 
-            return t.sec() + internalToUnix;
-        }
+// addSec adds d seconds to the time.
+private static void addSec(this ptr<Time> _addr_t, long d) {
+    ref Time t = ref _addr_t.val;
 
-        // addSec adds d seconds to the time.
-        private static void addSec(this ptr<Time> _addr_t, long d)
-        {
-            ref Time t = ref _addr_t.val;
-
-            if (t.wall & hasMonotonic != 0L)
-            {
-                var sec = int64(t.wall << (int)(1L) >> (int)((nsecShift + 1L)));
-                var dsec = sec + d;
-                if (0L <= dsec && dsec <= 1L << (int)(33L) - 1L)
-                {
-                    t.wall = t.wall & nsecMask | uint64(dsec) << (int)(nsecShift) | hasMonotonic;
-                    return ;
-                } 
-                // Wall second now out of range for packed field.
-                // Move to ext.
-                t.stripMono();
-
-            } 
-
-            // TODO: Check for overflow.
-            t.ext += d;
-
-        }
-
-        // setLoc sets the location associated with the time.
-        private static void setLoc(this ptr<Time> _addr_t, ptr<Location> _addr_loc)
-        {
-            ref Time t = ref _addr_t.val;
-            ref Location loc = ref _addr_loc.val;
-
-            if (loc == _addr_utcLoc)
-            {
-                loc = null;
-            }
-
-            t.stripMono();
-            t.loc = loc;
-
-        }
-
-        // stripMono strips the monotonic clock reading in t.
-        private static void stripMono(this ptr<Time> _addr_t)
-        {
-            ref Time t = ref _addr_t.val;
-
-            if (t.wall & hasMonotonic != 0L)
-            {
-                t.ext = t.sec();
-                t.wall &= nsecMask;
-            }
-
-        }
-
-        // setMono sets the monotonic clock reading in t.
-        // If t cannot hold a monotonic clock reading,
-        // because its wall time is too large,
-        // setMono is a no-op.
-        private static void setMono(this ptr<Time> _addr_t, long m)
-        {
-            ref Time t = ref _addr_t.val;
-
-            if (t.wall & hasMonotonic == 0L)
-            {
-                var sec = t.ext;
-                if (sec < minWall || maxWall < sec)
-                {
-                    return ;
-                }
-
-                t.wall |= hasMonotonic | uint64(sec - minWall) << (int)(nsecShift);
-
-            }
-
-            t.ext = m;
-
-        }
-
-        // mono returns t's monotonic clock reading.
-        // It returns 0 for a missing reading.
-        // This function is used only for testing,
-        // so it's OK that technically 0 is a valid
-        // monotonic clock reading as well.
-        private static long mono(this ptr<Time> _addr_t)
-        {
-            ref Time t = ref _addr_t.val;
-
-            if (t.wall & hasMonotonic == 0L)
-            {
-                return 0L;
-            }
-
-            return t.ext;
-
-        }
-
-        // After reports whether the time instant t is after u.
-        public static bool After(this Time t, Time u)
-        {
-            if (t.wall & u.wall & hasMonotonic != 0L)
-            {
-                return t.ext > u.ext;
-            }
-
-            var ts = t.sec();
-            var us = u.sec();
-            return ts > us || ts == us && t.nsec() > u.nsec();
-
-        }
-
-        // Before reports whether the time instant t is before u.
-        public static bool Before(this Time t, Time u)
-        {
-            if (t.wall & u.wall & hasMonotonic != 0L)
-            {
-                return t.ext < u.ext;
-            }
-
-            var ts = t.sec();
-            var us = u.sec();
-            return ts < us || ts == us && t.nsec() < u.nsec();
-
-        }
-
-        // Equal reports whether t and u represent the same time instant.
-        // Two times can be equal even if they are in different locations.
-        // For example, 6:00 +0200 and 4:00 UTC are Equal.
-        // See the documentation on the Time type for the pitfalls of using == with
-        // Time values; most code should use Equal instead.
-        public static bool Equal(this Time t, Time u)
-        {
-            if (t.wall & u.wall & hasMonotonic != 0L)
-            {
-                return t.ext == u.ext;
-            }
-
-            return t.sec() == u.sec() && t.nsec() == u.nsec();
-
-        }
-
-        // A Month specifies a month of the year (January = 1, ...).
-        public partial struct Month // : long
-        {
-        }
-
-        public static readonly Month January = (Month)1L + iota;
-        public static readonly var February = 0;
-        public static readonly var March = 1;
-        public static readonly var April = 2;
-        public static readonly var May = 3;
-        public static readonly var June = 4;
-        public static readonly var July = 5;
-        public static readonly var August = 6;
-        public static readonly var September = 7;
-        public static readonly var October = 8;
-        public static readonly var November = 9;
-        public static readonly var December = 10;
-
-
-        // String returns the English name of the month ("January", "February", ...).
-        public static @string String(this Month m)
-        {
-            if (January <= m && m <= December)
-            {
-                return longMonthNames[m - 1L];
-            }
-
-            var buf = make_slice<byte>(20L);
-            var n = fmtInt(buf, uint64(m));
-            return "%!Month(" + string(buf[n..]) + ")";
-
-        }
-
-        // A Weekday specifies a day of the week (Sunday = 0, ...).
-        public partial struct Weekday // : long
-        {
-        }
-
-        public static readonly Weekday Sunday = (Weekday)iota;
-        public static readonly var Monday = 0;
-        public static readonly var Tuesday = 1;
-        public static readonly var Wednesday = 2;
-        public static readonly var Thursday = 3;
-        public static readonly var Friday = 4;
-        public static readonly var Saturday = 5;
-
-
-        // String returns the English name of the day ("Sunday", "Monday", ...).
-        public static @string String(this Weekday d)
-        {
-            if (Sunday <= d && d <= Saturday)
-            {
-                return longDayNames[d];
-            }
-
-            var buf = make_slice<byte>(20L);
-            var n = fmtInt(buf, uint64(d));
-            return "%!Weekday(" + string(buf[n..]) + ")";
-
-        }
-
-        // Computations on time.
-        //
-        // The zero value for a Time is defined to be
-        //    January 1, year 1, 00:00:00.000000000 UTC
-        // which (1) looks like a zero, or as close as you can get in a date
-        // (1-1-1 00:00:00 UTC), (2) is unlikely enough to arise in practice to
-        // be a suitable "not set" sentinel, unlike Jan 1 1970, and (3) has a
-        // non-negative year even in time zones west of UTC, unlike 1-1-0
-        // 00:00:00 UTC, which would be 12-31-(-1) 19:00:00 in New York.
-        //
-        // The zero Time value does not force a specific epoch for the time
-        // representation. For example, to use the Unix epoch internally, we
-        // could define that to distinguish a zero value from Jan 1 1970, that
-        // time would be represented by sec=-1, nsec=1e9. However, it does
-        // suggest a representation, namely using 1-1-1 00:00:00 UTC as the
-        // epoch, and that's what we do.
-        //
-        // The Add and Sub computations are oblivious to the choice of epoch.
-        //
-        // The presentation computations - year, month, minute, and so on - all
-        // rely heavily on division and modulus by positive constants. For
-        // calendrical calculations we want these divisions to round down, even
-        // for negative values, so that the remainder is always positive, but
-        // Go's division (like most hardware division instructions) rounds to
-        // zero. We can still do those computations and then adjust the result
-        // for a negative numerator, but it's annoying to write the adjustment
-        // over and over. Instead, we can change to a different epoch so long
-        // ago that all the times we care about will be positive, and then round
-        // to zero and round down coincide. These presentation routines already
-        // have to add the zone offset, so adding the translation to the
-        // alternate epoch is cheap. For example, having a non-negative time t
-        // means that we can write
-        //
-        //    sec = t % 60
-        //
-        // instead of
-        //
-        //    sec = t % 60
-        //    if sec < 0 {
-        //        sec += 60
-        //    }
-        //
-        // everywhere.
-        //
-        // The calendar runs on an exact 400 year cycle: a 400-year calendar
-        // printed for 1970-2369 will apply as well to 2370-2769. Even the days
-        // of the week match up. It simplifies the computations to choose the
-        // cycle boundaries so that the exceptional years are always delayed as
-        // long as possible. That means choosing a year equal to 1 mod 400, so
-        // that the first leap year is the 4th year, the first missed leap year
-        // is the 100th year, and the missed missed leap year is the 400th year.
-        // So we'd prefer instead to print a calendar for 2001-2400 and reuse it
-        // for 2401-2800.
-        //
-        // Finally, it's convenient if the delta between the Unix epoch and
-        // long-ago epoch is representable by an int64 constant.
-        //
-        // These three considerations—choose an epoch as early as possible, that
-        // uses a year equal to 1 mod 400, and that is no more than 2⁶³ seconds
-        // earlier than 1970—bring us to the year -292277022399. We refer to
-        // this year as the absolute zero year, and to times measured as a uint64
-        // seconds since this year as absolute times.
-        //
-        // Times measured as an int64 seconds since the year 1—the representation
-        // used for Time's sec field—are called internal times.
-        //
-        // Times measured as an int64 seconds since the year 1970 are called Unix
-        // times.
-        //
-        // It is tempting to just use the year 1 as the absolute epoch, defining
-        // that the routines are only valid for years >= 1. However, the
-        // routines would then be invalid when displaying the epoch in time zones
-        // west of UTC, since it is year 0. It doesn't seem tenable to say that
-        // printing the zero time correctly isn't supported in half the time
-        // zones. By comparison, it's reasonable to mishandle some times in
-        // the year -292277022399.
-        //
-        // All this is opaque to clients of the API and can be changed if a
-        // better implementation presents itself.
-
- 
-        // The unsigned zero year for internal calculations.
-        // Must be 1 mod 400, and times before it will not compute correctly,
-        // but otherwise can be changed at will.
-        private static readonly long absoluteZeroYear = (long)-292277022399L; 
-
-        // The year of the zero Time.
-        // Assumed by the unixToInternal computation below.
-        private static readonly long internalYear = (long)1L; 
-
-        // Offsets to convert between internal and absolute or Unix times.
-        private static readonly long absoluteToInternal = (long)(absoluteZeroYear - internalYear) * 365.2425F * secondsPerDay;
-        private static readonly var internalToAbsolute = -absoluteToInternal;
-
-        private static readonly long unixToInternal = (1969L * 365L + 1969L / 4L - 1969L / 100L + 1969L / 400L) * secondsPerDay;
-        private static readonly long internalToUnix = (long)-unixToInternal;
-
-        private static readonly long wallToInternal = (1884L * 365L + 1884L / 4L - 1884L / 100L + 1884L / 400L) * secondsPerDay;
-        private static readonly long internalToWall = (long)-wallToInternal;
-
-
-        // IsZero reports whether t represents the zero time instant,
-        // January 1, year 1, 00:00:00 UTC.
-        public static bool IsZero(this Time t)
-        {
-            return t.sec() == 0L && t.nsec() == 0L;
-        }
-
-        // abs returns the time t as an absolute time, adjusted by the zone offset.
-        // It is called when computing a presentation property like Month or Hour.
-        public static ulong abs(this Time t)
-        {
-            var l = t.loc; 
-            // Avoid function calls when possible.
-            if (l == null || l == _addr_localLoc)
-            {
-                l = l.get();
-            }
-
-            var sec = t.unixSec();
-            if (l != _addr_utcLoc)
-            {
-                if (l.cacheZone != null && l.cacheStart <= sec && sec < l.cacheEnd)
-                {
-                    sec += int64(l.cacheZone.offset);
-                }
-                else
-                {
-                    var (_, offset, _, _) = l.lookup(sec);
-                    sec += int64(offset);
-                }
-
-            }
-
-            return uint64(sec + (unixToInternal + internalToAbsolute));
-
-        }
-
-        // locabs is a combination of the Zone and abs methods,
-        // extracting both return values from a single zone lookup.
-        public static (@string, long, ulong) locabs(this Time t)
-        {
-            @string name = default;
-            long offset = default;
-            ulong abs = default;
-
-            var l = t.loc;
-            if (l == null || l == _addr_localLoc)
-            {
-                l = l.get();
-            } 
-            // Avoid function call if we hit the local time cache.
-            var sec = t.unixSec();
-            if (l != _addr_utcLoc)
-            {
-                if (l.cacheZone != null && l.cacheStart <= sec && sec < l.cacheEnd)
-                {
-                    name = l.cacheZone.name;
-                    offset = l.cacheZone.offset;
-                }
-                else
-                {
-                    name, offset, _, _ = l.lookup(sec);
-                }
-
-                sec += int64(offset);
-
-            }
-            else
-            {
-                name = "UTC";
-            }
-
-            abs = uint64(sec + (unixToInternal + internalToAbsolute));
-            return ;
-
-        }
-
-        // Date returns the year, month, and day in which t occurs.
-        public static (long, Month, long) Date(this Time t)
-        {
-            long year = default;
-            Month month = default;
-            long day = default;
-
-            year, month, day, _ = t.date(true);
+    if (t.wall & hasMonotonic != 0) {
+        var sec = int64(t.wall << 1 >> (int)((nsecShift + 1)));
+        var dsec = sec + d;
+        if (0 <= dsec && dsec <= 1 << 33 - 1) {
+            t.wall = t.wall & nsecMask | uint64(dsec) << (int)(nsecShift) | hasMonotonic;
             return ;
         }
+        t.stripMono();
 
-        // Year returns the year in which t occurs.
-        public static long Year(this Time t)
-        {
-            var (year, _, _, _) = t.date(false);
-            return year;
-        }
+    }
+    var sum = t.ext + d;
+    if ((sum > t.ext) == (d > 0)) {
+        t.ext = sum;
+    }
+    else if (d > 0) {
+        t.ext = 1 << 63 - 1;
+    }
+    else
+ {
+        t.ext = -(1 << 63 - 1);
+    }
+}
 
-        // Month returns the month of the year specified by t.
-        public static Month Month(this Time t)
-        {
-            var (_, month, _, _) = t.date(true);
-            return month;
-        }
+// setLoc sets the location associated with the time.
+private static void setLoc(this ptr<Time> _addr_t, ptr<Location> _addr_loc) {
+    ref Time t = ref _addr_t.val;
+    ref Location loc = ref _addr_loc.val;
 
-        // Day returns the day of the month specified by t.
-        public static long Day(this Time t)
-        {
-            var (_, _, day, _) = t.date(true);
-            return day;
-        }
+    if (loc == _addr_utcLoc) {
+        loc = null;
+    }
+    t.stripMono();
+    t.loc = loc;
 
-        // Weekday returns the day of the week specified by t.
-        public static Weekday Weekday(this Time t)
-        {
-            return absWeekday(t.abs());
-        }
+}
 
-        // absWeekday is like Weekday but operates on an absolute time.
-        private static Weekday absWeekday(ulong abs)
-        { 
-            // January 1 of the absolute year, like January 1 of 2001, was a Monday.
-            var sec = (abs + uint64(Monday) * secondsPerDay) % secondsPerWeek;
-            return Weekday(int(sec) / secondsPerDay);
+// stripMono strips the monotonic clock reading in t.
+private static void stripMono(this ptr<Time> _addr_t) {
+    ref Time t = ref _addr_t.val;
 
-        }
+    if (t.wall & hasMonotonic != 0) {
+        t.ext = t.sec();
+        t.wall &= nsecMask;
+    }
+}
 
-        // ISOWeek returns the ISO 8601 year and week number in which t occurs.
-        // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
-        // week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1
-        // of year n+1.
-        public static (long, long) ISOWeek(this Time t)
-        {
-            long year = default;
-            long week = default;
- 
-            // According to the rule that the first calendar week of a calendar year is
-            // the week including the first Thursday of that year, and that the last one is
-            // the week immediately preceding the first calendar week of the next calendar year.
-            // See https://www.iso.org/obp/ui#iso:std:iso:8601:-1:ed-1:v1:en:term:3.1.1.23 for details.
+// setMono sets the monotonic clock reading in t.
+// If t cannot hold a monotonic clock reading,
+// because its wall time is too large,
+// setMono is a no-op.
+private static void setMono(this ptr<Time> _addr_t, long m) {
+    ref Time t = ref _addr_t.val;
 
-            // weeks start with Monday
-            // Monday Tuesday Wednesday Thursday Friday Saturday Sunday
-            // 1      2       3         4        5      6        7
-            // +3     +2      +1        0        -1     -2       -3
-            // the offset to Thursday
-            var abs = t.abs();
-            var d = Thursday - absWeekday(abs); 
-            // handle Sunday
-            if (d == 4L)
-            {
-                d = -3L;
-            } 
-            // find the Thursday of the calendar week
-            abs += uint64(d) * secondsPerDay;
-            var (year, _, _, yday) = absDate(abs, false);
-            return (year, yday / 7L + 1L);
-
-        }
-
-        // Clock returns the hour, minute, and second within the day specified by t.
-        public static (long, long, long) Clock(this Time t)
-        {
-            long hour = default;
-            long min = default;
-            long sec = default;
-
-            return absClock(t.abs());
-        }
-
-        // absClock is like clock but operates on an absolute time.
-        private static (long, long, long) absClock(ulong abs)
-        {
-            long hour = default;
-            long min = default;
-            long sec = default;
-
-            sec = int(abs % secondsPerDay);
-            hour = sec / secondsPerHour;
-            sec -= hour * secondsPerHour;
-            min = sec / secondsPerMinute;
-            sec -= min * secondsPerMinute;
+    if (t.wall & hasMonotonic == 0) {
+        var sec = t.ext;
+        if (sec < minWall || maxWall < sec) {
             return ;
         }
+        t.wall |= hasMonotonic | uint64(sec - minWall) << (int)(nsecShift);
 
-        // Hour returns the hour within the day specified by t, in the range [0, 23].
-        public static long Hour(this Time t)
-        {
-            return int(t.abs() % secondsPerDay) / secondsPerHour;
-        }
+    }
+    t.ext = m;
 
-        // Minute returns the minute offset within the hour specified by t, in the range [0, 59].
-        public static long Minute(this Time t)
-        {
-            return int(t.abs() % secondsPerHour) / secondsPerMinute;
-        }
+}
 
-        // Second returns the second offset within the minute specified by t, in the range [0, 59].
-        public static long Second(this Time t)
-        {
-            return int(t.abs() % secondsPerMinute);
-        }
+// mono returns t's monotonic clock reading.
+// It returns 0 for a missing reading.
+// This function is used only for testing,
+// so it's OK that technically 0 is a valid
+// monotonic clock reading as well.
+private static long mono(this ptr<Time> _addr_t) {
+    ref Time t = ref _addr_t.val;
 
-        // Nanosecond returns the nanosecond offset within the second specified by t,
-        // in the range [0, 999999999].
-        public static long Nanosecond(this Time t)
-        {
-            return int(t.nsec());
-        }
+    if (t.wall & hasMonotonic == 0) {
+        return 0;
+    }
+    return t.ext;
 
-        // YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
-        // and [1,366] in leap years.
-        public static long YearDay(this Time t)
-        {
-            var (_, _, _, yday) = t.date(false);
-            return yday + 1L;
-        }
+}
 
-        // A Duration represents the elapsed time between two instants
-        // as an int64 nanosecond count. The representation limits the
-        // largest representable duration to approximately 290 years.
-        public partial struct Duration // : long
-        {
-        }
+// After reports whether the time instant t is after u.
+public static bool After(this Time t, Time u) {
+    if (t.wall & u.wall & hasMonotonic != 0) {
+        return t.ext > u.ext;
+    }
+    var ts = t.sec();
+    var us = u.sec();
+    return ts > us || ts == us && t.nsec() > u.nsec();
 
-        private static readonly Duration minDuration = (Duration)-1L << (int)(63L);
-        private static readonly Duration maxDuration = (Duration)1L << (int)(63L) - 1L;
+}
+
+// Before reports whether the time instant t is before u.
+public static bool Before(this Time t, Time u) {
+    if (t.wall & u.wall & hasMonotonic != 0) {
+        return t.ext < u.ext;
+    }
+    var ts = t.sec();
+    var us = u.sec();
+    return ts < us || ts == us && t.nsec() < u.nsec();
+
+}
+
+// Equal reports whether t and u represent the same time instant.
+// Two times can be equal even if they are in different locations.
+// For example, 6:00 +0200 and 4:00 UTC are Equal.
+// See the documentation on the Time type for the pitfalls of using == with
+// Time values; most code should use Equal instead.
+public static bool Equal(this Time t, Time u) {
+    if (t.wall & u.wall & hasMonotonic != 0) {
+        return t.ext == u.ext;
+    }
+    return t.sec() == u.sec() && t.nsec() == u.nsec();
+
+}
+
+// A Month specifies a month of the year (January = 1, ...).
+public partial struct Month { // : nint
+}
+
+public static readonly Month January = 1 + iota;
+public static readonly var February = 0;
+public static readonly var March = 1;
+public static readonly var April = 2;
+public static readonly var May = 3;
+public static readonly var June = 4;
+public static readonly var July = 5;
+public static readonly var August = 6;
+public static readonly var September = 7;
+public static readonly var October = 8;
+public static readonly var November = 9;
+public static readonly var December = 10;
 
 
-        // Common durations. There is no definition for units of Day or larger
-        // to avoid confusion across daylight savings time zone transitions.
-        //
-        // To count the number of units in a Duration, divide:
-        //    second := time.Second
-        //    fmt.Print(int64(second/time.Millisecond)) // prints 1000
-        //
-        // To convert an integer number of units to a Duration, multiply:
-        //    seconds := 10
-        //    fmt.Print(time.Duration(seconds)*time.Second) // prints 10s
-        //
-        public static readonly Duration Nanosecond = (Duration)1L;
-        public static readonly long Microsecond = (long)1000L * Nanosecond;
-        public static readonly long Millisecond = (long)1000L * Microsecond;
-        public static readonly long Second = (long)1000L * Millisecond;
-        public static readonly long Minute = (long)60L * Second;
-        public static readonly long Hour = (long)60L * Minute;
+// String returns the English name of the month ("January", "February", ...).
+public static @string String(this Month m) {
+    if (January <= m && m <= December) {
+        return longMonthNames[m - 1];
+    }
+    var buf = make_slice<byte>(20);
+    var n = fmtInt(buf, uint64(m));
+    return "%!Month(" + string(buf[(int)n..]) + ")";
+
+}
+
+// A Weekday specifies a day of the week (Sunday = 0, ...).
+public partial struct Weekday { // : nint
+}
+
+public static readonly Weekday Sunday = iota;
+public static readonly var Monday = 0;
+public static readonly var Tuesday = 1;
+public static readonly var Wednesday = 2;
+public static readonly var Thursday = 3;
+public static readonly var Friday = 4;
+public static readonly var Saturday = 5;
 
 
-        // String returns a string representing the duration in the form "72h3m0.5s".
-        // Leading zero units are omitted. As a special case, durations less than one
-        // second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
-        // that the leading digit is non-zero. The zero duration formats as 0s.
-        public static @string String(this Duration d)
-        { 
-            // Largest time is 2540400h10m10.000000000s
-            array<byte> buf = new array<byte>(32L);
-            var w = len(buf);
+// String returns the English name of the day ("Sunday", "Monday", ...).
+public static @string String(this Weekday d) {
+    if (Sunday <= d && d <= Saturday) {
+        return longDayNames[d];
+    }
+    var buf = make_slice<byte>(20);
+    var n = fmtInt(buf, uint64(d));
+    return "%!Weekday(" + string(buf[(int)n..]) + ")";
 
-            var u = uint64(d);
-            var neg = d < 0L;
-            if (neg)
-            {
-                u = -u;
-            }
+}
 
-            if (u < uint64(Second))
-            { 
-                // Special case: if duration is smaller than a second,
-                // use smaller units, like 1.2ms
-                long prec = default;
-                w--;
-                buf[w] = 's';
-                w--;
+// Computations on time.
+//
+// The zero value for a Time is defined to be
+//    January 1, year 1, 00:00:00.000000000 UTC
+// which (1) looks like a zero, or as close as you can get in a date
+// (1-1-1 00:00:00 UTC), (2) is unlikely enough to arise in practice to
+// be a suitable "not set" sentinel, unlike Jan 1 1970, and (3) has a
+// non-negative year even in time zones west of UTC, unlike 1-1-0
+// 00:00:00 UTC, which would be 12-31-(-1) 19:00:00 in New York.
+//
+// The zero Time value does not force a specific epoch for the time
+// representation. For example, to use the Unix epoch internally, we
+// could define that to distinguish a zero value from Jan 1 1970, that
+// time would be represented by sec=-1, nsec=1e9. However, it does
+// suggest a representation, namely using 1-1-1 00:00:00 UTC as the
+// epoch, and that's what we do.
+//
+// The Add and Sub computations are oblivious to the choice of epoch.
+//
+// The presentation computations - year, month, minute, and so on - all
+// rely heavily on division and modulus by positive constants. For
+// calendrical calculations we want these divisions to round down, even
+// for negative values, so that the remainder is always positive, but
+// Go's division (like most hardware division instructions) rounds to
+// zero. We can still do those computations and then adjust the result
+// for a negative numerator, but it's annoying to write the adjustment
+// over and over. Instead, we can change to a different epoch so long
+// ago that all the times we care about will be positive, and then round
+// to zero and round down coincide. These presentation routines already
+// have to add the zone offset, so adding the translation to the
+// alternate epoch is cheap. For example, having a non-negative time t
+// means that we can write
+//
+//    sec = t % 60
+//
+// instead of
+//
+//    sec = t % 60
+//    if sec < 0 {
+//        sec += 60
+//    }
+//
+// everywhere.
+//
+// The calendar runs on an exact 400 year cycle: a 400-year calendar
+// printed for 1970-2369 will apply as well to 2370-2769. Even the days
+// of the week match up. It simplifies the computations to choose the
+// cycle boundaries so that the exceptional years are always delayed as
+// long as possible. That means choosing a year equal to 1 mod 400, so
+// that the first leap year is the 4th year, the first missed leap year
+// is the 100th year, and the missed missed leap year is the 400th year.
+// So we'd prefer instead to print a calendar for 2001-2400 and reuse it
+// for 2401-2800.
+//
+// Finally, it's convenient if the delta between the Unix epoch and
+// long-ago epoch is representable by an int64 constant.
+//
+// These three considerations—choose an epoch as early as possible, that
+// uses a year equal to 1 mod 400, and that is no more than 2⁶³ seconds
+// earlier than 1970—bring us to the year -292277022399. We refer to
+// this year as the absolute zero year, and to times measured as a uint64
+// seconds since this year as absolute times.
+//
+// Times measured as an int64 seconds since the year 1—the representation
+// used for Time's sec field—are called internal times.
+//
+// Times measured as an int64 seconds since the year 1970 are called Unix
+// times.
+//
+// It is tempting to just use the year 1 as the absolute epoch, defining
+// that the routines are only valid for years >= 1. However, the
+// routines would then be invalid when displaying the epoch in time zones
+// west of UTC, since it is year 0. It doesn't seem tenable to say that
+// printing the zero time correctly isn't supported in half the time
+// zones. By comparison, it's reasonable to mishandle some times in
+// the year -292277022399.
+//
+// All this is opaque to clients of the API and can be changed if a
+// better implementation presents itself.
 
-                if (u == 0L) 
-                    return "0s";
-                else if (u < uint64(Microsecond)) 
-                    // print nanoseconds
-                    prec = 0L;
-                    buf[w] = 'n';
-                else if (u < uint64(Millisecond)) 
-                    // print microseconds
-                    prec = 3L; 
-                    // U+00B5 'µ' micro sign == 0xC2 0xB5
-                    w--; // Need room for two bytes.
-                    copy(buf[w..], "µ");
-                else 
-                    // print milliseconds
-                    prec = 6L;
-                    buf[w] = 'm';
-                                w, u = fmtFrac(buf[..w], u, prec);
-                w = fmtInt(buf[..w], u);
-
-            }
-            else
-            {
-                w--;
-                buf[w] = 's';
-
-                w, u = fmtFrac(buf[..w], u, 9L); 
-
-                // u is now integer seconds
-                w = fmtInt(buf[..w], u % 60L);
-                u /= 60L; 
-
-                // u is now integer minutes
-                if (u > 0L)
-                {
-                    w--;
-                    buf[w] = 'm';
-                    w = fmtInt(buf[..w], u % 60L);
-                    u /= 60L; 
-
-                    // u is now integer hours
-                    // Stop at hours because days can be different lengths.
-                    if (u > 0L)
-                    {
-                        w--;
-                        buf[w] = 'h';
-                        w = fmtInt(buf[..w], u);
-                    }
-
-                }
-
-            }
-
-            if (neg)
-            {
-                w--;
-                buf[w] = '-';
-            }
-
-            return string(buf[w..]);
-
-        }
-
-        // fmtFrac formats the fraction of v/10**prec (e.g., ".12345") into the
-        // tail of buf, omitting trailing zeros. It omits the decimal
-        // point too when the fraction is 0. It returns the index where the
-        // output bytes begin and the value v/10**prec.
-        private static (long, ulong) fmtFrac(slice<byte> buf, ulong v, long prec)
-        {
-            long nw = default;
-            ulong nv = default;
  
-            // Omit trailing zeros up to and including decimal point.
-            var w = len(buf);
-            var print = false;
-            for (long i = 0L; i < prec; i++)
-            {
-                var digit = v % 10L;
-                print = print || digit != 0L;
-                if (print)
-                {
-                    w--;
-                    buf[w] = byte(digit) + '0';
-                }
+// The unsigned zero year for internal calculations.
+// Must be 1 mod 400, and times before it will not compute correctly,
+// but otherwise can be changed at will.
+private static readonly nint absoluteZeroYear = -(nint)292277022399L; 
 
-                v /= 10L;
+// The year of the zero Time.
+// Assumed by the unixToInternal computation below.
+private static readonly nint internalYear = 1; 
 
-            }
+// Offsets to convert between internal and absolute or Unix times.
+private static readonly long absoluteToInternal = (absoluteZeroYear - internalYear) * 365.2425F * secondsPerDay;
+private static readonly var internalToAbsolute = -absoluteToInternal;
 
-            if (print)
-            {
+private static readonly long unixToInternal = (1969 * 365 + 1969 / 4 - 1969 / 100 + 1969 / 400) * secondsPerDay;
+private static readonly long internalToUnix = -unixToInternal;
+
+private static readonly long wallToInternal = (1884 * 365 + 1884 / 4 - 1884 / 100 + 1884 / 400) * secondsPerDay;
+private static readonly long internalToWall = -wallToInternal;
+
+
+// IsZero reports whether t represents the zero time instant,
+// January 1, year 1, 00:00:00 UTC.
+public static bool IsZero(this Time t) {
+    return t.sec() == 0 && t.nsec() == 0;
+}
+
+// abs returns the time t as an absolute time, adjusted by the zone offset.
+// It is called when computing a presentation property like Month or Hour.
+public static ulong abs(this Time t) {
+    var l = t.loc; 
+    // Avoid function calls when possible.
+    if (l == null || l == _addr_localLoc) {
+        l = l.get();
+    }
+    var sec = t.unixSec();
+    if (l != _addr_utcLoc) {
+        if (l.cacheZone != null && l.cacheStart <= sec && sec < l.cacheEnd) {
+            sec += int64(l.cacheZone.offset);
+        }
+        else
+ {
+            var (_, offset, _, _, _) = l.lookup(sec);
+            sec += int64(offset);
+        }
+    }
+    return uint64(sec + (unixToInternal + internalToAbsolute));
+
+}
+
+// locabs is a combination of the Zone and abs methods,
+// extracting both return values from a single zone lookup.
+public static (@string, nint, ulong) locabs(this Time t) {
+    @string name = default;
+    nint offset = default;
+    ulong abs = default;
+
+    var l = t.loc;
+    if (l == null || l == _addr_localLoc) {
+        l = l.get();
+    }
+    var sec = t.unixSec();
+    if (l != _addr_utcLoc) {
+        if (l.cacheZone != null && l.cacheStart <= sec && sec < l.cacheEnd) {
+            name = l.cacheZone.name;
+            offset = l.cacheZone.offset;
+        }
+        else
+ {
+            name, offset, _, _, _ = l.lookup(sec);
+        }
+        sec += int64(offset);
+
+    }
+    else
+ {
+        name = "UTC";
+    }
+    abs = uint64(sec + (unixToInternal + internalToAbsolute));
+    return ;
+
+}
+
+// Date returns the year, month, and day in which t occurs.
+public static (nint, Month, nint) Date(this Time t) {
+    nint year = default;
+    Month month = default;
+    nint day = default;
+
+    year, month, day, _ = t.date(true);
+    return ;
+}
+
+// Year returns the year in which t occurs.
+public static nint Year(this Time t) {
+    var (year, _, _, _) = t.date(false);
+    return year;
+}
+
+// Month returns the month of the year specified by t.
+public static Month Month(this Time t) {
+    var (_, month, _, _) = t.date(true);
+    return month;
+}
+
+// Day returns the day of the month specified by t.
+public static nint Day(this Time t) {
+    var (_, _, day, _) = t.date(true);
+    return day;
+}
+
+// Weekday returns the day of the week specified by t.
+public static Weekday Weekday(this Time t) {
+    return absWeekday(t.abs());
+}
+
+// absWeekday is like Weekday but operates on an absolute time.
+private static Weekday absWeekday(ulong abs) { 
+    // January 1 of the absolute year, like January 1 of 2001, was a Monday.
+    var sec = (abs + uint64(Monday) * secondsPerDay) % secondsPerWeek;
+    return Weekday(int(sec) / secondsPerDay);
+
+}
+
+// ISOWeek returns the ISO 8601 year and week number in which t occurs.
+// Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
+// week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1
+// of year n+1.
+public static (nint, nint) ISOWeek(this Time t) {
+    nint year = default;
+    nint week = default;
+ 
+    // According to the rule that the first calendar week of a calendar year is
+    // the week including the first Thursday of that year, and that the last one is
+    // the week immediately preceding the first calendar week of the next calendar year.
+    // See https://www.iso.org/obp/ui#iso:std:iso:8601:-1:ed-1:v1:en:term:3.1.1.23 for details.
+
+    // weeks start with Monday
+    // Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+    // 1      2       3         4        5      6        7
+    // +3     +2      +1        0        -1     -2       -3
+    // the offset to Thursday
+    var abs = t.abs();
+    var d = Thursday - absWeekday(abs); 
+    // handle Sunday
+    if (d == 4) {
+        d = -3;
+    }
+    abs += uint64(d) * secondsPerDay;
+    var (year, _, _, yday) = absDate(abs, false);
+    return (year, yday / 7 + 1);
+
+}
+
+// Clock returns the hour, minute, and second within the day specified by t.
+public static (nint, nint, nint) Clock(this Time t) {
+    nint hour = default;
+    nint min = default;
+    nint sec = default;
+
+    return absClock(t.abs());
+}
+
+// absClock is like clock but operates on an absolute time.
+private static (nint, nint, nint) absClock(ulong abs) {
+    nint hour = default;
+    nint min = default;
+    nint sec = default;
+
+    sec = int(abs % secondsPerDay);
+    hour = sec / secondsPerHour;
+    sec -= hour * secondsPerHour;
+    min = sec / secondsPerMinute;
+    sec -= min * secondsPerMinute;
+    return ;
+}
+
+// Hour returns the hour within the day specified by t, in the range [0, 23].
+public static nint Hour(this Time t) {
+    return int(t.abs() % secondsPerDay) / secondsPerHour;
+}
+
+// Minute returns the minute offset within the hour specified by t, in the range [0, 59].
+public static nint Minute(this Time t) {
+    return int(t.abs() % secondsPerHour) / secondsPerMinute;
+}
+
+// Second returns the second offset within the minute specified by t, in the range [0, 59].
+public static nint Second(this Time t) {
+    return int(t.abs() % secondsPerMinute);
+}
+
+// Nanosecond returns the nanosecond offset within the second specified by t,
+// in the range [0, 999999999].
+public static nint Nanosecond(this Time t) {
+    return int(t.nsec());
+}
+
+// YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
+// and [1,366] in leap years.
+public static nint YearDay(this Time t) {
+    var (_, _, _, yday) = t.date(false);
+    return yday + 1;
+}
+
+// A Duration represents the elapsed time between two instants
+// as an int64 nanosecond count. The representation limits the
+// largest representable duration to approximately 290 years.
+public partial struct Duration { // : long
+}
+
+private static readonly Duration minDuration = -1 << 63;
+private static readonly Duration maxDuration = 1 << 63 - 1;
+
+
+// Common durations. There is no definition for units of Day or larger
+// to avoid confusion across daylight savings time zone transitions.
+//
+// To count the number of units in a Duration, divide:
+//    second := time.Second
+//    fmt.Print(int64(second/time.Millisecond)) // prints 1000
+//
+// To convert an integer number of units to a Duration, multiply:
+//    seconds := 10
+//    fmt.Print(time.Duration(seconds)*time.Second) // prints 10s
+//
+public static readonly Duration Nanosecond = 1;
+public static readonly nint Microsecond = 1000 * Nanosecond;
+public static readonly nint Millisecond = 1000 * Microsecond;
+public static readonly nint Second = 1000 * Millisecond;
+public static readonly nint Minute = 60 * Second;
+public static readonly nint Hour = 60 * Minute;
+
+
+// String returns a string representing the duration in the form "72h3m0.5s".
+// Leading zero units are omitted. As a special case, durations less than one
+// second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
+// that the leading digit is non-zero. The zero duration formats as 0s.
+public static @string String(this Duration d) { 
+    // Largest time is 2540400h10m10.000000000s
+    array<byte> buf = new array<byte>(32);
+    var w = len(buf);
+
+    var u = uint64(d);
+    var neg = d < 0;
+    if (neg) {
+        u = -u;
+    }
+    if (u < uint64(Second)) { 
+        // Special case: if duration is smaller than a second,
+        // use smaller units, like 1.2ms
+        nint prec = default;
+        w--;
+        buf[w] = 's';
+        w--;
+
+        if (u == 0) 
+            return "0s";
+        else if (u < uint64(Microsecond)) 
+            // print nanoseconds
+            prec = 0;
+            buf[w] = 'n';
+        else if (u < uint64(Millisecond)) 
+            // print microseconds
+            prec = 3; 
+            // U+00B5 'µ' micro sign == 0xC2 0xB5
+            w--; // Need room for two bytes.
+            copy(buf[(int)w..], "µ");
+        else 
+            // print milliseconds
+            prec = 6;
+            buf[w] = 'm';
+                w, u = fmtFrac(buf[..(int)w], u, prec);
+        w = fmtInt(buf[..(int)w], u);
+
+    }
+    else
+ {
+        w--;
+        buf[w] = 's';
+
+        w, u = fmtFrac(buf[..(int)w], u, 9); 
+
+        // u is now integer seconds
+        w = fmtInt(buf[..(int)w], u % 60);
+        u /= 60; 
+
+        // u is now integer minutes
+        if (u > 0) {
+            w--;
+            buf[w] = 'm';
+            w = fmtInt(buf[..(int)w], u % 60);
+            u /= 60; 
+
+            // u is now integer hours
+            // Stop at hours because days can be different lengths.
+            if (u > 0) {
                 w--;
-                buf[w] = '.';
+                buf[w] = 'h';
+                w = fmtInt(buf[..(int)w], u);
             }
-
-            return (w, v);
-
-        }
-
-        // fmtInt formats v into the tail of buf.
-        // It returns the index where the output begins.
-        private static long fmtInt(slice<byte> buf, ulong v)
-        {
-            var w = len(buf);
-            if (v == 0L)
-            {
-                w--;
-                buf[w] = '0';
-            }
-            else
-            {
-                while (v > 0L)
-                {
-                    w--;
-                    buf[w] = byte(v % 10L) + '0';
-                    v /= 10L;
-                }
-
-
-            }
-
-            return w;
-
-        }
-
-        // Nanoseconds returns the duration as an integer nanosecond count.
-        public static long Nanoseconds(this Duration d)
-        {
-            return int64(d);
-        }
-
-        // Microseconds returns the duration as an integer microsecond count.
-        public static long Microseconds(this Duration d)
-        {
-            return int64(d) / 1e3F;
-        }
-
-        // Milliseconds returns the duration as an integer millisecond count.
-        public static long Milliseconds(this Duration d)
-        {
-            return int64(d) / 1e6F;
-        }
-
-        // These methods return float64 because the dominant
-        // use case is for printing a floating point number like 1.5s, and
-        // a truncation to integer would make them not useful in those cases.
-        // Splitting the integer and fraction ourselves guarantees that
-        // converting the returned float64 to an integer rounds the same
-        // way that a pure integer conversion would have, even in cases
-        // where, say, float64(d.Nanoseconds())/1e9 would have rounded
-        // differently.
-
-        // Seconds returns the duration as a floating point number of seconds.
-        public static double Seconds(this Duration d)
-        {
-            var sec = d / Second;
-            var nsec = d % Second;
-            return float64(sec) + float64(nsec) / 1e9F;
-        }
-
-        // Minutes returns the duration as a floating point number of minutes.
-        public static double Minutes(this Duration d)
-        {
-            var min = d / Minute;
-            var nsec = d % Minute;
-            return float64(min) + float64(nsec) / (60L * 1e9F);
-        }
-
-        // Hours returns the duration as a floating point number of hours.
-        public static double Hours(this Duration d)
-        {
-            var hour = d / Hour;
-            var nsec = d % Hour;
-            return float64(hour) + float64(nsec) / (60L * 60L * 1e9F);
-        }
-
-        // Truncate returns the result of rounding d toward zero to a multiple of m.
-        // If m <= 0, Truncate returns d unchanged.
-        public static Duration Truncate(this Duration d, Duration m)
-        {
-            if (m <= 0L)
-            {
-                return d;
-            }
-
-            return d - d % m;
-
-        }
-
-        // lessThanHalf reports whether x+x < y but avoids overflow,
-        // assuming x and y are both positive (Duration is signed).
-        private static bool lessThanHalf(Duration x, Duration y)
-        {
-            return uint64(x) + uint64(x) < uint64(y);
-        }
-
-        // Round returns the result of rounding d to the nearest multiple of m.
-        // The rounding behavior for halfway values is to round away from zero.
-        // If the result exceeds the maximum (or minimum)
-        // value that can be stored in a Duration,
-        // Round returns the maximum (or minimum) duration.
-        // If m <= 0, Round returns d unchanged.
-        public static Duration Round(this Duration d, Duration m)
-        {
-            if (m <= 0L)
-            {
-                return d;
-            }
-
-            var r = d % m;
-            if (d < 0L)
-            {
-                r = -r;
-                if (lessThanHalf(r, m))
-                {
-                    return d + r;
-                }
-
-                {
-                    var d1__prev2 = d1;
-
-                    var d1 = d - m + r;
-
-                    if (d1 < d)
-                    {
-                        return d1;
-                    }
-
-                    d1 = d1__prev2;
-
-                }
-
-                return minDuration; // overflow
-            }
-
-            if (lessThanHalf(r, m))
-            {
-                return d - r;
-            }
-
-            {
-                var d1__prev1 = d1;
-
-                d1 = d + m - r;
-
-                if (d1 > d)
-                {
-                    return d1;
-                }
-
-                d1 = d1__prev1;
-
-            }
-
-            return maxDuration; // overflow
-        }
-
-        // Add returns the time t+d.
-        public static Time Add(this Time t, Duration d)
-        {
-            var dsec = int64(d / 1e9F);
-            var nsec = t.nsec() + int32(d % 1e9F);
-            if (nsec >= 1e9F)
-            {
-                dsec++;
-                nsec -= 1e9F;
-            }
-            else if (nsec < 0L)
-            {
-                dsec--;
-                nsec += 1e9F;
-            }
-
-            t.wall = t.wall & ~nsecMask | uint64(nsec); // update nsec
-            t.addSec(dsec);
-            if (t.wall & hasMonotonic != 0L)
-            {
-                var te = t.ext + int64(d);
-                if (d < 0L && te > t.ext || d > 0L && te < t.ext)
-                { 
-                    // Monotonic clock reading now out of range; degrade to wall-only.
-                    t.stripMono();
-
-                }
-                else
-                {
-                    t.ext = te;
-                }
-
-            }
-
-            return t;
-
-        }
-
-        // Sub returns the duration t-u. If the result exceeds the maximum (or minimum)
-        // value that can be stored in a Duration, the maximum (or minimum) duration
-        // will be returned.
-        // To compute t-d for a duration d, use t.Add(-d).
-        public static Duration Sub(this Time t, Time u)
-        {
-            if (t.wall & u.wall & hasMonotonic != 0L)
-            {
-                var te = t.ext;
-                var ue = u.ext;
-                var d = Duration(te - ue);
-                if (d < 0L && te > ue)
-                {
-                    return maxDuration; // t - u is positive out of range
-                }
-
-                if (d > 0L && te < ue)
-                {
-                    return minDuration; // t - u is negative out of range
-                }
-
-                return d;
-
-            }
-
-            d = Duration(t.sec() - u.sec()) * Second + Duration(t.nsec() - u.nsec()); 
-            // Check for overflow or underflow.
-
-            if (u.Add(d).Equal(t)) 
-                return d; // d is correct
-            else if (t.Before(u)) 
-                return minDuration; // t - u is negative out of range
-            else 
-                return maxDuration; // t - u is positive out of range
-                    }
-
-        // Since returns the time elapsed since t.
-        // It is shorthand for time.Now().Sub(t).
-        public static Duration Since(Time t)
-        {
-            Time now = default;
-            if (t.wall & hasMonotonic != 0L)
-            { 
-                // Common case optimization: if t has monotonic time, then Sub will use only it.
-                now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
-
-            }
-            else
-            {
-                now = Now();
-            }
-
-            return now.Sub(t);
-
-        }
-
-        // Until returns the duration until t.
-        // It is shorthand for t.Sub(time.Now()).
-        public static Duration Until(Time t)
-        {
-            Time now = default;
-            if (t.wall & hasMonotonic != 0L)
-            { 
-                // Common case optimization: if t has monotonic time, then Sub will use only it.
-                now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
-
-            }
-            else
-            {
-                now = Now();
-            }
-
-            return t.Sub(now);
-
-        }
-
-        // AddDate returns the time corresponding to adding the
-        // given number of years, months, and days to t.
-        // For example, AddDate(-1, 2, 3) applied to January 1, 2011
-        // returns March 4, 2010.
-        //
-        // AddDate normalizes its result in the same way that Date does,
-        // so, for example, adding one month to October 31 yields
-        // December 1, the normalized form for November 31.
-        public static Time AddDate(this Time t, long years, long months, long days)
-        {
-            var (year, month, day) = t.Date();
-            var (hour, min, sec) = t.Clock();
-            return Date(year + years, month + Month(months), day + days, hour, min, sec, int(t.nsec()), _addr_t.Location());
-        }
-
-        private static readonly long secondsPerMinute = (long)60L;
-        private static readonly long secondsPerHour = (long)60L * secondsPerMinute;
-        private static readonly long secondsPerDay = (long)24L * secondsPerHour;
-        private static readonly long secondsPerWeek = (long)7L * secondsPerDay;
-        private static readonly long daysPer400Years = (long)365L * 400L + 97L;
-        private static readonly long daysPer100Years = (long)365L * 100L + 24L;
-        private static readonly long daysPer4Years = (long)365L * 4L + 1L;
-
-
-        // date computes the year, day of year, and when full=true,
-        // the month and day in which t occurs.
-        public static (long, Month, long, long) date(this Time t, bool full)
-        {
-            long year = default;
-            Month month = default;
-            long day = default;
-            long yday = default;
-
-            return absDate(t.abs(), full);
-        }
-
-        // absDate is like date but operates on an absolute time.
-        private static (long, Month, long, long) absDate(ulong abs, bool full)
-        {
-            long year = default;
-            Month month = default;
-            long day = default;
-            long yday = default;
- 
-            // Split into time and day.
-            var d = abs / secondsPerDay; 
-
-            // Account for 400 year cycles.
-            var n = d / daysPer400Years;
-            long y = 400L * n;
-            d -= daysPer400Years * n; 
-
-            // Cut off 100-year cycles.
-            // The last cycle has one extra leap year, so on the last day
-            // of that year, day / daysPer100Years will be 4 instead of 3.
-            // Cut it back down to 3 by subtracting n>>2.
-            n = d / daysPer100Years;
-            n -= n >> (int)(2L);
-            y += 100L * n;
-            d -= daysPer100Years * n; 
-
-            // Cut off 4-year cycles.
-            // The last cycle has a missing leap year, which does not
-            // affect the computation.
-            n = d / daysPer4Years;
-            y += 4L * n;
-            d -= daysPer4Years * n; 
-
-            // Cut off years within a 4-year cycle.
-            // The last year is a leap year, so on the last day of that year,
-            // day / 365 will be 4 instead of 3. Cut it back down to 3
-            // by subtracting n>>2.
-            n = d / 365L;
-            n -= n >> (int)(2L);
-            y += n;
-            d -= 365L * n;
-
-            year = int(int64(y) + absoluteZeroYear);
-            yday = int(d);
-
-            if (!full)
-            {
-                return ;
-            }
-
-            day = yday;
-            if (isLeap(year))
-            { 
-                // Leap year
-
-                if (day > 31L + 29L - 1L) 
-                    // After leap day; pretend it wasn't there.
-                    day--;
-                else if (day == 31L + 29L - 1L) 
-                    // Leap day.
-                    month = February;
-                    day = 29L;
-                    return ;
-                
-            } 
-
-            // Estimate month on assumption that every month has 31 days.
-            // The estimate may be too low by at most one month, so adjust.
-            month = Month(day / 31L);
-            var end = int(daysBefore[month + 1L]);
-            long begin = default;
-            if (day >= end)
-            {
-                month++;
-                begin = end;
-            }
-            else
-            {
-                begin = int(daysBefore[month]);
-            }
-
-            month++; // because January is 1
-            day = day - begin + 1L;
-            return ;
-
-        }
-
-        // daysBefore[m] counts the number of days in a non-leap year
-        // before month m begins. There is an entry for m=12, counting
-        // the number of days before January of next year (365).
-        private static array<int> daysBefore = new array<int>(new int[] { 0, 31, 31+28, 31+28+31, 31+28+31+30, 31+28+31+30+31, 31+28+31+30+31+30, 31+28+31+30+31+30+31, 31+28+31+30+31+30+31+31, 31+28+31+30+31+30+31+31+30, 31+28+31+30+31+30+31+31+30+31, 31+28+31+30+31+30+31+31+30+31+30, 31+28+31+30+31+30+31+31+30+31+30+31 });
-
-        private static long daysIn(Month m, long year)
-        {
-            if (m == February && isLeap(year))
-            {
-                return 29L;
-            }
-
-            return int(daysBefore[m] - daysBefore[m - 1L]);
-
-        }
-
-        // daysSinceEpoch takes a year and returns the number of days from
-        // the absolute epoch to the start of that year.
-        // This is basically (year - zeroYear) * 365, but accounting for leap days.
-        private static ulong daysSinceEpoch(long year)
-        {
-            var y = uint64(int64(year) - absoluteZeroYear); 
-
-            // Add in days from 400-year cycles.
-            var n = y / 400L;
-            y -= 400L * n;
-            var d = daysPer400Years * n; 
-
-            // Add in 100-year cycles.
-            n = y / 100L;
-            y -= 100L * n;
-            d += daysPer100Years * n; 
-
-            // Add in 4-year cycles.
-            n = y / 4L;
-            y -= 4L * n;
-            d += daysPer4Years * n; 
-
-            // Add in non-leap years.
-            n = y;
-            d += 365L * n;
-
-            return d;
-
-        }
-
-        // Provided by package runtime.
-        private static (long, int, long) now()
-;
-
-        // runtimeNano returns the current value of the runtime clock in nanoseconds.
-        //go:linkname runtimeNano runtime.nanotime
-        private static long runtimeNano()
-;
-
-        // Monotonic times are reported as offsets from startNano.
-        // We initialize startNano to runtimeNano() - 1 so that on systems where
-        // monotonic time resolution is fairly low (e.g. Windows 2008
-        // which appears to have a default resolution of 15ms),
-        // we avoid ever reporting a monotonic time of 0.
-        // (Callers may want to use 0 as "time not set".)
-        private static long startNano = runtimeNano() - 1L;
-
-        // Now returns the current local time.
-        public static Time Now()
-        {
-            var (sec, nsec, mono) = now();
-            mono -= startNano;
-            sec += unixToInternal - minWall;
-            if (uint64(sec) >> (int)(33L) != 0L)
-            {>>MARKER:FUNCTION_runtimeNano_BLOCK_PREFIX<<
-                return new Time(uint64(nsec),sec+minWall,Local);
-            }
-
-            return new Time(hasMonotonic|uint64(sec)<<nsecShift|uint64(nsec),mono,Local);
-
-        }
-
-        private static Time unixTime(long sec, int nsec)
-        {
-            return new Time(uint64(nsec),sec+unixToInternal,Local);
-        }
-
-        // UTC returns t with the location set to UTC.
-        public static Time UTC(this Time t)
-        {
-            t.setLoc(_addr_utcLoc);
-            return t;
-        }
-
-        // Local returns t with the location set to local time.
-        public static Time Local(this Time t)
-        {
-            t.setLoc(Local);
-            return t;
-        }
-
-        // In returns a copy of t representing the same time instant, but
-        // with the copy's location information set to loc for display
-        // purposes.
-        //
-        // In panics if loc is nil.
-        public static Time In(this Time t, ptr<Location> _addr_loc) => func((_, panic, __) =>
-        {
-            ref Location loc = ref _addr_loc.val;
-
-            if (loc == null)
-            {>>MARKER:FUNCTION_now_BLOCK_PREFIX<<
-                panic("time: missing Location in call to Time.In");
-            }
-
-            t.setLoc(loc);
-            return t;
-
-        });
-
-        // Location returns the time zone information associated with t.
-        public static ptr<Location> Location(this Time t)
-        {
-            var l = t.loc;
-            if (l == null)
-            {
-                l = UTC;
-            }
-
-            return _addr_l!;
-
-        }
-
-        // Zone computes the time zone in effect at time t, returning the abbreviated
-        // name of the zone (such as "CET") and its offset in seconds east of UTC.
-        public static (@string, long) Zone(this Time t)
-        {
-            @string name = default;
-            long offset = default;
-
-            name, offset, _, _ = t.loc.lookup(t.unixSec());
-            return ;
-        }
-
-        // Unix returns t as a Unix time, the number of seconds elapsed
-        // since January 1, 1970 UTC. The result does not depend on the
-        // location associated with t.
-        // Unix-like operating systems often record time as a 32-bit
-        // count of seconds, but since the method here returns a 64-bit
-        // value it is valid for billions of years into the past or future.
-        public static long Unix(this Time t)
-        {
-            return t.unixSec();
-        }
-
-        // UnixNano returns t as a Unix time, the number of nanoseconds elapsed
-        // since January 1, 1970 UTC. The result is undefined if the Unix time
-        // in nanoseconds cannot be represented by an int64 (a date before the year
-        // 1678 or after 2262). Note that this means the result of calling UnixNano
-        // on the zero Time is undefined. The result does not depend on the
-        // location associated with t.
-        public static long UnixNano(this Time t)
-        {
-            return (t.unixSec()) * 1e9F + int64(t.nsec());
-        }
-
-        private static readonly byte timeBinaryVersion = (byte)1L;
-
-        // MarshalBinary implements the encoding.BinaryMarshaler interface.
-
-
-        // MarshalBinary implements the encoding.BinaryMarshaler interface.
-        public static (slice<byte>, error) MarshalBinary(this Time t)
-        {
-            slice<byte> _p0 = default;
-            error _p0 = default!;
-
-            short offsetMin = default; // minutes east of UTC. -1 is UTC.
-
-            if (t.Location() == UTC)
-            {
-                offsetMin = -1L;
-            }
-            else
-            {
-                var (_, offset) = t.Zone();
-                if (offset % 60L != 0L)
-                {
-                    return (null, error.As(errors.New("Time.MarshalBinary: zone offset has fractional minute"))!);
-                }
-
-                offset /= 60L;
-                if (offset < -32768L || offset == -1L || offset > 32767L)
-                {
-                    return (null, error.As(errors.New("Time.MarshalBinary: unexpected zone offset"))!);
-                }
-
-                offsetMin = int16(offset);
-
-            }
-
-            var sec = t.sec();
-            var nsec = t.nsec();
-            byte enc = new slice<byte>(new byte[] { timeBinaryVersion, byte(sec>>56), byte(sec>>48), byte(sec>>40), byte(sec>>32), byte(sec>>24), byte(sec>>16), byte(sec>>8), byte(sec), byte(nsec>>24), byte(nsec>>16), byte(nsec>>8), byte(nsec), byte(offsetMin>>8), byte(offsetMin) });
-
-            return (enc, error.As(null!)!);
-
-        }
-
-        // UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
-        private static error UnmarshalBinary(this ptr<Time> _addr_t, slice<byte> data)
-        {
-            ref Time t = ref _addr_t.val;
-
-            var buf = data;
-            if (len(buf) == 0L)
-            {
-                return error.As(errors.New("Time.UnmarshalBinary: no data"))!;
-            }
-
-            if (buf[0L] != timeBinaryVersion)
-            {
-                return error.As(errors.New("Time.UnmarshalBinary: unsupported version"))!;
-            }
-
-            if (len(buf) != 1L + 8L + 4L + 2L)
-            {
-                return error.As(errors.New("Time.UnmarshalBinary: invalid length"))!;
-            }
-
-            buf = buf[1L..];
-            var sec = int64(buf[7L]) | int64(buf[6L]) << (int)(8L) | int64(buf[5L]) << (int)(16L) | int64(buf[4L]) << (int)(24L) | int64(buf[3L]) << (int)(32L) | int64(buf[2L]) << (int)(40L) | int64(buf[1L]) << (int)(48L) | int64(buf[0L]) << (int)(56L);
-
-            buf = buf[8L..];
-            var nsec = int32(buf[3L]) | int32(buf[2L]) << (int)(8L) | int32(buf[1L]) << (int)(16L) | int32(buf[0L]) << (int)(24L);
-
-            buf = buf[4L..];
-            var offset = int(int16(buf[1L]) | int16(buf[0L]) << (int)(8L)) * 60L;
-
-            t.val = new Time();
-            t.wall = uint64(nsec);
-            t.ext = sec;
-
-            if (offset == -1L * 60L)
-            {
-                t.setLoc(_addr_utcLoc);
-            }            {
-                var (_, localoff, _, _) = Local.lookup(t.unixSec());
-
-
-                else if (offset == localoff)
-                {
-                    t.setLoc(Local);
-                }
-                else
-                {
-                    t.setLoc(FixedZone("", offset));
-                }
-
-            }
-
-
-            return error.As(null!)!;
-
-        }
-
-        // TODO(rsc): Remove GobEncoder, GobDecoder, MarshalJSON, UnmarshalJSON in Go 2.
-        // The same semantics will be provided by the generic MarshalBinary, MarshalText,
-        // UnmarshalBinary, UnmarshalText.
-
-        // GobEncode implements the gob.GobEncoder interface.
-        public static (slice<byte>, error) GobEncode(this Time t)
-        {
-            slice<byte> _p0 = default;
-            error _p0 = default!;
-
-            return t.MarshalBinary();
-        }
-
-        // GobDecode implements the gob.GobDecoder interface.
-        private static error GobDecode(this ptr<Time> _addr_t, slice<byte> data)
-        {
-            ref Time t = ref _addr_t.val;
-
-            return error.As(t.UnmarshalBinary(data))!;
-        }
-
-        // MarshalJSON implements the json.Marshaler interface.
-        // The time is a quoted string in RFC 3339 format, with sub-second precision added if present.
-        public static (slice<byte>, error) MarshalJSON(this Time t)
-        {
-            slice<byte> _p0 = default;
-            error _p0 = default!;
-
-            {
-                var y = t.Year();
-
-                if (y < 0L || y >= 10000L)
-                { 
-                    // RFC 3339 is clear that years are 4 digits exactly.
-                    // See golang.org/issue/4556#c15 for more discussion.
-                    return (null, error.As(errors.New("Time.MarshalJSON: year outside of range [0,9999]"))!);
-
-                }
-
-            }
-
-
-            var b = make_slice<byte>(0L, len(RFC3339Nano) + 2L);
-            b = append(b, '"');
-            b = t.AppendFormat(b, RFC3339Nano);
-            b = append(b, '"');
-            return (b, error.As(null!)!);
-
-        }
-
-        // UnmarshalJSON implements the json.Unmarshaler interface.
-        // The time is expected to be a quoted string in RFC 3339 format.
-        private static error UnmarshalJSON(this ptr<Time> _addr_t, slice<byte> data)
-        {
-            ref Time t = ref _addr_t.val;
- 
-            // Ignore null, like in the main JSON package.
-            if (string(data) == "null")
-            {
-                return error.As(null!)!;
-            } 
-            // Fractional seconds are handled implicitly by Parse.
-            error err = default!;
-            t.val, err = Parse("\"" + RFC3339 + "\"", string(data));
-            return error.As(err)!;
-
-        }
-
-        // MarshalText implements the encoding.TextMarshaler interface.
-        // The time is formatted in RFC 3339 format, with sub-second precision added if present.
-        public static (slice<byte>, error) MarshalText(this Time t)
-        {
-            slice<byte> _p0 = default;
-            error _p0 = default!;
-
-            {
-                var y = t.Year();
-
-                if (y < 0L || y >= 10000L)
-                {
-                    return (null, error.As(errors.New("Time.MarshalText: year outside of range [0,9999]"))!);
-                }
-
-            }
-
-
-            var b = make_slice<byte>(0L, len(RFC3339Nano));
-            return (t.AppendFormat(b, RFC3339Nano), error.As(null!)!);
-
-        }
-
-        // UnmarshalText implements the encoding.TextUnmarshaler interface.
-        // The time is expected to be in RFC 3339 format.
-        private static error UnmarshalText(this ptr<Time> _addr_t, slice<byte> data)
-        {
-            ref Time t = ref _addr_t.val;
- 
-            // Fractional seconds are handled implicitly by Parse.
-            error err = default!;
-            t.val, err = Parse(RFC3339, string(data));
-            return error.As(err)!;
-
-        }
-
-        // Unix returns the local Time corresponding to the given Unix time,
-        // sec seconds and nsec nanoseconds since January 1, 1970 UTC.
-        // It is valid to pass nsec outside the range [0, 999999999].
-        // Not all sec values have a corresponding time value. One such
-        // value is 1<<63-1 (the largest int64 value).
-        public static Time Unix(long sec, long nsec)
-        {
-            if (nsec < 0L || nsec >= 1e9F)
-            {
-                var n = nsec / 1e9F;
-                sec += n;
-                nsec -= n * 1e9F;
-                if (nsec < 0L)
-                {
-                    nsec += 1e9F;
-                    sec--;
-                }
-
-            }
-
-            return unixTime(sec, int32(nsec));
-
-        }
-
-        private static bool isLeap(long year)
-        {
-            return year % 4L == 0L && (year % 100L != 0L || year % 400L == 0L);
-        }
-
-        // norm returns nhi, nlo such that
-        //    hi * base + lo == nhi * base + nlo
-        //    0 <= nlo < base
-        private static (long, long) norm(long hi, long lo, long @base)
-        {
-            long nhi = default;
-            long nlo = default;
-
-            if (lo < 0L)
-            {
-                var n = (-lo - 1L) / base + 1L;
-                hi -= n;
-                lo += n * base;
-            }
-
-            if (lo >= base)
-            {
-                n = lo / base;
-                hi += n;
-                lo -= n * base;
-            }
-
-            return (hi, lo);
-
-        }
-
-        // Date returns the Time corresponding to
-        //    yyyy-mm-dd hh:mm:ss + nsec nanoseconds
-        // in the appropriate zone for that time in the given location.
-        //
-        // The month, day, hour, min, sec, and nsec values may be outside
-        // their usual ranges and will be normalized during the conversion.
-        // For example, October 32 converts to November 1.
-        //
-        // A daylight savings time transition skips or repeats times.
-        // For example, in the United States, March 13, 2011 2:15am never occurred,
-        // while November 6, 2011 1:15am occurred twice. In such cases, the
-        // choice of time zone, and therefore the time, is not well-defined.
-        // Date returns a time that is correct in one of the two zones involved
-        // in the transition, but it does not guarantee which.
-        //
-        // Date panics if loc is nil.
-        public static Time Date(long year, Month month, long day, long hour, long min, long sec, long nsec, ptr<Location> _addr_loc) => func((_, panic, __) =>
-        {
-            ref Location loc = ref _addr_loc.val;
-
-            if (loc == null)
-            {
-                panic("time: missing Location in call to Date");
-            } 
-
-            // Normalize month, overflowing into year.
-            var m = int(month) - 1L;
-            year, m = norm(year, m, 12L);
-            month = Month(m) + 1L; 
-
-            // Normalize nsec, sec, min, hour, overflowing into day.
-            sec, nsec = norm(sec, nsec, 1e9F);
-            min, sec = norm(min, sec, 60L);
-            hour, min = norm(hour, min, 60L);
-            day, hour = norm(day, hour, 24L); 
-
-            // Compute days since the absolute epoch.
-            var d = daysSinceEpoch(year); 
-
-            // Add in days before this month.
-            d += uint64(daysBefore[month - 1L]);
-            if (isLeap(year) && month >= March)
-            {
-                d++; // February 29
-            } 
-
-            // Add in days before today.
-            d += uint64(day - 1L); 
-
-            // Add in time elapsed today.
-            var abs = d * secondsPerDay;
-            abs += uint64(hour * secondsPerHour + min * secondsPerMinute + sec);
-
-            var unix = int64(abs) + (absoluteToInternal + internalToUnix); 
-
-            // Look for zone offset for t, so we can adjust to UTC.
-            // The lookup function expects UTC, so we pass t in the
-            // hope that it will not be too close to a zone transition,
-            // and then adjust if it is.
-            var (_, offset, start, end) = loc.lookup(unix);
-            if (offset != 0L)
-            {
-                {
-                    var utc = unix - int64(offset);
-
-
-                    if (utc < start) 
-                        _, offset, _, _ = loc.lookup(start - 1L);
-                    else if (utc >= end) 
-                        _, offset, _, _ = loc.lookup(end);
-
-                }
-                unix -= int64(offset);
-
-            }
-
-            var t = unixTime(unix, int32(nsec));
-            t.setLoc(loc);
-            return t;
-
-        });
-
-        // Truncate returns the result of rounding t down to a multiple of d (since the zero time).
-        // If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
-        //
-        // Truncate operates on the time as an absolute duration since the
-        // zero time; it does not operate on the presentation form of the
-        // time. Thus, Truncate(Hour) may return a time with a non-zero
-        // minute, depending on the time's Location.
-        public static Time Truncate(this Time t, Duration d)
-        {
-            t.stripMono();
-            if (d <= 0L)
-            {
-                return t;
-            }
-
-            var (_, r) = div(t, d);
-            return t.Add(-r);
-
-        }
-
-        // Round returns the result of rounding t to the nearest multiple of d (since the zero time).
-        // The rounding behavior for halfway values is to round up.
-        // If d <= 0, Round returns t stripped of any monotonic clock reading but otherwise unchanged.
-        //
-        // Round operates on the time as an absolute duration since the
-        // zero time; it does not operate on the presentation form of the
-        // time. Thus, Round(Hour) may return a time with a non-zero
-        // minute, depending on the time's Location.
-        public static Time Round(this Time t, Duration d)
-        {
-            t.stripMono();
-            if (d <= 0L)
-            {
-                return t;
-            }
-
-            var (_, r) = div(t, d);
-            if (lessThanHalf(r, d))
-            {
-                return t.Add(-r);
-            }
-
-            return t.Add(d - r);
-
-        }
-
-        // div divides t by d and returns the quotient parity and remainder.
-        // We don't use the quotient parity anymore (round half up instead of round to even)
-        // but it's still here in case we change our minds.
-        private static (long, Duration) div(Time t, Duration d)
-        {
-            long qmod2 = default;
-            Duration r = default;
-
-            var neg = false;
-            var nsec = t.nsec();
-            var sec = t.sec();
-            if (sec < 0L)
-            { 
-                // Operate on absolute value.
-                neg = true;
-                sec = -sec;
-                nsec = -nsec;
-                if (nsec < 0L)
-                {
-                    nsec += 1e9F;
-                    sec--; // sec >= 1 before the -- so safe
-                }
-
-            }
-
-
-            // Special case: 2d divides 1 second.
-            if (d < Second && Second % (d + d) == 0L) 
-                qmod2 = int(nsec / int32(d)) & 1L;
-                r = Duration(nsec % int32(d)); 
-
-                // Special case: d is a multiple of 1 second.
-            else if (d % Second == 0L) 
-                var d1 = int64(d / Second);
-                qmod2 = int(sec / d1) & 1L;
-                r = Duration(sec % d1) * Second + Duration(nsec); 
-
-                // General case.
-                // This could be faster if more cleverness were applied,
-                // but it's really only here to avoid special case restrictions in the API.
-                // No one will care about these cases.
-            else 
-                // Compute nanoseconds as 128-bit number.
-                sec = uint64(sec);
-                var tmp = (sec >> (int)(32L)) * 1e9F;
-                var u1 = tmp >> (int)(32L);
-                var u0 = tmp << (int)(32L);
-                tmp = (sec & 0xFFFFFFFFUL) * 1e9F;
-                var u0x = u0;
-                u0 = u0 + tmp;
-                if (u0 < u0x)
-                {
-                    u1++;
-                }
-
-                u0x = u0;
-                u0 = u0 + uint64(nsec);
-                if (u0 < u0x)
-                {
-                    u1++;
-                } 
-
-                // Compute remainder by subtracting r<<k for decreasing k.
-                // Quotient parity is whether we subtract on last round.
-                d1 = uint64(d);
-                while (d1 >> (int)(63L) != 1L)
-                {
-                    d1 <<= 1L;
-                }
-
-                var d0 = uint64(0L);
-                while (true)
-                {
-                    qmod2 = 0L;
-                    if (u1 > d1 || u1 == d1 && u0 >= d0)
-                    { 
-                        // subtract
-                        qmod2 = 1L;
-                        u0x = u0;
-                        u0 = u0 - d0;
-                        if (u0 > u0x)
-                        {
-                            u1--;
-                        }
-
-                        u1 -= d1;
-
-                    }
-
-                    if (d1 == 0L && d0 == uint64(d))
-                    {
-                        break;
-                    }
-
-                    d0 >>= 1L;
-                    d0 |= (d1 & 1L) << (int)(63L);
-                    d1 >>= 1L;
-
-                }
-
-                r = Duration(u0);
-                        if (neg && r != 0L)
-            { 
-                // If input was negative and not an exact multiple of d, we computed q, r such that
-                //    q*d + r = -t
-                // But the right answers are given by -(q-1), d-r:
-                //    q*d + r = -t
-                //    -q*d - r = t
-                //    -(q-1)*d + (d - r) = t
-                qmod2 ^= 1L;
-                r = d - r;
-
-            }
-
-            return ;
 
         }
     }
+    if (neg) {
+        w--;
+        buf[w] = '-';
+    }
+    return string(buf[(int)w..]);
+
 }
+
+// fmtFrac formats the fraction of v/10**prec (e.g., ".12345") into the
+// tail of buf, omitting trailing zeros. It omits the decimal
+// point too when the fraction is 0. It returns the index where the
+// output bytes begin and the value v/10**prec.
+private static (nint, ulong) fmtFrac(slice<byte> buf, ulong v, nint prec) {
+    nint nw = default;
+    ulong nv = default;
+ 
+    // Omit trailing zeros up to and including decimal point.
+    var w = len(buf);
+    var print = false;
+    for (nint i = 0; i < prec; i++) {
+        var digit = v % 10;
+        print = print || digit != 0;
+        if (print) {
+            w--;
+            buf[w] = byte(digit) + '0';
+        }
+        v /= 10;
+
+    }
+    if (print) {
+        w--;
+        buf[w] = '.';
+    }
+    return (w, v);
+
+}
+
+// fmtInt formats v into the tail of buf.
+// It returns the index where the output begins.
+private static nint fmtInt(slice<byte> buf, ulong v) {
+    var w = len(buf);
+    if (v == 0) {
+        w--;
+        buf[w] = '0';
+    }
+    else
+ {
+        while (v > 0) {
+            w--;
+            buf[w] = byte(v % 10) + '0';
+            v /= 10;
+        }
+    }
+    return w;
+
+}
+
+// Nanoseconds returns the duration as an integer nanosecond count.
+public static long Nanoseconds(this Duration d) {
+    return int64(d);
+}
+
+// Microseconds returns the duration as an integer microsecond count.
+public static long Microseconds(this Duration d) {
+    return int64(d) / 1e3F;
+}
+
+// Milliseconds returns the duration as an integer millisecond count.
+public static long Milliseconds(this Duration d) {
+    return int64(d) / 1e6F;
+}
+
+// These methods return float64 because the dominant
+// use case is for printing a floating point number like 1.5s, and
+// a truncation to integer would make them not useful in those cases.
+// Splitting the integer and fraction ourselves guarantees that
+// converting the returned float64 to an integer rounds the same
+// way that a pure integer conversion would have, even in cases
+// where, say, float64(d.Nanoseconds())/1e9 would have rounded
+// differently.
+
+// Seconds returns the duration as a floating point number of seconds.
+public static double Seconds(this Duration d) {
+    var sec = d / Second;
+    var nsec = d % Second;
+    return float64(sec) + float64(nsec) / 1e9F;
+}
+
+// Minutes returns the duration as a floating point number of minutes.
+public static double Minutes(this Duration d) {
+    var min = d / Minute;
+    var nsec = d % Minute;
+    return float64(min) + float64(nsec) / (60 * 1e9F);
+}
+
+// Hours returns the duration as a floating point number of hours.
+public static double Hours(this Duration d) {
+    var hour = d / Hour;
+    var nsec = d % Hour;
+    return float64(hour) + float64(nsec) / (60 * 60 * 1e9F);
+}
+
+// Truncate returns the result of rounding d toward zero to a multiple of m.
+// If m <= 0, Truncate returns d unchanged.
+public static Duration Truncate(this Duration d, Duration m) {
+    if (m <= 0) {
+        return d;
+    }
+    return d - d % m;
+
+}
+
+// lessThanHalf reports whether x+x < y but avoids overflow,
+// assuming x and y are both positive (Duration is signed).
+private static bool lessThanHalf(Duration x, Duration y) {
+    return uint64(x) + uint64(x) < uint64(y);
+}
+
+// Round returns the result of rounding d to the nearest multiple of m.
+// The rounding behavior for halfway values is to round away from zero.
+// If the result exceeds the maximum (or minimum)
+// value that can be stored in a Duration,
+// Round returns the maximum (or minimum) duration.
+// If m <= 0, Round returns d unchanged.
+public static Duration Round(this Duration d, Duration m) {
+    if (m <= 0) {
+        return d;
+    }
+    var r = d % m;
+    if (d < 0) {
+        r = -r;
+        if (lessThanHalf(r, m)) {
+            return d + r;
+        }
+        {
+            var d1__prev2 = d1;
+
+            var d1 = d - m + r;
+
+            if (d1 < d) {
+                return d1;
+            }
+
+            d1 = d1__prev2;
+
+        }
+
+        return minDuration; // overflow
+    }
+    if (lessThanHalf(r, m)) {
+        return d - r;
+    }
+    {
+        var d1__prev1 = d1;
+
+        d1 = d + m - r;
+
+        if (d1 > d) {
+            return d1;
+        }
+        d1 = d1__prev1;
+
+    }
+
+    return maxDuration; // overflow
+}
+
+// Add returns the time t+d.
+public static Time Add(this Time t, Duration d) {
+    var dsec = int64(d / 1e9F);
+    var nsec = t.nsec() + int32(d % 1e9F);
+    if (nsec >= 1e9F) {
+        dsec++;
+        nsec -= 1e9F;
+    }
+    else if (nsec < 0) {
+        dsec--;
+        nsec += 1e9F;
+    }
+    t.wall = t.wall & ~nsecMask | uint64(nsec); // update nsec
+    t.addSec(dsec);
+    if (t.wall & hasMonotonic != 0) {
+        var te = t.ext + int64(d);
+        if (d < 0 && te > t.ext || d > 0 && te < t.ext) { 
+            // Monotonic clock reading now out of range; degrade to wall-only.
+            t.stripMono();
+
+        }
+        else
+ {
+            t.ext = te;
+        }
+    }
+    return t;
+
+}
+
+// Sub returns the duration t-u. If the result exceeds the maximum (or minimum)
+// value that can be stored in a Duration, the maximum (or minimum) duration
+// will be returned.
+// To compute t-d for a duration d, use t.Add(-d).
+public static Duration Sub(this Time t, Time u) {
+    if (t.wall & u.wall & hasMonotonic != 0) {
+        var te = t.ext;
+        var ue = u.ext;
+        var d = Duration(te - ue);
+        if (d < 0 && te > ue) {
+            return maxDuration; // t - u is positive out of range
+        }
+        if (d > 0 && te < ue) {
+            return minDuration; // t - u is negative out of range
+        }
+        return d;
+
+    }
+    d = Duration(t.sec() - u.sec()) * Second + Duration(t.nsec() - u.nsec()); 
+    // Check for overflow or underflow.
+
+    if (u.Add(d).Equal(t)) 
+        return d; // d is correct
+    else if (t.Before(u)) 
+        return minDuration; // t - u is negative out of range
+    else 
+        return maxDuration; // t - u is positive out of range
+    }
+
+// Since returns the time elapsed since t.
+// It is shorthand for time.Now().Sub(t).
+public static Duration Since(Time t) {
+    Time now = default;
+    if (t.wall & hasMonotonic != 0) { 
+        // Common case optimization: if t has monotonic time, then Sub will use only it.
+        now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
+
+    }
+    else
+ {
+        now = Now();
+    }
+    return now.Sub(t);
+
+}
+
+// Until returns the duration until t.
+// It is shorthand for t.Sub(time.Now()).
+public static Duration Until(Time t) {
+    Time now = default;
+    if (t.wall & hasMonotonic != 0) { 
+        // Common case optimization: if t has monotonic time, then Sub will use only it.
+        now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
+
+    }
+    else
+ {
+        now = Now();
+    }
+    return t.Sub(now);
+
+}
+
+// AddDate returns the time corresponding to adding the
+// given number of years, months, and days to t.
+// For example, AddDate(-1, 2, 3) applied to January 1, 2011
+// returns March 4, 2010.
+//
+// AddDate normalizes its result in the same way that Date does,
+// so, for example, adding one month to October 31 yields
+// December 1, the normalized form for November 31.
+public static Time AddDate(this Time t, nint years, nint months, nint days) {
+    var (year, month, day) = t.Date();
+    var (hour, min, sec) = t.Clock();
+    return Date(year + years, month + Month(months), day + days, hour, min, sec, int(t.nsec()), _addr_t.Location());
+}
+
+private static readonly nint secondsPerMinute = 60;
+private static readonly nint secondsPerHour = 60 * secondsPerMinute;
+private static readonly nint secondsPerDay = 24 * secondsPerHour;
+private static readonly nint secondsPerWeek = 7 * secondsPerDay;
+private static readonly nint daysPer400Years = 365 * 400 + 97;
+private static readonly nint daysPer100Years = 365 * 100 + 24;
+private static readonly nint daysPer4Years = 365 * 4 + 1;
+
+
+// date computes the year, day of year, and when full=true,
+// the month and day in which t occurs.
+public static (nint, Month, nint, nint) date(this Time t, bool full) {
+    nint year = default;
+    Month month = default;
+    nint day = default;
+    nint yday = default;
+
+    return absDate(t.abs(), full);
+}
+
+// absDate is like date but operates on an absolute time.
+private static (nint, Month, nint, nint) absDate(ulong abs, bool full) {
+    nint year = default;
+    Month month = default;
+    nint day = default;
+    nint yday = default;
+ 
+    // Split into time and day.
+    var d = abs / secondsPerDay; 
+
+    // Account for 400 year cycles.
+    var n = d / daysPer400Years;
+    nint y = 400 * n;
+    d -= daysPer400Years * n; 
+
+    // Cut off 100-year cycles.
+    // The last cycle has one extra leap year, so on the last day
+    // of that year, day / daysPer100Years will be 4 instead of 3.
+    // Cut it back down to 3 by subtracting n>>2.
+    n = d / daysPer100Years;
+    n -= n >> 2;
+    y += 100 * n;
+    d -= daysPer100Years * n; 
+
+    // Cut off 4-year cycles.
+    // The last cycle has a missing leap year, which does not
+    // affect the computation.
+    n = d / daysPer4Years;
+    y += 4 * n;
+    d -= daysPer4Years * n; 
+
+    // Cut off years within a 4-year cycle.
+    // The last year is a leap year, so on the last day of that year,
+    // day / 365 will be 4 instead of 3. Cut it back down to 3
+    // by subtracting n>>2.
+    n = d / 365;
+    n -= n >> 2;
+    y += n;
+    d -= 365 * n;
+
+    year = int(int64(y) + absoluteZeroYear);
+    yday = int(d);
+
+    if (!full) {
+        return ;
+    }
+    day = yday;
+    if (isLeap(year)) { 
+        // Leap year
+
+        if (day > 31 + 29 - 1) 
+            // After leap day; pretend it wasn't there.
+            day--;
+        else if (day == 31 + 29 - 1) 
+            // Leap day.
+            month = February;
+            day = 29;
+            return ;
+        
+    }
+    month = Month(day / 31);
+    var end = int(daysBefore[month + 1]);
+    nint begin = default;
+    if (day >= end) {
+        month++;
+        begin = end;
+    }
+    else
+ {
+        begin = int(daysBefore[month]);
+    }
+    month++; // because January is 1
+    day = day - begin + 1;
+    return ;
+
+}
+
+// daysBefore[m] counts the number of days in a non-leap year
+// before month m begins. There is an entry for m=12, counting
+// the number of days before January of next year (365).
+private static array<int> daysBefore = new array<int>(new int[] { 0, 31, 31+28, 31+28+31, 31+28+31+30, 31+28+31+30+31, 31+28+31+30+31+30, 31+28+31+30+31+30+31, 31+28+31+30+31+30+31+31, 31+28+31+30+31+30+31+31+30, 31+28+31+30+31+30+31+31+30+31, 31+28+31+30+31+30+31+31+30+31+30, 31+28+31+30+31+30+31+31+30+31+30+31 });
+
+private static nint daysIn(Month m, nint year) {
+    if (m == February && isLeap(year)) {
+        return 29;
+    }
+    return int(daysBefore[m] - daysBefore[m - 1]);
+
+}
+
+// daysSinceEpoch takes a year and returns the number of days from
+// the absolute epoch to the start of that year.
+// This is basically (year - zeroYear) * 365, but accounting for leap days.
+private static ulong daysSinceEpoch(nint year) {
+    var y = uint64(int64(year) - absoluteZeroYear); 
+
+    // Add in days from 400-year cycles.
+    var n = y / 400;
+    y -= 400 * n;
+    var d = daysPer400Years * n; 
+
+    // Add in 100-year cycles.
+    n = y / 100;
+    y -= 100 * n;
+    d += daysPer100Years * n; 
+
+    // Add in 4-year cycles.
+    n = y / 4;
+    y -= 4 * n;
+    d += daysPer4Years * n; 
+
+    // Add in non-leap years.
+    n = y;
+    d += 365 * n;
+
+    return d;
+
+}
+
+// Provided by package runtime.
+private static (long, int, long) now();
+
+// runtimeNano returns the current value of the runtime clock in nanoseconds.
+//go:linkname runtimeNano runtime.nanotime
+private static long runtimeNano();
+
+// Monotonic times are reported as offsets from startNano.
+// We initialize startNano to runtimeNano() - 1 so that on systems where
+// monotonic time resolution is fairly low (e.g. Windows 2008
+// which appears to have a default resolution of 15ms),
+// we avoid ever reporting a monotonic time of 0.
+// (Callers may want to use 0 as "time not set".)
+private static long startNano = runtimeNano() - 1;
+
+// Now returns the current local time.
+public static Time Now() {
+    var (sec, nsec, mono) = now();
+    mono -= startNano;
+    sec += unixToInternal - minWall;
+    if (uint64(sec) >> 33 != 0) {>>MARKER:FUNCTION_runtimeNano_BLOCK_PREFIX<<
+        return new Time(uint64(nsec),sec+minWall,Local);
+    }
+    return new Time(hasMonotonic|uint64(sec)<<nsecShift|uint64(nsec),mono,Local);
+
+}
+
+private static Time unixTime(long sec, int nsec) {
+    return new Time(uint64(nsec),sec+unixToInternal,Local);
+}
+
+// UTC returns t with the location set to UTC.
+public static Time UTC(this Time t) {
+    t.setLoc(_addr_utcLoc);
+    return t;
+}
+
+// Local returns t with the location set to local time.
+public static Time Local(this Time t) {
+    t.setLoc(Local);
+    return t;
+}
+
+// In returns a copy of t representing the same time instant, but
+// with the copy's location information set to loc for display
+// purposes.
+//
+// In panics if loc is nil.
+public static Time In(this Time t, ptr<Location> _addr_loc) => func((_, panic, _) => {
+    ref Location loc = ref _addr_loc.val;
+
+    if (loc == null) {>>MARKER:FUNCTION_now_BLOCK_PREFIX<<
+        panic("time: missing Location in call to Time.In");
+    }
+    t.setLoc(loc);
+    return t;
+
+});
+
+// Location returns the time zone information associated with t.
+public static ptr<Location> Location(this Time t) {
+    var l = t.loc;
+    if (l == null) {
+        l = UTC;
+    }
+    return _addr_l!;
+
+}
+
+// Zone computes the time zone in effect at time t, returning the abbreviated
+// name of the zone (such as "CET") and its offset in seconds east of UTC.
+public static (@string, nint) Zone(this Time t) {
+    @string name = default;
+    nint offset = default;
+
+    name, offset, _, _, _ = t.loc.lookup(t.unixSec());
+    return ;
+}
+
+// Unix returns t as a Unix time, the number of seconds elapsed
+// since January 1, 1970 UTC. The result does not depend on the
+// location associated with t.
+// Unix-like operating systems often record time as a 32-bit
+// count of seconds, but since the method here returns a 64-bit
+// value it is valid for billions of years into the past or future.
+public static long Unix(this Time t) {
+    return t.unixSec();
+}
+
+// UnixMilli returns t as a Unix time, the number of milliseconds elapsed since
+// January 1, 1970 UTC. The result is undefined if the Unix time in
+// milliseconds cannot be represented by an int64 (a date more than 292 million
+// years before or after 1970). The result does not depend on the
+// location associated with t.
+public static long UnixMilli(this Time t) {
+    return t.unixSec() * 1e3F + int64(t.nsec()) / 1e6F;
+}
+
+// UnixMicro returns t as a Unix time, the number of microseconds elapsed since
+// January 1, 1970 UTC. The result is undefined if the Unix time in
+// microseconds cannot be represented by an int64 (a date before year -290307 or
+// after year 294246). The result does not depend on the location associated
+// with t.
+public static long UnixMicro(this Time t) {
+    return t.unixSec() * 1e6F + int64(t.nsec()) / 1e3F;
+}
+
+// UnixNano returns t as a Unix time, the number of nanoseconds elapsed
+// since January 1, 1970 UTC. The result is undefined if the Unix time
+// in nanoseconds cannot be represented by an int64 (a date before the year
+// 1678 or after 2262). Note that this means the result of calling UnixNano
+// on the zero Time is undefined. The result does not depend on the
+// location associated with t.
+public static long UnixNano(this Time t) {
+    return (t.unixSec()) * 1e9F + int64(t.nsec());
+}
+
+private static readonly byte timeBinaryVersion = 1;
+
+// MarshalBinary implements the encoding.BinaryMarshaler interface.
+
+
+// MarshalBinary implements the encoding.BinaryMarshaler interface.
+public static (slice<byte>, error) MarshalBinary(this Time t) {
+    slice<byte> _p0 = default;
+    error _p0 = default!;
+
+    short offsetMin = default; // minutes east of UTC. -1 is UTC.
+
+    if (t.Location() == UTC) {
+        offsetMin = -1;
+    }
+    else
+ {
+        var (_, offset) = t.Zone();
+        if (offset % 60 != 0) {
+            return (null, error.As(errors.New("Time.MarshalBinary: zone offset has fractional minute"))!);
+        }
+        offset /= 60;
+        if (offset < -32768 || offset == -1 || offset > 32767) {
+            return (null, error.As(errors.New("Time.MarshalBinary: unexpected zone offset"))!);
+        }
+        offsetMin = int16(offset);
+
+    }
+    var sec = t.sec();
+    var nsec = t.nsec();
+    byte enc = new slice<byte>(new byte[] { timeBinaryVersion, byte(sec>>56), byte(sec>>48), byte(sec>>40), byte(sec>>32), byte(sec>>24), byte(sec>>16), byte(sec>>8), byte(sec), byte(nsec>>24), byte(nsec>>16), byte(nsec>>8), byte(nsec), byte(offsetMin>>8), byte(offsetMin) });
+
+    return (enc, error.As(null!)!);
+
+}
+
+// UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
+private static error UnmarshalBinary(this ptr<Time> _addr_t, slice<byte> data) {
+    ref Time t = ref _addr_t.val;
+
+    var buf = data;
+    if (len(buf) == 0) {
+        return error.As(errors.New("Time.UnmarshalBinary: no data"))!;
+    }
+    if (buf[0] != timeBinaryVersion) {
+        return error.As(errors.New("Time.UnmarshalBinary: unsupported version"))!;
+    }
+    if (len(buf) != 1 + 8 + 4 + 2) {
+        return error.As(errors.New("Time.UnmarshalBinary: invalid length"))!;
+    }
+    buf = buf[(int)1..];
+    var sec = int64(buf[7]) | int64(buf[6]) << 8 | int64(buf[5]) << 16 | int64(buf[4]) << 24 | int64(buf[3]) << 32 | int64(buf[2]) << 40 | int64(buf[1]) << 48 | int64(buf[0]) << 56;
+
+    buf = buf[(int)8..];
+    var nsec = int32(buf[3]) | int32(buf[2]) << 8 | int32(buf[1]) << 16 | int32(buf[0]) << 24;
+
+    buf = buf[(int)4..];
+    var offset = int(int16(buf[1]) | int16(buf[0]) << 8) * 60;
+
+    t.val = new Time();
+    t.wall = uint64(nsec);
+    t.ext = sec;
+
+    if (offset == -1 * 60) {
+        t.setLoc(_addr_utcLoc);
+    }    {
+        var (_, localoff, _, _, _) = Local.lookup(t.unixSec());
+
+
+        else if (offset == localoff) {
+            t.setLoc(Local);
+        }
+        else
+ {
+            t.setLoc(FixedZone("", offset));
+        }
+    }
+
+
+    return error.As(null!)!;
+
+}
+
+// TODO(rsc): Remove GobEncoder, GobDecoder, MarshalJSON, UnmarshalJSON in Go 2.
+// The same semantics will be provided by the generic MarshalBinary, MarshalText,
+// UnmarshalBinary, UnmarshalText.
+
+// GobEncode implements the gob.GobEncoder interface.
+public static (slice<byte>, error) GobEncode(this Time t) {
+    slice<byte> _p0 = default;
+    error _p0 = default!;
+
+    return t.MarshalBinary();
+}
+
+// GobDecode implements the gob.GobDecoder interface.
+private static error GobDecode(this ptr<Time> _addr_t, slice<byte> data) {
+    ref Time t = ref _addr_t.val;
+
+    return error.As(t.UnmarshalBinary(data))!;
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+// The time is a quoted string in RFC 3339 format, with sub-second precision added if present.
+public static (slice<byte>, error) MarshalJSON(this Time t) {
+    slice<byte> _p0 = default;
+    error _p0 = default!;
+
+    {
+        var y = t.Year();
+
+        if (y < 0 || y >= 10000) { 
+            // RFC 3339 is clear that years are 4 digits exactly.
+            // See golang.org/issue/4556#c15 for more discussion.
+            return (null, error.As(errors.New("Time.MarshalJSON: year outside of range [0,9999]"))!);
+
+        }
+    }
+
+
+    var b = make_slice<byte>(0, len(RFC3339Nano) + 2);
+    b = append(b, '"');
+    b = t.AppendFormat(b, RFC3339Nano);
+    b = append(b, '"');
+    return (b, error.As(null!)!);
+
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// The time is expected to be a quoted string in RFC 3339 format.
+private static error UnmarshalJSON(this ptr<Time> _addr_t, slice<byte> data) {
+    ref Time t = ref _addr_t.val;
+ 
+    // Ignore null, like in the main JSON package.
+    if (string(data) == "null") {
+        return error.As(null!)!;
+    }
+    error err = default!;
+    t.val, err = Parse("\"" + RFC3339 + "\"", string(data));
+    return error.As(err)!;
+
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+// The time is formatted in RFC 3339 format, with sub-second precision added if present.
+public static (slice<byte>, error) MarshalText(this Time t) {
+    slice<byte> _p0 = default;
+    error _p0 = default!;
+
+    {
+        var y = t.Year();
+
+        if (y < 0 || y >= 10000) {
+            return (null, error.As(errors.New("Time.MarshalText: year outside of range [0,9999]"))!);
+        }
+    }
+
+
+    var b = make_slice<byte>(0, len(RFC3339Nano));
+    return (t.AppendFormat(b, RFC3339Nano), error.As(null!)!);
+
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The time is expected to be in RFC 3339 format.
+private static error UnmarshalText(this ptr<Time> _addr_t, slice<byte> data) {
+    ref Time t = ref _addr_t.val;
+ 
+    // Fractional seconds are handled implicitly by Parse.
+    error err = default!;
+    t.val, err = Parse(RFC3339, string(data));
+    return error.As(err)!;
+
+}
+
+// Unix returns the local Time corresponding to the given Unix time,
+// sec seconds and nsec nanoseconds since January 1, 1970 UTC.
+// It is valid to pass nsec outside the range [0, 999999999].
+// Not all sec values have a corresponding time value. One such
+// value is 1<<63-1 (the largest int64 value).
+public static Time Unix(long sec, long nsec) {
+    if (nsec < 0 || nsec >= 1e9F) {
+        var n = nsec / 1e9F;
+        sec += n;
+        nsec -= n * 1e9F;
+        if (nsec < 0) {
+            nsec += 1e9F;
+            sec--;
+        }
+    }
+    return unixTime(sec, int32(nsec));
+
+}
+
+// UnixMilli returns the local Time corresponding to the given Unix time,
+// msec milliseconds since January 1, 1970 UTC.
+public static Time UnixMilli(long msec) {
+    return Unix(msec / 1e3F, (msec % 1e3F) * 1e6F);
+}
+
+// UnixMicro returns the local Time corresponding to the given Unix time,
+// usec microseconds since January 1, 1970 UTC.
+public static Time UnixMicro(long usec) {
+    return Unix(usec / 1e6F, (usec % 1e6F) * 1e3F);
+}
+
+// IsDST reports whether the time in the configured location is in Daylight Savings Time.
+public static bool IsDST(this Time t) {
+    var (_, _, _, _, isDST) = t.loc.lookup(t.Unix());
+    return isDST;
+}
+
+private static bool isLeap(nint year) {
+    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+}
+
+// norm returns nhi, nlo such that
+//    hi * base + lo == nhi * base + nlo
+//    0 <= nlo < base
+private static (nint, nint) norm(nint hi, nint lo, nint @base) {
+    nint nhi = default;
+    nint nlo = default;
+
+    if (lo < 0) {
+        var n = (-lo - 1) / base + 1;
+        hi -= n;
+        lo += n * base;
+    }
+    if (lo >= base) {
+        n = lo / base;
+        hi += n;
+        lo -= n * base;
+    }
+    return (hi, lo);
+
+}
+
+// Date returns the Time corresponding to
+//    yyyy-mm-dd hh:mm:ss + nsec nanoseconds
+// in the appropriate zone for that time in the given location.
+//
+// The month, day, hour, min, sec, and nsec values may be outside
+// their usual ranges and will be normalized during the conversion.
+// For example, October 32 converts to November 1.
+//
+// A daylight savings time transition skips or repeats times.
+// For example, in the United States, March 13, 2011 2:15am never occurred,
+// while November 6, 2011 1:15am occurred twice. In such cases, the
+// choice of time zone, and therefore the time, is not well-defined.
+// Date returns a time that is correct in one of the two zones involved
+// in the transition, but it does not guarantee which.
+//
+// Date panics if loc is nil.
+public static Time Date(nint year, Month month, nint day, nint hour, nint min, nint sec, nint nsec, ptr<Location> _addr_loc) => func((_, panic, _) => {
+    ref Location loc = ref _addr_loc.val;
+
+    if (loc == null) {
+        panic("time: missing Location in call to Date");
+    }
+    var m = int(month) - 1;
+    year, m = norm(year, m, 12);
+    month = Month(m) + 1; 
+
+    // Normalize nsec, sec, min, hour, overflowing into day.
+    sec, nsec = norm(sec, nsec, 1e9F);
+    min, sec = norm(min, sec, 60);
+    hour, min = norm(hour, min, 60);
+    day, hour = norm(day, hour, 24); 
+
+    // Compute days since the absolute epoch.
+    var d = daysSinceEpoch(year); 
+
+    // Add in days before this month.
+    d += uint64(daysBefore[month - 1]);
+    if (isLeap(year) && month >= March) {
+        d++; // February 29
+    }
+    d += uint64(day - 1); 
+
+    // Add in time elapsed today.
+    var abs = d * secondsPerDay;
+    abs += uint64(hour * secondsPerHour + min * secondsPerMinute + sec);
+
+    var unix = int64(abs) + (absoluteToInternal + internalToUnix); 
+
+    // Look for zone offset for t, so we can adjust to UTC.
+    // The lookup function expects UTC, so we pass t in the
+    // hope that it will not be too close to a zone transition,
+    // and then adjust if it is.
+    var (_, offset, start, end, _) = loc.lookup(unix);
+    if (offset != 0) {
+        {
+            var utc = unix - int64(offset);
+
+
+            if (utc < start) 
+                _, offset, _, _, _ = loc.lookup(start - 1);
+            else if (utc >= end) 
+                _, offset, _, _, _ = loc.lookup(end);
+
+        }
+        unix -= int64(offset);
+
+    }
+    var t = unixTime(unix, int32(nsec));
+    t.setLoc(loc);
+    return t;
+
+});
+
+// Truncate returns the result of rounding t down to a multiple of d (since the zero time).
+// If d <= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
+//
+// Truncate operates on the time as an absolute duration since the
+// zero time; it does not operate on the presentation form of the
+// time. Thus, Truncate(Hour) may return a time with a non-zero
+// minute, depending on the time's Location.
+public static Time Truncate(this Time t, Duration d) {
+    t.stripMono();
+    if (d <= 0) {
+        return t;
+    }
+    var (_, r) = div(t, d);
+    return t.Add(-r);
+
+}
+
+// Round returns the result of rounding t to the nearest multiple of d (since the zero time).
+// The rounding behavior for halfway values is to round up.
+// If d <= 0, Round returns t stripped of any monotonic clock reading but otherwise unchanged.
+//
+// Round operates on the time as an absolute duration since the
+// zero time; it does not operate on the presentation form of the
+// time. Thus, Round(Hour) may return a time with a non-zero
+// minute, depending on the time's Location.
+public static Time Round(this Time t, Duration d) {
+    t.stripMono();
+    if (d <= 0) {
+        return t;
+    }
+    var (_, r) = div(t, d);
+    if (lessThanHalf(r, d)) {
+        return t.Add(-r);
+    }
+    return t.Add(d - r);
+
+}
+
+// div divides t by d and returns the quotient parity and remainder.
+// We don't use the quotient parity anymore (round half up instead of round to even)
+// but it's still here in case we change our minds.
+private static (nint, Duration) div(Time t, Duration d) {
+    nint qmod2 = default;
+    Duration r = default;
+
+    var neg = false;
+    var nsec = t.nsec();
+    var sec = t.sec();
+    if (sec < 0) { 
+        // Operate on absolute value.
+        neg = true;
+        sec = -sec;
+        nsec = -nsec;
+        if (nsec < 0) {
+            nsec += 1e9F;
+            sec--; // sec >= 1 before the -- so safe
+        }
+    }
+
+    // Special case: 2d divides 1 second.
+    if (d < Second && Second % (d + d) == 0) 
+        qmod2 = int(nsec / int32(d)) & 1;
+        r = Duration(nsec % int32(d)); 
+
+        // Special case: d is a multiple of 1 second.
+    else if (d % Second == 0) 
+        var d1 = int64(d / Second);
+        qmod2 = int(sec / d1) & 1;
+        r = Duration(sec % d1) * Second + Duration(nsec); 
+
+        // General case.
+        // This could be faster if more cleverness were applied,
+        // but it's really only here to avoid special case restrictions in the API.
+        // No one will care about these cases.
+    else 
+        // Compute nanoseconds as 128-bit number.
+        sec = uint64(sec);
+        var tmp = (sec >> 32) * 1e9F;
+        var u1 = tmp >> 32;
+        var u0 = tmp << 32;
+        tmp = (sec & 0xFFFFFFFF) * 1e9F;
+        var u0x = u0;
+        u0 = u0 + tmp;
+        if (u0 < u0x) {
+            u1++;
+        }
+        (u0x, u0) = (u0, u0 + uint64(nsec));        if (u0 < u0x) {
+            u1++;
+        }
+        d1 = uint64(d);
+        while (d1 >> 63 != 1) {
+            d1<<=1;
+        }
+        var d0 = uint64(0);
+        while (true) {
+            qmod2 = 0;
+            if (u1 > d1 || u1 == d1 && u0 >= d0) { 
+                // subtract
+                qmod2 = 1;
+                (u0x, u0) = (u0, u0 - d0);                if (u0 > u0x) {
+                    u1--;
+                }
+
+                u1 -= d1;
+
+            }
+
+            if (d1 == 0 && d0 == uint64(d)) {
+                break;
+            }
+
+            d0>>=1;
+            d0 |= (d1 & 1) << 63;
+            d1>>=1;
+
+        }
+        r = Duration(u0);
+        if (neg && r != 0) { 
+        // If input was negative and not an exact multiple of d, we computed q, r such that
+        //    q*d + r = -t
+        // But the right answers are given by -(q-1), d-r:
+        //    q*d + r = -t
+        //    -q*d - r = t
+        //    -(q-1)*d + (d - r) = t
+        qmod2 ^= 1;
+        r = d - r;
+
+    }
+    return ;
+
+}
+
+} // end time_package

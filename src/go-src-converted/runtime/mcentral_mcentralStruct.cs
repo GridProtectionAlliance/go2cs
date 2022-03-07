@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:31 UTC
+//     Generated on 2022 March 06 22:09:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 
 #nullable enable
@@ -27,24 +26,16 @@ namespace go
             // Constructors
             public mcentral(NilType _)
             {
-                this.@lock = default;
                 this.spanclass = default;
-                this.nonempty = default;
-                this.empty = default;
                 this.partial = default;
                 this.full = default;
-                this.nmalloc = default;
             }
 
-            public mcentral(mutex @lock = default, spanClass spanclass = default, mSpanList nonempty = default, mSpanList empty = default, array<spanSet> partial = default, array<spanSet> full = default, ulong nmalloc = default)
+            public mcentral(spanClass spanclass = default, array<spanSet> partial = default, array<spanSet> full = default)
             {
-                this.@lock = @lock;
                 this.spanclass = spanclass;
-                this.nonempty = nonempty;
-                this.empty = empty;
                 this.partial = partial;
                 this.full = full;
-                this.nmalloc = nmalloc;
             }
 
             // Enable comparisons between nil and mcentral struct
@@ -67,7 +58,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mcentral mcentral_cast(dynamic value)
         {
-            return new mcentral(value.@lock, value.spanclass, value.nonempty, value.empty, value.partial, value.full, value.nmalloc);
+            return new mcentral(value.spanclass, value.partial, value.full);
         }
     }
 }

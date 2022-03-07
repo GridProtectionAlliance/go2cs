@@ -4,8 +4,8 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 09 05:01:01 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\numgoroutine.go
+// package main -- go2cs converted at 2022 March 06 22:26:16 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\numgoroutine.go
 /*
 #include <stddef.h>
 #include <pthread.h>
@@ -45,104 +45,82 @@ static void CheckNumGoroutine() {
 using fmt = go.fmt_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
+namespace go;
+
+public static partial class main_package {
+
+private static nint baseGoroutines = default;
+
+private static void init() {
+    register("NumGoroutine", NumGoroutine);
+}
+
+public static void NumGoroutine() { 
+    // Test that there are just the expected number of goroutines
+    // running. Specifically, test that the spare M's goroutine
+    // doesn't show up.
     {
-        private static long baseGoroutines = default;
+        var (_, ok) = checkNumGoroutine("first", 1 + baseGoroutines);
 
-        private static void init()
-        {
-            register("NumGoroutine", NumGoroutine);
+        if (!ok) {
+            return ;
         }
+    } 
 
-        public static void NumGoroutine()
-        { 
-            // Test that there are just the expected number of goroutines
-            // running. Specifically, test that the spare M's goroutine
-            // doesn't show up.
-            {
-                var (_, ok) = checkNumGoroutine("first", 1L + baseGoroutines);
+    // Test that the goroutine for a callback from C appears.
+    C.CheckNumGoroutine();
 
-                if (!ok)
-                {
-                    return ;
-                } 
+    if (!callbackok) {
+        return ;
+    }
+    {
+        (_, ok) = checkNumGoroutine("third", 1 + baseGoroutines);
 
-                // Test that the goroutine for a callback from C appears.
-
-            } 
-
-            // Test that the goroutine for a callback from C appears.
-            C.CheckNumGoroutine();
-
-            if (!callbackok)
-            {
-                return ;
-            } 
-
-            // Make sure we're back to the initial goroutines.
-            {
-                (_, ok) = checkNumGoroutine("third", 1L + baseGoroutines);
-
-                if (!ok)
-                {
-                    return ;
-                }
-
-            }
-
-
-            fmt.Println("OK");
-
-        }
-
-        private static (@string, bool) checkNumGoroutine(@string label, long want)
-        {
-            @string _p0 = default;
-            bool _p0 = default;
-
-            var n = runtime.NumGoroutine();
-            if (n != want)
-            {
-                fmt.Printf("%s NumGoroutine: want %d; got %d\n", label, want, n);
-                return ("", false);
-            }
-
-            var sbuf = make_slice<byte>(32L << (int)(10L));
-            sbuf = sbuf[..runtime.Stack(sbuf, true)];
-            n = strings.Count(string(sbuf), "goroutine ");
-            if (n != want)
-            {
-                fmt.Printf("%s Stack: want %d; got %d:\n%s\n", label, want, n, string(sbuf));
-                return ("", false);
-            }
-
-            return (string(sbuf), true);
-
-        }
-
-        private static bool callbackok = default;
-
-        //export CallbackNumGoroutine
-        public static void CallbackNumGoroutine()
-        {
-            var (stk, ok) = checkNumGoroutine("second", 2L + baseGoroutines);
-            if (!ok)
-            {
-                return ;
-            }
-
-            if (!strings.Contains(stk, "CallbackNumGoroutine"))
-            {
-                fmt.Printf("missing CallbackNumGoroutine from stack:\n%s\n", stk);
-                return ;
-            }
-
-            callbackok = true;
-
+        if (!ok) {
+            return ;
         }
     }
+
+
+    fmt.Println("OK");
+
 }
+
+private static (@string, bool) checkNumGoroutine(@string label, nint want) {
+    @string _p0 = default;
+    bool _p0 = default;
+
+    var n = runtime.NumGoroutine();
+    if (n != want) {
+        fmt.Printf("%s NumGoroutine: want %d; got %d\n", label, want, n);
+        return ("", false);
+    }
+    var sbuf = make_slice<byte>(32 << 10);
+    sbuf = sbuf[..(int)runtime.Stack(sbuf, true)];
+    n = strings.Count(string(sbuf), "goroutine ");
+    if (n != want) {
+        fmt.Printf("%s Stack: want %d; got %d:\n%s\n", label, want, n, string(sbuf));
+        return ("", false);
+    }
+    return (string(sbuf), true);
+
+}
+
+private static bool callbackok = default;
+
+//export CallbackNumGoroutine
+public static void CallbackNumGoroutine() {
+    var (stk, ok) = checkNumGoroutine("second", 2 + baseGoroutines);
+    if (!ok) {
+        return ;
+    }
+    if (!strings.Contains(stk, "CallbackNumGoroutine")) {
+        fmt.Printf("missing CallbackNumGoroutine from stack:\n%s\n", stk);
+        return ;
+    }
+    callbackok = true;
+
+}
+
+} // end main_package

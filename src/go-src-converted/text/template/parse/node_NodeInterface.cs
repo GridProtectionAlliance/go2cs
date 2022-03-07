@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:20 UTC
+//     Generated on 2022 March 06 22:24:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -53,7 +52,7 @@ namespace template
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByPtr(m_target_ptr);
+                return s_TypeByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Tree> StringByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Tree> CopyByPtr(ptr<T> value);
@@ -119,13 +118,13 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CopyByPtr is null || !m_target_is_ptr)
                     return s_CopyByVal!(target);
 
-                return s_CopyByPtr(m_target_ptr);
+                return s_CopyByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Tree> PositionByPtr(ptr<T> value);
@@ -139,13 +138,13 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PositionByPtr is null || !m_target_is_ptr)
                     return s_PositionByVal!(target);
 
-                return s_PositionByPtr(m_target_ptr);
+                return s_PositionByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Tree> treeByPtr(ptr<T> value);
@@ -159,13 +158,13 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_treeByPtr is null || !m_target_is_ptr)
                     return s_treeByVal!(target);
 
-                return s_treeByPtr(m_target_ptr);
+                return s_treeByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Tree> writeToByPtr(ptr<T> value, ptr<strings.Builder> _p0);
@@ -179,16 +178,16 @@ namespace template
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_writeToByPtr is null || !m_target_is_ptr)
                     return s_writeToByVal!(target, _p0);
 
-                return s_writeToByPtr(m_target_ptr, _p0);
+                return s_writeToByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Node()
@@ -199,12 +198,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
                 if (s_TypeByPtr is null && s_TypeByVal is null)
@@ -212,12 +211,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -225,12 +224,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Copy");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CopyByPtr = extensionMethod.CreateStaticDelegate(typeof(CopyByPtr)) as CopyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Copy");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
 
                 if (s_CopyByPtr is null && s_CopyByVal is null)
@@ -238,12 +237,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Position");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PositionByPtr = extensionMethod.CreateStaticDelegate(typeof(PositionByPtr)) as PositionByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Position");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PositionByVal = extensionMethod.CreateStaticDelegate(typeof(PositionByVal)) as PositionByVal;
 
                 if (s_PositionByPtr is null && s_PositionByVal is null)
@@ -251,12 +250,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("tree");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_treeByPtr = extensionMethod.CreateStaticDelegate(typeof(treeByPtr)) as treeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("tree");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_treeByVal = extensionMethod.CreateStaticDelegate(typeof(treeByVal)) as treeByVal;
 
                 if (s_treeByPtr is null && s_treeByVal is null)
@@ -264,12 +263,12 @@ namespace template
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("writeTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeToByPtr = extensionMethod.CreateStaticDelegate(typeof(writeToByPtr)) as writeToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("writeTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeToByVal = extensionMethod.CreateStaticDelegate(typeof(writeToByVal)) as writeToByVal;
 
                 if (s_writeToByPtr is null && s_writeToByVal is null)

@@ -2,29 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build !amd64 gccgo appengine purego
+//go:build !amd64 || !gc || purego
+// +build !amd64 !gc purego
 
-// package curve25519 -- go2cs converted at 2020 October 09 06:06:31 UTC
+// package curve25519 -- go2cs converted at 2022 March 06 23:36:50 UTC
 // import "vendor/golang.org/x/crypto/curve25519" ==> using curve25519 = go.vendor.golang.org.x.crypto.curve25519_package
-// Original source: C:\Go\src\vendor\golang.org\x\crypto\curve25519\curve25519_noasm.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\curve25519\curve25519_noasm.go
 
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace crypto
-{
-    public static partial class curve25519_package
-    {
-        private static void scalarMult(ptr<array<byte>> _addr_@out, ptr<array<byte>> _addr_@in, ptr<array<byte>> _addr_@base)
-        {
-            ref array<byte> @out = ref _addr_@out.val;
-            ref array<byte> @in = ref _addr_@in.val;
-            ref array<byte> @base = ref _addr_@base.val;
+namespace go.vendor.golang.org.x.crypto;
 
-            scalarMultGeneric(out, in, base);
-        }
-    }
-}}}}}
+public static partial class curve25519_package {
+
+private static void scalarMult(ptr<array<byte>> _addr_@out, ptr<array<byte>> _addr_@in, ptr<array<byte>> _addr_@base) {
+    ref array<byte> @out = ref _addr_@out.val;
+    ref array<byte> @in = ref _addr_@in.val;
+    ref array<byte> @base = ref _addr_@base.val;
+
+    scalarMultGeneric(out, in, base);
+}
+
+} // end curve25519_package

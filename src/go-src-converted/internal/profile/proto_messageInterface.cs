@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:13 UTC
+//     Generated on 2022 March 06 22:24:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
@@ -51,7 +50,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,13 +76,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_decoderByPtr is null || !m_target_is_ptr)
                     return s_decoderByVal!(target);
 
-                return s_decoderByPtr(m_target_ptr);
+                return s_decoderByPtr(m_target_ptr!);
             }
 
             private delegate slice<decoder> encodeByPtr(ptr<T> value, ptr<buffer> _p0);
@@ -97,16 +96,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_encodeByPtr is null || !m_target_is_ptr)
                     return s_encodeByVal!(target, _p0);
 
-                return s_encodeByPtr(m_target_ptr, _p0);
+                return s_encodeByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static message()
@@ -117,12 +116,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("decoder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_decoderByPtr = extensionMethod.CreateStaticDelegate(typeof(decoderByPtr)) as decoderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("decoder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_decoderByVal = extensionMethod.CreateStaticDelegate(typeof(decoderByVal)) as decoderByVal;
 
                 if (s_decoderByPtr is null && s_decoderByVal is null)
@@ -130,12 +129,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("encode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_encodeByPtr = extensionMethod.CreateStaticDelegate(typeof(encodeByPtr)) as encodeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("encode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_encodeByVal = extensionMethod.CreateStaticDelegate(typeof(encodeByVal)) as encodeByVal;
 
                 if (s_encodeByPtr is null && s_encodeByVal is null)

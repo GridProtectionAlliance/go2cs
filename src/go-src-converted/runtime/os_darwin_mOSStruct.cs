@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:24 UTC
+//     Generated on 2022 March 06 22:10:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.@internal.abi_package;
 using @unsafe = go.@unsafe_package;
 
 #nullable enable
@@ -33,7 +33,7 @@ namespace go
                 this.count = default;
             }
 
-            public mOS(bool initialized = default, pthreadmutex mutex = default, pthreadcond cond = default, long count = default)
+            public mOS(bool initialized = default, pthreadmutex mutex = default, pthreadcond cond = default, nint count = default)
             {
                 this.initialized = initialized;
                 this.mutex = mutex;

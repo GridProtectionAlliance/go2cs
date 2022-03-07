@@ -4,74 +4,63 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 09 05:01:03 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\segv.go
+// package main -- go2cs converted at 2022 March 06 22:26:17 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\segv.go
 // static void nop() {}
 using C = go.C_package;// static void nop() {}
 
 
 using syscall = go.syscall_package;
 using time = go.time_package;
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("Segv", Segv);
-            register("SegvInCgo", SegvInCgo);
-        }
 
-        public static long Sum = default;
+namespace go;
 
-        public static void Segv()
-        {
-            var c = make_channel<bool>();
-            go_(() => () =>
-            {
-                close(c);
-                for (long i = 0L; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++)
-                {
-                    Sum += i;
-                }
+public static partial class main_package {
 
-
-            }());
-
-            c.Receive();
-
-            syscall.Kill(syscall.Getpid(), syscall.SIGSEGV); 
-
-            // Give the OS time to deliver the signal.
-            time.Sleep(time.Second);
-
-        }
-
-        public static void SegvInCgo()
-        {
-            var c = make_channel<bool>();
-            go_(() => () =>
-            {
-                close(c);
-                while (true)
-                {
-                    C.nop();
-                }
-
-
-            }());
-
-            c.Receive();
-
-            syscall.Kill(syscall.Getpid(), syscall.SIGSEGV); 
-
-            // Give the OS time to deliver the signal.
-            time.Sleep(time.Second);
-
-        }
-    }
+private static void init() {
+    register("Segv", Segv);
+    register("SegvInCgo", SegvInCgo);
 }
+
+public static nint Sum = default;
+
+public static void Segv() {
+    var c = make_channel<bool>();
+    go_(() => () => {
+        close(c);
+        for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+            Sum += i;
+        }
+    }());
+
+    c.Receive();
+
+    syscall.Kill(syscall.Getpid(), syscall.SIGSEGV); 
+
+    // Give the OS time to deliver the signal.
+    time.Sleep(time.Second);
+
+}
+
+public static void SegvInCgo() {
+    var c = make_channel<bool>();
+    go_(() => () => {
+        close(c);
+        while (true) {
+            C.nop();
+        }
+    }());
+
+    c.Receive();
+
+    syscall.Kill(syscall.Getpid(), syscall.SIGSEGV); 
+
+    // Give the OS time to deliver the signal.
+    time.Sleep(time.Second);
+
+}
+
+} // end main_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:21 UTC
+//     Generated on 2022 March 06 22:30:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using utf8 = go.unicode.utf8_package;
@@ -34,7 +33,7 @@ namespace go
                 this.prevRune = default;
             }
 
-            public Reader(@string s = default, long i = default, long prevRune = default)
+            public Reader(@string s = default, long i = default, nint prevRune = default)
             {
                 this.s = s;
                 this.i = i;

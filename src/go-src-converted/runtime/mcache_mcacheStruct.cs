@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:29 UTC
+//     Generated on 2022 March 06 22:09:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 
@@ -28,31 +27,25 @@ namespace go
             // Constructors
             public mcache(NilType _)
             {
-                this.next_sample = default;
-                this.local_scan = default;
+                this.nextSample = default;
+                this.scanAlloc = default;
                 this.tiny = default;
                 this.tinyoffset = default;
-                this.local_tinyallocs = default;
+                this.tinyAllocs = default;
                 this.alloc = default;
                 this.stackcache = default;
-                this.local_largefree = default;
-                this.local_nlargefree = default;
-                this.local_nsmallfree = default;
                 this.flushGen = default;
             }
 
-            public mcache(System.UIntPtr next_sample = default, System.UIntPtr local_scan = default, System.UIntPtr tiny = default, System.UIntPtr tinyoffset = default, System.UIntPtr local_tinyallocs = default, array<ptr<mspan>> alloc = default, array<stackfreelist> stackcache = default, System.UIntPtr local_largefree = default, System.UIntPtr local_nlargefree = default, array<System.UIntPtr> local_nsmallfree = default, uint flushGen = default)
+            public mcache(System.UIntPtr nextSample = default, System.UIntPtr scanAlloc = default, System.UIntPtr tiny = default, System.UIntPtr tinyoffset = default, System.UIntPtr tinyAllocs = default, array<ptr<mspan>> alloc = default, array<stackfreelist> stackcache = default, uint flushGen = default)
             {
-                this.next_sample = next_sample;
-                this.local_scan = local_scan;
+                this.nextSample = nextSample;
+                this.scanAlloc = scanAlloc;
                 this.tiny = tiny;
                 this.tinyoffset = tinyoffset;
-                this.local_tinyallocs = local_tinyallocs;
+                this.tinyAllocs = tinyAllocs;
                 this.alloc = alloc;
                 this.stackcache = stackcache;
-                this.local_largefree = local_largefree;
-                this.local_nlargefree = local_nlargefree;
-                this.local_nsmallfree = local_nsmallfree;
                 this.flushGen = flushGen;
             }
 
@@ -76,7 +69,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mcache mcache_cast(dynamic value)
         {
-            return new mcache(value.next_sample, value.local_scan, value.tiny, value.tinyoffset, value.local_tinyallocs, value.alloc, value.stackcache, value.local_largefree, value.local_nlargefree, value.local_nsmallfree, value.flushGen);
+            return new mcache(value.nextSample, value.scanAlloc, value.tiny, value.tinyoffset, value.tinyAllocs, value.alloc, value.stackcache, value.flushGen);
         }
     }
 }

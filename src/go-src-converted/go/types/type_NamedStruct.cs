@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:42 UTC
+//     Generated on 2022 March 06 22:42:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using sort = go.sort_package;
+using fmt = go.fmt_package;
+using token = go.go.token_package;
+using atomic = go.sync.atomic_package;
 using go;
 
 #nullable enable
@@ -29,19 +30,25 @@ namespace go
             // Constructors
             public Named(NilType _)
             {
+                this.check = default;
                 this.info = default;
                 this.obj = default;
                 this.orig = default;
                 this.underlying = default;
+                this.tparams = default;
+                this.targs = default;
                 this.methods = default;
             }
 
-            public Named(typeInfo info = default, ref ptr<TypeName> obj = default, Type orig = default, Type underlying = default, slice<ptr<Func>> methods = default)
+            public Named(ref ptr<Checker> check = default, typeInfo info = default, ref ptr<TypeName> obj = default, Type orig = default, Type underlying = default, slice<ptr<TypeName>> tparams = default, slice<Type> targs = default, slice<ptr<Func>> methods = default)
             {
+                this.check = check;
                 this.info = info;
                 this.obj = obj;
                 this.orig = orig;
                 this.underlying = underlying;
+                this.tparams = tparams;
+                this.targs = targs;
                 this.methods = methods;
             }
 
@@ -65,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Named Named_cast(dynamic value)
         {
-            return new Named(value.info, ref value.obj, value.orig, value.underlying, value.methods);
+            return new Named(ref value.check, value.info, ref value.obj, value.orig, value.underlying, value.tparams, value.targs, value.methods);
         }
     }
 }}

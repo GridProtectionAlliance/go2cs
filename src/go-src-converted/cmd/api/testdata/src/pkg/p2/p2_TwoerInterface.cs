@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace pkg
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,7 +79,7 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PackageTwoMethByPtr is null || !m_target_is_ptr)
@@ -88,12 +88,11 @@ namespace pkg
                     return;
                 }
 
-                s_PackageTwoMethByPtr(m_target_ptr);
+                s_PackageTwoMethByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Twoer()
@@ -104,12 +103,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PackageTwoMeth");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PackageTwoMethByPtr = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByPtr)) as PackageTwoMethByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PackageTwoMeth");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PackageTwoMethByVal = extensionMethod.CreateStaticDelegate(typeof(PackageTwoMethByVal)) as PackageTwoMethByVal;
 
                 if (s_PackageTwoMethByPtr is null && s_PackageTwoMethByVal is null)

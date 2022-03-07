@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:06 UTC
+//     Generated on 2022 March 06 22:16:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
+using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
 using sync = go.sync_package;
@@ -54,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,13 +80,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadFromByPtr is null || !m_target_is_ptr)
                     return s_ReadFromByVal!(target, p);
 
-                return s_ReadFromByPtr(m_target_ptr, p);
+                return s_ReadFromByPtr(m_target_ptr!, p);
             }
 
             private delegate error WriteToByPtr(ptr<T> value, slice<byte> p, Addr addr);
@@ -100,13 +100,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteToByPtr is null || !m_target_is_ptr)
                     return s_WriteToByVal!(target, p, addr);
 
-                return s_WriteToByPtr(m_target_ptr, p, addr);
+                return s_WriteToByPtr(m_target_ptr!, p, addr);
             }
 
             private delegate error CloseByPtr(ptr<T> value);
@@ -120,13 +120,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
 
             private delegate error LocalAddrByPtr(ptr<T> value);
@@ -140,13 +140,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LocalAddrByPtr is null || !m_target_is_ptr)
                     return s_LocalAddrByVal!(target);
 
-                return s_LocalAddrByPtr(m_target_ptr);
+                return s_LocalAddrByPtr(m_target_ptr!);
             }
 
             private delegate error SetDeadlineByPtr(ptr<T> value, time.Time t);
@@ -160,13 +160,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetDeadlineByVal!(target, t);
 
-                return s_SetDeadlineByPtr(m_target_ptr, t);
+                return s_SetDeadlineByPtr(m_target_ptr!, t);
             }
 
             private delegate error SetReadDeadlineByPtr(ptr<T> value, time.Time t);
@@ -180,13 +180,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetReadDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetReadDeadlineByVal!(target, t);
 
-                return s_SetReadDeadlineByPtr(m_target_ptr, t);
+                return s_SetReadDeadlineByPtr(m_target_ptr!, t);
             }
 
             private delegate error SetWriteDeadlineByPtr(ptr<T> value, time.Time t);
@@ -200,16 +200,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetWriteDeadlineByPtr is null || !m_target_is_ptr)
                     return s_SetWriteDeadlineByVal!(target, t);
 
-                return s_SetWriteDeadlineByPtr(m_target_ptr, t);
+                return s_SetWriteDeadlineByPtr(m_target_ptr!, t);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static PacketConn()
@@ -220,12 +220,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFromByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadFromByPtr)) as ReadFromByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFromByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFromByVal)) as ReadFromByVal;
 
                 if (s_ReadFromByPtr is null && s_ReadFromByVal is null)
@@ -233,12 +233,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteToByPtr)) as WriteToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteToByVal)) as WriteToByVal;
 
                 if (s_WriteToByPtr is null && s_WriteToByVal is null)
@@ -246,12 +246,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)
@@ -259,12 +259,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("LocalAddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LocalAddrByPtr = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByPtr)) as LocalAddrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("LocalAddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LocalAddrByVal = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByVal)) as LocalAddrByVal;
 
                 if (s_LocalAddrByPtr is null && s_LocalAddrByVal is null)
@@ -272,12 +272,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByPtr)) as SetDeadlineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByVal)) as SetDeadlineByVal;
 
                 if (s_SetDeadlineByPtr is null && s_SetDeadlineByVal is null)
@@ -285,12 +285,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetReadDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetReadDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByPtr)) as SetReadDeadlineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetReadDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetReadDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByVal)) as SetReadDeadlineByVal;
 
                 if (s_SetReadDeadlineByPtr is null && s_SetReadDeadlineByVal is null)
@@ -298,12 +298,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetWriteDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetWriteDeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByPtr)) as SetWriteDeadlineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetWriteDeadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetWriteDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByVal)) as SetWriteDeadlineByVal;
 
                 if (s_SetWriteDeadlineByPtr is null && s_SetWriteDeadlineByVal is null)

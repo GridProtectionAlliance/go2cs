@@ -4,24 +4,23 @@
 
 // This file contains tests for the buildtag checker.
 
-// +builder // ERROR "possible malformed \+build comment"
+// ERRORNEXT "possible malformed [+]build comment"
+// +builder
 // +build !ignore
 
-// package testdata -- go2cs converted at 2020 October 09 06:05:08 UTC
+// package testdata -- go2cs converted at 2022 March 06 23:35:18 UTC
 // import "cmd/vet/testdata.testdata" ==> using testdata = go.cmd.vet.testdata.testdata_package
-// Original source: C:\Go\src\cmd\vet\testdata\buildtag\buildtag.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\buildtag\buildtag.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet
-{
-    public static partial class testdata_package
-    {
-        // +build toolate // ERROR "build comment must appear before package clause and be followed by a blank line$"
-        private static long _ = 3L;
+namespace go.cmd.vet;
 
-        private static @string _ = "\n// +build notacomment\n";
-    }
-}}}
+public static partial class testdata_package {
+
+    // ERRORNEXT "misplaced \+build comment"
+    // +build toolate
+private static nint _ = 3;
+
+private static @string _ = "\n// +build notacomment\n";
+
+} // end testdata_package

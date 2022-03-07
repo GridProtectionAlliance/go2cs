@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !linux
 // +build !linux
 
-// package os -- go2cs converted at 2020 October 09 05:07:20 UTC
+// package os -- go2cs converted at 2022 March 06 22:13:45 UTC
 // import "os" ==> using os = go.os_package
-// Original source: C:\Go\src\os\readfrom_stub.go
+// Original source: C:\Program Files\Go\src\os\readfrom_stub.go
 using io = go.io_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class os_package
-    {
-        private static (long, bool, error) readFrom(this ptr<File> _addr_f, io.Reader r)
-        {
-            long n = default;
-            bool handled = default;
-            error err = default!;
-            ref File f = ref _addr_f.val;
+namespace go;
 
-            return (0L, false, error.As(null!)!);
-        }
-    }
+public static partial class os_package {
+
+private static (long, bool, error) readFrom(this ptr<File> _addr_f, io.Reader r) {
+    long n = default;
+    bool handled = default;
+    error err = default!;
+    ref File f = ref _addr_f.val;
+
+    return (0, false, error.As(null!)!);
 }
+
+} // end os_package

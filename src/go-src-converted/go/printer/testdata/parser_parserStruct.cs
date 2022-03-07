@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:44 UTC
+//     Generated on 2022 March 06 22:47:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using scanner = go.go.scanner_package;
@@ -53,7 +52,7 @@ namespace go
                 this.targetStack = default;
             }
 
-            public parser(ref ptr<token.File> file = default, scanner.ErrorVector ErrorVector = default, scanner.Scanner scanner = default, ulong mode = default, bool trace = default, ulong indent = default, slice<ptr<ast.CommentGroup>> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, long exprLev = default, ref ptr<ast.Scope> pkgScope = default, ref ptr<ast.Scope> topScope = default, slice<ptr<ast.Ident>> unresolved = default, slice<ptr<ast.ImportSpec>> imports = default, ref ptr<ast.Scope> labelScope = default, slice<slice<ptr<ast.Ident>>> targetStack = default)
+            public parser(ref ptr<token.File> file = default, scanner.ErrorVector ErrorVector = default, scanner.Scanner scanner = default, nuint mode = default, bool trace = default, nuint indent = default, slice<ptr<ast.CommentGroup>> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, nint exprLev = default, ref ptr<ast.Scope> pkgScope = default, ref ptr<ast.Scope> topScope = default, slice<ptr<ast.Ident>> unresolved = default, slice<ptr<ast.ImportSpec>> imports = default, ref ptr<ast.Scope> labelScope = default, slice<slice<ptr<ast.Ident>>> targetStack = default)
             {
                 this.file = file;
                 this.ErrorVector = ErrorVector;

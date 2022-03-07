@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:29 UTC
+//     Generated on 2022 March 06 22:42:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using sort = go.sort_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace container
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,7 +75,7 @@ namespace container
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PushByPtr is null || !m_target_is_ptr)
@@ -85,9 +84,8 @@ namespace container
                     return;
                 }
 
-                s_PushByPtr(m_target_ptr, x);
+                s_PushByPtr(m_target_ptr!, x);
                 return;
-                
             }
 
             private delegate void PopByPtr(ptr<T> value);
@@ -101,7 +99,7 @@ namespace container
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PopByPtr is null || !m_target_is_ptr)
@@ -110,72 +108,11 @@ namespace container
                     return;
                 }
 
-                s_PopByPtr(m_target_ptr);
+                s_PopByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate bool LenByPtr(ptr<T> value);
-            private delegate bool LenByVal(T value);
-
-            private static readonly LenByPtr? s_LenByPtr;
-            private static readonly LenByVal? s_LenByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Len()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_LenByPtr is null || !m_target_is_ptr)
-                    return s_LenByVal!(target);
-
-                return s_LenByPtr(m_target_ptr);
-            }
-
-            private delegate bool LessByPtr(ptr<T> value, long i, long j);
-            private delegate bool LessByVal(T value, long i, long j);
-
-            private static readonly LessByPtr? s_LessByPtr;
-            private static readonly LessByVal? s_LessByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Less(long i, long j)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_LessByPtr is null || !m_target_is_ptr)
-                    return s_LessByVal!(target, i, j);
-
-                return s_LessByPtr(m_target_ptr, i, j);
-            }
-
-            private delegate bool SwapByPtr(ptr<T> value, long i, long j);
-            private delegate bool SwapByVal(T value, long i, long j);
-
-            private static readonly SwapByPtr? s_SwapByPtr;
-            private static readonly SwapByVal? s_SwapByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Swap(long i, long j)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SwapByPtr is null || !m_target_is_ptr)
-                    return s_SwapByVal!(target, i, j);
-
-                return s_SwapByPtr(m_target_ptr, i, j);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Interface()
@@ -186,12 +123,12 @@ namespace container
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
                 if (s_PushByPtr is null && s_PushByVal is null)
@@ -199,55 +136,16 @@ namespace container
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pop");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PopByPtr = extensionMethod.CreateStaticDelegate(typeof(PopByPtr)) as PopByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pop");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PopByVal = extensionMethod.CreateStaticDelegate(typeof(PopByVal)) as PopByVal;
 
                 if (s_PopByPtr is null && s_PopByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Pop method", new Exception("Pop"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
-
-                if (!(extensionMethod is null))
-                    s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Len");
-
-                if (!(extensionMethod is null))
-                    s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
-
-                if (s_LenByPtr is null && s_LenByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Len method", new Exception("Len"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Less");
-
-                if (!(extensionMethod is null))
-                    s_LessByPtr = extensionMethod.CreateStaticDelegate(typeof(LessByPtr)) as LessByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Less");
-
-                if (!(extensionMethod is null))
-                    s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
-
-                if (s_LessByPtr is null && s_LessByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Less method", new Exception("Less"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Swap");
-
-                if (!(extensionMethod is null))
-                    s_SwapByPtr = extensionMethod.CreateStaticDelegate(typeof(SwapByPtr)) as SwapByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Swap");
-
-                if (!(extensionMethod is null))
-                    s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
-
-                if (s_SwapByPtr is null && s_SwapByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Interface.Swap method", new Exception("Swap"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:36 UTC
+//     Generated on 2022 March 06 23:35:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace image
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -75,16 +75,16 @@ namespace image
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RGBAByPtr is null || !m_target_is_ptr)
                     return s_RGBAByVal!(target);
 
-                return s_RGBAByPtr(m_target_ptr);
+                return s_RGBAByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Color()
@@ -95,12 +95,12 @@ namespace image
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RGBA");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RGBAByPtr = extensionMethod.CreateStaticDelegate(typeof(RGBAByPtr)) as RGBAByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RGBA");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RGBAByVal = extensionMethod.CreateStaticDelegate(typeof(RGBAByVal)) as RGBAByVal;
 
                 if (s_RGBAByPtr is null && s_RGBAByVal is null)

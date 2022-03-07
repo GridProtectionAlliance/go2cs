@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:29 UTC
+//     Generated on 2022 March 06 22:42:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using heap = go.container.heap_package;
 using fmt = go.fmt_package;
 using go;
@@ -37,7 +36,7 @@ namespace go
                 this.ndeps = default;
             }
 
-            public graphNode(dependency obj = default, nodeSet pred = default, nodeSet succ = default, long index = default, long ndeps = default)
+            public graphNode(dependency obj = default, nodeSet pred = default, nodeSet succ = default, nint index = default, nint ndeps = default)
             {
                 this.obj = obj;
                 this.pred = pred;

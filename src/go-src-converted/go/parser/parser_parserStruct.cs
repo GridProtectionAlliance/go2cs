@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:56 UTC
+//     Generated on 2022 March 06 22:42:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
+using typeparams = go.go.@internal.typeparams_package;
 using scanner = go.go.scanner_package;
 using token = go.go.token_package;
 using strconv = go.strconv_package;
@@ -51,15 +51,10 @@ namespace go
                 this.syncCnt = default;
                 this.exprLev = default;
                 this.inRhs = default;
-                this.pkgScope = default;
-                this.topScope = default;
-                this.unresolved = default;
                 this.imports = default;
-                this.labelScope = default;
-                this.targetStack = default;
             }
 
-            public parser(ref ptr<token.File> file = default, scanner.ErrorList errors = default, scanner.Scanner scanner = default, Mode mode = default, bool trace = default, long indent = default, slice<ptr<ast.CommentGroup>> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, token.Pos syncPos = default, long syncCnt = default, long exprLev = default, bool inRhs = default, ref ptr<ast.Scope> pkgScope = default, ref ptr<ast.Scope> topScope = default, slice<ptr<ast.Ident>> unresolved = default, slice<ptr<ast.ImportSpec>> imports = default, ref ptr<ast.Scope> labelScope = default, slice<slice<ptr<ast.Ident>>> targetStack = default)
+            public parser(ref ptr<token.File> file = default, scanner.ErrorList errors = default, scanner.Scanner scanner = default, Mode mode = default, bool trace = default, nint indent = default, slice<ptr<ast.CommentGroup>> comments = default, ref ptr<ast.CommentGroup> leadComment = default, ref ptr<ast.CommentGroup> lineComment = default, token.Pos pos = default, token.Token tok = default, @string lit = default, token.Pos syncPos = default, nint syncCnt = default, nint exprLev = default, bool inRhs = default, slice<ptr<ast.ImportSpec>> imports = default)
             {
                 this.file = file;
                 this.errors = errors;
@@ -77,12 +72,7 @@ namespace go
                 this.syncCnt = syncCnt;
                 this.exprLev = exprLev;
                 this.inRhs = inRhs;
-                this.pkgScope = pkgScope;
-                this.topScope = topScope;
-                this.unresolved = unresolved;
                 this.imports = imports;
-                this.labelScope = labelScope;
-                this.targetStack = targetStack;
             }
 
             // Enable comparisons between nil and parser struct
@@ -105,7 +95,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static parser parser_cast(dynamic value)
         {
-            return new parser(ref value.file, value.errors, value.scanner, value.mode, value.trace, value.indent, value.comments, ref value.leadComment, ref value.lineComment, value.pos, value.tok, value.lit, value.syncPos, value.syncCnt, value.exprLev, value.inRhs, ref value.pkgScope, ref value.topScope, value.unresolved, value.imports, ref value.labelScope, value.targetStack);
+            return new parser(ref value.file, value.errors, value.scanner, value.mode, value.trace, value.indent, value.comments, ref value.leadComment, ref value.lineComment, value.pos, value.tok, value.lit, value.syncPos, value.syncCnt, value.exprLev, value.inRhs, value.imports);
         }
     }
 }}

@@ -18,7 +18,7 @@
 // Go 1.8 export data files, so they will work before and after the
 // Go update. (See discussion at https://golang.org/issue/15651.)
 //
-// package gcexportdata -- go2cs converted at 2020 October 09 06:01:58 UTC
+// package gcexportdata -- go2cs converted at 2022 March 06 23:31:52 UTC
 // import "golang.org/x/tools/go/gcexportdata" ==> using gcexportdata = go.golang.org.x.tools.go.gcexportdata_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\gcexportdata\gcexportdata.go
 // import "golang.org/x/tools/go/gcexportdata"
@@ -32,116 +32,92 @@ using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 
 using gcimporter = go.golang.org.x.tools.go.@internal.gcimporter_package;
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go
-{
-    public static partial class gcexportdata_package
-    {
-        // Find returns the name of an object (.o) or archive (.a) file
-        // containing type information for the specified import path,
-        // using the workspace layout conventions of go/build.
-        // If no file was found, an empty filename is returned.
-        //
-        // A relative srcDir is interpreted relative to the current working directory.
-        //
-        // Find also returns the package's resolved (canonical) import path,
-        // reflecting the effects of srcDir and vendoring on importPath.
-        public static (@string, @string) Find(@string importPath, @string srcDir)
-        {
-            @string filename = default;
-            @string path = default;
+namespace go.golang.org.x.tools.go;
 
-            return gcimporter.FindPkg(importPath, srcDir);
-        }
+public static partial class gcexportdata_package {
 
-        // NewReader returns a reader for the export data section of an object
-        // (.o) or archive (.a) file read from r.  The new reader may provide
-        // additional trailing data beyond the end of the export data.
-        public static (io.Reader, error) NewReader(io.Reader r)
-        {
-            io.Reader _p0 = default;
-            error _p0 = default!;
+    // Find returns the name of an object (.o) or archive (.a) file
+    // containing type information for the specified import path,
+    // using the workspace layout conventions of go/build.
+    // If no file was found, an empty filename is returned.
+    //
+    // A relative srcDir is interpreted relative to the current working directory.
+    //
+    // Find also returns the package's resolved (canonical) import path,
+    // reflecting the effects of srcDir and vendoring on importPath.
+public static (@string, @string) Find(@string importPath, @string srcDir) {
+    @string filename = default;
+    @string path = default;
 
-            var buf = bufio.NewReader(r);
-            var (_, err) = gcimporter.FindExportData(buf); 
-            // If we ever switch to a zip-like archive format with the ToC
-            // at the end, we can return the correct portion of export data,
-            // but for now we must return the entire rest of the file.
-            return (buf, error.As(err)!);
+    return gcimporter.FindPkg(importPath, srcDir);
+}
 
-        }
+// NewReader returns a reader for the export data section of an object
+// (.o) or archive (.a) file read from r.  The new reader may provide
+// additional trailing data beyond the end of the export data.
+public static (io.Reader, error) NewReader(io.Reader r) {
+    io.Reader _p0 = default;
+    error _p0 = default!;
 
-        // Read reads export data from in, decodes it, and returns type
-        // information for the package.
-        // The package name is specified by path.
-        // File position information is added to fset.
-        //
-        // Read may inspect and add to the imports map to ensure that references
-        // within the export data to other packages are consistent.  The caller
-        // must ensure that imports[path] does not exist, or exists but is
-        // incomplete (see types.Package.Complete), and Read inserts the
-        // resulting package into this map entry.
-        //
-        // On return, the state of the reader is undefined.
-        public static (ptr<types.Package>, error) Read(io.Reader @in, ptr<token.FileSet> _addr_fset, map<@string, ptr<types.Package>> imports, @string path)
-        {
-            ptr<types.Package> _p0 = default!;
-            error _p0 = default!;
-            ref token.FileSet fset = ref _addr_fset.val;
+    var buf = bufio.NewReader(r);
+    var (_, err) = gcimporter.FindExportData(buf); 
+    // If we ever switch to a zip-like archive format with the ToC
+    // at the end, we can return the correct portion of export data,
+    // but for now we must return the entire rest of the file.
+    return (buf, error.As(err)!);
 
-            var (data, err) = ioutil.ReadAll(in);
-            if (err != null)
-            {
-                return (_addr_null!, error.As(fmt.Errorf("reading export data for %q: %v", path, err))!);
-            }
+}
 
-            if (bytes.HasPrefix(data, (slice<byte>)"!<arch>"))
-            {
-                return (_addr_null!, error.As(fmt.Errorf("can't read export data for %q directly from an archive file (call gcexportdata.NewReader first to extract export data)", path))!);
-            } 
+// Read reads export data from in, decodes it, and returns type
+// information for the package.
+// The package name is specified by path.
+// File position information is added to fset.
+//
+// Read may inspect and add to the imports map to ensure that references
+// within the export data to other packages are consistent.  The caller
+// must ensure that imports[path] does not exist, or exists but is
+// incomplete (see types.Package.Complete), and Read inserts the
+// resulting package into this map entry.
+//
+// On return, the state of the reader is undefined.
+public static (ptr<types.Package>, error) Read(io.Reader @in, ptr<token.FileSet> _addr_fset, map<@string, ptr<types.Package>> imports, @string path) {
+    ptr<types.Package> _p0 = default!;
+    error _p0 = default!;
+    ref token.FileSet fset = ref _addr_fset.val;
 
-            // The App Engine Go runtime v1.6 uses the old export data format.
-            // TODO(adonovan): delete once v1.7 has been around for a while.
-            if (bytes.HasPrefix(data, (slice<byte>)"package "))
-            {
-                return _addr_gcimporter.ImportData(imports, path, path, bytes.NewReader(data))!;
-            } 
-
-            // The indexed export format starts with an 'i'; the older
-            // binary export format starts with a 'c', 'd', or 'v'
-            // (from "version"). Select appropriate importer.
-            if (len(data) > 0L && data[0L] == 'i')
-            {
-                var (_, pkg, err) = gcimporter.IImportData(fset, imports, data[1L..], path);
-                return (_addr_pkg!, error.As(err)!);
-            }
-
-            (_, pkg, err) = gcimporter.BImportData(fset, imports, data, path);
-            return (_addr_pkg!, error.As(err)!);
-
-        }
-
-        // Write writes encoded type information for the specified package to out.
-        // The FileSet provides file position information for named objects.
-        public static error Write(io.Writer @out, ptr<token.FileSet> _addr_fset, ptr<types.Package> _addr_pkg)
-        {
-            ref token.FileSet fset = ref _addr_fset.val;
-            ref types.Package pkg = ref _addr_pkg.val;
-
-            var (b, err) = gcimporter.IExportData(fset, pkg);
-            if (err != null)
-            {
-                return error.As(err)!;
-            }
-
-            _, err = @out.Write(b);
-            return error.As(err)!;
-
-        }
+    var (data, err) = ioutil.ReadAll(in);
+    if (err != null) {
+        return (_addr_null!, error.As(fmt.Errorf("reading export data for %q: %v", path, err))!);
     }
-}}}}}
+    if (bytes.HasPrefix(data, (slice<byte>)"!<arch>")) {
+        return (_addr_null!, error.As(fmt.Errorf("can't read export data for %q directly from an archive file (call gcexportdata.NewReader first to extract export data)", path))!);
+    }
+    if (bytes.HasPrefix(data, (slice<byte>)"package ")) {
+        return _addr_gcimporter.ImportData(imports, path, path, bytes.NewReader(data))!;
+    }
+    if (len(data) > 0 && data[0] == 'i') {
+        var (_, pkg, err) = gcimporter.IImportData(fset, imports, data[(int)1..], path);
+        return (_addr_pkg!, error.As(err)!);
+    }
+    (_, pkg, err) = gcimporter.BImportData(fset, imports, data, path);
+    return (_addr_pkg!, error.As(err)!);
+
+}
+
+// Write writes encoded type information for the specified package to out.
+// The FileSet provides file position information for named objects.
+public static error Write(io.Writer @out, ptr<token.FileSet> _addr_fset, ptr<types.Package> _addr_pkg) {
+    ref token.FileSet fset = ref _addr_fset.val;
+    ref types.Package pkg = ref _addr_pkg.val;
+
+    var (b, err) = gcimporter.IExportData(fset, pkg);
+    if (err != null) {
+        return error.As(err)!;
+    }
+    _, err = @out.Write(b);
+    return error.As(err)!;
+
+}
+
+} // end gcexportdata_package

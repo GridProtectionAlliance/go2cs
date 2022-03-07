@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:16 UTC
+//     Generated on 2022 March 06 22:23:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using gzip = go.compress.gzip_package;
 using list = go.container.list_package;
@@ -24,6 +23,7 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using os = go.os_package;
@@ -78,6 +78,7 @@ namespace net
                 this.ExpectContinueTimeout = default;
                 this.TLSNextProto = default;
                 this.ProxyConnectHeader = default;
+                this.GetProxyConnectHeader = default;
                 this.MaxResponseHeaderBytes = default;
                 this.WriteBufferSize = default;
                 this.ReadBufferSize = default;
@@ -87,7 +88,7 @@ namespace net
                 this.ForceAttemptHTTP2 = default;
             }
 
-            public Transport(sync.Mutex idleMu = default, bool closeIdle = default, map<connectMethodKey, slice<ptr<persistConn>>> idleConn = default, map<connectMethodKey, wantConnQueue> idleConnWait = default, connLRU idleLRU = default, sync.Mutex reqMu = default, map<cancelKey, Action<error>> reqCanceler = default, sync.Mutex altMu = default, atomic.Value altProto = default, sync.Mutex connsPerHostMu = default, map<connectMethodKey, long> connsPerHost = default, map<connectMethodKey, wantConnQueue> connsPerHostWait = default, Func<ptr<Request>, (ptr<url.URL>, error)> Proxy = default, Func<context.Context, @string, @string, (net.Conn, error)> DialContext = default, Func<@string, @string, (net.Conn, error)> Dial = default, Func<context.Context, @string, @string, (net.Conn, error)> DialTLSContext = default, Func<@string, @string, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, time.Duration TLSHandshakeTimeout = default, bool DisableKeepAlives = default, bool DisableCompression = default, long MaxIdleConns = default, long MaxIdleConnsPerHost = default, long MaxConnsPerHost = default, time.Duration IdleConnTimeout = default, time.Duration ResponseHeaderTimeout = default, time.Duration ExpectContinueTimeout = default, map<@string, Func<@string, ptr<tls.Conn>, RoundTripper>> TLSNextProto = default, Header ProxyConnectHeader = default, long MaxResponseHeaderBytes = default, long WriteBufferSize = default, long ReadBufferSize = default, sync.Once nextProtoOnce = default, h2Transport h2transport = default, bool tlsNextProtoWasNil = default, bool ForceAttemptHTTP2 = default)
+            public Transport(sync.Mutex idleMu = default, bool closeIdle = default, map<connectMethodKey, slice<ptr<persistConn>>> idleConn = default, map<connectMethodKey, wantConnQueue> idleConnWait = default, connLRU idleLRU = default, sync.Mutex reqMu = default, map<cancelKey, Action<error>> reqCanceler = default, sync.Mutex altMu = default, atomic.Value altProto = default, sync.Mutex connsPerHostMu = default, map<connectMethodKey, nint> connsPerHost = default, map<connectMethodKey, wantConnQueue> connsPerHostWait = default, Func<ptr<Request>, (ptr<url.URL>, error)> Proxy = default, Func<context.Context, @string, @string, (net.Conn, error)> DialContext = default, Func<@string, @string, (net.Conn, error)> Dial = default, Func<context.Context, @string, @string, (net.Conn, error)> DialTLSContext = default, Func<@string, @string, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, time.Duration TLSHandshakeTimeout = default, bool DisableKeepAlives = default, bool DisableCompression = default, nint MaxIdleConns = default, nint MaxIdleConnsPerHost = default, nint MaxConnsPerHost = default, time.Duration IdleConnTimeout = default, time.Duration ResponseHeaderTimeout = default, time.Duration ExpectContinueTimeout = default, map<@string, Func<@string, ptr<tls.Conn>, RoundTripper>> TLSNextProto = default, Header ProxyConnectHeader = default, Func<context.Context, ptr<url.URL>, @string, (Header, error)> GetProxyConnectHeader = default, long MaxResponseHeaderBytes = default, nint WriteBufferSize = default, nint ReadBufferSize = default, sync.Once nextProtoOnce = default, h2Transport h2transport = default, bool tlsNextProtoWasNil = default, bool ForceAttemptHTTP2 = default)
             {
                 this.idleMu = idleMu;
                 this.closeIdle = closeIdle;
@@ -118,6 +119,7 @@ namespace net
                 this.ExpectContinueTimeout = ExpectContinueTimeout;
                 this.TLSNextProto = TLSNextProto;
                 this.ProxyConnectHeader = ProxyConnectHeader;
+                this.GetProxyConnectHeader = GetProxyConnectHeader;
                 this.MaxResponseHeaderBytes = MaxResponseHeaderBytes;
                 this.WriteBufferSize = WriteBufferSize;
                 this.ReadBufferSize = ReadBufferSize;
@@ -147,7 +149,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Transport Transport_cast(dynamic value)
         {
-            return new Transport(value.idleMu, value.closeIdle, value.idleConn, value.idleConnWait, value.idleLRU, value.reqMu, value.reqCanceler, value.altMu, value.altProto, value.connsPerHostMu, value.connsPerHost, value.connsPerHostWait, value.Proxy, value.DialContext, value.Dial, value.DialTLSContext, value.DialTLS, ref value.TLSClientConfig, value.TLSHandshakeTimeout, value.DisableKeepAlives, value.DisableCompression, value.MaxIdleConns, value.MaxIdleConnsPerHost, value.MaxConnsPerHost, value.IdleConnTimeout, value.ResponseHeaderTimeout, value.ExpectContinueTimeout, value.TLSNextProto, value.ProxyConnectHeader, value.MaxResponseHeaderBytes, value.WriteBufferSize, value.ReadBufferSize, value.nextProtoOnce, value.h2transport, value.tlsNextProtoWasNil, value.ForceAttemptHTTP2);
+            return new Transport(value.idleMu, value.closeIdle, value.idleConn, value.idleConnWait, value.idleLRU, value.reqMu, value.reqCanceler, value.altMu, value.altProto, value.connsPerHostMu, value.connsPerHost, value.connsPerHostWait, value.Proxy, value.DialContext, value.Dial, value.DialTLSContext, value.DialTLS, ref value.TLSClientConfig, value.TLSHandshakeTimeout, value.DisableKeepAlives, value.DisableCompression, value.MaxIdleConns, value.MaxIdleConnsPerHost, value.MaxConnsPerHost, value.IdleConnTimeout, value.ResponseHeaderTimeout, value.ExpectContinueTimeout, value.TLSNextProto, value.ProxyConnectHeader, value.GetProxyConnectHeader, value.MaxResponseHeaderBytes, value.WriteBufferSize, value.ReadBufferSize, value.nextProtoOnce, value.h2transport, value.tlsNextProtoWasNil, value.ForceAttemptHTTP2);
         }
     }
 }}

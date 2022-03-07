@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:17 UTC
+//     Generated on 2022 March 06 22:23:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using gzip = go.compress.gzip_package;
 using list = go.container.list_package;
@@ -24,6 +23,7 @@ using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using httptrace = go.net.http.httptrace_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using os = go.os_package;
@@ -64,11 +64,11 @@ namespace net
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
 
-                    if ((object)s_ErrorByRef == null)
+                    if (s_ErrorByRef is null)
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
             }

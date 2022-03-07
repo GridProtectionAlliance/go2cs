@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:29 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,6 @@ namespace sys
                 this.Owner = default;
                 this.Type = default;
                 this.Flags = default;
-                this._ = default;
                 this.Syncwrites = default;
                 this.Asyncwrites = default;
                 this.Fstypename = default;
@@ -54,11 +53,10 @@ namespace sys
                 this.Spares1 = default;
                 this.Mntfromname = default;
                 this.Spares2 = default;
-                this._ = default;
                 this.Spare = default;
             }
 
-            public Statfs_t(long Spare2 = default, long Bsize = default, long Iosize = default, long Blocks = default, long Bfree = default, long Bavail = default, long Files = default, long Ffree = default, Fsid Fsid = default, uint Owner = default, int Type = default, int Flags = default, array<byte> _ = default, long Syncwrites = default, long Asyncwrites = default, array<sbyte> Fstypename = default, array<sbyte> Mntonname = default, long Syncreads = default, long Asyncreads = default, short Spares1 = default, array<sbyte> Mntfromname = default, short Spares2 = default, array<byte> _ = default, array<long> Spare = default)
+            public Statfs_t(long Spare2 = default, long Bsize = default, long Iosize = default, long Blocks = default, long Bfree = default, long Bavail = default, long Files = default, long Ffree = default, Fsid Fsid = default, uint Owner = default, int Type = default, int Flags = default, long Syncwrites = default, long Asyncwrites = default, array<byte> Fstypename = default, array<byte> Mntonname = default, long Syncreads = default, long Asyncreads = default, short Spares1 = default, array<byte> Mntfromname = default, short Spares2 = default, array<long> Spare = default)
             {
                 this.Spare2 = Spare2;
                 this.Bsize = Bsize;
@@ -72,7 +70,6 @@ namespace sys
                 this.Owner = Owner;
                 this.Type = Type;
                 this.Flags = Flags;
-                this._ = _;
                 this.Syncwrites = Syncwrites;
                 this.Asyncwrites = Asyncwrites;
                 this.Fstypename = Fstypename;
@@ -82,7 +79,6 @@ namespace sys
                 this.Spares1 = Spares1;
                 this.Mntfromname = Mntfromname;
                 this.Spares2 = Spares2;
-                this._ = _;
                 this.Spare = Spare;
             }
 
@@ -106,7 +102,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Statfs_t Statfs_t_cast(dynamic value)
         {
-            return new Statfs_t(value.Spare2, value.Bsize, value.Iosize, value.Blocks, value.Bfree, value.Bavail, value.Files, value.Ffree, value.Fsid, value.Owner, value.Type, value.Flags, value._, value.Syncwrites, value.Asyncwrites, value.Fstypename, value.Mntonname, value.Syncreads, value.Asyncreads, value.Spares1, value.Mntfromname, value.Spares2, value._, value.Spare);
+            return new Statfs_t(value.Spare2, value.Bsize, value.Iosize, value.Blocks, value.Bfree, value.Bavail, value.Files, value.Ffree, value.Fsid, value.Owner, value.Type, value.Flags, value.Syncwrites, value.Asyncwrites, value.Fstypename, value.Mntonname, value.Syncreads, value.Asyncreads, value.Spares1, value.Mntfromname, value.Spares2, value.Spare);
         }
     }
 }}}}}}

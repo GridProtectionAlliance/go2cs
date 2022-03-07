@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:08 UTC
+//     Generated on 2022 March 06 22:13:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using atomic = go.sync.atomic_package;
 using syscall = go.syscall_package;
@@ -42,7 +41,7 @@ namespace @internal
                 this.isFile = default;
             }
 
-            public FD(fdMutex fdmu = default, long Sysfd = default, pollDesc pd = default, ref ptr<slice<syscall.Iovec>> iovecs = default, uint csema = default, uint isBlocking = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default)
+            public FD(fdMutex fdmu = default, nint Sysfd = default, pollDesc pd = default, ref ptr<slice<syscall.Iovec>> iovecs = default, uint csema = default, uint isBlocking = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default)
             {
                 this.fdmu = fdmu;
                 this.Sysfd = Sysfd;

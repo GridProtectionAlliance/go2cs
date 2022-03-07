@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:48 UTC
+//     Generated on 2022 March 06 22:21:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace net
         {
             // Value of the http2SettingID struct
             private readonly ushort m_value;
-
+            
             public http2SettingID(ushort value) => m_value = value;
 
             // Enable implicit conversions between ushort and http2SettingID struct

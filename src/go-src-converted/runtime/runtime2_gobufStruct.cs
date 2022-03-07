@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:09 UTC
+//     Generated on 2022 March 06 22:11:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -39,7 +37,7 @@ namespace go
                 this.bp = default;
             }
 
-            public gobuf(System.UIntPtr sp = default, System.UIntPtr pc = default, guintptr g = default, unsafe.Pointer ctxt = default, sys.Uintreg ret = default, System.UIntPtr lr = default, System.UIntPtr bp = default)
+            public gobuf(System.UIntPtr sp = default, System.UIntPtr pc = default, guintptr g = default, unsafe.Pointer ctxt = default, System.UIntPtr ret = default, System.UIntPtr lr = default, System.UIntPtr bp = default)
             {
                 this.sp = sp;
                 this.pc = pc;

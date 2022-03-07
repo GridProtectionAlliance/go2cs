@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:33 UTC
+//     Generated on 2022 March 06 22:14:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace os
         {
             // Value of the bufferKind struct
             private readonly C.int m_value;
-
+            
             public bufferKind(C.int value) => m_value = value;
 
             // Enable implicit conversions between C.int and bufferKind struct

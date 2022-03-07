@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:31 UTC
+//     Generated on 2022 March 06 23:15:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using json = go.encoding.json_package;
 using flag = go.flag_package;
@@ -22,6 +21,7 @@ using log = go.log_package;
 using os = go.os_package;
 using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
+using regexp = go.regexp_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -42,13 +42,15 @@ namespace go
                 this.GOOS = default;
                 this.GOARCH = default;
                 this.CgoSupported = default;
+                this.FirstClass = default;
             }
 
-            public jsonResult(@string GOOS = default, @string GOARCH = default, bool CgoSupported = default)
+            public jsonResult(@string GOOS = default, @string GOARCH = default, bool CgoSupported = default, bool FirstClass = default)
             {
                 this.GOOS = GOOS;
                 this.GOARCH = GOARCH;
                 this.CgoSupported = CgoSupported;
+                this.FirstClass = FirstClass;
             }
 
             // Enable comparisons between nil and jsonResult struct
@@ -71,7 +73,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static jsonResult jsonResult_cast(dynamic value)
         {
-            return new jsonResult(value.GOOS, value.GOARCH, value.CgoSupported);
+            return new jsonResult(value.GOOS, value.GOARCH, value.CgoSupported, value.FirstClass);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:30 UTC
+//     Generated on 2022 March 06 23:33:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
@@ -41,7 +40,7 @@ namespace go
 
             private ref register register_val => ref m_registerRef.Value;
 
-            public ref long num => ref m_registerRef.Value.num;
+            public ref nint num => ref m_registerRef.Value.num;
 
             public ref types.Type typ => ref m_registerRef.Value.typ;
 
@@ -57,7 +56,7 @@ namespace go
                 this.Field = default;
             }
 
-            public FieldAddr(register register = default, Value X = default, long Field = default)
+            public FieldAddr(register register = default, Value X = default, nint Field = default)
             {
                 this.m_registerRef = new ptr<register>(register);
                 this.X = X;

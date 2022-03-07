@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:29 UTC
+//     Generated on 2022 March 06 23:33:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
@@ -50,7 +49,7 @@ namespace go
                 this.rundefers = default;
             }
 
-            public BasicBlock(long Index = default, @string Comment = default, ref ptr<Function> parent = default, slice<Instruction> Instrs = default, slice<ptr<BasicBlock>> Preds = default, slice<ptr<BasicBlock>> Succs = default, array<ptr<BasicBlock>> succs2 = default, domInfo dom = default, long gaps = default, long rundefers = default)
+            public BasicBlock(nint Index = default, @string Comment = default, ref ptr<Function> parent = default, slice<Instruction> Instrs = default, slice<ptr<BasicBlock>> Preds = default, slice<ptr<BasicBlock>> Succs = default, array<ptr<BasicBlock>> succs2 = default, domInfo dom = default, nint gaps = default, nint rundefers = default)
             {
                 this.Index = Index;
                 this.Comment = Comment;

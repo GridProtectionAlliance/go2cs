@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:19 UTC
+//     Generated on 2022 March 06 23:23:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -62,7 +61,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -88,13 +87,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_writeByPtr is null || !m_target_is_ptr)
                     return s_writeByVal!(target, _p0);
 
-                return s_writeByPtr(m_target_ptr, _p0);
+                return s_writeByPtr(m_target_ptr!, _p0);
             }
 
             private delegate (@string, error) readLineByPtr(ptr<T> value);
@@ -108,13 +107,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_readLineByPtr is null || !m_target_is_ptr)
                     return s_readLineByVal!(target);
 
-                return s_readLineByPtr(m_target_ptr);
+                return s_readLineByPtr(m_target_ptr!);
             }
 
             private delegate (@string, error) closeByPtr(ptr<T> value);
@@ -128,16 +127,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_closeByPtr is null || !m_target_is_ptr)
                     return s_closeByVal!(target);
 
-                return s_closeByPtr(m_target_ptr);
+                return s_closeByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static lineReaderWriter()
@@ -148,12 +147,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeByPtr = extensionMethod.CreateStaticDelegate(typeof(writeByPtr)) as writeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeByVal = extensionMethod.CreateStaticDelegate(typeof(writeByVal)) as writeByVal;
 
                 if (s_writeByPtr is null && s_writeByVal is null)
@@ -161,12 +160,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("readLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_readLineByPtr = extensionMethod.CreateStaticDelegate(typeof(readLineByPtr)) as readLineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("readLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_readLineByVal = extensionMethod.CreateStaticDelegate(typeof(readLineByVal)) as readLineByVal;
 
                 if (s_readLineByPtr is null && s_readLineByVal is null)
@@ -174,12 +173,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_closeByPtr = extensionMethod.CreateStaticDelegate(typeof(closeByPtr)) as closeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_closeByVal = extensionMethod.CreateStaticDelegate(typeof(closeByVal)) as closeByVal;
 
                 if (s_closeByPtr is null && s_closeByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:21 UTC
+//     Generated on 2022 March 06 22:15:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace runtime
                 this.nest = default;
             }
 
-            public protobuf(slice<byte> data = default, array<byte> tmp = default, long nest = default)
+            public protobuf(slice<byte> data = default, array<byte> tmp = default, nint nest = default)
             {
                 this.data = data;
                 this.tmp = tmp;

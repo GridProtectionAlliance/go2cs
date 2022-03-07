@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:51 UTC
+//     Generated on 2022 March 06 23:38:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
 using go;
@@ -37,7 +36,7 @@ namespace net
                 this.MTU = default;
             }
 
-            public InterfaceMetrics(long Type = default, long MTU = default)
+            public InterfaceMetrics(nint Type = default, nint MTU = default)
             {
                 this.Type = Type;
                 this.MTU = MTU;

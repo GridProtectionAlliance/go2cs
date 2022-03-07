@@ -7,19 +7,18 @@
 // and be generated automatically, but that requires some API
 // development first.
 
-// package unicode -- go2cs converted at 2020 October 09 04:49:31 UTC
+// package unicode -- go2cs converted at 2022 March 06 22:14:11 UTC
 // import "unicode" ==> using unicode = go.unicode_package
-// Original source: C:\Go\src\unicode\casetables.go
+// Original source: C:\Program Files\Go\src\unicode\casetables.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class unicode_package
-    {
-        public static SpecialCase TurkishCase = _TurkishCase;
-        private static SpecialCase _TurkishCase = new SpecialCase(CaseRange{0x0049,0x0049,d{0,0x131-0x49,0}},CaseRange{0x0069,0x0069,d{0x130-0x69,0,0x130-0x69}},CaseRange{0x0130,0x0130,d{0,0x69-0x130,0}},CaseRange{0x0131,0x0131,d{0x49-0x131,0,0x49-0x131}},);
+namespace go;
 
-        public static SpecialCase AzeriCase = _TurkishCase;
-    }
-}
+public static partial class unicode_package {
+
+public static SpecialCase TurkishCase = _TurkishCase;
+private static SpecialCase _TurkishCase = new SpecialCase(CaseRange{0x0049,0x0049,d{0,0x131-0x49,0}},CaseRange{0x0069,0x0069,d{0x130-0x69,0,0x130-0x69}},CaseRange{0x0130,0x0130,d{0,0x69-0x130,0}},CaseRange{0x0131,0x0131,d{0x49-0x131,0,0x49-0x131}},);
+
+public static SpecialCase AzeriCase = _TurkishCase;
+
+} // end unicode_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:29 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,13 +34,11 @@ namespace sys
             {
                 this.Flags = default;
                 this._ = default;
-                this._ = default;
             }
 
-            public Log2phys_t(uint Flags = default, array<byte> _ = default, array<byte> _ = default)
+            public Log2phys_t(uint Flags = default, array<byte> _ = default)
             {
                 this.Flags = Flags;
-                this._ = _;
                 this._ = _;
             }
 
@@ -64,7 +62,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Log2phys_t Log2phys_t_cast(dynamic value)
         {
-            return new Log2phys_t(value.Flags, value._, value._);
+            return new Log2phys_t(value.Flags, value._);
         }
     }
 }}}}}}

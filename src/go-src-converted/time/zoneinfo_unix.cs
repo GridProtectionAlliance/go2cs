@@ -2,65 +2,93 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build aix darwin,amd64 dragonfly freebsd linux,!android netbsd openbsd solaris
+//go:build aix || (darwin && !ios) || dragonfly || freebsd || (linux && !android) || netbsd || openbsd || solaris
+// +build aix darwin,!ios dragonfly freebsd linux,!android netbsd openbsd solaris
 
 // Parse "zoneinfo" time zone file.
 // This is a fairly standard file format used on OS X, Linux, BSD, Sun, and others.
 // See tzfile(5), https://en.wikipedia.org/wiki/Zoneinfo,
 // and ftp://munnari.oz.au/pub/oldtz/
 
-// package time -- go2cs converted at 2020 October 09 05:06:16 UTC
+// package time -- go2cs converted at 2022 March 06 22:30:19 UTC
 // import "time" ==> using time = go.time_package
-// Original source: C:\Go\src\time\zoneinfo_unix.go
+// Original source: C:\Program Files\Go\src\time\zoneinfo_unix.go
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class time_package
-    {
-        // Many systems use /usr/share/zoneinfo, Solaris 2 has
-        // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ.
-        private static @string zoneSources = new slice<@string>(new @string[] { "/usr/share/zoneinfo/", "/usr/share/lib/zoneinfo/", "/usr/lib/locale/TZ/", runtime.GOROOT()+"/lib/time/zoneinfo.zip" });
+namespace go;
 
-        private static void initLocal()
-        { 
-            // consult $TZ to find the time zone to use.
-            // no $TZ means use the system default /etc/localtime.
-            // $TZ="" means use UTC.
-            // $TZ="foo" means use /usr/share/zoneinfo/foo.
+public static partial class time_package {
 
-            var (tz, ok) = syscall.Getenv("TZ");
+    // Many systems use /usr/share/zoneinfo, Solaris 2 has
+    // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ.
+private static @string zoneSources = new slice<@string>(new @string[] { "/usr/share/zoneinfo/", "/usr/share/lib/zoneinfo/", "/usr/lib/locale/TZ/", runtime.GOROOT()+"/lib/time/zoneinfo.zip" });
 
-            if (!ok) 
-                var (z, err) = loadLocation("localtime", new slice<@string>(new @string[] { "/etc" }));
-                if (err == null)
-                {
+private static void initLocal() { 
+    // consult $TZ to find the time zone to use.
+    // no $TZ means use the system default /etc/localtime.
+    // $TZ="" means use UTC.
+    // $TZ="foo" or $TZ=":foo" if foo is an absolute path, then the file pointed
+    // by foo will be used to initialize timezone; otherwise, file
+    // /usr/share/zoneinfo/foo will be used.
+
+    var (tz, ok) = syscall.Getenv("TZ");
+
+    if (!ok) 
+        var (z, err) = loadLocation("localtime", new slice<@string>(new @string[] { "/etc" }));
+        if (err == null) {
+            localLoc = z.val;
+            localLoc.name = "Local";
+            return ;
+        }
+    else if (tz != "") 
+        if (tz[0] == ':') {
+            tz = tz[(int)1..];
+        }
+        if (tz != "" && tz[0] == '/') {
+            {
+                var z__prev2 = z;
+
+                (z, err) = loadLocation(tz, new slice<@string>(new @string[] { "" }));
+
+                if (err == null) {
                     localLoc = z.val;
-                    localLoc.name = "Local";
+                    if (tz == "/etc/localtime") {
+                        localLoc.name = "Local";
+                    }
+                    else
+ {
+                        localLoc.name = tz;
+                    }
+
+                    return ;
+
+                }
+
+                z = z__prev2;
+
+            }
+
+        }
+        else if (tz != "" && tz != "UTC") {
+            {
+                var z__prev3 = z;
+
+                (z, err) = loadLocation(tz, zoneSources);
+
+                if (err == null) {
+                    localLoc = z.val;
                     return ;
                 }
 
-            else if (tz != "" && tz != "UTC") 
-                {
-                    var z__prev1 = z;
+                z = z__prev3;
 
-                    (z, err) = loadLocation(tz, zoneSources);
-
-                    if (err == null)
-                    {
-                        localLoc = z.val;
-                        return ;
-                    }
-
-                    z = z__prev1;
-
-                }
-
-            // Fall back to UTC.
-            localLoc.name = "UTC";
+            }
 
         }
-    }
+    // Fall back to UTC.
+    localLoc.name = "UTC";
+
 }
+
+} // end time_package

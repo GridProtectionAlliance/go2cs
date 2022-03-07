@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:10 UTC
+//     Generated on 2022 March 06 22:21:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,15 +12,14 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using mime = go.mime_package;
 using quotedprintable = go.mime.quotedprintable_package;
 using textproto = go.net.textproto_package;
+using filepath = go.path.filepath_package;
 using strings = go.strings_package;
 using go;
 
@@ -46,7 +45,7 @@ namespace mime
                 this.dashBoundary = default;
             }
 
-            public Reader(ref ptr<bufio.Reader> bufReader = default, ref ptr<Part> currentPart = default, long partsRead = default, slice<byte> nl = default, slice<byte> nlDashBoundary = default, slice<byte> dashBoundaryDash = default, slice<byte> dashBoundary = default)
+            public Reader(ref ptr<bufio.Reader> bufReader = default, ref ptr<Part> currentPart = default, nint partsRead = default, slice<byte> nl = default, slice<byte> nlDashBoundary = default, slice<byte> dashBoundaryDash = default, slice<byte> dashBoundary = default)
             {
                 this.bufReader = bufReader;
                 this.currentPart = currentPart;

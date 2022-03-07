@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:57 UTC
+//     Generated on 2022 March 06 22:19:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ecdsa = go.crypto.ecdsa_package;
 using elliptic = go.crypto.elliptic_package;
 using asn1 = go.encoding.asn1_package;
@@ -40,7 +39,7 @@ namespace crypto
                 this.PublicKey = default;
             }
 
-            public ecPrivateKey(long Version = default, slice<byte> PrivateKey = default, asn1.ObjectIdentifier NamedCurveOID = default, asn1.BitString PublicKey = default)
+            public ecPrivateKey(nint Version = default, slice<byte> PrivateKey = default, asn1.ObjectIdentifier NamedCurveOID = default, asn1.BitString PublicKey = default)
             {
                 this.Version = Version;
                 this.PrivateKey = PrivateKey;

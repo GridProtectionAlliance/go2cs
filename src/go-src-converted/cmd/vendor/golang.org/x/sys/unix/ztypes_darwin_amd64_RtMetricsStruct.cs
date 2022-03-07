@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:28 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,10 +42,11 @@ namespace sys
                 this.Rtt = default;
                 this.Rttvar = default;
                 this.Pksent = default;
+                this.State = default;
                 this.Filler = default;
             }
 
-            public RtMetrics(uint Locks = default, uint Mtu = default, uint Hopcount = default, int Expire = default, uint Recvpipe = default, uint Sendpipe = default, uint Ssthresh = default, uint Rtt = default, uint Rttvar = default, uint Pksent = default, array<uint> Filler = default)
+            public RtMetrics(uint Locks = default, uint Mtu = default, uint Hopcount = default, int Expire = default, uint Recvpipe = default, uint Sendpipe = default, uint Ssthresh = default, uint Rtt = default, uint Rttvar = default, uint Pksent = default, uint State = default, array<uint> Filler = default)
             {
                 this.Locks = Locks;
                 this.Mtu = Mtu;
@@ -57,6 +58,7 @@ namespace sys
                 this.Rtt = Rtt;
                 this.Rttvar = Rttvar;
                 this.Pksent = Pksent;
+                this.State = State;
                 this.Filler = Filler;
             }
 
@@ -80,7 +82,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RtMetrics RtMetrics_cast(dynamic value)
         {
-            return new RtMetrics(value.Locks, value.Mtu, value.Hopcount, value.Expire, value.Recvpipe, value.Sendpipe, value.Ssthresh, value.Rtt, value.Rttvar, value.Pksent, value.Filler);
+            return new RtMetrics(value.Locks, value.Mtu, value.Hopcount, value.Expire, value.Recvpipe, value.Sendpipe, value.Ssthresh, value.Rtt, value.Rttvar, value.Pksent, value.State, value.Filler);
         }
     }
 }}}}}}

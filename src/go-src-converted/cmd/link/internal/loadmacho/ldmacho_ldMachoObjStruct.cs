@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:58 UTC
+//     Generated on 2022 March 06 23:21:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -52,7 +51,7 @@ namespace @internal
                 this.ncmd = default;
             }
 
-            public ldMachoObj(ref ptr<bio.Reader> f = default, long @base = default, long length = default, bool is64 = default, @string name = default, binary.ByteOrder e = default, ulong cputype = default, ulong subcputype = default, uint filetype = default, uint flags = default, slice<ldMachoCmd> cmd = default, ulong ncmd = default)
+            public ldMachoObj(ref ptr<bio.Reader> f = default, long @base = default, long length = default, bool is64 = default, @string name = default, binary.ByteOrder e = default, nuint cputype = default, nuint subcputype = default, uint filetype = default, uint flags = default, slice<ldMachoCmd> cmd = default, nuint ncmd = default)
             {
                 this.f = f;
                 this.@base = @base;

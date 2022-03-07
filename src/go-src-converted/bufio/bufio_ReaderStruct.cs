@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:57 UTC
+//     Generated on 2022 March 06 22:14:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -40,7 +39,7 @@ namespace go
                 this.lastRuneSize = default;
             }
 
-            public Reader(slice<byte> buf = default, io.Reader rd = default, long r = default, long w = default, error err = default, long lastByte = default, long lastRuneSize = default)
+            public Reader(slice<byte> buf = default, io.Reader rd = default, nint r = default, nint w = default, error err = default, nint lastByte = default, nint lastRuneSize = default)
             {
                 this.buf = buf;
                 this.rd = rd;

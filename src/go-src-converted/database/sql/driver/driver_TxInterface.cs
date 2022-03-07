@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CommitByPtr is null || !m_target_is_ptr)
                     return s_CommitByVal!(target);
 
-                return s_CommitByPtr(m_target_ptr);
+                return s_CommitByPtr(m_target_ptr!);
             }
 
             private delegate error RollbackByPtr(ptr<T> value);
@@ -99,16 +98,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RollbackByPtr is null || !m_target_is_ptr)
                     return s_RollbackByVal!(target);
 
-                return s_RollbackByPtr(m_target_ptr);
+                return s_RollbackByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Tx()
@@ -119,12 +118,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Commit");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommitByPtr = extensionMethod.CreateStaticDelegate(typeof(CommitByPtr)) as CommitByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Commit");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommitByVal = extensionMethod.CreateStaticDelegate(typeof(CommitByVal)) as CommitByVal;
 
                 if (s_CommitByPtr is null && s_CommitByVal is null)
@@ -132,12 +131,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Rollback");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RollbackByPtr = extensionMethod.CreateStaticDelegate(typeof(RollbackByPtr)) as RollbackByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Rollback");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RollbackByVal = extensionMethod.CreateStaticDelegate(typeof(RollbackByVal)) as RollbackByVal;
 
                 if (s_RollbackByPtr is null && s_RollbackByVal is null)

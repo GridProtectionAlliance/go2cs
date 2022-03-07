@@ -4,9 +4,9 @@
 
 // Package elliptic implements several standard elliptic curves over prime
 // fields.
-// package elliptic -- go2cs converted at 2020 October 09 04:52:51 UTC
+// package elliptic -- go2cs converted at 2022 March 06 22:17:12 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
-// Original source: C:\Go\src\crypto\elliptic\elliptic.go
+// Original source: C:\Program Files\Go\src\crypto\elliptic\elliptic.go
 // This package operates, internally, on Jacobian coordinates. For a given
 // (x, y) position on the curve, the Jacobian coordinates are (x1, y1, z1)
 // where x = x1/z1² and y = y1/z1³. The greatest speedups come when the whole
@@ -17,620 +17,591 @@
 using io = go.io_package;
 using big = go.math.big_package;
 using sync = go.sync_package;
-using static go.builtin;
 
-namespace go {
-namespace crypto
-{
-    public static partial class elliptic_package
-    {
-        // A Curve represents a short-form Weierstrass curve with a=-3.
-        //
-        // Note that the point at infinity (0, 0) is not considered on the curve, and
-        // although it can be returned by Add, Double, ScalarMult, or ScalarBaseMult, it
-        // can't be marshaled or unmarshaled, and IsOnCurve will return false for it.
-        public partial interface Curve
-        {
-            (ptr<big.Int>, ptr<big.Int>) Params(); // IsOnCurve reports whether the given (x,y) lies on the curve.
-            (ptr<big.Int>, ptr<big.Int>) IsOnCurve(ptr<big.Int> x, ptr<big.Int> y); // Add returns the sum of (x1,y1) and (x2,y2)
-            (ptr<big.Int>, ptr<big.Int>) Add(ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2); // Double returns 2*(x,y)
-            (ptr<big.Int>, ptr<big.Int>) Double(ptr<big.Int> x1, ptr<big.Int> y1); // ScalarMult returns k*(Bx,By) where k is a number in big-endian form.
-            (ptr<big.Int>, ptr<big.Int>) ScalarMult(ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k); // ScalarBaseMult returns k*G, where G is the base point of the group
+namespace go.crypto;
+
+public static partial class elliptic_package {
+
+    // A Curve represents a short-form Weierstrass curve with a=-3.
+    //
+    // Note that the point at infinity (0, 0) is not considered on the curve, and
+    // although it can be returned by Add, Double, ScalarMult, or ScalarBaseMult, it
+    // can't be marshaled or unmarshaled, and IsOnCurve will return false for it.
+public partial interface Curve {
+    (ptr<big.Int>, ptr<big.Int>) Params(); // IsOnCurve reports whether the given (x,y) lies on the curve.
+    (ptr<big.Int>, ptr<big.Int>) IsOnCurve(ptr<big.Int> x, ptr<big.Int> y); // Add returns the sum of (x1,y1) and (x2,y2)
+    (ptr<big.Int>, ptr<big.Int>) Add(ptr<big.Int> x1, ptr<big.Int> y1, ptr<big.Int> x2, ptr<big.Int> y2); // Double returns 2*(x,y)
+    (ptr<big.Int>, ptr<big.Int>) Double(ptr<big.Int> x1, ptr<big.Int> y1); // ScalarMult returns k*(Bx,By) where k is a number in big-endian form.
+    (ptr<big.Int>, ptr<big.Int>) ScalarMult(ptr<big.Int> x1, ptr<big.Int> y1, slice<byte> k); // ScalarBaseMult returns k*G, where G is the base point of the group
 // and k is an integer in big-endian form.
-            (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(slice<byte> k);
+    (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(slice<byte> k);
+}
+
+private static (Curve, bool) matchesSpecificCurve(ptr<CurveParams> _addr_@params, params Curve[] available) {
+    Curve _p0 = default;
+    bool _p0 = default;
+    available = available.Clone();
+    ref CurveParams @params = ref _addr_@params.val;
+
+    foreach (var (_, c) in available) {
+        if (params == c.Params()) {
+            return (c, true);
         }
+    }    return (null, false);
 
-        // CurveParams contains the parameters of an elliptic curve and also provides
-        // a generic, non-constant time implementation of Curve.
-        public partial struct CurveParams
-        {
-            public ptr<big.Int> P; // the order of the underlying field
-            public ptr<big.Int> N; // the order of the base point
-            public ptr<big.Int> B; // the constant of the curve equation
-            public ptr<big.Int> Gx; // (x,y) of the base point
-            public ptr<big.Int> Gy; // (x,y) of the base point
-            public long BitSize; // the size of the underlying field
-            public @string Name; // the canonical name of the curve
-        }
+}
 
-        private static ptr<CurveParams> Params(this ptr<CurveParams> _addr_curve)
-        {
-            ref CurveParams curve = ref _addr_curve.val;
+// CurveParams contains the parameters of an elliptic curve and also provides
+// a generic, non-constant time implementation of Curve.
+public partial struct CurveParams {
+    public ptr<big.Int> P; // the order of the underlying field
+    public ptr<big.Int> N; // the order of the base point
+    public ptr<big.Int> B; // the constant of the curve equation
+    public ptr<big.Int> Gx; // (x,y) of the base point
+    public ptr<big.Int> Gy; // (x,y) of the base point
+    public nint BitSize; // the size of the underlying field
+    public @string Name; // the canonical name of the curve
+}
 
-            return _addr_curve!;
-        }
+private static ptr<CurveParams> Params(this ptr<CurveParams> _addr_curve) {
+    ref CurveParams curve = ref _addr_curve.val;
 
-        // polynomial returns x³ - 3x + b.
-        private static ptr<big.Int> polynomial(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x)
-        {
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x = ref _addr_x.val;
+    return _addr_curve!;
+}
 
-            ptr<big.Int> x3 = @new<big.Int>().Mul(x, x);
-            x3.Mul(x3, x);
+// polynomial returns x³ - 3x + b.
+private static ptr<big.Int> polynomial(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x) {
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x = ref _addr_x.val;
 
-            ptr<big.Int> threeX = @new<big.Int>().Lsh(x, 1L);
-            threeX.Add(threeX, x);
+    ptr<big.Int> x3 = @new<big.Int>().Mul(x, x);
+    x3.Mul(x3, x);
 
-            x3.Sub(x3, threeX);
-            x3.Add(x3, curve.B);
-            x3.Mod(x3, curve.P);
+    ptr<big.Int> threeX = @new<big.Int>().Lsh(x, 1);
+    threeX.Add(threeX, x);
 
-            return _addr_x3!;
-        }
+    x3.Sub(x3, threeX);
+    x3.Add(x3, curve.B);
+    x3.Mod(x3, curve.P);
 
-        private static bool IsOnCurve(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y)
-        {
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
+    return _addr_x3!;
+}
+
+private static bool IsOnCurve(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y) {
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
  
-            // y² = x³ - 3x + b
-            ptr<big.Int> y2 = @new<big.Int>().Mul(y, y);
-            y2.Mod(y2, curve.P);
+    // If there is a dedicated constant-time implementation for this curve operation,
+    // use that instead of the generic one.
+    {
+        var (specific, ok) = matchesSpecificCurve(_addr_curve, p224, p521);
 
-            return curve.polynomial(x).Cmp(y2) == 0L;
-
+        if (ok) {
+            return specific.IsOnCurve(x, y);
         }
+    } 
 
-        // zForAffine returns a Jacobian Z value for the affine point (x, y). If x and
-        // y are zero, it assumes that they represent the point at infinity because (0,
-        // 0) is not on the any of the curves handled here.
-        private static ptr<big.Int> zForAffine(ptr<big.Int> _addr_x, ptr<big.Int> _addr_y)
-        {
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
+    // y² = x³ - 3x + b
+    ptr<big.Int> y2 = @new<big.Int>().Mul(y, y);
+    y2.Mod(y2, curve.P);
 
-            ptr<big.Int> z = @new<big.Int>();
-            if (x.Sign() != 0L || y.Sign() != 0L)
-            {
-                z.SetInt64(1L);
-            }
+    return curve.polynomial(x).Cmp(y2) == 0;
 
-            return _addr_z!;
+}
 
-        }
+// zForAffine returns a Jacobian Z value for the affine point (x, y). If x and
+// y are zero, it assumes that they represent the point at infinity because (0,
+// 0) is not on the any of the curves handled here.
+private static ptr<big.Int> zForAffine(ptr<big.Int> _addr_x, ptr<big.Int> _addr_y) {
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
 
-        // affineFromJacobian reverses the Jacobian transform. See the comment at the
-        // top of the file. If the point is ∞ it returns 0, 0.
-        private static (ptr<big.Int>, ptr<big.Int>) affineFromJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y, ptr<big.Int> _addr_z)
-        {
-            ptr<big.Int> xOut = default!;
-            ptr<big.Int> yOut = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
-            ref big.Int z = ref _addr_z.val;
+    ptr<big.Int> z = @new<big.Int>();
+    if (x.Sign() != 0 || y.Sign() != 0) {
+        z.SetInt64(1);
+    }
+    return _addr_z!;
 
-            if (z.Sign() == 0L)
-            {
-                return (@new<big.Int>(), @new<big.Int>());
-            }
+}
 
-            ptr<big.Int> zinv = @new<big.Int>().ModInverse(z, curve.P);
-            ptr<big.Int> zinvsq = @new<big.Int>().Mul(zinv, zinv);
+// affineFromJacobian reverses the Jacobian transform. See the comment at the
+// top of the file. If the point is ∞ it returns 0, 0.
+private static (ptr<big.Int>, ptr<big.Int>) affineFromJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y, ptr<big.Int> _addr_z) {
+    ptr<big.Int> xOut = default!;
+    ptr<big.Int> yOut = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
+    ref big.Int z = ref _addr_z.val;
 
-            xOut = @new<big.Int>().Mul(x, zinvsq);
-            xOut.Mod(xOut, curve.P);
-            zinvsq.Mul(zinvsq, zinv);
-            yOut = @new<big.Int>().Mul(y, zinvsq);
-            yOut.Mod(yOut, curve.P);
-            return ;
+    if (z.Sign() == 0) {
+        return (@new<big.Int>(), @new<big.Int>());
+    }
+    ptr<big.Int> zinv = @new<big.Int>().ModInverse(z, curve.P);
+    ptr<big.Int> zinvsq = @new<big.Int>().Mul(zinv, zinv);
 
-        }
+    xOut = @new<big.Int>().Mul(x, zinvsq);
+    xOut.Mod(xOut, curve.P);
+    zinvsq.Mul(zinvsq, zinv);
+    yOut = @new<big.Int>().Mul(y, zinvsq);
+    yOut.Mod(yOut, curve.P);
+    return ;
 
-        private static (ptr<big.Int>, ptr<big.Int>) Add(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x1 = ref _addr_x1.val;
-            ref big.Int y1 = ref _addr_y1.val;
-            ref big.Int x2 = ref _addr_x2.val;
-            ref big.Int y2 = ref _addr_y2.val;
+}
 
-            var z1 = zForAffine(_addr_x1, _addr_y1);
-            var z2 = zForAffine(_addr_x2, _addr_y2);
-            return _addr_curve.affineFromJacobian(curve.addJacobian(x1, y1, z1, x2, y2, z2))!;
-        }
-
-        // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
-        // (x2, y2, z2) and returns their sum, also in Jacobian form.
-        private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) addJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_z1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2, ptr<big.Int> _addr_z2)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x1 = ref _addr_x1.val;
-            ref big.Int y1 = ref _addr_y1.val;
-            ref big.Int z1 = ref _addr_z1.val;
-            ref big.Int x2 = ref _addr_x2.val;
-            ref big.Int y2 = ref _addr_y2.val;
-            ref big.Int z2 = ref _addr_z2.val;
+private static (ptr<big.Int>, ptr<big.Int>) Add(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x1 = ref _addr_x1.val;
+    ref big.Int y1 = ref _addr_y1.val;
+    ref big.Int x2 = ref _addr_x2.val;
+    ref big.Int y2 = ref _addr_y2.val;
  
-            // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#addition-add-2007-bl
-            ptr<big.Int> x3 = @new<big.Int>();
-            ptr<big.Int> y3 = @new<big.Int>();
-            ptr<big.Int> z3 = @new<big.Int>();
-            if (z1.Sign() == 0L)
-            {
-                x3.Set(x2);
-                y3.Set(y2);
-                z3.Set(z2);
-                return (_addr_x3!, _addr_y3!, _addr_z3!);
-            }
-
-            if (z2.Sign() == 0L)
-            {
-                x3.Set(x1);
-                y3.Set(y1);
-                z3.Set(z1);
-                return (_addr_x3!, _addr_y3!, _addr_z3!);
-            }
-
-            ptr<big.Int> z1z1 = @new<big.Int>().Mul(z1, z1);
-            z1z1.Mod(z1z1, curve.P);
-            ptr<big.Int> z2z2 = @new<big.Int>().Mul(z2, z2);
-            z2z2.Mod(z2z2, curve.P);
-
-            ptr<big.Int> u1 = @new<big.Int>().Mul(x1, z2z2);
-            u1.Mod(u1, curve.P);
-            ptr<big.Int> u2 = @new<big.Int>().Mul(x2, z1z1);
-            u2.Mod(u2, curve.P);
-            ptr<big.Int> h = @new<big.Int>().Sub(u2, u1);
-            var xEqual = h.Sign() == 0L;
-            if (h.Sign() == -1L)
-            {
-                h.Add(h, curve.P);
-            }
-
-            ptr<big.Int> i = @new<big.Int>().Lsh(h, 1L);
-            i.Mul(i, i);
-            ptr<big.Int> j = @new<big.Int>().Mul(h, i);
-
-            ptr<big.Int> s1 = @new<big.Int>().Mul(y1, z2);
-            s1.Mul(s1, z2z2);
-            s1.Mod(s1, curve.P);
-            ptr<big.Int> s2 = @new<big.Int>().Mul(y2, z1);
-            s2.Mul(s2, z1z1);
-            s2.Mod(s2, curve.P);
-            ptr<big.Int> r = @new<big.Int>().Sub(s2, s1);
-            if (r.Sign() == -1L)
-            {
-                r.Add(r, curve.P);
-            }
-
-            var yEqual = r.Sign() == 0L;
-            if (xEqual && yEqual)
-            {
-                return _addr_curve.doubleJacobian(x1, y1, z1)!;
-            }
-
-            r.Lsh(r, 1L);
-            ptr<big.Int> v = @new<big.Int>().Mul(u1, i);
-
-            x3.Set(r);
-            x3.Mul(x3, x3);
-            x3.Sub(x3, j);
-            x3.Sub(x3, v);
-            x3.Sub(x3, v);
-            x3.Mod(x3, curve.P);
-
-            y3.Set(r);
-            v.Sub(v, x3);
-            y3.Mul(y3, v);
-            s1.Mul(s1, j);
-            s1.Lsh(s1, 1L);
-            y3.Sub(y3, s1);
-            y3.Mod(y3, curve.P);
-
-            z3.Add(z1, z2);
-            z3.Mul(z3, z3);
-            z3.Sub(z3, z1z1);
-            z3.Sub(z3, z2z2);
-            z3.Mul(z3, h);
-            z3.Mod(z3, curve.P);
-
-            return (_addr_x3!, _addr_y3!, _addr_z3!);
-
-        }
-
-        private static (ptr<big.Int>, ptr<big.Int>) Double(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x1 = ref _addr_x1.val;
-            ref big.Int y1 = ref _addr_y1.val;
-
-            var z1 = zForAffine(_addr_x1, _addr_y1);
-            return _addr_curve.affineFromJacobian(curve.doubleJacobian(x1, y1, z1))!;
-        }
-
-        // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
-        // returns its double, also in Jacobian form.
-        private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) doubleJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y, ptr<big.Int> _addr_z)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
-            ref big.Int z = ref _addr_z.val;
- 
-            // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
-            ptr<big.Int> delta = @new<big.Int>().Mul(z, z);
-            delta.Mod(delta, curve.P);
-            ptr<big.Int> gamma = @new<big.Int>().Mul(y, y);
-            gamma.Mod(gamma, curve.P);
-            ptr<big.Int> alpha = @new<big.Int>().Sub(x, delta);
-            if (alpha.Sign() == -1L)
-            {
-                alpha.Add(alpha, curve.P);
-            }
-
-            ptr<big.Int> alpha2 = @new<big.Int>().Add(x, delta);
-            alpha.Mul(alpha, alpha2);
-            alpha2.Set(alpha);
-            alpha.Lsh(alpha, 1L);
-            alpha.Add(alpha, alpha2);
-
-            var beta = alpha2.Mul(x, gamma);
-
-            ptr<big.Int> x3 = @new<big.Int>().Mul(alpha, alpha);
-            ptr<big.Int> beta8 = @new<big.Int>().Lsh(beta, 3L);
-            beta8.Mod(beta8, curve.P);
-            x3.Sub(x3, beta8);
-            if (x3.Sign() == -1L)
-            {
-                x3.Add(x3, curve.P);
-            }
-
-            x3.Mod(x3, curve.P);
-
-            ptr<big.Int> z3 = @new<big.Int>().Add(y, z);
-            z3.Mul(z3, z3);
-            z3.Sub(z3, gamma);
-            if (z3.Sign() == -1L)
-            {
-                z3.Add(z3, curve.P);
-            }
-
-            z3.Sub(z3, delta);
-            if (z3.Sign() == -1L)
-            {
-                z3.Add(z3, curve.P);
-            }
-
-            z3.Mod(z3, curve.P);
-
-            beta.Lsh(beta, 2L);
-            beta.Sub(beta, x3);
-            if (beta.Sign() == -1L)
-            {
-                beta.Add(beta, curve.P);
-            }
-
-            var y3 = alpha.Mul(alpha, beta);
-
-            gamma.Mul(gamma, gamma);
-            gamma.Lsh(gamma, 3L);
-            gamma.Mod(gamma, curve.P);
-
-            y3.Sub(y3, gamma);
-            if (y3.Sign() == -1L)
-            {
-                y3.Add(y3, curve.P);
-            }
-
-            y3.Mod(y3, curve.P);
-
-            return (_addr_x3!, _addr_y3!, _addr_z3!);
-
-        }
-
-        private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_Bx, ptr<big.Int> _addr_By, slice<byte> k)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-            ref big.Int Bx = ref _addr_Bx.val;
-            ref big.Int By = ref _addr_By.val;
-
-            ptr<big.Int> Bz = @new<big.Int>().SetInt64(1L);
-            ptr<big.Int> x = @new<big.Int>();
-            ptr<big.Int> y = @new<big.Int>();
-            ptr<big.Int> z = @new<big.Int>();
-
-            foreach (var (_, byte) in k)
-            {
-                for (long bitNum = 0L; bitNum < 8L; bitNum++)
-                {
-                    x, y, z = curve.doubleJacobian(x, y, z);
-                    if (byte & 0x80UL == 0x80UL)
-                    {
-                        x, y, z = curve.addJacobian(Bx, By, Bz, x, y, z);
-                    }
-
-                    byte <<= 1L;
-
-                }
-
-
-            }
-            return _addr_curve.affineFromJacobian(x, y, z)!;
-
-        }
-
-        private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this ptr<CurveParams> _addr_curve, slice<byte> k)
-        {
-            ptr<big.Int> _p0 = default!;
-            ptr<big.Int> _p0 = default!;
-            ref CurveParams curve = ref _addr_curve.val;
-
-            return _addr_curve.ScalarMult(curve.Gx, curve.Gy, k)!;
-        }
-
-        private static byte mask = new slice<byte>(new byte[] { 0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f });
-
-        // GenerateKey returns a public/private key pair. The private key is
-        // generated using the given reader, which must return random data.
-        public static (slice<byte>, ptr<big.Int>, ptr<big.Int>, error) GenerateKey(Curve curve, io.Reader rand)
-        {
-            slice<byte> priv = default;
-            ptr<big.Int> x = default!;
-            ptr<big.Int> y = default!;
-            error err = default!;
-
-            var N = curve.Params().N;
-            var bitSize = N.BitLen();
-            var byteLen = (bitSize + 7L) / 8L;
-            priv = make_slice<byte>(byteLen);
-
-            while (x == null)
-            {
-                _, err = io.ReadFull(rand, priv);
-                if (err != null)
-                {
-                    return ;
-                } 
-                // We have to mask off any excess bits in the case that the size of the
-                // underlying field is not a whole number of bytes.
-                priv[0L] &= mask[bitSize % 8L]; 
-                // This is because, in tests, rand will return all zeros and we don't
-                // want to get the point at infinity and loop forever.
-                priv[1L] ^= 0x42UL; 
-
-                // If the scalar is out of range, sample another random number.
-                if (@new<big.Int>().SetBytes(priv).Cmp(N) >= 0L)
-                {
-                    continue;
-                }
-
-                x, y = curve.ScalarBaseMult(priv);
-
-            }
-
-            return ;
-
-        }
-
-        // Marshal converts a point on the curve into the uncompressed form specified in
-        // section 4.3.6 of ANSI X9.62.
-        public static slice<byte> Marshal(Curve curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y)
-        {
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
-
-            var byteLen = (curve.Params().BitSize + 7L) / 8L;
-
-            var ret = make_slice<byte>(1L + 2L * byteLen);
-            ret[0L] = 4L; // uncompressed point
-
-            x.FillBytes(ret[1L..1L + byteLen]);
-            y.FillBytes(ret[1L + byteLen..1L + 2L * byteLen]);
-
-            return ret;
-
-        }
-
-        // MarshalCompressed converts a point on the curve into the compressed form
-        // specified in section 4.3.6 of ANSI X9.62.
-        public static slice<byte> MarshalCompressed(Curve curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y)
-        {
-            ref big.Int x = ref _addr_x.val;
-            ref big.Int y = ref _addr_y.val;
-
-            var byteLen = (curve.Params().BitSize + 7L) / 8L;
-            var compressed = make_slice<byte>(1L + byteLen);
-            compressed[0L] = byte(y.Bit(0L)) | 2L;
-            x.FillBytes(compressed[1L..]);
-            return compressed;
-        }
-
-        // Unmarshal converts a point, serialized by Marshal, into an x, y pair.
-        // It is an error if the point is not in uncompressed form or is not on the curve.
-        // On error, x = nil.
-        public static (ptr<big.Int>, ptr<big.Int>) Unmarshal(Curve curve, slice<byte> data)
-        {
-            ptr<big.Int> x = default!;
-            ptr<big.Int> y = default!;
-
-            var byteLen = (curve.Params().BitSize + 7L) / 8L;
-            if (len(data) != 1L + 2L * byteLen)
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            if (data[0L] != 4L)
-            { // uncompressed form
-                return (_addr_null!, _addr_null!);
-
-            }
-
-            var p = curve.Params().P;
-            x = @new<big.Int>().SetBytes(data[1L..1L + byteLen]);
-            y = @new<big.Int>().SetBytes(data[1L + byteLen..]);
-            if (x.Cmp(p) >= 0L || y.Cmp(p) >= 0L)
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            if (!curve.IsOnCurve(x, y))
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            return ;
-
-        }
-
-        // UnmarshalCompressed converts a point, serialized by MarshalCompressed, into an x, y pair.
-        // It is an error if the point is not in compressed form or is not on the curve.
-        // On error, x = nil.
-        public static (ptr<big.Int>, ptr<big.Int>) UnmarshalCompressed(Curve curve, slice<byte> data)
-        {
-            ptr<big.Int> x = default!;
-            ptr<big.Int> y = default!;
-
-            var byteLen = (curve.Params().BitSize + 7L) / 8L;
-            if (len(data) != 1L + byteLen)
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            if (data[0L] != 2L && data[0L] != 3L)
-            { // compressed form
-                return (_addr_null!, _addr_null!);
-
-            }
-
-            var p = curve.Params().P;
-            x = @new<big.Int>().SetBytes(data[1L..]);
-            if (x.Cmp(p) >= 0L)
-            {
-                return (_addr_null!, _addr_null!);
-            } 
-            // y² = x³ - 3x + b
-            y = curve.Params().polynomial(x);
-            y = y.ModSqrt(y, p);
-            if (y == null)
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            if (byte(y.Bit(0L)) != data[0L] & 1L)
-            {
-                y.Neg(y).Mod(y, p);
-            }
-
-            if (!curve.IsOnCurve(x, y))
-            {
-                return (_addr_null!, _addr_null!);
-            }
-
-            return ;
-
-        }
-
-        private static sync.Once initonce = default;
-        private static ptr<CurveParams> p384;
-        private static ptr<CurveParams> p521;
-
-        private static void initAll()
-        {
-            initP224();
-            initP256();
-            initP384();
-            initP521();
-        }
-
-        private static void initP384()
-        { 
-            // See FIPS 186-3, section D.2.4
-            p384 = addr(new CurveParams(Name:"P-384"));
-            p384.P, _ = @new<big.Int>().SetString("39402006196394479212279040100143613805079739270465446667948293404245721771496870329047266088258938001861606973112319", 10L);
-            p384.N, _ = @new<big.Int>().SetString("39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643", 10L);
-            p384.B, _ = @new<big.Int>().SetString("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16L);
-            p384.Gx, _ = @new<big.Int>().SetString("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16L);
-            p384.Gy, _ = @new<big.Int>().SetString("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16L);
-            p384.BitSize = 384L;
-
-        }
-
-        private static void initP521()
-        { 
-            // See FIPS 186-3, section D.2.5
-            p521 = addr(new CurveParams(Name:"P-521"));
-            p521.P, _ = @new<big.Int>().SetString("6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151", 10L);
-            p521.N, _ = @new<big.Int>().SetString("6864797660130609714981900799081393217269435300143305409394463459185543183397655394245057746333217197532963996371363321113864768612440380340372808892707005449", 10L);
-            p521.B, _ = @new<big.Int>().SetString("051953eb9618e1c9a1f929a21a0b68540eea2da725b99b315f3b8b489918ef109e156193951ec7e937b1652c0bd3bb1bf073573df883d2c34f1ef451fd46b503f00", 16L);
-            p521.Gx, _ = @new<big.Int>().SetString("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16L);
-            p521.Gy, _ = @new<big.Int>().SetString("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16L);
-            p521.BitSize = 521L;
-
-        }
-
-        // P256 returns a Curve which implements NIST P-256 (FIPS 186-3, section D.2.3),
-        // also known as secp256r1 or prime256v1. The CurveParams.Name of this Curve is
-        // "P-256".
-        //
-        // Multiple invocations of this function will return the same value, so it can
-        // be used for equality checks and switch statements.
-        //
-        // The cryptographic operations are implemented using constant-time algorithms.
-        public static Curve P256()
-        {
-            initonce.Do(initAll);
-            return p256;
-        }
-
-        // P384 returns a Curve which implements NIST P-384 (FIPS 186-3, section D.2.4),
-        // also known as secp384r1. The CurveParams.Name of this Curve is "P-384".
-        //
-        // Multiple invocations of this function will return the same value, so it can
-        // be used for equality checks and switch statements.
-        //
-        // The cryptographic operations do not use constant-time algorithms.
-        public static Curve P384()
-        {
-            initonce.Do(initAll);
-            return p384;
-        }
-
-        // P521 returns a Curve which implements NIST P-521 (FIPS 186-3, section D.2.5),
-        // also known as secp521r1. The CurveParams.Name of this Curve is "P-521".
-        //
-        // Multiple invocations of this function will return the same value, so it can
-        // be used for equality checks and switch statements.
-        //
-        // The cryptographic operations do not use constant-time algorithms.
-        public static Curve P521()
-        {
-            initonce.Do(initAll);
-            return p521;
+    // If there is a dedicated constant-time implementation for this curve operation,
+    // use that instead of the generic one.
+    {
+        var (specific, ok) = matchesSpecificCurve(_addr_curve, p224, p521);
+
+        if (ok) {
+            return _addr_specific.Add(x1, y1, x2, y2)!;
         }
     }
-}}
+
+
+    var z1 = zForAffine(_addr_x1, _addr_y1);
+    var z2 = zForAffine(_addr_x2, _addr_y2);
+    return _addr_curve.affineFromJacobian(curve.addJacobian(x1, y1, z1, x2, y2, z2))!;
+
+}
+
+// addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
+// (x2, y2, z2) and returns their sum, also in Jacobian form.
+private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) addJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_z1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2, ptr<big.Int> _addr_z2) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x1 = ref _addr_x1.val;
+    ref big.Int y1 = ref _addr_y1.val;
+    ref big.Int z1 = ref _addr_z1.val;
+    ref big.Int x2 = ref _addr_x2.val;
+    ref big.Int y2 = ref _addr_y2.val;
+    ref big.Int z2 = ref _addr_z2.val;
+ 
+    // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#addition-add-2007-bl
+    ptr<big.Int> x3 = @new<big.Int>();
+    ptr<big.Int> y3 = @new<big.Int>();
+    ptr<big.Int> z3 = @new<big.Int>();
+    if (z1.Sign() == 0) {
+        x3.Set(x2);
+        y3.Set(y2);
+        z3.Set(z2);
+        return (_addr_x3!, _addr_y3!, _addr_z3!);
+    }
+    if (z2.Sign() == 0) {
+        x3.Set(x1);
+        y3.Set(y1);
+        z3.Set(z1);
+        return (_addr_x3!, _addr_y3!, _addr_z3!);
+    }
+    ptr<big.Int> z1z1 = @new<big.Int>().Mul(z1, z1);
+    z1z1.Mod(z1z1, curve.P);
+    ptr<big.Int> z2z2 = @new<big.Int>().Mul(z2, z2);
+    z2z2.Mod(z2z2, curve.P);
+
+    ptr<big.Int> u1 = @new<big.Int>().Mul(x1, z2z2);
+    u1.Mod(u1, curve.P);
+    ptr<big.Int> u2 = @new<big.Int>().Mul(x2, z1z1);
+    u2.Mod(u2, curve.P);
+    ptr<big.Int> h = @new<big.Int>().Sub(u2, u1);
+    var xEqual = h.Sign() == 0;
+    if (h.Sign() == -1) {
+        h.Add(h, curve.P);
+    }
+    ptr<big.Int> i = @new<big.Int>().Lsh(h, 1);
+    i.Mul(i, i);
+    ptr<big.Int> j = @new<big.Int>().Mul(h, i);
+
+    ptr<big.Int> s1 = @new<big.Int>().Mul(y1, z2);
+    s1.Mul(s1, z2z2);
+    s1.Mod(s1, curve.P);
+    ptr<big.Int> s2 = @new<big.Int>().Mul(y2, z1);
+    s2.Mul(s2, z1z1);
+    s2.Mod(s2, curve.P);
+    ptr<big.Int> r = @new<big.Int>().Sub(s2, s1);
+    if (r.Sign() == -1) {
+        r.Add(r, curve.P);
+    }
+    var yEqual = r.Sign() == 0;
+    if (xEqual && yEqual) {
+        return _addr_curve.doubleJacobian(x1, y1, z1)!;
+    }
+    r.Lsh(r, 1);
+    ptr<big.Int> v = @new<big.Int>().Mul(u1, i);
+
+    x3.Set(r);
+    x3.Mul(x3, x3);
+    x3.Sub(x3, j);
+    x3.Sub(x3, v);
+    x3.Sub(x3, v);
+    x3.Mod(x3, curve.P);
+
+    y3.Set(r);
+    v.Sub(v, x3);
+    y3.Mul(y3, v);
+    s1.Mul(s1, j);
+    s1.Lsh(s1, 1);
+    y3.Sub(y3, s1);
+    y3.Mod(y3, curve.P);
+
+    z3.Add(z1, z2);
+    z3.Mul(z3, z3);
+    z3.Sub(z3, z1z1);
+    z3.Sub(z3, z2z2);
+    z3.Mul(z3, h);
+    z3.Mod(z3, curve.P);
+
+    return (_addr_x3!, _addr_y3!, _addr_z3!);
+
+}
+
+private static (ptr<big.Int>, ptr<big.Int>) Double(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x1 = ref _addr_x1.val;
+    ref big.Int y1 = ref _addr_y1.val;
+ 
+    // If there is a dedicated constant-time implementation for this curve operation,
+    // use that instead of the generic one.
+    {
+        var (specific, ok) = matchesSpecificCurve(_addr_curve, p224, p521);
+
+        if (ok) {
+            return _addr_specific.Double(x1, y1)!;
+        }
+    }
+
+
+    var z1 = zForAffine(_addr_x1, _addr_y1);
+    return _addr_curve.affineFromJacobian(curve.doubleJacobian(x1, y1, z1))!;
+
+}
+
+// doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
+// returns its double, also in Jacobian form.
+private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) doubleJacobian(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y, ptr<big.Int> _addr_z) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
+    ref big.Int z = ref _addr_z.val;
+ 
+    // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
+    ptr<big.Int> delta = @new<big.Int>().Mul(z, z);
+    delta.Mod(delta, curve.P);
+    ptr<big.Int> gamma = @new<big.Int>().Mul(y, y);
+    gamma.Mod(gamma, curve.P);
+    ptr<big.Int> alpha = @new<big.Int>().Sub(x, delta);
+    if (alpha.Sign() == -1) {
+        alpha.Add(alpha, curve.P);
+    }
+    ptr<big.Int> alpha2 = @new<big.Int>().Add(x, delta);
+    alpha.Mul(alpha, alpha2);
+    alpha2.Set(alpha);
+    alpha.Lsh(alpha, 1);
+    alpha.Add(alpha, alpha2);
+
+    var beta = alpha2.Mul(x, gamma);
+
+    ptr<big.Int> x3 = @new<big.Int>().Mul(alpha, alpha);
+    ptr<big.Int> beta8 = @new<big.Int>().Lsh(beta, 3);
+    beta8.Mod(beta8, curve.P);
+    x3.Sub(x3, beta8);
+    if (x3.Sign() == -1) {
+        x3.Add(x3, curve.P);
+    }
+    x3.Mod(x3, curve.P);
+
+    ptr<big.Int> z3 = @new<big.Int>().Add(y, z);
+    z3.Mul(z3, z3);
+    z3.Sub(z3, gamma);
+    if (z3.Sign() == -1) {
+        z3.Add(z3, curve.P);
+    }
+    z3.Sub(z3, delta);
+    if (z3.Sign() == -1) {
+        z3.Add(z3, curve.P);
+    }
+    z3.Mod(z3, curve.P);
+
+    beta.Lsh(beta, 2);
+    beta.Sub(beta, x3);
+    if (beta.Sign() == -1) {
+        beta.Add(beta, curve.P);
+    }
+    var y3 = alpha.Mul(alpha, beta);
+
+    gamma.Mul(gamma, gamma);
+    gamma.Lsh(gamma, 3);
+    gamma.Mod(gamma, curve.P);
+
+    y3.Sub(y3, gamma);
+    if (y3.Sign() == -1) {
+        y3.Add(y3, curve.P);
+    }
+    y3.Mod(y3, curve.P);
+
+    return (_addr_x3!, _addr_y3!, _addr_z3!);
+
+}
+
+private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_Bx, ptr<big.Int> _addr_By, slice<byte> k) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+    ref big.Int Bx = ref _addr_Bx.val;
+    ref big.Int By = ref _addr_By.val;
+ 
+    // If there is a dedicated constant-time implementation for this curve operation,
+    // use that instead of the generic one.
+    {
+        var (specific, ok) = matchesSpecificCurve(_addr_curve, p224, p256, p521);
+
+        if (ok) {
+            return _addr_specific.ScalarMult(Bx, By, k)!;
+        }
+    }
+
+
+    ptr<big.Int> Bz = @new<big.Int>().SetInt64(1);
+    ptr<big.Int> x = @new<big.Int>();
+    ptr<big.Int> y = @new<big.Int>();
+    ptr<big.Int> z = @new<big.Int>();
+
+    foreach (var (_, byte) in k) {
+        for (nint bitNum = 0; bitNum < 8; bitNum++) {
+            x, y, z = curve.doubleJacobian(x, y, z);
+            if (byte & 0x80 == 0x80) {
+                x, y, z = curve.addJacobian(Bx, By, Bz, x, y, z);
+            }
+            byte<<=1;
+        }
+    }    return _addr_curve.affineFromJacobian(x, y, z)!;
+
+}
+
+private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this ptr<CurveParams> _addr_curve, slice<byte> k) {
+    ptr<big.Int> _p0 = default!;
+    ptr<big.Int> _p0 = default!;
+    ref CurveParams curve = ref _addr_curve.val;
+ 
+    // If there is a dedicated constant-time implementation for this curve operation,
+    // use that instead of the generic one.
+    {
+        var (specific, ok) = matchesSpecificCurve(_addr_curve, p224, p256, p521);
+
+        if (ok) {
+            return _addr_specific.ScalarBaseMult(k)!;
+        }
+    }
+
+
+    return _addr_curve.ScalarMult(curve.Gx, curve.Gy, k)!;
+
+}
+
+private static byte mask = new slice<byte>(new byte[] { 0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f });
+
+// GenerateKey returns a public/private key pair. The private key is
+// generated using the given reader, which must return random data.
+public static (slice<byte>, ptr<big.Int>, ptr<big.Int>, error) GenerateKey(Curve curve, io.Reader rand) {
+    slice<byte> priv = default;
+    ptr<big.Int> x = default!;
+    ptr<big.Int> y = default!;
+    error err = default!;
+
+    var N = curve.Params().N;
+    var bitSize = N.BitLen();
+    var byteLen = (bitSize + 7) / 8;
+    priv = make_slice<byte>(byteLen);
+
+    while (x == null) {
+        _, err = io.ReadFull(rand, priv);
+        if (err != null) {
+            return ;
+        }
+        priv[0] &= mask[bitSize % 8]; 
+        // This is because, in tests, rand will return all zeros and we don't
+        // want to get the point at infinity and loop forever.
+        priv[1] ^= 0x42; 
+
+        // If the scalar is out of range, sample another random number.
+        if (@new<big.Int>().SetBytes(priv).Cmp(N) >= 0) {
+            continue;
+        }
+        x, y = curve.ScalarBaseMult(priv);
+
+    }
+    return ;
+
+}
+
+// Marshal converts a point on the curve into the uncompressed form specified in
+// section 4.3.6 of ANSI X9.62.
+public static slice<byte> Marshal(Curve curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y) {
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
+
+    var byteLen = (curve.Params().BitSize + 7) / 8;
+
+    var ret = make_slice<byte>(1 + 2 * byteLen);
+    ret[0] = 4; // uncompressed point
+
+    x.FillBytes(ret[(int)1..(int)1 + byteLen]);
+    y.FillBytes(ret[(int)1 + byteLen..(int)1 + 2 * byteLen]);
+
+    return ret;
+
+}
+
+// MarshalCompressed converts a point on the curve into the compressed form
+// specified in section 4.3.6 of ANSI X9.62.
+public static slice<byte> MarshalCompressed(Curve curve, ptr<big.Int> _addr_x, ptr<big.Int> _addr_y) {
+    ref big.Int x = ref _addr_x.val;
+    ref big.Int y = ref _addr_y.val;
+
+    var byteLen = (curve.Params().BitSize + 7) / 8;
+    var compressed = make_slice<byte>(1 + byteLen);
+    compressed[0] = byte(y.Bit(0)) | 2;
+    x.FillBytes(compressed[(int)1..]);
+    return compressed;
+}
+
+// Unmarshal converts a point, serialized by Marshal, into an x, y pair.
+// It is an error if the point is not in uncompressed form or is not on the curve.
+// On error, x = nil.
+public static (ptr<big.Int>, ptr<big.Int>) Unmarshal(Curve curve, slice<byte> data) {
+    ptr<big.Int> x = default!;
+    ptr<big.Int> y = default!;
+
+    var byteLen = (curve.Params().BitSize + 7) / 8;
+    if (len(data) != 1 + 2 * byteLen) {
+        return (_addr_null!, _addr_null!);
+    }
+    if (data[0] != 4) { // uncompressed form
+        return (_addr_null!, _addr_null!);
+
+    }
+    var p = curve.Params().P;
+    x = @new<big.Int>().SetBytes(data[(int)1..(int)1 + byteLen]);
+    y = @new<big.Int>().SetBytes(data[(int)1 + byteLen..]);
+    if (x.Cmp(p) >= 0 || y.Cmp(p) >= 0) {
+        return (_addr_null!, _addr_null!);
+    }
+    if (!curve.IsOnCurve(x, y)) {
+        return (_addr_null!, _addr_null!);
+    }
+    return ;
+
+}
+
+// UnmarshalCompressed converts a point, serialized by MarshalCompressed, into an x, y pair.
+// It is an error if the point is not in compressed form or is not on the curve.
+// On error, x = nil.
+public static (ptr<big.Int>, ptr<big.Int>) UnmarshalCompressed(Curve curve, slice<byte> data) {
+    ptr<big.Int> x = default!;
+    ptr<big.Int> y = default!;
+
+    var byteLen = (curve.Params().BitSize + 7) / 8;
+    if (len(data) != 1 + byteLen) {
+        return (_addr_null!, _addr_null!);
+    }
+    if (data[0] != 2 && data[0] != 3) { // compressed form
+        return (_addr_null!, _addr_null!);
+
+    }
+    var p = curve.Params().P;
+    x = @new<big.Int>().SetBytes(data[(int)1..]);
+    if (x.Cmp(p) >= 0) {
+        return (_addr_null!, _addr_null!);
+    }
+    y = curve.Params().polynomial(x);
+    y = y.ModSqrt(y, p);
+    if (y == null) {
+        return (_addr_null!, _addr_null!);
+    }
+    if (byte(y.Bit(0)) != data[0] & 1) {
+        y.Neg(y).Mod(y, p);
+    }
+    if (!curve.IsOnCurve(x, y)) {
+        return (_addr_null!, _addr_null!);
+    }
+    return ;
+
+}
+
+private static sync.Once initonce = default;
+private static ptr<CurveParams> p384;
+
+private static void initAll() {
+    initP224();
+    initP256();
+    initP384();
+    initP521();
+}
+
+private static void initP384() { 
+    // See FIPS 186-3, section D.2.4
+    p384 = addr(new CurveParams(Name:"P-384"));
+    p384.P, _ = @new<big.Int>().SetString("39402006196394479212279040100143613805079739270465446667948293404245721771496870329047266088258938001861606973112319", 10);
+    p384.N, _ = @new<big.Int>().SetString("39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643", 10);
+    p384.B, _ = @new<big.Int>().SetString("b3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef", 16);
+    p384.Gx, _ = @new<big.Int>().SetString("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
+    p384.Gy, _ = @new<big.Int>().SetString("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
+    p384.BitSize = 384;
+
+}
+
+// P256 returns a Curve which implements NIST P-256 (FIPS 186-3, section D.2.3),
+// also known as secp256r1 or prime256v1. The CurveParams.Name of this Curve is
+// "P-256".
+//
+// Multiple invocations of this function will return the same value, so it can
+// be used for equality checks and switch statements.
+//
+// ScalarMult and ScalarBaseMult are implemented using constant-time algorithms.
+public static Curve P256() {
+    initonce.Do(initAll);
+    return p256;
+}
+
+// P384 returns a Curve which implements NIST P-384 (FIPS 186-3, section D.2.4),
+// also known as secp384r1. The CurveParams.Name of this Curve is "P-384".
+//
+// Multiple invocations of this function will return the same value, so it can
+// be used for equality checks and switch statements.
+//
+// The cryptographic operations do not use constant-time algorithms.
+public static Curve P384() {
+    initonce.Do(initAll);
+    return p384;
+}
+
+// P521 returns a Curve which implements NIST P-521 (FIPS 186-3, section D.2.5),
+// also known as secp521r1. The CurveParams.Name of this Curve is "P-521".
+//
+// Multiple invocations of this function will return the same value, so it can
+// be used for equality checks and switch statements.
+//
+// The cryptographic operations are implemented using constant-time algorithms.
+public static Curve P521() {
+    initonce.Do(initAll);
+    return p521;
+}
+
+} // end elliptic_package

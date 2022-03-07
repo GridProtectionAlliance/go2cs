@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:23 UTC
+//     Generated on 2022 March 06 23:23:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -53,7 +52,7 @@ namespace @internal
                 this.Comment = default;
             }
 
-            public source(slice<@string> Sources = default, @string ExecName = default, @string BuildID = default, slice<@string> Base = default, bool DiffBase = default, bool Normalize = default, long Seconds = default, long Timeout = default, @string Symbolize = default, @string HTTPHostport = default, bool HTTPDisableBrowser = default, @string Comment = default)
+            public source(slice<@string> Sources = default, @string ExecName = default, @string BuildID = default, slice<@string> Base = default, bool DiffBase = default, bool Normalize = default, nint Seconds = default, nint Timeout = default, @string Symbolize = default, @string HTTPHostport = default, bool HTTPDisableBrowser = default, @string Comment = default)
             {
                 this.Sources = Sources;
                 this.ExecName = ExecName;

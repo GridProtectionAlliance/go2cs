@@ -5,43 +5,34 @@
 // Functions to access/create device major and minor numbers matching the
 // encoding used in NetBSD's sys/types.h header.
 
-// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:30 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_netbsd.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_netbsd.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Major returns the major component of a NetBSD device number.
-        public static uint Major(ulong dev)
-        {
-            return uint32((dev & 0x000fff00UL) >> (int)(8L));
-        }
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        // Minor returns the minor component of a NetBSD device number.
-        public static uint Minor(ulong dev)
-        {
-            var minor = uint32((dev & 0x000000ffUL) >> (int)(0L));
-            minor |= uint32((dev & 0xfff00000UL) >> (int)(12L));
-            return minor;
-        }
+public static partial class unix_package {
 
-        // Mkdev returns a NetBSD device number generated from the given major and minor
-        // components.
-        public static ulong Mkdev(uint major, uint minor)
-        {
-            var dev = (uint64(major) << (int)(8L)) & 0x000fff00UL;
-            dev |= (uint64(minor) << (int)(12L)) & 0xfff00000UL;
-            dev |= (uint64(minor) << (int)(0L)) & 0x000000ffUL;
-            return dev;
-        }
-    }
-}}}}}}
+    // Major returns the major component of a NetBSD device number.
+public static uint Major(ulong dev) {
+    return uint32((dev & 0x000fff00) >> 8);
+}
+
+// Minor returns the minor component of a NetBSD device number.
+public static uint Minor(ulong dev) {
+    var minor = uint32((dev & 0x000000ff) >> 0);
+    minor |= uint32((dev & 0xfff00000) >> 12);
+    return minor;
+}
+
+// Mkdev returns a NetBSD device number generated from the given major and minor
+// components.
+public static ulong Mkdev(uint major, uint minor) {
+    var dev = (uint64(major) << 8) & 0x000fff00;
+    dev |= (uint64(minor) << 12) & 0xfff00000;
+    dev |= (uint64(minor) << 0) & 0x000000ff;
+    return dev;
+}
+
+} // end unix_package

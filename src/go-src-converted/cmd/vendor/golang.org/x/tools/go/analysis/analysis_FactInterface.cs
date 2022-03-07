@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:15 UTC
+//     Generated on 2022 March 06 23:31:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -61,7 +60,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,7 +86,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AFactByPtr is null || !m_target_is_ptr)
@@ -96,12 +95,11 @@ namespace go
                     return;
                 }
 
-                s_AFactByPtr(m_target_ptr);
+                s_AFactByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Fact()
@@ -112,12 +110,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AFact");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AFactByPtr = extensionMethod.CreateStaticDelegate(typeof(AFactByPtr)) as AFactByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AFact");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AFactByVal = extensionMethod.CreateStaticDelegate(typeof(AFactByVal)) as AFactByVal;
 
                 if (s_AFactByPtr is null && s_AFactByVal is null)

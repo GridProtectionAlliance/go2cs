@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:52 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -26,7 +25,6 @@ using log = go.log_package;
 using bits = go.math.bits_package;
 using os = go.os_package;
 using sort = go.sort_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -51,11 +49,14 @@ namespace @internal
                 this.flags = default;
                 this.pkgprefix = default;
                 this.syms = default;
+                this.pkg = default;
                 this.ndef = default;
+                this.nhashed64def = default;
+                this.nhasheddef = default;
                 this.objidx = default;
             }
 
-            public oReader(ref ptr<goobj2.Reader> Reader> = default, ref ptr<sym.CompilationUnit> unit = default, long version = default, uint flags = default, @string pkgprefix = default, slice<Sym> syms = default, long ndef = default, uint objidx = default)
+            public oReader(ref ptr<goobj.Reader> Reader> = default, ref ptr<sym.CompilationUnit> unit = default, nint version = default, uint flags = default, @string pkgprefix = default, slice<Sym> syms = default, slice<uint> pkg = default, nint ndef = default, nint nhashed64def = default, nint nhasheddef = default, uint objidx = default)
             {
                 this.Reader> = Reader>;
                 this.unit = unit;
@@ -63,7 +64,10 @@ namespace @internal
                 this.flags = flags;
                 this.pkgprefix = pkgprefix;
                 this.syms = syms;
+                this.pkg = pkg;
                 this.ndef = ndef;
+                this.nhashed64def = nhashed64def;
+                this.nhasheddef = nhasheddef;
                 this.objidx = objidx;
             }
 
@@ -87,7 +91,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static oReader oReader_cast(dynamic value)
         {
-            return new oReader(ref value.Reader>, ref value.unit, value.version, value.flags, value.pkgprefix, value.syms, value.ndef, value.objidx);
+            return new oReader(ref value.Reader>, ref value.unit, value.version, value.flags, value.pkgprefix, value.syms, value.pkg, value.ndef, value.nhashed64def, value.nhasheddef, value.objidx);
         }
     }
 }}}}

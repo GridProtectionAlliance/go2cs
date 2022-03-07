@@ -4,24 +4,19 @@
 
 // This file contains tests for the suspicious shift checker.
 
-// package shift -- go2cs converted at 2020 October 09 06:05:12 UTC
+// package shift -- go2cs converted at 2022 March 06 23:35:21 UTC
 // import "cmd/vet/testdata/shift" ==> using shift = go.cmd.vet.testdata.shift_package
-// Original source: C:\Go\src\cmd\vet\testdata\shift\shift.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\shift\shift.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class shift_package
-    {
-        public static void ShiftTest()
-        {
-            sbyte i8 = default;
-            _ = i8 << (int)(7L);
-            _ = (i8 + 1L) << (int)(8L); // ERROR ".i8 . 1. .8 bits. too small for shift of 8"
-        }
-    }
-}}}}
+namespace go.cmd.vet.testdata;
+
+public static partial class shift_package {
+
+public static void ShiftTest() {
+    sbyte i8 = default;
+    _ = i8 << 7;
+    _ = (i8 + 1) << 8; // ERROR ".i8 . 1. .8 bits. too small for shift of 8"
+}
+
+} // end shift_package

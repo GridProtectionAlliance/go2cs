@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:00 UTC
+//     Generated on 2022 March 06 22:12:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.sync.atomic_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,7 +75,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GetenvByPtr is null || !m_target_is_ptr)
@@ -85,9 +84,8 @@ namespace @internal
                     return;
                 }
 
-                s_GetenvByPtr(m_target_ptr, key);
+                s_GetenvByPtr(m_target_ptr!, key);
                 return;
-                
             }
 
             private delegate void StatByPtr(ptr<T> value, @string file);
@@ -101,7 +99,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
@@ -110,9 +108,8 @@ namespace @internal
                     return;
                 }
 
-                s_StatByPtr(m_target_ptr, file);
+                s_StatByPtr(m_target_ptr!, file);
                 return;
-                
             }
 
             private delegate void OpenByPtr(ptr<T> value, @string file);
@@ -126,7 +123,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OpenByPtr is null || !m_target_is_ptr)
@@ -135,9 +132,8 @@ namespace @internal
                     return;
                 }
 
-                s_OpenByPtr(m_target_ptr, file);
+                s_OpenByPtr(m_target_ptr!, file);
                 return;
-                
             }
 
             private delegate void ChdirByPtr(ptr<T> value, @string dir);
@@ -151,7 +147,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ChdirByPtr is null || !m_target_is_ptr)
@@ -160,12 +156,11 @@ namespace @internal
                     return;
                 }
 
-                s_ChdirByPtr(m_target_ptr, dir);
+                s_ChdirByPtr(m_target_ptr!, dir);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Interface()
@@ -176,12 +171,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Getenv");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetenvByPtr = extensionMethod.CreateStaticDelegate(typeof(GetenvByPtr)) as GetenvByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Getenv");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetenvByVal = extensionMethod.CreateStaticDelegate(typeof(GetenvByVal)) as GetenvByVal;
 
                 if (s_GetenvByPtr is null && s_GetenvByVal is null)
@@ -189,12 +184,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)
@@ -202,12 +197,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
                 if (s_OpenByPtr is null && s_OpenByVal is null)
@@ -215,12 +210,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Chdir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ChdirByPtr = extensionMethod.CreateStaticDelegate(typeof(ChdirByPtr)) as ChdirByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Chdir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ChdirByVal = extensionMethod.CreateStaticDelegate(typeof(ChdirByVal)) as ChdirByVal;
 
                 if (s_ChdirByPtr is null && s_ChdirByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
                 this.m_exprRef = new ptr<expr>(new expr(nil));
             }
 
-            public CompositeLit(Expr Type = default, slice<Expr> ElemList = default, long NKeys = default, Pos Rbrace = default, expr expr = default)
+            public CompositeLit(Expr Type = default, slice<Expr> ElemList = default, nint NKeys = default, Pos Rbrace = default, expr expr = default)
             {
                 this.Type = Type;
                 this.ElemList = ElemList;

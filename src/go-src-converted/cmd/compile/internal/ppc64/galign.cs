@@ -2,41 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2020 October 09 05:24:03 UTC
+// package ppc64 -- go2cs converted at 2022 March 06 22:47:35 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
-// Original source: C:\Go\src\cmd\compile\internal\ppc64\galign.go
-using gc = go.cmd.compile.@internal.gc_package;
+// Original source: C:\Program Files\Go\src\cmd\compile\internal\ppc64\galign.go
+using ssagen = go.cmd.compile.@internal.ssagen_package;
 using ppc64 = go.cmd.@internal.obj.ppc64_package;
-using objabi = go.cmd.@internal.objabi_package;
-using static go.builtin;
+using buildcfg = go.@internal.buildcfg_package;
 
-namespace go {
-namespace cmd {
-namespace compile {
-namespace @internal
-{
-    public static partial class ppc64_package
-    {
-        public static void Init(ptr<gc.Arch> _addr_arch)
-        {
-            ref gc.Arch arch = ref _addr_arch.val;
+namespace go.cmd.compile.@internal;
 
-            arch.LinkArch = _addr_ppc64.Linkppc64;
-            if (objabi.GOARCH == "ppc64le")
-            {
-                arch.LinkArch = _addr_ppc64.Linkppc64le;
-            }
-            arch.REGSP = ppc64.REGSP;
-            arch.MAXWIDTH = 1L << (int)(60L);
+public static partial class ppc64_package {
 
-            arch.ZeroRange = zerorange;
-            arch.Ginsnop = ginsnop;
-            arch.Ginsnopdefer = ginsnopdefer;
+public static void Init(ptr<ssagen.ArchInfo> _addr_arch) {
+    ref ssagen.ArchInfo arch = ref _addr_arch.val;
 
-            arch.SSAMarkMoves = ssaMarkMoves;
-            arch.SSAGenValue = ssaGenValue;
-            arch.SSAGenBlock = ssaGenBlock;
-
-        }
+    arch.LinkArch = _addr_ppc64.Linkppc64;
+    if (buildcfg.GOARCH == "ppc64le") {
+        arch.LinkArch = _addr_ppc64.Linkppc64le;
     }
-}}}}
+    arch.REGSP = ppc64.REGSP;
+    arch.MAXWIDTH = 1 << 60;
+
+    arch.ZeroRange = zerorange;
+    arch.Ginsnop = ginsnop;
+    arch.Ginsnopdefer = ginsnopdefer;
+
+    arch.SSAMarkMoves = ssaMarkMoves;
+    arch.SSAGenValue = ssaGenValue;
+    arch.SSAGenBlock = ssaGenBlock;
+
+}
+
+} // end ppc64_package

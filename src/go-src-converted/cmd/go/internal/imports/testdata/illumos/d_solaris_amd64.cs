@@ -1,5 +1,5 @@
-// package illumos -- go2cs converted at 2020 October 09 05:45:46 UTC
+// package illumos -- go2cs converted at 2022 March 06 23:16:55 UTC
 // import "cmd/go/internal/imports/testdata/illumos" ==> using illumos = go.cmd.go.@internal.imports.testdata.illumos_package
-// Original source: C:\Go\src\cmd\go\internal\imports\testdata\illumos\d_solaris_amd64.go
-using _d_ = go.d_package;    }
-
+// Original source: C:\Program Files\Go\src\cmd\go\internal\imports\testdata\illumos\d_solaris_amd64.go
+using _d_ = go.d_package;
+} // end illumos_package

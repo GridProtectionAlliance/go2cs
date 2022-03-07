@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:57 UTC
+//     Generated on 2022 March 06 22:31:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using strings = go.strings_package;
+
 
 #nullable enable
 
@@ -32,7 +31,7 @@ namespace go
                 this.w = default;
             }
 
-            public lazybuf(@string s = default, slice<byte> buf = default, long w = default)
+            public lazybuf(@string s = default, slice<byte> buf = default, nint w = default)
             {
                 this.s = s;
                 this.buf = buf;

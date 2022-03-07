@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:25:44 UTC
+//     Generated on 2022 March 06 22:51:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using @base = go.cmd.compile.@internal.@base_package;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using sys = go.cmd.@internal.sys_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using bits = go.math.bits_package;
 using @unsafe = go.@unsafe_package;
 using go;
@@ -45,7 +46,6 @@ namespace @internal
                 this.SBReg = default;
                 this.GReg = default;
                 this.allocatable = default;
-                this.primary = default;
                 this.live = default;
                 this.desired = default;
                 this.values = default;
@@ -64,9 +64,11 @@ namespace @internal
                 this.copies = default;
                 this.loopnest = default;
                 this.visitOrder = default;
+                this.blockOrder = default;
+                this.doClobber = default;
             }
 
-            public regAllocState(ref ptr<Func> f = default, SparseTree sdom = default, slice<Register> registers = default, register numRegs = default, register SPReg = default, register SBReg = default, register GReg = default, regMask allocatable = default, slice<int> primary = default, slice<slice<liveInfo>> live = default, slice<desiredState> desired = default, slice<valState> values = default, ID sp = default, ID sb = default, slice<ptr<Value>> orig = default, slice<regState> regs = default, regMask nospill = default, regMask used = default, regMask tmpused = default, ref ptr<Block> curBlock = default, ref ptr<use> freeUseRecords = default, slice<slice<endReg>> endRegs = default, slice<slice<startReg>> startRegs = default, slice<slice<ID>> spillLive = default, map<ptr<Value>, bool> copies = default, ref ptr<loopnest> loopnest = default, slice<ptr<Block>> visitOrder = default)
+            public regAllocState(ref ptr<Func> f = default, SparseTree sdom = default, slice<Register> registers = default, register numRegs = default, register SPReg = default, register SBReg = default, register GReg = default, regMask allocatable = default, slice<slice<liveInfo>> live = default, slice<desiredState> desired = default, slice<valState> values = default, ID sp = default, ID sb = default, slice<ptr<Value>> orig = default, slice<regState> regs = default, regMask nospill = default, regMask used = default, regMask tmpused = default, ref ptr<Block> curBlock = default, ref ptr<use> freeUseRecords = default, slice<slice<endReg>> endRegs = default, slice<slice<startReg>> startRegs = default, slice<slice<ID>> spillLive = default, map<ptr<Value>, bool> copies = default, ref ptr<loopnest> loopnest = default, slice<ptr<Block>> visitOrder = default, slice<int> blockOrder = default, bool doClobber = default)
             {
                 this.f = f;
                 this.sdom = sdom;
@@ -76,7 +78,6 @@ namespace @internal
                 this.SBReg = SBReg;
                 this.GReg = GReg;
                 this.allocatable = allocatable;
-                this.primary = primary;
                 this.live = live;
                 this.desired = desired;
                 this.values = values;
@@ -95,6 +96,8 @@ namespace @internal
                 this.copies = copies;
                 this.loopnest = loopnest;
                 this.visitOrder = visitOrder;
+                this.blockOrder = blockOrder;
+                this.doClobber = doClobber;
             }
 
             // Enable comparisons between nil and regAllocState struct
@@ -117,7 +120,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static regAllocState regAllocState_cast(dynamic value)
         {
-            return new regAllocState(ref value.f, value.sdom, value.registers, value.numRegs, value.SPReg, value.SBReg, value.GReg, value.allocatable, value.primary, value.live, value.desired, value.values, value.sp, value.sb, value.orig, value.regs, value.nospill, value.used, value.tmpused, ref value.curBlock, ref value.freeUseRecords, value.endRegs, value.startRegs, value.spillLive, value.copies, ref value.loopnest, value.visitOrder);
+            return new regAllocState(ref value.f, value.sdom, value.registers, value.numRegs, value.SPReg, value.SBReg, value.GReg, value.allocatable, value.live, value.desired, value.values, value.sp, value.sb, value.orig, value.regs, value.nospill, value.used, value.tmpused, ref value.curBlock, ref value.freeUseRecords, value.endRegs, value.startRegs, value.spillLive, value.copies, ref value.loopnest, value.visitOrder, value.blockOrder, value.doClobber);
         }
     }
 }}}}

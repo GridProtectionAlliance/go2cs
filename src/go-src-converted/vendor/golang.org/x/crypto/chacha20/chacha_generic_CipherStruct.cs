@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:15 UTC
+//     Generated on 2022 March 06 23:36:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using cipher = go.crypto.cipher_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
@@ -57,7 +56,7 @@ namespace crypto
                 this.p15 = default;
             }
 
-            public Cipher(array<uint> key = default, uint counter = default, array<uint> nonce = default, array<byte> buf = default, long len = default, bool overflow = default, bool precompDone = default, uint p1 = default, uint p5 = default, uint p9 = default, uint p13 = default, uint p2 = default, uint p6 = default, uint p10 = default, uint p14 = default, uint p3 = default, uint p7 = default, uint p11 = default, uint p15 = default)
+            public Cipher(array<uint> key = default, uint counter = default, array<uint> nonce = default, array<byte> buf = default, nint len = default, bool overflow = default, bool precompDone = default, uint p1 = default, uint p5 = default, uint p9 = default, uint p13 = default, uint p2 = default, uint p6 = default, uint p10 = default, uint p14 = default, uint p3 = default, uint p7 = default, uint p11 = default, uint p15 = default)
             {
                 this.key = key;
                 this.counter = counter;

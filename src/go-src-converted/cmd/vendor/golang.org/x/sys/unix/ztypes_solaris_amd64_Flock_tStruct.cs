@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,6 @@ namespace sys
             {
                 this.Type = default;
                 this.Whence = default;
-                this._ = default;
                 this.Start = default;
                 this.Len = default;
                 this.Sysid = default;
@@ -42,11 +41,10 @@ namespace sys
                 this.Pad = default;
             }
 
-            public Flock_t(short Type = default, short Whence = default, array<byte> _ = default, long Start = default, long Len = default, int Sysid = default, int Pid = default, array<long> Pad = default)
+            public Flock_t(short Type = default, short Whence = default, long Start = default, long Len = default, int Sysid = default, int Pid = default, array<long> Pad = default)
             {
                 this.Type = Type;
                 this.Whence = Whence;
-                this._ = _;
                 this.Start = Start;
                 this.Len = Len;
                 this.Sysid = Sysid;
@@ -74,7 +72,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Flock_t Flock_t_cast(dynamic value)
         {
-            return new Flock_t(value.Type, value.Whence, value._, value.Start, value.Len, value.Sysid, value.Pid, value.Pad);
+            return new Flock_t(value.Type, value.Whence, value.Start, value.Len, value.Sysid, value.Pid, value.Pad);
         }
     }
 }}}}}}

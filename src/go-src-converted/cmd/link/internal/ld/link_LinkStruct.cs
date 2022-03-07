@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:01 UTC
+//     Generated on 2022 March 06 23:21:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -52,7 +51,7 @@ namespace @internal
                 this.ArchSyms = default;
                 this.outSem = default;
                 this.Out = default;
-                this.Syms = default;
+                this.version = default;
                 this.Debugvlog = default;
                 this.Bso = default;
                 this.Loaded = default;
@@ -62,10 +61,7 @@ namespace @internal
                 this.LibraryByPkg = default;
                 this.Shlibs = default;
                 this.Textp = default;
-                this.Textp2 = default;
-                this.NumFilesyms = default;
                 this.Moduledata = default;
-                this.Moduledata2 = default;
                 this.PackageFile = default;
                 this.PackageShlib = default;
                 this.tramps = default;
@@ -73,23 +69,20 @@ namespace @internal
                 this.runtimeCU = default;
                 this.loader = default;
                 this.cgodata = default;
-                this.cgo_export_static = default;
-                this.cgo_export_dynamic = default;
                 this.datap = default;
-                this.datap2 = default;
-                this.dynexp2 = default;
+                this.dynexp = default;
                 this.numelfsym = default;
-                this.elfbind = default;
+                this.generatorSyms = default;
             }
 
-            public Link(Target Target = default, ErrorReporter ErrorReporter = default, ArchSyms ArchSyms = default, channel<long> outSem = default, ref ptr<OutBuf> Out = default, ref ptr<sym.Symbols> Syms = default, long Debugvlog = default, ref ptr<bufio.Writer> Bso = default, bool Loaded = default, bool compressDWARF = default, slice<@string> Libdir = default, slice<ptr<sym.Library>> Library = default, map<@string, ptr<sym.Library>> LibraryByPkg = default, slice<Shlib> Shlibs = default, slice<ptr<sym.Symbol>> Textp = default, slice<loader.Sym> Textp2 = default, long NumFilesyms = default, ref ptr<sym.Symbol> Moduledata = default, loader.Sym Moduledata2 = default, map<@string, @string> PackageFile = default, map<@string, @string> PackageShlib = default, slice<loader.Sym> tramps = default, slice<ptr<sym.CompilationUnit>> compUnits = default, ref ptr<sym.CompilationUnit> runtimeCU = default, ref ptr<loader.Loader> loader = default, slice<cgodata> cgodata = default, map<@string, bool> cgo_export_static = default, map<@string, bool> cgo_export_dynamic = default, slice<ptr<sym.Symbol>> datap = default, slice<loader.Sym> datap2 = default, slice<loader.Sym> dynexp2 = default, long numelfsym = default, long elfbind = default)
+            public Link(Target Target = default, ErrorReporter ErrorReporter = default, ArchSyms ArchSyms = default, channel<nint> outSem = default, ref ptr<OutBuf> Out = default, nint version = default, nint Debugvlog = default, ref ptr<bufio.Writer> Bso = default, bool Loaded = default, bool compressDWARF = default, slice<@string> Libdir = default, slice<ptr<sym.Library>> Library = default, map<@string, ptr<sym.Library>> LibraryByPkg = default, slice<Shlib> Shlibs = default, slice<loader.Sym> Textp = default, loader.Sym Moduledata = default, map<@string, @string> PackageFile = default, map<@string, @string> PackageShlib = default, slice<loader.Sym> tramps = default, slice<ptr<sym.CompilationUnit>> compUnits = default, ref ptr<sym.CompilationUnit> runtimeCU = default, ref ptr<loader.Loader> loader = default, slice<cgodata> cgodata = default, slice<loader.Sym> datap = default, slice<loader.Sym> dynexp = default, nint numelfsym = default, map<loader.Sym, generatorFunc> generatorSyms = default)
             {
                 this.Target = Target;
                 this.m_ErrorReporterRef = new ptr<ErrorReporter>(ErrorReporter);
                 this.ArchSyms = ArchSyms;
                 this.outSem = outSem;
                 this.Out = Out;
-                this.Syms = Syms;
+                this.version = version;
                 this.Debugvlog = Debugvlog;
                 this.Bso = Bso;
                 this.Loaded = Loaded;
@@ -99,10 +92,7 @@ namespace @internal
                 this.LibraryByPkg = LibraryByPkg;
                 this.Shlibs = Shlibs;
                 this.Textp = Textp;
-                this.Textp2 = Textp2;
-                this.NumFilesyms = NumFilesyms;
                 this.Moduledata = Moduledata;
-                this.Moduledata2 = Moduledata2;
                 this.PackageFile = PackageFile;
                 this.PackageShlib = PackageShlib;
                 this.tramps = tramps;
@@ -110,13 +100,10 @@ namespace @internal
                 this.runtimeCU = runtimeCU;
                 this.loader = loader;
                 this.cgodata = cgodata;
-                this.cgo_export_static = cgo_export_static;
-                this.cgo_export_dynamic = cgo_export_dynamic;
                 this.datap = datap;
-                this.datap2 = datap2;
-                this.dynexp2 = dynexp2;
+                this.dynexp = dynexp;
                 this.numelfsym = numelfsym;
-                this.elfbind = elfbind;
+                this.generatorSyms = generatorSyms;
             }
 
             // Enable comparisons between nil and Link struct
@@ -139,7 +126,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Link Link_cast(dynamic value)
         {
-            return new Link(value.Target, value.ErrorReporter, value.ArchSyms, value.outSem, ref value.Out, ref value.Syms, value.Debugvlog, ref value.Bso, value.Loaded, value.compressDWARF, value.Libdir, value.Library, value.LibraryByPkg, value.Shlibs, value.Textp, value.Textp2, value.NumFilesyms, ref value.Moduledata, value.Moduledata2, value.PackageFile, value.PackageShlib, value.tramps, value.compUnits, ref value.runtimeCU, ref value.loader, value.cgodata, value.cgo_export_static, value.cgo_export_dynamic, value.datap, value.datap2, value.dynexp2, value.numelfsym, value.elfbind);
+            return new Link(value.Target, value.ErrorReporter, value.ArchSyms, value.outSem, ref value.Out, value.version, value.Debugvlog, ref value.Bso, value.Loaded, value.compressDWARF, value.Libdir, value.Library, value.LibraryByPkg, value.Shlibs, value.Textp, value.Moduledata, value.PackageFile, value.PackageShlib, value.tramps, value.compUnits, ref value.runtimeCU, ref value.loader, value.cgodata, value.datap, value.dynexp, value.numelfsym, value.generatorSyms);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:46 UTC
+//     Generated on 2022 March 06 22:17:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using hash = go.hash_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
@@ -50,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,16 +75,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HashFuncByPtr is null || !m_target_is_ptr)
                     return s_HashFuncByVal!(target);
 
-                return s_HashFuncByPtr(m_target_ptr);
+                return s_HashFuncByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static SignerOpts()
@@ -96,12 +95,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("HashFunc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HashFuncByPtr = extensionMethod.CreateStaticDelegate(typeof(HashFuncByPtr)) as HashFuncByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("HashFunc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HashFuncByVal = extensionMethod.CreateStaticDelegate(typeof(HashFuncByVal)) as HashFuncByVal;
 
                 if (s_HashFuncByPtr is null && s_HashFuncByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,16 +39,18 @@ namespace @internal
                 this.Pragma = default;
                 this.Recv = default;
                 this.Name = default;
+                this.TParamList = default;
                 this.Type = default;
                 this.Body = default;
                 this.m_declRef = new ptr<decl>(new decl(nil));
             }
 
-            public FuncDecl(Pragma Pragma = default, ref ptr<Field> Recv = default, ref ptr<Name> Name = default, ref ptr<FuncType> Type = default, ref ptr<BlockStmt> Body = default, decl decl = default)
+            public FuncDecl(Pragma Pragma = default, ref ptr<Field> Recv = default, ref ptr<Name> Name = default, slice<ptr<Field>> TParamList = default, ref ptr<FuncType> Type = default, ref ptr<BlockStmt> Body = default, decl decl = default)
             {
                 this.Pragma = Pragma;
                 this.Recv = Recv;
                 this.Name = Name;
+                this.TParamList = TParamList;
                 this.Type = Type;
                 this.Body = Body;
                 this.m_declRef = new ptr<decl>(decl);
@@ -74,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static FuncDecl FuncDecl_cast(dynamic value)
         {
-            return new FuncDecl(value.Pragma, ref value.Recv, ref value.Name, ref value.Type, ref value.Body, value.decl);
+            return new FuncDecl(value.Pragma, ref value.Recv, ref value.Name, value.TParamList, ref value.Type, ref value.Body, value.decl);
         }
     }
 }}}}

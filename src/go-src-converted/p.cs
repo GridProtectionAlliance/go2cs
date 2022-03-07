@@ -4,29 +4,22 @@
 
 // Input for TestIssue15517
 
-// package p -- go2cs converted at 2020 October 09 06:02:21 UTC
+// package p -- go2cs converted at 2022 March 06 23:32:14 UTC
 // import "golang.org/x/tools/go/internal/gcimporter.p" ==> using p = go.golang.org.x.tools.go.@internal.gcimporter.p_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\testdata\p.go
 
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go {
-namespace @internal
-{
-    public static partial class p_package
-    {
-        public static readonly long C = (long)0L;
+namespace go.golang.org.x.tools.go.@internal;
+
+public static partial class p_package {
+
+public static readonly nint C = 0;
 
 
 
-        public static long V = default;
+public static nint V = default;
 
-        public static void F()
-        {
-        }
-    }
-}}}}}}
+public static void F() {
+}
+
+} // end p_package

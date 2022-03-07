@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:21 UTC
+//     Generated on 2022 March 06 23:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using go;
@@ -54,7 +53,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,16 +79,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MarshalByPtr is null || !m_target_is_ptr)
                     return s_MarshalByVal!(target, b);
 
-                return s_MarshalByPtr(m_target_ptr, b);
+                return s_MarshalByPtr(m_target_ptr!, b);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static MarshalingValue()
@@ -100,12 +99,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Marshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MarshalByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalByPtr)) as MarshalByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Marshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MarshalByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalByVal)) as MarshalByVal;
 
                 if (s_MarshalByPtr is null && s_MarshalByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:45 UTC
+//     Generated on 2022 March 06 23:32:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,16 +76,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MByPtr is null || !m_target_is_ptr)
                     return s_MByVal!(target);
 
-                return s_MByPtr(m_target_ptr);
+                return s_MByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static E()
@@ -96,12 +96,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("M");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MByPtr = extensionMethod.CreateStaticDelegate(typeof(MByPtr)) as MByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("M");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MByVal = extensionMethod.CreateStaticDelegate(typeof(MByVal)) as MByVal;
 
                 if (s_MByPtr is null && s_MByVal is null)

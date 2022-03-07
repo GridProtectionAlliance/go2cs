@@ -5,35 +5,29 @@
 // Package predeclared is a go/doc test for handling of
 // exported methods on locally-defined predeclared types.
 // See issue 9860.
-// package predeclared -- go2cs converted at 2020 October 09 05:19:11 UTC
+// package predeclared -- go2cs converted at 2022 March 06 22:41:35 UTC
 // import "go/doc.predeclared" ==> using predeclared = go.go.doc.predeclared_package
-// Original source: C:\Go\src\go\doc\testdata\predeclared.go
+// Original source: C:\Program Files\Go\src\go\doc\testdata\predeclared.go
 
-using static go.builtin;
 
-namespace go {
-namespace go
-{
-    public static partial class predeclared_package
-    {
-        private partial struct error
-        {
-        }
+namespace go.go;
 
-        // Must not be visible.
-        private static @string Error(this error e)
-        {
-            return "";
-        }
+public static partial class predeclared_package {
 
-        private partial struct @bool // : long
-        {
-        }
+private partial struct error {
+}
 
-        // Must not be visible.
-        private static @string String(this bool b)
-        {
-            return "";
-        }
-    }
-}}
+// Must not be visible.
+private static @string Error(this error e) {
+    return "";
+}
+
+private partial struct @bool { // : nint
+}
+
+// Must not be visible.
+private static @string String(this bool b) {
+    return "";
+}
+
+} // end predeclared_package

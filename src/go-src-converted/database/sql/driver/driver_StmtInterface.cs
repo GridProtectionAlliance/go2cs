@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:18 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
 
             private delegate (Rows, error) NumInputByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumInputByPtr is null || !m_target_is_ptr)
                     return s_NumInputByVal!(target);
 
-                return s_NumInputByPtr(m_target_ptr);
+                return s_NumInputByPtr(m_target_ptr!);
             }
 
             private delegate (Rows, error) ExecByPtr(ptr<T> value, slice<Value> args);
@@ -119,13 +118,13 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExecByPtr is null || !m_target_is_ptr)
                     return s_ExecByVal!(target, args);
 
-                return s_ExecByPtr(m_target_ptr, args);
+                return s_ExecByPtr(m_target_ptr!, args);
             }
 
             private delegate (Rows, error) QueryByPtr(ptr<T> value, slice<Value> args);
@@ -139,16 +138,16 @@ namespace sql
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_QueryByPtr is null || !m_target_is_ptr)
                     return s_QueryByVal!(target, args);
 
-                return s_QueryByPtr(m_target_ptr, args);
+                return s_QueryByPtr(m_target_ptr!, args);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Stmt()
@@ -159,12 +158,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)
@@ -172,12 +171,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumInput");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumInputByPtr = extensionMethod.CreateStaticDelegate(typeof(NumInputByPtr)) as NumInputByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumInput");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumInputByVal = extensionMethod.CreateStaticDelegate(typeof(NumInputByVal)) as NumInputByVal;
 
                 if (s_NumInputByPtr is null && s_NumInputByVal is null)
@@ -185,12 +184,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Exec");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExecByPtr = extensionMethod.CreateStaticDelegate(typeof(ExecByPtr)) as ExecByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Exec");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExecByVal = extensionMethod.CreateStaticDelegate(typeof(ExecByVal)) as ExecByVal;
 
                 if (s_ExecByPtr is null && s_ExecByVal is null)
@@ -198,12 +197,12 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Query");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_QueryByPtr = extensionMethod.CreateStaticDelegate(typeof(QueryByPtr)) as QueryByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Query");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_QueryByVal = extensionMethod.CreateStaticDelegate(typeof(QueryByVal)) as QueryByVal;
 
                 if (s_QueryByPtr is null && s_QueryByVal is null)

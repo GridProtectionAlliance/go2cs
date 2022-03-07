@@ -5,8 +5,8 @@
 //go:generate go run gen.go
 
 // Package imageutil contains code shared by image-related packages.
-// package imageutil -- go2cs converted at 2020 October 09 06:05:48 UTC
+// package imageutil -- go2cs converted at 2022 March 06 23:36:03 UTC
 // import "image/internal/imageutil" ==> using imageutil = go.image.@internal.imageutil_package
-// Original source: C:\Go\src\image\internal\imageutil\imageutil.go
-    }
+// Original source: C:\Program Files\Go\src\image\internal\imageutil\imageutil.go
 
+} // end imageutil_package

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:04:43 UTC
+//     Generated on 2022 March 06 23:34:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -26,10 +28,33 @@ namespace passes
     public static partial class printf_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct stringSet
+        private partial struct stringSet : IMap
         {
             // Value of the stringSet struct
             private readonly map<@string, bool> m_value;
+            
+            public nint Length => ((IMap)m_value).Length;
+
+            object? IMap.this[object key]
+            {
+                get => ((IMap)m_value)[key];
+                set => ((IMap)m_value)[key] = value;
+            }
+
+            public bool this[@string key]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value[key];
+            
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => m_value[key] = value;
+            }
+
+            public (bool, bool) this[@string key, bool _]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value.TryGetValue(key, out bool value) ? (value!, true) : (default!, false);
+            }
 
             public stringSet(map<@string, bool> value) => m_value = value;
 

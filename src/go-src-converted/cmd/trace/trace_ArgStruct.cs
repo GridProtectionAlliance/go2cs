@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:17 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using traceviewer = go.cmd.@internal.traceviewer_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using trace = go.@internal.trace_package;
@@ -43,7 +43,7 @@ namespace go
                 this.P = default;
             }
 
-            public Arg(long P = default)
+            public Arg(nint P = default)
             {
                 this.P = P;
             }

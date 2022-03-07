@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:55 UTC
+//     Generated on 2022 March 06 23:19:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,20 +12,25 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
+using build = go.go.build_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
 using imports = go.cmd.go.@internal.imports_package;
+using load = go.cmd.go.@internal.load_package;
 using modload = go.cmd.go.@internal.modload_package;
-using work = go.cmd.go.@internal.work_package;
+using str = go.cmd.go.@internal.str_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
 using go;

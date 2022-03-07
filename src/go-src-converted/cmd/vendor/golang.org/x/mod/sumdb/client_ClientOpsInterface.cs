@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:01 UTC
+//     Generated on 2022 March 06 23:26:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -63,7 +62,7 @@ namespace mod
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -89,13 +88,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadRemoteByPtr is null || !m_target_is_ptr)
                     return s_ReadRemoteByVal!(target, path);
 
-                return s_ReadRemoteByPtr(m_target_ptr, path);
+                return s_ReadRemoteByPtr(m_target_ptr!, path);
             }
 
             private delegate (slice<byte>, error) ReadConfigByPtr(ptr<T> value, @string file);
@@ -109,13 +108,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadConfigByPtr is null || !m_target_is_ptr)
                     return s_ReadConfigByVal!(target, file);
 
-                return s_ReadConfigByPtr(m_target_ptr, file);
+                return s_ReadConfigByPtr(m_target_ptr!, file);
             }
 
             private delegate (slice<byte>, error) WriteConfigByPtr(ptr<T> value, @string file, slice<byte> old, slice<byte> @new);
@@ -129,13 +128,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteConfigByPtr is null || !m_target_is_ptr)
                     return s_WriteConfigByVal!(target, file, old, @new);
 
-                return s_WriteConfigByPtr(m_target_ptr, file, old, @new);
+                return s_WriteConfigByPtr(m_target_ptr!, file, old, @new);
             }
 
             private delegate (slice<byte>, error) ReadCacheByPtr(ptr<T> value, @string file);
@@ -149,13 +148,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadCacheByPtr is null || !m_target_is_ptr)
                     return s_ReadCacheByVal!(target, file);
 
-                return s_ReadCacheByPtr(m_target_ptr, file);
+                return s_ReadCacheByPtr(m_target_ptr!, file);
             }
 
             private delegate (slice<byte>, error) WriteCacheByPtr(ptr<T> value, @string file, slice<byte> data);
@@ -169,13 +168,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteCacheByPtr is null || !m_target_is_ptr)
                     return s_WriteCacheByVal!(target, file, data);
 
-                return s_WriteCacheByPtr(m_target_ptr, file, data);
+                return s_WriteCacheByPtr(m_target_ptr!, file, data);
             }
 
             private delegate (slice<byte>, error) LogByPtr(ptr<T> value, @string msg);
@@ -189,13 +188,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LogByPtr is null || !m_target_is_ptr)
                     return s_LogByVal!(target, msg);
 
-                return s_LogByPtr(m_target_ptr, msg);
+                return s_LogByPtr(m_target_ptr!, msg);
             }
 
             private delegate (slice<byte>, error) SecurityErrorByPtr(ptr<T> value, @string msg);
@@ -209,16 +208,16 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SecurityErrorByPtr is null || !m_target_is_ptr)
                     return s_SecurityErrorByVal!(target, msg);
 
-                return s_SecurityErrorByPtr(m_target_ptr, msg);
+                return s_SecurityErrorByPtr(m_target_ptr!, msg);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ClientOps()
@@ -229,12 +228,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRemote");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRemoteByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRemoteByPtr)) as ReadRemoteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadRemote");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRemoteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRemoteByVal)) as ReadRemoteByVal;
 
                 if (s_ReadRemoteByPtr is null && s_ReadRemoteByVal is null)
@@ -242,12 +241,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadConfig");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadConfigByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadConfigByPtr)) as ReadConfigByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadConfig");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadConfigByVal = extensionMethod.CreateStaticDelegate(typeof(ReadConfigByVal)) as ReadConfigByVal;
 
                 if (s_ReadConfigByPtr is null && s_ReadConfigByVal is null)
@@ -255,12 +254,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteConfig");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteConfigByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteConfigByPtr)) as WriteConfigByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteConfig");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteConfigByVal = extensionMethod.CreateStaticDelegate(typeof(WriteConfigByVal)) as WriteConfigByVal;
 
                 if (s_WriteConfigByPtr is null && s_WriteConfigByVal is null)
@@ -268,12 +267,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadCache");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadCacheByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadCacheByPtr)) as ReadCacheByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadCache");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadCacheByVal = extensionMethod.CreateStaticDelegate(typeof(ReadCacheByVal)) as ReadCacheByVal;
 
                 if (s_ReadCacheByPtr is null && s_ReadCacheByVal is null)
@@ -281,12 +280,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteCache");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteCacheByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteCacheByPtr)) as WriteCacheByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteCache");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteCacheByVal = extensionMethod.CreateStaticDelegate(typeof(WriteCacheByVal)) as WriteCacheByVal;
 
                 if (s_WriteCacheByPtr is null && s_WriteCacheByVal is null)
@@ -294,12 +293,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Log");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogByPtr = extensionMethod.CreateStaticDelegate(typeof(LogByPtr)) as LogByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Log");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
 
                 if (s_LogByPtr is null && s_LogByVal is null)
@@ -307,12 +306,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SecurityError");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SecurityErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(SecurityErrorByPtr)) as SecurityErrorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SecurityError");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SecurityErrorByVal = extensionMethod.CreateStaticDelegate(typeof(SecurityErrorByVal)) as SecurityErrorByVal;
 
                 if (s_SecurityErrorByPtr is null && s_SecurityErrorByVal is null)

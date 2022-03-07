@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:57 UTC
+//     Generated on 2022 March 06 23:32:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -53,7 +52,7 @@ namespace passes
                 this.inner = default;
             }
 
-            public asmVar(@string name = default, asmKind kind = default, @string typ = default, long off = default, long size = default, slice<ptr<asmVar>> inner = default)
+            public asmVar(@string name = default, asmKind kind = default, @string typ = default, nint off = default, nint size = default, slice<ptr<asmVar>> inner = default)
             {
                 this.name = name;
                 this.kind = kind;

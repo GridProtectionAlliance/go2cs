@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:43 UTC
+//     Generated on 2022 March 06 23:27:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
@@ -45,7 +44,7 @@ namespace sys
                 this.raw = default;
             }
 
-            public SockaddrLinklayer(ushort Protocol = default, long Ifindex = default, ushort Hatype = default, byte Pkttype = default, byte Halen = default, array<byte> Addr = default, RawSockaddrLinklayer raw = default)
+            public SockaddrLinklayer(ushort Protocol = default, nint Ifindex = default, ushort Hatype = default, byte Pkttype = default, byte Halen = default, array<byte> Addr = default, RawSockaddrLinklayer raw = default)
             {
                 this.Protocol = Protocol;
                 this.Ifindex = Ifindex;

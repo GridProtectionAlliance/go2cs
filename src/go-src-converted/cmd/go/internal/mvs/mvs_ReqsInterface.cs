@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:37 UTC
+//     Generated on 2022 March 06 23:18:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,12 +13,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
-using strings = go.strings_package;
 using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 using par = go.cmd.go.@internal.par_package;
 using module = go.golang.org.x.mod.module_package;
 using go;
@@ -58,7 +55,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,87 +70,47 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (module.Version, error) RequiredByPtr(ptr<T> value, module.Version m);
-            private delegate (module.Version, error) RequiredByVal(T value, module.Version m);
+            private delegate @string RequiredByPtr(ptr<T> value, module.Version m);
+            private delegate @string RequiredByVal(T value, module.Version m);
 
             private static readonly RequiredByPtr? s_RequiredByPtr;
             private static readonly RequiredByVal? s_RequiredByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Required(module.Version m)
+            public @string Required(module.Version m)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RequiredByPtr is null || !m_target_is_ptr)
                     return s_RequiredByVal!(target, m);
 
-                return s_RequiredByPtr(m_target_ptr, m);
+                return s_RequiredByPtr(m_target_ptr!, m);
             }
 
-            private delegate (module.Version, error) MaxByPtr(ptr<T> value, @string v1, @string v2);
-            private delegate (module.Version, error) MaxByVal(T value, @string v1, @string v2);
+            private delegate @string MaxByPtr(ptr<T> value, @string v1, @string v2);
+            private delegate @string MaxByVal(T value, @string v1, @string v2);
 
             private static readonly MaxByPtr? s_MaxByPtr;
             private static readonly MaxByVal? s_MaxByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Max(@string v1, @string v2)
+            public @string Max(@string v1, @string v2)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MaxByPtr is null || !m_target_is_ptr)
                     return s_MaxByVal!(target, v1, v2);
 
-                return s_MaxByPtr(m_target_ptr, v1, v2);
-            }
-
-            private delegate (module.Version, error) UpgradeByPtr(ptr<T> value, module.Version m);
-            private delegate (module.Version, error) UpgradeByVal(T value, module.Version m);
-
-            private static readonly UpgradeByPtr? s_UpgradeByPtr;
-            private static readonly UpgradeByVal? s_UpgradeByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Upgrade(module.Version m)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_UpgradeByPtr is null || !m_target_is_ptr)
-                    return s_UpgradeByVal!(target, m);
-
-                return s_UpgradeByPtr(m_target_ptr, m);
-            }
-
-            private delegate (module.Version, error) PreviousByPtr(ptr<T> value, module.Version m);
-            private delegate (module.Version, error) PreviousByVal(T value, module.Version m);
-
-            private static readonly PreviousByPtr? s_PreviousByPtr;
-            private static readonly PreviousByVal? s_PreviousByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (module.Version, error) Previous(module.Version m)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_PreviousByPtr is null || !m_target_is_ptr)
-                    return s_PreviousByVal!(target, m);
-
-                return s_PreviousByPtr(m_target_ptr, m);
+                return s_MaxByPtr(m_target_ptr!, v1, v2);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Reqs()
@@ -164,12 +121,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Required");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RequiredByPtr = extensionMethod.CreateStaticDelegate(typeof(RequiredByPtr)) as RequiredByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Required");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RequiredByVal = extensionMethod.CreateStaticDelegate(typeof(RequiredByVal)) as RequiredByVal;
 
                 if (s_RequiredByPtr is null && s_RequiredByVal is null)
@@ -177,42 +134,16 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Max");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MaxByPtr = extensionMethod.CreateStaticDelegate(typeof(MaxByPtr)) as MaxByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Max");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MaxByVal = extensionMethod.CreateStaticDelegate(typeof(MaxByVal)) as MaxByVal;
 
                 if (s_MaxByPtr is null && s_MaxByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Reqs.Max method", new Exception("Max"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Upgrade");
-
-                if (!(extensionMethod is null))
-                    s_UpgradeByPtr = extensionMethod.CreateStaticDelegate(typeof(UpgradeByPtr)) as UpgradeByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Upgrade");
-
-                if (!(extensionMethod is null))
-                    s_UpgradeByVal = extensionMethod.CreateStaticDelegate(typeof(UpgradeByVal)) as UpgradeByVal;
-
-                if (s_UpgradeByPtr is null && s_UpgradeByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Reqs.Upgrade method", new Exception("Upgrade"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Previous");
-
-                if (!(extensionMethod is null))
-                    s_PreviousByPtr = extensionMethod.CreateStaticDelegate(typeof(PreviousByPtr)) as PreviousByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Previous");
-
-                if (!(extensionMethod is null))
-                    s_PreviousByVal = extensionMethod.CreateStaticDelegate(typeof(PreviousByVal)) as PreviousByVal;
-
-                if (s_PreviousByPtr is null && s_PreviousByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Reqs.Previous method", new Exception("Previous"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

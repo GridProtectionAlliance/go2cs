@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:41:06 UTC
+//     Generated on 2022 March 06 23:13:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using unicode = go.unicode_package;
@@ -48,7 +47,7 @@ namespace @internal
                 this.prec = default;
             }
 
-            public scanner(source source = default, ulong mode = default, bool nlsemi = default, ulong line = default, ulong col = default, bool blank = default, token tok = default, @string lit = default, bool bad = default, LitKind kind = default, Operator op = default, long prec = default)
+            public scanner(source source = default, nuint mode = default, bool nlsemi = default, nuint line = default, nuint col = default, bool blank = default, token tok = default, @string lit = default, bool bad = default, LitKind kind = default, Operator op = default, nint prec = default)
             {
                 this.source = source;
                 this.mode = mode;

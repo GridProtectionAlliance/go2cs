@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:53 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using go;
 
 #nullable enable
@@ -36,33 +35,29 @@ namespace @internal
                 this.File = default;
                 this.Pkg = default;
                 this.Shlib = default;
-                this.Hash = default;
                 this.Fingerprint = default;
                 this.Autolib = default;
                 this.Imports = default;
                 this.Main = default;
-                this.Safe = default;
                 this.Units = default;
-                this.Textp2 = default;
-                this.DupTextSyms2 = default;
+                this.Textp = default;
+                this.DupTextSyms = default;
             }
 
-            public Library(@string Objref = default, @string Srcref = default, @string File = default, @string Pkg = default, @string Shlib = default, @string Hash = default, goobj2.FingerprintType Fingerprint = default, slice<goobj2.ImportedPkg> Autolib = default, slice<ptr<Library>> Imports = default, bool Main = default, bool Safe = default, slice<ptr<CompilationUnit>> Units = default, slice<LoaderSym> Textp2 = default, slice<LoaderSym> DupTextSyms2 = default)
+            public Library(@string Objref = default, @string Srcref = default, @string File = default, @string Pkg = default, @string Shlib = default, goobj.FingerprintType Fingerprint = default, slice<goobj.ImportedPkg> Autolib = default, slice<ptr<Library>> Imports = default, bool Main = default, slice<ptr<CompilationUnit>> Units = default, slice<LoaderSym> Textp = default, slice<LoaderSym> DupTextSyms = default)
             {
                 this.Objref = Objref;
                 this.Srcref = Srcref;
                 this.File = File;
                 this.Pkg = Pkg;
                 this.Shlib = Shlib;
-                this.Hash = Hash;
                 this.Fingerprint = Fingerprint;
                 this.Autolib = Autolib;
                 this.Imports = Imports;
                 this.Main = Main;
-                this.Safe = Safe;
                 this.Units = Units;
-                this.Textp2 = Textp2;
-                this.DupTextSyms2 = DupTextSyms2;
+                this.Textp = Textp;
+                this.DupTextSyms = DupTextSyms;
             }
 
             // Enable comparisons between nil and Library struct
@@ -85,7 +80,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Library Library_cast(dynamic value)
         {
-            return new Library(value.Objref, value.Srcref, value.File, value.Pkg, value.Shlib, value.Hash, value.Fingerprint, value.Autolib, value.Imports, value.Main, value.Safe, value.Units, value.Textp2, value.DupTextSyms2);
+            return new Library(value.Objref, value.Srcref, value.File, value.Pkg, value.Shlib, value.Fingerprint, value.Autolib, value.Imports, value.Main, value.Units, value.Textp, value.DupTextSyms);
         }
     }
 }}}}

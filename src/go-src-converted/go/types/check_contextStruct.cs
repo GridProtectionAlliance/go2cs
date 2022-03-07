@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:19 UTC
+//     Generated on 2022 March 06 22:41:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
@@ -36,18 +36,20 @@ namespace go
                 this.scope = default;
                 this.pos = default;
                 this.iota = default;
+                this.errpos = default;
                 this.sig = default;
                 this.isPanic = default;
                 this.hasLabel = default;
                 this.hasCallOrRecv = default;
             }
 
-            public context(ref ptr<declInfo> decl = default, ref ptr<Scope> scope = default, token.Pos pos = default, constant.Value iota = default, ref ptr<Signature> sig = default, map<ptr<ast.CallExpr>, bool> isPanic = default, bool hasLabel = default, bool hasCallOrRecv = default)
+            public context(ref ptr<declInfo> decl = default, ref ptr<Scope> scope = default, token.Pos pos = default, constant.Value iota = default, positioner errpos = default, ref ptr<Signature> sig = default, map<ptr<ast.CallExpr>, bool> isPanic = default, bool hasLabel = default, bool hasCallOrRecv = default)
             {
                 this.decl = decl;
                 this.scope = scope;
                 this.pos = pos;
                 this.iota = iota;
+                this.errpos = errpos;
                 this.sig = sig;
                 this.isPanic = isPanic;
                 this.hasLabel = hasLabel;
@@ -74,7 +76,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static context context_cast(dynamic value)
         {
-            return new context(ref value.decl, ref value.scope, value.pos, value.iota, ref value.sig, value.isPanic, value.hasLabel, value.hasCallOrRecv);
+            return new context(ref value.decl, ref value.scope, value.pos, value.iota, value.errpos, ref value.sig, value.isPanic, value.hasLabel, value.hasCallOrRecv);
         }
     }
 }}

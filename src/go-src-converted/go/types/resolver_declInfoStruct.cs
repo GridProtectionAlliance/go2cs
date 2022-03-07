@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:36 UTC
+//     Generated on 2022 March 06 22:42:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
+using typeparams = go.go.@internal.typeparams_package;
 using token = go.go.token_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
@@ -38,21 +38,23 @@ namespace go
             {
                 this.file = default;
                 this.lhs = default;
-                this.typ = default;
+                this.vtyp = default;
                 this.init = default;
+                this.inherited = default;
+                this.tdecl = default;
                 this.fdecl = default;
-                this.alias = default;
                 this.deps = default;
             }
 
-            public declInfo(ref ptr<Scope> file = default, slice<ptr<Var>> lhs = default, ast.Expr typ = default, ast.Expr init = default, ref ptr<ast.FuncDecl> fdecl = default, bool alias = default, map<Object, bool> deps = default)
+            public declInfo(ref ptr<Scope> file = default, slice<ptr<Var>> lhs = default, ast.Expr vtyp = default, ast.Expr init = default, bool inherited = default, ref ptr<ast.TypeSpec> tdecl = default, ref ptr<ast.FuncDecl> fdecl = default, map<Object, bool> deps = default)
             {
                 this.file = file;
                 this.lhs = lhs;
-                this.typ = typ;
+                this.vtyp = vtyp;
                 this.init = init;
+                this.inherited = inherited;
+                this.tdecl = tdecl;
                 this.fdecl = fdecl;
-                this.alias = alias;
                 this.deps = deps;
             }
 
@@ -76,7 +78,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static declInfo declInfo_cast(dynamic value)
         {
-            return new declInfo(ref value.file, value.lhs, value.typ, value.init, ref value.fdecl, value.alias, value.deps);
+            return new declInfo(ref value.file, value.lhs, value.vtyp, value.init, value.inherited, ref value.tdecl, ref value.fdecl, value.deps);
         }
     }
 }}

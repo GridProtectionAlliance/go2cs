@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:00 UTC
+//     Generated on 2022 March 06 22:09:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the gcBits struct
             private readonly byte m_value;
-
+            
             public gcBits(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and gcBits struct

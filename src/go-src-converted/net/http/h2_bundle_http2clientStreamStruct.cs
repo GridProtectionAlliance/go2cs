@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:52 UTC
+//     Generated on 2022 March 06 22:22:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -59,55 +58,73 @@ namespace net
             public http2clientStream(NilType _)
             {
                 this.cc = default;
-                this.req = default;
+                this.ctx = default;
+                this.reqCancel = default;
                 this.trace = default;
                 this.ID = default;
-                this.resc = default;
                 this.bufPipe = default;
-                this.startedWrite = default;
                 this.requestedGzip = default;
+                this.isHead = default;
+                this.abortOnce = default;
+                this.abort = default;
+                this.abortErr = default;
+                this.peerClosed = default;
+                this.donec = default;
                 this.on100 = default;
+                this.respHeaderRecv = default;
+                this.res = default;
                 this.flow = default;
                 this.inflow = default;
                 this.bytesRemain = default;
                 this.readErr = default;
-                this.stopReqBody = default;
-                this.didReset = default;
-                this.peerReset = default;
-                this.resetErr = default;
-                this.done = default;
+                this.reqBody = default;
+                this.reqBodyContentLength = default;
+                this.reqBodyClosed = default;
+                this.sentEndStream = default;
+                this.sentHeaders = default;
                 this.firstByte = default;
                 this.pastHeaders = default;
                 this.pastTrailers = default;
                 this.num1xx = default;
+                this.readClosed = default;
+                this.readAborted = default;
                 this.trailer = default;
                 this.resTrailer = default;
             }
 
-            public http2clientStream(ref ptr<http2ClientConn> cc = default, ref ptr<Request> req = default, ref ptr<httptrace.ClientTrace> trace = default, uint ID = default, channel<http2resAndError> resc = default, http2pipe bufPipe = default, bool startedWrite = default, bool requestedGzip = default, Action on100 = default, http2flow flow = default, http2flow inflow = default, long bytesRemain = default, error readErr = default, error stopReqBody = default, bool didReset = default, channel<object> peerReset = default, error resetErr = default, channel<object> done = default, bool firstByte = default, bool pastHeaders = default, bool pastTrailers = default, byte num1xx = default, Header trailer = default, ref ptr<Header> resTrailer = default)
+            public http2clientStream(ref ptr<http2ClientConn> cc = default, context.Context ctx = default, channel<object> reqCancel = default, ref ptr<httptrace.ClientTrace> trace = default, uint ID = default, http2pipe bufPipe = default, bool requestedGzip = default, bool isHead = default, sync.Once abortOnce = default, channel<object> abort = default, error abortErr = default, channel<object> peerClosed = default, channel<object> donec = default, channel<object> on100 = default, channel<object> respHeaderRecv = default, ref ptr<Response> res = default, http2flow flow = default, http2flow inflow = default, long bytesRemain = default, error readErr = default, io.ReadCloser reqBody = default, long reqBodyContentLength = default, bool reqBodyClosed = default, bool sentEndStream = default, bool sentHeaders = default, bool firstByte = default, bool pastHeaders = default, bool pastTrailers = default, byte num1xx = default, bool readClosed = default, bool readAborted = default, Header trailer = default, ref ptr<Header> resTrailer = default)
             {
                 this.cc = cc;
-                this.req = req;
+                this.ctx = ctx;
+                this.reqCancel = reqCancel;
                 this.trace = trace;
                 this.ID = ID;
-                this.resc = resc;
                 this.bufPipe = bufPipe;
-                this.startedWrite = startedWrite;
                 this.requestedGzip = requestedGzip;
+                this.isHead = isHead;
+                this.abortOnce = abortOnce;
+                this.abort = abort;
+                this.abortErr = abortErr;
+                this.peerClosed = peerClosed;
+                this.donec = donec;
                 this.on100 = on100;
+                this.respHeaderRecv = respHeaderRecv;
+                this.res = res;
                 this.flow = flow;
                 this.inflow = inflow;
                 this.bytesRemain = bytesRemain;
                 this.readErr = readErr;
-                this.stopReqBody = stopReqBody;
-                this.didReset = didReset;
-                this.peerReset = peerReset;
-                this.resetErr = resetErr;
-                this.done = done;
+                this.reqBody = reqBody;
+                this.reqBodyContentLength = reqBodyContentLength;
+                this.reqBodyClosed = reqBodyClosed;
+                this.sentEndStream = sentEndStream;
+                this.sentHeaders = sentHeaders;
                 this.firstByte = firstByte;
                 this.pastHeaders = pastHeaders;
                 this.pastTrailers = pastTrailers;
                 this.num1xx = num1xx;
+                this.readClosed = readClosed;
+                this.readAborted = readAborted;
                 this.trailer = trailer;
                 this.resTrailer = resTrailer;
             }
@@ -132,7 +149,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2clientStream http2clientStream_cast(dynamic value)
         {
-            return new http2clientStream(ref value.cc, ref value.req, ref value.trace, value.ID, value.resc, value.bufPipe, value.startedWrite, value.requestedGzip, value.on100, value.flow, value.inflow, value.bytesRemain, value.readErr, value.stopReqBody, value.didReset, value.peerReset, value.resetErr, value.done, value.firstByte, value.pastHeaders, value.pastTrailers, value.num1xx, value.trailer, ref value.resTrailer);
+            return new http2clientStream(ref value.cc, value.ctx, value.reqCancel, ref value.trace, value.ID, value.bufPipe, value.requestedGzip, value.isHead, value.abortOnce, value.abort, value.abortErr, value.peerClosed, value.donec, value.on100, value.respHeaderRecv, ref value.res, value.flow, value.inflow, value.bytesRemain, value.readErr, value.reqBody, value.reqBodyContentLength, value.reqBodyClosed, value.sentEndStream, value.sentHeaders, value.firstByte, value.pastHeaders, value.pastTrailers, value.num1xx, value.readClosed, value.readAborted, value.trailer, ref value.resTrailer);
         }
     }
 }}

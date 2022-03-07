@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:49 UTC
+//     Generated on 2022 March 06 22:21:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -108,7 +107,7 @@ namespace net
                 this.shutdownOnce = default;
             }
 
-            public http2serverConn(ref ptr<http2Server> srv = default, ref ptr<Server> hs = default, net.Conn conn = default, ref ptr<http2bufferedWriter> bw = default, Handler handler = default, context.Context baseCtx = default, ref ptr<http2Framer> framer = default, channel<object> doneServing = default, channel<http2readFrameResult> readFrameCh = default, channel<http2FrameWriteRequest> wantWriteFrameCh = default, channel<http2frameWriteResult> wroteFrameCh = default, channel<http2bodyReadMsg> bodyReadCh = default, channel<object> serveMsgCh = default, http2flow flow = default, http2flow inflow = default, ref ptr<tls.ConnectionState> tlsState = default, @string remoteAddrStr = default, http2WriteScheduler writeSched = default, http2goroutineLock serveG = default, bool pushEnabled = default, bool sawFirstSettings = default, bool needToSendSettingsAck = default, long unackedSettings = default, long queuedControlFrames = default, uint clientMaxStreams = default, uint advMaxStreams = default, uint curClientStreams = default, uint curPushedStreams = default, uint maxClientStreamID = default, uint maxPushPromiseID = default, map<uint, ptr<http2stream>> streams = default, int initialStreamSendWindowSize = default, int maxFrameSize = default, uint headerTableSize = default, uint peerMaxHeaderListSize = default, map<@string, @string> canonHeader = default, bool writingFrame = default, bool writingFrameAsync = default, bool needsFrameFlush = default, bool inGoAway = default, bool inFrameScheduleLoop = default, bool needToSendGoAway = default, http2ErrCode goAwayCode = default, ref ptr<time.Timer> shutdownTimer = default, ref ptr<time.Timer> idleTimer = default, bytes.Buffer headerWriteBuf = default, ref ptr<hpack.Encoder> hpackEncoder = default, sync.Once shutdownOnce = default)
+            public http2serverConn(ref ptr<http2Server> srv = default, ref ptr<Server> hs = default, net.Conn conn = default, ref ptr<http2bufferedWriter> bw = default, Handler handler = default, context.Context baseCtx = default, ref ptr<http2Framer> framer = default, channel<object> doneServing = default, channel<http2readFrameResult> readFrameCh = default, channel<http2FrameWriteRequest> wantWriteFrameCh = default, channel<http2frameWriteResult> wroteFrameCh = default, channel<http2bodyReadMsg> bodyReadCh = default, channel<object> serveMsgCh = default, http2flow flow = default, http2flow inflow = default, ref ptr<tls.ConnectionState> tlsState = default, @string remoteAddrStr = default, http2WriteScheduler writeSched = default, http2goroutineLock serveG = default, bool pushEnabled = default, bool sawFirstSettings = default, bool needToSendSettingsAck = default, nint unackedSettings = default, nint queuedControlFrames = default, uint clientMaxStreams = default, uint advMaxStreams = default, uint curClientStreams = default, uint curPushedStreams = default, uint maxClientStreamID = default, uint maxPushPromiseID = default, map<uint, ptr<http2stream>> streams = default, int initialStreamSendWindowSize = default, int maxFrameSize = default, uint headerTableSize = default, uint peerMaxHeaderListSize = default, map<@string, @string> canonHeader = default, bool writingFrame = default, bool writingFrameAsync = default, bool needsFrameFlush = default, bool inGoAway = default, bool inFrameScheduleLoop = default, bool needToSendGoAway = default, http2ErrCode goAwayCode = default, ref ptr<time.Timer> shutdownTimer = default, ref ptr<time.Timer> idleTimer = default, bytes.Buffer headerWriteBuf = default, ref ptr<hpack.Encoder> hpackEncoder = default, sync.Once shutdownOnce = default)
             {
                 this.srv = srv;
                 this.hs = hs;

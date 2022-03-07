@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:39:50 UTC
+//     Generated on 2022 March 06 23:09:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -49,7 +48,7 @@ namespace go
                 this.V = default;
             }
 
-            public StartCommuteLoop(long Depth = default, @string V = default)
+            public StartCommuteLoop(nint Depth = default, @string V = default)
             {
                 this.Depth = Depth;
                 this.V = V;

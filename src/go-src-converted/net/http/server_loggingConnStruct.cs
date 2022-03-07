@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:03 UTC
+//     Generated on 2022 March 06 22:23:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -20,8 +19,8 @@ using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
@@ -135,81 +134,81 @@ namespace net
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
-                    if ((object)s_ReadByRef == null)
+                    if (s_ReadByRef is null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
 
-                    if ((object)s_WriteByRef == null)
+                    if (s_WriteByRef is null)
                         s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Close");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
 
-                    if ((object)s_CloseByRef == null)
+                    if (s_CloseByRef is null)
                         s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("LocalAddr");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_LocalAddrByRef = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByRef)) as LocalAddrByRef;
 
-                    if ((object)s_LocalAddrByRef == null)
+                    if (s_LocalAddrByRef is null)
                         s_LocalAddrByVal = extensionMethod.CreateStaticDelegate(typeof(LocalAddrByVal)) as LocalAddrByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("RemoteAddr");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_RemoteAddrByRef = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByRef)) as RemoteAddrByRef;
 
-                    if ((object)s_RemoteAddrByRef == null)
+                    if (s_RemoteAddrByRef is null)
                         s_RemoteAddrByVal = extensionMethod.CreateStaticDelegate(typeof(RemoteAddrByVal)) as RemoteAddrByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SetDeadline");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SetDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByRef)) as SetDeadlineByRef;
 
-                    if ((object)s_SetDeadlineByRef == null)
+                    if (s_SetDeadlineByRef is null)
                         s_SetDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetDeadlineByVal)) as SetDeadlineByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SetReadDeadline");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SetReadDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByRef)) as SetReadDeadlineByRef;
 
-                    if ((object)s_SetReadDeadlineByRef == null)
+                    if (s_SetReadDeadlineByRef is null)
                         s_SetReadDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetReadDeadlineByVal)) as SetReadDeadlineByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SetWriteDeadline");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SetWriteDeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByRef)) as SetWriteDeadlineByRef;
 
-                    if ((object)s_SetWriteDeadlineByRef == null)
+                    if (s_SetWriteDeadlineByRef is null)
                         s_SetWriteDeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(SetWriteDeadlineByVal)) as SetWriteDeadlineByVal;
                 }
             }

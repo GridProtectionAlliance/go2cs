@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:57 UTC
+//     Generated on 2022 March 06 23:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using heap = go.container.heap_package;
 using math = go.math_package;
 using sort = go.sort_package;
@@ -43,7 +42,7 @@ namespace @internal
                 this.lastMU = default;
             }
 
-            public accumulator(double mmu = default, double bound = default, long nWorst = default, utilHeap wHeap = default, ref ptr<mud> mud = default, double preciseMass = default, long lastTime = default, double lastMU = default)
+            public accumulator(double mmu = default, double bound = default, nint nWorst = default, utilHeap wHeap = default, ref ptr<mud> mud = default, double preciseMass = default, long lastTime = default, double lastMU = default)
             {
                 this.mmu = mmu;
                 this.bound = bound;

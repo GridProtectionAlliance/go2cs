@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:39:43 UTC
+//     Generated on 2022 March 06 23:09:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using types = go.cmd.compile.@internal.types_package;
 using go;
 
@@ -33,13 +32,15 @@ namespace @internal
             {
                 this.op = default;
                 this.ai = default;
+                this.ax = default;
                 this.t = default;
             }
 
-            public vkey(Op op = default, long ai = default, ref ptr<types.Type> t = default)
+            public vkey(Op op = default, long ai = default, Aux ax = default, ref ptr<types.Type> t = default)
             {
                 this.op = op;
                 this.ai = ai;
+                this.ax = ax;
                 this.t = t;
             }
 
@@ -63,7 +64,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static vkey vkey_cast(dynamic value)
         {
-            return new vkey(value.op, value.ai, ref value.t);
+            return new vkey(value.op, value.ai, value.ax, ref value.t);
         }
     }
 }}}}

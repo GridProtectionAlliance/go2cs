@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:33 UTC
+//     Generated on 2022 March 06 22:30:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using math = go.math_package;
 
 #nullable enable
@@ -32,7 +31,7 @@ namespace go
                 this.bias = default;
             }
 
-            public floatInfo(ulong mantbits = default, ulong expbits = default, long bias = default)
+            public floatInfo(nuint mantbits = default, nuint expbits = default, nint bias = default)
             {
                 this.mantbits = mantbits;
                 this.expbits = expbits;

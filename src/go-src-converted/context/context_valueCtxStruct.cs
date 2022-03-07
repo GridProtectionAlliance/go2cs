@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:50 UTC
+//     Generated on 2022 March 06 22:14:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
@@ -76,41 +75,41 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Deadline");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_DeadlineByRef = extensionMethod.CreateStaticDelegate(typeof(DeadlineByRef)) as DeadlineByRef;
 
-                    if ((object)s_DeadlineByRef == null)
+                    if (s_DeadlineByRef is null)
                         s_DeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(DeadlineByVal)) as DeadlineByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Done");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_DoneByRef = extensionMethod.CreateStaticDelegate(typeof(DoneByRef)) as DoneByRef;
 
-                    if ((object)s_DoneByRef == null)
+                    if (s_DoneByRef is null)
                         s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Err");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ErrByRef = extensionMethod.CreateStaticDelegate(typeof(ErrByRef)) as ErrByRef;
 
-                    if ((object)s_ErrByRef == null)
+                    if (s_ErrByRef is null)
                         s_ErrByVal = extensionMethod.CreateStaticDelegate(typeof(ErrByVal)) as ErrByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Value");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ValueByRef = extensionMethod.CreateStaticDelegate(typeof(ValueByRef)) as ValueByRef;
 
-                    if ((object)s_ValueByRef == null)
+                    if (s_ValueByRef is null)
                         s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
                 }
             }

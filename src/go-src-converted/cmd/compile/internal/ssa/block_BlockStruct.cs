@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:18 UTC
+//     Generated on 2022 March 06 22:49:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using go;
@@ -40,6 +39,7 @@ namespace @internal
                 this.Succs = default;
                 this.Preds = default;
                 this.Controls = default;
+                this.Aux = default;
                 this.AuxInt = default;
                 this.Values = default;
                 this.Func = default;
@@ -48,7 +48,7 @@ namespace @internal
                 this.valstorage = default;
             }
 
-            public Block(ID ID = default, src.XPos Pos = default, BlockKind Kind = default, BranchPrediction Likely = default, bool FlagsLiveAtEnd = default, slice<Edge> Succs = default, slice<Edge> Preds = default, array<ptr<Value>> Controls = default, long AuxInt = default, slice<ptr<Value>> Values = default, ref ptr<Func> Func = default, array<Edge> succstorage = default, array<Edge> predstorage = default, array<ptr<Value>> valstorage = default)
+            public Block(ID ID = default, src.XPos Pos = default, BlockKind Kind = default, BranchPrediction Likely = default, bool FlagsLiveAtEnd = default, slice<Edge> Succs = default, slice<Edge> Preds = default, array<ptr<Value>> Controls = default, Aux Aux = default, long AuxInt = default, slice<ptr<Value>> Values = default, ref ptr<Func> Func = default, array<Edge> succstorage = default, array<Edge> predstorage = default, array<ptr<Value>> valstorage = default)
             {
                 this.ID = ID;
                 this.Pos = Pos;
@@ -58,6 +58,7 @@ namespace @internal
                 this.Succs = Succs;
                 this.Preds = Preds;
                 this.Controls = Controls;
+                this.Aux = Aux;
                 this.AuxInt = AuxInt;
                 this.Values = Values;
                 this.Func = Func;
@@ -86,7 +87,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Block Block_cast(dynamic value)
         {
-            return new Block(value.ID, value.Pos, value.Kind, value.Likely, value.FlagsLiveAtEnd, value.Succs, value.Preds, value.Controls, value.AuxInt, value.Values, ref value.Func, value.succstorage, value.predstorage, value.valstorage);
+            return new Block(value.ID, value.Pos, value.Kind, value.Likely, value.FlagsLiveAtEnd, value.Succs, value.Preds, value.Controls, value.Aux, value.AuxInt, value.Values, ref value.Func, value.succstorage, value.predstorage, value.valstorage);
         }
     }
 }}}}

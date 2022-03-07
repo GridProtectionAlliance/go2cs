@@ -3,167 +3,128 @@
 // license that can be found in the LICENSE file.
 
 // Package modget implements the module-aware ``go get'' command.
-// package modget -- go2cs converted at 2020 October 09 05:45:19 UTC
+// package modget -- go2cs converted at 2022 March 06 23:16:17 UTC
 // import "cmd/go/internal/modget" ==> using modget = go.cmd.go.@internal.modget_package
-// Original source: C:\Go\src\cmd\go\internal\modget\get.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\modget\get.go
+// The arguments to 'go get' are patterns with optional version queries, with
+// the version queries defaulting to "upgrade".
+//
+// The patterns are normally interpreted as package patterns. However, if a
+// pattern cannot match a package, it is instead interpreted as a *module*
+// pattern. For version queries such as "upgrade" and "patch" that depend on the
+// selected version of a module (or of the module containing a package),
+// whether a pattern denotes a package or module may change as updates are
+// applied (see the example in mod_get_patchmod.txt).
+//
+// There are a few other ambiguous cases to resolve, too. A package can exist in
+// two different modules at the same version: for example, the package
+// example.com/foo might be found in module example.com and also in module
+// example.com/foo, and those modules may have independent v0.1.0 tags — so the
+// input 'example.com/foo@v0.1.0' could syntactically refer to the variant of
+// the package loaded from either module! (See mod_get_ambiguous_pkg.txt.)
+// If the argument is ambiguous, the user can often disambiguate by specifying
+// explicit versions for *all* of the potential module paths involved.
+
+using context = go.context_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 
 using @base = go.cmd.go.@internal.@base_package;
-using get = go.cmd.go.@internal.get_package;
 using imports = go.cmd.go.@internal.imports_package;
 using load = go.cmd.go.@internal.load_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
 using modload = go.cmd.go.@internal.modload_package;
-using mvs = go.cmd.go.@internal.mvs_package;
 using par = go.cmd.go.@internal.par_package;
 using search = go.cmd.go.@internal.search_package;
 using work = go.cmd.go.@internal.work_package;
 
+using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
 using semver = go.golang.org.x.mod.semver_package;
-using static go.builtin;
 using System;
-using System.Threading;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class modget_package
-    {
-        public static ptr<base.Command> CmdGet = addr(new base.Command(UsageLine:"go get [-d] [-t] [-u] [-v] [-insecure] [build flags] [packages]",Short:"add dependencies to current module and install them",Long:`
-Get resolves and adds dependencies to the current development module
-and then builds and installs them.
 
-The first step is to resolve which dependencies to add.
+namespace go.cmd.go.@internal;
 
-For each named package or package pattern, get must decide which version of
-the corresponding module to use. By default, get looks up the latest tagged
-release version, such as v0.4.5 or v1.2.3. If there are no tagged release
-versions, get looks up the latest tagged pre-release version, such as
-v0.0.1-pre1. If there are no tagged versions at all, get looks up the latest
-known commit. If the module is not already required at a later version
-(for example, a pre-release newer than the latest release), get will use
-the version it looked up. Otherwise, get will use the currently
-required version.
+public static partial class modget_package {
 
-This default version selection can be overridden by adding an @version
-suffix to the package argument, as in 'go get golang.org/x/text@v0.3.0'.
-The version may be a prefix: @v1 denotes the latest available version starting
-with v1. See 'go help modules' under the heading 'Module queries' for the
-full query syntax.
+public static ptr<base.Command> CmdGet = addr(new base.Command(UsageLine:"go get [-d] [-t] [-u] [-v] [build flags] [packages]",Short:"add dependencies to current module and install them",Long:`
+Get resolves its command-line arguments to packages at specific module versions,
+updates go.mod to require those versions, downloads source code into the
+module cache, then builds and installs the named packages.
 
-For modules stored in source control repositories, the version suffix can
-also be a commit hash, branch identifier, or other syntax known to the
-source control system, as in 'go get golang.org/x/text@master'. Note that
-branches with names that overlap with other module query syntax cannot be
-selected explicitly. For example, the suffix @v2 means the latest version
-starting with v2, not the branch named v2.
+To add a dependency for a package or upgrade it to its latest version:
 
-If a module under consideration is already a dependency of the current
-development module, then get will update the required version.
-Specifying a version earlier than the current required version is valid and
-downgrades the dependency. The version suffix @none indicates that the
-dependency should be removed entirely, downgrading or removing modules
-depending on it as needed.
+	go get example.com/pkg
 
-The version suffix @latest explicitly requests the latest minor release of the
-module named by the given path. The suffix @upgrade is like @latest but
-will not downgrade a module if it is already required at a revision or
-pre-release version newer than the latest released version. The suffix
-@patch requests the latest patch release: the latest released version
-with the same major and minor version numbers as the currently required
-version. Like @upgrade, @patch will not downgrade a module already required
-at a newer version. If the path is not already required, @upgrade and @patch
-are equivalent to @latest.
+To upgrade or downgrade a package to a specific version:
 
-Although get defaults to using the latest version of the module containing
-a named package, it does not use the latest version of that module's
-dependencies. Instead it prefers to use the specific dependency versions
-requested by that module. For example, if the latest A requires module
-B v1.2.3, while B v1.2.4 and v1.3.1 are also available, then 'go get A'
-will use the latest A but then use B v1.2.3, as requested by A. (If there
-are competing requirements for a particular module, then 'go get' resolves
-those requirements by taking the maximum requested version.)
+	go get example.com/pkg@v1.2.3
+
+To remove a dependency on a module and downgrade modules that require it:
+
+	go get example.com/mod@none
+
+See https://golang.org/ref/mod#go-get for details.
+
+The 'go install' command may be used to build and install packages. When a
+version is specified, 'go install' runs in module-aware mode and ignores
+the go.mod file in the current directory. For example:
+
+	go install example.com/pkg@v1.2.3
+	go install example.com/pkg@latest
+
+See 'go help install' or https://golang.org/ref/mod#go-install for details.
+
+In addition to build flags (listed in 'go help build') 'go get' accepts the
+following flags.
 
 The -t flag instructs get to consider modules needed to build tests of
 packages specified on the command line.
 
 The -u flag instructs get to update modules providing dependencies
 of packages named on the command line to use newer minor or patch
-releases when available. Continuing the previous example, 'go get -u A'
-will use the latest A with B v1.3.1 (not B v1.2.3). If B requires module C,
-but C does not provide any packages needed to build packages in A
-(not including tests), then C will not be updated.
+releases when available.
 
 The -u=patch flag (not -u patch) also instructs get to update dependencies,
 but changes the default to select patch releases.
-Continuing the previous example,
-'go get -u=patch A@latest' will use the latest A with B v1.2.4 (not B v1.2.3),
-while 'go get -u=patch A' will use a patch release of A instead.
 
 When the -t and -u flags are used together, get will update
 test dependencies as well.
 
-In general, adding a new dependency may require upgrading
-existing dependencies to keep a working build, and 'go get' does
-this automatically. Similarly, downgrading one dependency may
-require downgrading other dependencies, and 'go get' does
-this automatically as well.
+The -d flag instructs get not to build or install packages. get will only
+update go.mod and download source code needed to build packages.
 
-The -insecure flag permits fetching from repositories and resolving
-custom domains using insecure schemes such as HTTP. Use with caution. The
-GOINSECURE environment variable is usually a better alternative, since it
-provides control over which modules may be retrieved using an insecure scheme.
-See 'go help environment' for details.
+Building and installing packages with get is deprecated. In a future release,
+the -d flag will be enabled by default, and 'go get' will be only be used to
+adjust dependencies of the current module. To install a package using
+dependencies from the current module, use 'go install'. To install a package
+ignoring the current module, use 'go install' with an @version suffix like
+"@latest" after each argument.
 
-The second step is to download (if needed), build, and install
-the named packages.
-
-If an argument names a module but not a package (because there is no
-Go source code in the module's root directory), then the install step
-is skipped for that argument, instead of causing a build failure.
-For example 'go get golang.org/x/perf' succeeds even though there
-is no code corresponding to that import path.
-
-Note that package patterns are allowed and are expanded after resolving
-the module versions. For example, 'go get golang.org/x/perf/cmd/...'
-adds the latest golang.org/x/perf and then installs the commands in that
-latest version.
-
-The -d flag instructs get to download the source code needed to build
-the named packages, including downloading necessary dependencies,
-but not to build and install them.
-
-With no package arguments, 'go get' applies to Go package in the
-current directory, if any. In particular, 'go get -u' and
-'go get -u=patch' update all the dependencies of that package.
-With no package arguments and also without -u, 'go get' is not much more
-than 'go install', and 'go get -d' not much more than 'go list'.
-
-For more about modules, see 'go help modules'.
+For more about modules, see https://golang.org/ref/mod.
 
 For more about specifying packages, see 'go help packages'.
 
 This text describes the behavior of get using modules to manage source
 code and dependencies. If instead the go command is running in GOPATH
 mode, the details of get's flags and effects change, as does 'go help get'.
-See 'go help modules' and 'go help gopath-get'.
+See 'go help gopath-get'.
 
 See also: go build, go install, go clean, go mod.
 	`,));
 
-        // Note that this help text is a stopgap to make the module-aware get help text
-        // available even in non-module settings. It should be deleted when the old get
-        // is deleted. It should NOT be considered to set a precedent of having hierarchical
-        // help names with dashes.
-        public static ptr<base.Command> HelpModuleGet = addr(new base.Command(UsageLine:"module-get",Short:"module-aware go get",Long:`
+// Note that this help text is a stopgap to make the module-aware get help text
+// available even in non-module settings. It should be deleted when the old get
+// is deleted. It should NOT be considered to set a precedent of having hierarchical
+// help names with dashes.
+public static ptr<base.Command> HelpModuleGet = addr(new base.Command(UsageLine:"module-get",Short:"module-aware go get",Long:`
 The 'go get' command changes behavior depending on whether the
 go command is running in module-aware mode or legacy GOPATH mode.
 This help text, accessible as 'go help module-get' even in legacy GOPATH mode,
@@ -172,1431 +133,2123 @@ describes 'go get' as it operates in module-aware mode.
 Usage: `+CmdGet.UsageLine+`
 `+CmdGet.Long,));
 
-        private static var getD = CmdGet.Flag.Bool("d", false, "");        private static var getF = CmdGet.Flag.Bool("f", false, "");        private static var getFix = CmdGet.Flag.Bool("fix", false, "");        private static var getM = CmdGet.Flag.Bool("m", false, "");        private static var getT = CmdGet.Flag.Bool("t", false, "");        private static upgradeFlag getU = default;
+public static ptr<base.Command> HelpVCS = addr(new base.Command(UsageLine:"vcs",Short:"controlling version control with GOVCS",Long:`
+The 'go get' command can run version control commands like git
+to download imported code. This functionality is critical to the decentralized
+Go package ecosystem, in which code can be imported from any server,
+but it is also a potential security problem, if a malicious server finds a
+way to cause the invoked version control command to run unintended code.
 
-        // upgradeFlag is a custom flag.Value for -u.
-        private partial struct upgradeFlag // : @string
+To balance the functionality and security concerns, the 'go get' command
+by default will only use git and hg to download code from public servers.
+But it will use any known version control system (bzr, fossil, git, hg, svn)
+to download code from private servers, defined as those hosting packages
+matching the GOPRIVATE variable (see 'go help private'). The rationale behind
+allowing only Git and Mercurial is that these two systems have had the most
+attention to issues of being run as clients of untrusted servers. In contrast,
+Bazaar, Fossil, and Subversion have primarily been used in trusted,
+authenticated environments and are not as well scrutinized as attack surfaces.
+
+The version control command restrictions only apply when using direct version
+control access to download code. When downloading modules from a proxy,
+'go get' uses the proxy protocol instead, which is always permitted.
+By default, the 'go get' command uses the Go module mirror (proxy.golang.org)
+for public packages and only falls back to version control for private
+packages or when the mirror refuses to serve a public package (typically for
+legal reasons). Therefore, clients can still access public code served from
+Bazaar, Fossil, or Subversion repositories by default, because those downloads
+use the Go module mirror, which takes on the security risk of running the
+version control commands using a custom sandbox.
+
+The GOVCS variable can be used to change the allowed version control systems
+for specific packages (identified by a module or import path).
+The GOVCS variable applies when building package in both module-aware mode
+and GOPATH mode. When using modules, the patterns match against the module path.
+When using GOPATH, the patterns match against the import path corresponding to
+the root of the version control repository.
+
+The general form of the GOVCS setting is a comma-separated list of
+pattern:vcslist rules. The pattern is a glob pattern that must match
+one or more leading elements of the module or import path. The vcslist
+is a pipe-separated list of allowed version control commands, or "all"
+to allow use of any known command, or "off" to disallow all commands.
+Note that if a module matches a pattern with vcslist "off", it may still be
+downloaded if the origin server uses the "mod" scheme, which instructs the
+go command to download the module using the GOPROXY protocol.
+The earliest matching pattern in the list applies, even if later patterns
+might also match.
+
+For example, consider:
+
+	GOVCS=github.com:git,evil.com:off,*:git|hg
+
+With this setting, code with a module or import path beginning with
+github.com/ can only use git; paths on evil.com cannot use any version
+control command, and all other paths (* matches everything) can use
+only git or hg.
+
+The special patterns "public" and "private" match public and private
+module or import paths. A path is private if it matches the GOPRIVATE
+variable; otherwise it is public.
+
+If no rules in the GOVCS variable match a particular module or import path,
+the 'go get' command applies its default rule, which can now be summarized
+in GOVCS notation as 'public:git|hg,private:all'.
+
+To allow unfettered use of any version control system for any package, use:
+
+	GOVCS=*:all
+
+To disable all use of version control, use:
+
+	GOVCS=*:off
+
+The 'go env -w' command (see 'go help env') can be used to set the GOVCS
+variable for future go command invocations.
+`,));
+
+private static var getD = CmdGet.Flag.Bool("d", false, "");private static var getF = CmdGet.Flag.Bool("f", false, "");private static var getFix = CmdGet.Flag.Bool("fix", false, "");private static var getM = CmdGet.Flag.Bool("m", false, "");private static var getT = CmdGet.Flag.Bool("t", false, "");private static upgradeFlag getU = default;private static var getInsecure = CmdGet.Flag.Bool("insecure", false, "");
+
+// upgradeFlag is a custom flag.Value for -u.
+private partial struct upgradeFlag {
+    public @string rawVersion;
+    public @string version;
+}
+
+private static bool IsBoolFlag(this ptr<upgradeFlag> _addr__p0) {
+    ref upgradeFlag _p0 = ref _addr__p0.val;
+
+    return true;
+} // allow -u
+
+private static error Set(this ptr<upgradeFlag> _addr_v, @string s) {
+    ref upgradeFlag v = ref _addr_v.val;
+
+    if (s == "false") {
+        v.version = "";
+        v.rawVersion = "";
+    }
+    else if (s == "true") {
+        v.version = "upgrade";
+        v.rawVersion = "";
+    }
+    else
+ {
+        v.version = s;
+        v.rawVersion = s;
+    }
+    return error.As(null!)!;
+
+}
+
+private static @string String(this ptr<upgradeFlag> _addr_v) {
+    ref upgradeFlag v = ref _addr_v.val;
+
+    return "";
+}
+
+private static void init() {
+    work.AddBuildFlags(CmdGet, work.OmitModFlag);
+    CmdGet.Run = runGet; // break init loop
+    CmdGet.Flag.Var(_addr_getU, "u", "");
+
+}
+
+private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
+    ref base.Command cmd = ref _addr_cmd.val;
+
+    switch (getU.version) {
+        case "": 
+
+        case "upgrade": 
+
+        case "patch": 
+
+            break;
+        default: 
+            @base.Fatalf("go get: unknown upgrade flag -u=%s", getU.rawVersion);
+            break;
+    }
+    if (getF.val) {
+        fmt.Fprintf(os.Stderr, "go get: -f flag is a no-op when using modules\n");
+    }
+    if (getFix.val) {
+        fmt.Fprintf(os.Stderr, "go get: -fix flag is a no-op when using modules\n");
+    }
+    if (getM.val) {
+        @base.Fatalf("go get: -m flag is no longer supported; consider -d to skip building packages");
+    }
+    if (getInsecure.val) {
+        @base.Fatalf("go get: -insecure flag is no longer supported; use GOINSECURE instead");
+    }
+    modload.DisallowWriteGoMod(); 
+
+    // Allow looking up modules for import paths when outside of a module.
+    // 'go get' is expected to do this, unlike other commands.
+    modload.AllowMissingModuleImports();
+
+    var queries = parseArgs(ctx, args);
+
+    var r = newResolver(ctx, queries);
+    r.performLocalQueries(ctx);
+    r.performPathQueries(ctx);
+
+    while (true) {
+        r.performWildcardQueries(ctx);
+        r.performPatternAllQueries(ctx);
+
         {
-        }
-
-        private static bool IsBoolFlag(this ptr<upgradeFlag> _addr__p0)
-        {
-            ref upgradeFlag _p0 = ref _addr__p0.val;
-
-            return true;
-        } // allow -u
-
-        private static error Set(this ptr<upgradeFlag> _addr_v, @string s)
-        {
-            ref upgradeFlag v = ref _addr_v.val;
-
-            if (s == "false")
-            {
-                s = "";
-            }
-
-            if (s == "true")
-            {
-                s = "upgrade";
-            }
-
-            v.val = upgradeFlag(s);
-            return error.As(null!)!;
-
-        }
-
-        private static @string String(this ptr<upgradeFlag> _addr_v)
-        {
-            ref upgradeFlag v = ref _addr_v.val;
-
-            return "";
-        }
-
-        private static void init()
-        {
-            work.AddBuildFlags(CmdGet, work.OmitModFlag);
-            CmdGet.Run = runGet; // break init loop
-            CmdGet.Flag.BoolVar(_addr_get.Insecure, "insecure", get.Insecure, "");
-            CmdGet.Flag.Var(_addr_getU, "u", "");
-
-        }
-
-        // A getArg holds a parsed positional argument for go get (path@vers).
-        private partial struct getArg
-        {
-            public @string raw; // path is the part of the argument before "@" (or the whole argument
-// if there is no "@"). path specifies the modules or packages to get.
-            public @string path; // vers is the part of the argument after "@" or an implied
-// "upgrade" or "patch" if there is no "@". vers specifies the
-// module version to get.
-            public @string vers;
-        }
-
-        // querySpec describes a query for a specific module. path may be a
-        // module path, package path, or package pattern. vers is a version
-        // query string from a command line argument.
-        private partial struct querySpec
-        {
-            public @string path; // vers specifies what version of the module to get.
-            public @string vers; // forceModulePath is true if path should be interpreted as a module path.
-// If forceModulePath is true, prevM must be set.
-            public bool forceModulePath; // prevM is the previous version of the module. prevM is needed
-// to determine the minor version number if vers is "patch". It's also
-// used to avoid downgrades from prerelease versions newer than
-// "latest" and "patch". If prevM is set, forceModulePath must be true.
-            public module.Version prevM;
-        }
-
-        // query holds the state for a query made for a specific module.
-        // After a query is performed, we know the actual module path and
-        // version and whether any packages were matched by the query path.
-        private partial struct query
-        {
-            public ref querySpec querySpec => ref querySpec_val; // arg is the command line argument that matched the specified module.
-            public @string arg; // m is the module path and version found by the query.
-            public module.Version m;
-        }
-
-        private static void runGet(ptr<base.Command> _addr_cmd, slice<@string> args)
-        {
-            ref base.Command cmd = ref _addr_cmd.val;
-
-            switch (getU)
-            {
-                case "": 
-
-                case "upgrade": 
-
-                case "patch": 
-                    break;
-                default: 
-                    @base.Fatalf("go get: unknown upgrade flag -u=%s", getU);
-                    break;
-            }
-            if (getF.val)
-            {
-                fmt.Fprintf(os.Stderr, "go get: -f flag is a no-op when using modules\n");
-            }
-
-            if (getFix.val)
-            {
-                fmt.Fprintf(os.Stderr, "go get: -fix flag is a no-op when using modules\n");
-            }
-
-            if (getM.val)
-            {
-                @base.Fatalf("go get: -m flag is no longer supported; consider -d to skip building packages");
-            }
-
-            modload.LoadTests = getT.val;
-
-            var buildList = modload.LoadBuildList();
-            buildList = buildList.slice(-1, len(buildList), len(buildList)); // copy on append
-            var versionByPath = make_map<@string, @string>();
-            {
-                var m__prev1 = m;
-
-                foreach (var (_, __m) in buildList)
-                {
-                    m = __m;
-                    versionByPath[m.Path] = m.Version;
-                } 
-
-                // Do not allow any updating of go.mod until we've applied
-                // all the requested changes and checked that the result matches
-                // what was requested.
-
-                m = m__prev1;
-            }
-
-            modload.DisallowWriteGoMod(); 
-
-            // Allow looking up modules for import paths outside of a module.
-            // 'go get' is expected to do this, unlike other commands.
-            modload.AllowMissingModuleImports(); 
-
-            // Parse command-line arguments and report errors. The command-line
-            // arguments are of the form path@version or simply path, with implicit
-            // @upgrade. path@none is "downgrade away".
-            slice<getArg> gets = default;
-            slice<ptr<query>> queries = default;
-            {
-                var arg__prev1 = arg;
-
-                foreach (var (_, __arg) in search.CleanPatterns(args))
-                {
-                    arg = __arg; 
-                    // Argument is path or path@vers.
-                    var path = arg;
-                    @string vers = "";
-                    {
-                        var i__prev1 = i;
-
-                        var i = strings.Index(arg, "@");
-
-                        if (i >= 0L)
-                        {
-                            path = arg[..i];
-                            vers = arg[i + 1L..];
-
-                        }
-
-                        i = i__prev1;
-
-                    }
-
-                    if (strings.Contains(vers, "@") || arg != path && vers == "")
-                    {
-                        @base.Errorf("go get %s: invalid module version syntax", arg);
-                        continue;
-                    } 
-
-                    // Guard against 'go get x.go', a common mistake.
-                    // Note that package and module paths may end with '.go', so only print an error
-                    // if the argument has no version and either has no slash or refers to an existing file.
-                    if (strings.HasSuffix(arg, ".go") && vers == "")
-                    {
-                        if (!strings.Contains(arg, "/"))
-                        {
-                            @base.Errorf("go get %s: arguments must be package or module paths", arg);
-                            continue;
-                        }
-
-                        {
-                            var err__prev2 = err;
-
-                            var (fi, err) = os.Stat(arg);
-
-                            if (err == null && !fi.IsDir())
-                            {
-                                @base.Errorf("go get: %s exists as a file, but 'go get' requires package arguments", arg);
-                                continue;
-                            }
-
-                            err = err__prev2;
-
-                        }
-
-                    } 
-
-                    // If no version suffix is specified, assume @upgrade.
-                    // If -u=patch was specified, assume @patch instead.
-                    if (vers == "")
-                    {
-                        if (getU != "")
-                        {
-                            vers = string(getU);
-                        }
-                        else
-                        {
-                            vers = "upgrade";
-                        }
-
-                    }
-
-                    gets = append(gets, new getArg(raw:arg,path:path,vers:vers)); 
-
-                    // Determine the modules that path refers to, and create queries
-                    // to lookup modules at target versions before loading packages.
-                    // This is an imprecise process, but it helps reduce unnecessary
-                    // queries and package loading. It's also necessary for handling
-                    // patterns like golang.org/x/tools/..., which can't be expanded
-                    // during package loading until they're in the build list.
-
-                    if (filepath.IsAbs(path) || search.IsRelativePath(path)) 
-                        // Absolute paths like C:\foo and relative paths like ../foo...
-                        // are restricted to matching packages in the main module. If the path
-                        // is explicit and contains no wildcards (...), check that it is a
-                        // package in the main module. If the path contains wildcards but
-                        // matches no packages, we'll warn after package loading.
-                        if (!strings.Contains(path, "..."))
-                        {
-                            var m = search.NewMatch(path);
-                            {
-                                var pkgPath = modload.DirImportPath(path);
-
-                                if (pkgPath != ".")
-                                {
-                                    m = modload.TargetPackages(pkgPath);
-                                }
-
-                            }
-
-                            if (len(m.Pkgs) == 0L)
-                            {
-                                {
-                                    var err__prev2 = err;
-
-                                    foreach (var (_, __err) in m.Errs)
-                                    {
-                                        err = __err;
-                                        @base.Errorf("go get %s: %v", arg, err);
-                                    }
-
-                                    err = err__prev2;
-                                }
-
-                                var (abs, err) = filepath.Abs(path);
-                                if (err != null)
-                                {
-                                    abs = path;
-                                }
-
-                                @base.Errorf("go get %s: path %s is not a package in module rooted at %s", arg, abs, modload.ModRoot());
-                                continue;
-
-                            }
-
-                        }
-
-                        if (path != arg)
-                        {
-                            @base.Errorf("go get %s: can't request explicit version of path in main module", arg);
-                            continue;
-                        }
-
-                    else if (strings.Contains(path, "..."))                     else if (path == "all") 
-                        // If there is no main module, "all" is not meaningful.
-                        if (!modload.HasModRoot())
-                        {
-                            @base.Errorf("go get %s: cannot match \"all\": working directory is not part of a module", arg);
-                        } 
-                        // Don't query modules until we load packages. We'll automatically
-                        // look up any missing modules.
-                    else if (search.IsMetaPackage(path)) 
-                        @base.Errorf("go get %s: explicit requirement on standard-library module %s not allowed", path, path);
-                        continue;
-                    else 
-                        // The argument is a package or module path.
-                        if (modload.HasModRoot())
-                        {
-                            {
-                                var m__prev2 = m;
-
-                                m = modload.TargetPackages(path);
-
-                                if (len(m.Pkgs) != 0L)
-                                { 
-                                    // The path is in the main module. Nothing to query.
-                                    if (vers != "upgrade" && vers != "patch")
-                                    {
-                                        @base.Errorf("go get %s: can't request explicit version of path in main module", arg);
-                                    }
-
-                                    continue;
-
-                                }
-
-                                m = m__prev2;
-
-                            }
-
-                        }
-
-                        var first = path;
-                        {
-                            var i__prev1 = i;
-
-                            i = strings.IndexByte(first, '/');
-
-                            if (i >= 0L)
-                            {
-                                first = path;
-                            }
-
-                            i = i__prev1;
-
-                        }
-
-                        if (!strings.Contains(first, "."))
-                        { 
-                            // The path doesn't have a dot in the first component and cannot be
-                            // queried as a module. It may be a package in the standard library,
-                            // which is fine, so don't report an error unless we encounter
-                            // a problem loading packages below.
-                            continue;
-
-                        } 
-
-                        // If we're querying "upgrade" or "patch", we need to know the current
-                        // version of the module. For "upgrade", we want to avoid accidentally
-                        // downgrading from a newer prerelease. For "patch", we need to query
-                        // the correct minor version.
-                        // Here, we check if "path" is the name of a module in the build list
-                        // (other than the main module) and set prevM if so. If "path" isn't
-                        // a module in the build list, the current version doesn't matter
-                        // since it's either an unknown module or a package within a module
-                        // that we'll discover later.
-                        ptr<query> q = addr(new query(querySpec:querySpec{path:path,vers:vers},arg:arg));
-                        {
-                            var v__prev1 = v;
-
-                            var (v, ok) = versionByPath[path];
-
-                            if (ok && path != modload.Target.Path)
-                            {
-                                q.prevM = new module.Version(Path:path,Version:v);
-                                q.forceModulePath = true;
-                            }
-
-                            v = v__prev1;
-
-                        }
-
-                        queries = append(queries, q);
-                    
-                }
-
-                arg = arg__prev1;
-            }
-
-            @base.ExitIfErrors(); 
-
-            // Query modules referenced by command line arguments at requested versions.
-            // We need to do this before loading packages since patterns that refer to
-            // packages in unknown modules can't be expanded. This also avoids looking
-            // up new modules while loading packages, only to downgrade later.
-            var queryCache = make_map<querySpec, ptr<query>>();
-            var byPath = runQueries(queryCache, queries, null); 
-
-            // Add missing modules to the build list.
-            // We call SetBuildList here and elsewhere, since newUpgrader,
-            // ImportPathsQuiet, and other functions read the global build list.
-            {
-                ptr<query> q__prev1 = q;
-
-                foreach (var (_, __q) in queries)
-                {
-                    q = __q;
-                    {
-                        var (_, ok) = versionByPath[q.m.Path];
-
-                        if (!ok && q.m.Version != "none")
-                        {
-                            buildList = append(buildList, q.m);
-                        }
-
-                    }
-
-                }
-
-                q = q__prev1;
-            }
-
-            versionByPath = null; // out of date now; rebuilt later when needed
-            modload.SetBuildList(buildList); 
-
-            // Upgrade modules specifically named on the command line. This is our only
-            // chance to upgrade modules without root packages (modOnly below).
-            // This also skips loading packages at an old version, only to upgrade
-            // and reload at a new version.
-            var upgrade = make_map<@string, ptr<query>>();
-            {
-                var path__prev1 = path;
-                ptr<query> q__prev1 = q;
-
-                foreach (var (__path, __q) in byPath)
-                {
-                    path = __path;
-                    q = __q;
-                    if (q.path == q.m.Path && q.m.Version != "none")
-                    {
-                        upgrade[path] = q;
-                    }
-
-                }
-
-                path = path__prev1;
-                q = q__prev1;
-            }
-
-            var (buildList, err) = mvs.UpgradeAll(modload.Target, newUpgrader(upgrade, null));
-            if (err != null)
-            {
-                @base.Fatalf("go get: %v", err);
-            }
-
-            modload.SetBuildList(buildList);
-            @base.ExitIfErrors();
-            var prevBuildList = buildList; 
-
-            // Build a set of module paths that we don't plan to load packages from.
-            // This includes explicitly requested modules that don't have a root package
-            // and modules with a target version of "none".
-            sync.WaitGroup wg = default;
-            sync.Mutex modOnlyMu = default;
-            var modOnly = make_map<@string, ptr<query>>();
-            {
-                ptr<query> q__prev1 = q;
-
-                foreach (var (_, __q) in queries)
-                {
-                    q = __q;
-                    if (q.m.Version == "none")
-                    {
-                        modOnlyMu.Lock();
-                        modOnly[q.m.Path] = q;
-                        modOnlyMu.Unlock();
-                        continue;
-                    }
-
-                    if (q.path == q.m.Path)
-                    {
-                        wg.Add(1L);
-                        go_(() => q =>
-                        {
-                            {
-                                var err__prev2 = err;
-
-                                var (hasPkg, err) = modload.ModuleHasRootPackage(q.m);
-
-                                if (err != null)
-                                {
-                                    @base.Errorf("go get: %v", err);
-                                }
-                                else if (!hasPkg)
-                                {
-                                    modOnlyMu.Lock();
-                                    modOnly[q.m.Path] = q;
-                                    modOnlyMu.Unlock();
-                                }
-
-
-                                err = err__prev2;
-
-                            }
-
-                            wg.Done();
-
-                        }(q));
-
-                    }
-
-                }
-
-                q = q__prev1;
-            }
-
-            wg.Wait();
-            @base.ExitIfErrors(); 
-
-            // Build a list of arguments that may refer to packages.
-            slice<@string> pkgPatterns = default;
-            slice<getArg> pkgGets = default;
-            {
-                var arg__prev1 = arg;
-
-                foreach (var (_, __arg) in gets)
-                {
-                    arg = __arg;
-                    if (modOnly[arg.path] == null && arg.vers != "none")
-                    {
-                        pkgPatterns = append(pkgPatterns, arg.path);
-                        pkgGets = append(pkgGets, arg);
-                    }
-
-                } 
-
-                // Load packages and upgrade the modules that provide them. We do this until
-                // we reach a fixed point, since modules providing packages may change as we
-                // change versions. This must terminate because the module graph is finite,
-                // and the load and upgrade operations may only add and upgrade modules
-                // in the build list.
-
-                arg = arg__prev1;
-            }
-
-            slice<ptr<search.Match>> matches = default;
-            while (true)
-            {
-                map<@string, bool> seenPkgs = default;
-                var seenQuery = make_map<querySpec, bool>();
-                queries = default;
-                Action<ptr<query>> addQuery = q =>
-                {
-                    if (!seenQuery[q.querySpec])
-                    {
-                        seenQuery[q.querySpec] = true;
-                        queries = append(queries, q);
-                    }
-
-                }
-;
-
-                if (len(pkgPatterns) > 0L)
-                { 
-                    // Don't load packages if pkgPatterns is empty. Both
-                    // modload.ImportPathsQuiet and ModulePackages convert an empty list
-                    // of patterns to []string{"."}, which is not what we want.
-                    matches = modload.ImportPathsQuiet(pkgPatterns, imports.AnyTags());
-                    seenPkgs = make_map<@string, bool>();
-                    {
-                        var i__prev2 = i;
-
-                        foreach (var (__i, __match) in matches)
-                        {
-                            i = __i;
-                            match = __match;
-                            var arg = pkgGets[i];
-
-                            if (len(match.Pkgs) == 0L)
-                            { 
-                                // If the pattern did not match any packages, look up a new module.
-                                // If the pattern doesn't match anything on the last iteration,
-                                // we'll print a warning after the outer loop.
-                                if (!match.IsLocal() && !match.IsLiteral() && arg.path != "all")
-                                {
-                                    addQuery(addr(new query(querySpec:querySpec{path:arg.path,vers:arg.vers},arg:arg.raw)));
-                                }
-                                else
-                                {
-                                    {
-                                        var err__prev3 = err;
-
-                                        foreach (var (_, __err) in match.Errs)
-                                        {
-                                            err = __err;
-                                            @base.Errorf("go get: %v", err);
-                                        }
-
-                                        err = err__prev3;
-                                    }
-                                }
-
-                                continue;
-
-                            }
-
-                            var allStd = true;
-                            foreach (var (_, pkg) in match.Pkgs)
-                            {
-                                if (!seenPkgs[pkg])
-                                {
-                                    seenPkgs[pkg] = true;
-                                    {
-                                        var err__prev3 = err;
-
-                                        var (_, _, err) = modload.Lookup("", false, pkg);
-
-                                        if (err != null)
-                                        {
-                                            allStd = false;
-                                            @base.Errorf("go get %s: %v", arg.raw, err);
-                                            continue;
-                                        }
-
-                                        err = err__prev3;
-
-                                    }
-
-                                }
-
-                                m = modload.PackageModule(pkg);
-                                if (m.Path == "")
-                                { 
-                                    // pkg is in the standard library.
-                                    continue;
-
-                                }
-
-                                allStd = false;
-                                if (m.Path == modload.Target.Path)
-                                { 
-                                    // pkg is in the main module.
-                                    continue;
-
-                                }
-
-                                addQuery(addr(new query(querySpec:querySpec{path:m.Path,vers:arg.vers,forceModulePath:true,prevM:m},arg:arg.raw)));
-
-                            }
-                            if (allStd && arg.path != arg.raw)
-                            {
-                                @base.Errorf("go get %s: cannot use pattern %q with explicit version", arg.raw, arg.raw);
-                            }
-
-                        }
-
-                        i = i__prev2;
-                    }
-                }
-
-                @base.ExitIfErrors(); 
-
-                // Query target versions for modules providing packages matched by
-                // command line arguments.
-                byPath = runQueries(queryCache, queries, modOnly); 
-
-                // Handle upgrades. This is needed for arguments that didn't match
-                // modules or matched different modules from a previous iteration. It
-                // also upgrades modules providing package dependencies if -u is set.
-                (buildList, err) = mvs.UpgradeAll(modload.Target, newUpgrader(byPath, seenPkgs));
-                if (err != null)
-                {
-                    @base.Fatalf("go get: %v", err);
-                }
-
-                modload.SetBuildList(buildList);
-                @base.ExitIfErrors(); 
-
-                // Stop if no changes have been made to the build list.
-                buildList = modload.BuildList();
-                var eq = len(buildList) == len(prevBuildList);
-                {
-                    var i__prev2 = i;
-
-                    for (i = 0L; eq && i < len(buildList); i++)
-                    {
-                        eq = buildList[i] == prevBuildList[i];
-                    }
-
-
-                    i = i__prev2;
-                }
-                if (eq)
-                {
-                    break;
-                }
-
-                prevBuildList = buildList;
-
-            }
-
-            if (!getD.val)
-            { 
-                // Only print warnings after the last iteration,
-                // and only if we aren't going to build.
-                search.WarnUnmatched(matches);
+            var changed__prev1 = changed;
+
+            var changed = r.resolveQueries(ctx, queries);
+
+            if (changed) { 
+                // 'go get' arguments can be (and often are) package patterns rather than
+                // (just) modules. A package can be provided by any module with a prefix
+                // of its import path, and a wildcard can even match packages in modules
+                // with totally different paths. Because of these effects, and because any
+                // change to the selected version of a module can bring in entirely new
+                // module paths as dependencies, we need to reissue queries whenever we
+                // change the build list.
+                //
+                // The result of any version query for a given module — even "upgrade" or
+                // "patch" — is always relative to the build list at the start of
+                // the 'go get' command, not an intermediate state, and is therefore
+                // dederministic and therefore cachable, and the constraints on the
+                // selected version of each module can only narrow as we iterate.
+                //
+                // "all" is functionally very similar to a wildcard pattern. The set of
+                // packages imported by the main module does not change, and the query
+                // result for the module containing each such package also does not change
+                // (it is always relative to the initial build list, before applying
+                // queries). So the only way that the result of an "all" query can change
+                // is if some matching package moves from one module in the build list
+                // to another, which should not happen very often.
+                continue;
 
             } 
 
-            // Handle downgrades.
-            slice<module.Version> down = default;
-            {
-                var m__prev1 = m;
+            // When we load imports, we detect the following conditions:
+            //
+            // - missing transitive depencies that need to be resolved from outside the
+            //   current build list (note that these may add new matches for existing
+            //   pattern queries!)
+            //
+            // - transitive dependencies that didn't match any other query,
+            //   but need to be upgraded due to the -u flag
+            //
+            // - ambiguous import errors.
+            //   TODO(#27899): Try to resolve ambiguous import errors automatically.
 
-                foreach (var (_, __m) in modload.BuildList())
-                {
-                    m = __m;
-                    q = byPath[m.Path];
-                    if (q != null && semver.Compare(m.Version, q.m.Version) > 0L)
-                    {
-                        down = append(down, new module.Version(Path:m.Path,Version:q.m.Version));
-                    }
+            changed = changed__prev1;
 
-                }
+        } 
 
-                m = m__prev1;
+        // When we load imports, we detect the following conditions:
+        //
+        // - missing transitive depencies that need to be resolved from outside the
+        //   current build list (note that these may add new matches for existing
+        //   pattern queries!)
+        //
+        // - transitive dependencies that didn't match any other query,
+        //   but need to be upgraded due to the -u flag
+        //
+        // - ambiguous import errors.
+        //   TODO(#27899): Try to resolve ambiguous import errors automatically.
+        var upgrades = r.findAndUpgradeImports(ctx, queries);
+        {
+            var changed__prev1 = changed;
+
+            changed = r.applyUpgrades(ctx, upgrades);
+
+            if (changed) {
+                continue;
             }
 
-            if (len(down) > 0L)
-            {
-                (buildList, err) = mvs.Downgrade(modload.Target, modload.Reqs(), down);
-                if (err != null)
-                {
-                    @base.Fatalf("go: %v", err);
-                }
+            changed = changed__prev1;
 
-                modload.SetBuildList(buildList);
-                modload.ReloadBuildList(); // note: does not update go.mod
-                @base.ExitIfErrors();
+        }
 
-            } 
 
-            // Scan for any upgrades lost by the downgrades.
-            slice<ptr<query>> lostUpgrades = default;
-            if (len(down) > 0L)
-            {
-                versionByPath = make_map<@string, @string>();
-                {
-                    var m__prev1 = m;
+        r.findMissingWildcards(ctx);
+        {
+            var changed__prev1 = changed;
 
-                    foreach (var (_, __m) in modload.BuildList())
-                    {
-                        m = __m;
-                        versionByPath[m.Path] = m.Version;
-                    }
+            changed = r.resolveQueries(ctx, r.wildcardQueries);
 
-                    m = m__prev1;
-                }
+            if (changed) {
+                continue;
+            }
 
-                {
-                    ptr<query> q__prev1 = q;
+            changed = changed__prev1;
 
-                    foreach (var (_, __q) in byPath)
-                    {
-                        q = __q;
+        }
+
+
+        break;
+
+    }
+
+    r.checkWildcardVersions(ctx);
+
+    slice<@string> pkgPatterns = default;
+    foreach (var (_, q) in queries) {
+        if (q.matchesPackages) {
+            pkgPatterns = append(pkgPatterns, q.pattern);
+        }
+    }    r.checkPackageProblems(ctx, pkgPatterns); 
+
+    // We've already downloaded modules (and identified direct and indirect
+    // dependencies) by loading packages in findAndUpgradeImports.
+    // So if -d is set, we're done after the module work.
+    //
+    // Otherwise, we need to build and install the packages matched by
+    // command line arguments.
+    // Note that 'go get -u' without arguments is equivalent to
+    // 'go get -u .', so we'll typically build the package in the current
+    // directory.
+    if (!getD && len(pkgPatterns) > 0.val) {
+        work.BuildInit();
+
+        load.PackageOpts pkgOpts = new load.PackageOpts(ModResolveTests:*getT);
+        slice<ptr<load.Package>> pkgs = default;
+        {
+            var pkg__prev1 = pkg;
+
+            foreach (var (_, __pkg) in load.PackagesAndErrors(ctx, pkgOpts, pkgPatterns)) {
+                pkg = __pkg;
+                if (pkg.Error != null) {
+                    ptr<load.NoGoError> noGo;
+                    if (errors.As(pkg.Error.Err, _addr_noGo)) {
                         {
-                            var v__prev2 = v;
+                            var m = modload.PackageModule(pkg.ImportPath);
 
-                            (v, ok) = versionByPath[q.m.Path];
+                            if (m.Path == pkg.ImportPath) { 
+                                // pkg is at the root of a module, and doesn't exist with the current
+                                // build tags. Probably the user just wanted to change the version of
+                                // that module — not also build the package — so suppress the error.
+                                // (See https://golang.org/issue/33526.)
+                                continue;
 
-                            if (q.m.Version != "none" && (!ok || semver.Compare(v, q.m.Version) != 0L))
-                            {
-                                lostUpgrades = append(lostUpgrades, q);
                             }
-
-                            v = v__prev2;
 
                         }
 
                     }
 
-                    q = q__prev1;
                 }
 
-                sort.Slice(lostUpgrades, (i, j) =>
+                pkgs = append(pkgs, pkg);
+
+            }
+
+            pkg = pkg__prev1;
+        }
+
+        load.CheckPackageErrors(pkgs);
+
+        var haveExternalExe = false;
+        {
+            var pkg__prev1 = pkg;
+
+            foreach (var (_, __pkg) in pkgs) {
+                pkg = __pkg;
+                if (pkg.Name == "main" && pkg.Module != null && pkg.Module.Path != modload.Target.Path) {
+                    haveExternalExe = true;
+                    break;
+                }
+            }
+
+            pkg = pkg__prev1;
+        }
+
+        if (haveExternalExe) {
+            fmt.Fprint(os.Stderr, "go get: installing executables with 'go get' in module mode is deprecated.");
+            @string altMsg = default;
+            if (modload.HasModRoot()) {
+                altMsg = @"
+	To adjust and download dependencies of the current module, use 'go get -d'.
+	To install using requirements of the current module, use 'go install'.
+	To install ignoring the current module, use 'go install' with a version,
+	like 'go install example.com/cmd@latest'.
+";
+            }
+            else
+ {
+                altMsg = "\n\tUse 'go install pkg@version' instead.\n";
+            }
+
+            fmt.Fprint(os.Stderr, altMsg);
+            fmt.Fprintf(os.Stderr, "\tFor more information, see https://golang.org/doc/go-get-install-deprecation\n\tor run 'go help get' or 'go help install'.\n");
+
+        }
+        work.InstallPackages(ctx, pkgPatterns, pkgs);
+
+    }
+    if (!modload.HasModRoot()) {
+        return ;
+    }
+    var oldReqs = reqsFromGoMod(_addr_modload.ModFile());
+
+    modload.AllowWriteGoMod();
+    modload.WriteGoMod(ctx);
+    modload.DisallowWriteGoMod();
+
+    var newReqs = reqsFromGoMod(_addr_modload.ModFile());
+    r.reportChanges(oldReqs, newReqs);
+
+}
+
+// parseArgs parses command-line arguments and reports errors.
+//
+// The command-line arguments are of the form path@version or simply path, with
+// implicit @upgrade. path@none is "downgrade away".
+private static slice<ptr<query>> parseArgs(context.Context ctx, slice<@string> rawArgs) => func((defer, _, _) => {
+    defer(@base.ExitIfErrors());
+
+    slice<ptr<query>> queries = default;
+    foreach (var (_, arg) in search.CleanPatterns(rawArgs)) {
+        var (q, err) = newQuery(arg);
+        if (err != null) {
+            @base.Errorf("go get: %v", err);
+            continue;
+        }
+        if (len(rawArgs) == 0) {
+            q.raw = "";
+        }
+        if (strings.HasSuffix(q.raw, ".go") && q.rawVersion == "") {
+            if (!strings.Contains(q.raw, "/")) {
+                @base.Errorf("go get %s: arguments must be package or module paths", q.raw);
+                continue;
+            }
+            {
+                var (fi, err) = os.Stat(q.raw);
+
+                if (err == null && !fi.IsDir()) {
+                    @base.Errorf("go get: %s exists as a file, but 'go get' requires package arguments", q.raw);
+                    continue;
+                }
+
+            }
+
+        }
+        queries = append(queries, q);
+
+    }    return queries;
+
+});
+
+private partial struct resolver {
+    public slice<ptr<query>> localQueries; // queries for absolute or relative paths
+    public slice<ptr<query>> pathQueries; // package path literal queries in original order
+    public slice<ptr<query>> wildcardQueries; // path wildcard queries in original order
+    public slice<ptr<query>> patternAllQueries; // queries with the pattern "all"
+
+// Indexed "none" queries. These are also included in the slices above;
+// they are indexed here to speed up noneForPath.
+    public map<@string, ptr<query>> nonesByPath; // path-literal "@none" queries indexed by path
+    public slice<ptr<query>> wildcardNones; // wildcard "@none" queries
+
+// resolvedVersion maps each module path to the version of that module that
+// must be selected in the final build list, along with the first query
+// that resolved the module to that version (the “reason”).
+    public map<@string, versionReason> resolvedVersion;
+    public slice<module.Version> buildList;
+    public map<@string, @string> buildListVersion; // index of buildList (module path → version)
+
+    public map<@string, @string> initialVersion; // index of the initial build list at the start of 'go get'
+
+    public slice<pathSet> missing; // candidates for missing transitive dependencies
+
+    public ptr<par.Queue> work;
+    public par.Cache matchInModuleCache;
+}
+
+private partial struct versionReason {
+    public @string version;
+    public ptr<query> reason;
+}
+
+private static ptr<resolver> newResolver(context.Context ctx, slice<ptr<query>> queries) { 
+    // LoadModGraph also sets modload.Target, which is needed by various resolver
+    // methods.
+    const @string defaultGoVersion = "";
+
+    var mg = modload.LoadModGraph(ctx, defaultGoVersion);
+
+    var buildList = mg.BuildList();
+    var initialVersion = make_map<@string, @string>(len(buildList));
+    foreach (var (_, m) in buildList) {
+        initialVersion[m.Path] = m.Version;
+    }    ptr<resolver> r = addr(new resolver(work:par.NewQueue(runtime.GOMAXPROCS(0)),resolvedVersion:map[string]versionReason{},buildList:buildList,buildListVersion:initialVersion,initialVersion:initialVersion,nonesByPath:map[string]*query{},));
+
+    foreach (var (_, q) in queries) {
+        if (q.pattern == "all") {
+            r.patternAllQueries = append(r.patternAllQueries, q);
+        }
+        else if (q.patternIsLocal) {
+            r.localQueries = append(r.localQueries, q);
+        }
+        else if (q.isWildcard()) {
+            r.wildcardQueries = append(r.wildcardQueries, q);
+        }
+        else
+ {
+            r.pathQueries = append(r.pathQueries, q);
+        }
+        if (q.version == "none") { 
+            // Index "none" queries to make noneForPath more efficient.
+            if (q.isWildcard()) {
+                r.wildcardNones = append(r.wildcardNones, q);
+            }
+            else
+ { 
+                // All "<path>@none" queries for the same path are identical; we only
+                // need to index one copy.
+                r.nonesByPath[q.pattern] = q;
+
+            }
+
+        }
+    }    return _addr_r!;
+
+}
+
+// initialSelected returns the version of the module with the given path that
+// was selected at the start of this 'go get' invocation.
+private static @string initialSelected(this ptr<resolver> _addr_r, @string mPath) {
+    @string version = default;
+    ref resolver r = ref _addr_r.val;
+
+    var (v, ok) = r.initialVersion[mPath];
+    if (!ok) {
+        return "none";
+    }
+    return v;
+
+}
+
+// selected returns the version of the module with the given path that is
+// selected in the resolver's current build list.
+private static @string selected(this ptr<resolver> _addr_r, @string mPath) {
+    @string version = default;
+    ref resolver r = ref _addr_r.val;
+
+    var (v, ok) = r.buildListVersion[mPath];
+    if (!ok) {
+        return "none";
+    }
+    return v;
+
+}
+
+// noneForPath returns a "none" query matching the given module path,
+// or found == false if no such query exists.
+private static (ptr<query>, bool) noneForPath(this ptr<resolver> _addr_r, @string mPath) {
+    ptr<query> nq = default!;
+    bool found = default;
+    ref resolver r = ref _addr_r.val;
+
+    nq = r.nonesByPath[mPath];
+
+    if (nq != null) {
+        return (_addr_nq!, true);
+    }
+    foreach (var (_, nq) in r.wildcardNones) {
+        if (nq.matchesPath(mPath)) {
+            return (_addr_nq!, true);
+        }
+    }    return (_addr_null!, false);
+
+}
+
+// queryModule wraps modload.Query, substituting r.checkAllowedOr to decide
+// allowed versions.
+private static (module.Version, error) queryModule(this ptr<resolver> _addr_r, context.Context ctx, @string mPath, @string query, Func<@string, @string> selected) {
+    module.Version _p0 = default;
+    error _p0 = default!;
+    ref resolver r = ref _addr_r.val;
+
+    var current = r.initialSelected(mPath);
+    var (rev, err) = modload.Query(ctx, mPath, query, current, r.checkAllowedOr(query, selected));
+    if (err != null) {
+        return (new module.Version(), error.As(err)!);
+    }
+    return (new module.Version(Path:mPath,Version:rev.Version), error.As(null!)!);
+
+}
+
+// queryPackage wraps modload.QueryPackage, substituting r.checkAllowedOr to
+// decide allowed versions.
+private static (slice<module.Version>, error) queryPackages(this ptr<resolver> _addr_r, context.Context ctx, @string pattern, @string query, Func<@string, @string> selected) {
+    slice<module.Version> pkgMods = default;
+    error err = default!;
+    ref resolver r = ref _addr_r.val;
+
+    var (results, err) = modload.QueryPackages(ctx, pattern, query, selected, r.checkAllowedOr(query, selected));
+    if (len(results) > 0) {
+        pkgMods = make_slice<module.Version>(0, len(results));
+        foreach (var (_, qr) in results) {
+            pkgMods = append(pkgMods, qr.Mod);
+        }
+    }
+    return (pkgMods, error.As(err)!);
+
+}
+
+// queryPattern wraps modload.QueryPattern, substituting r.checkAllowedOr to
+// decide allowed versions.
+private static (slice<module.Version>, module.Version, error) queryPattern(this ptr<resolver> _addr_r, context.Context ctx, @string pattern, @string query, Func<@string, @string> selected) {
+    slice<module.Version> pkgMods = default;
+    module.Version mod = default;
+    error err = default!;
+    ref resolver r = ref _addr_r.val;
+
+    var (results, modOnly, err) = modload.QueryPattern(ctx, pattern, query, selected, r.checkAllowedOr(query, selected));
+    if (len(results) > 0) {
+        pkgMods = make_slice<module.Version>(0, len(results));
+        foreach (var (_, qr) in results) {
+            pkgMods = append(pkgMods, qr.Mod);
+        }
+    }
+    if (modOnly != null) {
+        mod = modOnly.Mod;
+    }
+    return (pkgMods, mod, error.As(err)!);
+
+}
+
+// checkAllowedOr is like modload.CheckAllowed, but it always allows the requested
+// and current versions (even if they are retracted or otherwise excluded).
+private static modload.AllowedFunc checkAllowedOr(this ptr<resolver> _addr_r, @string requested, Func<@string, @string> selected) {
+    ref resolver r = ref _addr_r.val;
+
+    return (ctx, m) => {
+        if (m.Version == requested) {
+            return modload.CheckExclusions(ctx, m);
+        }
+        if ((requested == "upgrade" || requested == "patch") && m.Version == selected(m.Path)) {
+            return null;
+        }
+        return modload.CheckAllowed(ctx, m);
+
+    };
+
+}
+
+// matchInModule is a caching wrapper around modload.MatchInModule.
+private static (slice<@string>, error) matchInModule(this ptr<resolver> _addr_r, context.Context ctx, @string pattern, module.Version m) {
+    slice<@string> packages = default;
+    error err = default!;
+    ref resolver r = ref _addr_r.val;
+
+    private partial struct key {
+        public @string pattern;
+        public module.Version m;
+    }
+    private partial struct entry {
+        public slice<@string> packages;
+        public error err;
+    }
+
+    entry e = r.matchInModuleCache.Do(new key(pattern,m), () => {
+        var match = modload.MatchInModule(ctx, pattern, m, imports.AnyTags());
+        if (len(match.Errs) > 0) {
+            return new entry(match.Pkgs,match.Errs[0]);
+        }
+        return new entry(match.Pkgs,nil);
+
+    })._<entry>();
+
+    return (e.packages, error.As(e.err)!);
+
+}
+
+// queryNone adds a candidate set to q for each module matching q.pattern.
+// Each candidate set has only one possible module version: the matched
+// module at version "none".
+//
+// We interpret arguments to 'go get' as packages first, and fall back to
+// modules second. However, no module exists at version "none", and therefore no
+// package exists at that version either: we know that the argument cannot match
+// any packages, and thus it must match modules instead.
+private static void queryNone(this ptr<resolver> _addr_r, context.Context ctx, ptr<query> _addr_q) => func((_, panic, _) => {
+    ref resolver r = ref _addr_r.val;
+    ref query q = ref _addr_q.val;
+
+    if (search.IsMetaPackage(q.pattern)) {
+        panic(fmt.Sprintf("internal error: queryNone called with pattern %q", q.pattern));
+    }
+    if (!q.isWildcard()) {
+        q.pathOnce(q.pattern, () => {
+            if (modload.HasModRoot() && q.pattern == modload.Target.Path) { 
+                // The user has explicitly requested to downgrade their own module to
+                // version "none". This is not an entirely unreasonable request: it
+                // could plausibly mean “downgrade away everything that depends on any
+                // explicit version of the main module”, or “downgrade away the
+                // package with the same path as the main module, found in a module
+                // with a prefix of the main module's path”.
+                //
+                // However, neither of those behaviors would be consistent with the
+                // plain meaning of the query. To try to reduce confusion, reject the
+                // query explicitly.
+                return errSet(addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version)));
+
+            }
+
+            return new pathSet(mod:module.Version{Path:q.pattern,Version:"none"});
+
+        });
+
+    }
+    foreach (var (_, curM) in r.buildList) {
+        if (!q.matchesPath(curM.Path)) {
+            continue;
+        }
+        q.pathOnce(curM.Path, () => {
+            if (modload.HasModRoot() && curM == modload.Target) {
+                return errSet(addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version)));
+            }
+            return new pathSet(mod:module.Version{Path:curM.Path,Version:"none"});
+        });
+
+    }
+});
+
+private static void performLocalQueries(this ptr<resolver> _addr_r, context.Context ctx) {
+    ref resolver r = ref _addr_r.val;
+
+    foreach (var (_, q) in r.localQueries) {
+        q.pathOnce(q.pattern, () => {
+            @string absDetail = "";
+            if (!filepath.IsAbs(q.pattern)) {
                 {
-                    return lostUpgrades[i].m.Path < lostUpgrades[j].m.Path;
+                    var (absPath, err) = filepath.Abs(q.pattern);
+
+                    if (err == null) {
+                        absDetail = fmt.Sprintf(" (%s)", absPath);
+                    }
+
+                }
+
+            } 
+
+            // Absolute paths like C:\foo and relative paths like ../foo... are
+            // restricted to matching packages in the main module.
+            var pkgPattern = modload.DirImportPath(ctx, q.pattern);
+            if (pkgPattern == ".") {
+                return errSet(fmt.Errorf("%s%s is not within module rooted at %s", q.pattern, absDetail, modload.ModRoot()));
+            }
+
+            var match = modload.MatchInModule(ctx, pkgPattern, modload.Target, imports.AnyTags());
+            if (len(match.Errs) > 0) {
+                return new pathSet(err:match.Errs[0]);
+            }
+
+            if (len(match.Pkgs) == 0) {
+                if (q.raw == "" || q.raw == ".") {
+                    return errSet(fmt.Errorf("no package in current directory"));
+                }
+                if (!q.isWildcard()) {
+                    return errSet(fmt.Errorf("%s%s is not a package in module rooted at %s", q.pattern, absDetail, modload.ModRoot()));
+                }
+                search.WarnUnmatched(new slice<ptr<search.Match>>(new ptr<search.Match>[] { match }));
+                return new pathSet();
+            }
+
+            return new pathSet(pkgMods:[]module.Version{modload.Target});
+
+        });
+
+    }
+}
+
+// performWildcardQueries populates the candidates for each query whose pattern
+// is a wildcard.
+//
+// The candidates for a given module path matching (or containing a package
+// matching) a wildcard query depend only on the initial build list, but the set
+// of modules may be expanded by other queries, so wildcard queries need to be
+// re-evaluated whenever a potentially-matching module path is added to the
+// build list.
+private static void performWildcardQueries(this ptr<resolver> _addr_r, context.Context ctx) {
+    ref resolver r = ref _addr_r.val;
+
+    {
+        var q__prev1 = q;
+
+        foreach (var (_, __q) in r.wildcardQueries) {
+            q = __q;
+            var q = q;
+            r.work.Add(() => {
+                if (q.version == "none") {
+                    r.queryNone(ctx, q);
+                }
+                else
+ {
+                    r.queryWildcard(ctx, q);
+                }
+
+            });
+
+        }
+        q = q__prev1;
+    }
+
+    r.work.Idle().Receive();
+
+}
+
+// queryWildcard adds a candidate set to q for each module for which:
+//     - some version of the module is already in the build list, and
+//     - that module exists at some version matching q.version, and
+//     - either the module path itself matches q.pattern, or some package within
+//       the module at q.version matches q.pattern.
+private static void queryWildcard(this ptr<resolver> _addr_r, context.Context ctx, ptr<query> _addr_q) {
+    ref resolver r = ref _addr_r.val;
+    ref query q = ref _addr_q.val;
+ 
+    // For wildcard patterns, modload.QueryPattern only identifies modules
+    // matching the prefix of the path before the wildcard. However, the build
+    // list may already contain other modules with matching packages, and we
+    // should consider those modules to satisfy the query too.
+    // We want to match any packages in existing dependencies, but we only want to
+    // resolve new dependencies if nothing else turns up.
+    foreach (var (_, curM) in r.buildList) {
+        if (!q.canMatchInModule(curM.Path)) {
+            continue;
+        }
+        q.pathOnce(curM.Path, () => {
+            {
+                var (_, hit) = r.noneForPath(curM.Path);
+
+                if (hit) { 
+                    // This module is being removed, so it will no longer be in the build list
+                    // (and thus will no longer match the pattern).
+                    return new pathSet();
+
+                }
+
+            }
+
+
+            if (curM.Path == modload.Target.Path && !versionOkForMainModule(q.version)) {
+                if (q.matchesPath(curM.Path)) {
+                    return errSet(addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version,)));
+                }
+                var (packages, err) = r.matchInModule(ctx, q.pattern, curM);
+                if (err != null) {
+                    return errSet(err);
+                }
+                if (len(packages) > 0) {
+                    return errSet(addr(new modload.QueryMatchesPackagesInMainModuleError(Pattern:q.pattern,Query:q.version,Packages:packages,)));
+                }
+                return r.tryWildcard(ctx, q, curM);
+            }
+
+            var (m, err) = r.queryModule(ctx, curM.Path, q.version, r.initialSelected);
+            if (err != null) {
+                if (!isNoSuchModuleVersion(err)) { 
+                    // We can't tell whether a matching version exists.
+                    return errSet(err);
+
+                } 
+                // There is no version of curM.Path matching the query.
+
+                // We haven't checked whether curM contains any matching packages at its
+                // currently-selected version, or whether curM.Path itself matches q. If
+                // either of those conditions holds, *and* no other query changes the
+                // selected version of curM, then we will fail in checkWildcardVersions.
+                // (This could be an error, but it's too soon to tell.)
+                //
+                // However, even then the transitive requirements of some other query
+                // may downgrade this module out of the build list entirely, in which
+                // case the pattern will no longer include it and it won't be an error.
+                //
+                // Either way, punt on the query rather than erroring out just yet.
+                return new pathSet();
+
+            }
+
+            return r.tryWildcard(ctx, q, m);
+
+        });
+
+    }
+}
+
+// tryWildcard returns a pathSet for module m matching query q.
+// If m does not actually match q, tryWildcard returns an empty pathSet.
+private static pathSet tryWildcard(this ptr<resolver> _addr_r, context.Context ctx, ptr<query> _addr_q, module.Version m) {
+    ref resolver r = ref _addr_r.val;
+    ref query q = ref _addr_q.val;
+
+    var mMatches = q.matchesPath(m.Path);
+    var (packages, err) = r.matchInModule(ctx, q.pattern, m);
+    if (err != null) {
+        return errSet(err);
+    }
+    if (len(packages) > 0) {
+        return new pathSet(pkgMods:[]module.Version{m});
+    }
+    if (mMatches) {
+        return new pathSet(mod:m);
+    }
+    return new pathSet();
+
+}
+
+// findMissingWildcards adds a candidate set for each query in r.wildcardQueries
+// that has not yet resolved to any version containing packages.
+private static void findMissingWildcards(this ptr<resolver> _addr_r, context.Context ctx) {
+    ref resolver r = ref _addr_r.val;
+
+    foreach (var (_, q) in r.wildcardQueries) {
+        if (q.version == "none" || q.matchesPackages) {
+            continue; // q is not “missing”
+        }
+        r.work.Add(() => {
+            q.pathOnce(q.pattern, () => {
+                var (pkgMods, mod, err) = r.queryPattern(ctx, q.pattern, q.version, r.initialSelected);
+                if (err != null) {
+                    if (isNoSuchPackageVersion(err) && len(q.resolved) > 0) { 
+                        // q already resolved one or more modules but matches no packages.
+                        // That's ok: this pattern is just a module pattern, and we don't
+                        // need to add any more modules to satisfy it.
+                        return new pathSet();
+
+                    }
+
+                    return errSet(err);
+
+                }
+
+                return new pathSet(pkgMods:pkgMods,mod:mod);
+
+            });
+
+        });
+
+    }    r.work.Idle().Receive();
+
+}
+
+// checkWildcardVersions reports an error if any module in the build list has a
+// path (or contains a package) matching a query with a wildcard pattern, but
+// has a selected version that does *not* match the query.
+private static void checkWildcardVersions(this ptr<resolver> _addr_r, context.Context ctx) => func((defer, _, _) => {
+    ref resolver r = ref _addr_r.val;
+
+    defer(@base.ExitIfErrors());
+
+    foreach (var (_, q) in r.wildcardQueries) {
+        foreach (var (_, curM) in r.buildList) {
+            if (!q.canMatchInModule(curM.Path)) {
+                continue;
+            }
+            if (!q.matchesPath(curM.Path)) {
+                var (packages, err) = r.matchInModule(ctx, q.pattern, curM);
+                if (len(packages) == 0) {
+                    if (err != null) {
+                        reportError(q, err);
+                    }
+                    continue; // curM is not relevant to q.
+                }
+
+            }
+
+            var (rev, err) = r.queryModule(ctx, curM.Path, q.version, r.initialSelected);
+            if (err != null) {
+                reportError(q, err);
+                continue;
+            }
+
+            if (rev.Version == curM.Version) {
+                continue; // curM already matches q.
+            }
+
+            if (!q.matchesPath(curM.Path)) {
+                module.Version m = new module.Version(Path:curM.Path,Version:rev.Version);
+                (packages, err) = r.matchInModule(ctx, q.pattern, m);
+                if (err != null) {
+                    reportError(q, err);
+                    continue;
+                }
+                if (len(packages) == 0) { 
+                    // curM at its original version contains a path matching q.pattern,
+                    // but at rev.Version it does not, so (somewhat paradoxically) if
+                    // we changed the version of curM it would no longer match the query.
+                    var version = m;
+                    if (rev.Version != q.version) {
+                        version = fmt.Sprintf("%s@%s (%s)", m.Path, q.version, m.Version);
+                    }
+
+                    reportError(q, fmt.Errorf("%v matches packages in %v but not %v: specify a different version for module %s", q, curM, version, m.Path));
+                    continue;
+
+                }
+
+            } 
+
+            // Since queryModule succeeded and either curM or one of the packages it
+            // contains matches q.pattern, we should have either selected the version
+            // of curM matching q, or reported a conflict error (and exited).
+            // If we're still here and the version doesn't match,
+            // something has gone very wrong.
+            reportError(q, fmt.Errorf("internal error: selected %v instead of %v", curM, rev.Version));
+
+        }
+    }
+});
+
+// performPathQueries populates the candidates for each query whose pattern is
+// a path literal.
+//
+// The candidate packages and modules for path literals depend only on the
+// initial build list, not the current build list, so we only need to query path
+// literals once.
+private static void performPathQueries(this ptr<resolver> _addr_r, context.Context ctx) {
+    ref resolver r = ref _addr_r.val;
+
+    {
+        var q__prev1 = q;
+
+        foreach (var (_, __q) in r.pathQueries) {
+            q = __q;
+            var q = q;
+            r.work.Add(() => {
+                if (q.version == "none") {
+                    r.queryNone(ctx, q);
+                }
+                else
+ {
+                    r.queryPath(ctx, q);
+                }
+
+            });
+
+        }
+        q = q__prev1;
+    }
+
+    r.work.Idle().Receive();
+
+}
+
+// queryPath adds a candidate set to q for the package with path q.pattern.
+// The candidate set consists of all modules that could provide q.pattern
+// and have a version matching q, plus (if it exists) the module whose path
+// is itself q.pattern (at a matching version).
+private static void queryPath(this ptr<resolver> _addr_r, context.Context ctx, ptr<query> _addr_q) => func((_, panic, _) => {
+    ref resolver r = ref _addr_r.val;
+    ref query q = ref _addr_q.val;
+
+    q.pathOnce(q.pattern, () => {
+        if (search.IsMetaPackage(q.pattern) || q.isWildcard()) {
+            panic(fmt.Sprintf("internal error: queryPath called with pattern %q", q.pattern));
+        }
+        if (q.version == "none") {
+            panic("internal error: queryPath called with version \"none\"");
+        }
+        if (search.IsStandardImportPath(q.pattern)) {
+            module.Version stdOnly = new module.Version();
+            var (packages, _) = r.matchInModule(ctx, q.pattern, stdOnly);
+            if (len(packages) > 0) {
+                if (q.rawVersion != "") {
+                    return errSet(fmt.Errorf("can't request explicit version %q of standard library package %s", q.version, q.pattern));
+                }
+                q.matchesPackages = true;
+                return new pathSet(); // No module needed for standard library.
+            }
+
+        }
+        var (pkgMods, mod, err) = r.queryPattern(ctx, q.pattern, q.version, r.initialSelected);
+        if (err != null) {
+            return errSet(err);
+        }
+        return new pathSet(pkgMods:pkgMods,mod:mod);
+
+    });
+
+});
+
+// performPatternAllQueries populates the candidates for each query whose
+// pattern is "all".
+//
+// The candidate modules for a given package in "all" depend only on the initial
+// build list, but we cannot follow the dependencies of a given package until we
+// know which candidate is selected — and that selection may depend on the
+// results of other queries. We need to re-evaluate the "all" queries whenever
+// the module for one or more packages in "all" are resolved.
+private static void performPatternAllQueries(this ptr<resolver> _addr_r, context.Context ctx) {
+    ref resolver r = ref _addr_r.val;
+
+    if (len(r.patternAllQueries) == 0) {
+        return ;
+    }
+    Func<context.Context, @string, module.Version, bool> findPackage = (ctx, path, m) => {
+        versionOk = true;
+        {
+            var q__prev1 = q;
+
+            foreach (var (_, __q) in r.patternAllQueries) {
+                q = __q;
+                q.pathOnce(path, () => {
+                    var (pkgMods, err) = r.queryPackages(ctx, path, q.version, r.initialSelected);
+                    if (len(pkgMods) != 1 || pkgMods[0] != m) { 
+                        // There are candidates other than m for the given path, so we can't
+                        // be certain that m will actually be the module selected to provide
+                        // the package. Don't load its dependencies just yet, because they
+                        // might no longer be dependencies after we resolve the correct
+                        // version.
+                        versionOk = false;
+
+                    }
+
+                    return new pathSet(pkgMods:pkgMods,err:err);
+
                 });
 
             }
 
-            if (len(lostUpgrades) > 0L)
-            {
-                Func<module.Version, @string> desc = m =>
-                {
-                    var s = m.Path + "@" + m.Version;
-                    var t = byPath[m.Path];
-                    if (t != null && t.arg != s)
-                    {
-                        s += " from " + t.arg;
-                    }
-
-                    return s;
-
-                }
-;
-                var downByPath = make_map<@string, module.Version>();
-                foreach (var (_, d) in down)
-                {
-                    downByPath[d.Path] = d;
-                }
-                ref strings.Builder buf = ref heap(out ptr<strings.Builder> _addr_buf);
-                fmt.Fprintf(_addr_buf, "go get: inconsistent versions:");
-                var reqs = modload.Reqs();
-                {
-                    ptr<query> q__prev1 = q;
-
-                    foreach (var (_, __q) in lostUpgrades)
-                    {
-                        q = __q; 
-                        // We lost q because its build list requires a newer version of something in down.
-                        // Figure out exactly what.
-                        // Repeatedly constructing the build list is inefficient
-                        // if there are MANY command-line arguments,
-                        // but at least all the necessary requirement lists are cached at this point.
-                        var (list, err) = buildListForLostUpgrade(q.m, reqs);
-                        if (err != null)
-                        {
-                            @base.Fatalf("go: %v", err);
-                        }
-
-                        fmt.Fprintf(_addr_buf, "\n\t%s", desc(q.m));
-                        @string sep = " requires";
-                        {
-                            var m__prev2 = m;
-
-                            foreach (var (_, __m) in list)
-                            {
-                                m = __m;
-                                {
-                                    slice<module.Version> down__prev2 = down;
-
-                                    var (down, ok) = downByPath[m.Path];
-
-                                    if (ok && semver.Compare(down.Version, m.Version) < 0L)
-                                    {
-                                        fmt.Fprintf(_addr_buf, "%s %s@%s (not %s)", sep, m.Path, m.Version, desc(down));
-                                        sep = ",";
-                                    }
-
-                                    down = down__prev2;
-
-                                }
-
-                            }
-
-                            m = m__prev2;
-                        }
-
-                        if (sep != ",")
-                        { 
-                            // We have no idea why this happened.
-                            // At least report the problem.
-                            {
-                                var v__prev3 = v;
-
-                                var v = versionByPath[q.m.Path];
-
-                                if (v == "")
-                                {
-                                    fmt.Fprintf(_addr_buf, " removed unexpectedly");
-                                }
-                                else
-                                {
-                                    fmt.Fprintf(_addr_buf, " ended up at %s unexpectedly", v);
-                                }
-
-                                v = v__prev3;
-
-                            }
-
-                            fmt.Fprintf(_addr_buf, " (please report at golang.org/issue/new)");
-
-                        }
-
-                    }
-
-                    q = q__prev1;
-                }
-
-                @base.Fatalf("%v", buf.String());
-
-            } 
-
-            // Everything succeeded. Update go.mod.
-            modload.AllowWriteGoMod();
-            modload.WriteGoMod(); 
-
-            // If -d was specified, we're done after the module work.
-            // We've already downloaded modules by loading packages above.
-            // Otherwise, we need to build and install the packages matched by
-            // command line arguments. This may be a different set of packages,
-            // since we only build packages for the target platform.
-            // Note that 'go get -u' without arguments is equivalent to
-            // 'go get -u .', so we'll typically build the package in the current
-            // directory.
-            if (getD || len(pkgPatterns) == 0L.val)
-            {
-                return ;
-            }
-
-            work.BuildInit();
-            var pkgs = load.PackagesForBuild(pkgPatterns);
-            work.InstallPackages(pkgPatterns, pkgs);
-
+            q = q__prev1;
         }
 
-        // runQueries looks up modules at target versions in parallel. Results will be
-        // cached. If the same module is referenced by multiple queries at different
-        // versions (including earlier queries in the modOnly map), an error will be
-        // reported. A map from module paths to queries is returned, which includes
-        // queries and modOnly.
-        private static map<@string, ptr<query>> runQueries(map<querySpec, ptr<query>> cache, slice<ptr<query>> queries, map<@string, ptr<query>> modOnly)
-        {
-            par.Work lookup = default;
-            {
-                var q__prev1 = q;
+        return versionOk;
 
-                foreach (var (_, __q) in queries)
-                {
-                    q = __q;
-                    {
-                        var cached = cache[q.querySpec];
+    };
 
-                        if (cached != null)
-                        {
-                            q.val = cached.val;
-                        }
-                        else
-                        {
-                            cache[q.querySpec] = q;
-                            lookup.Add(q);
-                        }
+    r.loadPackages(ctx, new slice<@string>(new @string[] { "all" }), findPackage); 
 
-                    }
+    // Since we built up the candidate lists concurrently, they may be in a
+    // nondeterministic order. We want 'go get' to be fully deterministic,
+    // including in which errors it chooses to report, so sort the candidates
+    // into a deterministic-but-arbitrary order.
+    {
+        var q__prev1 = q;
 
-                }
-
-                q = q__prev1;
-            }
-
-            lookup.Do(10L, item =>
-            {
-                ptr<query> q = item._<ptr<query>>();
-                if (q.vers == "none")
-                { 
-                    // Wait for downgrade step.
-                    q.m = new module.Version(Path:q.path,Version:"none");
-                    return ;
-
-                }
-
-                var (m, err) = getQuery(q.path, q.vers, q.prevM, q.forceModulePath);
-                if (err != null)
-                {
-                    @base.Errorf("go get %s: %v", q.arg, err);
-                }
-
-                q.m = m;
-
+        foreach (var (_, __q) in r.patternAllQueries) {
+            q = __q;
+            sort.Slice(q.candidates, (i, j) => {
+                return q.candidates[i].path < q.candidates[j].path;
             });
-            @base.ExitIfErrors();
+        }
+        q = q__prev1;
+    }
+}
 
-            var byPath = make_map<@string, ptr<query>>();
-            Action<ptr<query>> check = q =>
+// findAndUpgradeImports returns a pathSet for each package that is not yet
+// in the build list but is transitively imported by the packages matching the
+// given queries (which must already have been resolved).
+//
+// If the getU flag ("-u") is set, findAndUpgradeImports also returns a
+// pathSet for each module that is not constrained by any other
+// command-line argument and has an available matching upgrade.
+private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, context.Context ctx, slice<ptr<query>> queries) {
+    slice<pathSet> upgrades = default;
+    ref resolver r = ref _addr_r.val;
+
+    var patterns = make_slice<@string>(0, len(queries));
+    foreach (var (_, q) in queries) {
+        if (q.matchesPackages) {
+            patterns = append(patterns, q.pattern);
+        }
+    }    if (len(patterns) == 0) {
+        return null;
+    }
+    sync.Mutex mu = default;
+
+    Func<context.Context, @string, module.Version, bool> findPackage = (ctx, path, m) => {
+        @string version = "latest";
+        if (m.Path != "") {
+            if (getU.version == "") { 
+                // The user did not request that we upgrade transitive dependencies.
+                return true;
+
+            }
+
             {
-                {
-                    var (prev, ok) = byPath[q.m.Path];
+                var (_, ok) = r.resolvedVersion[m.Path];
 
-                    if (prev != null && prev.m != q.m)
-                    {
-                        @base.Errorf("go get: conflicting versions for module %s: %s and %s", q.m.Path, prev.m.Version, q.m.Version);
-                        byPath[q.m.Path] = null; // sentinel to stop errors
-                        return ;
-
-                    }
-                    else if (!ok)
-                    {
-                        byPath[q.m.Path] = q;
-                    }
-
+                if (ok) { 
+                    // We cannot upgrade m implicitly because its version is determined by
+                    // an explicit pattern argument.
+                    return true;
 
                 }
 
             }
-;
-            {
-                var q__prev1 = q;
 
-                foreach (var (_, __q) in queries)
-                {
-                    q = __q;
-                    check(q);
-                }
+            version = getU.version;
 
-                q = q__prev1;
+        }
+        var (pkgMods, err) = r.queryPackages(ctx, path, version, r.selected);
+        foreach (var (_, u) in pkgMods) {
+            if (u == m) { 
+                // The selected package version is already upgraded appropriately; there
+                // is no need to change it.
+                return true;
+
             }
 
-            {
-                var q__prev1 = q;
+        }        if (err != null) {
+            if (isNoSuchPackageVersion(err) || (m.Path == "" && module.CheckPath(path) != null)) { 
+                // We can't find the package because it doesn't — or can't — even exist
+                // in any module at the latest version. (Note that invalid module paths
+                // could in general exist due to replacements, so we at least need to
+                // run the query to check those.)
+                //
+                // There is no version change we can make to fix the package, so leave
+                // it unresolved. Either some other query (perhaps a wildcard matching a
+                // newly-added dependency for some other missing package) will fill in
+                // the gaps, or we will report an error (with a better import stack) in
+                // the final LoadPackages call.
+                return true;
 
-                foreach (var (_, __q) in modOnly)
-                {
-                    q = __q;
-                    check(q);
-                }
-
-                q = q__prev1;
             }
 
-            @base.ExitIfErrors();
+        }
+        mu.Lock();
+        upgrades = append(upgrades, new pathSet(path:path,pkgMods:pkgMods,err:err));
+        mu.Unlock();
+        return false;
 
-            return byPath;
+    };
+
+    r.loadPackages(ctx, patterns, findPackage); 
+
+    // Since we built up the candidate lists concurrently, they may be in a
+    // nondeterministic order. We want 'go get' to be fully deterministic,
+    // including in which errors it chooses to report, so sort the candidates
+    // into a deterministic-but-arbitrary order.
+    sort.Slice(upgrades, (i, j) => {
+        return upgrades[i].path < upgrades[j].path;
+    });
+    return upgrades;
+
+}
+
+// loadPackages loads the packages matching the given patterns, invoking the
+// findPackage function for each package that may require a change to the
+// build list.
+//
+// loadPackages invokes the findPackage function for each package loaded from a
+// module outside the main module. If the module or version that supplies that
+// package needs to be changed due to a query, findPackage may return false
+// and the imports of that package will not be loaded.
+//
+// loadPackages also invokes the findPackage function for each imported package
+// that is neither present in the standard library nor in any module in the
+// build list.
+private static bool loadPackages(this ptr<resolver> _addr_r, context.Context ctx, slice<@string> patterns, Func<context.Context, @string, module.Version, bool> findPackage) {
+    bool versionOk = default;
+    ref resolver r = ref _addr_r.val;
+
+    modload.PackageOpts opts = new modload.PackageOpts(Tags:imports.AnyTags(),VendorModulesInGOROOTSrc:true,LoadTests:*getT,AssumeRootsImported:true,SilencePackageErrors:true,);
+
+    opts.AllowPackage = (ctx, path, m) => {
+        if (m.Path == "" || m == modload.Target) { 
+            // Packages in the standard library and main module are already at their
+            // latest (and only) available versions.
+            return null;
+
+        }
+        {
+            var ok = findPackage(ctx, path, m);
+
+            if (!ok) {
+                return errVersionChange;
+            }
 
         }
 
-        // getQuery evaluates the given (package or module) path and version
-        // to determine the underlying module version being requested.
-        // If forceModulePath is set, getQuery must interpret path
-        // as a module path.
-        private static (module.Version, error) getQuery(@string path, @string vers, module.Version prevM, bool forceModulePath)
+        return null;
+
+    };
+
+    var (_, pkgs) = modload.LoadPackages(ctx, opts, patterns);
+    {
+        var path__prev1 = path;
+
+        foreach (var (_, __path) in pkgs) {
+            path = __path;
+            const @string parentPath = "";
+            const var parentIsStd = false;
+            var (_, _, err) = modload.Lookup(parentPath, parentIsStd, path);
+            if (err == null) {
+                continue;
+            }
+            if (errors.Is(err, errVersionChange)) { 
+                // We already added candidates during loading.
+                continue;
+
+            }
+
+            ptr<modload.ImportMissingError> importMissing;            ptr<modload.AmbiguousImportError> ambiguous;
+            if (!errors.As(err, _addr_importMissing) && !errors.As(err, _addr_ambiguous)) { 
+                // The package, which is a dependency of something we care about, has some
+                // problem that we can't resolve with a version change.
+                // Leave the error for the final LoadPackages call.
+                continue;
+
+            }
+
+            var path = path;
+            r.work.Add(() => {
+                findPackage(ctx, path, new module.Version());
+            });
+
+        }
+        path = path__prev1;
+    }
+
+    r.work.Idle().Receive();
+
+}
+
+// errVersionChange is a sentinel error indicating that a module's version needs
+// to be updated before its dependencies can be loaded.
+private static var errVersionChange = errors.New("version change needed");
+
+// resolveQueries resolves candidate sets that are attached to the given
+// queries and/or needed to provide the given missing-package dependencies.
+//
+// resolveQueries starts by resolving one module version from each
+// unambiguous pathSet attached to the given queries.
+//
+// If no unambiguous query results in a change to the build list,
+// resolveQueries revisits the ambiguous query candidates and resolves them
+// arbitrarily in order to guarantee forward progress.
+//
+// If all pathSets are resolved without any changes to the build list,
+// resolveQueries returns with changed=false.
+private static bool resolveQueries(this ptr<resolver> _addr_r, context.Context ctx, slice<ptr<query>> queries) => func((defer, _, _) => {
+    bool changed = default;
+    ref resolver r = ref _addr_r.val;
+
+    defer(@base.ExitIfErrors()); 
+
+    // Note: this is O(N²) with the number of pathSets in the worst case.
+    //
+    // We could perhaps get it down to O(N) if we were to index the pathSets
+    // by module path, so that we only revisit a given pathSet when the
+    // version of some module in its containingPackage list has been determined.
+    //
+    // However, N tends to be small, and most candidate sets will include only one
+    // candidate module (so they will be resolved in the first iteration), so for
+    // now we'll stick to the simple O(N²) approach.
+
+    nint resolved = 0;
+    while (true) {
+        var prevResolved = resolved;
+
         {
-            module.Version _p0 = default;
-            error _p0 = default!;
+            var q__prev2 = q;
 
-            if ((prevM.Version != "") != forceModulePath)
-            { 
-                // We resolve package patterns by calling QueryPattern, which does not
-                // accept a previous version and therefore cannot take it into account for
-                // the "latest" or "patch" queries.
-                // If we are resolving a package path or pattern, the caller has already
-                // resolved any existing packages to their containing module(s), and
-                // will set both prevM.Version and forceModulePath for those modules.
-                // The only remaining package patterns are those that are not already
-                // provided by the build list, which are indicated by
-                // an empty prevM.Version.
-                @base.Fatalf("go get: internal error: prevM may be set if and only if forceModulePath is set");
+            foreach (var (_, __q) in queries) {
+                q = __q;
+                var unresolved = q.candidates[..(int)0];
 
-            } 
-
-            // If the query must be a module path, try only that module path.
-            if (forceModulePath)
-            {
-                if (path == modload.Target.Path)
                 {
-                    if (vers != "latest")
-                    {
-                        return (new module.Version(), error.As(fmt.Errorf("can't get a specific version of the main module"))!);
-                    }
+                    var cs__prev3 = cs;
 
-                }
+                    foreach (var (_, __cs) in q.candidates) {
+                        cs = __cs;
+                        if (cs.err != null) {
+                            reportError(q, cs.err);
+                            resolved++;
+                            continue;
+                        }
+                        var (filtered, isPackage, m, unique) = r.disambiguate(cs);
+                        if (!unique) {
+                            unresolved = append(unresolved, filtered);
+                            continue;
+                        }
+                        if (m.Path == "") { 
+                            // The query is not viable. Choose an arbitrary candidate from
+                            // before filtering and “resolve” it to report a conflict.
+                            isPackage, m = r.chooseArbitrarily(cs);
 
-                var (info, err) = modload.Query(path, vers, prevM.Version, modload.Allowed);
-                if (err == null)
-                {
-                    if (info.Version != vers && info.Version != prevM.Version)
-                    {
-                        logOncef("go: %s %s => %s", path, vers, info.Version);
-                    }
-
-                    return (new module.Version(Path:path,Version:info.Version), error.As(null!)!);
-
-                } 
-
-                // If the query was "upgrade" or "patch" and the current version has been
-                // replaced, check to see whether the error was for that same version:
-                // if so, the version was probably replaced because it is invalid,
-                // and we should keep that replacement without complaining.
-                if (vers == "upgrade" || vers == "patch")
-                {
-                    ptr<module.InvalidVersionError> vErr;
-                    if (errors.As(err, _addr_vErr) && vErr.Version == prevM.Version && modload.Replacement(prevM).Path != "")
-                    {
-                        return (prevM, error.As(null!)!);
-                    }
-
-                }
-
-                return (new module.Version(), error.As(err)!);
-
-            } 
-
-            // If the query may be either a package or a module, try it as a package path.
-            // If it turns out to only exist as a module, we can detect the resulting
-            // PackageNotInModuleError and avoid a second round-trip through (potentially)
-            // all of the configured proxies.
-            var (results, err) = modload.QueryPattern(path, vers, modload.Allowed);
-            if (err != null)
-            { 
-                // If the path doesn't contain a wildcard, check whether it was actually a
-                // module path instead. If so, return that.
-                if (!strings.Contains(path, "..."))
-                {
-                    ptr<modload.PackageNotInModuleError> modErr;
-                    if (errors.As(err, _addr_modErr) && modErr.Mod.Path == path)
-                    {
-                        if (modErr.Mod.Version != vers)
-                        {
-                            logOncef("go: %s %s => %s", path, vers, modErr.Mod.Version);
                         }
 
-                        return (modErr.Mod, error.As(null!)!);
-
-                    }
-
-                }
-
-                return (new module.Version(), error.As(err)!);
-
-            }
-
-            var m = results[0L].Mod;
-            if (m.Path != path)
-            {
-                logOncef("go: found %s in %s %s", path, m.Path, m.Version);
-            }
-            else if (m.Version != vers)
-            {
-                logOncef("go: %s %s => %s", path, vers, m.Version);
-            }
-
-            return (m, error.As(null!)!);
-
-        }
-
-        // An upgrader adapts an underlying mvs.Reqs to apply an
-        // upgrade policy to a list of targets and their dependencies.
-        private partial struct upgrader : mvs.Reqs
-        {
-            public ref mvs.Reqs Reqs => ref Reqs_val; // cmdline maps a module path to a query made for that module at a
-// specific target version. Each query corresponds to a module
-// matched by a command line argument.
-            public map<@string, ptr<query>> cmdline; // upgrade is a set of modules providing dependencies of packages
-// matched by command line arguments. If -u or -u=patch is set,
-// these modules are upgraded accordingly.
-            public map<@string, bool> upgrade;
-        }
-
-        // newUpgrader creates an upgrader. cmdline contains queries made at
-        // specific versions for modules matched by command line arguments. pkgs
-        // is the set of packages matched by command line arguments. If -u or -u=patch
-        // is set, modules providing dependencies of pkgs are upgraded accordingly.
-        private static ptr<upgrader> newUpgrader(map<@string, ptr<query>> cmdline, map<@string, bool> pkgs)
-        {
-            ptr<upgrader> u = addr(new upgrader(Reqs:modload.Reqs(),cmdline:cmdline,));
-            if (getU != "")
-            {
-                u.upgrade = make_map<@string, bool>(); 
-
-                // Traverse package import graph.
-                // Initialize work queue with root packages.
-                var seen = make_map<@string, bool>();
-                slice<@string> work = default;
-                Action<@string> add = path =>
-                {
-                    if (!seen[path])
-                    {
-                        seen[path] = true;
-                        work = append(work, path);
-                    }
-
-                }
-;
-                {
-                    var pkg__prev1 = pkg;
-
-                    foreach (var (__pkg) in pkgs)
-                    {
-                        pkg = __pkg;
-                        add(pkg);
-                    }
-
-                    pkg = pkg__prev1;
-                }
-
-                while (len(work) > 0L)
-                {
-                    var pkg = work[0L];
-                    work = work[1L..];
-                    var m = modload.PackageModule(pkg);
-                    u.upgrade[m.Path] = true; 
-
-                    // testImports is empty unless test imports were actually loaded,
-                    // i.e., -t was set or "all" was one of the arguments.
-                    var (imports, testImports) = modload.PackageImports(pkg);
-                    {
-                        var imp__prev2 = imp;
-
-                        foreach (var (_, __imp) in imports)
-                        {
-                            imp = __imp;
-                            add(imp);
+                        if (isPackage) {
+                            q.matchesPackages = true;
                         }
 
-                        imp = imp__prev2;
+                        r.resolve(q, m);
+                        resolved++;
+
                     }
 
-                    {
-                        var imp__prev2 = imp;
-
-                        foreach (var (_, __imp) in testImports)
-                        {
-                            imp = __imp;
-                            add(imp);
-                        }
-
-                        imp = imp__prev2;
-                    }
+                    cs = cs__prev3;
                 }
 
+                q.candidates = unresolved;
 
             }
 
-            return _addr_u!;
-
+            q = q__prev2;
         }
 
-        // Required returns the requirement list for m.
-        // For the main module, we override requirements with the modules named
-        // one the command line, and we include new requirements. Otherwise,
-        // we defer to u.Reqs.
-        private static (slice<module.Version>, error) Required(this ptr<upgrader> _addr_u, module.Version m)
-        {
-            slice<module.Version> _p0 = default;
-            error _p0 = default!;
-            ref upgrader u = ref _addr_u.val;
-
-            var (rs, err) = u.Reqs.Required(m);
-            if (err != null)
-            {
-                return (null, error.As(err)!);
-            }
-
-            if (m != modload.Target)
-            {
-                return (rs, error.As(null!)!);
-            }
-
-            var overridden = make_map<@string, bool>();
-            foreach (var (i, m) in rs)
-            {
-                {
-                    var q__prev1 = q;
-
-                    var q = u.cmdline[m.Path];
-
-                    if (q != null && q.m.Version != "none")
-                    {
-                        rs[i] = q.m;
-                        overridden[q.m.Path] = true;
-                    }
-
-                    q = q__prev1;
-
-                }
-
-            }
-            {
-                var q__prev1 = q;
-
-                foreach (var (_, __q) in u.cmdline)
-                {
-                    q = __q;
-                    if (!overridden[q.m.Path] && q.m.Path != modload.Target.Path && q.m.Version != "none")
-                    {
-                        rs = append(rs, q.m);
-                    }
-
-                }
-
-                q = q__prev1;
-            }
-
-            return (rs, error.As(null!)!);
-
+        @base.ExitIfErrors();
+        if (resolved == prevResolved) {
+            break; // No unambiguous candidate remains.
         }
+    }
 
-        // Upgrade returns the desired upgrade for m.
-        //
-        // If m was requested at a specific version on the command line, then
-        // Upgrade returns that version.
-        //
-        // If -u is set and m provides a dependency of a package matched by
-        // command line arguments, then Upgrade may provider a newer tagged version.
-        // If m is a tagged version, then Upgrade will return the latest tagged
-        // version (with the same minor version number if -u=patch).
-        // If m is a pseudo-version, then Upgrade returns the latest tagged version
-        // only if that version has a time-stamp newer than m. This special case
-        // prevents accidental downgrades when already using a pseudo-version
-        // newer than the latest tagged version.
-        //
-        // If none of the above cases apply, then Upgrade returns m.
-        private static (module.Version, error) Upgrade(this ptr<upgrader> _addr_u, module.Version m)
-        {
-            module.Version _p0 = default;
-            error _p0 = default!;
-            ref upgrader u = ref _addr_u.val;
- 
-            // Allow pkg@vers on the command line to override the upgrade choice v.
-            // If q's version is < m.Version, then we're going to downgrade anyway,
-            // and it's cleaner to avoid moving back and forth and picking up
-            // extraneous other newer dependencies.
-            // If q's version is > m.Version, then we're going to upgrade past
-            // m.Version anyway, and again it's cleaner to avoid moving back and forth
-            // picking up extraneous other newer dependencies.
-            {
-                var q = u.cmdline[m.Path];
+    if (resolved > 0) {
+        changed = r.updateBuildList(ctx, null);
 
-                if (q != null)
-                {
-                    return (q.m, error.As(null!)!);
-                }
-
-            }
-
-
-            if (!u.upgrade[m.Path])
-            { 
-                // Not involved in upgrade. Leave alone.
-                return (m, error.As(null!)!);
-
-            } 
-
-            // Run query required by upgrade semantics.
-            // Note that Query "latest" is not the same as using repo.Latest,
-            // which may return a pseudoversion for the latest commit.
-            // Query "latest" returns the newest tagged version or the newest
-            // prerelease version if there are no non-prereleases, or repo.Latest
-            // if there aren't any tagged versions.
-            // If we're querying "upgrade" or "patch", Query will compare the current
-            // version against the chosen version and will return the current version
-            // if it is newer.
-            var (info, err) = modload.Query(m.Path, string(getU), m.Version, modload.Allowed);
-            if (err != null)
-            { 
-                // Report error but return m, to let version selection continue.
-                // (Reporting the error will fail the command at the next base.ExitIfErrors.)
-
-                // Special case: if the error is for m.Version itself and m.Version has a
-                // replacement, then keep it and don't report the error: the fact that the
-                // version is invalid is likely the reason it was replaced to begin with.
-                ptr<module.InvalidVersionError> vErr;
-                if (errors.As(err, _addr_vErr) && vErr.Version == m.Version && modload.Replacement(m).Path != "")
-                {
-                    return (m, error.As(null!)!);
-                } 
-
-                // Special case: if the error is "no matching versions" then don't
-                // even report the error. Because Query does not consider pseudo-versions,
-                // it may happen that we have a pseudo-version but during -u=patch
-                // the query v0.0 matches no versions (not even the one we're using).
-                ptr<modload.NoMatchingVersionError> noMatch;
-                if (!errors.As(err, _addr_noMatch))
-                {
-                    @base.Errorf("go get: upgrading %s@%s: %v", m.Path, m.Version, err);
-                }
-
-                return (m, error.As(null!)!);
-
-            }
-
-            if (info.Version != m.Version)
-            {
-                logOncef("go: %s %s => %s", m.Path, getU, info.Version);
-            }
-
-            return (new module.Version(Path:m.Path,Version:info.Version), error.As(null!)!);
-
-        }
-
-        // buildListForLostUpgrade returns the build list for the module graph
-        // rooted at lost. Unlike mvs.BuildList, the target module (lost) is not
-        // treated specially. The returned build list may contain a newer version
-        // of lost.
-        //
-        // buildListForLostUpgrade is used after a downgrade has removed a module
-        // requested at a specific version. This helps us understand the requirements
-        // implied by each downgrade.
-        private static (slice<module.Version>, error) buildListForLostUpgrade(module.Version lost, mvs.Reqs reqs)
-        {
-            slice<module.Version> _p0 = default;
-            error _p0 = default!;
-
-            return mvs.BuildList(lostUpgradeRoot, addr(new lostUpgradeReqs(Reqs:reqs,lost:lost)));
-        }
-
-        private static module.Version lostUpgradeRoot = new module.Version(Path:"lost-upgrade-root",Version:"");
-
-        private partial struct lostUpgradeReqs : mvs.Reqs
-        {
-            public ref mvs.Reqs Reqs => ref Reqs_val;
-            public module.Version lost;
-        }
-
-        private static (slice<module.Version>, error) Required(this ptr<lostUpgradeReqs> _addr_r, module.Version mod)
-        {
-            slice<module.Version> _p0 = default;
-            error _p0 = default!;
-            ref lostUpgradeReqs r = ref _addr_r.val;
-
-            if (mod == lostUpgradeRoot)
-            {
-                return (new slice<module.Version>(new module.Version[] { r.lost }), error.As(null!)!);
-            }
-
-            return r.Reqs.Required(mod);
-
-        }
-
-        private static sync.Map loggedLines = default;
-
-        private static void logOncef(@string format, params object[] args)
-        {
-            args = args.Clone();
-
-            var msg = fmt.Sprintf(format, args);
-            {
-                var (_, dup) = loggedLines.LoadOrStore(msg, true);
-
-                if (!dup)
-                {
-                    fmt.Fprintln(os.Stderr, msg);
-                }
-
-            }
+        if (changed) { 
+            // The build list has changed, so disregard any remaining ambiguous queries:
+            // they might now be determined by requirements in the build list, which we
+            // would prefer to use instead of arbitrary versions.
+            return true;
 
         }
     }
-}}}}
+    nint resolvedArbitrarily = 0;
+    {
+        var q__prev1 = q;
+
+        foreach (var (_, __q) in queries) {
+            q = __q;
+            {
+                var cs__prev2 = cs;
+
+                foreach (var (_, __cs) in q.candidates) {
+                    cs = __cs;
+                    var (isPackage, m) = r.chooseArbitrarily(cs);
+                    if (isPackage) {
+                        q.matchesPackages = true;
+                    }
+                    r.resolve(q, m);
+                    resolvedArbitrarily++;
+                }
+
+                cs = cs__prev2;
+            }
+        }
+        q = q__prev1;
+    }
+
+    if (resolvedArbitrarily > 0) {
+        changed = r.updateBuildList(ctx, null);
+    }
+    return changed;
+
+});
+
+// applyUpgrades disambiguates candidate sets that are needed to upgrade (or
+// provide) transitive dependencies imported by previously-resolved packages.
+//
+// applyUpgrades modifies the build list by adding one module version from each
+// pathSet in upgrades, then downgrading (or further upgrading) those modules as
+// needed to maintain any already-resolved versions of other modules.
+// applyUpgrades does not mark the new versions as resolved, so they can still
+// be further modified by other queries (such as wildcards).
+//
+// If all pathSets are resolved without any changes to the build list,
+// applyUpgrades returns with changed=false.
+private static bool applyUpgrades(this ptr<resolver> _addr_r, context.Context ctx, slice<pathSet> upgrades) => func((defer, _, _) => {
+    bool changed = default;
+    ref resolver r = ref _addr_r.val;
+
+    defer(@base.ExitIfErrors()); 
+
+    // Arbitrarily add a "latest" version that provides each missing package, but
+    // do not mark the version as resolved: we still want to allow the explicit
+    // queries to modify the resulting versions.
+    slice<module.Version> tentative = default;
+    foreach (var (_, cs) in upgrades) {
+        if (cs.err != null) {
+            @base.Errorf("go get: %v", cs.err);
+            continue;
+        }
+        var (filtered, _, m, unique) = r.disambiguate(cs);
+        if (!unique) {
+            _, m = r.chooseArbitrarily(filtered);
+        }
+        if (m.Path == "") { 
+            // There is no viable candidate for the missing package.
+            // Leave it unresolved.
+            continue;
+
+        }
+        tentative = append(tentative, m);
+
+    }    @base.ExitIfErrors();
+
+    changed = r.updateBuildList(ctx, tentative);
+    return changed;
+
+});
+
+// disambiguate eliminates candidates from cs that conflict with other module
+// versions that have already been resolved. If there is only one (unique)
+// remaining candidate, disambiguate returns that candidate, along with
+// an indication of whether that result interprets cs.path as a package
+//
+// Note: we're only doing very simple disambiguation here. The goal is to
+// reproduce the user's intent, not to find a solution that a human couldn't.
+// In the vast majority of cases, we expect only one module per pathSet,
+// but we want to give some minimal additional tools so that users can add an
+// extra argument or two on the command line to resolve simple ambiguities.
+private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resolver> _addr_r, pathSet cs) => func((_, panic, _) => {
+    pathSet filtered = default;
+    bool isPackage = default;
+    module.Version m = default;
+    bool unique = default;
+    ref resolver r = ref _addr_r.val;
+
+    if (len(cs.pkgMods) == 0 && cs.mod.Path == "") {
+        panic("internal error: resolveIfUnambiguous called with empty pathSet");
+    }
+    foreach (var (_, m) in cs.pkgMods) {
+        {
+            var (_, ok) = r.noneForPath(m.Path);
+
+            if (ok) { 
+                // A query with version "none" forces the candidate module to version
+                // "none", so we cannot use any other version for that module.
+                continue;
+
+            }
+
+        }
+
+
+        if (m.Path == modload.Target.Path) {
+            if (m.Version == modload.Target.Version) {
+                return (new pathSet(), true, m, true);
+            } 
+            // The main module can only be set to its own version.
+            continue;
+
+        }
+        var (vr, ok) = r.resolvedVersion[m.Path];
+        if (!ok) { 
+            // m is a viable answer to the query, but other answers may also
+            // still be viable.
+            filtered.pkgMods = append(filtered.pkgMods, m);
+            continue;
+
+        }
+        if (vr.version != m.Version) { 
+            // Some query forces the candidate module to a version other than this
+            // one.
+            //
+            // The command could be something like
+            //
+            //     go get example.com/foo/bar@none example.com/foo/bar/baz@latest
+            //
+            // in which case we *cannot* resolve the package from
+            // example.com/foo/bar (because it is constrained to version
+            // "none") and must fall through to module example.com/foo@latest.
+            continue;
+
+        }
+        return (new pathSet(), true, m, true);
+
+    }    if (cs.mod.Path != "") {
+        (vr, ok) = r.resolvedVersion[cs.mod.Path];
+        if (!ok || vr.version == cs.mod.Version) {
+            filtered.mod = cs.mod;
+        }
+    }
+    if (len(filtered.pkgMods) == 1 && (filtered.mod.Path == "" || filtered.mod == filtered.pkgMods[0])) { 
+        // Exactly one viable module contains the package with the given path
+        // (by far the common case), so we can resolve it unambiguously.
+        return (new pathSet(), true, filtered.pkgMods[0], true);
+
+    }
+    if (len(filtered.pkgMods) == 0) { 
+        // All modules that could provide the path as a package conflict with other
+        // resolved arguments. If it can refer to a module instead, return that;
+        // otherwise, this pathSet cannot be resolved (and we will return the
+        // zero module.Version).
+        return (new pathSet(), false, filtered.mod, true);
+
+    }
+    return (filtered, false, new module.Version(), false);
+
+});
+
+// chooseArbitrarily returns an arbitrary (but deterministic) module version
+// from among those in the given set.
+//
+// chooseArbitrarily prefers module paths that were already in the build list at
+// the start of 'go get', prefers modules that provide packages over those that
+// do not, and chooses the first module meeting those criteria (so biases toward
+// longer paths).
+private static (bool, module.Version) chooseArbitrarily(this ptr<resolver> _addr_r, pathSet cs) {
+    bool isPackage = default;
+    module.Version m = default;
+    ref resolver r = ref _addr_r.val;
+ 
+    // Prefer to upgrade some module that was already in the build list.
+    foreach (var (_, m) in cs.pkgMods) {
+        if (r.initialSelected(m.Path) != "none") {
+            return (true, m);
+        }
+    }    if (len(cs.pkgMods) > 0) {
+        return (true, cs.pkgMods[0]);
+    }
+    return (false, cs.mod);
+
+}
+
+// checkPackageProblems reloads packages for the given patterns and reports
+// missing and ambiguous package errors. It also reports retractions and
+// deprecations for resolved modules and modules needed to build named packages.
+// It also adds a sum for each updated module in the build list if we had one
+// before and didn't get one while loading packages.
+//
+// We skip missing-package errors earlier in the process, since we want to
+// resolve pathSets ourselves, but at that point, we don't have enough context
+// to log the package-import chains leading to each error.
+private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Context ctx, slice<@string> pkgPatterns) => func((defer, _, _) => {
+    ref resolver r = ref _addr_r.val;
+
+    defer(@base.ExitIfErrors()); 
+
+    // Gather information about modules we might want to load retractions and
+    // deprecations for. Loading this metadata requires at least one version
+    // lookup per module, and we don't want to load information that's neither
+    // relevant nor actionable.
+    private partial struct modFlags { // : nint
+    }
+    const modFlags resolved = 1 << (int)(iota); // version resolved by 'go get'
+    const var named = 0; // explicitly named on command line or provides a named package
+    const var hasPkg = 1; // needed to build named packages
+    const var direct = 2; // provides a direct dependency of the main module
+    var relevantMods = make_map<module.Version, modFlags>();
+    foreach (var (path, reason) in r.resolvedVersion) {
+        module.Version m = new module.Version(Path:path,Version:reason.version);
+        relevantMods[m] |= resolved;
+    }    if (len(pkgPatterns) > 0) { 
+        // LoadPackages will print errors (since it has more context) but will not
+        // exit, since we need to load retractions later.
+        modload.PackageOpts pkgOpts = new modload.PackageOpts(VendorModulesInGOROOTSrc:true,LoadTests:*getT,ResolveMissingImports:false,AllowErrors:true,SilenceNoGoErrors:true,);
+        var (matches, pkgs) = modload.LoadPackages(ctx, pkgOpts, pkgPatterns);
+        {
+            module.Version m__prev1 = m;
+
+            foreach (var (_, __m) in matches) {
+                m = __m;
+                if (len(m.Errs) > 0) {
+                    @base.SetExitStatus(1);
+                    break;
+                }
+            }
+
+            m = m__prev1;
+        }
+
+        {
+            var pkg__prev1 = pkg;
+
+            foreach (var (_, __pkg) in pkgs) {
+                pkg = __pkg;
+                {
+                    var err__prev2 = err;
+
+                    var (dir, _, err) = modload.Lookup("", false, pkg);
+
+                    if (err != null) {
+                        if (dir != "" && errors.Is(err, imports.ErrNoGo)) { 
+                            // Since dir is non-empty, we must have located source files
+                            // associated with either the package or its test — ErrNoGo must
+                            // indicate that none of those source files happen to apply in this
+                            // configuration. If we are actually building the package (no -d
+                            // flag), we will report the problem then; otherwise, assume that the
+                            // user is going to build or test this package in some other
+                            // configuration and suppress the error.
+                            continue;
+
+                        }
+
+                        @base.SetExitStatus(1);
+                        {
+                            ref var ambiguousErr = ref heap((modload.AmbiguousImportError.val)(null), out ptr<var> _addr_ambiguousErr);
+
+                            if (errors.As(err, _addr_ambiguousErr)) {
+                                {
+                                    module.Version m__prev2 = m;
+
+                                    foreach (var (_, __m) in ambiguousErr.Modules) {
+                                        m = __m;
+                                        relevantMods[m] |= hasPkg;
+                                    }
+
+                                    m = m__prev2;
+                                }
+                            }
+
+                        }
+
+                    }
+
+                    err = err__prev2;
+
+                }
+
+                {
+                    module.Version m__prev2 = m;
+
+                    m = modload.PackageModule(pkg);
+
+                    if (m.Path != "") {
+                        relevantMods[m] |= hasPkg;
+                    }
+
+                    m = m__prev2;
+
+                }
+
+            }
+
+            pkg = pkg__prev1;
+        }
+
+        foreach (var (_, match) in matches) {
+            {
+                var pkg__prev2 = pkg;
+
+                foreach (var (_, __pkg) in match.Pkgs) {
+                    pkg = __pkg;
+                    m = modload.PackageModule(pkg);
+                    relevantMods[m] |= named;
+                }
+
+                pkg = pkg__prev2;
+            }
+        }
+    }
+    var reqs = modload.LoadModFile(ctx);
+    {
+        module.Version m__prev1 = m;
+
+        foreach (var (__m) in relevantMods) {
+            m = __m;
+            if (reqs.IsDirect(m.Path)) {
+                relevantMods[m] |= direct;
+            }
+        }
+        m = m__prev1;
+    }
+
+    private partial struct modMessage {
+        public module.Version m;
+        public @string message;
+    }
+    var retractions = make_slice<modMessage>(0, len(relevantMods));
+    {
+        module.Version m__prev1 = m;
+        var flags__prev1 = flags;
+
+        foreach (var (__m, __flags) in relevantMods) {
+            m = __m;
+            flags = __flags;
+            if (flags & (resolved | named | hasPkg) != 0) {
+                retractions = append(retractions, new modMessage(m:m));
+            }
+        }
+        m = m__prev1;
+        flags = flags__prev1;
+    }
+
+    sort.Slice(retractions, (i, j) => retractions[i].m.Path < retractions[j].m.Path);
+    {
+        var i__prev1 = i;
+
+        foreach (var (__i) in retractions) {
+            i = __i;
+            var i = i;
+            r.work.Add(() => {
+                var err = modload.CheckRetractions(ctx, retractions[i].m);
+                {
+                    ref var retractErr = ref heap((modload.ModuleRetractedError.val)(null), out ptr<var> _addr_retractErr);
+
+                    if (errors.As(err, _addr_retractErr)) {
+                        retractions[i].message = err.Error();
+                    }
+
+                }
+
+            });
+
+        }
+        i = i__prev1;
+    }
+
+    var deprecations = make_slice<modMessage>(0, len(relevantMods));
+    {
+        module.Version m__prev1 = m;
+        var flags__prev1 = flags;
+
+        foreach (var (__m, __flags) in relevantMods) {
+            m = __m;
+            flags = __flags;
+            if (flags & (resolved | named) != 0 || flags & (hasPkg | direct) == hasPkg | direct) {
+                deprecations = append(deprecations, new modMessage(m:m));
+            }
+        }
+        m = m__prev1;
+        flags = flags__prev1;
+    }
+
+    sort.Slice(deprecations, (i, j) => deprecations[i].m.Path < deprecations[j].m.Path);
+    {
+        var i__prev1 = i;
+
+        foreach (var (__i) in deprecations) {
+            i = __i;
+            i = i;
+            r.work.Add(() => {
+                var (deprecation, err) = modload.CheckDeprecation(ctx, deprecations[i].m);
+                if (err != null || deprecation == "") {
+                    return ;
+                }
+                deprecations[i].message = modload.ShortMessage(deprecation, "");
+            });
+        }
+        i = i__prev1;
+    }
+
+    var sumErrs = make_slice<error>(len(r.buildList));
+    {
+        var i__prev1 = i;
+
+        foreach (var (__i) in r.buildList) {
+            i = __i;
+            i = i;
+            m = r.buildList[i];
+            var mActual = m;
+            {
+                var mRepl = modload.Replacement(m);
+
+                if (mRepl.Path != "") {
+                    mActual = mRepl;
+                }
+
+            }
+
+            module.Version old = new module.Version(Path:m.Path,Version:r.initialVersion[m.Path]);
+            if (old.Version == "") {
+                continue;
+            }
+
+            var oldActual = old;
+            {
+                var oldRepl = modload.Replacement(old);
+
+                if (oldRepl.Path != "") {
+                    oldActual = oldRepl;
+                }
+
+            }
+
+            if (mActual == oldActual || mActual.Version == "" || !modfetch.HaveSum(oldActual)) {
+                continue;
+            }
+
+            r.work.Add(() => {
+                {
+                    var err__prev1 = err;
+
+                    var (_, err) = modfetch.DownloadZip(ctx, mActual);
+
+                    if (err != null) {
+                        @string verb = "upgraded";
+                        if (semver.Compare(m.Version, old.Version) < 0) {
+                            verb = "downgraded";
+                        }
+                        @string replaced = "";
+                        if (mActual != m) {
+                            replaced = fmt.Sprintf(" (replaced by %s)", mActual);
+                        }
+                        err = fmt.Errorf("%s %s %s => %s%s: error finding sum for %s: %v", verb, m.Path, old.Version, m.Version, replaced, mActual, err);
+                        sumErrs[i] = err;
+                    }
+
+                    err = err__prev1;
+
+                }
+
+            });
+
+        }
+        i = i__prev1;
+    }
+
+    r.work.Idle().Receive(); 
+
+    // Report deprecations, then retractions, then errors fetching sums.
+    // Only errors fetching sums are hard errors.
+    {
+        var mm__prev1 = mm;
+
+        foreach (var (_, __mm) in deprecations) {
+            mm = __mm;
+            if (mm.message != "") {
+                fmt.Fprintf(os.Stderr, "go: module %s is deprecated: %s\n", mm.m.Path, mm.message);
+            }
+        }
+        mm = mm__prev1;
+    }
+
+    @string retractPath = default;
+    {
+        var mm__prev1 = mm;
+
+        foreach (var (_, __mm) in retractions) {
+            mm = __mm;
+            if (mm.message != "") {
+                fmt.Fprintf(os.Stderr, "go: warning: %v\n", mm.message);
+                if (retractPath == "") {
+                    retractPath = mm.m.Path;
+                }
+                else
+ {
+                    retractPath = "<module>";
+                }
+
+            }
+
+        }
+        mm = mm__prev1;
+    }
+
+    if (retractPath != "") {
+        fmt.Fprintf(os.Stderr, "go: to switch to the latest unretracted version, run:\n\tgo get %s@latest\n", retractPath);
+    }
+    {
+        var err__prev1 = err;
+
+        foreach (var (_, __err) in sumErrs) {
+            err = __err;
+            if (err != null) {
+                @base.Errorf("go: %v", err);
+            }
+        }
+        err = err__prev1;
+    }
+
+    @base.ExitIfErrors();
+
+});
+
+// reportChanges logs version changes to os.Stderr.
+//
+// reportChanges only logs changes to modules named on the command line and to
+// explicitly required modules in go.mod. Most changes to indirect requirements
+// are not relevant to the user and are not logged.
+//
+// reportChanges should be called after WriteGoMod.
+private static void reportChanges(this ptr<resolver> _addr_r, slice<module.Version> oldReqs, slice<module.Version> newReqs) {
+    ref resolver r = ref _addr_r.val;
+
+    private partial struct change {
+        public @string path;
+        public @string old;
+        public @string @new;
+    }
+    var changes = make_map<@string, change>(); 
+
+    // Collect changes in modules matched by command line arguments.
+    {
+        var path__prev1 = path;
+
+        foreach (var (__path, __reason) in r.resolvedVersion) {
+            path = __path;
+            reason = __reason;
+            var old = r.initialVersion[path];
+            var @new = reason.version;
+            if (old != new && (old != "" || new != "none")) {
+                changes[path] = new change(path,old,new);
+            }
+        }
+        path = path__prev1;
+    }
+
+    {
+        var req__prev1 = req;
+
+        foreach (var (_, __req) in oldReqs) {
+            req = __req;
+            var path = req.Path;
+            old = req.Version;
+            @new = r.buildListVersion[path];
+            if (old != new) {
+                changes[path] = new change(path,old,new);
+            }
+        }
+        req = req__prev1;
+    }
+
+    {
+        var req__prev1 = req;
+
+        foreach (var (_, __req) in newReqs) {
+            req = __req;
+            path = req.Path;
+            old = r.initialVersion[path];
+            @new = req.Version;
+            if (old != new) {
+                changes[path] = new change(path,old,new);
+            }
+        }
+        req = req__prev1;
+    }
+
+    var sortedChanges = make_slice<change>(0, len(changes));
+    {
+        var c__prev1 = c;
+
+        foreach (var (_, __c) in changes) {
+            c = __c;
+            sortedChanges = append(sortedChanges, c);
+        }
+        c = c__prev1;
+    }
+
+    sort.Slice(sortedChanges, (i, j) => {
+        return sortedChanges[i].path < sortedChanges[j].path;
+    });
+    {
+        var c__prev1 = c;
+
+        foreach (var (_, __c) in sortedChanges) {
+            c = __c;
+            if (c.old == "") {
+                fmt.Fprintf(os.Stderr, "go get: added %s %s\n", c.path, c.@new);
+            }
+            else if (c.@new == "none" || c.@new == "") {
+                fmt.Fprintf(os.Stderr, "go get: removed %s %s\n", c.path, c.old);
+            }
+            else if (semver.Compare(c.@new, c.old) > 0) {
+                fmt.Fprintf(os.Stderr, "go get: upgraded %s %s => %s\n", c.path, c.old, c.@new);
+            }
+            else
+ {
+                fmt.Fprintf(os.Stderr, "go get: downgraded %s %s => %s\n", c.path, c.old, c.@new);
+            }
+
+        }
+        c = c__prev1;
+    }
+}
+
+// resolve records that module m must be at its indicated version (which may be
+// "none") due to query q. If some other query forces module m to be at a
+// different version, resolve reports a conflict error.
+private static void resolve(this ptr<resolver> _addr_r, ptr<query> _addr_q, module.Version m) => func((_, panic, _) => {
+    ref resolver r = ref _addr_r.val;
+    ref query q = ref _addr_q.val;
+
+    if (m.Path == "") {
+        panic("internal error: resolving a module.Version with an empty path");
+    }
+    if (m.Path == modload.Target.Path && m.Version != modload.Target.Version) {
+        reportError(q, addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version,)));
+        return ;
+    }
+    var (vr, ok) = r.resolvedVersion[m.Path];
+    if (ok && vr.version != m.Version) {
+        reportConflict(q, m, vr);
+        return ;
+    }
+    r.resolvedVersion[m.Path] = new versionReason(m.Version,q);
+    q.resolved = append(q.resolved, m);
+
+});
+
+// updateBuildList updates the module loader's global build list to be
+// consistent with r.resolvedVersion, and to include additional modules
+// provided that they do not conflict with the resolved versions.
+//
+// If the additional modules conflict with the resolved versions, they will be
+// downgraded to a non-conflicting version (possibly "none").
+//
+// If the resulting build list is the same as the one resulting from the last
+// call to updateBuildList, updateBuildList returns with changed=false.
+private static bool updateBuildList(this ptr<resolver> _addr_r, context.Context ctx, slice<module.Version> additions) => func((defer, panic, _) => {
+    bool changed = default;
+    ref resolver r = ref _addr_r.val;
+
+    defer(@base.ExitIfErrors());
+
+    var resolved = make_slice<module.Version>(0, len(r.resolvedVersion));
+    {
+        var rv__prev1 = rv;
+
+        foreach (var (__mPath, __rv) in r.resolvedVersion) {
+            mPath = __mPath;
+            rv = __rv;
+            if (mPath != modload.Target.Path) {
+                resolved = append(resolved, new module.Version(Path:mPath,Version:rv.version));
+            }
+        }
+        rv = rv__prev1;
+    }
+
+    var (changed, err) = modload.EditBuildList(ctx, additions, resolved);
+    if (err != null) {
+        ptr<modload.ConstraintError> constraint;
+        if (!errors.As(err, _addr_constraint)) {
+            @base.Errorf("go get: %v", err);
+            return false;
+        }
+        Func<module.Version, @string> reason = m => {
+            var (rv, ok) = r.resolvedVersion[m.Path];
+            if (!ok) {
+                panic(fmt.Sprintf("internal error: can't find reason for requirement on %v", m));
+            }
+            return rv.reason.ResolvedString(new module.Version(Path:m.Path,Version:rv.version));
+        };
+        foreach (var (_, c) in constraint.Conflicts) {
+            @base.Errorf("go get: %v requires %v, not %v", reason(c.Source), c.Dep, reason(c.Constraint));
+        }        return false;
+
+    }
+    if (!changed) {
+        return false;
+    }
+    const @string defaultGoVersion = "";
+
+    r.buildList = modload.LoadModGraph(ctx, defaultGoVersion).BuildList();
+    r.buildListVersion = make_map<@string, @string>(len(r.buildList));
+    foreach (var (_, m) in r.buildList) {
+        r.buildListVersion[m.Path] = m.Version;
+    }    return true;
+
+});
+
+private static slice<module.Version> reqsFromGoMod(ptr<modfile.File> _addr_f) {
+    ref modfile.File f = ref _addr_f.val;
+
+    var reqs = make_slice<module.Version>(len(f.Require));
+    foreach (var (i, r) in f.Require) {
+        reqs[i] = r.Mod;
+    }    return reqs;
+}
+
+// isNoSuchModuleVersion reports whether err indicates that the requested module
+// does not exist at the requested version, either because the module does not
+// exist at all or because it does not include that specific version.
+private static bool isNoSuchModuleVersion(error err) {
+    ptr<modload.NoMatchingVersionError> noMatch;
+    return errors.Is(err, os.ErrNotExist) || errors.As(err, _addr_noMatch);
+}
+
+// isNoSuchPackageVersion reports whether err indicates that the requested
+// package does not exist at the requested version, either because no module
+// that could contain it exists at that version, or because every such module
+// that does exist does not actually contain the package.
+private static bool isNoSuchPackageVersion(error err) {
+    ptr<modload.PackageNotInModuleError> noPackage;
+    return isNoSuchModuleVersion(err) || errors.As(err, _addr_noPackage);
+}
+
+} // end modget_package

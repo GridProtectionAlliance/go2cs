@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:56 UTC
+//     Generated on 2022 March 06 22:18:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,28 @@ namespace crypto
     public static partial class elliptic_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct p224FieldElement
+        private partial struct p224FieldElement : IArray
         {
             // Value of the p224FieldElement struct
             private readonly array<uint> m_value;
+            
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+
+            public ref uint this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public p224FieldElement(array<uint> value) => m_value = value;
 

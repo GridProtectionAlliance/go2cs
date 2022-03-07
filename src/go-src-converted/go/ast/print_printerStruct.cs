@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:05 UTC
+//     Generated on 2022 March 06 22:42:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using token = go.go.token_package;
 using io = go.io_package;
@@ -41,7 +40,7 @@ namespace go
                 this.line = default;
             }
 
-            public printer(io.Writer output = default, ref ptr<token.FileSet> fset = default, FieldFilter filter = default, long indent = default, byte last = default, long line = default)
+            public printer(io.Writer output = default, ref ptr<token.FileSet> fset = default, FieldFilter filter = default, nint indent = default, byte last = default, nint line = default)
             {
                 this.output = output;
                 this.fset = fset;

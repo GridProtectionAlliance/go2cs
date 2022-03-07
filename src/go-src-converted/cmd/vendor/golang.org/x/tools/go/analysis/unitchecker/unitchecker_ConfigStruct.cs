@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:04:53 UTC
+//     Generated on 2022 March 06 23:34:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using gob = go.encoding.gob_package;
 using json = go.encoding.json_package;
 using flag = go.flag_package;
@@ -63,6 +62,7 @@ namespace analysis
                 this.ImportPath = default;
                 this.GoFiles = default;
                 this.NonGoFiles = default;
+                this.IgnoredFiles = default;
                 this.ImportMap = default;
                 this.PackageFile = default;
                 this.Standard = default;
@@ -72,7 +72,7 @@ namespace analysis
                 this.SucceedOnTypecheckFailure = default;
             }
 
-            public Config(@string ID = default, @string Compiler = default, @string Dir = default, @string ImportPath = default, slice<@string> GoFiles = default, slice<@string> NonGoFiles = default, map<@string, @string> ImportMap = default, map<@string, @string> PackageFile = default, map<@string, bool> Standard = default, map<@string, @string> PackageVetx = default, bool VetxOnly = default, @string VetxOutput = default, bool SucceedOnTypecheckFailure = default)
+            public Config(@string ID = default, @string Compiler = default, @string Dir = default, @string ImportPath = default, slice<@string> GoFiles = default, slice<@string> NonGoFiles = default, slice<@string> IgnoredFiles = default, map<@string, @string> ImportMap = default, map<@string, @string> PackageFile = default, map<@string, bool> Standard = default, map<@string, @string> PackageVetx = default, bool VetxOnly = default, @string VetxOutput = default, bool SucceedOnTypecheckFailure = default)
             {
                 this.ID = ID;
                 this.Compiler = Compiler;
@@ -80,6 +80,7 @@ namespace analysis
                 this.ImportPath = ImportPath;
                 this.GoFiles = GoFiles;
                 this.NonGoFiles = NonGoFiles;
+                this.IgnoredFiles = IgnoredFiles;
                 this.ImportMap = ImportMap;
                 this.PackageFile = PackageFile;
                 this.Standard = Standard;
@@ -109,7 +110,7 @@ namespace analysis
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Config Config_cast(dynamic value)
         {
-            return new Config(value.ID, value.Compiler, value.Dir, value.ImportPath, value.GoFiles, value.NonGoFiles, value.ImportMap, value.PackageFile, value.Standard, value.PackageVetx, value.VetxOnly, value.VetxOutput, value.SucceedOnTypecheckFailure);
+            return new Config(value.ID, value.Compiler, value.Dir, value.ImportPath, value.GoFiles, value.NonGoFiles, value.IgnoredFiles, value.ImportMap, value.PackageFile, value.Standard, value.PackageVetx, value.VetxOnly, value.VetxOutput, value.SucceedOnTypecheckFailure);
         }
     }
 }}}}}}}}

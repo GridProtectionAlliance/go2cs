@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:56 UTC
+//     Generated on 2022 March 06 23:38:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace secure
         {
             // Value of the ruleState struct
             private readonly byte m_value;
-
+            
             public ruleState(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and ruleState struct

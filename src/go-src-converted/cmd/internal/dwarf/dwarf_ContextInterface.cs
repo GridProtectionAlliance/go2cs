@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:22:46 UTC
+//     Generated on 2022 March 06 22:46:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,15 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
-using exec = go.os.exec_package;
+using buildcfg = go.@internal.buildcfg_package;
+using exec = go.@internal.execabs_package;
 using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
+using objabi = go.cmd.@internal.objabi_package;
 using go;
 
 #nullable enable
@@ -58,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,7 +84,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PtrSizeByPtr is null || !m_target_is_ptr)
@@ -93,23 +93,22 @@ namespace @internal
                     return;
                 }
 
-                s_PtrSizeByPtr(m_target_ptr);
+                s_PtrSizeByPtr(m_target_ptr!);
                 return;
-                
             }
 
-            private delegate void AddIntByPtr(ptr<T> value, Sym s, long size, long i);
-            private delegate void AddIntByVal(T value, Sym s, long size, long i);
+            private delegate void AddIntByPtr(ptr<T> value, Sym s, nint size, long i);
+            private delegate void AddIntByVal(T value, Sym s, nint size, long i);
 
             private static readonly AddIntByPtr? s_AddIntByPtr;
             private static readonly AddIntByVal? s_AddIntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void AddInt(Sym s, long size, long i)
+            public void AddInt(Sym s, nint size, long i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddIntByPtr is null || !m_target_is_ptr)
@@ -118,9 +117,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddIntByPtr(m_target_ptr, s, size, i);
+                s_AddIntByPtr(m_target_ptr!, s, size, i);
                 return;
-                
             }
 
             private delegate void AddBytesByPtr(ptr<T> value, Sym s, slice<byte> b);
@@ -134,7 +132,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddBytesByPtr is null || !m_target_is_ptr)
@@ -143,9 +141,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddBytesByPtr(m_target_ptr, s, b);
+                s_AddBytesByPtr(m_target_ptr!, s, b);
                 return;
-                
             }
 
             private delegate void AddAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
@@ -159,7 +156,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddAddressByPtr is null || !m_target_is_ptr)
@@ -168,9 +165,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddAddressByPtr(m_target_ptr, s, t, ofs);
+                s_AddAddressByPtr(m_target_ptr!, s, t, ofs);
                 return;
-                
             }
 
             private delegate void AddCURelativeAddressByPtr(ptr<T> value, Sym s, object t, long ofs);
@@ -184,7 +180,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddCURelativeAddressByPtr is null || !m_target_is_ptr)
@@ -193,23 +189,22 @@ namespace @internal
                     return;
                 }
 
-                s_AddCURelativeAddressByPtr(m_target_ptr, s, t, ofs);
+                s_AddCURelativeAddressByPtr(m_target_ptr!, s, t, ofs);
                 return;
-                
             }
 
-            private delegate void AddSectionOffsetByPtr(ptr<T> value, Sym s, long size, object t, long ofs);
-            private delegate void AddSectionOffsetByVal(T value, Sym s, long size, object t, long ofs);
+            private delegate void AddSectionOffsetByPtr(ptr<T> value, Sym s, nint size, object t, long ofs);
+            private delegate void AddSectionOffsetByVal(T value, Sym s, nint size, object t, long ofs);
 
             private static readonly AddSectionOffsetByPtr? s_AddSectionOffsetByPtr;
             private static readonly AddSectionOffsetByVal? s_AddSectionOffsetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void AddSectionOffset(Sym s, long size, object t, long ofs)
+            public void AddSectionOffset(Sym s, nint size, object t, long ofs)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddSectionOffsetByPtr is null || !m_target_is_ptr)
@@ -218,9 +213,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddSectionOffsetByPtr(m_target_ptr, s, size, t, ofs);
+                s_AddSectionOffsetByPtr(m_target_ptr!, s, size, t, ofs);
                 return;
-                
             }
 
             private delegate void AddDWARFAddrSectionOffsetByPtr(ptr<T> value, Sym s, object t, long ofs);
@@ -234,7 +228,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddDWARFAddrSectionOffsetByPtr is null || !m_target_is_ptr)
@@ -243,9 +237,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddDWARFAddrSectionOffsetByPtr(m_target_ptr, s, t, ofs);
+                s_AddDWARFAddrSectionOffsetByPtr(m_target_ptr!, s, t, ofs);
                 return;
-                
             }
 
             private delegate void CurrentOffsetByPtr(ptr<T> value, Sym s);
@@ -259,7 +252,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CurrentOffsetByPtr is null || !m_target_is_ptr)
@@ -268,23 +261,22 @@ namespace @internal
                     return;
                 }
 
-                s_CurrentOffsetByPtr(m_target_ptr, s);
+                s_CurrentOffsetByPtr(m_target_ptr!, s);
                 return;
-                
             }
 
-            private delegate void RecordDclReferenceByPtr(ptr<T> value, Sym from, Sym to, long dclIdx, long inlIndex);
-            private delegate void RecordDclReferenceByVal(T value, Sym from, Sym to, long dclIdx, long inlIndex);
+            private delegate void RecordDclReferenceByPtr(ptr<T> value, Sym from, Sym to, nint dclIdx, nint inlIndex);
+            private delegate void RecordDclReferenceByVal(T value, Sym from, Sym to, nint dclIdx, nint inlIndex);
 
             private static readonly RecordDclReferenceByPtr? s_RecordDclReferenceByPtr;
             private static readonly RecordDclReferenceByVal? s_RecordDclReferenceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void RecordDclReference(Sym from, Sym to, long dclIdx, long inlIndex)
+            public void RecordDclReference(Sym from, Sym to, nint dclIdx, nint inlIndex)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RecordDclReferenceByPtr is null || !m_target_is_ptr)
@@ -293,9 +285,8 @@ namespace @internal
                     return;
                 }
 
-                s_RecordDclReferenceByPtr(m_target_ptr, from, to, dclIdx, inlIndex);
+                s_RecordDclReferenceByPtr(m_target_ptr!, from, to, dclIdx, inlIndex);
                 return;
-                
             }
 
             private delegate void RecordChildDieOffsetsByPtr(ptr<T> value, Sym s, slice<ptr<Var>> vars, slice<int> offsets);
@@ -309,7 +300,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RecordChildDieOffsetsByPtr is null || !m_target_is_ptr)
@@ -318,9 +309,8 @@ namespace @internal
                     return;
                 }
 
-                s_RecordChildDieOffsetsByPtr(m_target_ptr, s, vars, offsets);
+                s_RecordChildDieOffsetsByPtr(m_target_ptr!, s, vars, offsets);
                 return;
-                
             }
 
             private delegate void AddStringByPtr(ptr<T> value, Sym s, @string v);
@@ -334,7 +324,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddStringByPtr is null || !m_target_is_ptr)
@@ -343,9 +333,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddStringByPtr(m_target_ptr, s, v);
+                s_AddStringByPtr(m_target_ptr!, s, v);
                 return;
-                
             }
 
             private delegate void AddFileRefByPtr(ptr<T> value, Sym s, object f);
@@ -359,7 +348,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddFileRefByPtr is null || !m_target_is_ptr)
@@ -368,9 +357,8 @@ namespace @internal
                     return;
                 }
 
-                s_AddFileRefByPtr(m_target_ptr, s, f);
+                s_AddFileRefByPtr(m_target_ptr!, s, f);
                 return;
-                
             }
 
             private delegate void LogfByPtr(ptr<T> value, @string format, params object[] args);
@@ -384,7 +372,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LogfByPtr is null || !m_target_is_ptr)
@@ -393,12 +381,11 @@ namespace @internal
                     return;
                 }
 
-                s_LogfByPtr(m_target_ptr, format, args);
+                s_LogfByPtr(m_target_ptr!, format, args);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Context()
@@ -409,12 +396,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PtrSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PtrSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByPtr)) as PtrSizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PtrSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PtrSizeByVal = extensionMethod.CreateStaticDelegate(typeof(PtrSizeByVal)) as PtrSizeByVal;
 
                 if (s_PtrSizeByPtr is null && s_PtrSizeByVal is null)
@@ -422,12 +409,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddInt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddIntByPtr = extensionMethod.CreateStaticDelegate(typeof(AddIntByPtr)) as AddIntByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddInt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddIntByVal = extensionMethod.CreateStaticDelegate(typeof(AddIntByVal)) as AddIntByVal;
 
                 if (s_AddIntByPtr is null && s_AddIntByVal is null)
@@ -435,12 +422,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddBytes");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddBytesByPtr = extensionMethod.CreateStaticDelegate(typeof(AddBytesByPtr)) as AddBytesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddBytes");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddBytesByVal = extensionMethod.CreateStaticDelegate(typeof(AddBytesByVal)) as AddBytesByVal;
 
                 if (s_AddBytesByPtr is null && s_AddBytesByVal is null)
@@ -448,12 +435,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddAddressByPtr = extensionMethod.CreateStaticDelegate(typeof(AddAddressByPtr)) as AddAddressByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddAddressByVal)) as AddAddressByVal;
 
                 if (s_AddAddressByPtr is null && s_AddAddressByVal is null)
@@ -461,12 +448,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddCURelativeAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddCURelativeAddressByPtr = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByPtr)) as AddCURelativeAddressByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddCURelativeAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddCURelativeAddressByVal = extensionMethod.CreateStaticDelegate(typeof(AddCURelativeAddressByVal)) as AddCURelativeAddressByVal;
 
                 if (s_AddCURelativeAddressByPtr is null && s_AddCURelativeAddressByVal is null)
@@ -474,12 +461,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddSectionOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddSectionOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByPtr)) as AddSectionOffsetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddSectionOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddSectionOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(AddSectionOffsetByVal)) as AddSectionOffsetByVal;
 
                 if (s_AddSectionOffsetByPtr is null && s_AddSectionOffsetByVal is null)
@@ -487,12 +474,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddDWARFAddrSectionOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddDWARFAddrSectionOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(AddDWARFAddrSectionOffsetByPtr)) as AddDWARFAddrSectionOffsetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddDWARFAddrSectionOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddDWARFAddrSectionOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(AddDWARFAddrSectionOffsetByVal)) as AddDWARFAddrSectionOffsetByVal;
 
                 if (s_AddDWARFAddrSectionOffsetByPtr is null && s_AddDWARFAddrSectionOffsetByVal is null)
@@ -500,12 +487,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CurrentOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CurrentOffsetByPtr = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByPtr)) as CurrentOffsetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CurrentOffset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CurrentOffsetByVal = extensionMethod.CreateStaticDelegate(typeof(CurrentOffsetByVal)) as CurrentOffsetByVal;
 
                 if (s_CurrentOffsetByPtr is null && s_CurrentOffsetByVal is null)
@@ -513,12 +500,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RecordDclReference");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecordDclReferenceByPtr = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByPtr)) as RecordDclReferenceByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RecordDclReference");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecordDclReferenceByVal = extensionMethod.CreateStaticDelegate(typeof(RecordDclReferenceByVal)) as RecordDclReferenceByVal;
 
                 if (s_RecordDclReferenceByPtr is null && s_RecordDclReferenceByVal is null)
@@ -526,12 +513,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RecordChildDieOffsets");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecordChildDieOffsetsByPtr = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByPtr)) as RecordChildDieOffsetsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RecordChildDieOffsets");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RecordChildDieOffsetsByVal = extensionMethod.CreateStaticDelegate(typeof(RecordChildDieOffsetsByVal)) as RecordChildDieOffsetsByVal;
 
                 if (s_RecordChildDieOffsetsByPtr is null && s_RecordChildDieOffsetsByVal is null)
@@ -539,12 +526,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddStringByPtr = extensionMethod.CreateStaticDelegate(typeof(AddStringByPtr)) as AddStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddStringByVal = extensionMethod.CreateStaticDelegate(typeof(AddStringByVal)) as AddStringByVal;
 
                 if (s_AddStringByPtr is null && s_AddStringByVal is null)
@@ -552,12 +539,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddFileRef");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddFileRefByPtr = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByPtr)) as AddFileRefByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddFileRef");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddFileRefByVal = extensionMethod.CreateStaticDelegate(typeof(AddFileRefByVal)) as AddFileRefByVal;
 
                 if (s_AddFileRefByPtr is null && s_AddFileRefByVal is null)
@@ -565,12 +552,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Logf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
 
                 if (s_LogfByPtr is null && s_LogfByVal is null)

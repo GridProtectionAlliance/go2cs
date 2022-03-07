@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:47 UTC
+//     Generated on 2022 March 06 23:19:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -29,6 +28,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
+using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 

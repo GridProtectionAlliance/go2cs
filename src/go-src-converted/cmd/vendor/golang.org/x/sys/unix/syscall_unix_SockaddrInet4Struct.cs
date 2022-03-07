@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:57:00 UTC
+//     Generated on 2022 March 06 23:27:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sort = go.sort_package;
 using sync = go.sync_package;
@@ -43,7 +42,7 @@ namespace sys
                 this.raw = default;
             }
 
-            public SockaddrInet4(long Port = default, array<byte> Addr = default, RawSockaddrInet4 raw = default)
+            public SockaddrInet4(nint Port = default, array<byte> Addr = default, RawSockaddrInet4 raw = default)
             {
                 this.Port = Port;
                 this.Addr = Addr;

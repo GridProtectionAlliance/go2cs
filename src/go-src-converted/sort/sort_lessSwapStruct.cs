@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:20 UTC
+//     Generated on 2022 March 06 22:12:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.Swap = default;
             }
 
-            public lessSwap(Func<long, long, bool> Less = default, Action<long, long> Swap = default)
+            public lessSwap(Func<nint, nint, bool> Less = default, Action<nint, nint> Swap = default)
             {
                 this.Less = Less;
                 this.Swap = Swap;

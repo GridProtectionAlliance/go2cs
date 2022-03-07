@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:20 UTC
+//     Generated on 2022 March 06 22:25:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
@@ -58,7 +57,7 @@ namespace encoding
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,16 +83,16 @@ namespace encoding
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TokenByPtr is null || !m_target_is_ptr)
                     return s_TokenByVal!(target);
 
-                return s_TokenByPtr(m_target_ptr);
+                return s_TokenByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static TokenReader()
@@ -104,12 +103,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Token");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TokenByPtr = extensionMethod.CreateStaticDelegate(typeof(TokenByPtr)) as TokenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Token");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
 
                 if (s_TokenByPtr is null && s_TokenByVal is null)

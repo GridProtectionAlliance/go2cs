@@ -2,69 +2,73 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build aix darwin freebsd linux netbsd openbsd solaris
+//go:build aix || darwin || freebsd || linux || netbsd || openbsd || solaris || zos
+// +build aix darwin freebsd linux netbsd openbsd solaris zos
 
-// package unix -- go2cs converted at 2020 October 09 05:56:21 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:40 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\sockcmsg_unix_other.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\sockcmsg_unix_other.go
 using runtime = go.runtime_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Round the length of a raw sockaddr up to align it properly.
-        private static long cmsgAlignOf(long salen)
-        {
-            var salign = SizeofPtr; 
+namespace go.cmd.vendor.golang.org.x.sys;
 
-            // dragonfly needs to check ABI version at runtime, see cmsgAlignOf in
-            // sockcmsg_dragonfly.go
-            switch (runtime.GOOS)
-            {
-                case "aix": 
-                    // There is no alignment on AIX.
-                    salign = 1L;
-                    break;
-                case "darwin": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
+public static partial class unix_package {
 
-                case "illumos": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
+    // Round the length of a raw sockaddr up to align it properly.
+private static nint cmsgAlignOf(nint salen) {
+    var salign = SizeofPtr; 
 
-                case "solaris": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
-                    if (SizeofPtr == 8L)
-                    {
-                        salign = 4L;
-                    }
-                    break;
-                case "netbsd": 
-                    // NetBSD and OpenBSD armv7 require 64-bit alignment.
+    // dragonfly needs to check ABI version at runtime, see cmsgAlignOf in
+    // sockcmsg_dragonfly.go
+    switch (runtime.GOOS) {
+        case "aix": 
+            // There is no alignment on AIX.
+            salign = 1;
+            break;
+        case "darwin": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
 
-                case "openbsd": 
-                    // NetBSD and OpenBSD armv7 require 64-bit alignment.
-                    if (runtime.GOARCH == "arm")
-                    {
-                        salign = 8L;
-                    }
-                    break;
+        case "ios": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+
+        case "illumos": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+
+        case "solaris": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+            if (SizeofPtr == 8) {
+                salign = 4;
             }
+            break;
+        case "netbsd": 
+            // NetBSD and OpenBSD armv7 require 64-bit alignment.
 
-            return (salen + salign - 1L) & ~(salign - 1L);
-
-        }
+        case "openbsd": 
+            // NetBSD and OpenBSD armv7 require 64-bit alignment.
+            if (runtime.GOARCH == "arm") {
+                salign = 8;
+            }
+            if (runtime.GOOS == "netbsd" && runtime.GOARCH == "arm64") {
+                salign = 16;
+            }
+            break;
+        case "zos": 
+            // z/OS socket macros use [32-bit] sizeof(int) alignment,
+            // not pointer width.
+            salign = SizeofInt;
+            break;
     }
-}}}}}}
+
+    return (salen + salign - 1) & ~(salign - 1);
+
+}
+
+} // end unix_package

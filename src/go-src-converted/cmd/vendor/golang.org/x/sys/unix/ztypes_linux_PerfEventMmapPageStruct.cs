@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:34 UTC
+//     Generated on 2022 March 06 23:30:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,6 +47,9 @@ namespace sys
                 this.Time_zero = default;
                 this.Size = default;
                 this._ = default;
+                this.Time_cycles = default;
+                this.Time_mask = default;
+                this._ = default;
                 this.Data_head = default;
                 this.Data_tail = default;
                 this.Data_offset = default;
@@ -57,7 +60,7 @@ namespace sys
                 this.Aux_size = default;
             }
 
-            public PerfEventMmapPage(uint Version = default, uint Compat_version = default, uint Lock = default, uint Index = default, long Offset = default, ulong Time_enabled = default, ulong Time_running = default, ulong Capabilities = default, ushort Pmc_width = default, ushort Time_shift = default, uint Time_mult = default, ulong Time_offset = default, ulong Time_zero = default, uint Size = default, array<byte> _ = default, ulong Data_head = default, ulong Data_tail = default, ulong Data_offset = default, ulong Data_size = default, ulong Aux_head = default, ulong Aux_tail = default, ulong Aux_offset = default, ulong Aux_size = default)
+            public PerfEventMmapPage(uint Version = default, uint Compat_version = default, uint Lock = default, uint Index = default, long Offset = default, ulong Time_enabled = default, ulong Time_running = default, ulong Capabilities = default, ushort Pmc_width = default, ushort Time_shift = default, uint Time_mult = default, ulong Time_offset = default, ulong Time_zero = default, uint Size = default, uint _ = default, ulong Time_cycles = default, ulong Time_mask = default, array<byte> _ = default, ulong Data_head = default, ulong Data_tail = default, ulong Data_offset = default, ulong Data_size = default, ulong Aux_head = default, ulong Aux_tail = default, ulong Aux_offset = default, ulong Aux_size = default)
             {
                 this.Version = Version;
                 this.Compat_version = Compat_version;
@@ -73,6 +76,9 @@ namespace sys
                 this.Time_offset = Time_offset;
                 this.Time_zero = Time_zero;
                 this.Size = Size;
+                this._ = _;
+                this.Time_cycles = Time_cycles;
+                this.Time_mask = Time_mask;
                 this._ = _;
                 this.Data_head = Data_head;
                 this.Data_tail = Data_tail;
@@ -104,7 +110,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PerfEventMmapPage PerfEventMmapPage_cast(dynamic value)
         {
-            return new PerfEventMmapPage(value.Version, value.Compat_version, value.Lock, value.Index, value.Offset, value.Time_enabled, value.Time_running, value.Capabilities, value.Pmc_width, value.Time_shift, value.Time_mult, value.Time_offset, value.Time_zero, value.Size, value._, value.Data_head, value.Data_tail, value.Data_offset, value.Data_size, value.Aux_head, value.Aux_tail, value.Aux_offset, value.Aux_size);
+            return new PerfEventMmapPage(value.Version, value.Compat_version, value.Lock, value.Index, value.Offset, value.Time_enabled, value.Time_running, value.Capabilities, value.Pmc_width, value.Time_shift, value.Time_mult, value.Time_offset, value.Time_zero, value.Size, value._, value.Time_cycles, value.Time_mask, value._, value.Data_head, value.Data_tail, value.Data_offset, value.Data_size, value.Aux_head, value.Aux_tail, value.Aux_offset, value.Aux_size);
         }
     }
 }}}}}}

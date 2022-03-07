@@ -2,23 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 09 05:07:39 UTC
+// package math -- go2cs converted at 2022 March 06 22:31:03 UTC
 // import "math" ==> using math = go.math_package
-// Original source: C:\Go\src\math\copysign.go
+// Original source: C:\Program Files\Go\src\math\copysign.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class math_package
-    {
-        // Copysign returns a value with the magnitude
-        // of x and the sign of y.
-        public static double Copysign(double x, double y)
-        {
-            const long sign = (long)1L << (int)(63L);
+namespace go;
 
-            return Float64frombits(Float64bits(x) & ~sign | Float64bits(y) & sign);
-        }
-    }
+public static partial class math_package {
+
+    // Copysign returns a value with the magnitude
+    // of x and the sign of y.
+public static double Copysign(double x, double y) {
+    const nint sign = 1 << 63;
+
+    return Float64frombits(Float64bits(x) & ~sign | Float64bits(y) & sign);
 }
+
+} // end math_package

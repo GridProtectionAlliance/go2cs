@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:22 UTC
+//     Generated on 2022 March 06 23:24:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -39,15 +38,17 @@ namespace ianlancetaylor
                 this.off = default;
                 this.subs = default;
                 this.templates = default;
+                this.inLambda = default;
             }
 
-            public state(@string str = default, bool verbose = default, long off = default, substitutions subs = default, slice<ptr<Template>> templates = default)
+            public state(@string str = default, bool verbose = default, nint off = default, substitutions subs = default, slice<ptr<Template>> templates = default, nint inLambda = default)
             {
                 this.str = str;
                 this.verbose = verbose;
                 this.off = off;
                 this.subs = subs;
                 this.templates = templates;
+                this.inLambda = inLambda;
             }
 
             // Enable comparisons between nil and state struct
@@ -70,7 +71,7 @@ namespace ianlancetaylor
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static state state_cast(dynamic value)
         {
-            return new state(value.str, value.verbose, value.off, value.subs, value.templates);
+            return new state(value.str, value.verbose, value.off, value.subs, value.templates, value.inLambda);
         }
     }
 }}}}}

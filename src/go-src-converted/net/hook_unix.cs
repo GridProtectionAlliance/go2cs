@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2020 October 09 04:51:32 UTC
+// package net -- go2cs converted at 2022 March 06 22:15:49 UTC
 // import "net" ==> using net = go.net_package
-// Original source: C:\Go\src\net\hook_unix.go
+// Original source: C:\Program Files\Go\src\net\hook_unix.go
 using syscall = go.syscall_package;
-using static go.builtin;
 using System;
 
-namespace go
-{
-    public static partial class net_package
-    {
-        private static Action testHookDialChannel = () =>
-        {
-        };        private static Action testHookCanceledDial = () =>
-        {
-        };        private static Func<long, long, long, (long, error)> socketFunc = syscall.Socket;        private static Func<long, syscall.Sockaddr, error> connectFunc = syscall.Connect;        private static Func<long, long, error> listenFunc = syscall.Listen;        private static Func<long, long, long, (long, error)> getsockoptIntFunc = syscall.GetsockoptInt;
-    }
-}
+
+namespace go;
+
+public static partial class net_package {
+
+private static Action testHookDialChannel = () => {
+};private static Action testHookCanceledDial = () => {
+};private static Func<nint, nint, nint, (nint, error)> socketFunc = syscall.Socket;private static Func<nint, syscall.Sockaddr, error> connectFunc = syscall.Connect;private static Func<nint, nint, error> listenFunc = syscall.Listen;private static Func<nint, nint, nint, (nint, error)> getsockoptIntFunc = syscall.GetsockoptInt;
+
+} // end net_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:57 UTC
+//     Generated on 2022 March 06 23:38:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -56,7 +55,7 @@ namespace text
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -71,47 +70,47 @@ namespace text
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, long, error) TransformByPtr(ptr<T> value, slice<byte> dst, slice<byte> src, bool atEOF);
-            private delegate (long, long, error) TransformByVal(T value, slice<byte> dst, slice<byte> src, bool atEOF);
+            private delegate (nint, nint, error) TransformByPtr(ptr<T> value, slice<byte> dst, slice<byte> src, bool atEOF);
+            private delegate (nint, nint, error) TransformByVal(T value, slice<byte> dst, slice<byte> src, bool atEOF);
 
             private static readonly TransformByPtr? s_TransformByPtr;
             private static readonly TransformByVal? s_TransformByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, long, error) Transform(slice<byte> dst, slice<byte> src, bool atEOF)
+            public (nint, nint, error) Transform(slice<byte> dst, slice<byte> src, bool atEOF)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TransformByPtr is null || !m_target_is_ptr)
                     return s_TransformByVal!(target, dst, src, atEOF);
 
-                return s_TransformByPtr(m_target_ptr, dst, src, atEOF);
+                return s_TransformByPtr(m_target_ptr!, dst, src, atEOF);
             }
 
-            private delegate (long, long, error) ResetByPtr(ptr<T> value);
-            private delegate (long, long, error) ResetByVal(T value);
+            private delegate (nint, nint, error) ResetByPtr(ptr<T> value);
+            private delegate (nint, nint, error) ResetByVal(T value);
 
             private static readonly ResetByPtr? s_ResetByPtr;
             private static readonly ResetByVal? s_ResetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, long, error) Reset()
+            public (nint, nint, error) Reset()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ResetByPtr is null || !m_target_is_ptr)
                     return s_ResetByVal!(target);
 
-                return s_ResetByPtr(m_target_ptr);
+                return s_ResetByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Transformer()
@@ -122,12 +121,12 @@ namespace text
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Transform");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TransformByPtr = extensionMethod.CreateStaticDelegate(typeof(TransformByPtr)) as TransformByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Transform");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TransformByVal = extensionMethod.CreateStaticDelegate(typeof(TransformByVal)) as TransformByVal;
 
                 if (s_TransformByPtr is null && s_TransformByVal is null)
@@ -135,12 +134,12 @@ namespace text
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Reset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ResetByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetByPtr)) as ResetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Reset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
 
                 if (s_ResetByPtr is null && s_ResetByVal is null)

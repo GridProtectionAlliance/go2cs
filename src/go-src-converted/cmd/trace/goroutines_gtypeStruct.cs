@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:07 UTC
+//     Generated on 2022 March 06 23:23:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using template = go.html.template_package;
 using trace = go.@internal.trace_package;
@@ -42,7 +41,7 @@ namespace go
                 this.ExecTime = default;
             }
 
-            public gtype(ulong ID = default, @string Name = default, long N = default, long ExecTime = default)
+            public gtype(ulong ID = default, @string Name = default, nint N = default, long ExecTime = default)
             {
                 this.ID = ID;
                 this.Name = Name;

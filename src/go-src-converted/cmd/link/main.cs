@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:48:10 UTC
-// Original source: C:\Go\src\cmd\link\main.go
-using objabi = go.cmd.@internal.objabi_package;
+// package main -- go2cs converted at 2022 March 06 23:19:48 UTC
+// Original source: C:\Program Files\Go\src\cmd\link\main.go
 using sys = go.cmd.@internal.sys_package;
 using amd64 = go.cmd.link.@internal.amd64_package;
 using arm = go.cmd.link.@internal.arm_package;
@@ -18,76 +17,75 @@ using s390x = go.cmd.link.@internal.s390x_package;
 using wasm = go.cmd.link.@internal.wasm_package;
 using x86 = go.cmd.link.@internal.x86_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using os = go.os_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        // The bulk of the linker implementation lives in cmd/link/internal/ld.
-        // Architecture-specific code lives in cmd/link/internal/GOARCH.
-        //
-        // Program initialization:
-        //
-        // Before any argument parsing is done, the Init function of relevant
-        // architecture package is called. The only job done in Init is
-        // configuration of the architecture-specific variables.
-        //
-        // Then control flow passes to ld.Main, which parses flags, makes
-        // some configuration decisions, and then gives the architecture
-        // packages a second chance to modify the linker's configuration
-        // via the ld.Arch.Archinit function.
-        private static void Main()
-        {
-            ptr<sys.Arch> arch;
-            ld.Arch theArch = default;
+namespace go;
 
-            switch (objabi.GOARCH)
-            {
-                case "386": 
-                    arch, theArch = x86.Init();
-                    break;
-                case "amd64": 
-                    arch, theArch = amd64.Init();
-                    break;
-                case "arm": 
-                    arch, theArch = arm.Init();
-                    break;
-                case "arm64": 
-                    arch, theArch = arm64.Init();
-                    break;
-                case "mips": 
+public static partial class main_package {
 
-                case "mipsle": 
-                    arch, theArch = mips.Init();
-                    break;
-                case "mips64": 
+    // The bulk of the linker implementation lives in cmd/link/internal/ld.
+    // Architecture-specific code lives in cmd/link/internal/GOARCH.
+    //
+    // Program initialization:
+    //
+    // Before any argument parsing is done, the Init function of relevant
+    // architecture package is called. The only job done in Init is
+    // configuration of the architecture-specific variables.
+    //
+    // Then control flow passes to ld.Main, which parses flags, makes
+    // some configuration decisions, and then gives the architecture
+    // packages a second chance to modify the linker's configuration
+    // via the ld.Arch.Archinit function.
+private static void Main() {
+    ptr<sys.Arch> arch;
+    ld.Arch theArch = default;
 
-                case "mips64le": 
-                    arch, theArch = mips64.Init();
-                    break;
-                case "ppc64": 
+    buildcfg.Check();
+    switch (buildcfg.GOARCH) {
+        case "386": 
+            arch, theArch = x86.Init();
+            break;
+        case "amd64": 
+            arch, theArch = amd64.Init();
+            break;
+        case "arm": 
+            arch, theArch = arm.Init();
+            break;
+        case "arm64": 
+            arch, theArch = arm64.Init();
+            break;
+        case "mips": 
 
-                case "ppc64le": 
-                    arch, theArch = ppc64.Init();
-                    break;
-                case "riscv64": 
-                    arch, theArch = riscv64.Init();
-                    break;
-                case "s390x": 
-                    arch, theArch = s390x.Init();
-                    break;
-                case "wasm": 
-                    arch, theArch = wasm.Init();
-                    break;
-                default: 
-                    fmt.Fprintf(os.Stderr, "link: unknown architecture %q\n", objabi.GOARCH);
-                    os.Exit(2L);
-                    break;
-            }
-            ld.Main(arch, theArch);
+        case "mipsle": 
+            arch, theArch = mips.Init();
+            break;
+        case "mips64": 
 
-        }
+        case "mips64le": 
+            arch, theArch = mips64.Init();
+            break;
+        case "ppc64": 
+
+        case "ppc64le": 
+            arch, theArch = ppc64.Init();
+            break;
+        case "riscv64": 
+            arch, theArch = riscv64.Init();
+            break;
+        case "s390x": 
+            arch, theArch = s390x.Init();
+            break;
+        case "wasm": 
+            arch, theArch = wasm.Init();
+            break;
+        default: 
+            fmt.Fprintf(os.Stderr, "link: unknown architecture %q\n", buildcfg.GOARCH);
+            os.Exit(2);
+            break;
     }
+    ld.Main(arch, theArch);
+
 }
+
+} // end main_package

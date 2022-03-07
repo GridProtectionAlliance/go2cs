@@ -4,38 +4,29 @@
 
 // +build windows
 
-// package windows -- go2cs converted at 2020 October 09 06:00:53 UTC
+// package windows -- go2cs converted at 2022 March 06 23:30:36 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\str.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\str.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class windows_package
-    {
-        private static @string itoa(long val)
-        { // do it here rather than with fmt to avoid dependency
-            if (val < 0L)
-            {
-                return "-" + itoa(-val);
-            }
-            array<byte> buf = new array<byte>(32L); // big enough for int64
-            var i = len(buf) - 1L;
-            while (val >= 10L)
-            {
-                buf[i] = byte(val % 10L + '0');
-                i--;
-                val /= 10L;
-            }
-            buf[i] = byte(val + '0');
-            return string(buf[i..]);
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        }
+public static partial class windows_package {
+
+private static @string itoa(nint val) { // do it here rather than with fmt to avoid dependency
+    if (val < 0) {
+        return "-" + itoa(-val);
     }
-}}}}}}
+    array<byte> buf = new array<byte>(32); // big enough for int64
+    var i = len(buf) - 1;
+    while (val >= 10) {
+        buf[i] = byte(val % 10 + '0');
+        i--;
+        val /= 10;
+    }
+    buf[i] = byte(val + '0');
+    return string(buf[(int)i..]);
+
+}
+
+} // end windows_package

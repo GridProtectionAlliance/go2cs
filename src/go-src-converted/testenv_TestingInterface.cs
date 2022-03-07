@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:27 UTC
+//     Generated on 2022 March 06 23:31:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
@@ -61,7 +60,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,7 +86,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SkipfByPtr is null || !m_target_is_ptr)
@@ -96,9 +95,8 @@ namespace @internal
                     return;
                 }
 
-                s_SkipfByPtr(m_target_ptr, format, args);
+                s_SkipfByPtr(m_target_ptr!, format, args);
                 return;
-                
             }
 
             private delegate void FatalfByPtr(ptr<T> value, @string format, params object[] args);
@@ -112,7 +110,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FatalfByPtr is null || !m_target_is_ptr)
@@ -121,12 +119,11 @@ namespace @internal
                     return;
                 }
 
-                s_FatalfByPtr(m_target_ptr, format, args);
+                s_FatalfByPtr(m_target_ptr!, format, args);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Testing()
@@ -137,12 +134,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Skipf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SkipfByPtr = extensionMethod.CreateStaticDelegate(typeof(SkipfByPtr)) as SkipfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Skipf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SkipfByVal = extensionMethod.CreateStaticDelegate(typeof(SkipfByVal)) as SkipfByVal;
 
                 if (s_SkipfByPtr is null && s_SkipfByVal is null)
@@ -150,12 +147,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Fatalf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FatalfByPtr = extensionMethod.CreateStaticDelegate(typeof(FatalfByPtr)) as FatalfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Fatalf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
 
                 if (s_FatalfByPtr is null && s_FatalfByVal is null)

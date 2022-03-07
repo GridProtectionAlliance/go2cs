@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:50 UTC
+//     Generated on 2022 March 06 23:19:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
@@ -38,7 +37,7 @@ namespace testing
 
             private ref CheckError CheckError_val => ref m_CheckErrorRef.Value;
 
-            public ref long Count => ref m_CheckErrorRef.Value.Count;
+            public ref nint Count => ref m_CheckErrorRef.Value.Count;
 
             public ref slice<object> In => ref m_CheckErrorRef.Value.In;
 

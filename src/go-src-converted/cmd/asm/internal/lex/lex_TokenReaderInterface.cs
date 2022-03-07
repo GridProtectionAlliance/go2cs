@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:03 UTC
+//     Generated on 2022 March 06 22:46:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using log = go.log_package;
 using os = go.os_package;
@@ -57,7 +56,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -72,167 +71,167 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate long NextByPtr(ptr<T> value);
-            private delegate long NextByVal(T value);
+            private delegate nint NextByPtr(ptr<T> value);
+            private delegate nint NextByVal(T value);
 
             private static readonly NextByPtr? s_NextByPtr;
             private static readonly NextByVal? s_NextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Next()
+            public nint Next()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target);
 
-                return s_NextByPtr(m_target_ptr);
+                return s_NextByPtr(m_target_ptr!);
             }
 
-            private delegate long TextByPtr(ptr<T> value);
-            private delegate long TextByVal(T value);
+            private delegate nint TextByPtr(ptr<T> value);
+            private delegate nint TextByVal(T value);
 
             private static readonly TextByPtr? s_TextByPtr;
             private static readonly TextByVal? s_TextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Text()
+            public nint Text()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TextByPtr is null || !m_target_is_ptr)
                     return s_TextByVal!(target);
 
-                return s_TextByPtr(m_target_ptr);
+                return s_TextByPtr(m_target_ptr!);
             }
 
-            private delegate long FileByPtr(ptr<T> value);
-            private delegate long FileByVal(T value);
+            private delegate nint FileByPtr(ptr<T> value);
+            private delegate nint FileByVal(T value);
 
             private static readonly FileByPtr? s_FileByPtr;
             private static readonly FileByVal? s_FileByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long File()
+            public nint File()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FileByPtr is null || !m_target_is_ptr)
                     return s_FileByVal!(target);
 
-                return s_FileByPtr(m_target_ptr);
+                return s_FileByPtr(m_target_ptr!);
             }
 
-            private delegate long BaseByPtr(ptr<T> value);
-            private delegate long BaseByVal(T value);
+            private delegate nint BaseByPtr(ptr<T> value);
+            private delegate nint BaseByVal(T value);
 
             private static readonly BaseByPtr? s_BaseByPtr;
             private static readonly BaseByVal? s_BaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Base()
+            public nint Base()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BaseByPtr is null || !m_target_is_ptr)
                     return s_BaseByVal!(target);
 
-                return s_BaseByPtr(m_target_ptr);
+                return s_BaseByPtr(m_target_ptr!);
             }
 
-            private delegate long SetBaseByPtr(ptr<T> value, ptr<src.PosBase> _p0);
-            private delegate long SetBaseByVal(T value, ptr<src.PosBase> _p0);
+            private delegate nint SetBaseByPtr(ptr<T> value, ptr<src.PosBase> _p0);
+            private delegate nint SetBaseByVal(T value, ptr<src.PosBase> _p0);
 
             private static readonly SetBaseByPtr? s_SetBaseByPtr;
             private static readonly SetBaseByVal? s_SetBaseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long SetBase(ptr<src.PosBase> _p0)
+            public nint SetBase(ptr<src.PosBase> _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetBaseByPtr is null || !m_target_is_ptr)
                     return s_SetBaseByVal!(target, _p0);
 
-                return s_SetBaseByPtr(m_target_ptr, _p0);
+                return s_SetBaseByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate long LineByPtr(ptr<T> value);
-            private delegate long LineByVal(T value);
+            private delegate nint LineByPtr(ptr<T> value);
+            private delegate nint LineByVal(T value);
 
             private static readonly LineByPtr? s_LineByPtr;
             private static readonly LineByVal? s_LineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Line()
+            public nint Line()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LineByPtr is null || !m_target_is_ptr)
                     return s_LineByVal!(target);
 
-                return s_LineByPtr(m_target_ptr);
+                return s_LineByPtr(m_target_ptr!);
             }
 
-            private delegate long ColByPtr(ptr<T> value);
-            private delegate long ColByVal(T value);
+            private delegate nint ColByPtr(ptr<T> value);
+            private delegate nint ColByVal(T value);
 
             private static readonly ColByPtr? s_ColByPtr;
             private static readonly ColByVal? s_ColByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Col()
+            public nint Col()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ColByPtr is null || !m_target_is_ptr)
                     return s_ColByVal!(target);
 
-                return s_ColByPtr(m_target_ptr);
+                return s_ColByPtr(m_target_ptr!);
             }
 
-            private delegate long CloseByPtr(ptr<T> value);
-            private delegate long CloseByVal(T value);
+            private delegate nint CloseByPtr(ptr<T> value);
+            private delegate nint CloseByVal(T value);
 
             private static readonly CloseByPtr? s_CloseByPtr;
             private static readonly CloseByVal? s_CloseByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Close()
+            public nint Close()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static TokenReader()
@@ -243,12 +242,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
                 if (s_NextByPtr is null && s_NextByVal is null)
@@ -256,12 +255,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Text");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TextByPtr = extensionMethod.CreateStaticDelegate(typeof(TextByPtr)) as TextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Text");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TextByVal = extensionMethod.CreateStaticDelegate(typeof(TextByVal)) as TextByVal;
 
                 if (s_TextByPtr is null && s_TextByVal is null)
@@ -269,12 +268,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("File");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FileByPtr = extensionMethod.CreateStaticDelegate(typeof(FileByPtr)) as FileByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("File");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FileByVal = extensionMethod.CreateStaticDelegate(typeof(FileByVal)) as FileByVal;
 
                 if (s_FileByPtr is null && s_FileByVal is null)
@@ -282,12 +281,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Base");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BaseByPtr = extensionMethod.CreateStaticDelegate(typeof(BaseByPtr)) as BaseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Base");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
 
                 if (s_BaseByPtr is null && s_BaseByVal is null)
@@ -295,12 +294,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetBase");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetBaseByPtr = extensionMethod.CreateStaticDelegate(typeof(SetBaseByPtr)) as SetBaseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetBase");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetBaseByVal = extensionMethod.CreateStaticDelegate(typeof(SetBaseByVal)) as SetBaseByVal;
 
                 if (s_SetBaseByPtr is null && s_SetBaseByVal is null)
@@ -308,12 +307,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Line");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LineByPtr = extensionMethod.CreateStaticDelegate(typeof(LineByPtr)) as LineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Line");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LineByVal = extensionMethod.CreateStaticDelegate(typeof(LineByVal)) as LineByVal;
 
                 if (s_LineByPtr is null && s_LineByVal is null)
@@ -321,12 +320,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Col");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColByPtr = extensionMethod.CreateStaticDelegate(typeof(ColByPtr)) as ColByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Col");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColByVal = extensionMethod.CreateStaticDelegate(typeof(ColByVal)) as ColByVal;
 
                 if (s_ColByPtr is null && s_ColByVal is null)
@@ -334,12 +333,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:36 UTC
+//     Generated on 2022 March 06 22:47:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
+using constraint = go.go.build.constraint_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -42,20 +42,20 @@ namespace go
 
             public ref Mode Mode => ref m_ConfigRef.Value.Mode;
 
-            public ref long Tabwidth => ref m_ConfigRef.Value.Tabwidth;
+            public ref nint Tabwidth => ref m_ConfigRef.Value.Tabwidth;
 
-            public ref long Indent => ref m_ConfigRef.Value.Indent;
+            public ref nint Indent => ref m_ConfigRef.Value.Indent;
 
             // commentInfo structure promotion - sourced from value copy
             private readonly ptr<commentInfo> m_commentInfoRef;
 
             private ref commentInfo commentInfo_val => ref m_commentInfoRef.Value;
 
-            public ref long cindex => ref m_commentInfoRef.Value.cindex;
+            public ref nint cindex => ref m_commentInfoRef.Value.cindex;
 
             public ref ptr<ast.CommentGroup> comment => ref m_commentInfoRef.Value.comment;
 
-            public ref long commentOffset => ref m_commentInfoRef.Value.commentOffset;
+            public ref nint commentOffset => ref m_commentInfoRef.Value.commentOffset;
 
             public ref bool commentNewline => ref m_commentInfoRef.Value.commentNewline;
 
@@ -73,6 +73,8 @@ namespace go
                 this.lastTok = default;
                 this.prevOpen = default;
                 this.wsbuf = default;
+                this.goBuild = default;
+                this.plusBuild = default;
                 this.pos = default;
                 this.@out = default;
                 this.last = default;
@@ -85,7 +87,7 @@ namespace go
                 this.cachedLine = default;
             }
 
-            public printer(Config Config = default, ref ptr<token.FileSet> fset = default, slice<byte> output = default, long indent = default, long level = default, pmode mode = default, bool endAlignment = default, bool impliedSemi = default, token.Token lastTok = default, token.Token prevOpen = default, slice<whiteSpace> wsbuf = default, token.Position pos = default, token.Position @out = default, token.Position last = default, ref ptr<long> linePtr = default, slice<ptr<ast.CommentGroup>> comments = default, bool useNodeComments = default, commentInfo commentInfo = default, map<ast.Node, long> nodeSizes = default, token.Pos cachedPos = default, long cachedLine = default)
+            public printer(Config Config = default, ref ptr<token.FileSet> fset = default, slice<byte> output = default, nint indent = default, nint level = default, pmode mode = default, bool endAlignment = default, bool impliedSemi = default, token.Token lastTok = default, token.Token prevOpen = default, slice<whiteSpace> wsbuf = default, slice<nint> goBuild = default, slice<nint> plusBuild = default, token.Position pos = default, token.Position @out = default, token.Position last = default, ref ptr<nint> linePtr = default, slice<ptr<ast.CommentGroup>> comments = default, bool useNodeComments = default, commentInfo commentInfo = default, map<ast.Node, nint> nodeSizes = default, token.Pos cachedPos = default, nint cachedLine = default)
             {
                 this.m_ConfigRef = new ptr<Config>(Config);
                 this.fset = fset;
@@ -98,6 +100,8 @@ namespace go
                 this.lastTok = lastTok;
                 this.prevOpen = prevOpen;
                 this.wsbuf = wsbuf;
+                this.goBuild = goBuild;
+                this.plusBuild = plusBuild;
                 this.pos = pos;
                 this.@out = @out;
                 this.last = last;
@@ -130,7 +134,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static printer printer_cast(dynamic value)
         {
-            return new printer(value.Config, ref value.fset, value.output, value.indent, value.level, value.mode, value.endAlignment, value.impliedSemi, value.lastTok, value.prevOpen, value.wsbuf, value.pos, value.@out, value.last, ref value.linePtr, value.comments, value.useNodeComments, value.commentInfo, value.nodeSizes, value.cachedPos, value.cachedLine);
+            return new printer(value.Config, ref value.fset, value.output, value.indent, value.level, value.mode, value.endAlignment, value.impliedSemi, value.lastTok, value.prevOpen, value.wsbuf, value.goBuild, value.plusBuild, value.pos, value.@out, value.last, ref value.linePtr, value.comments, value.useNodeComments, value.commentInfo, value.nodeSizes, value.cachedPos, value.cachedLine);
         }
     }
 }}

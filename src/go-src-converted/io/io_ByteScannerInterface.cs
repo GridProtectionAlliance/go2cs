@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:26 UTC
+//     Generated on 2022 March 06 22:12:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using sync = go.sync_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -48,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,36 +74,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnreadByteByPtr is null || !m_target_is_ptr)
                     return s_UnreadByteByVal!(target);
 
-                return s_UnreadByteByPtr(m_target_ptr);
-            }
-
-            private delegate (byte, error) ReadByteByPtr(ptr<T> value);
-            private delegate (byte, error) ReadByteByVal(T value);
-
-            private static readonly ReadByteByPtr? s_ReadByteByPtr;
-            private static readonly ReadByteByVal? s_ReadByteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (byte, error) ReadByte()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByteByPtr is null || !m_target_is_ptr)
-                    return s_ReadByteByVal!(target);
-
-                return s_ReadByteByPtr(m_target_ptr);
+                return s_UnreadByteByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ByteScanner()
@@ -114,29 +94,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadByte");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadByteByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByPtr)) as UnreadByteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnreadByte");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadByteByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadByteByVal)) as UnreadByteByVal;
 
                 if (s_UnreadByteByPtr is null && s_UnreadByteByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ByteScanner.UnreadByte method", new Exception("UnreadByte"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadByte");
-
-                if (!(extensionMethod is null))
-                    s_ReadByteByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByteByPtr)) as ReadByteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("ReadByte");
-
-                if (!(extensionMethod is null))
-                    s_ReadByteByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByteByVal)) as ReadByteByVal;
-
-                if (s_ReadByteByPtr is null && s_ReadByteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ByteScanner.ReadByte method", new Exception("ReadByte"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

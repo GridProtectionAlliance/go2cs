@@ -66,7 +66,7 @@ Grouping:
 
 Empty strings:
   ^              at beginning of text or line (flag m=true)
-  $              at end of text (like \z not Perl's \Z) or line (flag m=true)
+  $              at end of text (like \z not \Z) or line (flag m=true)
   \A             at beginning of text
   \b             at ASCII word boundary (\w on one side and \W, \A, or \z on the other)
   \B             not at ASCII word boundary
@@ -127,9 +127,10 @@ ASCII character classes:
   [[:word:]]     word characters (== [0-9A-Za-z_])
   [[:xdigit:]]   hex digit (== [0-9A-Fa-f])
 
+Unicode character classes are those in unicode.Categories and unicode.Scripts.
 */
-// package syntax -- go2cs converted at 2020 October 09 04:58:26 UTC
+// package syntax -- go2cs converted at 2022 March 06 22:23:30 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
-// Original source: C:\Go\src\regexp\syntax\doc.go
-    }
+// Original source: C:\Program Files\Go\src\regexp\syntax\doc.go
 
+} // end syntax_package

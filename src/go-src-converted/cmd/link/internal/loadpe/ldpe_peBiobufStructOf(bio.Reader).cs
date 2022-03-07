@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:00 UTC
+//     Generated on 2022 March 06 23:21:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -25,7 +27,7 @@ namespace @internal
         {
             // Value of the peBiobuf struct
             private readonly bio.Reader m_value;
-
+            
             public peBiobuf(bio.Reader value) => m_value = value;
 
             // Enable implicit conversions between bio.Reader and peBiobuf struct

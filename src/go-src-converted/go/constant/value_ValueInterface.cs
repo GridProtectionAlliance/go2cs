@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:02 UTC
+//     Generated on 2022 March 06 22:41:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,11 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using token = go.go.token_package;
 using math = go.math_package;
 using big = go.math.big_package;
+using bits = go.math.bits_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
@@ -57,7 +57,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,13 +83,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_KindByPtr is null || !m_target_is_ptr)
                     return s_KindByVal!(target);
 
-                return s_KindByPtr(m_target_ptr);
+                return s_KindByPtr(m_target_ptr!);
             }
 
             private delegate @string StringByPtr(ptr<T> value);
@@ -103,13 +103,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate @string ExactStringByPtr(ptr<T> value);
@@ -123,13 +123,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExactStringByPtr is null || !m_target_is_ptr)
                     return s_ExactStringByVal!(target);
 
-                return s_ExactStringByPtr(m_target_ptr);
+                return s_ExactStringByPtr(m_target_ptr!);
             }
 
             private delegate @string implementsValueByPtr(ptr<T> value);
@@ -143,16 +143,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_implementsValueByPtr is null || !m_target_is_ptr)
                     return s_implementsValueByVal!(target);
 
-                return s_implementsValueByPtr(m_target_ptr);
+                return s_implementsValueByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Value()
@@ -163,12 +163,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByPtr = extensionMethod.CreateStaticDelegate(typeof(KindByPtr)) as KindByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
 
                 if (s_KindByPtr is null && s_KindByVal is null)
@@ -176,12 +176,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -189,12 +189,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ExactString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExactStringByPtr = extensionMethod.CreateStaticDelegate(typeof(ExactStringByPtr)) as ExactStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ExactString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExactStringByVal = extensionMethod.CreateStaticDelegate(typeof(ExactStringByVal)) as ExactStringByVal;
 
                 if (s_ExactStringByPtr is null && s_ExactStringByVal is null)
@@ -202,12 +202,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("implementsValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_implementsValueByPtr = extensionMethod.CreateStaticDelegate(typeof(implementsValueByPtr)) as implementsValueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("implementsValue");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_implementsValueByVal = extensionMethod.CreateStaticDelegate(typeof(implementsValueByVal)) as implementsValueByVal;
 
                 if (s_implementsValueByPtr is null && s_implementsValueByVal is null)

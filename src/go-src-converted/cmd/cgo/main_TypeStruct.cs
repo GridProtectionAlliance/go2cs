@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:46 UTC
+//     Generated on 2022 March 06 22:47:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,16 +12,17 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using md5 = go.crypto.md5_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using printer = go.go.printer_package;
 using token = go.go.token_package;
+using buildcfg = go.@internal.buildcfg_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using os = go.os_package;
+using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
@@ -49,9 +50,10 @@ namespace go
                 this.EnumValues = default;
                 this.Typedef = default;
                 this.BadPointer = default;
+                this.NotInHeap = default;
             }
 
-            public Type(long Size = default, long Align = default, ref ptr<TypeRepr> C = default, ast.Expr Go = default, map<@string, long> EnumValues = default, @string Typedef = default, bool BadPointer = default)
+            public Type(long Size = default, long Align = default, ref ptr<TypeRepr> C = default, ast.Expr Go = default, map<@string, long> EnumValues = default, @string Typedef = default, bool BadPointer = default, bool NotInHeap = default)
             {
                 this.Size = Size;
                 this.Align = Align;
@@ -60,6 +62,7 @@ namespace go
                 this.EnumValues = EnumValues;
                 this.Typedef = Typedef;
                 this.BadPointer = BadPointer;
+                this.NotInHeap = NotInHeap;
             }
 
             // Enable comparisons between nil and Type struct
@@ -82,7 +85,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Type Type_cast(dynamic value)
         {
-            return new Type(value.Size, value.Align, ref value.C, value.Go, value.EnumValues, value.Typedef, value.BadPointer);
+            return new Type(value.Size, value.Align, ref value.C, value.Go, value.EnumValues, value.Typedef, value.BadPointer, value.NotInHeap);
         }
     }
 }

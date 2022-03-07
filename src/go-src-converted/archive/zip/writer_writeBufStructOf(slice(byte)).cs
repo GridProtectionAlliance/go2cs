@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:13 UTC
+//     Generated on 2022 March 06 22:31:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,40 @@ namespace archive
     public static partial class zip_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct writeBuf
+        private partial struct writeBuf : ISlice
         {
             // Value of the writeBuf struct
             private readonly slice<byte> m_value;
+            
+            public Array Array => ((ISlice)m_value).Array;
+
+            public nint Low => ((ISlice)m_value).Low;
+
+            public nint High => ((ISlice)m_value).High;
+
+            public nint Capacity => ((ISlice)m_value).Capacity;
+
+            public nint Available => ((ISlice)m_value).Available;
+
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+            
+            public ref byte this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+            
+            public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public writeBuf(slice<byte> value) => m_value = value;
 

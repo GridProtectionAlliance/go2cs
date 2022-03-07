@@ -5,21 +5,18 @@
 // Package cmplx provides basic constants and mathematical functions for
 // complex numbers. Special case handling conforms to the C99 standard
 // Annex G IEC 60559-compatible complex arithmetic.
-// package cmplx -- go2cs converted at 2020 October 09 05:07:47 UTC
+// package cmplx -- go2cs converted at 2022 March 06 22:31:12 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
-// Original source: C:\Go\src\math\cmplx\abs.go
+// Original source: C:\Program Files\Go\src\math\cmplx\abs.go
 using math = go.math_package;
-using static go.builtin;
 
-namespace go {
-namespace math
-{
-    public static partial class cmplx_package
-    {
-        // Abs returns the absolute value (also called the modulus) of x.
-        public static double Abs(System.Numerics.Complex128 x)
-        {
-            return math.Hypot(real(x), imag(x));
-        }
-    }
-}}
+namespace go.math;
+
+public static partial class cmplx_package {
+
+    // Abs returns the absolute value (also called the modulus) of x.
+public static double Abs(System.Numerics.Complex128 x) {
+    return math.Hypot(real(x), imag(x));
+}
+
+} // end cmplx_package

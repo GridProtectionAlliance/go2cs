@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:34 UTC
+//     Generated on 2022 March 06 23:23:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using template = go.html.template_package;
@@ -59,9 +58,10 @@ namespace @internal
                 this.TextBody = default;
                 this.Top = default;
                 this.FlameGraph = default;
+                this.Configs = default;
             }
 
-            public webArgs(@string Title = default, slice<@string> Errors = default, long Total = default, slice<@string> SampleTypes = default, slice<@string> Legend = default, map<@string, @string> Help = default, slice<@string> Nodes = default, template.HTML HTMLBody = default, @string TextBody = default, slice<report.TextItem> Top = default, template.JS FlameGraph = default)
+            public webArgs(@string Title = default, slice<@string> Errors = default, long Total = default, slice<@string> SampleTypes = default, slice<@string> Legend = default, map<@string, @string> Help = default, slice<@string> Nodes = default, template.HTML HTMLBody = default, @string TextBody = default, slice<report.TextItem> Top = default, template.JS FlameGraph = default, slice<configMenuEntry> Configs = default)
             {
                 this.Title = Title;
                 this.Errors = Errors;
@@ -74,6 +74,7 @@ namespace @internal
                 this.TextBody = TextBody;
                 this.Top = Top;
                 this.FlameGraph = FlameGraph;
+                this.Configs = Configs;
             }
 
             // Enable comparisons between nil and webArgs struct
@@ -96,7 +97,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static webArgs webArgs_cast(dynamic value)
         {
-            return new webArgs(value.Title, value.Errors, value.Total, value.SampleTypes, value.Legend, value.Help, value.Nodes, value.HTMLBody, value.TextBody, value.Top, value.FlameGraph);
+            return new webArgs(value.Title, value.Errors, value.Total, value.SampleTypes, value.Legend, value.Help, value.Nodes, value.HTMLBody, value.TextBody, value.Top, value.FlameGraph, value.Configs);
         }
     }
 }}}}}}}

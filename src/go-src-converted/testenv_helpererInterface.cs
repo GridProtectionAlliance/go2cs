@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:27 UTC
+//     Generated on 2022 March 06 23:31:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
@@ -61,7 +60,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,7 +86,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HelperByPtr is null || !m_target_is_ptr)
@@ -96,12 +95,11 @@ namespace @internal
                     return;
                 }
 
-                s_HelperByPtr(m_target_ptr);
+                s_HelperByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static helperer()
@@ -112,12 +110,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Helper");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HelperByPtr = extensionMethod.CreateStaticDelegate(typeof(HelperByPtr)) as HelperByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Helper");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HelperByVal = extensionMethod.CreateStaticDelegate(typeof(HelperByVal)) as HelperByVal;
 
                 if (s_HelperByPtr is null && s_HelperByVal is null)

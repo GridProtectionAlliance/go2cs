@@ -4,23 +4,19 @@
 
 // This file contains the test for untagged struct literals.
 
-// package composite -- go2cs converted at 2020 October 09 06:05:08 UTC
+// package composite -- go2cs converted at 2022 March 06 23:35:18 UTC
 // import "cmd/vet/testdata/composite" ==> using composite = go.cmd.vet.testdata.composite_package
-// Original source: C:\Go\src\cmd\vet\testdata\composite\composite.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\composite\composite.go
 using flag = go.flag_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class composite_package
-    {
-        // Testing is awkward because we need to reference things from a separate package
-        // to trigger the warnings.
-        private static flag.Flag goodStructLiteral = new flag.Flag(Name:"Name",Usage:"Usage",);
+namespace go.cmd.vet.testdata;
 
-        private static flag.Flag badStructLiteral = new flag.Flag("Name","Usage",nil,"DefValue",);
-    }
-}}}}
+public static partial class composite_package {
+
+    // Testing is awkward because we need to reference things from a separate package
+    // to trigger the warnings.
+private static flag.Flag goodStructLiteral = new flag.Flag(Name:"Name",Usage:"Usage",);
+
+private static flag.Flag badStructLiteral = new flag.Flag("Name","Usage",nil,"DefValue",);
+
+} // end composite_package

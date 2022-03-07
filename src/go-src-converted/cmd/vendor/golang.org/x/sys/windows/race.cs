@@ -4,44 +4,34 @@
 
 // +build windows,race
 
-// package windows -- go2cs converted at 2020 October 09 06:00:50 UTC
+// package windows -- go2cs converted at 2022 March 06 23:30:34 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\race.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\race.go
 using runtime = go.runtime_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class windows_package
-    {
-        private static readonly var raceenabled = true;
+namespace go.cmd.vendor.golang.org.x.sys;
+
+public static partial class windows_package {
+
+private static readonly var raceenabled = true;
 
 
 
-        private static void raceAcquire(unsafe.Pointer addr)
-        {
-            runtime.RaceAcquire(addr);
-        }
+private static void raceAcquire(unsafe.Pointer addr) {
+    runtime.RaceAcquire(addr);
+}
 
-        private static void raceReleaseMerge(unsafe.Pointer addr)
-        {
-            runtime.RaceReleaseMerge(addr);
-        }
+private static void raceReleaseMerge(unsafe.Pointer addr) {
+    runtime.RaceReleaseMerge(addr);
+}
 
-        private static void raceReadRange(unsafe.Pointer addr, long len)
-        {
-            runtime.RaceReadRange(addr, len);
-        }
+private static void raceReadRange(unsafe.Pointer addr, nint len) {
+    runtime.RaceReadRange(addr, len);
+}
 
-        private static void raceWriteRange(unsafe.Pointer addr, long len)
-        {
-            runtime.RaceWriteRange(addr, len);
-        }
-    }
-}}}}}}
+private static void raceWriteRange(unsafe.Pointer addr, nint len) {
+    runtime.RaceWriteRange(addr, len);
+}
+
+} // end windows_package

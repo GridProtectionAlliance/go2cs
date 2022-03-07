@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:57 UTC
+//     Generated on 2022 March 06 22:41:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -37,14 +36,20 @@ namespace go
                 this.Pos = default;
                 this.Msg = default;
                 this.Soft = default;
+                this.go116code = default;
+                this.go116start = default;
+                this.go116end = default;
             }
 
-            public Error(ref ptr<token.FileSet> Fset = default, token.Pos Pos = default, @string Msg = default, bool Soft = default)
+            public Error(ref ptr<token.FileSet> Fset = default, token.Pos Pos = default, @string Msg = default, bool Soft = default, errorCode go116code = default, token.Pos go116start = default, token.Pos go116end = default)
             {
                 this.Fset = Fset;
                 this.Pos = Pos;
                 this.Msg = Msg;
                 this.Soft = Soft;
+                this.go116code = go116code;
+                this.go116start = go116start;
+                this.go116end = go116end;
             }
 
             // Enable comparisons between nil and Error struct
@@ -67,7 +72,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Error Error_cast(dynamic value)
         {
-            return new Error(ref value.Fset, value.Pos, value.Msg, value.Soft);
+            return new Error(ref value.Fset, value.Pos, value.Msg, value.Soft, value.go116code, value.go116start, value.go116end);
         }
     }
 }}

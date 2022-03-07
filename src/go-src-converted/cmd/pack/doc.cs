@@ -38,7 +38,7 @@ For the t command, the listing includes additional file metadata.
 For the x command, names are printed as files are extracted.
 
 */
-// package main -- go2cs converted at 2020 October 09 05:52:44 UTC
-// Original source: C:\Go\src\cmd\pack\doc.go
-    }
+// package main -- go2cs converted at 2022 March 06 23:22:37 UTC
+// Original source: C:\Program Files\Go\src\cmd\pack\doc.go
 
+} // end main_package

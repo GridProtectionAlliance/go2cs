@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:57 UTC
+//     Generated on 2022 March 06 23:17:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
 using scanner = go.go.scanner_package;
 using token = go.go.token_package;
-using ioutil = go.io.ioutil_package;
+using goroot = go.@internal.goroot_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
-using pathpkg = go.path_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
@@ -32,10 +33,18 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
+using imports = go.cmd.go.@internal.imports_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
 using modinfo = go.cmd.go.@internal.modinfo_package;
+using modload = go.cmd.go.@internal.modload_package;
 using par = go.cmd.go.@internal.par_package;
 using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
+using trace = go.cmd.go.@internal.trace_package;
+using sys = go.cmd.@internal.sys_package;
+using modfile = go.golang.org.x.mod.modfile_package;
+using module = go.golang.org.x.mod.module_package;
 using go;
 
 #nullable enable
@@ -64,6 +73,7 @@ namespace @internal
                 this.ConflictDir = default;
                 this.ForTest = default;
                 this.Export = default;
+                this.BuildID = default;
                 this.Module = default;
                 this.Match = default;
                 this.Goroot = default;
@@ -77,6 +87,8 @@ namespace @internal
                 this.CgoFiles = default;
                 this.CompiledGoFiles = default;
                 this.IgnoredGoFiles = default;
+                this.InvalidGoFiles = default;
+                this.IgnoredOtherFiles = default;
                 this.CFiles = default;
                 this.CXXFiles = default;
                 this.MFiles = default;
@@ -86,6 +98,8 @@ namespace @internal
                 this.SwigFiles = default;
                 this.SwigCXXFiles = default;
                 this.SysoFiles = default;
+                this.EmbedPatterns = default;
+                this.EmbedFiles = default;
                 this.CgoCFLAGS = default;
                 this.CgoCPPFLAGS = default;
                 this.CgoCXXFLAGS = default;
@@ -99,11 +113,15 @@ namespace @internal
                 this.DepsErrors = default;
                 this.TestGoFiles = default;
                 this.TestImports = default;
+                this.TestEmbedPatterns = default;
+                this.TestEmbedFiles = default;
                 this.XTestGoFiles = default;
                 this.XTestImports = default;
+                this.XTestEmbedPatterns = default;
+                this.XTestEmbedFiles = default;
             }
 
-            public PackagePublic(@string Dir = default, @string ImportPath = default, @string ImportComment = default, @string Name = default, @string Doc = default, @string Target = default, @string Shlib = default, @string Root = default, @string ConflictDir = default, @string ForTest = default, @string Export = default, ref ptr<modinfo.ModulePublic> Module = default, slice<@string> Match = default, bool Goroot = default, bool Standard = default, bool DepOnly = default, bool BinaryOnly = default, bool Incomplete = default, bool Stale = default, @string StaleReason = default, slice<@string> GoFiles = default, slice<@string> CgoFiles = default, slice<@string> CompiledGoFiles = default, slice<@string> IgnoredGoFiles = default, slice<@string> CFiles = default, slice<@string> CXXFiles = default, slice<@string> MFiles = default, slice<@string> HFiles = default, slice<@string> FFiles = default, slice<@string> SFiles = default, slice<@string> SwigFiles = default, slice<@string> SwigCXXFiles = default, slice<@string> SysoFiles = default, slice<@string> CgoCFLAGS = default, slice<@string> CgoCPPFLAGS = default, slice<@string> CgoCXXFLAGS = default, slice<@string> CgoFFLAGS = default, slice<@string> CgoLDFLAGS = default, slice<@string> CgoPkgConfig = default, slice<@string> Imports = default, map<@string, @string> ImportMap = default, slice<@string> Deps = default, ref ptr<PackageError> Error = default, slice<ptr<PackageError>> DepsErrors = default, slice<@string> TestGoFiles = default, slice<@string> TestImports = default, slice<@string> XTestGoFiles = default, slice<@string> XTestImports = default)
+            public PackagePublic(@string Dir = default, @string ImportPath = default, @string ImportComment = default, @string Name = default, @string Doc = default, @string Target = default, @string Shlib = default, @string Root = default, @string ConflictDir = default, @string ForTest = default, @string Export = default, @string BuildID = default, ref ptr<modinfo.ModulePublic> Module = default, slice<@string> Match = default, bool Goroot = default, bool Standard = default, bool DepOnly = default, bool BinaryOnly = default, bool Incomplete = default, bool Stale = default, @string StaleReason = default, slice<@string> GoFiles = default, slice<@string> CgoFiles = default, slice<@string> CompiledGoFiles = default, slice<@string> IgnoredGoFiles = default, slice<@string> InvalidGoFiles = default, slice<@string> IgnoredOtherFiles = default, slice<@string> CFiles = default, slice<@string> CXXFiles = default, slice<@string> MFiles = default, slice<@string> HFiles = default, slice<@string> FFiles = default, slice<@string> SFiles = default, slice<@string> SwigFiles = default, slice<@string> SwigCXXFiles = default, slice<@string> SysoFiles = default, slice<@string> EmbedPatterns = default, slice<@string> EmbedFiles = default, slice<@string> CgoCFLAGS = default, slice<@string> CgoCPPFLAGS = default, slice<@string> CgoCXXFLAGS = default, slice<@string> CgoFFLAGS = default, slice<@string> CgoLDFLAGS = default, slice<@string> CgoPkgConfig = default, slice<@string> Imports = default, map<@string, @string> ImportMap = default, slice<@string> Deps = default, ref ptr<PackageError> Error = default, slice<ptr<PackageError>> DepsErrors = default, slice<@string> TestGoFiles = default, slice<@string> TestImports = default, slice<@string> TestEmbedPatterns = default, slice<@string> TestEmbedFiles = default, slice<@string> XTestGoFiles = default, slice<@string> XTestImports = default, slice<@string> XTestEmbedPatterns = default, slice<@string> XTestEmbedFiles = default)
             {
                 this.Dir = Dir;
                 this.ImportPath = ImportPath;
@@ -116,6 +134,7 @@ namespace @internal
                 this.ConflictDir = ConflictDir;
                 this.ForTest = ForTest;
                 this.Export = Export;
+                this.BuildID = BuildID;
                 this.Module = Module;
                 this.Match = Match;
                 this.Goroot = Goroot;
@@ -129,6 +148,8 @@ namespace @internal
                 this.CgoFiles = CgoFiles;
                 this.CompiledGoFiles = CompiledGoFiles;
                 this.IgnoredGoFiles = IgnoredGoFiles;
+                this.InvalidGoFiles = InvalidGoFiles;
+                this.IgnoredOtherFiles = IgnoredOtherFiles;
                 this.CFiles = CFiles;
                 this.CXXFiles = CXXFiles;
                 this.MFiles = MFiles;
@@ -138,6 +159,8 @@ namespace @internal
                 this.SwigFiles = SwigFiles;
                 this.SwigCXXFiles = SwigCXXFiles;
                 this.SysoFiles = SysoFiles;
+                this.EmbedPatterns = EmbedPatterns;
+                this.EmbedFiles = EmbedFiles;
                 this.CgoCFLAGS = CgoCFLAGS;
                 this.CgoCPPFLAGS = CgoCPPFLAGS;
                 this.CgoCXXFLAGS = CgoCXXFLAGS;
@@ -151,8 +174,12 @@ namespace @internal
                 this.DepsErrors = DepsErrors;
                 this.TestGoFiles = TestGoFiles;
                 this.TestImports = TestImports;
+                this.TestEmbedPatterns = TestEmbedPatterns;
+                this.TestEmbedFiles = TestEmbedFiles;
                 this.XTestGoFiles = XTestGoFiles;
                 this.XTestImports = XTestImports;
+                this.XTestEmbedPatterns = XTestEmbedPatterns;
+                this.XTestEmbedFiles = XTestEmbedFiles;
             }
 
             // Enable comparisons between nil and PackagePublic struct
@@ -175,7 +202,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static PackagePublic PackagePublic_cast(dynamic value)
         {
-            return new PackagePublic(value.Dir, value.ImportPath, value.ImportComment, value.Name, value.Doc, value.Target, value.Shlib, value.Root, value.ConflictDir, value.ForTest, value.Export, ref value.Module, value.Match, value.Goroot, value.Standard, value.DepOnly, value.BinaryOnly, value.Incomplete, value.Stale, value.StaleReason, value.GoFiles, value.CgoFiles, value.CompiledGoFiles, value.IgnoredGoFiles, value.CFiles, value.CXXFiles, value.MFiles, value.HFiles, value.FFiles, value.SFiles, value.SwigFiles, value.SwigCXXFiles, value.SysoFiles, value.CgoCFLAGS, value.CgoCPPFLAGS, value.CgoCXXFLAGS, value.CgoFFLAGS, value.CgoLDFLAGS, value.CgoPkgConfig, value.Imports, value.ImportMap, value.Deps, ref value.Error, value.DepsErrors, value.TestGoFiles, value.TestImports, value.XTestGoFiles, value.XTestImports);
+            return new PackagePublic(value.Dir, value.ImportPath, value.ImportComment, value.Name, value.Doc, value.Target, value.Shlib, value.Root, value.ConflictDir, value.ForTest, value.Export, value.BuildID, ref value.Module, value.Match, value.Goroot, value.Standard, value.DepOnly, value.BinaryOnly, value.Incomplete, value.Stale, value.StaleReason, value.GoFiles, value.CgoFiles, value.CompiledGoFiles, value.IgnoredGoFiles, value.InvalidGoFiles, value.IgnoredOtherFiles, value.CFiles, value.CXXFiles, value.MFiles, value.HFiles, value.FFiles, value.SFiles, value.SwigFiles, value.SwigCXXFiles, value.SysoFiles, value.EmbedPatterns, value.EmbedFiles, value.CgoCFLAGS, value.CgoCPPFLAGS, value.CgoCXXFLAGS, value.CgoFFLAGS, value.CgoLDFLAGS, value.CgoPkgConfig, value.Imports, value.ImportMap, value.Deps, ref value.Error, value.DepsErrors, value.TestGoFiles, value.TestImports, value.TestEmbedPatterns, value.TestEmbedFiles, value.XTestGoFiles, value.XTestImports, value.XTestEmbedPatterns, value.XTestEmbedFiles);
         }
     }
 }}}}

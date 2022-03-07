@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:42 UTC
+//     Generated on 2022 March 06 22:19:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using bytes = go.bytes_package;
+using sha256 = go.crypto.sha256_package;
 using pem = go.encoding.pem_package;
 using errors = go.errors_package;
 using runtime = go.runtime_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -31,16 +33,16 @@ namespace crypto
             // Constructors
             public CertPool(NilType _)
             {
-                this.bySubjectKeyId = default;
                 this.byName = default;
-                this.certs = default;
+                this.lazyCerts = default;
+                this.haveSum = default;
             }
 
-            public CertPool(map<@string, slice<long>> bySubjectKeyId = default, map<@string, slice<long>> byName = default, slice<ptr<Certificate>> certs = default)
+            public CertPool(map<@string, slice<nint>> byName = default, slice<lazyCert> lazyCerts = default, map<sum224, bool> haveSum = default)
             {
-                this.bySubjectKeyId = bySubjectKeyId;
                 this.byName = byName;
-                this.certs = certs;
+                this.lazyCerts = lazyCerts;
+                this.haveSum = haveSum;
             }
 
             // Enable comparisons between nil and CertPool struct
@@ -63,7 +65,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static CertPool CertPool_cast(dynamic value)
         {
-            return new CertPool(value.bySubjectKeyId, value.byName, value.certs);
+            return new CertPool(value.byName, value.lazyCerts, value.haveSum);
         }
     }
 }}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:57 UTC
+//     Generated on 2022 March 06 23:17:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,17 +13,18 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using build = go.go.build_package;
 using scanner = go.go.scanner_package;
 using token = go.go.token_package;
-using ioutil = go.io.ioutil_package;
+using goroot = go.@internal.goroot_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
-using pathpkg = go.path_package;
+using path = go.path_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
 using sort = go.sort_package;
@@ -33,10 +34,18 @@ using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
+using imports = go.cmd.go.@internal.imports_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
 using modinfo = go.cmd.go.@internal.modinfo_package;
+using modload = go.cmd.go.@internal.modload_package;
 using par = go.cmd.go.@internal.par_package;
 using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
+using trace = go.cmd.go.@internal.trace_package;
+using sys = go.cmd.@internal.sys_package;
+using modfile = go.golang.org.x.mod.modfile_package;
+using module = go.golang.org.x.mod.module_package;
 using go;
 
 #nullable enable
@@ -74,7 +83,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -100,36 +109,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ImportPathByPtr is null || !m_target_is_ptr)
                     return s_ImportPathByVal!(target);
 
-                return s_ImportPathByPtr(m_target_ptr);
-            }
-
-            private delegate @string ErrorByPtr(ptr<T> value);
-            private delegate @string ErrorByVal(T value);
-
-            private static readonly ErrorByPtr? s_ErrorByPtr;
-            private static readonly ErrorByVal? s_ErrorByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Error()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ErrorByPtr is null || !m_target_is_ptr)
-                    return s_ErrorByVal!(target);
-
-                return s_ErrorByPtr(m_target_ptr);
+                return s_ImportPathByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ImportPathError()
@@ -140,29 +129,16 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ImportPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportPathByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportPathByPtr)) as ImportPathByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ImportPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportPathByVal = extensionMethod.CreateStaticDelegate(typeof(ImportPathByVal)) as ImportPathByVal;
 
                 if (s_ImportPathByPtr is null && s_ImportPathByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ImportPathError.ImportPath method", new Exception("ImportPath"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-
-                if (s_ErrorByPtr is null && s_ErrorByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ImportPathError.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

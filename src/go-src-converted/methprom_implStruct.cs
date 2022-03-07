@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:47 UTC
+//     Generated on 2022 March 06 23:33:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
                 this.magic = default;
             }
 
-            public impl(long magic = default)
+            public impl(nint magic = default)
             {
                 this.magic = magic;
             }

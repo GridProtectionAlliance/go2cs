@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2020 October 09 04:53:02 UTC
+// package rand -- go2cs converted at 2022 March 06 22:17:18 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
-// Original source: C:\Go\src\crypto\rand\rand_freebsd.go
+// Original source: C:\Program Files\Go\src\crypto\rand\rand_freebsd.go
 
-using static go.builtin;
 
-namespace go {
-namespace crypto
-{
-    public static partial class rand_package
-    {
-        // maxGetRandomRead is the maximum number of bytes to ask for in one call to the
-        // getrandom() syscall. In FreeBSD at most 256 bytes will be returned per call.
-        private static readonly long maxGetRandomRead = (long)1L << (int)(8L);
+namespace go.crypto;
 
-    }
-}}
+public static partial class rand_package {
+
+    // maxGetRandomRead is the maximum number of bytes to ask for in one call to the
+    // getrandom() syscall. In FreeBSD at most 256 bytes will be returned per call.
+private static readonly nint maxGetRandomRead = 1 << 8;
+
+
+} // end rand_package

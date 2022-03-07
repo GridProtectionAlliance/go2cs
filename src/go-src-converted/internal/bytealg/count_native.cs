@@ -2,56 +2,43 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build amd64 arm arm64 ppc64le ppc64 s390x
+//go:build amd64 || arm || arm64 || ppc64le || ppc64 || riscv64 || s390x
+// +build amd64 arm arm64 ppc64le ppc64 riscv64 s390x
 
-// package bytealg -- go2cs converted at 2020 October 09 04:45:56 UTC
+// package bytealg -- go2cs converted at 2022 March 06 22:30:04 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
-// Original source: C:\Go\src\internal\bytealg\count_native.go
+// Original source: C:\Program Files\Go\src\internal\bytealg\count_native.go
 
-using static go.builtin;
 
-namespace go {
-namespace @internal
-{
-    public static partial class bytealg_package
-    {
-        //go:noescape
-        public static long Count(slice<byte> b, byte c)
-;
+namespace go.@internal;
 
-        //go:noescape
-        public static long CountString(@string s, byte c)
-;
+public static partial class bytealg_package {
 
-        // A backup implementation to use by assembly.
-        private static long countGeneric(slice<byte> b, byte c)
-        {
-            long n = 0L;
-            foreach (var (_, x) in b)
-            {
-                if (x == c)
-                {>>MARKER:FUNCTION_CountString_BLOCK_PREFIX<<
-                    n++;
-                }
+    //go:noescape
+public static nint Count(slice<byte> b, byte c);
 
-            }
-            return n;
+//go:noescape
+public static nint CountString(@string s, byte c);
 
+// A backup implementation to use by assembly.
+private static nint countGeneric(slice<byte> b, byte c) {
+    nint n = 0;
+    foreach (var (_, x) in b) {
+        if (x == c) {>>MARKER:FUNCTION_CountString_BLOCK_PREFIX<<
+            n++;
         }
-        private static long countGenericString(@string s, byte c)
-        {
-            long n = 0L;
-            for (long i = 0L; i < len(s); i++)
-            {>>MARKER:FUNCTION_Count_BLOCK_PREFIX<<
-                if (s[i] == c)
-                {
-                    n++;
-                }
+    }    return n;
 
-            }
-
-            return n;
-
+}
+private static nint countGenericString(@string s, byte c) {
+    nint n = 0;
+    for (nint i = 0; i < len(s); i++) {>>MARKER:FUNCTION_Count_BLOCK_PREFIX<<
+        if (s[i] == c) {
+            n++;
         }
     }
-}}
+    return n;
+
+}
+
+} // end bytealg_package

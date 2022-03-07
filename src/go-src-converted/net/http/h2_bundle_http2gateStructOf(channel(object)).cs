@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:48 UTC
+//     Generated on 2022 March 06 22:21:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,30 @@ namespace net
     public static partial class http_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct http2gate
+        private partial struct http2gate : IChannel
         {
             // Value of the http2gate struct
             private readonly channel<object> m_value;
+            
+            public nint Capacity => m_value.Capacity;
+
+            public nint Length => m_value.Length;
+
+            public bool SendIsReady => m_value.SendIsReady;
+
+            public bool ReceiveIsReady => m_value.ReceiveIsReady;
+
+            void Send(object value) => m_value.Send(value);
+
+            object Receive() => m_value.Receive();
+
+            bool Sent(object value) => m_value.Sent(value);
+
+            bool Received(out object value) => m_values.Received(out value);
+
+            void Close() => m_value.Close();
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
 
             public http2gate(channel<object> value) => m_value = value;
 

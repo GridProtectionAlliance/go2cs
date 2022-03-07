@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:30 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,22 +35,20 @@ namespace sys
                 this.Msglen = default;
                 this.Version = default;
                 this.Type = default;
-                this.Addrs = default;
-                this.Flags = default;
                 this.Index = default;
-                this._ = default;
+                this.Flags = default;
+                this.Addrs = default;
                 this.Data = default;
             }
 
-            public IfMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, int Addrs = default, int Flags = default, ushort Index = default, array<byte> _ = default, IfData Data = default)
+            public IfMsghdr(ushort Msglen = default, byte Version = default, byte Type = default, ushort Index = default, int Flags = default, int Addrs = default, IfData Data = default)
             {
                 this.Msglen = Msglen;
                 this.Version = Version;
                 this.Type = Type;
-                this.Addrs = Addrs;
-                this.Flags = Flags;
                 this.Index = Index;
-                this._ = _;
+                this.Flags = Flags;
+                this.Addrs = Addrs;
                 this.Data = Data;
             }
 
@@ -74,7 +72,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static IfMsghdr IfMsghdr_cast(dynamic value)
         {
-            return new IfMsghdr(value.Msglen, value.Version, value.Type, value.Addrs, value.Flags, value.Index, value._, value.Data);
+            return new IfMsghdr(value.Msglen, value.Version, value.Type, value.Index, value.Flags, value.Addrs, value.Data);
         }
     }
 }}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:56 UTC
+//     Generated on 2022 March 06 22:50:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
+using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
 using fmt = go.fmt_package;
+using strings = go.strings_package;
 using go;
 
 #nullable enable
@@ -36,7 +39,7 @@ namespace @internal
                 this.regs = default;
             }
 
-            public inputInfo(long idx = default, regMask regs = default)
+            public inputInfo(nint idx = default, regMask regs = default)
             {
                 this.idx = idx;
                 this.regs = regs;

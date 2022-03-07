@@ -4,22 +4,17 @@
 
 // +build go1.12
 
-// package route -- go2cs converted at 2020 October 09 04:51:41 UTC
+// package route -- go2cs converted at 2022 March 06 22:15:58 UTC
 // import "golang.org/x/net/route" ==> using route = go.golang.org.x.net.route_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\route\syscall_go1_12_darwin.go
 using _@unsafe_ = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class route_package
-    { // for linkname
+namespace go.golang.org.x.net;
 
-        //go:linkname sysctl syscall.sysctl
-        private static error sysctl(slice<int> mib, ptr<byte> old, ptr<System.UIntPtr> oldlen, ptr<byte> @new, System.UIntPtr newlen)
-;
-    }
-}}}}
+public static partial class route_package {
+ // for linkname
+
+    //go:linkname sysctl syscall.sysctl
+private static error sysctl(slice<int> mib, ptr<byte> old, ptr<System.UIntPtr> oldlen, ptr<byte> @new, System.UIntPtr newlen);
+
+} // end route_package

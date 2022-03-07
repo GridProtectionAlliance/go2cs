@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:54 UTC
+//     Generated on 2022 March 06 22:22:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -68,7 +67,7 @@ namespace net
                 this.contentLength = default;
             }
 
-            public http2writeResHeaders(uint streamID = default, long httpResCode = default, Header h = default, slice<@string> trailers = default, bool endStream = default, @string date = default, @string contentType = default, @string contentLength = default)
+            public http2writeResHeaders(uint streamID = default, nint httpResCode = default, Header h = default, slice<@string> trailers = default, bool endStream = default, @string date = default, @string contentType = default, @string contentLength = default)
             {
                 this.streamID = streamID;
                 this.httpResCode = httpResCode;

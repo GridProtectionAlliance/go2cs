@@ -2,33 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build (!linux && !freebsd && !darwin) || !cgo
 // +build !linux,!freebsd,!darwin !cgo
 
-// package plugin -- go2cs converted at 2020 October 09 06:06:13 UTC
+// package plugin -- go2cs converted at 2022 March 06 23:36:30 UTC
 // import "plugin" ==> using plugin = go.plugin_package
-// Original source: C:\Go\src\plugin\plugin_stubs.go
+// Original source: C:\Program Files\Go\src\plugin\plugin_stubs.go
 using errors = go.errors_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class plugin_package
-    {
-        private static (Symbol, error) lookup(ptr<Plugin> _addr_p, @string symName)
-        {
-            Symbol _p0 = default;
-            error _p0 = default!;
-            ref Plugin p = ref _addr_p.val;
+namespace go;
 
-            return (null, error.As(errors.New("plugin: not implemented"))!);
-        }
+public static partial class plugin_package {
 
-        private static (ptr<Plugin>, error) open(@string name)
-        {
-            ptr<Plugin> _p0 = default!;
-            error _p0 = default!;
+private static (Symbol, error) lookup(ptr<Plugin> _addr_p, @string symName) {
+    Symbol _p0 = default;
+    error _p0 = default!;
+    ref Plugin p = ref _addr_p.val;
 
-            return (_addr_null!, error.As(errors.New("plugin: not implemented"))!);
-        }
-    }
+    return (null, error.As(errors.New("plugin: not implemented"))!);
 }
+
+private static (ptr<Plugin>, error) open(@string name) {
+    ptr<Plugin> _p0 = default!;
+    error _p0 = default!;
+
+    return (_addr_null!, error.As(errors.New("plugin: not implemented"))!);
+}
+
+} // end plugin_package

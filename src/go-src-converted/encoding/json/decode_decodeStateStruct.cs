@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:42 UTC
+//     Generated on 2022 March 06 22:24:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
 using fmt = go.fmt_package;
@@ -41,17 +40,19 @@ namespace encoding
                 this.off = default;
                 this.opcode = default;
                 this.scan = default;
+                this.errorContext = default;
                 this.savedError = default;
                 this.useNumber = default;
                 this.disallowUnknownFields = default;
             }
 
-            public decodeState(slice<byte> data = default, long off = default, long opcode = default, scanner scan = default, error savedError = default, bool useNumber = default, bool disallowUnknownFields = default)
+            public decodeState(slice<byte> data = default, nint off = default, nint opcode = default, scanner scan = default, ref ptr<errorContext> errorContext = default, error savedError = default, bool useNumber = default, bool disallowUnknownFields = default)
             {
                 this.data = data;
                 this.off = off;
                 this.opcode = opcode;
                 this.scan = scan;
+                this.errorContext = errorContext;
                 this.savedError = savedError;
                 this.useNumber = useNumber;
                 this.disallowUnknownFields = disallowUnknownFields;
@@ -77,7 +78,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static decodeState decodeState_cast(dynamic value)
         {
-            return new decodeState(value.data, value.off, value.opcode, value.scan, value.savedError, value.useNumber, value.disallowUnknownFields);
+            return new decodeState(value.data, value.off, value.opcode, value.scan, ref value.errorContext, value.savedError, value.useNumber, value.disallowUnknownFields);
         }
     }
 }}

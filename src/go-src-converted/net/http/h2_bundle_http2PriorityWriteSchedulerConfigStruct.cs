@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:54 UTC
+//     Generated on 2022 March 06 22:22:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -63,7 +62,7 @@ namespace net
                 this.ThrottleOutOfOrderWrites = default;
             }
 
-            public http2PriorityWriteSchedulerConfig(long MaxClosedNodesInTree = default, long MaxIdleNodesInTree = default, bool ThrottleOutOfOrderWrites = default)
+            public http2PriorityWriteSchedulerConfig(nint MaxClosedNodesInTree = default, nint MaxIdleNodesInTree = default, bool ThrottleOutOfOrderWrites = default)
             {
                 this.MaxClosedNodesInTree = MaxClosedNodesInTree;
                 this.MaxIdleNodesInTree = MaxIdleNodesInTree;

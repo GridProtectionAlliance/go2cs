@@ -6,145 +6,129 @@
 // s390x instruction set, to minimize its interaction
 // with the core of the assembler.
 
-// package arch -- go2cs converted at 2020 October 09 05:23:11 UTC
+// package arch -- go2cs converted at 2022 March 06 22:46:39 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
-// Original source: C:\Go\src\cmd\asm\internal\arch\s390x.go
+// Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\s390x.go
 using s390x = go.cmd.@internal.obj.s390x_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace asm {
-namespace @internal
-{
-    public static partial class arch_package
-    {
-        private static bool jumpS390x(@string word)
-        {
-            switch (word)
-            {
-                case "BRC": 
+namespace go.cmd.asm.@internal;
 
-                case "BC": 
+public static partial class arch_package {
 
-                case "BCL": 
+private static bool jumpS390x(@string word) {
+    switch (word) {
+        case "BRC": 
 
-                case "BEQ": 
+        case "BC": 
 
-                case "BGE": 
+        case "BCL": 
 
-                case "BGT": 
+        case "BEQ": 
 
-                case "BL": 
+        case "BGE": 
 
-                case "BLE": 
+        case "BGT": 
 
-                case "BLEU": 
+        case "BL": 
 
-                case "BLT": 
+        case "BLE": 
 
-                case "BLTU": 
+        case "BLEU": 
 
-                case "BNE": 
+        case "BLT": 
 
-                case "BR": 
+        case "BLTU": 
 
-                case "BVC": 
+        case "BNE": 
 
-                case "BVS": 
+        case "BR": 
 
-                case "BRCT": 
+        case "BVC": 
 
-                case "BRCTG": 
+        case "BVS": 
 
-                case "CMPBEQ": 
+        case "BRCT": 
 
-                case "CMPBGE": 
+        case "BRCTG": 
 
-                case "CMPBGT": 
+        case "CMPBEQ": 
 
-                case "CMPBLE": 
+        case "CMPBGE": 
 
-                case "CMPBLT": 
+        case "CMPBGT": 
 
-                case "CMPBNE": 
+        case "CMPBLE": 
 
-                case "CMPUBEQ": 
+        case "CMPBLT": 
 
-                case "CMPUBGE": 
+        case "CMPBNE": 
 
-                case "CMPUBGT": 
+        case "CMPUBEQ": 
 
-                case "CMPUBLE": 
+        case "CMPUBGE": 
 
-                case "CMPUBLT": 
+        case "CMPUBGT": 
 
-                case "CMPUBNE": 
+        case "CMPUBLE": 
 
-                case "CRJ": 
+        case "CMPUBLT": 
 
-                case "CGRJ": 
+        case "CMPUBNE": 
 
-                case "CLRJ": 
+        case "CRJ": 
 
-                case "CLGRJ": 
+        case "CGRJ": 
 
-                case "CIJ": 
+        case "CLRJ": 
 
-                case "CGIJ": 
+        case "CLGRJ": 
 
-                case "CLIJ": 
+        case "CIJ": 
 
-                case "CLGIJ": 
+        case "CGIJ": 
 
-                case "CALL": 
+        case "CLIJ": 
 
-                case "JMP": 
-                    return true;
-                    break;
-            }
-            return false;
+        case "CLGIJ": 
 
-        }
+        case "CALL": 
 
-        private static (short, bool) s390xRegisterNumber(@string name, short n)
-        {
-            short _p0 = default;
-            bool _p0 = default;
-
-            switch (name)
-            {
-                case "AR": 
-                    if (0L <= n && n <= 15L)
-                    {
-                        return (s390x.REG_AR0 + n, true);
-                    }
-
-                    break;
-                case "F": 
-                    if (0L <= n && n <= 15L)
-                    {
-                        return (s390x.REG_F0 + n, true);
-                    }
-
-                    break;
-                case "R": 
-                    if (0L <= n && n <= 15L)
-                    {
-                        return (s390x.REG_R0 + n, true);
-                    }
-
-                    break;
-                case "V": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (s390x.REG_V0 + n, true);
-                    }
-
-                    break;
-            }
-            return (0L, false);
-
-        }
+        case "JMP": 
+            return true;
+            break;
     }
-}}}}
+    return false;
+
+}
+
+private static (short, bool) s390xRegisterNumber(@string name, short n) {
+    short _p0 = default;
+    bool _p0 = default;
+
+    switch (name) {
+        case "AR": 
+            if (0 <= n && n <= 15) {
+                return (s390x.REG_AR0 + n, true);
+            }
+            break;
+        case "F": 
+            if (0 <= n && n <= 15) {
+                return (s390x.REG_F0 + n, true);
+            }
+            break;
+        case "R": 
+            if (0 <= n && n <= 15) {
+                return (s390x.REG_R0 + n, true);
+            }
+            break;
+        case "V": 
+            if (0 <= n && n <= 31) {
+                return (s390x.REG_V0 + n, true);
+            }
+            break;
+    }
+    return (0, false);
+
+}
+
+} // end arch_package

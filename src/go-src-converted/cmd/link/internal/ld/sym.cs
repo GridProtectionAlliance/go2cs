@@ -29,87 +29,80 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2020 October 09 05:50:25 UTC
+// package ld -- go2cs converted at 2022 March 06 23:22:19 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
-// Original source: C:\Go\src\cmd\link\internal\ld\sym.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\ld\sym.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using buildcfg = go.@internal.buildcfg_package;
 using log = go.log_package;
 using runtime = go.runtime_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class ld_package
-    {
-        private static ptr<Link> linknew(ptr<sys.Arch> _addr_arch)
-        {
-            ref sys.Arch arch = ref _addr_arch.val;
 
-            loader.ErrorReporter ler = new loader.ErrorReporter(AfterErrorAction:afterErrorAction);
-            ptr<Link> ctxt = addr(new Link(Target:Target{Arch:arch},Syms:sym.NewSymbols(),outSem:make(chanint,2*runtime.GOMAXPROCS(0)),Out:NewOutBuf(arch),LibraryByPkg:make(map[string]*sym.Library),numelfsym:1,ErrorReporter:ErrorReporter{ErrorReporter:ler},));
+namespace go.cmd.link.@internal;
 
-            if (objabi.GOARCH != arch.Name)
-            {
-                log.Fatalf("invalid objabi.GOARCH %s (want %s)", objabi.GOARCH, arch.Name);
-            }
-            AtExit(() =>
-            {
-                if (nerrors > 0L)
-                {
-                    ctxt.Out.Close();
-                    mayberemoveoutfile();
-                }
-            });
+public static partial class ld_package {
 
-            return _addr_ctxt!;
+private static ptr<Link> linknew(ptr<sys.Arch> _addr_arch) {
+    ref sys.Arch arch = ref _addr_arch.val;
 
-        }
+    loader.ErrorReporter ler = new loader.ErrorReporter(AfterErrorAction:afterErrorAction);
+    ptr<Link> ctxt = addr(new Link(Target:Target{Arch:arch},version:sym.SymVerStatic,outSem:make(chanint,2*runtime.GOMAXPROCS(0)),Out:NewOutBuf(arch),LibraryByPkg:make(map[string]*sym.Library),numelfsym:1,ErrorReporter:ErrorReporter{ErrorReporter:ler},generatorSyms:make(map[loader.Sym]generatorFunc),));
 
-        // computeTLSOffset records the thread-local storage offset.
-        // Not used for Android where the TLS offset is determined at runtime.
-        private static void computeTLSOffset(this ptr<Link> _addr_ctxt)
-        {
-            ref Link ctxt = ref _addr_ctxt.val;
-
-
-            if (ctxt.HeadType == objabi.Hplan9 || ctxt.HeadType == objabi.Hwindows || ctxt.HeadType == objabi.Hjs || ctxt.HeadType == objabi.Haix) 
-                break;
-            else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd || ctxt.HeadType == objabi.Hdragonfly || ctxt.HeadType == objabi.Hsolaris) 
-                /*
-                         * ELF uses TLS offset negative from FS.
-                         * Translate 0(FS) and 8(FS) into -16(FS) and -8(FS).
-                         * Known to low-level assembly in package runtime and runtime/cgo.
-                         */
-                ctxt.Tlsoffset = -1L * ctxt.Arch.PtrSize;
-            else if (ctxt.HeadType == objabi.Hdarwin) 
-                /*
-                         * OS X system constants - offset from 0(GS) to our TLS.
-                         */
-
-                if (ctxt.Arch.Family == sys.AMD64) 
-                    ctxt.Tlsoffset = 0x30UL;
-                else if (ctxt.Arch.Family == sys.ARM64) 
-                    ctxt.Tlsoffset = 0L; // dummy value, not needed
-                else 
-                    log.Fatalf("unknown thread-local storage offset for darwin/%s", ctxt.Arch.Name);
-
-                    /*
-                                 * For x86, Apple has reserved a slot in the TLS for Go. See issue 23617.
-                                 * That slot is at offset 0x30 on amd64.
-                                 * The slot will hold the G pointer.
-                                 * These constants should match those in runtime/sys_darwin_amd64.s
-                                 * and runtime/cgo/gcc_darwin_amd64.c.
-                                 */
-                            else 
-                log.Fatalf("unknown thread-local storage offset for %v", ctxt.HeadType);
-            
-        }
+    if (buildcfg.GOARCH != arch.Name) {
+        log.Fatalf("invalid buildcfg.GOARCH %s (want %s)", buildcfg.GOARCH, arch.Name);
     }
-}}}}
+    AtExit(() => {
+        if (nerrors > 0) {
+            ctxt.Out.Close();
+            mayberemoveoutfile();
+        }
+    });
+
+    return _addr_ctxt!;
+
+}
+
+// computeTLSOffset records the thread-local storage offset.
+// Not used for Android where the TLS offset is determined at runtime.
+private static void computeTLSOffset(this ptr<Link> _addr_ctxt) {
+    ref Link ctxt = ref _addr_ctxt.val;
+
+
+    if (ctxt.HeadType == objabi.Hplan9 || ctxt.HeadType == objabi.Hwindows || ctxt.HeadType == objabi.Hjs || ctxt.HeadType == objabi.Haix) 
+        break;
+    else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd || ctxt.HeadType == objabi.Hdragonfly || ctxt.HeadType == objabi.Hsolaris) 
+        /*
+                 * ELF uses TLS offset negative from FS.
+                 * Translate 0(FS) and 8(FS) into -16(FS) and -8(FS).
+                 * Known to low-level assembly in package runtime and runtime/cgo.
+                 */
+        ctxt.Tlsoffset = -1 * ctxt.Arch.PtrSize;
+    else if (ctxt.HeadType == objabi.Hdarwin) 
+        /*
+                 * OS X system constants - offset from 0(GS) to our TLS.
+                 */
+
+        if (ctxt.Arch.Family == sys.AMD64) 
+            ctxt.Tlsoffset = 0x30;
+        else if (ctxt.Arch.Family == sys.ARM64) 
+            ctxt.Tlsoffset = 0; // dummy value, not needed
+        else 
+            log.Fatalf("unknown thread-local storage offset for darwin/%s", ctxt.Arch.Name);
+
+            /*
+                         * For x86, Apple has reserved a slot in the TLS for Go. See issue 23617.
+                         * That slot is at offset 0x30 on amd64.
+                         * The slot will hold the G pointer.
+                         * These constants should match those in runtime/sys_darwin_amd64.s
+                         * and runtime/cgo/gcc_darwin_amd64.c.
+                         */
+            else 
+        log.Fatalf("unknown thread-local storage offset for %v", ctxt.HeadType);
+    
+}
+
+} // end ld_package

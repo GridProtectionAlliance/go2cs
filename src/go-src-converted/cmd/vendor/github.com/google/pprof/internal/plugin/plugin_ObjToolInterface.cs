@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:41 UTC
+//     Generated on 2022 March 06 23:23:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -59,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,36 +84,36 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, file, start, limit, offset);
 
-                return s_OpenByPtr(m_target_ptr, file, start, limit, offset);
+                return s_OpenByPtr(m_target_ptr!, file, start, limit, offset);
             }
 
-            private delegate (slice<Inst>, error) DisasmByPtr(ptr<T> value, @string file, ulong start, ulong end);
-            private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end);
+            private delegate (slice<Inst>, error) DisasmByPtr(ptr<T> value, @string file, ulong start, ulong end, bool intelSyntax);
+            private delegate (slice<Inst>, error) DisasmByVal(T value, @string file, ulong start, ulong end, bool intelSyntax);
 
             private static readonly DisasmByPtr? s_DisasmByPtr;
             private static readonly DisasmByVal? s_DisasmByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<Inst>, error) Disasm(@string file, ulong start, ulong end)
+            public (slice<Inst>, error) Disasm(@string file, ulong start, ulong end, bool intelSyntax)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DisasmByPtr is null || !m_target_is_ptr)
-                    return s_DisasmByVal!(target, file, start, end);
+                    return s_DisasmByVal!(target, file, start, end, intelSyntax);
 
-                return s_DisasmByPtr(m_target_ptr, file, start, end);
+                return s_DisasmByPtr(m_target_ptr!, file, start, end, intelSyntax);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ObjTool()
@@ -125,12 +124,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
                 if (s_OpenByPtr is null && s_OpenByVal is null)
@@ -138,12 +137,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Disasm");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DisasmByPtr = extensionMethod.CreateStaticDelegate(typeof(DisasmByPtr)) as DisasmByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Disasm");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DisasmByVal = extensionMethod.CreateStaticDelegate(typeof(DisasmByVal)) as DisasmByVal;
 
                 if (s_DisasmByPtr is null && s_DisasmByVal is null)

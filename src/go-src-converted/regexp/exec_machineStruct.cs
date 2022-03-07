@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:36 UTC
+//     Generated on 2022 March 06 22:23:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using syntax = go.regexp.syntax_package;
 using sync = go.sync_package;
@@ -39,7 +38,7 @@ namespace go
                 this.inputs = default;
             }
 
-            public machine(ref ptr<Regexp> re = default, ref ptr<syntax.Prog> p = default, queue q0 = default, queue q1 = default, slice<ptr<thread>> pool = default, bool matched = default, slice<long> matchcap = default, inputs inputs = default)
+            public machine(ref ptr<Regexp> re = default, ref ptr<syntax.Prog> p = default, queue q0 = default, queue q1 = default, slice<ptr<thread>> pool = default, bool matched = default, slice<nint> matchcap = default, inputs inputs = default)
             {
                 this.re = re;
                 this.p = p;

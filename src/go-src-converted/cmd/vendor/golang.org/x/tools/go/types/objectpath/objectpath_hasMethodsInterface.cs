@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:03 UTC
+//     Generated on 2022 March 06 23:35:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -59,7 +58,7 @@ namespace types
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,47 +73,47 @@ namespace types
                 m_target_is_ptr = true;
             }
 
-            private delegate long MethodByPtr(ptr<T> value, long _p0);
-            private delegate long MethodByVal(T value, long _p0);
+            private delegate nint MethodByPtr(ptr<T> value, nint _p0);
+            private delegate nint MethodByVal(T value, nint _p0);
 
             private static readonly MethodByPtr? s_MethodByPtr;
             private static readonly MethodByVal? s_MethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Method(long _p0)
+            public nint Method(nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MethodByPtr is null || !m_target_is_ptr)
                     return s_MethodByVal!(target, _p0);
 
-                return s_MethodByPtr(m_target_ptr, _p0);
+                return s_MethodByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate long NumMethodsByPtr(ptr<T> value);
-            private delegate long NumMethodsByVal(T value);
+            private delegate nint NumMethodsByPtr(ptr<T> value);
+            private delegate nint NumMethodsByVal(T value);
 
             private static readonly NumMethodsByPtr? s_NumMethodsByPtr;
             private static readonly NumMethodsByVal? s_NumMethodsByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long NumMethods()
+            public nint NumMethods()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumMethodsByPtr is null || !m_target_is_ptr)
                     return s_NumMethodsByVal!(target);
 
-                return s_NumMethodsByPtr(m_target_ptr);
+                return s_NumMethodsByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static hasMethods()
@@ -125,12 +124,12 @@ namespace types
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Method");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByPtr = extensionMethod.CreateStaticDelegate(typeof(MethodByPtr)) as MethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Method");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByVal)) as MethodByVal;
 
                 if (s_MethodByPtr is null && s_MethodByVal is null)
@@ -138,12 +137,12 @@ namespace types
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumMethods");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumMethodsByPtr = extensionMethod.CreateStaticDelegate(typeof(NumMethodsByPtr)) as NumMethodsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumMethods");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumMethodsByVal = extensionMethod.CreateStaticDelegate(typeof(NumMethodsByVal)) as NumMethodsByVal;
 
                 if (s_NumMethodsByPtr is null && s_NumMethodsByVal is null)

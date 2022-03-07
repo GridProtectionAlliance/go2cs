@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:42 UTC
+//     Generated on 2022 March 06 22:50:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using @base = go.cmd.compile.@internal.@base_package;
 using types = go.cmd.compile.@internal.types_package;
 using src = go.cmd.@internal.src_package;
 using sha1 = go.crypto.sha1_package;
@@ -46,7 +47,6 @@ namespace @internal
                 this.Type = default;
                 this.Blocks = default;
                 this.Entry = default;
-                this.LastDeferExit = default;
                 this.bid = default;
                 this.vid = default;
                 this.logfiles = default;
@@ -54,12 +54,21 @@ namespace @internal
                 this.DebugTest = default;
                 this.PrintOrHtmlSSA = default;
                 this.ruleMatches = default;
+                this.ABI0 = default;
+                this.ABI1 = default;
+                this.ABISelf = default;
+                this.ABIDefault = default;
                 this.scheduled = default;
                 this.laidout = default;
                 this.NoSplit = default;
+                this.dumpFileSeq = default;
                 this.RegAlloc = default;
                 this.NamedValues = default;
                 this.Names = default;
+                this.CanonicalLocalSlots = default;
+                this.CanonicalLocalSplits = default;
+                this.RegArgs = default;
+                this.OwnAux = default;
                 this.WBLoads = default;
                 this.freeValues = default;
                 this.freeBlocks = default;
@@ -72,7 +81,7 @@ namespace @internal
                 this.constants = default;
             }
 
-            public Func(ref ptr<Config> Config = default, ref ptr<Cache> Cache = default, Frontend fe = default, ref ptr<pass> pass = default, @string Name = default, ref ptr<types.Type> Type = default, slice<ptr<Block>> Blocks = default, ref ptr<Block> Entry = default, ref ptr<Value> LastDeferExit = default, idAlloc bid = default, idAlloc vid = default, map<@string, writeSyncer> logfiles = default, ref ptr<HTMLWriter> HTMLWriter = default, bool DebugTest = default, bool PrintOrHtmlSSA = default, map<@string, long> ruleMatches = default, bool scheduled = default, bool laidout = default, bool NoSplit = default, slice<Location> RegAlloc = default, map<LocalSlot, slice<ptr<Value>>> NamedValues = default, slice<LocalSlot> Names = default, slice<ptr<Block>> WBLoads = default, ref ptr<Value> freeValues = default, ref ptr<Block> freeBlocks = default, slice<ptr<Block>> cachedPostorder = default, slice<ptr<Block>> cachedIdom = default, SparseTree cachedSdom = default, ref ptr<loopnest> cachedLoopnest = default, ref ptr<xposmap> cachedLineStarts = default, auxmap auxmap = default, map<long, slice<ptr<Value>>> constants = default)
+            public Func(ref ptr<Config> Config = default, ref ptr<Cache> Cache = default, Frontend fe = default, ref ptr<pass> pass = default, @string Name = default, ref ptr<types.Type> Type = default, slice<ptr<Block>> Blocks = default, ref ptr<Block> Entry = default, idAlloc bid = default, idAlloc vid = default, map<@string, writeSyncer> logfiles = default, ref ptr<HTMLWriter> HTMLWriter = default, bool DebugTest = default, bool PrintOrHtmlSSA = default, map<@string, nint> ruleMatches = default, ref ptr<abi.ABIConfig> ABI0 = default, ref ptr<abi.ABIConfig> ABI1 = default, ref ptr<abi.ABIConfig> ABISelf = default, ref ptr<abi.ABIConfig> ABIDefault = default, bool scheduled = default, bool laidout = default, bool NoSplit = default, byte dumpFileSeq = default, slice<Location> RegAlloc = default, map<LocalSlot, slice<ptr<Value>>> NamedValues = default, slice<ptr<LocalSlot>> Names = default, map<LocalSlot, ptr<LocalSlot>> CanonicalLocalSlots = default, map<LocalSlotSplitKey, ptr<LocalSlot>> CanonicalLocalSplits = default, slice<Spill> RegArgs = default, ref ptr<AuxCall> OwnAux = default, slice<ptr<Block>> WBLoads = default, ref ptr<Value> freeValues = default, ref ptr<Block> freeBlocks = default, slice<ptr<Block>> cachedPostorder = default, slice<ptr<Block>> cachedIdom = default, SparseTree cachedSdom = default, ref ptr<loopnest> cachedLoopnest = default, ref ptr<xposmap> cachedLineStarts = default, auxmap auxmap = default, map<long, slice<ptr<Value>>> constants = default)
             {
                 this.Config = Config;
                 this.Cache = Cache;
@@ -82,7 +91,6 @@ namespace @internal
                 this.Type = Type;
                 this.Blocks = Blocks;
                 this.Entry = Entry;
-                this.LastDeferExit = LastDeferExit;
                 this.bid = bid;
                 this.vid = vid;
                 this.logfiles = logfiles;
@@ -90,12 +98,21 @@ namespace @internal
                 this.DebugTest = DebugTest;
                 this.PrintOrHtmlSSA = PrintOrHtmlSSA;
                 this.ruleMatches = ruleMatches;
+                this.ABI0 = ABI0;
+                this.ABI1 = ABI1;
+                this.ABISelf = ABISelf;
+                this.ABIDefault = ABIDefault;
                 this.scheduled = scheduled;
                 this.laidout = laidout;
                 this.NoSplit = NoSplit;
+                this.dumpFileSeq = dumpFileSeq;
                 this.RegAlloc = RegAlloc;
                 this.NamedValues = NamedValues;
                 this.Names = Names;
+                this.CanonicalLocalSlots = CanonicalLocalSlots;
+                this.CanonicalLocalSplits = CanonicalLocalSplits;
+                this.RegArgs = RegArgs;
+                this.OwnAux = OwnAux;
                 this.WBLoads = WBLoads;
                 this.freeValues = freeValues;
                 this.freeBlocks = freeBlocks;
@@ -128,7 +145,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Func Func_cast(dynamic value)
         {
-            return new Func(ref value.Config, ref value.Cache, value.fe, ref value.pass, value.Name, ref value.Type, value.Blocks, ref value.Entry, ref value.LastDeferExit, value.bid, value.vid, value.logfiles, ref value.HTMLWriter, value.DebugTest, value.PrintOrHtmlSSA, value.ruleMatches, value.scheduled, value.laidout, value.NoSplit, value.RegAlloc, value.NamedValues, value.Names, value.WBLoads, ref value.freeValues, ref value.freeBlocks, value.cachedPostorder, value.cachedIdom, value.cachedSdom, ref value.cachedLoopnest, ref value.cachedLineStarts, value.auxmap, value.constants);
+            return new Func(ref value.Config, ref value.Cache, value.fe, ref value.pass, value.Name, ref value.Type, value.Blocks, ref value.Entry, value.bid, value.vid, value.logfiles, ref value.HTMLWriter, value.DebugTest, value.PrintOrHtmlSSA, value.ruleMatches, ref value.ABI0, ref value.ABI1, ref value.ABISelf, ref value.ABIDefault, value.scheduled, value.laidout, value.NoSplit, value.dumpFileSeq, value.RegAlloc, value.NamedValues, value.Names, value.CanonicalLocalSlots, value.CanonicalLocalSplits, value.RegArgs, ref value.OwnAux, value.WBLoads, ref value.freeValues, ref value.freeBlocks, value.cachedPostorder, value.cachedIdom, value.cachedSdom, ref value.cachedLoopnest, ref value.cachedLineStarts, value.auxmap, value.constants);
         }
     }
 }}}}

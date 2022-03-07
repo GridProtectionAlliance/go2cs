@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:00:56 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\deadlock.go
+// package main -- go2cs converted at 2022 March 06 22:26:11 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\deadlock.go
 /*
 char *geterror() {
     return "cgo error";
@@ -16,31 +16,26 @@ char *geterror() {
 */
 
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoPanicDeadlock", CgoPanicDeadlock);
-        }
+namespace go;
 
-        private partial struct cgoError
-        {
-        }
+public static partial class main_package {
 
-        private static @string Error(this cgoError _p0)
-        {
-            fmt.Print(""); // necessary to trigger the deadlock
-            return C.GoString(C.geterror());
-
-        }
-
-        public static void CgoPanicDeadlock() => func((_, panic, __) =>
-        {
-            panic(new cgoError());
-        });
-    }
+private static void init() {
+    register("CgoPanicDeadlock", CgoPanicDeadlock);
 }
+
+private partial struct cgoError {
+}
+
+private static @string Error(this cgoError _p0) {
+    fmt.Print(""); // necessary to trigger the deadlock
+    return C.GoString(C.geterror());
+
+}
+
+public static void CgoPanicDeadlock() => func((_, panic, _) => {
+    panic(new cgoError());
+});
+
+} // end main_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:41 UTC
+//     Generated on 2022 March 06 23:23:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -44,7 +43,7 @@ namespace @internal
                 this.Handlers = default;
             }
 
-            public HTTPServerArgs(@string Hostport = default, @string Host = default, long Port = default, map<@string, http.Handler> Handlers = default)
+            public HTTPServerArgs(@string Hostport = default, @string Host = default, nint Port = default, map<@string, http.Handler> Handlers = default)
             {
                 this.Hostport = Hostport;
                 this.Host = Host;

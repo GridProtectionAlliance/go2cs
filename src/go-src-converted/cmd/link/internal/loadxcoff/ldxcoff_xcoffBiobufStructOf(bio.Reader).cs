@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:01 UTC
+//     Generated on 2022 March 06 23:21:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -25,7 +27,7 @@ namespace @internal
         {
             // Value of the xcoffBiobuf struct
             private readonly bio.Reader m_value;
-
+            
             public xcoffBiobuf(bio.Reader value) => m_value = value;
 
             // Enable implicit conversions between bio.Reader and xcoffBiobuf struct

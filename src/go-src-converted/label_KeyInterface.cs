@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:44 UTC
+//     Generated on 2022 March 06 23:31:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using reflect = go.reflect_package;
@@ -57,7 +56,7 @@ namespace @event
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,13 +82,13 @@ namespace @event
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate @string DescriptionByPtr(ptr<T> value);
@@ -103,13 +102,13 @@ namespace @event
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DescriptionByPtr is null || !m_target_is_ptr)
                     return s_DescriptionByVal!(target);
 
-                return s_DescriptionByPtr(m_target_ptr);
+                return s_DescriptionByPtr(m_target_ptr!);
             }
 
             private delegate @string FormatByPtr(ptr<T> value, io.Writer w, slice<byte> buf, Label l);
@@ -123,16 +122,16 @@ namespace @event
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FormatByPtr is null || !m_target_is_ptr)
                     return s_FormatByVal!(target, w, buf, l);
 
-                return s_FormatByPtr(m_target_ptr, w, buf, l);
+                return s_FormatByPtr(m_target_ptr!, w, buf, l);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Key()
@@ -143,12 +142,12 @@ namespace @event
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -156,12 +155,12 @@ namespace @event
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Description");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DescriptionByPtr = extensionMethod.CreateStaticDelegate(typeof(DescriptionByPtr)) as DescriptionByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Description");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DescriptionByVal = extensionMethod.CreateStaticDelegate(typeof(DescriptionByVal)) as DescriptionByVal;
 
                 if (s_DescriptionByPtr is null && s_DescriptionByVal is null)
@@ -169,12 +168,12 @@ namespace @event
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Format");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FormatByPtr = extensionMethod.CreateStaticDelegate(typeof(FormatByPtr)) as FormatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Format");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FormatByVal = extensionMethod.CreateStaticDelegate(typeof(FormatByVal)) as FormatByVal;
 
                 if (s_FormatByPtr is null && s_FormatByVal is null)

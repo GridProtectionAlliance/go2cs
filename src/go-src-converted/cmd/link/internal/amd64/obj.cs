@@ -28,89 +28,65 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2020 October 09 05:50:38 UTC
+// package amd64 -- go2cs converted at 2022 March 06 23:22:35 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
-// Original source: C:\Go\src\cmd\link\internal\amd64\obj.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\amd64\obj.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using ld = go.cmd.link.@internal.ld_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class amd64_package
-    {
-        public static (ptr<sys.Arch>, ld.Arch) Init()
-        {
-            ptr<sys.Arch> _p0 = default!;
-            ld.Arch _p0 = default;
+namespace go.cmd.link.@internal;
 
-            var arch = sys.ArchAMD64;
+public static partial class amd64_package {
 
-            var fa = funcAlign;
-            if (objabi.GOAMD64 == "alignedjumps")
-            {
-                fa = 32L;
-            }
-            ld.Arch theArch = new ld.Arch(Funcalign:fa,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Adddynrel2:adddynrel2,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Asmb:asmb,Asmb2:asmb2,Elfreloc2:elfreloc2,Elfsetupplt:elfsetupplt,Gentext2:gentext2,Machoreloc1:machoreloc1,PEreloc1:pereloc1,TLSIEtoLE:tlsIEtoLE,Linuxdynld:"/lib64/ld-linux-x86-64.so.2",Freebsddynld:"/libexec/ld-elf.so.1",Openbsddynld:"/usr/libexec/ld.so",Netbsddynld:"/libexec/ld.elf_so",Dragonflydynld:"/usr/libexec/ld-elf.so.2",Solarisdynld:"/lib/amd64/ld.so.1",);
+public static (ptr<sys.Arch>, ld.Arch) Init() {
+    ptr<sys.Arch> _p0 = default!;
+    ld.Arch _p0 = default;
 
-            return (_addr_arch!, theArch);
+    var arch = sys.ArchAMD64;
 
+    ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,CodePad:[]byte{0xCC},Plan9Magic:uint32(4*26*26+7),Plan9_64Bit:true,Adddynrel:adddynrel,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Elfreloc1:elfreloc1,ElfrelocSize:24,Elfsetupplt:elfsetupplt,Gentext:gentext,Machoreloc1:machoreloc1,MachorelocSize:8,PEreloc1:pereloc1,TLSIEtoLE:tlsIEtoLE,Linuxdynld:"/lib64/ld-linux-x86-64.so.2",Freebsddynld:"/libexec/ld-elf.so.1",Openbsddynld:"/usr/libexec/ld.so",Netbsddynld:"/libexec/ld.elf_so",Dragonflydynld:"/usr/libexec/ld-elf.so.2",Solarisdynld:"/lib/amd64/ld.so.1",);
+
+    return (_addr_arch!, theArch);
+}
+
+private static void archinit(ptr<ld.Link> _addr_ctxt) {
+    ref ld.Link ctxt = ref _addr_ctxt.val;
+
+
+    if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
+        ld.HEADR = 32 + 8;
+
+        if (ld.FlagTextAddr == -1.val) {
+            ld.FlagTextAddr.val = 0x200000 + int64(ld.HEADR);
         }
-
-        private static void archinit(ptr<ld.Link> _addr_ctxt)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-
-
-            if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
-                ld.HEADR = 32L + 8L;
-
-                if (ld.FlagTextAddr == -1L.val)
-                {
-                    ld.FlagTextAddr.val = 0x200000UL + int64(ld.HEADR);
-                }
-
-                if (ld.FlagRound == -1L.val)
-                {
-                    ld.FlagRound.val = 0x200000UL;
-                }
-
-            else if (ctxt.HeadType == objabi.Hdarwin) /* apple MACH */
-                ld.HEADR = ld.INITIAL_MACHO_HEADR;
-                if (ld.FlagRound == -1L.val)
-                {
-                    ld.FlagRound.val = 4096L;
-                }
-
-                if (ld.FlagTextAddr == -1L.val)
-                {
-                    ld.FlagTextAddr.val = 0x1000000UL + int64(ld.HEADR);
-                }
-
-            else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd || ctxt.HeadType == objabi.Hdragonfly || ctxt.HeadType == objabi.Hsolaris) /* solaris */
-                ld.Elfinit(ctxt);
-
-                ld.HEADR = ld.ELFRESERVE;
-                if (ld.FlagTextAddr == -1L.val)
-                {
-                    ld.FlagTextAddr.val = (1L << (int)(22L)) + int64(ld.HEADR);
-                }
-
-                if (ld.FlagRound == -1L.val)
-                {
-                    ld.FlagRound.val = 4096L;
-                }
-
-            else if (ctxt.HeadType == objabi.Hwindows) /* PE executable */
-                // ld.HEADR, ld.FlagTextAddr, ld.FlagRound are set in ld.Peinit
-                return ;
-            else 
-                ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-            
+        if (ld.FlagRound == -1.val) {
+            ld.FlagRound.val = 0x200000;
         }
-    }
-}}}}
+    else if (ctxt.HeadType == objabi.Hdarwin) /* apple MACH */
+        ld.HEADR = ld.INITIAL_MACHO_HEADR;
+        if (ld.FlagRound == -1.val) {
+            ld.FlagRound.val = 4096;
+        }
+        if (ld.FlagTextAddr == -1.val) {
+            ld.FlagTextAddr.val = 0x1000000 + int64(ld.HEADR);
+        }
+    else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hfreebsd || ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd || ctxt.HeadType == objabi.Hdragonfly || ctxt.HeadType == objabi.Hsolaris) /* solaris */
+        ld.Elfinit(ctxt);
+
+        ld.HEADR = ld.ELFRESERVE;
+        if (ld.FlagTextAddr == -1.val) {
+            ld.FlagTextAddr.val = (1 << 22) + int64(ld.HEADR);
+        }
+        if (ld.FlagRound == -1.val) {
+            ld.FlagRound.val = 4096;
+        }
+    else if (ctxt.HeadType == objabi.Hwindows) /* PE executable */
+        // ld.HEADR, ld.FlagTextAddr, ld.FlagRound are set in ld.Peinit
+        return ;
+    else 
+        ld.Exitf("unknown -H option: %v", ctxt.HeadType);
+    
+}
+
+} // end amd64_package

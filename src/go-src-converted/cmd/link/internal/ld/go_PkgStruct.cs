@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:40 UTC
+//     Generated on 2022 March 06 23:21:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,20 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
+using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using elf = go.debug.elf_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
+using sort = go.sort_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 

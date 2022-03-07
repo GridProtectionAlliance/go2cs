@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,17 +37,17 @@ namespace sys
                 this.Flowinfo = default;
                 this.Addr = default;
                 this.Scope_id = default;
-                this.X__sin6_src_id = default;
+                this._ = default;
             }
 
-            public RawSockaddrInet6(ushort Family = default, ushort Port = default, uint Flowinfo = default, array<byte> Addr = default, uint Scope_id = default, uint X__sin6_src_id = default)
+            public RawSockaddrInet6(ushort Family = default, ushort Port = default, uint Flowinfo = default, array<byte> Addr = default, uint Scope_id = default, uint _ = default)
             {
                 this.Family = Family;
                 this.Port = Port;
                 this.Flowinfo = Flowinfo;
                 this.Addr = Addr;
                 this.Scope_id = Scope_id;
-                this.X__sin6_src_id = X__sin6_src_id;
+                this._ = _;
             }
 
             // Enable comparisons between nil and RawSockaddrInet6 struct
@@ -70,7 +70,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RawSockaddrInet6 RawSockaddrInet6_cast(dynamic value)
         {
-            return new RawSockaddrInet6(value.Family, value.Port, value.Flowinfo, value.Addr, value.Scope_id, value.X__sin6_src_id);
+            return new RawSockaddrInet6(value.Family, value.Port, value.Flowinfo, value.Addr, value.Scope_id, value._);
         }
     }
 }}}}}}

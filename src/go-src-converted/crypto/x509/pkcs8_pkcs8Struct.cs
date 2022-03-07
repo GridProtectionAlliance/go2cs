@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:52 UTC
+//     Generated on 2022 March 06 22:19:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ecdsa = go.crypto.ecdsa_package;
 using ed25519 = go.crypto.ed25519_package;
 using rsa = go.crypto.rsa_package;
@@ -40,7 +39,7 @@ namespace crypto
                 this.PrivateKey = default;
             }
 
-            public pkcs8(long Version = default, pkix.AlgorithmIdentifier Algo = default, slice<byte> PrivateKey = default)
+            public pkcs8(nint Version = default, pkix.AlgorithmIdentifier Algo = default, slice<byte> PrivateKey = default)
             {
                 this.Version = Version;
                 this.Algo = Algo;

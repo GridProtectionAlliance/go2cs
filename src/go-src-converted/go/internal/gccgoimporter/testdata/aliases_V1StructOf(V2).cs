@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:54 UTC
+//     Generated on 2022 March 06 23:32:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace @internal
         {
             // Value of the V1 struct
             private readonly V2 m_value;
-
+            
             public V1(V2 value) => m_value = value;
 
             // Enable implicit conversions between V2 and V1 struct

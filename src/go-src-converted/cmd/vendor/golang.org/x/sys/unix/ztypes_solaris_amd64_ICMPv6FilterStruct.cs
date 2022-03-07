@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,12 +32,12 @@ namespace sys
             // Constructors
             public ICMPv6Filter(NilType _)
             {
-                this.X__icmp6_filt = default;
+                this.Filt = default;
             }
 
-            public ICMPv6Filter(array<uint> X__icmp6_filt = default)
+            public ICMPv6Filter(array<uint> Filt = default)
             {
-                this.X__icmp6_filt = X__icmp6_filt;
+                this.Filt = Filt;
             }
 
             // Enable comparisons between nil and ICMPv6Filter struct
@@ -60,7 +60,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ICMPv6Filter ICMPv6Filter_cast(dynamic value)
         {
-            return new ICMPv6Filter(value.X__icmp6_filt);
+            return new ICMPv6Filter(value.Filt);
         }
     }
 }}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:02 UTC
+//     Generated on 2022 March 06 22:12:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
@@ -35,7 +35,7 @@ namespace go
 
             public ref ulong lastTicks => ref m_traceBufHeaderRef.Value.lastTicks;
 
-            public ref long pos => ref m_traceBufHeaderRef.Value.pos;
+            public ref nint pos => ref m_traceBufHeaderRef.Value.pos;
 
             public ref array<System.UIntPtr> stk => ref m_traceBufHeaderRef.Value.stk;
 

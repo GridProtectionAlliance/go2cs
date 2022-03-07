@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:52 UTC
+//     Generated on 2022 March 06 23:15:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -27,14 +26,14 @@ namespace cmd
         public partial struct ExportedType
         {
             // Reader.Read function promotion
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (nint, error) ReadByVal(T value, slice<byte> p);
+            private delegate (nint, error) ReadByRef(ref T value, slice<byte> p);
 
             private static readonly ReadByVal s_ReadByVal;
             private static readonly ReadByRef s_ReadByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // error.Error function promotion
             private delegate @string ErrorByVal(T value);
@@ -54,21 +53,21 @@ namespace cmd
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
-                    if ((object)s_ReadByRef == null)
+                    if (s_ReadByRef is null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
 
-                    if ((object)s_ErrorByRef == null)
+                    if (s_ErrorByRef is null)
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
             }
@@ -87,7 +86,7 @@ namespace cmd
                 this.error = default;
             }
 
-            public ExportedType(long ExportedField = default, long unexportedField = default, ExportedEmbeddedType ExportedEmbeddedType = default, ref ptr<ExportedEmbeddedType> ptr<ExportedEmbeddedType> = default, ref ptr<qualified.ExportedEmbeddedType> ExportedEmbeddedType> = default, unexportedType unexportedType = default, ref ptr<unexportedType> ptr<unexportedType> = default, io.Reader Reader = default, error error = default)
+            public ExportedType(nint ExportedField = default, nint unexportedField = default, ExportedEmbeddedType ExportedEmbeddedType = default, ref ptr<ExportedEmbeddedType> ptr<ExportedEmbeddedType> = default, ref ptr<qualified.ExportedEmbeddedType> ExportedEmbeddedType> = default, unexportedType unexportedType = default, ref ptr<unexportedType> ptr<unexportedType> = default, io.Reader Reader = default, error error = default)
             {
                 this.ExportedField = ExportedField;
                 this.unexportedField = unexportedField;

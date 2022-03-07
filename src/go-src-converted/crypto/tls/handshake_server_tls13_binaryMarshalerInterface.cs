@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:58 UTC
+//     Generated on 2022 March 06 22:21:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using crypto = go.crypto_package;
 using hmac = go.crypto.hmac_package;
 using rsa = go.crypto.rsa_package;
@@ -58,7 +58,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,13 +84,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MarshalBinaryByPtr is null || !m_target_is_ptr)
                     return s_MarshalBinaryByVal!(target);
 
-                return s_MarshalBinaryByPtr(m_target_ptr);
+                return s_MarshalBinaryByPtr(m_target_ptr!);
             }
 
             private delegate error UnmarshalBinaryByPtr(ptr<T> value, slice<byte> data);
@@ -104,16 +104,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnmarshalBinaryByPtr is null || !m_target_is_ptr)
                     return s_UnmarshalBinaryByVal!(target, data);
 
-                return s_UnmarshalBinaryByPtr(m_target_ptr, data);
+                return s_UnmarshalBinaryByPtr(m_target_ptr!, data);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static binaryMarshaler()
@@ -124,12 +124,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("MarshalBinary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MarshalBinaryByPtr = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByPtr)) as MarshalBinaryByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("MarshalBinary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(MarshalBinaryByVal)) as MarshalBinaryByVal;
 
                 if (s_MarshalBinaryByPtr is null && s_MarshalBinaryByVal is null)
@@ -137,12 +137,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnmarshalBinary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalBinaryByPtr = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByPtr)) as UnmarshalBinaryByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnmarshalBinary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnmarshalBinaryByVal = extensionMethod.CreateStaticDelegate(typeof(UnmarshalBinaryByVal)) as UnmarshalBinaryByVal;
 
                 if (s_UnmarshalBinaryByPtr is null && s_UnmarshalBinaryByVal is null)

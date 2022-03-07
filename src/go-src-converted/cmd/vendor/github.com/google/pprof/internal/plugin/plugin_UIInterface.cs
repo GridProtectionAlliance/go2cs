@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:41 UTC
+//     Generated on 2022 March 06 23:23:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -59,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,13 +84,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadLineByPtr is null || !m_target_is_ptr)
                     return s_ReadLineByVal!(target, prompt);
 
-                return s_ReadLineByPtr(m_target_ptr, prompt);
+                return s_ReadLineByPtr(m_target_ptr!, prompt);
             }
 
             private delegate @string PrintByPtr(ptr<T> value, params object _p0);
@@ -105,13 +104,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PrintByPtr is null || !m_target_is_ptr)
                     return s_PrintByVal!(target, _p0);
 
-                return s_PrintByPtr(m_target_ptr, _p0);
+                return s_PrintByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string PrintErrByPtr(ptr<T> value, params object _p0);
@@ -125,13 +124,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PrintErrByPtr is null || !m_target_is_ptr)
                     return s_PrintErrByVal!(target, _p0);
 
-                return s_PrintErrByPtr(m_target_ptr, _p0);
+                return s_PrintErrByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string IsTerminalByPtr(ptr<T> value);
@@ -145,13 +144,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_IsTerminalByPtr is null || !m_target_is_ptr)
                     return s_IsTerminalByVal!(target);
 
-                return s_IsTerminalByPtr(m_target_ptr);
+                return s_IsTerminalByPtr(m_target_ptr!);
             }
 
             private delegate @string WantBrowserByPtr(ptr<T> value);
@@ -165,13 +164,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WantBrowserByPtr is null || !m_target_is_ptr)
                     return s_WantBrowserByVal!(target);
 
-                return s_WantBrowserByPtr(m_target_ptr);
+                return s_WantBrowserByPtr(m_target_ptr!);
             }
 
             private delegate @string SetAutoCompleteByPtr(ptr<T> value, Func<@string, @string> complete);
@@ -185,16 +184,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetAutoCompleteByPtr is null || !m_target_is_ptr)
                     return s_SetAutoCompleteByVal!(target, complete);
 
-                return s_SetAutoCompleteByPtr(m_target_ptr, complete);
+                return s_SetAutoCompleteByPtr(m_target_ptr!, complete);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static UI()
@@ -205,12 +204,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadLineByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadLineByPtr)) as ReadLineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadLineByVal = extensionMethod.CreateStaticDelegate(typeof(ReadLineByVal)) as ReadLineByVal;
 
                 if (s_ReadLineByPtr is null && s_ReadLineByVal is null)
@@ -218,12 +217,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintByPtr)) as PrintByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintByVal = extensionMethod.CreateStaticDelegate(typeof(PrintByVal)) as PrintByVal;
 
                 if (s_PrintByPtr is null && s_PrintByVal is null)
@@ -231,12 +230,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PrintErr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintErrByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintErrByPtr)) as PrintErrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PrintErr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintErrByVal = extensionMethod.CreateStaticDelegate(typeof(PrintErrByVal)) as PrintErrByVal;
 
                 if (s_PrintErrByPtr is null && s_PrintErrByVal is null)
@@ -244,12 +243,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("IsTerminal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsTerminalByPtr = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByPtr)) as IsTerminalByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("IsTerminal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsTerminalByVal = extensionMethod.CreateStaticDelegate(typeof(IsTerminalByVal)) as IsTerminalByVal;
 
                 if (s_IsTerminalByPtr is null && s_IsTerminalByVal is null)
@@ -257,12 +256,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WantBrowser");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WantBrowserByPtr = extensionMethod.CreateStaticDelegate(typeof(WantBrowserByPtr)) as WantBrowserByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WantBrowser");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WantBrowserByVal = extensionMethod.CreateStaticDelegate(typeof(WantBrowserByVal)) as WantBrowserByVal;
 
                 if (s_WantBrowserByPtr is null && s_WantBrowserByVal is null)
@@ -270,12 +269,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetAutoComplete");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetAutoCompleteByPtr = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByPtr)) as SetAutoCompleteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetAutoComplete");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetAutoCompleteByVal = extensionMethod.CreateStaticDelegate(typeof(SetAutoCompleteByVal)) as SetAutoCompleteByVal;
 
                 if (s_SetAutoCompleteByPtr is null && s_SetAutoCompleteByVal is null)

@@ -4,8 +4,8 @@
 
 // Goroutine-related profiles.
 
-// package main -- go2cs converted at 2020 October 09 05:53:06 UTC
-// Original source: C:\Go\src\cmd\trace\goroutines.go
+// package main -- go2cs converted at 2022 March 06 23:23:02 UTC
+// Original source: C:\Program Files\Go\src\cmd\trace\goroutines.go
 using fmt = go.fmt_package;
 using template = go.html.template_package;
 using trace = go.@internal.trace_package;
@@ -16,163 +16,130 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
 using time = go.time_package;
-using static go.builtin;
 using System;
 
-namespace go
-{
-    public static partial class main_package
+
+namespace go;
+
+public static partial class main_package {
+
+private static void init() {
+    http.HandleFunc("/goroutines", httpGoroutines);
+    http.HandleFunc("/goroutine", httpGoroutine);
+}
+
+// gtype describes a group of goroutines grouped by start PC.
+private partial struct gtype {
+    public ulong ID; // Unique identifier (PC).
+    public @string Name; // Start function.
+    public nint N; // Total number of goroutines in this group.
+    public long ExecTime; // Total execution time of all goroutines in this group.
+}
+
+private static sync.Once gsInit = default;private static map<ulong, ptr<trace.GDesc>> gs = default;
+
+// analyzeGoroutines generates statistics about execution of all goroutines and stores them in gs.
+private static void analyzeGoroutines(slice<ptr<trace.Event>> events) {
+    gsInit.Do(() => {
+        gs = trace.GoroutineStats(events);
+    });
+}
+
+// httpGoroutines serves list of goroutine groups.
+private static void httpGoroutines(http.ResponseWriter w, ptr<http.Request> _addr_r) {
+    ref http.Request r = ref _addr_r.val;
+
+    var (events, err) = parseEvents();
+    if (err != null) {
+        http.Error(w, err.Error(), http.StatusInternalServerError);
+        return ;
+    }
+    analyzeGoroutines(events);
+    var gss = make_map<ulong, gtype>();
+    foreach (var (_, g) in gs) {
+        var gs1 = gss[g.PC];
+        gs1.ID = g.PC;
+        gs1.Name = g.Name;
+        gs1.N++;
+        gs1.ExecTime += g.ExecTime;
+        gss[g.PC] = gs1;
+    }    slice<gtype> glist = default;
+    foreach (var (k, v) in gss) {
+        v.ID = k;
+        glist = append(glist, v);
+    }    sort.Slice(glist, (i, j) => glist[i].ExecTime > glist[j].ExecTime);
+    w.Header().Set("Content-Type", "text/html;charset=utf-8");
     {
-        private static void init()
-        {
-            http.HandleFunc("/goroutines", httpGoroutines);
-            http.HandleFunc("/goroutine", httpGoroutine);
+        var err = templGoroutines.Execute(w, glist);
+
+        if (err != null) {
+            log.Printf("failed to execute template: %v", err);
+            return ;
         }
+    }
 
-        // gtype describes a group of goroutines grouped by start PC.
-        private partial struct gtype
-        {
-            public ulong ID; // Unique identifier (PC).
-            public @string Name; // Start function.
-            public long N; // Total number of goroutines in this group.
-            public long ExecTime; // Total execution time of all goroutines in this group.
-        }
+}
 
-        private static sync.Once gsInit = default;        private static map<ulong, ptr<trace.GDesc>> gs = default;
-
-        // analyzeGoroutines generates statistics about execution of all goroutines and stores them in gs.
-        private static void analyzeGoroutines(slice<ptr<trace.Event>> events)
-        {
-            gsInit.Do(() =>
-            {
-                gs = trace.GoroutineStats(events);
-            });
-
-        }
-
-        // httpGoroutines serves list of goroutine groups.
-        private static void httpGoroutines(http.ResponseWriter w, ptr<http.Request> _addr_r)
-        {
-            ref http.Request r = ref _addr_r.val;
-
-            var (events, err) = parseEvents();
-            if (err != null)
-            {
-                http.Error(w, err.Error(), http.StatusInternalServerError);
-                return ;
-            }
-
-            analyzeGoroutines(events);
-            var gss = make_map<ulong, gtype>();
-            foreach (var (_, g) in gs)
-            {
-                var gs1 = gss[g.PC];
-                gs1.ID = g.PC;
-                gs1.Name = g.Name;
-                gs1.N++;
-                gs1.ExecTime += g.ExecTime;
-                gss[g.PC] = gs1;
-            }
-            slice<gtype> glist = default;
-            foreach (var (k, v) in gss)
-            {
-                v.ID = k;
-                glist = append(glist, v);
-            }
-            sort.Slice(glist, (i, j) => glist[i].ExecTime > glist[j].ExecTime);
-            w.Header().Set("Content-Type", "text/html;charset=utf-8");
-            {
-                var err = templGoroutines.Execute(w, glist);
-
-                if (err != null)
-                {
-                    log.Printf("failed to execute template: %v", err);
-                    return ;
-                }
-
-            }
-
-        }
-
-        private static var templGoroutines = template.Must(template.New("").Parse("\n<html>\n<body>\nGoroutines: <br>\n{{range $}}\n  <a href=\"/goroutine?id={{.ID}}\">{{." +
+private static var templGoroutines = template.Must(template.New("").Parse("\n<html>\n<body>\nGoroutines: <br>\n{{range $}}\n  <a href=\"/goroutine?id={{.ID}}\">{{." +
     "Name}}</a> N={{.N}} <br>\n{{end}}\n</body>\n</html>\n"));
 
-        // httpGoroutine serves list of goroutines in a particular group.
-        private static void httpGoroutine(http.ResponseWriter w, ptr<http.Request> _addr_r)
-        {
-            ref http.Request r = ref _addr_r.val;
+// httpGoroutine serves list of goroutines in a particular group.
+private static void httpGoroutine(http.ResponseWriter w, ptr<http.Request> _addr_r) {
+    ref http.Request r = ref _addr_r.val;
  
-            // TODO(hyangah): support format=csv (raw data)
+    // TODO(hyangah): support format=csv (raw data)
 
-            var (events, err) = parseEvents();
-            if (err != null)
-            {
-                http.Error(w, err.Error(), http.StatusInternalServerError);
-                return ;
-            }
+    var (events, err) = parseEvents();
+    if (err != null) {
+        http.Error(w, err.Error(), http.StatusInternalServerError);
+        return ;
+    }
+    var (pc, err) = strconv.ParseUint(r.FormValue("id"), 10, 64);
+    if (err != null) {
+        http.Error(w, fmt.Sprintf("failed to parse id parameter '%v': %v", r.FormValue("id"), err), http.StatusInternalServerError);
+        return ;
+    }
+    analyzeGoroutines(events);
+    slice<ptr<trace.GDesc>> glist = default;    @string name = default;    long totalExecTime = default;    long execTime = default;
+    long maxTotalTime = default;
 
-            var (pc, err) = strconv.ParseUint(r.FormValue("id"), 10L, 64L);
-            if (err != null)
-            {
-                http.Error(w, fmt.Sprintf("failed to parse id parameter '%v': %v", r.FormValue("id"), err), http.StatusInternalServerError);
-                return ;
-            }
+    foreach (var (_, g) in gs) {
+        totalExecTime += g.ExecTime;
 
-            analyzeGoroutines(events);
-            slice<ptr<trace.GDesc>> glist = default;            @string name = default;            long totalExecTime = default;            long execTime = default;
-            long maxTotalTime = default;
-
-            foreach (var (_, g) in gs)
-            {
-                totalExecTime += g.ExecTime;
-
-                if (g.PC != pc)
-                {
-                    continue;
-                }
-
-                glist = append(glist, g);
-                name = g.Name;
-                execTime += g.ExecTime;
-                if (maxTotalTime < g.TotalTime)
-                {
-                    maxTotalTime = g.TotalTime;
-                }
-
-            }
-            @string execTimePercent = "";
-            if (totalExecTime > 0L)
-            {
-                execTimePercent = fmt.Sprintf("%.2f%%", float64(execTime) / float64(totalExecTime) * 100L);
-            }
-
-            var sortby = r.FormValue("sortby");
-            var (_, ok) = reflect.TypeOf(new trace.GDesc()).FieldByNameFunc(s =>
-            {
-                return s == sortby;
-            });
-            if (!ok)
-            {
-                sortby = "TotalTime";
-            }
-
-            sort.Slice(glist, (i, j) =>
-            {
-                var ival = reflect.ValueOf(glist[i]).Elem().FieldByName(sortby).Int();
-                var jval = reflect.ValueOf(glist[j]).Elem().FieldByName(sortby).Int();
-                return ival > jval;
-            });
-
-            err = templGoroutine.Execute(w, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{NamestringPCuint64NintExecTimePercentstringMaxTotalint64GList[]*trace.GDesc}{Name:name,PC:pc,N:len(glist),ExecTimePercent:execTimePercent,MaxTotal:maxTotalTime,GList:glist});
-            if (err != null)
-            {
-                http.Error(w, fmt.Sprintf("failed to execute template: %v", err), http.StatusInternalServerError);
-                return ;
-            }
-
+        if (g.PC != pc) {
+            continue;
         }
+        glist = append(glist, g);
+        name = g.Name;
+        execTime += g.ExecTime;
+        if (maxTotalTime < g.TotalTime) {
+            maxTotalTime = g.TotalTime;
+        }
+    }    @string execTimePercent = "";
+    if (totalExecTime > 0) {
+        execTimePercent = fmt.Sprintf("%.2f%%", float64(execTime) / float64(totalExecTime) * 100);
+    }
+    var sortby = r.FormValue("sortby");
+    var (_, ok) = reflect.TypeOf(new trace.GDesc()).FieldByNameFunc(s => {
+        return s == sortby;
+    });
+    if (!ok) {
+        sortby = "TotalTime";
+    }
+    sort.Slice(glist, (i, j) => {
+        var ival = reflect.ValueOf(glist[i]).Elem().FieldByName(sortby).Int();
+        var jval = reflect.ValueOf(glist[j]).Elem().FieldByName(sortby).Int();
+        return ival > jval;
+    });
 
-        private static var templGoroutine = template.Must(template.New("").Funcs(new template.FuncMap("prettyDuration":func(nsecint64)template.HTML{d:=time.Duration(nsec)*time.Nanosecondreturntemplate.HTML(niceDuration(d))},"percent":func(dividend,divisorint64)template.HTML{ifdivisor==0{return""}returntemplate.HTML(fmt.Sprintf("(%.1f%%)",float64(dividend)/float64(divisor)*100))},"barLen":func(dividend,divisorint64)template.HTML{ifdivisor==0{return"0"}returntemplate.HTML(fmt.Sprintf("%.2f%%",float64(dividend)/float64(divisor)*100))},"unknownTime":func(desc*trace.GDesc)int64{sum:=desc.ExecTime+desc.IOTime+desc.BlockTime+desc.SyscallTime+desc.SchedWaitTimeifsum<desc.TotalTime{returndesc.TotalTime-sum}return0},)).Parse("\n<!DOCTYPE html>\n<title>Goroutine {{.Name}}</title>\n<style>\nth {\n  background-col" +
+    err = templGoroutine.Execute(w, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{NamestringPCuint64NintExecTimePercentstringMaxTotalint64GList[]*trace.GDesc}{Name:name,PC:pc,N:len(glist),ExecTimePercent:execTimePercent,MaxTotal:maxTotalTime,GList:glist});
+    if (err != null) {
+        http.Error(w, fmt.Sprintf("failed to execute template: %v", err), http.StatusInternalServerError);
+        return ;
+    }
+}
+
+private static var templGoroutine = template.Must(template.New("").Funcs(new template.FuncMap("prettyDuration":func(nsecint64)template.HTML{d:=time.Duration(nsec)*time.Nanosecondreturntemplate.HTML(niceDuration(d))},"percent":func(dividend,divisorint64)template.HTML{ifdivisor==0{return""}returntemplate.HTML(fmt.Sprintf("(%.1f%%)",float64(dividend)/float64(divisor)*100))},"barLen":func(dividend,divisorint64)template.HTML{ifdivisor==0{return"0"}returntemplate.HTML(fmt.Sprintf("%.2f%%",float64(dividend)/float64(divisor)*100))},"unknownTime":func(desc*trace.GDesc)int64{sum:=desc.ExecTime+desc.IOTime+desc.BlockTime+desc.SyscallTime+desc.SchedWaitTimeifsum<desc.TotalTime{returndesc.TotalTime-sum}return0},)).Parse("\n<!DOCTYPE html>\n<title>Goroutine {{.Name}}</title>\n<style>\nth {\n  background-col" +
     "or: #050505;\n  color: #fff;\n}\nth.total-time,\nth.exec-time,\nth.io-time,\nth.block-" +
     "time,\nth.syscall-time,\nth.sched-time,\nth.sweep-time,\nth.pause-time {\n  cursor: p" +
     "ointer;\n}\ntable {\n  border-collapse: collapse;\n}\n.details tr:hover {\n  backgroun" +
@@ -224,5 +191,5 @@ namespace go
     "  <td> {{prettyDuration .SweepTime}} {{percent .SweepTime .TotalTime}}</td>\n    " +
     "<td> {{prettyDuration .GCTime}} {{percent .GCTime .TotalTime}}</td>\n  </tr>\n{{en" +
     "d}}\n</table>\n"));
-    }
-}
+
+} // end main_package

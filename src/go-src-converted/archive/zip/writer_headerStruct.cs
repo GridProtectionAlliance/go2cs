@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:13 UTC
+//     Generated on 2022 March 06 22:31:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
@@ -38,12 +37,14 @@ namespace archive
             {
                 this.ptr<FileHeader> = default;
                 this.offset = default;
+                this.raw = default;
             }
 
-            public header(ref ptr<FileHeader> ptr<FileHeader> = default, ulong offset = default)
+            public header(ref ptr<FileHeader> ptr<FileHeader> = default, ulong offset = default, bool raw = default)
             {
                 this.ptr<FileHeader> = ptr<FileHeader>;
                 this.offset = offset;
+                this.raw = raw;
             }
 
             // Enable comparisons between nil and header struct
@@ -66,7 +67,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static header header_cast(dynamic value)
         {
-            return new header(ref value.ptr<FileHeader>, value.offset);
+            return new header(ref value.ptr<FileHeader>, value.offset, value.raw);
         }
     }
 }}

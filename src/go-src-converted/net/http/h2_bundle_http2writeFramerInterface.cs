@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:53 UTC
+//     Generated on 2022 March 06 22:22:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -105,36 +104,36 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_writeFrameByPtr is null || !m_target_is_ptr)
                     return s_writeFrameByVal!(target, _p0);
 
-                return s_writeFrameByPtr(m_target_ptr, _p0);
+                return s_writeFrameByPtr(m_target_ptr!, _p0);
             }
 
-            private delegate bool staysWithinBufferByPtr(ptr<T> value, long size);
-            private delegate bool staysWithinBufferByVal(T value, long size);
+            private delegate bool staysWithinBufferByPtr(ptr<T> value, nint size);
+            private delegate bool staysWithinBufferByVal(T value, nint size);
 
             private static readonly staysWithinBufferByPtr? s_staysWithinBufferByPtr;
             private static readonly staysWithinBufferByVal? s_staysWithinBufferByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool staysWithinBuffer(long size)
+            public bool staysWithinBuffer(nint size)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_staysWithinBufferByPtr is null || !m_target_is_ptr)
                     return s_staysWithinBufferByVal!(target, size);
 
-                return s_staysWithinBufferByPtr(m_target_ptr, size);
+                return s_staysWithinBufferByPtr(m_target_ptr!, size);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2writeFramer()
@@ -145,12 +144,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("writeFrame");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeFrameByPtr = extensionMethod.CreateStaticDelegate(typeof(writeFrameByPtr)) as writeFrameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("writeFrame");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_writeFrameByVal = extensionMethod.CreateStaticDelegate(typeof(writeFrameByVal)) as writeFrameByVal;
 
                 if (s_writeFrameByPtr is null && s_writeFrameByVal is null)
@@ -158,12 +157,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("staysWithinBuffer");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_staysWithinBufferByPtr = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByPtr)) as staysWithinBufferByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("staysWithinBuffer");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_staysWithinBufferByVal = extensionMethod.CreateStaticDelegate(typeof(staysWithinBufferByVal)) as staysWithinBufferByVal;
 
                 if (s_staysWithinBufferByPtr is null && s_staysWithinBufferByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:47 UTC
+//     Generated on 2022 March 06 22:21:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -105,7 +104,7 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_closeIdleConnectionsByPtr is null || !m_target_is_ptr)
@@ -114,52 +113,11 @@ namespace net
                     return;
                 }
 
-                s_closeIdleConnectionsByPtr(m_target_ptr);
+                s_closeIdleConnectionsByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate (ptr<http2ClientConn>, error) GetClientConnByPtr(ptr<T> value, ptr<Request> req, @string addr);
-            private delegate (ptr<http2ClientConn>, error) GetClientConnByVal(T value, ptr<Request> req, @string addr);
-
-            private static readonly GetClientConnByPtr? s_GetClientConnByPtr;
-            private static readonly GetClientConnByVal? s_GetClientConnByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ptr<http2ClientConn>, error) GetClientConn(ptr<Request> req, @string addr)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_GetClientConnByPtr is null || !m_target_is_ptr)
-                    return s_GetClientConnByVal!(target, req, addr);
-
-                return s_GetClientConnByPtr(m_target_ptr, req, addr);
-            }
-
-            private delegate (ptr<http2ClientConn>, error) MarkDeadByPtr(ptr<T> value, ptr<http2ClientConn> _p0);
-            private delegate (ptr<http2ClientConn>, error) MarkDeadByVal(T value, ptr<http2ClientConn> _p0);
-
-            private static readonly MarkDeadByPtr? s_MarkDeadByPtr;
-            private static readonly MarkDeadByVal? s_MarkDeadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ptr<http2ClientConn>, error) MarkDead(ptr<http2ClientConn> _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_MarkDeadByPtr is null || !m_target_is_ptr)
-                    return s_MarkDeadByVal!(target, _p0);
-
-                return s_MarkDeadByPtr(m_target_ptr, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2clientConnPoolIdleCloser()
@@ -170,42 +128,16 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("closeIdleConnections");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_closeIdleConnectionsByPtr = extensionMethod.CreateStaticDelegate(typeof(closeIdleConnectionsByPtr)) as closeIdleConnectionsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("closeIdleConnections");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_closeIdleConnectionsByVal = extensionMethod.CreateStaticDelegate(typeof(closeIdleConnectionsByVal)) as closeIdleConnectionsByVal;
 
                 if (s_closeIdleConnectionsByPtr is null && s_closeIdleConnectionsByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement http2clientConnPoolIdleCloser.closeIdleConnections method", new Exception("closeIdleConnections"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("GetClientConn");
-
-                if (!(extensionMethod is null))
-                    s_GetClientConnByPtr = extensionMethod.CreateStaticDelegate(typeof(GetClientConnByPtr)) as GetClientConnByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("GetClientConn");
-
-                if (!(extensionMethod is null))
-                    s_GetClientConnByVal = extensionMethod.CreateStaticDelegate(typeof(GetClientConnByVal)) as GetClientConnByVal;
-
-                if (s_GetClientConnByPtr is null && s_GetClientConnByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement http2clientConnPoolIdleCloser.GetClientConn method", new Exception("GetClientConn"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("MarkDead");
-
-                if (!(extensionMethod is null))
-                    s_MarkDeadByPtr = extensionMethod.CreateStaticDelegate(typeof(MarkDeadByPtr)) as MarkDeadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("MarkDead");
-
-                if (!(extensionMethod is null))
-                    s_MarkDeadByVal = extensionMethod.CreateStaticDelegate(typeof(MarkDeadByVal)) as MarkDeadByVal;
-
-                if (s_MarkDeadByPtr is null && s_MarkDeadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement http2clientConnPoolIdleCloser.MarkDead method", new Exception("MarkDead"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

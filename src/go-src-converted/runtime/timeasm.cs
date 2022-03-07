@@ -4,20 +4,20 @@
 
 // Declarations for operating systems implementing time.now directly in assembly.
 
-// +build windows
+//go:build !faketime && (windows || (linux && amd64))
+// +build !faketime
+// +build windows linux,amd64
 
-// package runtime -- go2cs converted at 2020 October 09 04:48:58 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:12:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\timeasm.go
+// Original source: C:\Program Files\Go\src\runtime\timeasm.go
 using _@unsafe_ = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        //go:linkname time_now time.now
-        private static (long, int, long) time_now()
-;
-    }
-}
+namespace go;
+
+public static partial class runtime_package {
+
+    //go:linkname time_now time.now
+private static (long, int, long) time_now();
+
+} // end runtime_package

@@ -5,24 +5,21 @@
 // Test that a live variable doesn't bring its type
 // descriptor live.
 
-// package main -- go2cs converted at 2020 October 09 05:50:36 UTC
-// Original source: C:\Go\src\cmd\link\internal\ld\testdata\deadcode\typedesc.go
+// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\deadcode\typedesc.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        public partial struct T // : array<@string>
-        {
-        }
+namespace go;
 
-        private static T t = default;
+public static partial class main_package {
 
-        private static void Main()
-        {
-            println(t[8L]);
-        }
-    }
+public partial struct T { // : array<@string>
 }
+
+private static T t = default;
+
+private static void Main() {
+    println(t[8]);
+}
+
+} // end main_package

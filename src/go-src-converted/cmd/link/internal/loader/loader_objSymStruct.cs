@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:52 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -26,7 +25,6 @@ using log = go.log_package;
 using bits = go.math.bits_package;
 using os = go.os_package;
 using sort = go.sort_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -45,13 +43,13 @@ namespace @internal
             // Constructors
             public objSym(NilType _)
             {
-                this.r = default;
+                this.objidx = default;
                 this.s = default;
             }
 
-            public objSym(ref ptr<oReader> r = default, long s = default)
+            public objSym(uint objidx = default, uint s = default)
             {
-                this.r = r;
+                this.objidx = objidx;
                 this.s = s;
             }
 
@@ -75,7 +73,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static objSym objSym_cast(dynamic value)
         {
-            return new objSym(ref value.r, value.s);
+            return new objSym(value.objidx, value.s);
         }
     }
 }}}}

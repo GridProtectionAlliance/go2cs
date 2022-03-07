@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:17 UTC
+//     Generated on 2022 March 06 22:24:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
@@ -37,7 +36,7 @@ namespace template
                 this.input = default;
                 this.leftDelim = default;
                 this.rightDelim = default;
-                this.trimRightDelim = default;
+                this.emitComment = default;
                 this.pos = default;
                 this.start = default;
                 this.width = default;
@@ -47,13 +46,13 @@ namespace template
                 this.startLine = default;
             }
 
-            public lexer(@string name = default, @string input = default, @string leftDelim = default, @string rightDelim = default, @string trimRightDelim = default, Pos pos = default, Pos start = default, Pos width = default, channel<item> items = default, long parenDepth = default, long line = default, long startLine = default)
+            public lexer(@string name = default, @string input = default, @string leftDelim = default, @string rightDelim = default, bool emitComment = default, Pos pos = default, Pos start = default, Pos width = default, channel<item> items = default, nint parenDepth = default, nint line = default, nint startLine = default)
             {
                 this.name = name;
                 this.input = input;
                 this.leftDelim = leftDelim;
                 this.rightDelim = rightDelim;
-                this.trimRightDelim = trimRightDelim;
+                this.emitComment = emitComment;
                 this.pos = pos;
                 this.start = start;
                 this.width = width;
@@ -83,7 +82,7 @@ namespace template
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static lexer lexer_cast(dynamic value)
         {
-            return new lexer(value.name, value.input, value.leftDelim, value.rightDelim, value.trimRightDelim, value.pos, value.start, value.width, value.items, value.parenDepth, value.line, value.startLine);
+            return new lexer(value.name, value.input, value.leftDelim, value.rightDelim, value.emitComment, value.pos, value.start, value.width, value.items, value.parenDepth, value.line, value.startLine);
         }
     }
 }}}

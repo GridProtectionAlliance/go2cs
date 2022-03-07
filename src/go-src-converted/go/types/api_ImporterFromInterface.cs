@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:57 UTC
+//     Generated on 2022 March 06 22:41:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -54,7 +53,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,36 +79,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ImportFromByPtr is null || !m_target_is_ptr)
                     return s_ImportFromByVal!(target, path, dir, mode);
 
-                return s_ImportFromByPtr(m_target_ptr, path, dir, mode);
-            }
-
-            private delegate (ptr<Package>, error) ImportByPtr(ptr<T> value, @string path);
-            private delegate (ptr<Package>, error) ImportByVal(T value, @string path);
-
-            private static readonly ImportByPtr? s_ImportByPtr;
-            private static readonly ImportByVal? s_ImportByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (ptr<Package>, error) Import(@string path)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ImportByPtr is null || !m_target_is_ptr)
-                    return s_ImportByVal!(target, path);
-
-                return s_ImportByPtr(m_target_ptr, path);
+                return s_ImportFromByPtr(m_target_ptr!, path, dir, mode);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ImporterFrom()
@@ -120,29 +99,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ImportFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportFromByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportFromByPtr)) as ImportFromByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ImportFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportFromByVal = extensionMethod.CreateStaticDelegate(typeof(ImportFromByVal)) as ImportFromByVal;
 
                 if (s_ImportFromByPtr is null && s_ImportFromByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ImporterFrom.ImportFrom method", new Exception("ImportFrom"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Import");
-
-                if (!(extensionMethod is null))
-                    s_ImportByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportByPtr)) as ImportByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Import");
-
-                if (!(extensionMethod is null))
-                    s_ImportByVal = extensionMethod.CreateStaticDelegate(typeof(ImportByVal)) as ImportByVal;
-
-                if (s_ImportByPtr is null && s_ImportByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ImporterFrom.Import method", new Exception("Import"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

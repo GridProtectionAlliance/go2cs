@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:26 UTC
+//     Generated on 2022 March 06 22:49:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
 using crc32 = go.hash.crc32_package;
+using buildcfg = go.@internal.buildcfg_package;
 using log = go.log_package;
 using rand = go.math.rand_package;
 using os = go.os_package;
@@ -55,7 +54,7 @@ namespace @internal
                 this.dump = default;
             }
 
-            public pass(@string name = default, Action<ptr<Func>> fn = default, bool required = default, bool disabled = default, bool time = default, bool mem = default, long stats = default, long debug = default, long test = default, map<@string, bool> dump = default)
+            public pass(@string name = default, Action<ptr<Func>> fn = default, bool required = default, bool disabled = default, bool time = default, bool mem = default, nint stats = default, nint debug = default, nint test = default, map<@string, bool> dump = default)
             {
                 this.name = name;
                 this.fn = fn;

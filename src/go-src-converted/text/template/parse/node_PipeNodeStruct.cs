@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:20 UTC
+//     Generated on 2022 March 06 22:24:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -41,7 +40,7 @@ namespace template
                 this.Cmds = default;
             }
 
-            public PipeNode(NodeType NodeType = default, Pos Pos = default, ref ptr<Tree> tr = default, long Line = default, bool IsAssign = default, slice<ptr<VariableNode>> Decl = default, slice<ptr<CommandNode>> Cmds = default)
+            public PipeNode(NodeType NodeType = default, Pos Pos = default, ref ptr<Tree> tr = default, nint Line = default, bool IsAssign = default, slice<ptr<VariableNode>> Decl = default, slice<ptr<CommandNode>> Cmds = default)
             {
                 this.NodeType = NodeType;
                 this.Pos = Pos;

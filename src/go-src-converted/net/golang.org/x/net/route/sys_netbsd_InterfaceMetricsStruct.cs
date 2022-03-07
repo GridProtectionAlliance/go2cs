@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:43 UTC
+//     Generated on 2022 March 06 22:15:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace net
                 this.MTU = default;
             }
 
-            public InterfaceMetrics(long Type = default, long MTU = default)
+            public InterfaceMetrics(nint Type = default, nint MTU = default)
             {
                 this.Type = Type;
                 this.MTU = MTU;

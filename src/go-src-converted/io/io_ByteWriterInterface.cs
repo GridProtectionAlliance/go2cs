@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:26 UTC
+//     Generated on 2022 March 06 22:12:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using sync = go.sync_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -48,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,16 +74,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteByteByPtr is null || !m_target_is_ptr)
                     return s_WriteByteByVal!(target, c);
 
-                return s_WriteByteByPtr(m_target_ptr, c);
+                return s_WriteByteByPtr(m_target_ptr!, c);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ByteWriter()
@@ -94,12 +94,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteByte");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByteByPtr)) as WriteByteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteByte");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
 
                 if (s_WriteByteByPtr is null && s_WriteByteByVal is null)

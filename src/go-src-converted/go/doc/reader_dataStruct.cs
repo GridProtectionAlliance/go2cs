@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:08 UTC
+//     Generated on 2022 March 06 22:41:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
 using lazyregexp = go.@internal.lazyregexp_package;
@@ -38,7 +37,7 @@ namespace go
                 this.less = default;
             }
 
-            public data(long n = default, Action<long, long> swap = default, Func<long, long, bool> less = default)
+            public data(nint n = default, Action<nint, nint> swap = default, Func<nint, nint, bool> less = default)
             {
                 this.n = n;
                 this.swap = swap;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:39 UTC
+//     Generated on 2022 March 06 22:25:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace go
                 this.Infos = default;
             }
 
-            public serializedFile(@string Name = default, long Base = default, long Size = default, slice<long> Lines = default, slice<lineInfo> Infos = default)
+            public serializedFile(@string Name = default, nint Base = default, nint Size = default, slice<nint> Lines = default, slice<lineInfo> Infos = default)
             {
                 this.Name = Name;
                 this.Base = Base;

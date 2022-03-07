@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:47 UTC
+//     Generated on 2022 March 06 23:36:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using image = go.image_package;
 using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
@@ -52,7 +51,7 @@ namespace image
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -67,18 +66,18 @@ namespace image
                 m_target_is_ptr = true;
             }
 
-            private delegate void SetByPtr(ptr<T> value, long x, long y, color.Color c);
-            private delegate void SetByVal(T value, long x, long y, color.Color c);
+            private delegate void SetByPtr(ptr<T> value, nint x, nint y, color.Color c);
+            private delegate void SetByVal(T value, nint x, nint y, color.Color c);
 
             private static readonly SetByPtr? s_SetByPtr;
             private static readonly SetByVal? s_SetByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void Set(long x, long y, color.Color c)
+            public void Set(nint x, nint y, color.Color c)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetByPtr is null || !m_target_is_ptr)
@@ -87,72 +86,11 @@ namespace image
                     return;
                 }
 
-                s_SetByPtr(m_target_ptr, x, y, c);
+                s_SetByPtr(m_target_ptr!, x, y, c);
                 return;
-                
-            }
-
-            private delegate color.Color ColorModelByPtr(ptr<T> value);
-            private delegate color.Color ColorModelByVal(T value);
-
-            private static readonly ColorModelByPtr? s_ColorModelByPtr;
-            private static readonly ColorModelByVal? s_ColorModelByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public color.Color ColorModel()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ColorModelByPtr is null || !m_target_is_ptr)
-                    return s_ColorModelByVal!(target);
-
-                return s_ColorModelByPtr(m_target_ptr);
-            }
-
-            private delegate color.Color BoundsByPtr(ptr<T> value);
-            private delegate color.Color BoundsByVal(T value);
-
-            private static readonly BoundsByPtr? s_BoundsByPtr;
-            private static readonly BoundsByVal? s_BoundsByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public color.Color Bounds()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_BoundsByPtr is null || !m_target_is_ptr)
-                    return s_BoundsByVal!(target);
-
-                return s_BoundsByPtr(m_target_ptr);
-            }
-
-            private delegate color.Color AtByPtr(ptr<T> value, long x, long y);
-            private delegate color.Color AtByVal(T value, long x, long y);
-
-            private static readonly AtByPtr? s_AtByPtr;
-            private static readonly AtByVal? s_AtByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public color.Color At(long x, long y)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_AtByPtr is null || !m_target_is_ptr)
-                    return s_AtByVal!(target, x, y);
-
-                return s_AtByPtr(m_target_ptr, x, y);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Image()
@@ -163,55 +101,16 @@ namespace image
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Set");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetByPtr = extensionMethod.CreateStaticDelegate(typeof(SetByPtr)) as SetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Set");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
 
                 if (s_SetByPtr is null && s_SetByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Image.Set method", new Exception("Set"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("ColorModel");
-
-                if (!(extensionMethod is null))
-                    s_ColorModelByPtr = extensionMethod.CreateStaticDelegate(typeof(ColorModelByPtr)) as ColorModelByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("ColorModel");
-
-                if (!(extensionMethod is null))
-                    s_ColorModelByVal = extensionMethod.CreateStaticDelegate(typeof(ColorModelByVal)) as ColorModelByVal;
-
-                if (s_ColorModelByPtr is null && s_ColorModelByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Image.ColorModel method", new Exception("ColorModel"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Bounds");
-
-                if (!(extensionMethod is null))
-                    s_BoundsByPtr = extensionMethod.CreateStaticDelegate(typeof(BoundsByPtr)) as BoundsByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Bounds");
-
-                if (!(extensionMethod is null))
-                    s_BoundsByVal = extensionMethod.CreateStaticDelegate(typeof(BoundsByVal)) as BoundsByVal;
-
-                if (s_BoundsByPtr is null && s_BoundsByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Image.Bounds method", new Exception("Bounds"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("At");
-
-                if (!(extensionMethod is null))
-                    s_AtByPtr = extensionMethod.CreateStaticDelegate(typeof(AtByPtr)) as AtByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("At");
-
-                if (!(extensionMethod is null))
-                    s_AtByVal = extensionMethod.CreateStaticDelegate(typeof(AtByVal)) as AtByVal;
-
-                if (s_AtByPtr is null && s_AtByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Image.At method", new Exception("At"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

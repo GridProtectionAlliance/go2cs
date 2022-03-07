@@ -4,22 +4,18 @@
 
 // Input for TestIssue13566
 
-// package a -- go2cs converted at 2020 October 09 06:02:45 UTC
+// package a -- go2cs converted at 2022 March 06 23:32:40 UTC
 // import "go/internal/gcimporter.a" ==> using a = go.go.@internal.gcimporter.a_package
-// Original source: C:\Go\src\go\internal\gcimporter\testdata\a.go
+// Original source: C:\Program Files\Go\src\go\internal\gcimporter\testdata\a.go
 using json = go.encoding.json_package;
-using static go.builtin;
 
-namespace go {
-namespace go {
-namespace @internal
-{
-    public static partial class a_package
-    {
-        public partial struct A
-        {
-            public ptr<A> a;
-            public json.RawMessage json;
-        }
-    }
-}}}
+namespace go.go.@internal;
+
+public static partial class a_package {
+
+public partial struct A {
+    public ptr<A> a;
+    public json.RawMessage json;
+}
+
+} // end a_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:21 UTC
+//     Generated on 2022 March 06 23:15:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
@@ -20,7 +19,6 @@ using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
 using sort = go.sort_package;
@@ -46,7 +44,7 @@ namespace go
 
             public ref token.Pos endByte => ref m_BlockRef.Value.endByte;
 
-            public ref long numStmt => ref m_BlockRef.Value.numStmt;
+            public ref nint numStmt => ref m_BlockRef.Value.numStmt;
 
             // Constructors
             public block1(NilType _)
@@ -55,7 +53,7 @@ namespace go
                 this.index = default;
             }
 
-            public block1(Block Block = default, long index = default)
+            public block1(Block Block = default, nint index = default)
             {
                 this.m_BlockRef = new ptr<Block>(Block);
                 this.index = index;

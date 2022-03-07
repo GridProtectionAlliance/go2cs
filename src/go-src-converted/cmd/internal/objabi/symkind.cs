@@ -28,60 +28,61 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2020 October 09 05:08:53 UTC
+// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
-// Original source: C:\Go\src\cmd\internal\objabi\symkind.go
+// Original source: C:\Program Files\Go\src\cmd\internal\objabi\symkind.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace @internal
-{
-    public static partial class objabi_package
-    {
-        // A SymKind describes the kind of memory represented by a symbol.
-        public partial struct SymKind // : byte
-        {
-        }
+namespace go.cmd.@internal;
 
-        // Defined SymKind values.
-        // These are used to index into cmd/link/internal/sym/AbiSymKindToSymKind
-        //
-        // TODO(rsc): Give idiomatic Go names.
-        //go:generate stringer -type=SymKind
+public static partial class objabi_package {
+
+    // A SymKind describes the kind of memory represented by a symbol.
+public partial struct SymKind { // : byte
+}
+
+// Defined SymKind values.
+// These are used to index into cmd/link/internal/sym/AbiSymKindToSymKind
+//
+// TODO(rsc): Give idiomatic Go names.
+//go:generate stringer -type=SymKind
  
-        // An otherwise invalid zero value for the type
-        public static readonly SymKind Sxxx = (SymKind)iota; 
-        // Executable instructions
-        public static readonly var STEXT = 0; 
-        // Read only static data
-        public static readonly var SRODATA = 1; 
-        // Static data that does not contain any pointers
-        public static readonly var SNOPTRDATA = 2; 
-        // Static data
-        public static readonly var SDATA = 3; 
-        // Statically data that is initially all 0s
-        public static readonly var SBSS = 4; 
-        // Statically data that is initially all 0s and does not contain pointers
-        public static readonly var SNOPTRBSS = 5; 
-        // Thread-local data that is initially all 0s
-        public static readonly var STLSBSS = 6; 
-        // Debugging data
-        public static readonly var SDWARFINFO = 7;
-        public static readonly var SDWARFRANGE = 8;
-        public static readonly var SDWARFLOC = 9;
-        public static readonly var SDWARFLINES = 10; 
-        // ABI alias. An ABI alias symbol is an empty symbol with a
-        // single relocation with 0 size that references the native
-        // function implementation symbol.
-        //
-        // TODO(austin): Remove this and all uses once the compiler
-        // generates real ABI wrappers rather than symbol aliases.
-        public static readonly var SABIALIAS = 11; 
-        // Coverage instrumentation counter for libfuzzer.
-        public static readonly var SLIBFUZZER_EXTRA_COUNTER = 12; 
-        // Update cmd/link/internal/sym/AbiSymKindToSymKind for new SymKind values.
+// An otherwise invalid zero value for the type
+public static readonly SymKind Sxxx = iota; 
+// Executable instructions
+public static readonly var STEXT = 0; 
+// Read only static data
+public static readonly var SRODATA = 1; 
+// Static data that does not contain any pointers
+public static readonly var SNOPTRDATA = 2; 
+// Static data
+public static readonly var SDATA = 3; 
+// Statically data that is initially all 0s
+public static readonly var SBSS = 4; 
+// Statically data that is initially all 0s and does not contain pointers
+public static readonly var SNOPTRBSS = 5; 
+// Thread-local data that is initially all 0s
+public static readonly var STLSBSS = 6; 
+// Debugging data
+public static readonly var SDWARFCUINFO = 7;
+public static readonly var SDWARFCONST = 8;
+public static readonly var SDWARFFCN = 9;
+public static readonly var SDWARFABSFCN = 10;
+public static readonly var SDWARFTYPE = 11;
+public static readonly var SDWARFVAR = 12;
+public static readonly var SDWARFRANGE = 13;
+public static readonly var SDWARFLOC = 14;
+public static readonly var SDWARFLINES = 15; 
+// ABI alias. An ABI alias symbol is an empty symbol with a
+// single relocation with 0 size that references the native
+// function implementation symbol.
+//
+// TODO(austin): Remove this and all uses once the compiler
+// generates real ABI wrappers rather than symbol aliases.
+public static readonly var SABIALIAS = 16; 
+// Coverage instrumentation counter for libfuzzer.
+public static readonly var SLIBFUZZER_EXTRA_COUNTER = 17; 
+// Update cmd/link/internal/sym/AbiSymKindToSymKind for new SymKind values.
 
-    }
-}}}
+
+} // end objabi_package

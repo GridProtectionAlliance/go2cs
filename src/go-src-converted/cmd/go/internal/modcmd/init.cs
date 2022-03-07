@@ -4,74 +4,49 @@
 
 // go mod init
 
-// package modcmd -- go2cs converted at 2020 October 09 05:47:53 UTC
+// package modcmd -- go2cs converted at 2022 March 06 23:19:36 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
-// Original source: C:\Go\src\cmd\go\internal\modcmd\init.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\init.go
 using @base = go.cmd.go.@internal.@base_package;
 using modload = go.cmd.go.@internal.modload_package;
-using work = go.cmd.go.@internal.work_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using static go.builtin;
+using context = go.context_package;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class modcmd_package
-    {
-        private static ptr<base.Command> cmdInit = addr(new base.Command(UsageLine:"go mod init [module]",Short:"initialize new module in current directory",Long:`
-Init initializes and writes a new go.mod to the current directory,
-in effect creating a new module rooted at the current directory.
-The file go.mod must not already exist.
-If possible, init will guess the module path from import comments
-(see 'go help importpath') or from version control configuration.
-To override this guess, supply the module path as an argument.
-	`,Run:runInit,));
+namespace go.cmd.go.@internal;
 
-        private static void init()
-        {
-            work.AddModCommonFlags(cmdInit);
-        }
+public static partial class modcmd_package {
 
-        private static void runInit(ptr<base.Command> _addr_cmd, slice<@string> args)
-        {
-            ref base.Command cmd = ref _addr_cmd.val;
+private static ptr<base.Command> cmdInit = addr(new base.Command(UsageLine:"go mod init [module-path]",Short:"initialize new module in current directory",Long:`
+Init initializes and writes a new go.mod file in the current directory, in
+effect creating a new module rooted at the current directory. The go.mod file
+must not already exist.
 
-            modload.CmdModInit = true;
-            if (len(args) > 1L)
-            {
-                @base.Fatalf("go mod init: too many arguments");
-            }
+Init accepts one optional argument, the module path for the new module. If the
+module path argument is omitted, init will attempt to infer the module path
+using import comments in .go files, vendoring tool configuration files (like
+Gopkg.lock), and the current directory (if in GOPATH).
 
-            if (len(args) == 1L)
-            {
-                modload.CmdModModule = args[0L];
-            }
+If a configuration file for a vendoring tool is present, init will attempt to
+import module requirements from it.
 
-            if (os.Getenv("GO111MODULE") == "off")
-            {
-                @base.Fatalf("go mod init: modules disabled by GO111MODULE=off; see 'go help modules'");
-            }
+See https://golang.org/ref/mod#go-mod-init for more about 'go mod init'.
+`,Run:runInit,));
 
-            var modFilePath = modload.ModFilePath();
-            {
-                var (_, err) = os.Stat(modFilePath);
+private static void init() {
+    @base.AddModCommonFlags(_addr_cmdInit.Flag);
+}
 
-                if (err == null)
-                {
-                    @base.Fatalf("go mod init: go.mod already exists");
-                }
+private static void runInit(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
+    ref base.Command cmd = ref _addr_cmd.val;
 
-            }
-
-            if (strings.Contains(modload.CmdModModule, "@"))
-            {
-                @base.Fatalf("go mod init: module path must not contain '@'");
-            }
-
-            modload.InitMod(); // does all the hard work
-        }
+    if (len(args) > 1) {
+        @base.Fatalf("go mod init: too many arguments");
     }
-}}}}
+    @string modPath = default;
+    if (len(args) == 1) {
+        modPath = args[0];
+    }
+    modload.ForceUseModules = true;
+    modload.CreateModFile(ctx, modPath); // does all the hard work
+}
+
+} // end modcmd_package

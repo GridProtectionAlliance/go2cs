@@ -4,8 +4,8 @@
 
 // +build linux,amd64 freebsd,amd64
 
-// package main -- go2cs converted at 2020 October 09 05:01:02 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\raceprof.go
+// package main -- go2cs converted at 2022 March 06 22:26:16 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\raceprof.go
 // Test that we can collect a lot of colliding profiling signals from
 // an external C thread. This used to fail when built with the race
 // detector, because a call of the predeclared function copy was
@@ -107,26 +107,23 @@ using fmt = go.fmt_package;
 using runtime = go.runtime_package;
 using pprof = go.runtime.pprof_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoRaceprof", CgoRaceprof);
-        }
+namespace go;
 
-        public static void CgoRaceprof()
-        {
-            runtime.SetCgoTraceback(0L, @unsafe.Pointer(C.raceprofTraceback), null, null);
+public static partial class main_package {
 
-            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
-            pprof.StartCPUProfile(_addr_buf);
-
-            C.runRaceprofThread();
-            fmt.Println("OK");
-        }
-    }
+private static void init() {
+    register("CgoRaceprof", CgoRaceprof);
 }
+
+public static void CgoRaceprof() {
+    runtime.SetCgoTraceback(0, @unsafe.Pointer(C.raceprofTraceback), null, null);
+
+    ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+    pprof.StartCPUProfile(_addr_buf);
+
+    C.runRaceprofThread();
+    fmt.Println("OK");
+}
+
+} // end main_package

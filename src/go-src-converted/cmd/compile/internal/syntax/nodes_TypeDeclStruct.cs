@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,16 +39,18 @@ namespace @internal
                 this.Group = default;
                 this.Pragma = default;
                 this.Name = default;
+                this.TParamList = default;
                 this.Alias = default;
                 this.Type = default;
                 this.m_declRef = new ptr<decl>(new decl(nil));
             }
 
-            public TypeDecl(ref ptr<Group> Group = default, Pragma Pragma = default, ref ptr<Name> Name = default, bool Alias = default, Expr Type = default, decl decl = default)
+            public TypeDecl(ref ptr<Group> Group = default, Pragma Pragma = default, ref ptr<Name> Name = default, slice<ptr<Field>> TParamList = default, bool Alias = default, Expr Type = default, decl decl = default)
             {
                 this.Group = Group;
                 this.Pragma = Pragma;
                 this.Name = Name;
+                this.TParamList = TParamList;
                 this.Alias = Alias;
                 this.Type = Type;
                 this.m_declRef = new ptr<decl>(decl);
@@ -74,7 +76,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static TypeDecl TypeDecl_cast(dynamic value)
         {
-            return new TypeDecl(ref value.Group, value.Pragma, ref value.Name, value.Alias, value.Type, value.decl);
+            return new TypeDecl(ref value.Group, value.Pragma, ref value.Name, value.TParamList, value.Alias, value.Type, value.decl);
         }
     }
 }}}}

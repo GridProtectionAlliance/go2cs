@@ -92,362 +92,303 @@
 // dead (meaning that foo() never accesses B again after it calls
 // bar()), then B's pointers into the heap are not considered live.
 
-// package runtime -- go2cs converted at 2020 October 09 04:46:49 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:09:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\mgcstack.go
+// Original source: C:\Program Files\Go\src\runtime\mgcstack.go
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static readonly var stackTraceDebug = false;
+namespace go;
 
-        // Buffer for pointers found during stack tracing.
-        // Must be smaller than or equal to workbuf.
-        //
-        //go:notinheap
+public static partial class runtime_package {
+
+private static readonly var stackTraceDebug = false;
+
+// Buffer for pointers found during stack tracing.
+// Must be smaller than or equal to workbuf.
+//
+//go:notinheap
 
 
-        // Buffer for pointers found during stack tracing.
-        // Must be smaller than or equal to workbuf.
-        //
-        //go:notinheap
-        private partial struct stackWorkBuf
-        {
-            public ref stackWorkBufHdr stackWorkBufHdr => ref stackWorkBufHdr_val;
-            public array<System.UIntPtr> obj;
-        }
+// Buffer for pointers found during stack tracing.
+// Must be smaller than or equal to workbuf.
+//
+//go:notinheap
+private partial struct stackWorkBuf {
+    public ref stackWorkBufHdr stackWorkBufHdr => ref stackWorkBufHdr_val;
+    public array<System.UIntPtr> obj;
+}
 
-        // Header declaration must come after the buf declaration above, because of issue #14620.
-        //
-        //go:notinheap
-        private partial struct stackWorkBufHdr
-        {
-            public ref workbufhdr workbufhdr => ref workbufhdr_val;
-            public ptr<stackWorkBuf> next; // linked list of workbufs
+// Header declaration must come after the buf declaration above, because of issue #14620.
+//
+//go:notinheap
+private partial struct stackWorkBufHdr {
+    public ref workbufhdr workbufhdr => ref workbufhdr_val;
+    public ptr<stackWorkBuf> next; // linked list of workbufs
 // Note: we could theoretically repurpose lfnode.next as this next pointer.
 // It would save 1 word, but that probably isn't worth busting open
 // the lfnode API.
-        }
+}
 
-        // Buffer for stack objects found on a goroutine stack.
-        // Must be smaller than or equal to workbuf.
-        //
-        //go:notinheap
-        private partial struct stackObjectBuf
-        {
-            public ref stackObjectBufHdr stackObjectBufHdr => ref stackObjectBufHdr_val;
-            public array<stackObject> obj;
-        }
+// Buffer for stack objects found on a goroutine stack.
+// Must be smaller than or equal to workbuf.
+//
+//go:notinheap
+private partial struct stackObjectBuf {
+    public ref stackObjectBufHdr stackObjectBufHdr => ref stackObjectBufHdr_val;
+    public array<stackObject> obj;
+}
 
-        //go:notinheap
-        private partial struct stackObjectBufHdr
-        {
-            public ref workbufhdr workbufhdr => ref workbufhdr_val;
-            public ptr<stackObjectBuf> next;
-        }
+//go:notinheap
+private partial struct stackObjectBufHdr {
+    public ref workbufhdr workbufhdr => ref workbufhdr_val;
+    public ptr<stackObjectBuf> next;
+}
 
-        private static void init() => func((_, panic, __) =>
-        {
-            if (@unsafe.Sizeof(new stackWorkBuf()) > @unsafe.Sizeof(new workbuf()))
-            {
-                panic("stackWorkBuf too big");
-            }
+private static void init() => func((_, panic, _) => {
+    if (@unsafe.Sizeof(new stackWorkBuf()) > @unsafe.Sizeof(new workbuf())) {
+        panic("stackWorkBuf too big");
+    }
+    if (@unsafe.Sizeof(new stackObjectBuf()) > @unsafe.Sizeof(new workbuf())) {
+        panic("stackObjectBuf too big");
+    }
+});
 
-            if (@unsafe.Sizeof(new stackObjectBuf()) > @unsafe.Sizeof(new workbuf()))
-            {
-                panic("stackObjectBuf too big");
-            }
+// A stackObject represents a variable on the stack that has had
+// its address taken.
+//
+//go:notinheap
+private partial struct stackObject {
+    public uint off; // offset above stack.lo
+    public uint size; // size of object
+    public ptr<stackObjectRecord> r; // info of the object (for ptr/nonptr bits). nil if object has been scanned.
+    public ptr<stackObject> left; // objects with lower addresses
+    public ptr<stackObject> right; // objects with higher addresses
+}
 
-        });
-
-        // A stackObject represents a variable on the stack that has had
-        // its address taken.
-        //
-        //go:notinheap
-        private partial struct stackObject
-        {
-            public uint off; // offset above stack.lo
-            public uint size; // size of object
-            public ptr<_type> typ; // type info (for ptr/nonptr bits). nil if object has been scanned.
-            public ptr<stackObject> left; // objects with lower addresses
-            public ptr<stackObject> right; // objects with higher addresses
-        }
-
-        // obj.typ = typ, but with no write barrier.
-        //go:nowritebarrier
-        private static void setType(this ptr<stackObject> _addr_obj, ptr<_type> _addr_typ)
-        {
-            ref stackObject obj = ref _addr_obj.val;
-            ref _type typ = ref _addr_typ.val;
+// obj.r = r, but with no write barrier.
+//go:nowritebarrier
+private static void setRecord(this ptr<stackObject> _addr_obj, ptr<stackObjectRecord> _addr_r) {
+    ref stackObject obj = ref _addr_obj.val;
+    ref stackObjectRecord r = ref _addr_r.val;
  
-            // Types of stack objects are always in read-only memory, not the heap.
-            // So not using a write barrier is ok.
-            (uintptr.val)(@unsafe.Pointer(_addr_obj.typ)).val;
+    // Types of stack objects are always in read-only memory, not the heap.
+    // So not using a write barrier is ok.
+    (uintptr.val)(@unsafe.Pointer(_addr_obj.r)).val;
 
-            uintptr(@unsafe.Pointer(typ));
+    uintptr(@unsafe.Pointer(r));
 
-        }
+}
 
-        // A stackScanState keeps track of the state used during the GC walk
-        // of a goroutine.
-        //
-        //go:notinheap
-        private partial struct stackScanState
-        {
-            public pcvalueCache cache; // stack limits
-            public stack stack; // conservative indicates that the next frame must be scanned conservatively.
+// A stackScanState keeps track of the state used during the GC walk
+// of a goroutine.
+private partial struct stackScanState {
+    public pcvalueCache cache; // stack limits
+    public stack stack; // conservative indicates that the next frame must be scanned conservatively.
 // This applies only to the innermost frame at an async safe-point.
-            public bool conservative; // buf contains the set of possible pointers to stack objects.
+    public bool conservative; // buf contains the set of possible pointers to stack objects.
 // Organized as a LIFO linked list of buffers.
 // All buffers except possibly the head buffer are full.
-            public ptr<stackWorkBuf> buf;
-            public ptr<stackWorkBuf> freeBuf; // keep around one free buffer for allocation hysteresis
+    public ptr<stackWorkBuf> buf;
+    public ptr<stackWorkBuf> freeBuf; // keep around one free buffer for allocation hysteresis
 
 // cbuf contains conservative pointers to stack objects. If
 // all pointers to a stack object are obtained via
 // conservative scanning, then the stack object may be dead
 // and may contain dead pointers, so it must be scanned
 // defensively.
-            public ptr<stackWorkBuf> cbuf; // list of stack objects
+    public ptr<stackWorkBuf> cbuf; // list of stack objects
 // Objects are in increasing address order.
-            public ptr<stackObjectBuf> head;
-            public ptr<stackObjectBuf> tail;
-            public long nobjs; // root of binary tree for fast object lookup by address
+    public ptr<stackObjectBuf> head;
+    public ptr<stackObjectBuf> tail;
+    public nint nobjs; // root of binary tree for fast object lookup by address
 // Initialized by buildIndex.
-            public ptr<stackObject> root;
+    public ptr<stackObject> root;
+}
+
+// Add p as a potential pointer to a stack object.
+// p must be a stack address.
+private static void putPtr(this ptr<stackScanState> _addr_s, System.UIntPtr p, bool conservative) {
+    ref stackScanState s = ref _addr_s.val;
+
+    if (p < s.stack.lo || p >= s.stack.hi) {
+        throw("address not a stack address");
+    }
+    var head = _addr_s.buf;
+    if (conservative) {
+        head = _addr_s.cbuf;
+    }
+    var buf = head.val;
+    if (buf == null) { 
+        // Initial setup.
+        buf = (stackWorkBuf.val)(@unsafe.Pointer(getempty()));
+        buf.nobj = 0;
+        buf.next = null;
+        head.val = buf;
+
+    }
+    else if (buf.nobj == len(buf.obj)) {
+        if (s.freeBuf != null) {
+            buf = s.freeBuf;
+            s.freeBuf = null;
         }
+        else
+ {
+            buf = (stackWorkBuf.val)(@unsafe.Pointer(getempty()));
+        }
+        buf.nobj = 0;
+        buf.next = head.val;
+        head.val = buf;
 
-        // Add p as a potential pointer to a stack object.
-        // p must be a stack address.
-        private static void putPtr(this ptr<stackScanState> _addr_s, System.UIntPtr p, bool conservative)
-        {
-            ref stackScanState s = ref _addr_s.val;
+    }
+    buf.obj[buf.nobj] = p;
+    buf.nobj++;
 
-            if (p < s.stack.lo || p >= s.stack.hi)
-            {
-                throw("address not a stack address");
-            }
+}
 
-            var head = _addr_s.buf;
-            if (conservative)
-            {
-                head = _addr_s.cbuf;
-            }
+// Remove and return a potential pointer to a stack object.
+// Returns 0 if there are no more pointers available.
+//
+// This prefers non-conservative pointers so we scan stack objects
+// precisely if there are any non-conservative pointers to them.
+private static (System.UIntPtr, bool) getPtr(this ptr<stackScanState> _addr_s) {
+    System.UIntPtr p = default;
+    bool conservative = default;
+    ref stackScanState s = ref _addr_s.val;
 
-            var buf = head.val;
-            if (buf == null)
-            { 
-                // Initial setup.
-                buf = (stackWorkBuf.val)(@unsafe.Pointer(getempty()));
-                buf.nobj = 0L;
-                buf.next = null;
-                head.val = buf;
-
-            }
-            else if (buf.nobj == len(buf.obj))
-            {
-                if (s.freeBuf != null)
-                {
-                    buf = s.freeBuf;
-                    s.freeBuf = null;
-                }
-                else
-                {
-                    buf = (stackWorkBuf.val)(@unsafe.Pointer(getempty()));
-                }
-
-                buf.nobj = 0L;
-                buf.next = head.val;
-                head.val = buf;
-
-            }
-
-            buf.obj[buf.nobj] = p;
-            buf.nobj++;
+    foreach (var (_, head) in new slice<ptr<ptr<stackWorkBuf>>>(new ptr<ptr<stackWorkBuf>>[] { &s.buf, &s.cbuf })) {
+        var buf = head.val;
+        if (buf == null) { 
+            // Never had any data.
+            continue;
 
         }
-
-        // Remove and return a potential pointer to a stack object.
-        // Returns 0 if there are no more pointers available.
-        //
-        // This prefers non-conservative pointers so we scan stack objects
-        // precisely if there are any non-conservative pointers to them.
-        private static (System.UIntPtr, bool) getPtr(this ptr<stackScanState> _addr_s)
-        {
-            System.UIntPtr p = default;
-            bool conservative = default;
-            ref stackScanState s = ref _addr_s.val;
-
-            foreach (var (_, head) in new slice<ptr<ptr<stackWorkBuf>>>(new ptr<ptr<stackWorkBuf>>[] { &s.buf, &s.cbuf }))
-            {
-                var buf = head.val;
-                if (buf == null)
-                { 
-                    // Never had any data.
-                    continue;
-
-                }
-
-                if (buf.nobj == 0L)
-                {
-                    if (s.freeBuf != null)
-                    { 
-                        // Free old freeBuf.
-                        putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
-
-                    } 
-                    // Move buf to the freeBuf.
-                    s.freeBuf = buf;
-                    buf = buf.next;
-                    head.val = buf;
-                    if (buf == null)
-                    { 
-                        // No more data in this list.
-                        continue;
-
-                    }
-
-                }
-
-                buf.nobj--;
-                return (buf.obj[buf.nobj], head == _addr_s.cbuf);
+        if (buf.nobj == 0) {
+            if (s.freeBuf != null) { 
+                // Free old freeBuf.
+                putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
 
             } 
-            // No more data in either list.
-            if (s.freeBuf != null)
-            {
-                putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
-                s.freeBuf = null;
-            }
+            // Move buf to the freeBuf.
+            s.freeBuf = buf;
+            buf = buf.next;
+            head.val = buf;
+            if (buf == null) { 
+                // No more data in this list.
+                continue;
 
-            return (0L, false);
+            }
 
         }
+        buf.nobj--;
+        return (buf.obj[buf.nobj], head == _addr_s.cbuf);
 
-        // addObject adds a stack object at addr of type typ to the set of stack objects.
-        private static void addObject(this ptr<stackScanState> _addr_s, System.UIntPtr addr, ptr<_type> _addr_typ)
-        {
-            ref stackScanState s = ref _addr_s.val;
-            ref _type typ = ref _addr_typ.val;
-
-            var x = s.tail;
-            if (x == null)
-            { 
-                // initial setup
-                x = (stackObjectBuf.val)(@unsafe.Pointer(getempty()));
-                x.next = null;
-                s.head = x;
-                s.tail = x;
-
-            }
-
-            if (x.nobj > 0L && uint32(addr - s.stack.lo) < x.obj[x.nobj - 1L].off + x.obj[x.nobj - 1L].size)
-            {
-                throw("objects added out of order or overlapping");
-            }
-
-            if (x.nobj == len(x.obj))
-            { 
-                // full buffer - allocate a new buffer, add to end of linked list
-                var y = (stackObjectBuf.val)(@unsafe.Pointer(getempty()));
-                y.next = null;
-                x.next = y;
-                s.tail = y;
-                x = y;
-
-            }
-
-            var obj = _addr_x.obj[x.nobj];
-            x.nobj++;
-            obj.off = uint32(addr - s.stack.lo);
-            obj.size = uint32(typ.size);
-            obj.setType(typ); 
-            // obj.left and obj.right will be initialized by buildIndex before use.
-            s.nobjs++;
-
-        }
-
-        // buildIndex initializes s.root to a binary search tree.
-        // It should be called after all addObject calls but before
-        // any call of findObject.
-        private static void buildIndex(this ptr<stackScanState> _addr_s)
-        {
-            ref stackScanState s = ref _addr_s.val;
-
-            s.root, _, _ = binarySearchTree(_addr_s.head, 0L, s.nobjs);
-        }
-
-        // Build a binary search tree with the n objects in the list
-        // x.obj[idx], x.obj[idx+1], ..., x.next.obj[0], ...
-        // Returns the root of that tree, and the buf+idx of the nth object after x.obj[idx].
-        // (The first object that was not included in the binary search tree.)
-        // If n == 0, returns nil, x.
-        private static (ptr<stackObject>, ptr<stackObjectBuf>, long) binarySearchTree(ptr<stackObjectBuf> _addr_x, long idx, long n)
-        {
-            ptr<stackObject> root = default!;
-            ptr<stackObjectBuf> restBuf = default!;
-            long restIdx = default;
-            ref stackObjectBuf x = ref _addr_x.val;
-
-            if (n == 0L)
-            {
-                return (_addr_null!, _addr_x!, idx);
-            }
-
-            ptr<stackObject> left;            ptr<stackObject> right;
-
-            left, x, idx = binarySearchTree(_addr_x, idx, n / 2L);
-            root = _addr_x.obj[idx];
-            idx++;
-            if (idx == len(x.obj))
-            {
-                x = x.next;
-                idx = 0L;
-            }
-
-            right, x, idx = binarySearchTree(_addr_x, idx, n - n / 2L - 1L);
-            root.left = left;
-            root.right = right;
-            return (_addr_root!, _addr_x!, idx);
-
-        }
-
-        // findObject returns the stack object containing address a, if any.
-        // Must have called buildIndex previously.
-        private static ptr<stackObject> findObject(this ptr<stackScanState> _addr_s, System.UIntPtr a)
-        {
-            ref stackScanState s = ref _addr_s.val;
-
-            var off = uint32(a - s.stack.lo);
-            var obj = s.root;
-            while (true)
-            {
-                if (obj == null)
-                {
-                    return _addr_null!;
-                }
-
-                if (off < obj.off)
-                {
-                    obj = obj.left;
-                    continue;
-                }
-
-                if (off >= obj.off + obj.size)
-                {
-                    obj = obj.right;
-                    continue;
-                }
-
-                return _addr_obj!;
-
-            }
-
-
-        }
+    }    if (s.freeBuf != null) {
+        putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
+        s.freeBuf = null;
     }
+    return (0, false);
+
 }
+
+// addObject adds a stack object at addr of type typ to the set of stack objects.
+private static void addObject(this ptr<stackScanState> _addr_s, System.UIntPtr addr, ptr<stackObjectRecord> _addr_r) {
+    ref stackScanState s = ref _addr_s.val;
+    ref stackObjectRecord r = ref _addr_r.val;
+
+    var x = s.tail;
+    if (x == null) { 
+        // initial setup
+        x = (stackObjectBuf.val)(@unsafe.Pointer(getempty()));
+        x.next = null;
+        s.head = x;
+        s.tail = x;
+
+    }
+    if (x.nobj > 0 && uint32(addr - s.stack.lo) < x.obj[x.nobj - 1].off + x.obj[x.nobj - 1].size) {
+        throw("objects added out of order or overlapping");
+    }
+    if (x.nobj == len(x.obj)) { 
+        // full buffer - allocate a new buffer, add to end of linked list
+        var y = (stackObjectBuf.val)(@unsafe.Pointer(getempty()));
+        y.next = null;
+        x.next = y;
+        s.tail = y;
+        x = y;
+
+    }
+    var obj = _addr_x.obj[x.nobj];
+    x.nobj++;
+    obj.off = uint32(addr - s.stack.lo);
+    obj.size = uint32(r.size);
+    obj.setRecord(r); 
+    // obj.left and obj.right will be initialized by buildIndex before use.
+    s.nobjs++;
+
+}
+
+// buildIndex initializes s.root to a binary search tree.
+// It should be called after all addObject calls but before
+// any call of findObject.
+private static void buildIndex(this ptr<stackScanState> _addr_s) {
+    ref stackScanState s = ref _addr_s.val;
+
+    s.root, _, _ = binarySearchTree(_addr_s.head, 0, s.nobjs);
+}
+
+// Build a binary search tree with the n objects in the list
+// x.obj[idx], x.obj[idx+1], ..., x.next.obj[0], ...
+// Returns the root of that tree, and the buf+idx of the nth object after x.obj[idx].
+// (The first object that was not included in the binary search tree.)
+// If n == 0, returns nil, x.
+private static (ptr<stackObject>, ptr<stackObjectBuf>, nint) binarySearchTree(ptr<stackObjectBuf> _addr_x, nint idx, nint n) {
+    ptr<stackObject> root = default!;
+    ptr<stackObjectBuf> restBuf = default!;
+    nint restIdx = default;
+    ref stackObjectBuf x = ref _addr_x.val;
+
+    if (n == 0) {
+        return (_addr_null!, _addr_x!, idx);
+    }
+    ptr<stackObject> left;    ptr<stackObject> right;
+
+    left, x, idx = binarySearchTree(_addr_x, idx, n / 2);
+    root = _addr_x.obj[idx];
+    idx++;
+    if (idx == len(x.obj)) {
+        x = x.next;
+        idx = 0;
+    }
+    right, x, idx = binarySearchTree(_addr_x, idx, n - n / 2 - 1);
+    root.left = left;
+    root.right = right;
+    return (_addr_root!, _addr_x!, idx);
+
+}
+
+// findObject returns the stack object containing address a, if any.
+// Must have called buildIndex previously.
+private static ptr<stackObject> findObject(this ptr<stackScanState> _addr_s, System.UIntPtr a) {
+    ref stackScanState s = ref _addr_s.val;
+
+    var off = uint32(a - s.stack.lo);
+    var obj = s.root;
+    while (true) {
+        if (obj == null) {
+            return _addr_null!;
+        }
+        if (off < obj.off) {
+            obj = obj.left;
+            continue;
+        }
+        if (off >= obj.off + obj.size) {
+            obj = obj.right;
+            continue;
+        }
+        return _addr_obj!;
+
+    }
+
+}
+
+} // end runtime_package

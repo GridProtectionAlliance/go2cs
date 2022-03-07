@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:00 UTC
+//     Generated on 2022 March 06 22:25:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using encoding = go.encoding_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -52,7 +51,7 @@ namespace encoding
                 this.Len = default;
             }
 
-            public arrayType(CommonType CommonType = default, typeId Elem = default, long Len = default)
+            public arrayType(CommonType CommonType = default, typeId Elem = default, nint Len = default)
             {
                 this.m_CommonTypeRef = new ptr<CommonType>(CommonType);
                 this.Elem = Elem;

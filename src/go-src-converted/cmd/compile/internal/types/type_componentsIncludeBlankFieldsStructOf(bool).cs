@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:16 UTC
+//     Generated on 2022 March 06 22:48:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -25,7 +27,7 @@ namespace @internal
         {
             // Value of the componentsIncludeBlankFields struct
             private readonly bool m_value;
-
+            
             public componentsIncludeBlankFields(bool value) => m_value = value;
 
             // Enable implicit conversions between bool and componentsIncludeBlankFields struct

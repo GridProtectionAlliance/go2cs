@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:39 UTC
+//     Generated on 2022 March 06 22:25:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace go
                 this.Files = default;
             }
 
-            public serializedFileSet(long Base = default, slice<serializedFile> Files = default)
+            public serializedFileSet(nint Base = default, slice<serializedFile> Files = default)
             {
                 this.Base = Base;
                 this.Files = Files;

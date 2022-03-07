@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:49 UTC
+//     Generated on 2022 March 06 22:41:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using token = go.go.token_package;
 using strings = go.strings_package;
 using go;
@@ -51,7 +50,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,7 +76,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_specNodeByPtr is null || !m_target_is_ptr)
@@ -86,52 +85,11 @@ namespace go
                     return;
                 }
 
-                s_specNodeByPtr(m_target_ptr);
+                s_specNodeByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate token.Pos PosByPtr(ptr<T> value);
-            private delegate token.Pos PosByVal(T value);
-
-            private static readonly PosByPtr? s_PosByPtr;
-            private static readonly PosByVal? s_PosByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos Pos()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_PosByPtr is null || !m_target_is_ptr)
-                    return s_PosByVal!(target);
-
-                return s_PosByPtr(m_target_ptr);
-            }
-
-            private delegate token.Pos EndByPtr(ptr<T> value);
-            private delegate token.Pos EndByVal(T value);
-
-            private static readonly EndByPtr? s_EndByPtr;
-            private static readonly EndByVal? s_EndByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos End()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_EndByPtr is null || !m_target_is_ptr)
-                    return s_EndByVal!(target);
-
-                return s_EndByPtr(m_target_ptr);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Spec()
@@ -142,42 +100,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("specNode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_specNodeByPtr = extensionMethod.CreateStaticDelegate(typeof(specNodeByPtr)) as specNodeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("specNode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_specNodeByVal = extensionMethod.CreateStaticDelegate(typeof(specNodeByVal)) as specNodeByVal;
 
                 if (s_specNodeByPtr is null && s_specNodeByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Spec.specNode method", new Exception("specNode"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
-
-                if (!(extensionMethod is null))
-                    s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Pos");
-
-                if (!(extensionMethod is null))
-                    s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
-
-                if (s_PosByPtr is null && s_PosByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Spec.Pos method", new Exception("Pos"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("End");
-
-                if (!(extensionMethod is null))
-                    s_EndByPtr = extensionMethod.CreateStaticDelegate(typeof(EndByPtr)) as EndByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("End");
-
-                if (!(extensionMethod is null))
-                    s_EndByVal = extensionMethod.CreateStaticDelegate(typeof(EndByVal)) as EndByVal;
-
-                if (s_EndByPtr is null && s_EndByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Spec.End method", new Exception("End"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

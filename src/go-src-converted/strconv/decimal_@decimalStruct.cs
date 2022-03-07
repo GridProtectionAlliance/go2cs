@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:30 UTC
+//     Generated on 2022 March 06 22:30:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
                 this.trunc = default;
             }
 
-            public @decimal(array<byte> d = default, long nd = default, long dp = default, bool neg = default, bool trunc = default)
+            public @decimal(array<byte> d = default, nint nd = default, nint dp = default, bool neg = default, bool trunc = default)
             {
                 this.d = d;
                 this.nd = nd;

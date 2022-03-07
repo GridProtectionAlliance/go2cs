@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:05 UTC
+//     Generated on 2022 March 06 22:10:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -17,10 +19,28 @@ namespace go
     public static partial class runtime_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct pageBits
+        private partial struct pageBits : IArray
         {
             // Value of the pageBits struct
             private readonly array<ulong> m_value;
+            
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+
+            public ref ulong this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public pageBits(array<ulong> value) => m_value = value;
 

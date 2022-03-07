@@ -2,64 +2,68 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build aix || darwin || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin freebsd linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2020 October 09 05:01:32 UTC
+// package syscall -- go2cs converted at 2022 March 06 22:26:47 UTC
 // import "syscall" ==> using syscall = go.syscall_package
-// Original source: C:\Go\src\syscall\sockcmsg_unix_other.go
+// Original source: C:\Program Files\Go\src\syscall\sockcmsg_unix_other.go
 using runtime = go.runtime_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class syscall_package
-    {
-        // Round the length of a raw sockaddr up to align it properly.
-        private static long cmsgAlignOf(long salen)
-        {
-            var salign = sizeofPtr; 
+namespace go;
 
-            // dragonfly needs to check ABI version at runtime, see cmsgAlignOf in
-            // sockcmsg_dragonfly.go
-            switch (runtime.GOOS)
-            {
-                case "aix": 
-                    // There is no alignment on AIX.
-                    salign = 1L;
-                    break;
-                case "darwin": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
+public static partial class syscall_package {
 
-                case "illumos": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
+    // Round the length of a raw sockaddr up to align it properly.
+private static nint cmsgAlignOf(nint salen) {
+    var salign = sizeofPtr; 
 
-                case "solaris": 
-                    // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
-                    // kernels still require 32-bit aligned access to network
-                    // subsystem.
-                    if (sizeofPtr == 8L)
-                    {
-                        salign = 4L;
-                    }
-                    break;
-                case "netbsd": 
-                    // NetBSD and OpenBSD armv7 require 64-bit alignment.
+    // dragonfly needs to check ABI version at runtime, see cmsgAlignOf in
+    // sockcmsg_dragonfly.go
+    switch (runtime.GOOS) {
+        case "aix": 
+            // There is no alignment on AIX.
+            salign = 1;
+            break;
+        case "darwin": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
 
-                case "openbsd": 
-                    // NetBSD and OpenBSD armv7 require 64-bit alignment.
-                    if (runtime.GOARCH == "arm")
-                    {
-                        salign = 8L;
-                    }
-                    break;
+        case "ios": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+
+        case "illumos": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+
+        case "solaris": 
+            // NOTE: It seems like 64-bit Darwin, Illumos and Solaris
+            // kernels still require 32-bit aligned access to network
+            // subsystem.
+            if (sizeofPtr == 8) {
+                salign = 4;
             }
+            break;
+        case "netbsd": 
+            // NetBSD and OpenBSD armv7 require 64-bit alignment.
 
-            return (salen + salign - 1L) & ~(salign - 1L);
-
-        }
+        case "openbsd": 
+            // NetBSD and OpenBSD armv7 require 64-bit alignment.
+            if (runtime.GOARCH == "arm") {
+                salign = 8;
+            }
+            if (runtime.GOOS == "netbsd" && runtime.GOARCH == "arm64") {
+                salign = 16;
+            }
+            break;
     }
+
+    return (salen + salign - 1) & ~(salign - 1);
+
 }
+
+} // end syscall_package

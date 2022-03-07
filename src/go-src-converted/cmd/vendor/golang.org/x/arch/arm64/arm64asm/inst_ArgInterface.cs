@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:46 UTC
+//     Generated on 2022 March 06 23:24:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -56,7 +55,7 @@ namespace arm64
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -82,13 +81,13 @@ namespace arm64
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_isArgByPtr is null || !m_target_is_ptr)
                     return s_isArgByVal!(target);
 
-                return s_isArgByPtr(m_target_ptr);
+                return s_isArgByPtr(m_target_ptr!);
             }
 
             private delegate @string StringByPtr(ptr<T> value);
@@ -102,16 +101,16 @@ namespace arm64
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Arg()
@@ -122,12 +121,12 @@ namespace arm64
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("isArg");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isArgByPtr = extensionMethod.CreateStaticDelegate(typeof(isArgByPtr)) as isArgByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("isArg");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isArgByVal = extensionMethod.CreateStaticDelegate(typeof(isArgByVal)) as isArgByVal;
 
                 if (s_isArgByPtr is null && s_isArgByVal is null)
@@ -135,12 +134,12 @@ namespace arm64
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)

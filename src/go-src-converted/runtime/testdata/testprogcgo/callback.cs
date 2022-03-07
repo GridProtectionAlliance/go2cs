@@ -4,8 +4,8 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 09 05:00:54 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\callback.go
+// package main -- go2cs converted at 2022 March 06 22:26:10 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\callback.go
 /*
 #include <pthread.h>
 
@@ -49,124 +49,100 @@ static void foo() {
 using fmt = go.fmt_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoCallbackGC", CgoCallbackGC);
-        }
 
-        //export go_callback
-        private static void go_callback()
-        {
-            runtime.GC();
-            grow();
-            runtime.GC();
-        }
+namespace go;
 
-        private static long cnt = default;
+public static partial class main_package {
 
-        private static void grow() => func((_, panic, __) =>
-        {
-            ref long x = ref heap(10000L, out ptr<long> _addr_x);
-            ref long sum = ref heap(0L, out ptr<long> _addr_sum);
-            if (grow1(_addr_x, _addr_sum) == 0L)
-            {
-                panic("bad");
-            }
-
-        });
-
-        private static long grow1(ptr<long> _addr_x, ptr<long> _addr_sum)
-        {
-            ref long x = ref _addr_x.val;
-            ref long sum = ref _addr_sum.val;
-
-            if (x == 0L.val)
-            {
-                return sum + 1L.val;
-            }
-
-            x--;
-            ref var sum1 = ref heap(sum + x.val, out ptr<var> _addr_sum1);
-            return grow1(_addr_x, _addr_sum1);
-
-        }
-
-        public static void CgoCallbackGC()
-        {
-            long P = 100L;
-            if (os.Getenv("RUNTIME_TESTING_SHORT") != "")
-            {
-                P = 10L;
-            }
-
-            var done = make_channel<bool>(); 
-            // allocate a bunch of stack frames and spray them with pointers
-            {
-                long i__prev1 = i;
-
-                for (long i = 0L; i < P; i++)
-                {
-                    go_(() => () =>
-                    {
-                        grow();
-                        done.Send(true);
-                    }());
-
-                }
-
-
-                i = i__prev1;
-            }
-            {
-                long i__prev1 = i;
-
-                for (i = 0L; i < P; i++)
-                {
-                    done.Receive();
-                } 
-                // now give these stack frames to cgo callbacks
-
-
-                i = i__prev1;
-            } 
-            // now give these stack frames to cgo callbacks
-            {
-                long i__prev1 = i;
-
-                for (i = 0L; i < P; i++)
-                {
-                    go_(() => () =>
-                    {
-                        C.foo();
-                        done.Send(true);
-                    }());
-
-                }
-
-
-                i = i__prev1;
-            }
-            {
-                long i__prev1 = i;
-
-                for (i = 0L; i < P; i++)
-                {
-                    done.Receive();
-                }
-
-
-                i = i__prev1;
-            }
-            fmt.Printf("OK\n");
-
-        }
-    }
+private static void init() {
+    register("CgoCallbackGC", CgoCallbackGC);
 }
+
+//export go_callback
+private static void go_callback() {
+    runtime.GC();
+    grow();
+    runtime.GC();
+}
+
+private static nint cnt = default;
+
+private static void grow() => func((_, panic, _) => {
+    ref nint x = ref heap(10000, out ptr<nint> _addr_x);
+    ref nint sum = ref heap(0, out ptr<nint> _addr_sum);
+    if (grow1(_addr_x, _addr_sum) == 0) {
+        panic("bad");
+    }
+});
+
+private static nint grow1(ptr<nint> _addr_x, ptr<nint> _addr_sum) {
+    ref nint x = ref _addr_x.val;
+    ref nint sum = ref _addr_sum.val;
+
+    if (x == 0.val) {
+        return sum + 1.val;
+    }
+    x--;
+    ref var sum1 = ref heap(sum + x.val, out ptr<var> _addr_sum1);
+    return grow1(_addr_x, _addr_sum1);
+
+}
+
+public static void CgoCallbackGC() {
+    nint P = 100;
+    if (os.Getenv("RUNTIME_TESTING_SHORT") != "") {
+        P = 10;
+    }
+    var done = make_channel<bool>(); 
+    // allocate a bunch of stack frames and spray them with pointers
+    {
+        nint i__prev1 = i;
+
+        for (nint i = 0; i < P; i++) {
+            go_(() => () => {
+                grow();
+                done.Send(true);
+            }());
+        }
+
+        i = i__prev1;
+    }
+    {
+        nint i__prev1 = i;
+
+        for (i = 0; i < P; i++) {
+            done.Receive();
+        }
+
+        i = i__prev1;
+    } 
+    // now give these stack frames to cgo callbacks
+    {
+        nint i__prev1 = i;
+
+        for (i = 0; i < P; i++) {
+            go_(() => () => {
+                C.foo();
+                done.Send(true);
+            }());
+        }
+
+        i = i__prev1;
+    }
+    {
+        nint i__prev1 = i;
+
+        for (i = 0; i < P; i++) {
+            done.Receive();
+        }
+
+        i = i__prev1;
+    }
+    fmt.Printf("OK\n");
+
+}
+
+} // end main_package

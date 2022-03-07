@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:20 UTC
+//     Generated on 2022 March 06 23:23:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using io = go.io_package;
@@ -41,13 +40,17 @@ namespace @internal
             public symbolInfo(NilType _)
             {
                 this.address = default;
+                this.size = default;
                 this.name = default;
+                this.symType = default;
             }
 
-            public symbolInfo(ulong address = default, @string name = default)
+            public symbolInfo(ulong address = default, ulong size = default, @string name = default, @string symType = default)
             {
                 this.address = address;
+                this.size = size;
                 this.name = name;
+                this.symType = symType;
             }
 
             // Enable comparisons between nil and symbolInfo struct
@@ -70,7 +73,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static symbolInfo symbolInfo_cast(dynamic value)
         {
-            return new symbolInfo(value.address, value.name);
+            return new symbolInfo(value.address, value.size, value.name, value.symType);
         }
     }
 }}}}}}}

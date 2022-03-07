@@ -150,7 +150,8 @@
     concrete value that it holds, and printing continues with the next rule.
 
     2. If an operand implements the Formatter interface, it will
-    be invoked. Formatter provides fine control of formatting.
+    be invoked. In this case the interpretation of verbs and flags is
+    controlled by that implementation.
 
     3. If the %v verb is used with the # flag (%#v) and the operand
     implements the GoStringer interface, that will be invoked.
@@ -188,7 +189,7 @@
     When printing a struct, fmt cannot and therefore does not invoke
     formatting methods such as Error or String on unexported fields.
 
-    Explicit argument indexes:
+    Explicit argument indexes
 
     In Printf, Sprintf, and Fprintf, the default behavior is for each
     formatting verb to format successive arguments passed in the call.
@@ -210,7 +211,7 @@
         fmt.Sprintf("%d %d %#[1]x %#x", 16, 17)
     will yield "16 17 0x10 0x11".
 
-    Format errors:
+    Format errors
 
     If an invalid argument is given for a verb, such as providing
     a string to %d, the generated string will contain a
@@ -339,8 +340,8 @@
     methods to a reader without that capability, use
     bufio.NewReader.
 */
-// package fmt -- go2cs converted at 2020 October 09 04:45:16 UTC
+// package fmt -- go2cs converted at 2022 March 06 22:08:00 UTC
 // import "fmt" ==> using fmt = go.fmt_package
-// Original source: C:\Go\src\fmt\doc.go
-    }
+// Original source: C:\Program Files\Go\src\fmt\doc.go
 
+} // end fmt_package

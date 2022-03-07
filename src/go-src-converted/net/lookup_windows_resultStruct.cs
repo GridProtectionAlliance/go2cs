@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:04 UTC
+//     Generated on 2022 March 06 22:16:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using windows = go.@internal.syscall.windows_package;
 using os = go.os_package;
@@ -36,7 +35,7 @@ namespace go
                 this.err = default;
             }
 
-            public result(long proto = default, error err = default)
+            public result(nint proto = default, error err = default)
             {
                 this.proto = proto;
                 this.err = err;

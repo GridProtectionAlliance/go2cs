@@ -2,278 +2,464 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build go1.16
+// +build go1.16
+
 // Package buildtag defines an Analyzer that checks build tags.
-// package buildtag -- go2cs converted at 2020 October 09 06:04:29 UTC
+// package buildtag -- go2cs converted at 2022 March 06 23:34:30 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/buildtag" ==> using buildtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.buildtag_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\buildtag\buildtag.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\buildtag\buildtag.go
 using ast = go.go.ast_package;
+using constraint = go.go.build.constraint_package;
+using parser = go.go.parser_package;
+using token = go.go.token_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 
 using analysis = go.golang.org.x.tools.go.analysis_package;
 using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go {
-namespace analysis {
-namespace passes
-{
-    public static partial class buildtag_package
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+public static partial class buildtag_package {
+
+public static readonly @string Doc = "check that +build tags are well-formed and correctly located";
+
+
+
+public static ptr<analysis.Analyzer> Analyzer = addr(new analysis.Analyzer(Name:"buildtag",Doc:Doc,Run:runBuildTag,));
+
+private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
+    object _p0 = default;
+    error _p0 = default!;
+    ref analysis.Pass pass = ref _addr_pass.val;
+
     {
-        public static readonly @string Doc = (@string)"check that +build tags are well-formed and correctly located";
+        var f__prev1 = f;
 
+        foreach (var (_, __f) in pass.Files) {
+            f = __f;
+            checkGoFile(_addr_pass, _addr_f);
+        }
+        f = f__prev1;
+    }
 
+    {
+        var name__prev1 = name;
 
-        public static ptr<analysis.Analyzer> Analyzer = addr(new analysis.Analyzer(Name:"buildtag",Doc:Doc,Run:runBuildTag,));
-
-        private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass)
-        {
-            object _p0 = default;
-            error _p0 = default!;
-            ref analysis.Pass pass = ref _addr_pass.val;
-
-            foreach (var (_, f) in pass.Files)
+        foreach (var (_, __name) in pass.OtherFiles) {
+            name = __name;
             {
+                var err__prev1 = err;
+
+                var err = checkOtherFile(_addr_pass, name);
+
+                if (err != null) {
+                    return (null, error.As(err)!);
+                }
+
+                err = err__prev1;
+
+            }
+
+        }
+        name = name__prev1;
+    }
+
+    {
+        var name__prev1 = name;
+
+        foreach (var (_, __name) in pass.IgnoredFiles) {
+            name = __name;
+            if (strings.HasSuffix(name, ".go")) {
+                var (f, err) = parser.ParseFile(pass.Fset, name, null, parser.ParseComments);
+                if (err != null) { 
+                    // Not valid Go source code - not our job to diagnose, so ignore.
+                    return (null, error.As(null!)!);
+
+                }
+
                 checkGoFile(_addr_pass, _addr_f);
-            }
-            foreach (var (_, name) in pass.OtherFiles)
-            {
-                {
-                    var err = checkOtherFile(_addr_pass, name);
-
-                    if (err != null)
-                    {
-                        return (null, error.As(err)!);
-                    }
-
-                }
-
-            }
-            return (null, error.As(null!)!);
-
-        }
-
-        private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _addr_f)
-        {
-            ref analysis.Pass pass = ref _addr_pass.val;
-            ref ast.File f = ref _addr_f.val;
-
-            var pastCutoff = false;
-            foreach (var (_, group) in f.Comments)
-            { 
-                // A +build comment is ignored after or adjoining the package declaration.
-                if (group.End() + 1L >= f.Package)
-                {
-                    pastCutoff = true;
-                } 
-
-                // "+build" is ignored within or after a /*...*/ comment.
-                if (!strings.HasPrefix(group.List[0L].Text, "//"))
-                {
-                    pastCutoff = true;
-                    continue;
-                } 
-
-                // Check each line of a //-comment.
-                foreach (var (_, c) in group.List)
-                {
-                    if (!strings.Contains(c.Text, "+build"))
-                    {
-                        continue;
-                    }
-
-                    {
-                        var err = checkLine(c.Text, pastCutoff);
-
-                        if (err != null)
-                        {
-                            pass.Reportf(c.Pos(), "%s", err);
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        private static error checkOtherFile(ptr<analysis.Pass> _addr_pass, @string filename)
-        {
-            ref analysis.Pass pass = ref _addr_pass.val;
-
-            var (content, tf, err) = analysisutil.ReadFile(pass.Fset, filename);
-            if (err != null)
-            {
-                return error.As(err)!;
-            } 
-
-            // We must look at the raw lines, as build tags may appear in non-Go
-            // files such as assembly files.
-            var lines = bytes.SplitAfter(content, nl); 
-
-            // Determine cutpoint where +build comments are no longer valid.
-            // They are valid in leading // comments in the file followed by
-            // a blank line.
-            //
-            // This must be done as a separate pass because of the
-            // requirement that the comment be followed by a blank line.
-            long cutoff = default;
-            {
-                var i__prev1 = i;
-                var line__prev1 = line;
-
-                foreach (var (__i, __line) in lines)
-                {
-                    i = __i;
-                    line = __line;
-                    line = bytes.TrimSpace(line);
-                    if (!bytes.HasPrefix(line, slashSlash))
-                    {
-                        if (len(line) > 0L)
-                        {
-                            break;
-                        }
-
-                        cutoff = i;
-
-                    }
-
-                }
-
-                i = i__prev1;
-                line = line__prev1;
-            }
-
-            {
-                var i__prev1 = i;
-                var line__prev1 = line;
-
-                foreach (var (__i, __line) in lines)
-                {
-                    i = __i;
-                    line = __line;
-                    line = bytes.TrimSpace(line);
-                    if (!bytes.HasPrefix(line, slashSlash))
-                    {
-                        continue;
-                    }
-
-                    if (!bytes.Contains(line, (slice<byte>)"+build"))
-                    {
-                        continue;
-                    }
-
-                    {
-                        var err = checkLine(string(line), i >= cutoff);
-
-                        if (err != null)
-                        {
-                            pass.Reportf(analysisutil.LineStart(tf, i + 1L), "%s", err);
-                            continue;
-                        }
-
-                    }
-
-                }
-
-                i = i__prev1;
-                line = line__prev1;
-            }
-
-            return error.As(null!)!;
-
-        }
-
-        // checkLine checks a line that starts with "//" and contains "+build".
-        private static error checkLine(@string line, bool pastCutoff)
-        {
-            line = strings.TrimPrefix(line, "//");
-            line = strings.TrimSpace(line);
-
-            if (strings.HasPrefix(line, "+build"))
-            {
-                var fields = strings.Fields(line);
-                if (fields[0L] != "+build")
-                { 
-                    // Comment is something like +buildasdf not +build.
-                    return error.As(fmt.Errorf("possible malformed +build comment"))!;
-
-                }
-
-                if (pastCutoff)
-                {
-                    return error.As(fmt.Errorf("+build comment must appear before package clause and be followed by a blank line"))!;
-                }
-
-                {
-                    var err = checkArguments(fields);
-
-                    if (err != null)
-                    {
-                        return error.As(err)!;
-                    }
-
-                }
 
             }
             else
-            { 
-                // Comment with +build but not at beginning.
-                if (!pastCutoff)
+ {
                 {
-                    return error.As(fmt.Errorf("possible malformed +build comment"))!;
+                    var err__prev2 = err;
+
+                    err = checkOtherFile(_addr_pass, name);
+
+                    if (err != null) {
+                        return (null, error.As(err)!);
+                    }
+
+                    err = err__prev2;
+
                 }
 
             }
 
-            return error.As(null!)!;
-
         }
-
-        private static error checkArguments(slice<@string> fields)
-        { 
-            // The original version of this checker in vet could examine
-            // files with malformed build tags that would cause the file to
-            // be always ignored by "go build". However, drivers for the new
-            // analysis API will analyze only the files selected to form a
-            // package, so these checks will never fire.
-            // TODO(adonovan): rethink this.
-
-            foreach (var (_, arg) in fields[1L..])
-            {
-                foreach (var (_, elem) in strings.Split(arg, ","))
-                {
-                    if (strings.HasPrefix(elem, "!!"))
-                    {
-                        return error.As(fmt.Errorf("invalid double negative in build constraint: %s", arg))!;
-                    }
-
-                    elem = strings.TrimPrefix(elem, "!");
-                    foreach (var (_, c) in elem)
-                    {
-                        if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '_' && c != '.')
-                        {
-                            return error.As(fmt.Errorf("invalid non-alphanumeric build constraint: %s", arg))!;
-                        }
-
-                    }
-
-                }
-
-            }
-            return error.As(null!)!;
-
-        }
-
-        private static slice<byte> nl = (slice<byte>)"\n";        private static slice<byte> slashSlash = (slice<byte>)"//";
+        name = name__prev1;
     }
-}}}}}}}}}
+
+    return (null, error.As(null!)!);
+
+}
+
+private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _addr_f) => func((defer, _, _) => {
+    ref analysis.Pass pass = ref _addr_pass.val;
+    ref ast.File f = ref _addr_f.val;
+
+    checker check = default;
+    check.init(pass);
+    defer(check.finish());
+
+    foreach (var (_, group) in f.Comments) { 
+        // A +build comment is ignored after or adjoining the package declaration.
+        if (group.End() + 1 >= f.Package) {
+            check.plusBuildOK = false;
+        }
+        if (group.Pos() >= f.Package) {
+            check.goBuildOK = false;
+        }
+        foreach (var (_, c) in group.List) { 
+            // "+build" is ignored within or after a /*...*/ comment.
+            if (!strings.HasPrefix(c.Text, "//")) {
+                check.plusBuildOK = false;
+            }
+
+            check.comment(c.Slash, c.Text);
+
+        }
+    }
+});
+
+private static error checkOtherFile(ptr<analysis.Pass> _addr_pass, @string filename) => func((defer, _, _) => {
+    ref analysis.Pass pass = ref _addr_pass.val;
+
+    checker check = default;
+    check.init(pass);
+    defer(check.finish()); 
+
+    // We cannot use the Go parser, since this may not be a Go source file.
+    // Read the raw bytes instead.
+    var (content, tf, err) = analysisutil.ReadFile(pass.Fset, filename);
+    if (err != null) {
+        return error.As(err)!;
+    }
+    check.file(token.Pos(tf.Base()), string(content));
+    return error.As(null!)!;
+
+});
+
+private partial struct checker {
+    public ptr<analysis.Pass> pass;
+    public bool plusBuildOK; // "+build" lines still OK
+    public bool goBuildOK; // "go:build" lines still OK
+    public bool crossCheck; // cross-check go:build and +build lines when done reading file
+    public bool inStar; // currently in a /* */ comment
+    public token.Pos goBuildPos; // position of first go:build line found
+    public token.Pos plusBuildPos; // position of first "+build" line found
+    public constraint.Expr goBuild; // go:build constraint found
+    public constraint.Expr plusBuild; // AND of +build constraints found
+}
+
+private static void init(this ptr<checker> _addr_check, ptr<analysis.Pass> _addr_pass) {
+    ref checker check = ref _addr_check.val;
+    ref analysis.Pass pass = ref _addr_pass.val;
+
+    check.pass = pass;
+    check.goBuildOK = true;
+    check.plusBuildOK = true;
+    check.crossCheck = true;
+}
+
+private static void file(this ptr<checker> _addr_check, token.Pos pos, @string text) {
+    ref checker check = ref _addr_check.val;
+ 
+    // Determine cutpoint where +build comments are no longer valid.
+    // They are valid in leading // comments in the file followed by
+    // a blank line.
+    //
+    // This must be done as a separate pass because of the
+    // requirement that the comment be followed by a blank line.
+    nint plusBuildCutoff = default;
+    var fullText = text;
+    while (text != "") {
+        var i = strings.Index(text, "\n");
+        if (i < 0) {
+            i = len(text);
+        }
+        else
+ {
+            i++;
+        }
+        var offset = len(fullText) - len(text);
+        var line = text[..(int)i];
+        text = text[(int)i..];
+        line = strings.TrimSpace(line);
+        if (!strings.HasPrefix(line, "//") && line != "") {
+            break;
+        }
+        if (line == "") {
+            plusBuildCutoff = offset;
+        }
+    } 
+
+    // Process each line.
+    // Must stop once we hit goBuildOK == false
+    text = fullText;
+    check.inStar = false;
+    while (text != "") {
+        i = strings.Index(text, "\n");
+        if (i < 0) {
+            i = len(text);
+        }
+        else
+ {
+            i++;
+        }
+        offset = len(fullText) - len(text);
+        line = text[..(int)i];
+        text = text[(int)i..];
+        check.plusBuildOK = offset < plusBuildCutoff;
+
+        if (strings.HasPrefix(line, "//")) {
+            check.comment(pos + token.Pos(offset), line);
+            continue;
+        }
+        while (true) {
+            line = strings.TrimSpace(line);
+            if (check.inStar) {
+                i = strings.Index(line, "*/");
+                if (i < 0) {
+                    line = "";
+                    break;
+                }
+                line = line[(int)i + len("*/")..];
+                check.inStar = false;
+                continue;
+            }
+            if (strings.HasPrefix(line, "/*")) {
+                check.inStar = true;
+                line = line[(int)len("/*")..];
+                continue;
+            }
+            break;
+        }
+        if (line != "") { 
+            // Found non-comment non-blank line.
+            // Ends space for valid //go:build comments,
+            // but also ends the fraction of the file we can
+            // reliably parse. From this point on we might
+            // incorrectly flag "comments" inside multiline
+            // string constants or anything else (this might
+            // not even be a Go program). So stop.
+            break;
+
+        }
+    }
+
+}
+
+private static void comment(this ptr<checker> _addr_check, token.Pos pos, @string text) {
+    ref checker check = ref _addr_check.val;
+
+    if (strings.HasPrefix(text, "//")) {
+        if (strings.Contains(text, "+build")) {
+            check.plusBuildLine(pos, text);
+        }
+        if (strings.Contains(text, "//go:build")) {
+            check.goBuildLine(pos, text);
+        }
+    }
+    if (strings.HasPrefix(text, "/*")) {
+        {
+            var i__prev2 = i;
+
+            var i = strings.Index(text, "\n");
+
+            if (i >= 0) { 
+                // multiline /* */ comment - process interior lines
+                check.inStar = true;
+                i++;
+                pos += token.Pos(i);
+                text = text[(int)i..];
+                while (text != "") {
+                    i = strings.Index(text, "\n");
+                    if (i < 0) {
+                        i = len(text);
+                    }
+                    else
+ {
+                        i++;
+                    }
+
+                    var line = text[..(int)i];
+                    if (strings.HasPrefix(line, "//")) {
+                        check.comment(pos, line);
+                    }
+
+                    pos += token.Pos(i);
+                    text = text[(int)i..];
+
+                }
+
+                check.inStar = false;
+
+            }
+
+            i = i__prev2;
+
+        }
+
+    }
+}
+
+private static void goBuildLine(this ptr<checker> _addr_check, token.Pos pos, @string line) {
+    ref checker check = ref _addr_check.val;
+
+    if (!constraint.IsGoBuild(line)) {
+        if (!strings.HasPrefix(line, "//go:build") && constraint.IsGoBuild("//" + strings.TrimSpace(line[(int)len("//")..]))) {
+            check.pass.Reportf(pos, "malformed //go:build line (space between // and go:build)");
+        }
+        return ;
+
+    }
+    if (!check.goBuildOK || check.inStar) {
+        check.pass.Reportf(pos, "misplaced //go:build comment");
+        check.crossCheck = false;
+        return ;
+    }
+    if (check.goBuildPos == token.NoPos) {
+        check.goBuildPos = pos;
+    }
+    else
+ {
+        check.pass.Reportf(pos, "unexpected extra //go:build line");
+        check.crossCheck = false;
+    }
+    {
+        var i = strings.Index(line, " // ERROR ");
+
+        if (i >= 0) {
+            line = line[..(int)i];
+        }
+    }
+
+
+    var (x, err) = constraint.Parse(line);
+    if (err != null) {
+        check.pass.Reportf(pos, "%v", err);
+        check.crossCheck = false;
+        return ;
+    }
+    if (check.goBuild == null) {
+        check.goBuild = x;
+    }
+}
+
+private static void plusBuildLine(this ptr<checker> _addr_check, token.Pos pos, @string line) {
+    ref checker check = ref _addr_check.val;
+
+    line = strings.TrimSpace(line);
+    if (!constraint.IsPlusBuild(line)) { 
+        // Comment with +build but not at beginning.
+        // Only report early in file.
+        if (check.plusBuildOK && !strings.HasPrefix(line, "// want")) {
+            check.pass.Reportf(pos, "possible malformed +build comment");
+        }
+        return ;
+
+    }
+    if (!check.plusBuildOK) { // inStar implies !plusBuildOK
+        check.pass.Reportf(pos, "misplaced +build comment");
+        check.crossCheck = false;
+
+    }
+    if (check.plusBuildPos == token.NoPos) {
+        check.plusBuildPos = pos;
+    }
+    {
+        var i = strings.Index(line, " // ERROR ");
+
+        if (i >= 0) {
+            line = line[..(int)i];
+        }
+    }
+
+
+    var fields = strings.Fields(line[(int)len("//")..]); 
+    // IsPlusBuildConstraint check above implies fields[0] == "+build"
+    foreach (var (_, arg) in fields[(int)1..]) {
+        foreach (var (_, elem) in strings.Split(arg, ",")) {
+            if (strings.HasPrefix(elem, "!!")) {
+                check.pass.Reportf(pos, "invalid double negative in build constraint: %s", arg);
+                check.crossCheck = false;
+                continue;
+            }
+            elem = strings.TrimPrefix(elem, "!");
+            foreach (var (_, c) in elem) {
+                if (!unicode.IsLetter(c) && !unicode.IsDigit(c) && c != '_' && c != '.') {
+                    check.pass.Reportf(pos, "invalid non-alphanumeric build constraint: %s", arg);
+                    check.crossCheck = false;
+                    break;
+                }
+            }
+        }
+    }    if (check.crossCheck) {
+        var (y, err) = constraint.Parse(line);
+        if (err != null) { 
+            // Should never happen - constraint.Parse never rejects a // +build line.
+            // Also, we just checked the syntax above.
+            // Even so, report.
+            check.pass.Reportf(pos, "%v", err);
+            check.crossCheck = false;
+            return ;
+
+        }
+        if (check.plusBuild == null) {
+            check.plusBuild = y;
+        }
+        else
+ {
+            check.plusBuild = addr(new constraint.AndExpr(X:check.plusBuild,Y:y));
+        }
+    }
+}
+
+private static void finish(this ptr<checker> _addr_check) {
+    ref checker check = ref _addr_check.val;
+
+    if (!check.crossCheck || check.plusBuildPos == token.NoPos || check.goBuildPos == token.NoPos) {
+        return ;
+    }
+    constraint.Expr want = default;
+    var (lines, err) = constraint.PlusBuildLines(check.goBuild);
+    if (err != null) {
+        check.pass.Reportf(check.goBuildPos, "%v", err);
+        return ;
+    }
+    foreach (var (_, line) in lines) {
+        var (y, err) = constraint.Parse(line);
+        if (err != null) { 
+            // Definitely should not happen, but not the user's fault.
+            // Do not report.
+            return ;
+
+        }
+        if (want == null) {
+            want = y;
+        }
+        else
+ {
+            want = addr(new constraint.AndExpr(X:want,Y:y));
+        }
+    }    if (want.String() != check.plusBuild.String()) {
+        check.pass.Reportf(check.plusBuildPos, "+build lines do not match //go:build condition");
+        return ;
+    }
+}
+
+} // end buildtag_package

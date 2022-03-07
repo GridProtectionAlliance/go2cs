@@ -1,26 +1,19 @@
 // SVG pan and zoom library.
 // See copyright notice in string constant below.
 
-// package svgpan -- go2cs converted at 2020 October 09 05:54:03 UTC
+// package svgpan -- go2cs converted at 2022 March 06 23:24:05 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/svgpan" ==> using svgpan = go.cmd.vendor.github.com.google.pprof.third_party.svgpan_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\third_party\svgpan\svgpan.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\svgpan\svgpan.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace third_party
-{
-    public static partial class svgpan_package
-    {
-        // https://github.com/aleofreddi/svgpan
+namespace go.cmd.vendor.github.com.google.pprof.third_party;
 
-        // JSSource returns the svgpan.js file
-        public static readonly @string JSSource = (@string)"\n/**\n *  SVGPan library 1.2.2\n * ======================\n *\n * Given an unique exi" +
+public static partial class svgpan_package {
+
+    // https://github.com/aleofreddi/svgpan
+
+    // JSSource returns the svgpan.js file
+public static readonly @string JSSource = "\n/**\n *  SVGPan library 1.2.2\n * ======================\n *\n * Given an unique exi" +
     "sting element with id \"viewport\" (or when missing, the\n * first g-element), incl" +
     "uding the library into any SVG adds the following\n * capabilities:\n *\n *  - Mous" +
     "e panning\n *  - Mouse zooming (using the wheel)\n *  - Object dragging\n *\n * You " +
@@ -121,5 +114,5 @@ namespace third_party
     "rDocument;\n\n\tif(state == \'pan\' || state == \'drag\') {\n\t\t// Quit pan mode\n\t\tstate " +
     "= \'\';\n\t}\n}\n";
 
-    }
-}}}}}}}
+
+} // end svgpan_package

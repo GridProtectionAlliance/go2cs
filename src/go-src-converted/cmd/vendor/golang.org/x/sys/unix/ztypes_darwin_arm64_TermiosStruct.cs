@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:29 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,19 +37,17 @@ namespace sys
                 this.Cflag = default;
                 this.Lflag = default;
                 this.Cc = default;
-                this._ = default;
                 this.Ispeed = default;
                 this.Ospeed = default;
             }
 
-            public Termios(ulong Iflag = default, ulong Oflag = default, ulong Cflag = default, ulong Lflag = default, array<byte> Cc = default, array<byte> _ = default, ulong Ispeed = default, ulong Ospeed = default)
+            public Termios(ulong Iflag = default, ulong Oflag = default, ulong Cflag = default, ulong Lflag = default, array<byte> Cc = default, ulong Ispeed = default, ulong Ospeed = default)
             {
                 this.Iflag = Iflag;
                 this.Oflag = Oflag;
                 this.Cflag = Cflag;
                 this.Lflag = Lflag;
                 this.Cc = Cc;
-                this._ = _;
                 this.Ispeed = Ispeed;
                 this.Ospeed = Ospeed;
             }
@@ -74,7 +72,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Termios Termios_cast(dynamic value)
         {
-            return new Termios(value.Iflag, value.Oflag, value.Cflag, value.Lflag, value.Cc, value._, value.Ispeed, value.Ospeed);
+            return new Termios(value.Iflag, value.Oflag, value.Cflag, value.Lflag, value.Cc, value.Ispeed, value.Ospeed);
         }
     }
 }}}}}}

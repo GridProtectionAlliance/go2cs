@@ -2,20 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package help -- go2cs converted at 2020 October 09 05:47:58 UTC
+// package help -- go2cs converted at 2022 March 06 23:19:42 UTC
 // import "cmd/go/internal/help" ==> using help = go.cmd.go.@internal.help_package
-// Original source: C:\Go\src\cmd\go\internal\help\helpdoc.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\help\helpdoc.go
 using @base = go.cmd.go.@internal.@base_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class help_package
-    {
-        public static ptr<base.Command> HelpC = addr(new base.Command(UsageLine:"c",Short:"calling between Go and C",Long:`
+namespace go.cmd.go.@internal;
+
+public static partial class help_package {
+
+public static ptr<base.Command> HelpC = addr(new base.Command(UsageLine:"c",Short:"calling between Go and C",Long:`
 There are two different ways to call between Go and C/C++ code.
 
 The first is the cgo tool, which is part of the Go distribution. For
@@ -33,7 +29,7 @@ compiler. The CC or CXX environment variables may be set to determine
 the C or C++ compiler, respectively, to use.
 	`,));
 
-        public static ptr<base.Command> HelpPackages = addr(new base.Command(UsageLine:"packages",Short:"package lists and patterns",Long:`
+public static ptr<base.Command> HelpPackages = addr(new base.Command(UsageLine:"packages",Short:"package lists and patterns",Long:`
 Many commands apply to a set of packages:
 
 	go action [packages]
@@ -116,7 +112,7 @@ Directory and file names that begin with "." or "_" are ignored
 by the go tool, as are directories named "testdata".
 	`,));
 
-        public static ptr<base.Command> HelpImportPath = addr(new base.Command(UsageLine:"importpath",Short:"import path syntax",Long:`
+public static ptr<base.Command> HelpImportPath = addr(new base.Command(UsageLine:"importpath",Short:"import path syntax",Long:`
 
 An import path (see 'go help packages') denotes a package stored in the local
 file system. In general, an import path denotes either a standard package (such
@@ -249,7 +245,7 @@ For example,
 will result in the following requests:
 
 	https://example.org/pkg/foo?go-get=1 (preferred)
-	http://example.org/pkg/foo?go-get=1  (fallback, only with -insecure)
+	http://example.org/pkg/foo?go-get=1  (fallback, only with use of correctly set GOINSECURE)
 
 If that page contains the meta tag
 
@@ -264,7 +260,7 @@ listed in the GOPATH environment variable.
 (See 'go help gopath-get' and 'go help gopath'.)
 
 When using modules, downloaded packages are stored in the module cache.
-(See 'go help module-get' and 'go help goproxy'.)
+See https://golang.org/ref/mod#module-cache.
 
 When using modules, an additional variant of the go-import meta tag is
 recognized and is preferred over those listing version control systems.
@@ -274,7 +270,8 @@ That variant uses "mod" as the vcs in the content value, as in:
 
 This tag means to fetch modules with paths beginning with example.org
 from the module proxy available at the URL https://code.org/moduleproxy.
-See 'go help goproxy' for details about the proxy protocol.
+See https://golang.org/ref/mod#goproxy-protocol for details about the
+proxy protocol.
 
 Import path checking
 
@@ -303,7 +300,7 @@ Import path comments are obsoleted by the go.mod file's module statement.
 See https://golang.org/s/go14customimport for details.
 	`,));
 
-        public static ptr<base.Command> HelpGopath = addr(new base.Command(UsageLine:"gopath",Short:"GOPATH environment variable",Long:`
+public static ptr<base.Command> HelpGopath = addr(new base.Command(UsageLine:"gopath",Short:"GOPATH environment variable",Long:`
 The Go path is used to resolve import statements.
 It is implemented by and documented in the go/build package.
 
@@ -457,7 +454,7 @@ placed in the main GOPATH, never in a vendor subtree.
 See https://golang.org/s/go15vendor for details.
 	`,));
 
-        public static ptr<base.Command> HelpEnvironment = addr(new base.Command(UsageLine:"environment",Short:"environment variables",Long:`
+public static ptr<base.Command> HelpEnvironment = addr(new base.Command(UsageLine:"environment",Short:"environment variables",Long:`
 
 The go command and the tools it invokes consult environment variables
 for configuration. If an environment variable is unset, the go command
@@ -473,6 +470,10 @@ See 'go help env' for details.
 
 General-purpose environment variables:
 
+	GO111MODULE
+		Controls whether the go command runs in module-aware mode or GOPATH mode.
+		May be "off", "on", or "auto".
+		See https://golang.org/ref/mod#mod-commands.
 	GCCGO
 		The gccgo command to run for 'go build -compiler=gccgo'.
 	GOARCH
@@ -502,29 +503,32 @@ General-purpose environment variables:
 		Comma-separated list of glob patterns (in the syntax of Go's path.Match)
 		of module path prefixes that should always be fetched in an insecure
 		manner. Only applies to dependencies that are being fetched directly.
-		Unlike the -insecure flag on 'go get', GOINSECURE does not disable
-		checksum database validation. GOPRIVATE or GONOSUMDB may be used
-		to achieve that.
+		GOINSECURE does not disable checksum database validation. GOPRIVATE or
+		GONOSUMDB may be used to achieve that.
 	GOOS
 		The operating system for which to compile code.
 		Examples are linux, darwin, windows, netbsd.
 	GOPATH
 		For more details see: 'go help gopath'.
 	GOPROXY
-		URL of Go module proxy. See 'go help modules'.
+		URL of Go module proxy. See https://golang.org/ref/mod#environment-variables
+		and https://golang.org/ref/mod#module-proxy for details.
 	GOPRIVATE, GONOPROXY, GONOSUMDB
 		Comma-separated list of glob patterns (in the syntax of Go's path.Match)
 		of module path prefixes that should always be fetched directly
 		or that should not be compared against the checksum database.
-		See 'go help module-private'.
+		See https://golang.org/ref/mod#private-modules.
 	GOROOT
 		The root of the go tree.
 	GOSUMDB
 		The name of checksum database to use and optionally its public key and
-		URL. See 'go help module-auth'.
+		URL. See https://golang.org/ref/mod#authenticating.
 	GOTMPDIR
 		The directory where the go command will write
 		temporary source files, packages, and binaries.
+	GOVCS
+		Lists version control commands that may be used with matching servers.
+		See 'go help vcs'.
 
 Environment variables for use with cgo:
 
@@ -572,14 +576,17 @@ Architecture-specific environment variables:
 		For GOARCH=arm, the ARM architecture for which to compile.
 		Valid values are 5, 6, 7.
 	GO386
-		For GOARCH=386, the floating point instruction set.
-		Valid values are 387, sse2.
+		For GOARCH=386, how to implement floating point instructions.
+		Valid values are sse2 (default), softfloat.
 	GOMIPS
 		For GOARCH=mips{,le}, whether to use floating point instructions.
 		Valid values are hardfloat (default), softfloat.
 	GOMIPS64
 		For GOARCH=mips64{,le}, whether to use floating point instructions.
 		Valid values are hardfloat (default), softfloat.
+	GOPPC64
+		For GOARCH=ppc64{,le}, the target ISA (Instruction Set Architecture).
+		Valid values are power8 (default), power9.
 	GOWASM
 		For GOARCH=wasm, comma-separated list of experimental WebAssembly features to use.
 		Valid values are satconv, signext.
@@ -589,6 +596,12 @@ Special-purpose environment variables:
 	GCCGOTOOLDIR
 		If set, where to find gccgo tools, such as cgo.
 		The default is based on how gccgo was configured.
+	GOEXPERIMENT
+		Comma-separated list of toolchain experiments to enable or disable.
+		The list of available experiments may change arbitrarily over time.
+		See src/internal/goexperiment/flags.go for currently valid values.
+		Warning: This variable is provided for the development and testing
+		of the Go toolchain itself. Use beyond that purpose is unsupported.
 	GOROOT_FINAL
 		The root of the installed Go tree, when it is
 		installed in a location other than where it is built.
@@ -622,9 +635,11 @@ Additional information available from 'go env' but not read from the environment
 		If module-aware mode is disabled, GOMOD will be the empty string.
 	GOTOOLDIR
 		The directory where the go tools (compile, cover, doc, etc...) are installed.
+	GOVERSION
+		The version of the installed Go tree, as reported by runtime.Version.
 	`,));
 
-        public static ptr<base.Command> HelpFileType = addr(new base.Command(UsageLine:"filetype",Short:"file types",Long:`
+public static ptr<base.Command> HelpFileType = addr(new base.Command(UsageLine:"filetype",Short:"file types",Long:`
 The go command examines the contents of a restricted set of files
 in each directory. It identifies which files to examine based on
 the extension of the file name. These extensions are:
@@ -659,7 +674,7 @@ line comment. See the go/build package documentation for
 more details.
 	`,));
 
-        public static ptr<base.Command> HelpBuildmode = addr(new base.Command(UsageLine:"buildmode",Short:"build modes",Long:`
+public static ptr<base.Command> HelpBuildmode = addr(new base.Command(UsageLine:"buildmode",Short:"build modes",Long:`
 The 'go build' and 'go install' commands take a -buildmode argument which
 indicates which kind of object file is to be built. Currently supported values
 are:
@@ -707,7 +722,7 @@ On AIX, when linking a C program that uses a Go archive built with
 -buildmode=c-archive, you must pass -Wl,-bnoobjreorder to the C compiler.
 `,));
 
-        public static ptr<base.Command> HelpCache = addr(new base.Command(UsageLine:"cache",Short:"build and test caching",Long:`
+public static ptr<base.Command> HelpCache = addr(new base.Command(UsageLine:"cache",Short:"build and test caching",Long:`
 The go command caches build outputs for reuse in future builds.
 The default location for cache data is a subdirectory named go-build
 in the standard user cache directory for the current operating system.
@@ -745,10 +760,10 @@ GODEBUG=gocachetest=1 causes the go command to print details of its
 decisions about whether to reuse a cached test result.
 `,));
 
-        public static ptr<base.Command> HelpBuildConstraint = addr(new base.Command(UsageLine:"buildconstraint",Short:"build constraints",Long:`
+public static ptr<base.Command> HelpBuildConstraint = addr(new base.Command(UsageLine:"buildconstraint",Short:"build constraints",Long:`
 A build constraint, also known as a build tag, is a line comment that begins
 
-	// +build
+	//go:build
 
 that lists the conditions under which a file should be included in the package.
 Constraints may appear in any kind of source file (not just Go), but
@@ -756,30 +771,20 @@ they must appear near the top of the file, preceded
 only by blank lines and other line comments. These rules mean that in Go
 files a build constraint must appear before the package clause.
 
-To distinguish build constraints from package documentation, a series of
-build constraints must be followed by a blank line.
+To distinguish build constraints from package documentation,
+a build constraint should be followed by a blank line.
 
-A build constraint is evaluated as the OR of space-separated options.
-Each option evaluates as the AND of its comma-separated terms.
-Each term consists of letters, digits, underscores, and dots.
-A term may be negated with a preceding !.
-For example, the build constraint:
+A build constraint is evaluated as an expression containing options
+combined by ||, &&, and ! operators and parentheses. Operators have
+the same meaning as in Go.
 
-	// +build linux,386 darwin,!cgo
+For example, the following build constraint constrains a file to
+build when the "linux" and "386" constraints are satisfied, or when
+"darwin" is satisfied and "cgo" is not:
 
-corresponds to the boolean formula:
+	//go:build (linux && 386) || (darwin && !cgo)
 
-	(linux AND 386) OR (darwin AND (NOT cgo))
-
-A file may have multiple build constraints. The overall constraint is the AND
-of the individual constraints. That is, the build constraints:
-
-	// +build linux darwin
-	// +build amd64
-
-corresponds to the boolean formula:
-
-	(linux OR darwin) AND amd64
+It is an error for a file to have more than one //go:build line.
 
 During a particular build, the following words are satisfied:
 
@@ -812,25 +817,32 @@ in addition to android tags and files.
 Using GOOS=illumos matches build tags and files as for GOOS=solaris
 in addition to illumos tags and files.
 
+Using GOOS=ios matches build tags and files as for GOOS=darwin
+in addition to ios tags and files.
+
 To keep a file from being considered for the build:
 
-	// +build ignore
+	//go:build ignore
 
 (any other unsatisfied word will work as well, but "ignore" is conventional.)
 
 To build a file only when using cgo, and only on Linux and OS X:
 
-	// +build linux,cgo darwin,cgo
+	//go:build cgo && (linux || darwin)
 
 Such a file is usually paired with another file implementing the
 default functionality for other systems, which in this case would
 carry the constraint:
 
-	// +build !linux,!darwin !cgo
+	//go:build !(cgo && (linux || darwin))
 
 Naming a file dns_windows.go will cause it to be included only when
 building the package for Windows; similarly, math_386.s will be included
 only when building the package for 32-bit x86.
+
+Go versions 1.16 and earlier used a different syntax for build constraints,
+with a "// +build" prefix. The gofmt command will add an equivalent //go:build
+constraint when encountering the older syntax.
 `,));
-    }
-}}}}
+
+} // end help_package

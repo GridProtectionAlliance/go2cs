@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:47 UTC
+//     Generated on 2022 March 06 22:30:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
@@ -33,19 +32,15 @@ namespace go
             public layoutType(NilType _)
             {
                 this.t = default;
-                this.argSize = default;
-                this.retOffset = default;
-                this.stack = default;
                 this.framePool = default;
+                this.abi = default;
             }
 
-            public layoutType(ref ptr<rtype> t = default, System.UIntPtr argSize = default, System.UIntPtr retOffset = default, ref ptr<bitVector> stack = default, ref ptr<sync.Pool> framePool = default)
+            public layoutType(ref ptr<rtype> t = default, ref ptr<sync.Pool> framePool = default, abiDesc abi = default)
             {
                 this.t = t;
-                this.argSize = argSize;
-                this.retOffset = retOffset;
-                this.stack = stack;
                 this.framePool = framePool;
+                this.abi = abi;
             }
 
             // Enable comparisons between nil and layoutType struct
@@ -68,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static layoutType layoutType_cast(dynamic value)
         {
-            return new layoutType(ref value.t, value.argSize, value.retOffset, ref value.stack, ref value.framePool);
+            return new layoutType(ref value.t, ref value.framePool, value.abi);
         }
     }
 }

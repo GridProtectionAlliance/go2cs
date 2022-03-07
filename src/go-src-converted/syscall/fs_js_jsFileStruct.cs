@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:23 UTC
+//     Generated on 2022 March 06 22:26:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
-using io = go.io_package;
 using sync = go.sync_package;
 using js = go.syscall.js_package;
 
@@ -37,7 +35,7 @@ namespace go
                 this.seeked = default;
             }
 
-            public jsFile(@string path = default, slice<@string> entries = default, long dirIdx = default, long pos = default, bool seeked = default)
+            public jsFile(@string path = default, slice<@string> entries = default, nint dirIdx = default, long pos = default, bool seeked = default)
             {
                 this.path = path;
                 this.entries = entries;

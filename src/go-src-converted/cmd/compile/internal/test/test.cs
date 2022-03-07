@@ -1,5 +1,5 @@
-// package test -- go2cs converted at 2020 October 09 05:44:19 UTC
+// package test -- go2cs converted at 2022 March 06 23:14:57 UTC
 // import "cmd/compile/internal/test" ==> using test = go.cmd.compile.@internal.test_package
-// Original source: C:\Go\src\cmd\compile\internal\test\test.go
-    }
+// Original source: C:\Program Files\Go\src\cmd\compile\internal\test\test.go
 
+} // end test_package

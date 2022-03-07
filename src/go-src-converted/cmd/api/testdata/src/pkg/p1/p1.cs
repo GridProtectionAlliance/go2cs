@@ -1,289 +1,238 @@
-// package p1 -- go2cs converted at 2020 October 09 05:20:07 UTC
+// package p1 -- go2cs converted at 2022 March 06 22:43:01 UTC
 // import "cmd/api/testdata/src/pkg/p1" ==> using p1 = go.cmd.api.testdata.src.pkg.p1_package
-// Original source: C:\Go\src\cmd\api\testdata\src\pkg\p1\p1.go
+// Original source: C:\Program Files\Go\src\cmd\api\testdata\src\pkg\p1\p1.go
 using ptwo = go.p2_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace cmd {
-namespace api {
-namespace testdata {
-namespace src {
-namespace pkg
-{
-    public static partial class p1_package
-    {
-        public static readonly var ConstChase2 = constChase; // forward declaration to unexported ident
-        private static readonly var constChase = AIsLowerA; // forward declaration to exported ident
-
-        public static readonly long A = (long)1L;
-        private static readonly long a = (long)11L;
-        public static readonly long A64 = 1L;
-
-        public static readonly var AIsLowerA = a; // previously declared
-
-        public static readonly var ConversionConst = MyInt(5L);
 
+namespace go.cmd.api.testdata.src.pkg;
 
-        // Variables from function calls.
-        public static var V = ptwo.F();        public static var VError = BarE();        public static var V1 = Bar1(1L, 2L, 3L);        public static var V2 = ptwo.G();
+public static partial class p1_package {
 
-        // Variables with conversions:
-        public static var StrConv = string("foo");        public static slice<byte> ByteConv = (slice<byte>)"foo";
+public static readonly var ConstChase2 = constChase; // forward declaration to unexported ident
+private static readonly var constChase = AIsLowerA; // forward declaration to exported ident
 
-        public static var ChecksumError = ptwo.NewError("gzip checksum error");
+public static readonly nint A = 1;
+private static readonly nint a = 11;
+public static readonly long A64 = 1;
 
-        public static readonly long B0 = (long)2L;
+public static readonly var AIsLowerA = a; // previously declared
 
-        public static readonly @string StrConst = (@string)"foo";
+public static readonly var ConversionConst = MyInt(5);
 
-        public static readonly float FloatConst = (float)1.5F;
 
+// Variables from function calls.
+public static var V = ptwo.F();public static var VError = BarE();public static var V1 = Bar1(1, 2, 3);public static var V2 = ptwo.G();
 
+// Variables with conversions:
+public static var StrConv = string("foo");public static slice<byte> ByteConv = (slice<byte>)"foo";
 
-        private partial struct myInt // : long
-        {
-        }
+public static var ChecksumError = ptwo.NewError("gzip checksum error");
 
-        public partial struct MyInt // : long
-        {
-        }
+public static readonly nint B0 = 2;
 
-        public partial struct Time
-        {
-        }
+public static readonly @string StrConst = "foo";
 
-        public partial struct S
-        {
-            public ptr<long> Public;
-            public ptr<long> @private;
-            public Time PublicTime;
-        }
+public static readonly float FloatConst = 1.5F;
 
-        public partial struct URL
-        {
-        }
 
-        public partial struct EmbedURLPtr
-        {
-            public ref ptr<URL> ptr<URL> => ref ptr<URL>_ptr;
-        }
 
-        public partial struct S2
-        {
-            public ref S S => ref S_val;
-            public bool Extra;
-        }
+private partial struct myInt { // : nint
+}
 
-        public static long X0 = default;
+public partial struct MyInt { // : nint
+}
 
-        public static long Y = default;        public static I X = default!;
+public partial struct Time {
+}
 
-        public partial interface Namer
-        {
-            @string Name();
-        }
+public partial struct S {
+    public ptr<nint> Public;
+    public ptr<nint> @private;
+    public Time PublicTime;
+}
 
-        public partial interface I : Namer, ptwo.Twoer
-        {
-            long Set(@string name, long balance);
-            long Get(@string _p0);
-            long GetNamed(@string _p0);
-            long @private();
-        }
+public partial struct URL {
+}
 
-        public partial interface Public
-        {
-            void X();
-            void Y();
-        }
+public partial struct EmbedURLPtr {
+    public ref ptr<URL> ptr<URL> => ref ptr<URL>_ptr;
+}
 
-        public partial interface Private
-        {
-            void X();
-            void y();
-        }
+public partial struct S2 {
+    public ref S S => ref S_val;
+    public bool Extra;
+}
 
-        public partial interface Error : error
-        {
-            bool Temporary();
-        }
+public static long X0 = default;
 
-        private static void privateTypeMethod(this myInt _p0)
-        {
-        }
-        private static void CapitalMethodUnexportedType(this myInt _p0)
-        {
-        }
+public static nint Y = default;public static I X = default!;
 
-        private static void SMethod(this ptr<S2> _addr_s, sbyte x, short y, long z)
-        {
-            ref S2 s = ref _addr_s.val;
+public partial interface Namer {
+    @string Name();
+}
 
-        }
+public partial interface I {
+    long Set(@string name, long balance);
+    long Get(@string _p0);
+    long GetNamed(@string _p0);
+    long @private();
+}
 
-        private partial struct s
-        {
-        }
+public partial interface Public {
+    void X();
+    void Y();
+}
 
-        private static void method(this s _p0)
+public partial interface Private {
+    void X();
+    void y();
+}
 
-        private static void Method(this s _p0)
+public partial interface Error {
+    bool Temporary();
+}
 
+private static void privateTypeMethod(this myInt _p0) {
+}
+private static void CapitalMethodUnexportedType(this myInt _p0) {
+}
 
-        public static void StructValueMethod(this S _p0)
+private static void SMethod(this ptr<S2> _addr_s, sbyte x, short y, long z) {
+    ref S2 s = ref _addr_s.val;
 
-        public static void StructValueMethodNamedRecv(this S ignored)
+}
 
+private partial struct s {
+}
 
-        private static void unexported(this ptr<S2> _addr_s, sbyte x, short y, long z)
-        {
-            ref S2 s = ref _addr_s.val;
+private static void method(this s _p0)
+private static void Method(this s _p0)
 
-        }
-
-        public static void Bar(sbyte x, short y, long z)
-        {
-        }
-        public static ulong Bar1(sbyte x, short y, long z)
-        {
-        }
-        public static (byte, ulong) Bar2(sbyte x, short y, long z)
-        {
-            byte _p0 = default;
-            ulong _p0 = default;
+public static void StructValueMethod(this S _p0)
+public static void StructValueMethodNamedRecv(this S ignored)
 
-        }
-        public static Error BarE()
-        {
-        }
-
-        private static void unexported(sbyte x, short y, long z)
-        {
-        }
+private static void unexported(this ptr<S2> _addr_s, sbyte x, short y, long z) {
+    ref S2 s = ref _addr_s.val;
 
-        public static long TakesFunc(Func<long, long> f)
-;
+}
 
-        public partial struct Codec
-        {
-            public Func<long, long, long> Func;
-        }
+public static void Bar(sbyte x, short y, long z) {
+}
+public static ulong Bar1(sbyte x, short y, long z) {
+}
+public static (byte, ulong) Bar2(sbyte x, short y, long z) {
+    byte _p0 = default;
+    ulong _p0 = default;
 
-        public partial struct SI
-        {
-            public long I;
-        }
+}
+public static Error BarE() {
+}
 
-        public static SI SIVal = new SI();
-        public static ptr<SI> SIPtr = addr(new SI());
-        public static ptr<SI> SIPtr2;
+private static void unexported(sbyte x, short y, long z) {
+}
 
-        public partial struct T
-        {
-            public ref common common => ref common_val;
-        }
+public static nint TakesFunc(Func<nint, nint> f);
 
-        public partial struct B
-        {
-            public ref common common => ref common_val;
-        }
+public partial struct Codec {
+    public Func<nint, nint, nint> Func;
+}
 
-        private partial struct common
-        {
-            public long i;
-        }
+public partial struct SI {
+    public nint I;
+}
 
-        public partial struct TPtrUnexported
-        {
-            public ref ptr<common> ptr<common> => ref ptr<common>_ptr;
-        }
+public static SI SIVal = new SI();
+public static ptr<SI> SIPtr = addr(new SI());
+public static ptr<SI> SIPtr2;
 
-        public partial struct TPtrExported
-        {
-            public ref ptr<Embedded> ptr<Embedded> => ref ptr<Embedded>_ptr;
-        }
+public partial struct T {
+    public ref common common => ref common_val;
+}
 
-        public delegate  error) FuncType(long,  long,  @string,  (ptr<B>);
+public partial struct B {
+    public ref common common => ref common_val;
+}
 
-        public partial struct Embedded
-        {
-        }
+private partial struct common {
+    public nint i;
+}
 
-        public static (ptr<B>, error) PlainFunc(long x, long y, @string s)
-;
+public partial struct TPtrUnexported {
+    public ref ptr<common> ptr<common> => ref ptr<common>_ptr;
+}
 
-        private static void OnEmbedded(this ptr<Embedded> _addr__p0)
-        {
-            ref Embedded _p0 = ref _addr__p0.val;
+public partial struct TPtrExported {
+    public ref ptr<Embedded> ptr<Embedded> => ref ptr<Embedded>_ptr;
+}
 
-        }
+public delegate  error) FuncType(nint,  nint,  @string,  (ptr<B>);
 
-        private static void JustOnT(this ptr<T> _addr__p0)
-        {
-            ref T _p0 = ref _addr__p0.val;
+public partial struct Embedded {
+}
 
-        }
-        private static void JustOnB(this ptr<B> _addr__p0)
-        {
-            ref B _p0 = ref _addr__p0.val;
+public static (ptr<B>, error) PlainFunc(nint x, nint y, @string s);
 
-        }
-        private static void OnBothTandBPtr(this ptr<common> _addr__p0)
-        {
-            ref common _p0 = ref _addr__p0.val;
+private static void OnEmbedded(this ptr<Embedded> _addr__p0) {
+    ref Embedded _p0 = ref _addr__p0.val;
 
-        }
-        private static void OnBothTandBVal(this common _p0)
-        {
-        }
+}
 
-        public partial struct EmbedSelector
-        {
-            public ref Time Time => ref Time_val;
-        }
+private static void JustOnT(this ptr<T> _addr__p0) {
+    ref T _p0 = ref _addr__p0.val;
 
-        private static readonly @string foo = (@string)"foo";
-        private static readonly @string foo2 = "foo2";
-        private static readonly var truth = foo == "foo" || foo2 == "foo2";
+}
+private static void JustOnB(this ptr<B> _addr__p0) {
+    ref B _p0 = ref _addr__p0.val;
 
+}
+private static void OnBothTandBPtr(this ptr<common> _addr__p0) {
+    ref common _p0 = ref _addr__p0.val;
 
-        private static void ellipsis(params @string _p0)
-        {
-        }
+}
+private static void OnBothTandBVal(this common _p0) {
+}
 
-        public static Time Now()
-        {
-            Time now = default;
-            return now;
-        }
+public partial struct EmbedSelector {
+    public ref Time Time => ref Time_val;
+}
 
-        private static ptr<S> x = addr(new S(Public:nil,private:nil,PublicTime:Now(),));
+private static readonly @string foo = "foo";
+private static readonly @string foo2 = "foo2";
+private static readonly var truth = foo == "foo" || foo2 == "foo2";
 
-        private static long parenExpr = (1L + 5L);
 
-        private static Action funcLit = () =>
-        {>>MARKER:FUNCTION_PlainFunc_BLOCK_PREFIX<<
-        };
+private static void ellipsis(params @string _p0) {
+}
 
-        private static map<@string, long> m = default;
+public static Time Now() {
+    Time now = default;
+    return now;
+}
 
-        private static channel<long> chanVar = default;
+private static ptr<S> x = addr(new S(Public:nil,private:nil,PublicTime:Now(),));
 
-        private static long ifaceVar = 5L;
+private static nint parenExpr = (1 + 5);
 
-        private static long assertVar = ifaceVar._<long>();
+private static Action funcLit = () => {>>MARKER:FUNCTION_PlainFunc_BLOCK_PREFIX<<
+};
 
-        private static var indexVar = m["foo"];
+private static map<@string, nint> m = default;
 
-        public static byte Byte = default;
-        public static Func<byte, int> ByteFunc = default;
+private static channel<nint> chanVar = default;
 
-        public partial struct ByteStruct
-        {
-            public byte B;
-            public int R;
-        }
-    }
-}}}}}}
+private static nint ifaceVar = 5;
+
+private static nint assertVar = ifaceVar._<nint>();
+
+private static var indexVar = m["foo"];
+
+public static byte Byte = default;
+public static Func<byte, int> ByteFunc = default;
+
+public partial struct ByteStruct {
+    public byte B;
+    public int R;
+}
+
+} // end p1_package

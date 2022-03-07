@@ -2,23 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build gccgo
 // +build gccgo
 
-// package build -- go2cs converted at 2020 October 09 05:20:00 UTC
+// package build -- go2cs converted at 2022 March 06 22:42:52 UTC
 // import "go/build" ==> using build = go.go.build_package
-// Original source: C:\Go\src\go\build\gccgo.go
+// Original source: C:\Program Files\Go\src\go\build\gccgo.go
 using runtime = go.runtime_package;
-using static go.builtin;
 
-namespace go {
-namespace go
-{
-    public static partial class build_package
-    {
-        // getToolDir returns the default value of ToolDir.
-        private static @string getToolDir()
-        {
-            return envOr("GCCGOTOOLDIR", runtime.GCCGOTOOLDIR);
-        }
-    }
-}}
+namespace go.go;
+
+public static partial class build_package {
+
+    // getToolDir returns the default value of ToolDir.
+private static @string getToolDir() {
+    return envOr("GCCGOTOOLDIR", runtime.GCCGOTOOLDIR);
+}
+
+} // end build_package

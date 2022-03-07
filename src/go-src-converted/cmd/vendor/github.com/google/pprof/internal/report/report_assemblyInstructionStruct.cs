@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:45 UTC
+//     Generated on 2022 March 06 23:23:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using filepath = go.path.filepath_package;
@@ -59,7 +58,7 @@ namespace @internal
                 this.inlineCalls = default;
             }
 
-            public assemblyInstruction(ulong address = default, @string instruction = default, @string function = default, @string file = default, long line = default, long flat = default, long cum = default, long flatDiv = default, long cumDiv = default, bool startsBlock = default, slice<callID> inlineCalls = default)
+            public assemblyInstruction(ulong address = default, @string instruction = default, @string function = default, @string file = default, nint line = default, long flat = default, long cum = default, long flatDiv = default, long cumDiv = default, bool startsBlock = default, slice<callID> inlineCalls = default)
             {
                 this.address = address;
                 this.instruction = instruction;

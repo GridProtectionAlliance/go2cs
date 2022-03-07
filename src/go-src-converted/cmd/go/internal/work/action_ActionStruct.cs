@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:27 UTC
+//     Generated on 2022 March 06 23:16:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using heap = go.container.heap_package;
+using context = go.context_package;
 using elf = go.debug.elf_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
@@ -30,6 +29,7 @@ using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using trace = go.cmd.go.@internal.trace_package;
 using buildid = go.cmd.@internal.buildid_package;
 using go;
 
@@ -72,9 +72,11 @@ namespace @internal
                 this.priority = default;
                 this.Failed = default;
                 this.json = default;
+                this.nonGoOverlay = default;
+                this.traceSpan = default;
             }
 
-            public Action(@string Mode = default, ref ptr<load.Package> Package = default, slice<ptr<Action>> Deps = default, Func<ptr<Builder>, ptr<Action>, error> Func = default, bool IgnoreFail = default, ref ptr<bytes.Buffer> TestOutput = default, slice<@string> Args = default, slice<ptr<Action>> triggers = default, bool buggyInstall = default, Func<ptr<Builder>, ptr<Action>, bool> TryCache = default, @string Objdir = default, @string Target = default, @string built = default, cache.ActionID actionID = default, @string buildID = default, bool VetxOnly = default, bool needVet = default, bool needBuild = default, ref ptr<vetConfig> vetCfg = default, slice<byte> output = default, long pending = default, long priority = default, bool Failed = default, ref ptr<actionJSON> json = default)
+            public Action(@string Mode = default, ref ptr<load.Package> Package = default, slice<ptr<Action>> Deps = default, Func<ptr<Builder>, context.Context, ptr<Action>, error> Func = default, bool IgnoreFail = default, ref ptr<bytes.Buffer> TestOutput = default, slice<@string> Args = default, slice<ptr<Action>> triggers = default, bool buggyInstall = default, Func<ptr<Builder>, ptr<Action>, bool> TryCache = default, @string Objdir = default, @string Target = default, @string built = default, cache.ActionID actionID = default, @string buildID = default, bool VetxOnly = default, bool needVet = default, bool needBuild = default, ref ptr<vetConfig> vetCfg = default, slice<byte> output = default, nint pending = default, nint priority = default, bool Failed = default, ref ptr<actionJSON> json = default, map<@string, @string> nonGoOverlay = default, ref ptr<trace.Span> traceSpan = default)
             {
                 this.Mode = Mode;
                 this.Package = Package;
@@ -100,6 +102,8 @@ namespace @internal
                 this.priority = priority;
                 this.Failed = Failed;
                 this.json = json;
+                this.nonGoOverlay = nonGoOverlay;
+                this.traceSpan = traceSpan;
             }
 
             // Enable comparisons between nil and Action struct
@@ -122,7 +126,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Action Action_cast(dynamic value)
         {
-            return new Action(value.Mode, ref value.Package, value.Deps, value.Func, value.IgnoreFail, ref value.TestOutput, value.Args, value.triggers, value.buggyInstall, value.TryCache, value.Objdir, value.Target, value.built, value.actionID, value.buildID, value.VetxOnly, value.needVet, value.needBuild, ref value.vetCfg, value.output, value.pending, value.priority, value.Failed, ref value.json);
+            return new Action(value.Mode, ref value.Package, value.Deps, value.Func, value.IgnoreFail, ref value.TestOutput, value.Args, value.triggers, value.buggyInstall, value.TryCache, value.Objdir, value.Target, value.built, value.actionID, value.buildID, value.VetxOnly, value.needVet, value.needBuild, ref value.vetCfg, value.output, value.pending, value.priority, value.Failed, ref value.json, value.nonGoOverlay, ref value.traceSpan);
         }
     }
 }}}}

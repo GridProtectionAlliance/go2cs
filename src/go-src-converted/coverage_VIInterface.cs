@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:45 UTC
+//     Generated on 2022 March 06 23:33:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
 using strings = go.strings_package;
@@ -50,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -65,18 +64,18 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void fByPtr(ptr<T> value, long x, params @string[] y);
-            private delegate void fByVal(T value, long x, params @string[] y);
+            private delegate void fByPtr(ptr<T> value, nint x, params @string[] y);
+            private delegate void fByVal(T value, nint x, params @string[] y);
 
             private static readonly fByPtr? s_fByPtr;
             private static readonly fByVal? s_fByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void f(long x, params @string[] y)
+            public void f(nint x, params @string[] y)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_fByPtr is null || !m_target_is_ptr)
@@ -85,12 +84,11 @@ namespace go
                     return;
                 }
 
-                s_fByPtr(m_target_ptr, x, y);
+                s_fByPtr(m_target_ptr!, x, y);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static VI()
@@ -101,12 +99,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("f");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_fByPtr = extensionMethod.CreateStaticDelegate(typeof(fByPtr)) as fByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("f");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_fByVal = extensionMethod.CreateStaticDelegate(typeof(fByVal)) as fByVal;
 
                 if (s_fByPtr is null && s_fByVal is null)

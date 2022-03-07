@@ -3,24 +3,17 @@
 // Version 2.0.0-alpha4
 // See LICENSE file for license details
 
-// package d3flamegraph -- go2cs converted at 2020 October 09 05:54:03 UTC
+// package d3flamegraph -- go2cs converted at 2022 March 06 23:24:05 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/d3flamegraph" ==> using d3flamegraph = go.cmd.vendor.github.com.google.pprof.third_party.d3flamegraph_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3flamegraph\d3_flame_graph.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3flamegraph\d3_flame_graph.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace third_party
-{
-    public static partial class d3flamegraph_package
-    {
-        // JSSource returns the d3-flamegraph.js file
-        public static readonly @string JSSource = (@string)"\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
+namespace go.cmd.vendor.github.com.google.pprof.third_party;
+
+public static partial class d3flamegraph_package {
+
+    // JSSource returns the d3-flamegraph.js file
+public static readonly @string JSSource = "\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
     "\'undefined\' ? factory(exports, require(\'d3\')) :\n\ttypeof define === \'function\' &&" +
     " define.amd ? define([\'exports\', \'d3\'], factory) :\n\t(factory((global.d3 = global" +
     ".d3 || {}),global.d3));\n}(this, (function (exports,d3) { \'use strict\';\n\nvar d3__" +
@@ -301,11 +294,11 @@ namespace third_party
     " chart\n};\n\nexports.flamegraph = flamegraph;\n\nObject.defineProperty(exports, \'__e" +
     "sModule\', { value: true });\n\n})));\n";
 
-        // CSSSource returns the d3-flamegraph.css file
+// CSSSource returns the d3-flamegraph.css file
 
 
-        // CSSSource returns the d3-flamegraph.css file
-        public static readonly @string CSSSource = (@string)"\n.d3-flame-graph rect {\n  stroke: #EEEEEE;\n  fill-opacity: .8;\n}\n\n.d3-flame-graph" +
+// CSSSource returns the d3-flamegraph.css file
+public static readonly @string CSSSource = "\n.d3-flame-graph rect {\n  stroke: #EEEEEE;\n  fill-opacity: .8;\n}\n\n.d3-flame-graph" +
     " rect:hover {\n  stroke: #474747;\n  stroke-width: 0.5;\n  cursor: pointer;\n}\n\n.d3-" +
     "flame-graph-label {\n  pointer-events: none;\n  white-space: nowrap;\n  text-overfl" +
     "ow: ellipsis;\n  overflow: hidden;\n  font-size: 12px;\n  font-family: Verdana;\n  m" +
@@ -326,5 +319,5 @@ namespace third_party
     ": center;\n}\n\n/* Westward tooltips */\n.d3-flame-graph-tip.w:after {\n  content: \"\\" +
     "25B6\";\n  margin: -4px 0 0 -1px;\n  top: 50%;\n  left: 100%;\n}\n";
 
-    }
-}}}}}}}
+
+} // end d3flamegraph_package

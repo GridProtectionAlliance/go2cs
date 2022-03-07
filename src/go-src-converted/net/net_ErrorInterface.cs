@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:06 UTC
+//     Generated on 2022 March 06 22:16:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
+using poll = go.@internal.poll_package;
 using io = go.io_package;
 using os = go.os_package;
 using sync = go.sync_package;
@@ -54,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,13 +80,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TimeoutByPtr is null || !m_target_is_ptr)
                     return s_TimeoutByVal!(target);
 
-                return s_TimeoutByPtr(m_target_ptr);
+                return s_TimeoutByPtr(m_target_ptr!);
             }
 
             private delegate bool TemporaryByPtr(ptr<T> value);
@@ -100,36 +100,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TemporaryByPtr is null || !m_target_is_ptr)
                     return s_TemporaryByVal!(target);
 
-                return s_TemporaryByPtr(m_target_ptr);
-            }
-
-            private delegate @string ErrorByPtr(ptr<T> value);
-            private delegate @string ErrorByVal(T value);
-
-            private static readonly ErrorByPtr? s_ErrorByPtr;
-            private static readonly ErrorByVal? s_ErrorByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Error()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ErrorByPtr is null || !m_target_is_ptr)
-                    return s_ErrorByVal!(target);
-
-                return s_ErrorByPtr(m_target_ptr);
+                return s_TemporaryByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Error()
@@ -140,12 +120,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Timeout");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TimeoutByPtr = extensionMethod.CreateStaticDelegate(typeof(TimeoutByPtr)) as TimeoutByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Timeout");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TimeoutByVal = extensionMethod.CreateStaticDelegate(typeof(TimeoutByVal)) as TimeoutByVal;
 
                 if (s_TimeoutByPtr is null && s_TimeoutByVal is null)
@@ -153,29 +133,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Temporary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TemporaryByPtr = extensionMethod.CreateStaticDelegate(typeof(TemporaryByPtr)) as TemporaryByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Temporary");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TemporaryByVal = extensionMethod.CreateStaticDelegate(typeof(TemporaryByVal)) as TemporaryByVal;
 
                 if (s_TemporaryByPtr is null && s_TemporaryByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.Temporary method", new Exception("Temporary"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-
-                if (s_ErrorByPtr is null && s_ErrorByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Error.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

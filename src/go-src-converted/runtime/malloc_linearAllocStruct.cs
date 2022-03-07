@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:12 UTC
+//     Generated on 2022 March 06 22:08:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using math = go.runtime.@internal.math_package;
 using sys = go.runtime.@internal.sys_package;
@@ -33,13 +32,15 @@ namespace go
                 this.next = default;
                 this.mapped = default;
                 this.end = default;
+                this.mapMemory = default;
             }
 
-            public linearAlloc(System.UIntPtr next = default, System.UIntPtr mapped = default, System.UIntPtr end = default)
+            public linearAlloc(System.UIntPtr next = default, System.UIntPtr mapped = default, System.UIntPtr end = default, bool mapMemory = default)
             {
                 this.next = next;
                 this.mapped = mapped;
                 this.end = end;
+                this.mapMemory = mapMemory;
             }
 
             // Enable comparisons between nil and linearAlloc struct
@@ -62,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static linearAlloc linearAlloc_cast(dynamic value)
         {
-            return new linearAlloc(value.next, value.mapped, value.end);
+            return new linearAlloc(value.next, value.mapped, value.end, value.mapMemory);
         }
     }
 }

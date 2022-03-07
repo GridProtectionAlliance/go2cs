@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:12 UTC
+//     Generated on 2022 March 06 22:19:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace container
                 this.len = default;
             }
 
-            public List(Element root = default, long len = default)
+            public List(Element root = default, nint len = default)
             {
                 this.root = root;
                 this.len = len;

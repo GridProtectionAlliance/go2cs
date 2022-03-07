@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:45 UTC
+//     Generated on 2022 March 06 22:24:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
@@ -47,10 +46,11 @@ namespace encoding
                 this.rawBuffer = default;
                 this.recordBuffer = default;
                 this.fieldIndexes = default;
+                this.fieldPositions = default;
                 this.lastRecord = default;
             }
 
-            public Reader(int Comma = default, int Comment = default, long FieldsPerRecord = default, bool LazyQuotes = default, bool TrimLeadingSpace = default, bool ReuseRecord = default, bool TrailingComma = default, ref ptr<bufio.Reader> r = default, long numLine = default, slice<byte> rawBuffer = default, slice<byte> recordBuffer = default, slice<long> fieldIndexes = default, slice<@string> lastRecord = default)
+            public Reader(int Comma = default, int Comment = default, nint FieldsPerRecord = default, bool LazyQuotes = default, bool TrimLeadingSpace = default, bool ReuseRecord = default, bool TrailingComma = default, ref ptr<bufio.Reader> r = default, nint numLine = default, slice<byte> rawBuffer = default, slice<byte> recordBuffer = default, slice<nint> fieldIndexes = default, slice<position> fieldPositions = default, slice<@string> lastRecord = default)
             {
                 this.Comma = Comma;
                 this.Comment = Comment;
@@ -64,6 +64,7 @@ namespace encoding
                 this.rawBuffer = rawBuffer;
                 this.recordBuffer = recordBuffer;
                 this.fieldIndexes = fieldIndexes;
+                this.fieldPositions = fieldPositions;
                 this.lastRecord = lastRecord;
             }
 
@@ -87,7 +88,7 @@ namespace encoding
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Reader Reader_cast(dynamic value)
         {
-            return new Reader(value.Comma, value.Comment, value.FieldsPerRecord, value.LazyQuotes, value.TrimLeadingSpace, value.ReuseRecord, value.TrailingComma, ref value.r, value.numLine, value.rawBuffer, value.recordBuffer, value.fieldIndexes, value.lastRecord);
+            return new Reader(value.Comma, value.Comment, value.FieldsPerRecord, value.LazyQuotes, value.TrimLeadingSpace, value.ReuseRecord, value.TrailingComma, ref value.r, value.numLine, value.rawBuffer, value.recordBuffer, value.fieldIndexes, value.fieldPositions, value.lastRecord);
         }
     }
 }}

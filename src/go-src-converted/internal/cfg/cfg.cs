@@ -5,20 +5,18 @@
 // Package cfg holds configuration shared by the Go command and internal/testenv.
 // Definitions that don't need to be exposed outside of cmd/go should be in
 // cmd/go/internal/cfg instead of this package.
-// package cfg -- go2cs converted at 2020 October 09 05:45:28 UTC
+// package cfg -- go2cs converted at 2022 March 06 23:16:30 UTC
 // import "internal/cfg" ==> using cfg = go.@internal.cfg_package
-// Original source: C:\Go\src\internal\cfg\cfg.go
+// Original source: C:\Program Files\Go\src\internal\cfg\cfg.go
 
-using static go.builtin;
 
-namespace go {
-namespace @internal
-{
-    public static partial class cfg_package
-    {
-        // KnownEnv is a list of environment variables that affect the operation
-        // of the Go command.
-        public static readonly @string KnownEnv = (@string)@"
+namespace go.@internal;
+
+public static partial class cfg_package {
+
+    // KnownEnv is a list of environment variables that affect the operation
+    // of the Go command.
+public static readonly @string KnownEnv = @"
 	AR
 	CC
 	CGO_CFLAGS
@@ -48,6 +46,7 @@ namespace @internal
 	GOCACHE
 	GOENV
 	GOEXE
+	GOEXPERIMENT
 	GOFLAGS
 	GOGCCFLAGS
 	GOHOSTARCH
@@ -67,10 +66,11 @@ namespace @internal
 	GOSUMDB
 	GOTMPDIR
 	GOTOOLDIR
+	GOVCS
 	GOWASM
 	GO_EXTLINK_ENABLED
 	PKG_CONFIG
 ";
 
-    }
-}}
+
+} // end cfg_package

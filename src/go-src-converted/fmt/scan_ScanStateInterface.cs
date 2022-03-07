@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:00 UTC
+//     Generated on 2022 March 06 22:31:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -55,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -70,127 +69,127 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) ReadRuneByPtr(ptr<T> value);
-            private delegate (long, error) ReadRuneByVal(T value);
+            private delegate (nint, error) ReadRuneByPtr(ptr<T> value);
+            private delegate (nint, error) ReadRuneByVal(T value);
 
             private static readonly ReadRuneByPtr? s_ReadRuneByPtr;
             private static readonly ReadRuneByVal? s_ReadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) ReadRune()
+            public (nint, error) ReadRune()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadRuneByPtr is null || !m_target_is_ptr)
                     return s_ReadRuneByVal!(target);
 
-                return s_ReadRuneByPtr(m_target_ptr);
+                return s_ReadRuneByPtr(m_target_ptr!);
             }
 
-            private delegate (long, error) UnreadRuneByPtr(ptr<T> value);
-            private delegate (long, error) UnreadRuneByVal(T value);
+            private delegate (nint, error) UnreadRuneByPtr(ptr<T> value);
+            private delegate (nint, error) UnreadRuneByVal(T value);
 
             private static readonly UnreadRuneByPtr? s_UnreadRuneByPtr;
             private static readonly UnreadRuneByVal? s_UnreadRuneByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) UnreadRune()
+            public (nint, error) UnreadRune()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnreadRuneByPtr is null || !m_target_is_ptr)
                     return s_UnreadRuneByVal!(target);
 
-                return s_UnreadRuneByPtr(m_target_ptr);
+                return s_UnreadRuneByPtr(m_target_ptr!);
             }
 
-            private delegate (long, error) SkipSpaceByPtr(ptr<T> value);
-            private delegate (long, error) SkipSpaceByVal(T value);
+            private delegate (nint, error) SkipSpaceByPtr(ptr<T> value);
+            private delegate (nint, error) SkipSpaceByVal(T value);
 
             private static readonly SkipSpaceByPtr? s_SkipSpaceByPtr;
             private static readonly SkipSpaceByVal? s_SkipSpaceByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) SkipSpace()
+            public (nint, error) SkipSpace()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SkipSpaceByPtr is null || !m_target_is_ptr)
                     return s_SkipSpaceByVal!(target);
 
-                return s_SkipSpaceByPtr(m_target_ptr);
+                return s_SkipSpaceByPtr(m_target_ptr!);
             }
 
-            private delegate (long, error) TokenByPtr(ptr<T> value, bool skipSpace, Func<int, bool> f);
-            private delegate (long, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
+            private delegate (nint, error) TokenByPtr(ptr<T> value, bool skipSpace, Func<int, bool> f);
+            private delegate (nint, error) TokenByVal(T value, bool skipSpace, Func<int, bool> f);
 
             private static readonly TokenByPtr? s_TokenByPtr;
             private static readonly TokenByVal? s_TokenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Token(bool skipSpace, Func<int, bool> f)
+            public (nint, error) Token(bool skipSpace, Func<int, bool> f)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TokenByPtr is null || !m_target_is_ptr)
                     return s_TokenByVal!(target, skipSpace, f);
 
-                return s_TokenByPtr(m_target_ptr, skipSpace, f);
+                return s_TokenByPtr(m_target_ptr!, skipSpace, f);
             }
 
-            private delegate (long, error) WidthByPtr(ptr<T> value);
-            private delegate (long, error) WidthByVal(T value);
+            private delegate (nint, error) WidthByPtr(ptr<T> value);
+            private delegate (nint, error) WidthByVal(T value);
 
             private static readonly WidthByPtr? s_WidthByPtr;
             private static readonly WidthByVal? s_WidthByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Width()
+            public (nint, error) Width()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WidthByPtr is null || !m_target_is_ptr)
                     return s_WidthByVal!(target);
 
-                return s_WidthByPtr(m_target_ptr);
+                return s_WidthByPtr(m_target_ptr!);
             }
 
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> buf);
-            private delegate (long, error) ReadByVal(T value, slice<byte> buf);
+            private delegate (nint, error) ReadByPtr(ptr<T> value, slice<byte> buf);
+            private delegate (nint, error) ReadByVal(T value, slice<byte> buf);
 
             private static readonly ReadByPtr? s_ReadByPtr;
             private static readonly ReadByVal? s_ReadByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> buf)
+            public (nint, error) Read(slice<byte> buf)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadByPtr is null || !m_target_is_ptr)
                     return s_ReadByVal!(target, buf);
 
-                return s_ReadByPtr(m_target_ptr, buf);
+                return s_ReadByPtr(m_target_ptr!, buf);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ScanState()
@@ -201,12 +200,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByPtr)) as ReadRuneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
 
                 if (s_ReadRuneByPtr is null && s_ReadRuneByVal is null)
@@ -214,12 +213,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByPtr)) as UnreadRuneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnreadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
 
                 if (s_UnreadRuneByPtr is null && s_UnreadRuneByVal is null)
@@ -227,12 +226,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SkipSpace");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SkipSpaceByPtr = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByPtr)) as SkipSpaceByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SkipSpace");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SkipSpaceByVal = extensionMethod.CreateStaticDelegate(typeof(SkipSpaceByVal)) as SkipSpaceByVal;
 
                 if (s_SkipSpaceByPtr is null && s_SkipSpaceByVal is null)
@@ -240,12 +239,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Token");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TokenByPtr = extensionMethod.CreateStaticDelegate(typeof(TokenByPtr)) as TokenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Token");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TokenByVal = extensionMethod.CreateStaticDelegate(typeof(TokenByVal)) as TokenByVal;
 
                 if (s_TokenByPtr is null && s_TokenByVal is null)
@@ -253,12 +252,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Width");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WidthByPtr = extensionMethod.CreateStaticDelegate(typeof(WidthByPtr)) as WidthByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Width");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
 
                 if (s_WidthByPtr is null && s_WidthByVal is null)
@@ -266,12 +265,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Read");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
 
                 if (s_ReadByPtr is null && s_ReadByVal is null)

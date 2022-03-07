@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:48 UTC
+//     Generated on 2022 March 06 22:17:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using crypto = go.crypto_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
@@ -104,61 +103,61 @@ namespace crypto
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Params");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ParamsByRef = extensionMethod.CreateStaticDelegate(typeof(ParamsByRef)) as ParamsByRef;
 
-                    if ((object)s_ParamsByRef == null)
+                    if (s_ParamsByRef is null)
                         s_ParamsByVal = extensionMethod.CreateStaticDelegate(typeof(ParamsByVal)) as ParamsByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("IsOnCurve");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_IsOnCurveByRef = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByRef)) as IsOnCurveByRef;
 
-                    if ((object)s_IsOnCurveByRef == null)
+                    if (s_IsOnCurveByRef is null)
                         s_IsOnCurveByVal = extensionMethod.CreateStaticDelegate(typeof(IsOnCurveByVal)) as IsOnCurveByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Add");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_AddByRef = extensionMethod.CreateStaticDelegate(typeof(AddByRef)) as AddByRef;
 
-                    if ((object)s_AddByRef == null)
+                    if (s_AddByRef is null)
                         s_AddByVal = extensionMethod.CreateStaticDelegate(typeof(AddByVal)) as AddByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Double");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_DoubleByRef = extensionMethod.CreateStaticDelegate(typeof(DoubleByRef)) as DoubleByRef;
 
-                    if ((object)s_DoubleByRef == null)
+                    if (s_DoubleByRef is null)
                         s_DoubleByVal = extensionMethod.CreateStaticDelegate(typeof(DoubleByVal)) as DoubleByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("ScalarMult");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ScalarMultByRef = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByRef)) as ScalarMultByRef;
 
-                    if ((object)s_ScalarMultByRef == null)
+                    if (s_ScalarMultByRef is null)
                         s_ScalarMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarMultByVal)) as ScalarMultByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("ScalarBaseMult");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ScalarBaseMultByRef = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByRef)) as ScalarBaseMultByRef;
 
-                    if ((object)s_ScalarBaseMultByRef == null)
+                    if (s_ScalarBaseMultByRef is null)
                         s_ScalarBaseMultByVal = extensionMethod.CreateStaticDelegate(typeof(ScalarBaseMultByVal)) as ScalarBaseMultByVal;
                 }
             }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:30 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,13 +44,12 @@ namespace sys
                 this.Hopcount = default;
                 this.Mssopt = default;
                 this.Pad = default;
-                this._ = default;
                 this.Msl = default;
                 this.Iwmaxsegs = default;
                 this.Iwcapsegs = default;
             }
 
-            public RtMetrics(ulong Locks = default, ulong Mtu = default, ulong Pksent = default, ulong Expire = default, ulong Sendpipe = default, ulong Ssthresh = default, ulong Rtt = default, ulong Rttvar = default, ulong Recvpipe = default, ulong Hopcount = default, ushort Mssopt = default, ushort Pad = default, array<byte> _ = default, ulong Msl = default, ulong Iwmaxsegs = default, ulong Iwcapsegs = default)
+            public RtMetrics(ulong Locks = default, ulong Mtu = default, ulong Pksent = default, ulong Expire = default, ulong Sendpipe = default, ulong Ssthresh = default, ulong Rtt = default, ulong Rttvar = default, ulong Recvpipe = default, ulong Hopcount = default, ushort Mssopt = default, ushort Pad = default, ulong Msl = default, ulong Iwmaxsegs = default, ulong Iwcapsegs = default)
             {
                 this.Locks = Locks;
                 this.Mtu = Mtu;
@@ -64,7 +63,6 @@ namespace sys
                 this.Hopcount = Hopcount;
                 this.Mssopt = Mssopt;
                 this.Pad = Pad;
-                this._ = _;
                 this.Msl = Msl;
                 this.Iwmaxsegs = Iwmaxsegs;
                 this.Iwcapsegs = Iwcapsegs;
@@ -90,7 +88,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RtMetrics RtMetrics_cast(dynamic value)
         {
-            return new RtMetrics(value.Locks, value.Mtu, value.Pksent, value.Expire, value.Sendpipe, value.Ssthresh, value.Rtt, value.Rttvar, value.Recvpipe, value.Hopcount, value.Mssopt, value.Pad, value._, value.Msl, value.Iwmaxsegs, value.Iwcapsegs);
+            return new RtMetrics(value.Locks, value.Mtu, value.Pksent, value.Expire, value.Sendpipe, value.Ssthresh, value.Rtt, value.Rttvar, value.Recvpipe, value.Hopcount, value.Mssopt, value.Pad, value.Msl, value.Iwmaxsegs, value.Iwcapsegs);
         }
     }
 }}}}}}

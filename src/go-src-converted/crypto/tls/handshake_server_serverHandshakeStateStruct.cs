@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:51 UTC
+//     Generated on 2022 March 06 22:20:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using context = go.context_package;
 using crypto = go.crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
 using ed25519 = go.crypto.ed25519_package;
@@ -21,6 +21,7 @@ using subtle = go.crypto.subtle_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using hash = go.hash_package;
 using io = go.io_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
@@ -40,6 +41,7 @@ namespace crypto
             public serverHandshakeState(NilType _)
             {
                 this.c = default;
+                this.ctx = default;
                 this.clientHello = default;
                 this.hello = default;
                 this.suite = default;
@@ -53,9 +55,10 @@ namespace crypto
                 this.cert = default;
             }
 
-            public serverHandshakeState(ref ptr<Conn> c = default, ref ptr<clientHelloMsg> clientHello = default, ref ptr<serverHelloMsg> hello = default, ref ptr<cipherSuite> suite = default, bool ecdheOk = default, bool ecSignOk = default, bool rsaDecryptOk = default, bool rsaSignOk = default, ref ptr<sessionState> sessionState = default, finishedHash finishedHash = default, slice<byte> masterSecret = default, ref ptr<Certificate> cert = default)
+            public serverHandshakeState(ref ptr<Conn> c = default, context.Context ctx = default, ref ptr<clientHelloMsg> clientHello = default, ref ptr<serverHelloMsg> hello = default, ref ptr<cipherSuite> suite = default, bool ecdheOk = default, bool ecSignOk = default, bool rsaDecryptOk = default, bool rsaSignOk = default, ref ptr<sessionState> sessionState = default, finishedHash finishedHash = default, slice<byte> masterSecret = default, ref ptr<Certificate> cert = default)
             {
                 this.c = c;
+                this.ctx = ctx;
                 this.clientHello = clientHello;
                 this.hello = hello;
                 this.suite = suite;
@@ -89,7 +92,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static serverHandshakeState serverHandshakeState_cast(dynamic value)
         {
-            return new serverHandshakeState(ref value.c, ref value.clientHello, ref value.hello, ref value.suite, value.ecdheOk, value.ecSignOk, value.rsaDecryptOk, value.rsaSignOk, ref value.sessionState, value.finishedHash, value.masterSecret, ref value.cert);
+            return new serverHandshakeState(ref value.c, value.ctx, ref value.clientHello, ref value.hello, ref value.suite, value.ecdheOk, value.ecSignOk, value.rsaDecryptOk, value.rsaSignOk, ref value.sessionState, value.finishedHash, value.masterSecret, ref value.cert);
         }
     }
 }}

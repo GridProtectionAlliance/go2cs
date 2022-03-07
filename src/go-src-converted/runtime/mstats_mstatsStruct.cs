@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:11 UTC
+//     Generated on 2022 March 06 22:10:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -35,9 +34,7 @@ namespace go
                 this.nlookup = default;
                 this.nmalloc = default;
                 this.nfree = default;
-                this.heap_alloc = default;
                 this.heap_sys = default;
-                this.heap_idle = default;
                 this.heap_inuse = default;
                 this.heap_released = default;
                 this.heap_objects = default;
@@ -48,9 +45,10 @@ namespace go
                 this.mcache_inuse = default;
                 this.mcache_sys = default;
                 this.buckhash_sys = default;
-                this.gc_sys = default;
+                this.gcWorkBufInUse = default;
+                this.gcProgPtrScalarBitsInUse = default;
+                this.gcMiscSys = default;
                 this.other_sys = default;
-                this.next_gc = default;
                 this.last_gc_unix = default;
                 this.pause_total_ns = default;
                 this.pause_ns = default;
@@ -60,18 +58,14 @@ namespace go
                 this.gc_cpu_fraction = default;
                 this.enablegc = default;
                 this.debuggc = default;
+                this._ = default;
                 this.last_gc_nanotime = default;
-                this.tinyallocs = default;
-                this.last_next_gc = default;
                 this.last_heap_inuse = default;
-                this.triggerRatio = default;
-                this.gc_trigger = default;
-                this.heap_live = default;
-                this.heap_scan = default;
-                this.heap_marked = default;
+                this.heapStats = default;
+                this.gcPauseDist = default;
             }
 
-            public mstats(ulong alloc = default, ulong total_alloc = default, ulong sys = default, ulong nlookup = default, ulong nmalloc = default, ulong nfree = default, ulong heap_alloc = default, ulong heap_sys = default, ulong heap_idle = default, ulong heap_inuse = default, ulong heap_released = default, ulong heap_objects = default, ulong stacks_inuse = default, ulong stacks_sys = default, ulong mspan_inuse = default, ulong mspan_sys = default, ulong mcache_inuse = default, ulong mcache_sys = default, ulong buckhash_sys = default, ulong gc_sys = default, ulong other_sys = default, ulong next_gc = default, ulong last_gc_unix = default, ulong pause_total_ns = default, array<ulong> pause_ns = default, array<ulong> pause_end = default, uint numgc = default, uint numforcedgc = default, double gc_cpu_fraction = default, bool enablegc = default, bool debuggc = default, ulong last_gc_nanotime = default, ulong tinyallocs = default, ulong last_next_gc = default, ulong last_heap_inuse = default, double triggerRatio = default, ulong gc_trigger = default, ulong heap_live = default, ulong heap_scan = default, ulong heap_marked = default)
+            public mstats(ulong alloc = default, ulong total_alloc = default, ulong sys = default, ulong nlookup = default, ulong nmalloc = default, ulong nfree = default, sysMemStat heap_sys = default, ulong heap_inuse = default, ulong heap_released = default, ulong heap_objects = default, ulong stacks_inuse = default, sysMemStat stacks_sys = default, ulong mspan_inuse = default, sysMemStat mspan_sys = default, ulong mcache_inuse = default, sysMemStat mcache_sys = default, sysMemStat buckhash_sys = default, ulong gcWorkBufInUse = default, ulong gcProgPtrScalarBitsInUse = default, sysMemStat gcMiscSys = default, sysMemStat other_sys = default, ulong last_gc_unix = default, ulong pause_total_ns = default, array<ulong> pause_ns = default, array<ulong> pause_end = default, uint numgc = default, uint numforcedgc = default, double gc_cpu_fraction = default, bool enablegc = default, bool debuggc = default, array<uint> _ = default, ulong last_gc_nanotime = default, ulong last_heap_inuse = default, consistentHeapStats heapStats = default, timeHistogram gcPauseDist = default)
             {
                 this.alloc = alloc;
                 this.total_alloc = total_alloc;
@@ -79,9 +73,7 @@ namespace go
                 this.nlookup = nlookup;
                 this.nmalloc = nmalloc;
                 this.nfree = nfree;
-                this.heap_alloc = heap_alloc;
                 this.heap_sys = heap_sys;
-                this.heap_idle = heap_idle;
                 this.heap_inuse = heap_inuse;
                 this.heap_released = heap_released;
                 this.heap_objects = heap_objects;
@@ -92,9 +84,10 @@ namespace go
                 this.mcache_inuse = mcache_inuse;
                 this.mcache_sys = mcache_sys;
                 this.buckhash_sys = buckhash_sys;
-                this.gc_sys = gc_sys;
+                this.gcWorkBufInUse = gcWorkBufInUse;
+                this.gcProgPtrScalarBitsInUse = gcProgPtrScalarBitsInUse;
+                this.gcMiscSys = gcMiscSys;
                 this.other_sys = other_sys;
-                this.next_gc = next_gc;
                 this.last_gc_unix = last_gc_unix;
                 this.pause_total_ns = pause_total_ns;
                 this.pause_ns = pause_ns;
@@ -104,15 +97,11 @@ namespace go
                 this.gc_cpu_fraction = gc_cpu_fraction;
                 this.enablegc = enablegc;
                 this.debuggc = debuggc;
+                this._ = _;
                 this.last_gc_nanotime = last_gc_nanotime;
-                this.tinyallocs = tinyallocs;
-                this.last_next_gc = last_next_gc;
                 this.last_heap_inuse = last_heap_inuse;
-                this.triggerRatio = triggerRatio;
-                this.gc_trigger = gc_trigger;
-                this.heap_live = heap_live;
-                this.heap_scan = heap_scan;
-                this.heap_marked = heap_marked;
+                this.heapStats = heapStats;
+                this.gcPauseDist = gcPauseDist;
             }
 
             // Enable comparisons between nil and mstats struct
@@ -135,7 +124,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static mstats mstats_cast(dynamic value)
         {
-            return new mstats(value.alloc, value.total_alloc, value.sys, value.nlookup, value.nmalloc, value.nfree, value.heap_alloc, value.heap_sys, value.heap_idle, value.heap_inuse, value.heap_released, value.heap_objects, value.stacks_inuse, value.stacks_sys, value.mspan_inuse, value.mspan_sys, value.mcache_inuse, value.mcache_sys, value.buckhash_sys, value.gc_sys, value.other_sys, value.next_gc, value.last_gc_unix, value.pause_total_ns, value.pause_ns, value.pause_end, value.numgc, value.numforcedgc, value.gc_cpu_fraction, value.enablegc, value.debuggc, value.last_gc_nanotime, value.tinyallocs, value.last_next_gc, value.last_heap_inuse, value.triggerRatio, value.gc_trigger, value.heap_live, value.heap_scan, value.heap_marked);
+            return new mstats(value.alloc, value.total_alloc, value.sys, value.nlookup, value.nmalloc, value.nfree, value.heap_sys, value.heap_inuse, value.heap_released, value.heap_objects, value.stacks_inuse, value.stacks_sys, value.mspan_inuse, value.mspan_sys, value.mcache_inuse, value.mcache_sys, value.buckhash_sys, value.gcWorkBufInUse, value.gcProgPtrScalarBitsInUse, value.gcMiscSys, value.other_sys, value.last_gc_unix, value.pause_total_ns, value.pause_ns, value.pause_end, value.numgc, value.numforcedgc, value.gc_cpu_fraction, value.enablegc, value.debuggc, value._, value.last_gc_nanotime, value.last_heap_inuse, value.heapStats, value.gcPauseDist);
         }
     }
 }

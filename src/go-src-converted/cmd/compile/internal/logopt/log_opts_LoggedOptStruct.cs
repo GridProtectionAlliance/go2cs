@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:12 UTC
+//     Generated on 2022 March 06 22:47:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using io = go.io_package;
 using log = go.log_package;
 using url = go.net.url_package;
@@ -27,6 +26,7 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using unicode = go.unicode_package;
 using go;
 
 #nullable enable
@@ -45,17 +45,17 @@ namespace @internal
             public LoggedOpt(NilType _)
             {
                 this.pos = default;
-                this.pass = default;
-                this.fname = default;
+                this.compilerPass = default;
+                this.functionName = default;
                 this.what = default;
                 this.target = default;
             }
 
-            public LoggedOpt(src.XPos pos = default, @string pass = default, @string fname = default, @string what = default, slice<object> target = default)
+            public LoggedOpt(src.XPos pos = default, @string compilerPass = default, @string functionName = default, @string what = default, slice<object> target = default)
             {
                 this.pos = pos;
-                this.pass = pass;
-                this.fname = fname;
+                this.compilerPass = compilerPass;
+                this.functionName = functionName;
                 this.what = what;
                 this.target = target;
             }
@@ -80,7 +80,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static LoggedOpt LoggedOpt_cast(dynamic value)
         {
-            return new LoggedOpt(value.pos, value.pass, value.fname, value.what, value.target);
+            return new LoggedOpt(value.pos, value.compilerPass, value.functionName, value.what, value.target);
         }
     }
 }}}}

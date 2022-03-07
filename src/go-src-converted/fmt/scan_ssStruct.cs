@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:00 UTC
+//     Generated on 2022 March 06 22:31:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -43,11 +42,11 @@ namespace go
 
             public ref bool nlIsSpace => ref m_ssaveRef.Value.nlIsSpace;
 
-            public ref long argLimit => ref m_ssaveRef.Value.argLimit;
+            public ref nint argLimit => ref m_ssaveRef.Value.argLimit;
 
-            public ref long limit => ref m_ssaveRef.Value.limit;
+            public ref nint limit => ref m_ssaveRef.Value.limit;
 
-            public ref long maxWid => ref m_ssaveRef.Value.maxWid;
+            public ref nint maxWid => ref m_ssaveRef.Value.maxWid;
 
             // Constructors
             public ss(NilType _)
@@ -59,7 +58,7 @@ namespace go
                 this.m_ssaveRef = new ptr<ssave>(new ssave(nil));
             }
 
-            public ss(io.RuneScanner rs = default, buffer buf = default, long count = default, bool atEOF = default, ssave ssave = default)
+            public ss(io.RuneScanner rs = default, buffer buf = default, nint count = default, bool atEOF = default, ssave ssave = default)
             {
                 this.rs = rs;
                 this.buf = buf;

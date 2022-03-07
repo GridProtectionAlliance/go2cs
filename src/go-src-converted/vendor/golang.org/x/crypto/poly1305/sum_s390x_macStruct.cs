@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:34 UTC
+//     Generated on 2022 March 06 23:36:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using cpu = go.golang.org.x.sys.cpu_package;
 using go;
 
@@ -37,7 +36,7 @@ namespace crypto
                 this.offset = default;
             }
 
-            public mac(macState macState = default, array<byte> buffer = default, long offset = default)
+            public mac(macState macState = default, array<byte> buffer = default, nint offset = default)
             {
                 this.macState = macState;
                 this.buffer = buffer;

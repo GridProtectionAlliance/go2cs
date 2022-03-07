@@ -2,71 +2,64 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build gofuzz
 // +build gofuzz
 
-// package csv -- go2cs converted at 2020 October 09 04:59:44 UTC
+// package csv -- go2cs converted at 2022 March 06 22:24:54 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
-// Original source: C:\Go\src\encoding\csv\fuzz.go
+// Original source: C:\Program Files\Go\src\encoding\csv\fuzz.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using reflect = go.reflect_package;
-using static go.builtin;
 
-namespace go {
-namespace encoding
-{
-    public static partial class csv_package
-    {
-        public static long Fuzz(slice<byte> data) => func((_, panic, __) =>
-        {
-            long score = 0L;
-            ptr<object> buf = @new<bytes.Buffer>();
+namespace go.encoding;
 
-            foreach (var (_, tt) in new slice<Reader>(new Reader[] { {}, {Comma:';'}, {Comma:'\t'}, {LazyQuotes:true}, {TrimLeadingSpace:true}, {Comment:'#'}, {Comment:';'} }))
-            {
-                var r = NewReader(bytes.NewReader(data));
-                r.Comma = tt.Comma;
-                r.Comment = tt.Comment;
-                r.LazyQuotes = tt.LazyQuotes;
-                r.TrimLeadingSpace = tt.TrimLeadingSpace;
+public static partial class csv_package {
 
-                var (records, err) = r.ReadAll();
-                if (err != null)
-                {
-                    continue;
-                }
-                score = 1L;
+public static nint Fuzz(slice<byte> data) => func((_, panic, _) => {
+    nint score = 0;
+    ptr<object> buf = @new<bytes.Buffer>();
 
-                buf.Reset();
-                var w = NewWriter(buf);
-                w.Comma = tt.Comma;
-                err = w.WriteAll(records);
-                if (err != null)
-                {
-                    fmt.Printf("writer  = %#v\n", w);
-                    fmt.Printf("records = %v\n", records);
-                    panic(err);
-                }
-                r = NewReader(buf);
-                r.Comma = tt.Comma;
-                r.Comment = tt.Comment;
-                r.LazyQuotes = tt.LazyQuotes;
-                r.TrimLeadingSpace = tt.TrimLeadingSpace;
-                var (result, err) = r.ReadAll();
-                if (err != null)
-                {
-                    fmt.Printf("reader  = %#v\n", r);
-                    fmt.Printf("records = %v\n", records);
-                    panic(err);
-                }
-                if (!reflect.DeepEqual(records, result))
-                {
-                    fmt.Println("records = \n", records);
-                    fmt.Println("result  = \n", records);
-                    panic("not equal");
-                }
-            }            return score;
+    foreach (var (_, tt) in new slice<Reader>(new Reader[] { {}, {Comma:';'}, {Comma:'\t'}, {LazyQuotes:true}, {TrimLeadingSpace:true}, {Comment:'#'}, {Comment:';'} })) {
+        var r = NewReader(bytes.NewReader(data));
+        r.Comma = tt.Comma;
+        r.Comment = tt.Comment;
+        r.LazyQuotes = tt.LazyQuotes;
+        r.TrimLeadingSpace = tt.TrimLeadingSpace;
 
-        });
-    }
-}}
+        var (records, err) = r.ReadAll();
+        if (err != null) {
+            continue;
+        }
+        score = 1;
+
+        buf.Reset();
+        var w = NewWriter(buf);
+        w.Comma = tt.Comma;
+        err = w.WriteAll(records);
+        if (err != null) {
+            fmt.Printf("writer  = %#v\n", w);
+            fmt.Printf("records = %v\n", records);
+            panic(err);
+        }
+        r = NewReader(buf);
+        r.Comma = tt.Comma;
+        r.Comment = tt.Comment;
+        r.LazyQuotes = tt.LazyQuotes;
+        r.TrimLeadingSpace = tt.TrimLeadingSpace;
+        var (result, err) = r.ReadAll();
+        if (err != null) {
+            fmt.Printf("reader  = %#v\n", r);
+            fmt.Printf("records = %v\n", records);
+            panic(err);
+        }
+        if (!reflect.DeepEqual(records, result)) {
+            fmt.Println("records = \n", records);
+            fmt.Println("result  = \n", records);
+            panic("not equal");
+        }
+    }    return score;
+
+});
+
+} // end csv_package

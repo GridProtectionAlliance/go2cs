@@ -4,30 +4,26 @@
 
 // +build !plan9
 
-// package main -- go2cs converted at 2020 October 09 05:01:04 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\threadpanic.go
+// package main -- go2cs converted at 2022 March 06 22:26:18 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\threadpanic.go
 // void start(void);
 using C = go.C_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoExternalThreadPanic", CgoExternalThreadPanic);
-        }
+namespace go;
 
-        public static void CgoExternalThreadPanic()
-        {
-            C.start();
-        }
+public static partial class main_package {
 
-        //export gopanic
-        private static void gopanic() => func((_, panic, __) =>
-        {
-            panic("BOOM");
-        });
-    }
+private static void init() {
+    register("CgoExternalThreadPanic", CgoExternalThreadPanic);
 }
+
+public static void CgoExternalThreadPanic() {
+    C.start();
+}
+
+//export gopanic
+private static void gopanic() => func((_, panic, _) => {
+    panic("BOOM");
+});
+
+} // end main_package

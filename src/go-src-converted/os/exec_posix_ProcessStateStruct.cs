@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:07 UTC
+//     Generated on 2022 March 06 22:13:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using itoa = go.@internal.itoa_package;
 using execenv = go.@internal.syscall.execenv_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
@@ -34,7 +34,7 @@ namespace go
                 this.rusage = default;
             }
 
-            public ProcessState(long pid = default, syscall.WaitStatus status = default, ref ptr<syscall.Rusage> rusage = default)
+            public ProcessState(nint pid = default, syscall.WaitStatus status = default, ref ptr<syscall.Rusage> rusage = default)
             {
                 this.pid = pid;
                 this.status = status;

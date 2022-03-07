@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:33 UTC
+//     Generated on 2022 March 06 22:42:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using constant = go.go.constant_package;
@@ -53,7 +52,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ParentByPtr is null || !m_target_is_ptr)
                     return s_ParentByVal!(target);
 
-                return s_ParentByPtr(m_target_ptr);
+                return s_ParentByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos PosByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByPtr(m_target_ptr);
+                return s_PosByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos PkgByPtr(ptr<T> value);
@@ -119,13 +118,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PkgByPtr is null || !m_target_is_ptr)
                     return s_PkgByVal!(target);
 
-                return s_PkgByPtr(m_target_ptr);
+                return s_PkgByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos NameByPtr(ptr<T> value);
@@ -139,13 +138,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos TypeByPtr(ptr<T> value);
@@ -159,13 +158,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TypeByPtr is null || !m_target_is_ptr)
                     return s_TypeByVal!(target);
 
-                return s_TypeByPtr(m_target_ptr);
+                return s_TypeByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos ExportedByPtr(ptr<T> value);
@@ -179,13 +178,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExportedByPtr is null || !m_target_is_ptr)
                     return s_ExportedByVal!(target);
 
-                return s_ExportedByPtr(m_target_ptr);
+                return s_ExportedByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos IdByPtr(ptr<T> value);
@@ -199,13 +198,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_IdByPtr is null || !m_target_is_ptr)
                     return s_IdByVal!(target);
 
-                return s_IdByPtr(m_target_ptr);
+                return s_IdByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos StringByPtr(ptr<T> value);
@@ -219,13 +218,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos orderByPtr(ptr<T> value);
@@ -239,13 +238,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_orderByPtr is null || !m_target_is_ptr)
                     return s_orderByVal!(target);
 
-                return s_orderByPtr(m_target_ptr);
+                return s_orderByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos colorByPtr(ptr<T> value);
@@ -259,13 +258,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_colorByPtr is null || !m_target_is_ptr)
                     return s_colorByVal!(target);
 
-                return s_colorByPtr(m_target_ptr);
+                return s_colorByPtr(m_target_ptr!);
+            }
+
+            private delegate token.Pos setTypeByPtr(ptr<T> value, Type _p0);
+            private delegate token.Pos setTypeByVal(T value, Type _p0);
+
+            private static readonly setTypeByPtr? s_setTypeByPtr;
+            private static readonly setTypeByVal? s_setTypeByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public token.Pos setType(Type _p0)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    target = m_target_ptr.val;
+
+                if (s_setTypeByPtr is null || !m_target_is_ptr)
+                    return s_setTypeByVal!(target, _p0);
+
+                return s_setTypeByPtr(m_target_ptr!, _p0);
             }
 
             private delegate token.Pos setOrderByPtr(ptr<T> value, uint _p0);
@@ -279,13 +298,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setOrderByPtr is null || !m_target_is_ptr)
                     return s_setOrderByVal!(target, _p0);
 
-                return s_setOrderByPtr(m_target_ptr, _p0);
+                return s_setOrderByPtr(m_target_ptr!, _p0);
             }
 
             private delegate token.Pos setColorByPtr(ptr<T> value, color color);
@@ -299,13 +318,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setColorByPtr is null || !m_target_is_ptr)
                     return s_setColorByVal!(target, color);
 
-                return s_setColorByPtr(m_target_ptr, color);
+                return s_setColorByPtr(m_target_ptr!, color);
             }
 
             private delegate token.Pos setParentByPtr(ptr<T> value, ptr<Scope> _p0);
@@ -319,13 +338,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setParentByPtr is null || !m_target_is_ptr)
                     return s_setParentByVal!(target, _p0);
 
-                return s_setParentByPtr(m_target_ptr, _p0);
+                return s_setParentByPtr(m_target_ptr!, _p0);
             }
 
             private delegate token.Pos sameIdByPtr(ptr<T> value, ptr<Package> pkg, @string name);
@@ -339,13 +358,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_sameIdByPtr is null || !m_target_is_ptr)
                     return s_sameIdByVal!(target, pkg, name);
 
-                return s_sameIdByPtr(m_target_ptr, pkg, name);
+                return s_sameIdByPtr(m_target_ptr!, pkg, name);
             }
 
             private delegate token.Pos scopePosByPtr(ptr<T> value);
@@ -359,13 +378,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_scopePosByPtr is null || !m_target_is_ptr)
                     return s_scopePosByVal!(target);
 
-                return s_scopePosByPtr(m_target_ptr);
+                return s_scopePosByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos setScopePosByPtr(ptr<T> value, token.Pos pos);
@@ -379,16 +398,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setScopePosByPtr is null || !m_target_is_ptr)
                     return s_setScopePosByVal!(target, pos);
 
-                return s_setScopePosByPtr(m_target_ptr, pos);
+                return s_setScopePosByPtr(m_target_ptr!, pos);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Object()
@@ -399,12 +418,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Parent");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParentByPtr = extensionMethod.CreateStaticDelegate(typeof(ParentByPtr)) as ParentByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Parent");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParentByVal = extensionMethod.CreateStaticDelegate(typeof(ParentByVal)) as ParentByVal;
 
                 if (s_ParentByPtr is null && s_ParentByVal is null)
@@ -412,12 +431,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
                 if (s_PosByPtr is null && s_PosByVal is null)
@@ -425,12 +444,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pkg");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgByPtr = extensionMethod.CreateStaticDelegate(typeof(PkgByPtr)) as PkgByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pkg");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgByVal = extensionMethod.CreateStaticDelegate(typeof(PkgByVal)) as PkgByVal;
 
                 if (s_PkgByPtr is null && s_PkgByVal is null)
@@ -438,12 +457,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -451,12 +470,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByPtr = extensionMethod.CreateStaticDelegate(typeof(TypeByPtr)) as TypeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Type");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TypeByVal = extensionMethod.CreateStaticDelegate(typeof(TypeByVal)) as TypeByVal;
 
                 if (s_TypeByPtr is null && s_TypeByVal is null)
@@ -464,12 +483,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Exported");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExportedByPtr = extensionMethod.CreateStaticDelegate(typeof(ExportedByPtr)) as ExportedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Exported");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExportedByVal = extensionMethod.CreateStaticDelegate(typeof(ExportedByVal)) as ExportedByVal;
 
                 if (s_ExportedByPtr is null && s_ExportedByVal is null)
@@ -477,12 +496,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Id");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IdByPtr = extensionMethod.CreateStaticDelegate(typeof(IdByPtr)) as IdByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Id");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IdByVal = extensionMethod.CreateStaticDelegate(typeof(IdByVal)) as IdByVal;
 
                 if (s_IdByPtr is null && s_IdByVal is null)
@@ -490,12 +509,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -503,12 +522,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("order");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_orderByPtr = extensionMethod.CreateStaticDelegate(typeof(orderByPtr)) as orderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("order");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_orderByVal = extensionMethod.CreateStaticDelegate(typeof(orderByVal)) as orderByVal;
 
                 if (s_orderByPtr is null && s_orderByVal is null)
@@ -516,25 +535,38 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("color");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_colorByPtr = extensionMethod.CreateStaticDelegate(typeof(colorByPtr)) as colorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("color");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_colorByVal = extensionMethod.CreateStaticDelegate(typeof(colorByVal)) as colorByVal;
 
                 if (s_colorByPtr is null && s_colorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Object.color method", new Exception("color"));
 
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("setType");
+
+                if (extensionMethod is not null)
+                    s_setTypeByPtr = extensionMethod.CreateStaticDelegate(typeof(setTypeByPtr)) as setTypeByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("setType");
+
+                if (extensionMethod is not null)
+                    s_setTypeByVal = extensionMethod.CreateStaticDelegate(typeof(setTypeByVal)) as setTypeByVal;
+
+                if (s_setTypeByPtr is null && s_setTypeByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement Object.setType method", new Exception("setType"));
+
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setOrder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setOrderByPtr = extensionMethod.CreateStaticDelegate(typeof(setOrderByPtr)) as setOrderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setOrder");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setOrderByVal = extensionMethod.CreateStaticDelegate(typeof(setOrderByVal)) as setOrderByVal;
 
                 if (s_setOrderByPtr is null && s_setOrderByVal is null)
@@ -542,12 +574,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setColor");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setColorByPtr = extensionMethod.CreateStaticDelegate(typeof(setColorByPtr)) as setColorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setColor");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setColorByVal = extensionMethod.CreateStaticDelegate(typeof(setColorByVal)) as setColorByVal;
 
                 if (s_setColorByPtr is null && s_setColorByVal is null)
@@ -555,12 +587,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setParent");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setParentByPtr = extensionMethod.CreateStaticDelegate(typeof(setParentByPtr)) as setParentByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setParent");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setParentByVal = extensionMethod.CreateStaticDelegate(typeof(setParentByVal)) as setParentByVal;
 
                 if (s_setParentByPtr is null && s_setParentByVal is null)
@@ -568,12 +600,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("sameId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sameIdByPtr = extensionMethod.CreateStaticDelegate(typeof(sameIdByPtr)) as sameIdByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("sameId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sameIdByVal = extensionMethod.CreateStaticDelegate(typeof(sameIdByVal)) as sameIdByVal;
 
                 if (s_sameIdByPtr is null && s_sameIdByVal is null)
@@ -581,12 +613,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("scopePos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_scopePosByPtr = extensionMethod.CreateStaticDelegate(typeof(scopePosByPtr)) as scopePosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("scopePos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_scopePosByVal = extensionMethod.CreateStaticDelegate(typeof(scopePosByVal)) as scopePosByVal;
 
                 if (s_scopePosByPtr is null && s_scopePosByVal is null)
@@ -594,12 +626,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setScopePos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setScopePosByPtr = extensionMethod.CreateStaticDelegate(typeof(setScopePosByPtr)) as setScopePosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setScopePos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setScopePosByVal = extensionMethod.CreateStaticDelegate(typeof(setScopePosByVal)) as setScopePosByVal;
 
                 if (s_setScopePosByPtr is null && s_setScopePosByVal is null)

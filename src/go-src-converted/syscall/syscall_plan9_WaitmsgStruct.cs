@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:55 UTC
+//     Generated on 2022 March 06 22:27:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using oserror = go.@internal.oserror_package;
 using @unsafe = go.@unsafe_package;
 
@@ -33,7 +32,7 @@ namespace go
                 this.Msg = default;
             }
 
-            public Waitmsg(long Pid = default, array<uint> Time = default, @string Msg = default)
+            public Waitmsg(nint Pid = default, array<uint> Time = default, @string Msg = default)
             {
                 this.Pid = Pid;
                 this.Time = Time;

@@ -28,71 +28,57 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips64 -- go2cs converted at 2020 October 09 05:49:00 UTC
+// package mips64 -- go2cs converted at 2022 March 06 23:20:38 UTC
 // import "cmd/link/internal/mips64" ==> using mips64 = go.cmd.link.@internal.mips64_package
-// Original source: C:\Go\src\cmd\link\internal\mips64\obj.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\mips64\obj.go
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using ld = go.cmd.link.@internal.ld_package;
-using static go.builtin;
+using buildcfg = go.@internal.buildcfg_package;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class mips64_package
-    {
-        public static (ptr<sys.Arch>, ld.Arch) Init()
-        {
-            ptr<sys.Arch> _p0 = default!;
-            ld.Arch _p0 = default;
+namespace go.cmd.link.@internal;
 
-            var arch = sys.ArchMIPS64;
-            if (objabi.GOARCH == "mips64le")
-            {
-                arch = sys.ArchMIPS64LE;
-            }
-            ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Adddynrel:adddynrel,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Asmb:asmb,Asmb2:asmb2,Elfreloc1:elfreloc1,Elfsetupplt:elfsetupplt,Gentext2:gentext2,Machoreloc1:machoreloc1,Linuxdynld:"/lib64/ld64.so.1",Freebsddynld:"XXX",Openbsddynld:"XXX",Netbsddynld:"XXX",Dragonflydynld:"XXX",Solarisdynld:"XXX",);
+public static partial class mips64_package {
 
-            return (_addr_arch!, theArch);
+public static (ptr<sys.Arch>, ld.Arch) Init() {
+    ptr<sys.Arch> _p0 = default!;
+    ld.Arch _p0 = default;
 
-        }
-
-        private static void archinit(ptr<ld.Link> _addr_ctxt)
-        {
-            ref ld.Link ctxt = ref _addr_ctxt.val;
-
-
-            if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
-                ld.HEADR = 32L;
-
-                if (ld.FlagTextAddr == -1L.val)
-                {
-                    ld.FlagTextAddr.val = 16L * 1024L + int64(ld.HEADR);
-                }
-
-                if (ld.FlagRound == -1L.val)
-                {
-                    ld.FlagRound.val = 16L * 1024L;
-                }
-
-            else if (ctxt.HeadType == objabi.Hlinux) /* mips64 elf */
-                ld.Elfinit(ctxt);
-                ld.HEADR = ld.ELFRESERVE;
-                if (ld.FlagTextAddr == -1L.val)
-                {
-                    ld.FlagTextAddr.val = 0x10000UL + int64(ld.HEADR);
-                }
-
-                if (ld.FlagRound == -1L.val)
-                {
-                    ld.FlagRound.val = 0x10000UL;
-                }
-
-            else 
-                ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-            
-        }
+    var arch = sys.ArchMIPS64;
+    if (buildcfg.GOARCH == "mips64le") {
+        arch = sys.ArchMIPS64LE;
     }
-}}}}
+    ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Extreloc:extreloc,Elfreloc1:elfreloc1,ElfrelocSize:24,Elfsetupplt:elfsetupplt,Gentext:gentext,Machoreloc1:machoreloc1,Linuxdynld:"/lib64/ld64.so.1",Freebsddynld:"XXX",Openbsddynld:"/usr/libexec/ld.so",Netbsddynld:"XXX",Dragonflydynld:"XXX",Solarisdynld:"XXX",);
+
+    return (_addr_arch!, theArch);
+
+}
+
+private static void archinit(ptr<ld.Link> _addr_ctxt) {
+    ref ld.Link ctxt = ref _addr_ctxt.val;
+
+
+    if (ctxt.HeadType == objabi.Hplan9) /* plan 9 */
+        ld.HEADR = 32;
+
+        if (ld.FlagTextAddr == -1.val) {
+            ld.FlagTextAddr.val = 16 * 1024 + int64(ld.HEADR);
+        }
+        if (ld.FlagRound == -1.val) {
+            ld.FlagRound.val = 16 * 1024;
+        }
+    else if (ctxt.HeadType == objabi.Hlinux || ctxt.HeadType == objabi.Hopenbsd) 
+        ld.Elfinit(ctxt);
+        ld.HEADR = ld.ELFRESERVE;
+        if (ld.FlagTextAddr == -1.val) {
+            ld.FlagTextAddr.val = 0x10000 + int64(ld.HEADR);
+        }
+        if (ld.FlagRound == -1.val) {
+            ld.FlagRound.val = 0x10000;
+        }
+    else 
+        ld.Exitf("unknown -H option: %v", ctxt.HeadType);
+    
+}
+
+} // end mips64_package

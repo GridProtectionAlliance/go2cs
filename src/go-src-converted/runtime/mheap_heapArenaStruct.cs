@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:59 UTC
+//     Generated on 2022 March 06 22:09:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
@@ -35,16 +34,18 @@ namespace go
                 this.pageInUse = default;
                 this.pageMarks = default;
                 this.pageSpecials = default;
+                this.checkmarks = default;
                 this.zeroedBase = default;
             }
 
-            public heapArena(array<byte> bitmap = default, array<ptr<mspan>> spans = default, array<byte> pageInUse = default, array<byte> pageMarks = default, array<byte> pageSpecials = default, System.UIntPtr zeroedBase = default)
+            public heapArena(array<byte> bitmap = default, array<ptr<mspan>> spans = default, array<byte> pageInUse = default, array<byte> pageMarks = default, array<byte> pageSpecials = default, ref ptr<checkmarksMap> checkmarks = default, System.UIntPtr zeroedBase = default)
             {
                 this.bitmap = bitmap;
                 this.spans = spans;
                 this.pageInUse = pageInUse;
                 this.pageMarks = pageMarks;
                 this.pageSpecials = pageSpecials;
+                this.checkmarks = checkmarks;
                 this.zeroedBase = zeroedBase;
             }
 
@@ -68,7 +69,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static heapArena heapArena_cast(dynamic value)
         {
-            return new heapArena(value.bitmap, value.spans, value.pageInUse, value.pageMarks, value.pageSpecials, value.zeroedBase);
+            return new heapArena(value.bitmap, value.spans, value.pageInUse, value.pageMarks, value.pageSpecials, ref value.checkmarks, value.zeroedBase);
         }
     }
 }

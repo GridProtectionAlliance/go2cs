@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:39 UTC
+//     Generated on 2022 March 06 22:11:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using math = go.runtime.@internal.math_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -34,7 +33,7 @@ namespace go
                 this.cap = default;
             }
 
-            public slice(unsafe.Pointer array = default, long len = default, long cap = default)
+            public slice(unsafe.Pointer array = default, nint len = default, nint cap = default)
             {
                 this.array = array;
                 this.len = len;

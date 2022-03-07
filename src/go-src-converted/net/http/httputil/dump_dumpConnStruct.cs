@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:56 UTC
+//     Generated on 2022 March 06 22:24:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using net = go.net_package;
 using http = go.net.http_package;
 using url = go.net.url_package;
@@ -38,24 +36,24 @@ namespace http
         private partial struct dumpConn
         {
             // Writer.Write function promotion
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
+            private delegate (nint, error) WriteByVal(T value, slice<byte> p);
+            private delegate (nint, error) WriteByRef(ref T value, slice<byte> p);
 
             private static readonly WriteByVal s_WriteByVal;
             private static readonly WriteByRef s_WriteByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? Writer?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? Writer?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // Reader.Read function promotion
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (nint, error) ReadByVal(T value, slice<byte> p);
+            private delegate (nint, error) ReadByRef(ref T value, slice<byte> p);
 
             private static readonly ReadByVal s_ReadByVal;
             private static readonly ReadByRef s_ReadByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static dumpConn()
@@ -65,21 +63,21 @@ namespace http
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
 
-                    if ((object)s_WriteByRef == null)
+                    if (s_WriteByRef is null)
                         s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
-                    if ((object)s_ReadByRef == null)
+                    if (s_ReadByRef is null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
             }

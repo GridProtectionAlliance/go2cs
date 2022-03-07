@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:20 UTC
+//     Generated on 2022 March 06 23:32:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ast = go.go.ast_package;
 using go;
 
@@ -54,7 +53,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,36 +79,36 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_m1ByPtr is null || !m_target_is_ptr)
                     return s_m1ByVal!(target);
 
-                return s_m1ByPtr(m_target_ptr);
+                return s_m1ByPtr(m_target_ptr!);
             }
 
-            private delegate float m2ByPtr(ptr<T> value, long _p0);
-            private delegate float m2ByVal(T value, long _p0);
+            private delegate float m2ByPtr(ptr<T> value, nint _p0);
+            private delegate float m2ByVal(T value, nint _p0);
 
             private static readonly m2ByPtr? s_m2ByPtr;
             private static readonly m2ByVal? s_m2ByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public float m2(long _p0)
+            public float m2(nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_m2ByPtr is null || !m_target_is_ptr)
                     return s_m2ByVal!(target, _p0);
 
-                return s_m2ByPtr(m_target_ptr, _p0);
+                return s_m2ByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static T13()
@@ -120,12 +119,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("m1");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_m1ByPtr = extensionMethod.CreateStaticDelegate(typeof(m1ByPtr)) as m1ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("m1");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_m1ByVal = extensionMethod.CreateStaticDelegate(typeof(m1ByVal)) as m1ByVal;
 
                 if (s_m1ByPtr is null && s_m1ByVal is null)
@@ -133,12 +132,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("m2");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_m2ByPtr = extensionMethod.CreateStaticDelegate(typeof(m2ByPtr)) as m2ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("m2");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_m2ByVal = extensionMethod.CreateStaticDelegate(typeof(m2ByVal)) as m2ByVal;
 
                 if (s_m2ByPtr is null && s_m2ByVal is null)

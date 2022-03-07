@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:50 UTC
+//     Generated on 2022 March 06 22:14:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
@@ -52,7 +51,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,13 +77,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_cancelByPtr is null || !m_target_is_ptr)
                     return s_cancelByVal!(target, removeFromParent, err);
 
-                return s_cancelByPtr(m_target_ptr, removeFromParent, err);
+                return s_cancelByPtr(m_target_ptr!, removeFromParent, err);
             }
 
             private delegate channel<object> DoneByPtr(ptr<T> value);
@@ -98,16 +97,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DoneByPtr is null || !m_target_is_ptr)
                     return s_DoneByVal!(target);
 
-                return s_DoneByPtr(m_target_ptr);
+                return s_DoneByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static canceler()
@@ -118,12 +117,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("cancel");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_cancelByPtr = extensionMethod.CreateStaticDelegate(typeof(cancelByPtr)) as cancelByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("cancel");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_cancelByVal = extensionMethod.CreateStaticDelegate(typeof(cancelByVal)) as cancelByVal;
 
                 if (s_cancelByPtr is null && s_cancelByVal is null)
@@ -131,12 +130,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Done");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoneByPtr = extensionMethod.CreateStaticDelegate(typeof(DoneByPtr)) as DoneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Done");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
 
                 if (s_DoneByPtr is null && s_DoneByVal is null)

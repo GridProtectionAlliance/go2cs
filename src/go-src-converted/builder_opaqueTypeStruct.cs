@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:12 UTC
+//     Generated on 2022 March 06 23:33:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
@@ -63,21 +62,21 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Underlying");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_UnderlyingByRef = extensionMethod.CreateStaticDelegate(typeof(UnderlyingByRef)) as UnderlyingByRef;
 
-                    if ((object)s_UnderlyingByRef == null)
+                    if (s_UnderlyingByRef is null)
                         s_UnderlyingByVal = extensionMethod.CreateStaticDelegate(typeof(UnderlyingByVal)) as UnderlyingByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("String");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;
 
-                    if ((object)s_StringByRef == null)
+                    if (s_StringByRef is null)
                         s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
                 }
             }

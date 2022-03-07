@@ -1,22 +1,20 @@
+//go:build windows
 // +build windows
 
-// package main -- go2cs converted at 2020 October 09 05:01:07 UTC
-// Original source: C:\Go\src\runtime\testdata\testwinlibsignal\dummy.go
+// package main -- go2cs converted at 2022 March 06 22:26:22 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testwinlibsignal\dummy.go
+using C = go.C_package;
 
-using static go.builtin;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        //export Dummy
-        public static long Dummy()
-        {
-            return 42L;
-        }
+public static partial class main_package {
 
-        private static void Main()
-        {
-        }
-    }
+    //export Dummy
+public static nint Dummy() {
+    return 42;
 }
+
+private static void Main() {
+}
+
+} // end main_package

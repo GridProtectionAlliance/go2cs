@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:26 UTC
+//     Generated on 2022 March 06 22:23:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using unicode = go.unicode_package;
 using go;
 
@@ -31,12 +30,14 @@ namespace regexp
             {
                 this.i = default;
                 this.@out = default;
+                this.nullable = default;
             }
 
-            public frag(uint i = default, patchList @out = default)
+            public frag(uint i = default, patchList @out = default, bool nullable = default)
             {
                 this.i = i;
                 this.@out = @out;
+                this.nullable = nullable;
             }
 
             // Enable comparisons between nil and frag struct
@@ -59,7 +60,7 @@ namespace regexp
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static frag frag_cast(dynamic value)
         {
-            return new frag(value.i, value.@out);
+            return new frag(value.i, value.@out, value.nullable);
         }
     }
 }}

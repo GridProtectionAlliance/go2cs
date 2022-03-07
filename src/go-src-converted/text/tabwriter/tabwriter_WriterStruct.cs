@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:59 UTC
+//     Generated on 2022 March 06 22:14:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -44,7 +43,7 @@ namespace text
                 this.widths = default;
             }
 
-            public Writer(io.Writer output = default, long minwidth = default, long tabwidth = default, long padding = default, array<byte> padbytes = default, ulong flags = default, slice<byte> buf = default, long pos = default, cell cell = default, byte endChar = default, slice<slice<cell>> lines = default, slice<long> widths = default)
+            public Writer(io.Writer output = default, nint minwidth = default, nint tabwidth = default, nint padding = default, array<byte> padbytes = default, nuint flags = default, slice<byte> buf = default, nint pos = default, cell cell = default, byte endChar = default, slice<slice<cell>> lines = default, slice<nint> widths = default)
             {
                 this.output = output;
                 this.minwidth = minwidth;

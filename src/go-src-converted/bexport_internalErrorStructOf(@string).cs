@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:04 UTC
+//     Generated on 2022 March 06 23:31:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace @internal
         {
             // Value of the internalError struct
             private readonly @string m_value;
-
+            
             public internalError(@string value) => m_value = value;
 
             // Enable implicit conversions between @string and internalError struct

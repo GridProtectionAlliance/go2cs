@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:50 UTC
+//     Generated on 2022 March 06 23:31:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -29,7 +31,7 @@ namespace ocagent
         {
             // Value of the Language struct
             private readonly int m_value;
-
+            
             public Language(int value) => m_value = value;
 
             // Enable implicit conversions between int and Language struct

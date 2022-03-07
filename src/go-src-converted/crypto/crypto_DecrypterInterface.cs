@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:46 UTC
+//     Generated on 2022 March 06 22:17:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using hash = go.hash_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
@@ -50,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,13 +75,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PublicByPtr is null || !m_target_is_ptr)
                     return s_PublicByVal!(target);
 
-                return s_PublicByPtr(m_target_ptr);
+                return s_PublicByPtr(m_target_ptr!);
             }
 
             private delegate (slice<byte>, error) DecryptByPtr(ptr<T> value, io.Reader rand, slice<byte> msg, DecrypterOpts opts);
@@ -96,16 +95,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DecryptByPtr is null || !m_target_is_ptr)
                     return s_DecryptByVal!(target, rand, msg, opts);
 
-                return s_DecryptByPtr(m_target_ptr, rand, msg, opts);
+                return s_DecryptByPtr(m_target_ptr!, rand, msg, opts);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Decrypter()
@@ -116,12 +115,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Public");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicByPtr = extensionMethod.CreateStaticDelegate(typeof(PublicByPtr)) as PublicByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Public");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicByVal = extensionMethod.CreateStaticDelegate(typeof(PublicByVal)) as PublicByVal;
 
                 if (s_PublicByPtr is null && s_PublicByVal is null)
@@ -129,12 +128,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Decrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecryptByPtr = extensionMethod.CreateStaticDelegate(typeof(DecryptByPtr)) as DecryptByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Decrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecryptByVal = extensionMethod.CreateStaticDelegate(typeof(DecryptByVal)) as DecryptByVal;
 
                 if (s_DecryptByPtr is null && s_DecryptByVal is null)

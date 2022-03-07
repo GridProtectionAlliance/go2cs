@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:47 UTC
+//     Generated on 2022 March 06 23:33:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace go
 
             private ref A A_val => ref m_ARef.Value;
 
-            public ref long magic => ref m_ARef.Value.magic;
+            public ref nint magic => ref m_ARef.Value.magic;
             
             [DebuggerStepperBoundary]
             static C()
@@ -49,11 +49,11 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("f");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_fByRef = extensionMethod.CreateStaticDelegate(typeof(fByRef)) as fByRef;
 
-                    if ((object)s_fByRef == null)
+                    if (s_fByRef is null)
                         s_fByVal = extensionMethod.CreateStaticDelegate(typeof(fByVal)) as fByVal;
                 }
             }

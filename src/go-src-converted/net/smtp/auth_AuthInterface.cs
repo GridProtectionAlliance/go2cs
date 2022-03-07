@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:40 UTC
+//     Generated on 2022 March 06 22:25:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using hmac = go.crypto.hmac_package;
 using md5 = go.crypto.md5_package;
 using errors = go.errors_package;
@@ -53,7 +52,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StartByPtr is null || !m_target_is_ptr)
                     return s_StartByVal!(target, server);
 
-                return s_StartByPtr(m_target_ptr, server);
+                return s_StartByPtr(m_target_ptr!, server);
             }
 
             private delegate (slice<byte>, error) NextByPtr(ptr<T> value, slice<byte> fromServer, bool more);
@@ -99,16 +98,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NextByPtr is null || !m_target_is_ptr)
                     return s_NextByVal!(target, fromServer, more);
 
-                return s_NextByPtr(m_target_ptr, fromServer, more);
+                return s_NextByPtr(m_target_ptr!, fromServer, more);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Auth()
@@ -119,12 +118,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Start");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartByPtr = extensionMethod.CreateStaticDelegate(typeof(StartByPtr)) as StartByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Start");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartByVal = extensionMethod.CreateStaticDelegate(typeof(StartByVal)) as StartByVal;
 
                 if (s_StartByPtr is null && s_StartByVal is null)
@@ -132,12 +131,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Next");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
 
                 if (s_NextByPtr is null && s_NextByVal is null)

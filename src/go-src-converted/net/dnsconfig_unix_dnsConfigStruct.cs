@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:51 UTC
+//     Generated on 2022 March 06 22:15:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytealg = go.@internal.bytealg_package;
 using os = go.os_package;
 using atomic = go.sync.atomic_package;
@@ -45,7 +44,7 @@ namespace go
                 this.useTCP = default;
             }
 
-            public dnsConfig(slice<@string> servers = default, slice<@string> search = default, long ndots = default, time.Duration timeout = default, long attempts = default, bool rotate = default, bool unknownOpt = default, slice<@string> lookup = default, error err = default, time.Time mtime = default, uint soffset = default, bool singleRequest = default, bool useTCP = default)
+            public dnsConfig(slice<@string> servers = default, slice<@string> search = default, nint ndots = default, time.Duration timeout = default, nint attempts = default, bool rotate = default, bool unknownOpt = default, slice<@string> lookup = default, error err = default, time.Time mtime = default, uint soffset = default, bool singleRequest = default, bool useTCP = default)
             {
                 this.servers = servers;
                 this.search = search;

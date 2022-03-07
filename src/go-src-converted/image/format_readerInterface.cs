@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:33 UTC
+//     Generated on 2022 March 06 23:35:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -52,7 +51,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -67,47 +66,27 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (slice<byte>, error) PeekByPtr(ptr<T> value, long _p0);
-            private delegate (slice<byte>, error) PeekByVal(T value, long _p0);
+            private delegate (slice<byte>, error) PeekByPtr(ptr<T> value, nint _p0);
+            private delegate (slice<byte>, error) PeekByVal(T value, nint _p0);
 
             private static readonly PeekByPtr? s_PeekByPtr;
             private static readonly PeekByVal? s_PeekByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (slice<byte>, error) Peek(long _p0)
+            public (slice<byte>, error) Peek(nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PeekByPtr is null || !m_target_is_ptr)
                     return s_PeekByVal!(target, _p0);
 
-                return s_PeekByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-
-            private static readonly ReadByPtr? s_ReadByPtr;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByPtr is null || !m_target_is_ptr)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByPtr(m_target_ptr, p);
+                return s_PeekByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static reader()
@@ -118,29 +97,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Peek");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PeekByPtr = extensionMethod.CreateStaticDelegate(typeof(PeekByPtr)) as PeekByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Peek");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PeekByVal = extensionMethod.CreateStaticDelegate(typeof(PeekByVal)) as PeekByVal;
 
                 if (s_PeekByPtr is null && s_PeekByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement reader.Peek method", new Exception("Peek"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-
-                if (s_ReadByPtr is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement reader.Read method", new Exception("Read"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

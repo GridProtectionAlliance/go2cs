@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:58 UTC
+//     Generated on 2022 March 06 23:21:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -46,7 +45,7 @@ namespace @internal
                 this.dsym = default;
             }
 
-            public ldMachoCmd(long type_ = default, uint off = default, uint size = default, ldMachoSeg seg = default, ldMachoSymtab sym = default, ldMachoDysymtab dsym = default)
+            public ldMachoCmd(nint type_ = default, uint off = default, uint size = default, ldMachoSeg seg = default, ldMachoSymtab sym = default, ldMachoDysymtab dsym = default)
             {
                 this.type_ = type_;
                 this.off = off;

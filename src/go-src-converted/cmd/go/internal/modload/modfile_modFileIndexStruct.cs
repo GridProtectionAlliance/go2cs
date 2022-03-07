@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:52 UTC
+//     Generated on 2022 March 06 23:18:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,24 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using context = go.context_package;
+using errors = go.errors_package;
+using fmt = go.fmt_package;
+using os = go.os_package;
+using filepath = go.path.filepath_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
+using unicode = go.unicode_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
+using lockedfile = go.cmd.go.@internal.lockedfile_package;
+using modfetch = go.cmd.go.@internal.modfetch_package;
+using par = go.cmd.go.@internal.par_package;
+using trace = go.cmd.go.@internal.trace_package;
 using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
+using semver = go.golang.org.x.mod.semver_package;
 using go;
 
 #nullable enable
@@ -37,20 +50,22 @@ namespace @internal
                 this.data = default;
                 this.dataNeedsFix = default;
                 this.module = default;
-                this.goVersion = default;
+                this.goVersionV = default;
                 this.require = default;
                 this.replace = default;
+                this.highestReplaced = default;
                 this.exclude = default;
             }
 
-            public modFileIndex(slice<byte> data = default, bool dataNeedsFix = default, module.Version module = default, @string goVersion = default, map<module.Version, requireMeta> require = default, map<module.Version, module.Version> replace = default, map<module.Version, bool> exclude = default)
+            public modFileIndex(slice<byte> data = default, bool dataNeedsFix = default, module.Version module = default, @string goVersionV = default, map<module.Version, requireMeta> require = default, map<module.Version, module.Version> replace = default, map<@string, @string> highestReplaced = default, map<module.Version, bool> exclude = default)
             {
                 this.data = data;
                 this.dataNeedsFix = dataNeedsFix;
                 this.module = module;
-                this.goVersion = goVersion;
+                this.goVersionV = goVersionV;
                 this.require = require;
                 this.replace = replace;
+                this.highestReplaced = highestReplaced;
                 this.exclude = exclude;
             }
 
@@ -74,7 +89,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static modFileIndex modFileIndex_cast(dynamic value)
         {
-            return new modFileIndex(value.data, value.dataNeedsFix, value.module, value.goVersion, value.require, value.replace, value.exclude);
+            return new modFileIndex(value.data, value.dataNeedsFix, value.module, value.goVersionV, value.require, value.replace, value.highestReplaced, value.exclude);
         }
     }
 }}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:20 UTC
+//     Generated on 2022 March 06 22:12:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,24 +34,24 @@ namespace go
             public bool Len() => s_LenByRef?.Invoke(ref this) ?? s_LenByVal?.Invoke(this) ?? Interface?.Len() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // Interface.Less function promotion
-            private delegate bool LessByVal(T value, long i, long j);
-            private delegate bool LessByRef(ref T value, long i, long j);
+            private delegate bool LessByVal(T value, nint i, nint j);
+            private delegate bool LessByRef(ref T value, nint i, nint j);
 
             private static readonly LessByVal s_LessByVal;
             private static readonly LessByRef s_LessByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Less(long i, long j) => s_LessByRef?.Invoke(ref this, i, j) ?? s_LessByVal?.Invoke(this, i, j) ?? Interface?.Less(i, j) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public bool Less(nint i, nint j) => s_LessByRef?.Invoke(ref this, i, j) ?? s_LessByVal?.Invoke(this, i, j) ?? Interface?.Less(i, j) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // Interface.Swap function promotion
-            private delegate bool SwapByVal(T value, long i, long j);
-            private delegate bool SwapByRef(ref T value, long i, long j);
+            private delegate bool SwapByVal(T value, nint i, nint j);
+            private delegate bool SwapByRef(ref T value, nint i, nint j);
 
             private static readonly SwapByVal s_SwapByVal;
             private static readonly SwapByRef s_SwapByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Swap(long i, long j) => s_SwapByRef?.Invoke(ref this, i, j) ?? s_SwapByVal?.Invoke(this, i, j) ?? Interface?.Swap(i, j) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public bool Swap(nint i, nint j) => s_SwapByRef?.Invoke(ref this, i, j) ?? s_SwapByVal?.Invoke(this, i, j) ?? Interface?.Swap(i, j) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static reverse()
@@ -61,31 +61,31 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Len");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_LenByRef = extensionMethod.CreateStaticDelegate(typeof(LenByRef)) as LenByRef;
 
-                    if ((object)s_LenByRef == null)
+                    if (s_LenByRef is null)
                         s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Less");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_LessByRef = extensionMethod.CreateStaticDelegate(typeof(LessByRef)) as LessByRef;
 
-                    if ((object)s_LessByRef == null)
+                    if (s_LessByRef is null)
                         s_LessByVal = extensionMethod.CreateStaticDelegate(typeof(LessByVal)) as LessByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Swap");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SwapByRef = extensionMethod.CreateStaticDelegate(typeof(SwapByRef)) as SwapByRef;
 
-                    if ((object)s_SwapByRef == null)
+                    if (s_SwapByRef is null)
                         s_SwapByVal = extensionMethod.CreateStaticDelegate(typeof(SwapByVal)) as SwapByVal;
                 }
             }

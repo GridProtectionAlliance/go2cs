@@ -12,115 +12,96 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2020 October 09 05:53:53 UTC
+// package profile -- go2cs converted at 2022 March 06 23:23:55 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\index.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\index.go
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof
-{
-    public static partial class profile_package
-    {
-        // SampleIndexByName returns the appropriate index for a value of sample index.
-        // If numeric, it returns the number, otherwise it looks up the text in the
-        // profile sample types.
-        private static (long, error) SampleIndexByName(this ptr<Profile> _addr_p, @string sampleIndex)
+namespace go.cmd.vendor.github.com.google.pprof;
+
+public static partial class profile_package {
+
+    // SampleIndexByName returns the appropriate index for a value of sample index.
+    // If numeric, it returns the number, otherwise it looks up the text in the
+    // profile sample types.
+private static (nint, error) SampleIndexByName(this ptr<Profile> _addr_p, @string sampleIndex) {
+    nint _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
+
+    if (sampleIndex == "") {
         {
-            long _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
+            var dst = p.DefaultSampleType;
 
-            if (sampleIndex == "")
-            {
+            if (dst != "") {
                 {
-                    var dst = p.DefaultSampleType;
+                    var i__prev1 = i;
+                    var t__prev1 = t;
 
-                    if (dst != "")
-                    {
-                        {
-                            var i__prev1 = i;
-                            var t__prev1 = t;
-
-                            foreach (var (__i, __t) in sampleTypes(_addr_p))
-                            {
-                                i = __i;
-                                t = __t;
-                                if (t == dst)
-                                {
-                                    return (i, error.As(null!)!);
-                                }
-                            }
-                            i = i__prev1;
-                            t = t__prev1;
+                    foreach (var (__i, __t) in sampleTypes(_addr_p)) {
+                        i = __i;
+                        t = __t;
+                        if (t == dst) {
+                            return (i, error.As(null!)!);
                         }
                     }
-                } 
-                // By default select the last sample value
-                return (len(p.SampleType) - 1L, error.As(null!)!);
-
-            }
-            {
-                var i__prev1 = i;
-
-                var (i, err) = strconv.Atoi(sampleIndex);
-
-                if (err == null)
-                {
-                    if (i < 0L || i >= len(p.SampleType))
-                    {
-                        return (0L, error.As(fmt.Errorf("sample_index %s is outside the range [0..%d]", sampleIndex, len(p.SampleType) - 1L))!);
-                    }
-                    return (i, error.As(null!)!);
-
+                    i = i__prev1;
+                    t = t__prev1;
                 }
-                i = i__prev1;
-
-            } 
-
-            // Remove the inuse_ prefix to support legacy pprof options
-            // "inuse_space" and "inuse_objects" for profiles containing types
-            // "space" and "objects".
-            var noInuse = strings.TrimPrefix(sampleIndex, "inuse_");
-            {
-                var i__prev1 = i;
-                var t__prev1 = t;
-
-                foreach (var (__i, __t) in p.SampleType)
-                {
-                    i = __i;
-                    t = __t;
-                    if (t.Type == sampleIndex || t.Type == noInuse)
-                    {
-                        return (i, error.As(null!)!);
-                    }
-                }
-                i = i__prev1;
-                t = t__prev1;
             }
+        } 
+        // By default select the last sample value
+        return (len(p.SampleType) - 1, error.As(null!)!);
 
-            return (0L, error.As(fmt.Errorf("sample_index %q must be one of: %v", sampleIndex, sampleTypes(_addr_p)))!);
-
-        }
-
-        private static slice<@string> sampleTypes(ptr<Profile> _addr_p)
-        {
-            ref Profile p = ref _addr_p.val;
-
-            var types = make_slice<@string>(len(p.SampleType));
-            foreach (var (i, t) in p.SampleType)
-            {
-                types[i] = t.Type;
-            }
-            return types;
-
-        }
     }
-}}}}}}
+    {
+        var i__prev1 = i;
+
+        var (i, err) = strconv.Atoi(sampleIndex);
+
+        if (err == null) {
+            if (i < 0 || i >= len(p.SampleType)) {
+                return (0, error.As(fmt.Errorf("sample_index %s is outside the range [0..%d]", sampleIndex, len(p.SampleType) - 1))!);
+            }
+            return (i, error.As(null!)!);
+
+        }
+        i = i__prev1;
+
+    } 
+
+    // Remove the inuse_ prefix to support legacy pprof options
+    // "inuse_space" and "inuse_objects" for profiles containing types
+    // "space" and "objects".
+    var noInuse = strings.TrimPrefix(sampleIndex, "inuse_");
+    {
+        var i__prev1 = i;
+        var t__prev1 = t;
+
+        foreach (var (__i, __t) in p.SampleType) {
+            i = __i;
+            t = __t;
+            if (t.Type == sampleIndex || t.Type == noInuse) {
+                return (i, error.As(null!)!);
+            }
+        }
+        i = i__prev1;
+        t = t__prev1;
+    }
+
+    return (0, error.As(fmt.Errorf("sample_index %q must be one of: %v", sampleIndex, sampleTypes(_addr_p)))!);
+
+}
+
+private static slice<@string> sampleTypes(ptr<Profile> _addr_p) {
+    ref Profile p = ref _addr_p.val;
+
+    var types = make_slice<@string>(len(p.SampleType));
+    foreach (var (i, t) in p.SampleType) {
+        types[i] = t.Type;
+    }    return types;
+}
+
+} // end profile_package

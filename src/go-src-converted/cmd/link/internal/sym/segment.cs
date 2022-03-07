@@ -28,47 +28,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2020 October 09 05:48:53 UTC
+// package sym -- go2cs converted at 2022 March 06 23:20:35 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
-// Original source: C:\Go\src\cmd\link\internal\sym\segment.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\sym\segment.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal
-{
-    public static partial class sym_package
-    {
-        // Terrible but standard terminology.
-        // A segment describes a block of file to load into memory.
-        // A section further describes the pieces of that block for
-        // use in debuggers and such.
-        public partial struct Segment
-        {
-            public byte Rwx; // permission as usual unix bits (5 = r-x etc)
-            public ulong Vaddr; // virtual address
-            public ulong Length; // length in memory
-            public ulong Fileoff; // file offset
-            public ulong Filelen; // length on disk
-            public slice<ptr<Section>> Sections;
-        }
+namespace go.cmd.link.@internal;
 
-        public partial struct Section
-        {
-            public byte Rwx;
-            public short Extnum;
-            public int Align;
-            public @string Name;
-            public ulong Vaddr;
-            public ulong Length;
-            public ptr<Segment> Seg;
-            public ulong Reloff;
-            public ulong Rellen;
-            public ptr<Symbol> Sym; // symbol for the section, if any
-            public LoaderSym Sym2; // symbol for the section, if any
-            public ushort Index; // each section has a unique index, used internally
-        }
-    }
-}}}}
+public static partial class sym_package {
+
+    // Terrible but standard terminology.
+    // A segment describes a block of file to load into memory.
+    // A section further describes the pieces of that block for
+    // use in debuggers and such.
+public partial struct Segment {
+    public byte Rwx; // permission as usual unix bits (5 = r-x etc)
+    public ulong Vaddr; // virtual address
+    public ulong Length; // length in memory
+    public ulong Fileoff; // file offset
+    public ulong Filelen; // length on disk
+    public slice<ptr<Section>> Sections;
+}
+
+public partial struct Section {
+    public byte Rwx;
+    public short Extnum;
+    public int Align;
+    public @string Name;
+    public ulong Vaddr;
+    public ulong Length;
+    public ptr<Segment> Seg;
+    public ulong Reloff;
+    public ulong Rellen; // Relcount is the number of *host* relocations applied to this section
+// (when external linking).
+// Incremented atomically on multiple goroutines.
+// Note: this may differ from number of Go relocations, as one Go relocation
+// may turn into multiple host relocations.
+    public uint Relcount;
+    public LoaderSym Sym; // symbol for the section, if any
+    public ushort Index; // each section has a unique index, used internally
+}
+
+} // end sym_package

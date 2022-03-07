@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:25:49 UTC
+//     Generated on 2022 March 06 22:51:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -25,7 +27,7 @@ namespace @internal
         {
             // Value of the flagConstant struct
             private readonly byte m_value;
-
+            
             public flagConstant(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and flagConstant struct

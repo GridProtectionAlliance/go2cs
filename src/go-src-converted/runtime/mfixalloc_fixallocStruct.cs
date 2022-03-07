@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:35 UTC
+//     Generated on 2022 March 06 22:09:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using @unsafe = go.@unsafe_package;
 
 #nullable enable
@@ -38,7 +37,7 @@ namespace go
                 this.zero = default;
             }
 
-            public fixalloc(System.UIntPtr size = default, Action<unsafe.Pointer, unsafe.Pointer> first = default, unsafe.Pointer arg = default, ref ptr<mlink> list = default, System.UIntPtr chunk = default, uint nchunk = default, System.UIntPtr inuse = default, ref ptr<ulong> stat = default, bool zero = default)
+            public fixalloc(System.UIntPtr size = default, Action<unsafe.Pointer, unsafe.Pointer> first = default, unsafe.Pointer arg = default, ref ptr<mlink> list = default, System.UIntPtr chunk = default, uint nchunk = default, System.UIntPtr inuse = default, ref ptr<sysMemStat> stat = default, bool zero = default)
             {
                 this.size = size;
                 this.first = first;

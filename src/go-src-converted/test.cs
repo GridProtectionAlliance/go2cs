@@ -21,27 +21,19 @@
 // Make sure this source is extended such that it exercises
 // whatever export format change has taken place.
 
-// package test -- go2cs converted at 2020 October 09 06:02:21 UTC
+// package test -- go2cs converted at 2022 March 06 23:32:14 UTC
 // import "golang.org/x/tools/go/internal/gcimporter/testdata.test" ==> using test = go.golang.org.x.tools.go.@internal.gcimporter.testdata.test_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\internal\gcimporter\testdata\versions\test.go
 
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go {
-namespace @internal {
-namespace gcimporter
-{
-    public static partial class test_package
-    {
-        // Any release before and including Go 1.7 didn't encode
-        // the package for a blank struct field.
-        public partial struct BlankField
-        {
-            public long _;
-        }
-    }
-}}}}}}}
+namespace go.golang.org.x.tools.go.@internal.gcimporter;
+
+public static partial class test_package {
+
+    // Any release before and including Go 1.7 didn't encode
+    // the package for a blank struct field.
+public partial struct BlankField {
+    public nint _;
+}
+
+} // end test_package

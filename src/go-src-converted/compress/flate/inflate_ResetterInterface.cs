@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:19 UTC
+//     Generated on 2022 March 06 22:15:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using io = go.io_package;
 using bits = go.math.bits_package;
@@ -54,7 +53,7 @@ namespace compress
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,16 +79,16 @@ namespace compress
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ResetByPtr is null || !m_target_is_ptr)
                     return s_ResetByVal!(target, r, dict);
 
-                return s_ResetByPtr(m_target_ptr, r, dict);
+                return s_ResetByPtr(m_target_ptr!, r, dict);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Resetter()
@@ -100,12 +99,12 @@ namespace compress
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Reset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ResetByPtr = extensionMethod.CreateStaticDelegate(typeof(ResetByPtr)) as ResetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Reset");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ResetByVal = extensionMethod.CreateStaticDelegate(typeof(ResetByVal)) as ResetByVal;
 
                 if (s_ResetByPtr is null && s_ResetByVal is null)

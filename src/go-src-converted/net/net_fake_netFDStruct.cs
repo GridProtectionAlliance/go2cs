@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:07 UTC
+//     Generated on 2022 March 06 22:16:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using poll = go.@internal.poll_package;
 using io = go.io_package;
@@ -48,7 +47,7 @@ namespace go
                 this.isConnected = default;
             }
 
-            public netFD(ref ptr<bufferedPipe> r = default, ref ptr<bufferedPipe> w = default, channel<ptr<netFD>> incoming = default, sync.Mutex closedMu = default, bool closed = default, bool listener = default, long family = default, long sotype = default, @string net = default, Addr laddr = default, Addr raddr = default, poll.FD pfd = default, bool isConnected = default)
+            public netFD(ref ptr<bufferedPipe> r = default, ref ptr<bufferedPipe> w = default, channel<ptr<netFD>> incoming = default, sync.Mutex closedMu = default, bool closed = default, bool listener = default, nint family = default, nint sotype = default, @string net = default, Addr laddr = default, Addr raddr = default, poll.FD pfd = default, bool isConnected = default)
             {
                 this.r = r;
                 this.w = w;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:48 UTC
+//     Generated on 2022 March 06 22:19:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
@@ -44,7 +43,7 @@ namespace encoding
                 this.FullBytes = default;
             }
 
-            public RawValue(long Class = default, long Tag = default, bool IsCompound = default, slice<byte> Bytes = default, slice<byte> FullBytes = default)
+            public RawValue(nint Class = default, nint Tag = default, bool IsCompound = default, slice<byte> Bytes = default, slice<byte> FullBytes = default)
             {
                 this.Class = Class;
                 this.Tag = Tag;

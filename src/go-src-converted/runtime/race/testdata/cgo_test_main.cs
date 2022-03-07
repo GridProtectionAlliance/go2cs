@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:00:42 UTC
-// Original source: C:\Go\src\runtime\race\testdata\cgo_test_main.go
+// package main -- go2cs converted at 2022 March 06 22:25:57 UTC
+// Original source: C:\Program Files\Go\src\runtime\race\testdata\cgo_test_main.go
 /*
 int sync;
 
@@ -18,25 +18,22 @@ void Wait(void)
 }
 */
 using C = go.C_package;
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void Main()
-        {
-            long data = 0L;
-            go_(() => () =>
-            {
-                data = 1L;
-                C.Notify();
-            }());
-            C.Wait();
-            _ = data;
 
-        }
-    }
+namespace go;
+
+public static partial class main_package {
+
+private static void Main() {
+    nint data = 0;
+    go_(() => () => {
+        data = 1;
+        C.Notify();
+    }());
+    C.Wait();
+    _ = data;
 }
+
+} // end main_package

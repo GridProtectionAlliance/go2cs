@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,15 +35,15 @@ namespace sys
                 this.Recv = default;
                 this.Drop = default;
                 this.Capt = default;
-                this.Padding = default;
+                this._ = default;
             }
 
-            public BpfStat(ulong Recv = default, ulong Drop = default, ulong Capt = default, array<ulong> Padding = default)
+            public BpfStat(ulong Recv = default, ulong Drop = default, ulong Capt = default, array<ulong> _ = default)
             {
                 this.Recv = Recv;
                 this.Drop = Drop;
                 this.Capt = Capt;
-                this.Padding = Padding;
+                this._ = _;
             }
 
             // Enable comparisons between nil and BpfStat struct
@@ -66,7 +66,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static BpfStat BpfStat_cast(dynamic value)
         {
-            return new BpfStat(value.Recv, value.Drop, value.Capt, value.Padding);
+            return new BpfStat(value.Recv, value.Drop, value.Capt, value._);
         }
     }
 }}}}}}

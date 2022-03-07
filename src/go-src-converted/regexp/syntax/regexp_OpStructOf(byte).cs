@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:34 UTC
+//     Generated on 2022 March 06 22:23:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace regexp
         {
             // Value of the Op struct
             private readonly byte m_value;
-
+            
             public Op(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and Op struct

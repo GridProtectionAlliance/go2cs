@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:16 UTC
+//     Generated on 2022 March 06 22:31:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using src = go.cmd.@internal.src_package;
@@ -69,7 +68,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,27 +83,27 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (@string, long, ptr<gosym.Func>) PCToLineByPtr(ptr<T> value, ulong _p0);
-            private delegate (@string, long, ptr<gosym.Func>) PCToLineByVal(T value, ulong _p0);
+            private delegate (@string, nint, ptr<gosym.Func>) PCToLineByPtr(ptr<T> value, ulong _p0);
+            private delegate (@string, nint, ptr<gosym.Func>) PCToLineByVal(T value, ulong _p0);
 
             private static readonly PCToLineByPtr? s_PCToLineByPtr;
             private static readonly PCToLineByVal? s_PCToLineByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (@string, long, ptr<gosym.Func>) PCToLine(ulong _p0)
+            public (@string, nint, ptr<gosym.Func>) PCToLine(ulong _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PCToLineByPtr is null || !m_target_is_ptr)
                     return s_PCToLineByVal!(target, _p0);
 
-                return s_PCToLineByPtr(m_target_ptr, _p0);
+                return s_PCToLineByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Liner()
@@ -115,12 +114,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PCToLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PCToLineByPtr = extensionMethod.CreateStaticDelegate(typeof(PCToLineByPtr)) as PCToLineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PCToLine");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PCToLineByVal = extensionMethod.CreateStaticDelegate(typeof(PCToLineByVal)) as PCToLineByVal;
 
                 if (s_PCToLineByPtr is null && s_PCToLineByVal is null)

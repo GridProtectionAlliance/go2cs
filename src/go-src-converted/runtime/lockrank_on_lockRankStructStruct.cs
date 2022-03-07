@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:07 UTC
+//     Generated on 2022 March 06 22:08:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 
 #nullable enable
@@ -31,7 +31,7 @@ namespace go
                 this.pad = default;
             }
 
-            public lockRankStruct(lockRank rank = default, long pad = default)
+            public lockRankStruct(lockRank rank = default, nint pad = default)
             {
                 this.rank = rank;
                 this.pad = pad;

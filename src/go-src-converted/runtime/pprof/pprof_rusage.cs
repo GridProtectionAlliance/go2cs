@@ -2,45 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin || linux
 // +build darwin linux
 
-// package pprof -- go2cs converted at 2020 October 09 04:50:00 UTC
+// package pprof -- go2cs converted at 2022 March 06 22:14:45 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
-// Original source: C:\Go\src\runtime\pprof\pprof_rusage.go
+// Original source: C:\Program Files\Go\src\runtime\pprof\pprof_rusage.go
 using fmt = go.fmt_package;
 using io = go.io_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace runtime
-{
-    public static partial class pprof_package
-    {
-        // Adds MaxRSS to platforms that are supported.
-        private static void addMaxRSS(io.Writer w) => func((_, panic, __) =>
-        {
-            System.UIntPtr rssToBytes = default;
-            switch (runtime.GOOS)
-            {
-                case "linux": 
+namespace go.runtime;
 
-                case "android": 
-                    rssToBytes = 1024L;
-                    break;
-                case "darwin": 
-                    rssToBytes = 1L;
-                    break;
-                default: 
-                    panic("unsupported OS");
-                    break;
-            }
+public static partial class pprof_package {
 
-            ref syscall.Rusage rusage = ref heap(out ptr<syscall.Rusage> _addr_rusage);
-            syscall.Getrusage(0L, _addr_rusage);
-            fmt.Fprintf(w, "# MaxRSS = %d\n", uintptr(rusage.Maxrss) * rssToBytes);
+    // Adds MaxRSS to platforms that are supported.
+private static void addMaxRSS(io.Writer w) => func((_, panic, _) => {
+    System.UIntPtr rssToBytes = default;
+    switch (runtime.GOOS) {
+        case "linux": 
 
-        });
+        case "android": 
+            rssToBytes = 1024;
+            break;
+        case "darwin": 
+
+        case "ios": 
+            rssToBytes = 1;
+            break;
+        default: 
+            panic("unsupported OS");
+            break;
     }
-}}
+
+    ref syscall.Rusage rusage = ref heap(out ptr<syscall.Rusage> _addr_rusage);
+    syscall.Getrusage(0, _addr_rusage);
+    fmt.Fprintf(w, "# MaxRSS = %d\n", uintptr(rusage.Maxrss) * rssToBytes);
+
+});
+
+} // end pprof_package

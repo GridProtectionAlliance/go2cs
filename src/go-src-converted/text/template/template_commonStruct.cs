@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:35 UTC
+//     Generated on 2022 March 06 22:24:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using reflect = go.reflect_package;
 using sync = go.sync_package;
 using parse = go.text.template.parse_package;
@@ -32,15 +31,17 @@ namespace text
             public common(NilType _)
             {
                 this.tmpl = default;
+                this.muTmpl = default;
                 this.option = default;
                 this.muFuncs = default;
                 this.parseFuncs = default;
                 this.execFuncs = default;
             }
 
-            public common(map<@string, ptr<Template>> tmpl = default, option option = default, sync.RWMutex muFuncs = default, FuncMap parseFuncs = default, map<@string, reflect.Value> execFuncs = default)
+            public common(map<@string, ptr<Template>> tmpl = default, sync.RWMutex muTmpl = default, option option = default, sync.RWMutex muFuncs = default, FuncMap parseFuncs = default, map<@string, reflect.Value> execFuncs = default)
             {
                 this.tmpl = tmpl;
+                this.muTmpl = muTmpl;
                 this.option = option;
                 this.muFuncs = muFuncs;
                 this.parseFuncs = parseFuncs;
@@ -67,7 +68,7 @@ namespace text
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static common common_cast(dynamic value)
         {
-            return new common(value.tmpl, value.option, value.muFuncs, value.parseFuncs, value.execFuncs);
+            return new common(value.tmpl, value.muTmpl, value.option, value.muFuncs, value.parseFuncs, value.execFuncs);
         }
     }
 }}

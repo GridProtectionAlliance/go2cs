@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:09 UTC
+//     Generated on 2022 March 06 22:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
+using path = go.path_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
@@ -34,14 +38,14 @@ namespace archive
         public partial struct ReadCloser
         {
             // Reader.Read function promotion
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-            private delegate (long, error) ReadByRef(ref T value, slice<byte> p);
+            private delegate (nint, error) ReadByVal(T value, slice<byte> p);
+            private delegate (nint, error) ReadByRef(ref T value, slice<byte> p);
 
             private static readonly ReadByVal s_ReadByVal;
             private static readonly ReadByRef s_ReadByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Read(slice<byte> p) => s_ReadByRef?.Invoke(ref this, p) ?? s_ReadByVal?.Invoke(this, p) ?? Reader?.Read(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static ReadCloser()
@@ -51,11 +55,11 @@ namespace archive
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Read");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;
 
-                    if ((object)s_ReadByRef == null)
+                    if (s_ReadByRef is null)
                         s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
                 }
             }

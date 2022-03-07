@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:31 UTC
+//     Generated on 2022 March 06 23:30:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace sys
                 this.Mntonname = default;
             }
 
-            public Statfs_t(uint Version = default, uint Type = default, ulong Flags = default, ulong Bsize = default, ulong Iosize = default, ulong Blocks = default, ulong Bfree = default, long Bavail = default, ulong Files = default, long Ffree = default, ulong Syncwrites = default, ulong Asyncwrites = default, ulong Syncreads = default, ulong Asyncreads = default, array<ulong> Spare = default, uint Namemax = default, uint Owner = default, Fsid Fsid = default, array<sbyte> Charspare = default, array<sbyte> Fstypename = default, array<sbyte> Mntfromname = default, array<sbyte> Mntonname = default)
+            public Statfs_t(uint Version = default, uint Type = default, ulong Flags = default, ulong Bsize = default, ulong Iosize = default, ulong Blocks = default, ulong Bfree = default, long Bavail = default, ulong Files = default, long Ffree = default, ulong Syncwrites = default, ulong Asyncwrites = default, ulong Syncreads = default, ulong Asyncreads = default, array<ulong> Spare = default, uint Namemax = default, uint Owner = default, Fsid Fsid = default, array<sbyte> Charspare = default, array<byte> Fstypename = default, array<byte> Mntfromname = default, array<byte> Mntonname = default)
             {
                 this.Version = Version;
                 this.Type = Type;

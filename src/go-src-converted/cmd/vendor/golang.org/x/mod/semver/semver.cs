@@ -20,606 +20,481 @@
 // with two exceptions. First, it requires the "v" prefix. Second, it recognizes
 // vMAJOR and vMAJOR.MINOR (with no prerelease or build suffixes)
 // as shorthands for vMAJOR.0.0 and vMAJOR.MINOR.0.
-// package semver -- go2cs converted at 2020 October 09 05:55:58 UTC
+// package semver -- go2cs converted at 2022 March 06 23:26:09 UTC
 // import "cmd/vendor/golang.org/x/mod/semver" ==> using semver = go.cmd.vendor.golang.org.x.mod.semver_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\mod\semver\semver.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\semver\semver.go
+using sort = go.sort_package;
 
-using static go.builtin;
+namespace go.cmd.vendor.golang.org.x.mod;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace mod
-{
-    public static partial class semver_package
+public static partial class semver_package {
+
+    // parsed returns the parsed form of a semantic version string.
+private partial struct parsed {
+    public @string major;
+    public @string minor;
+    public @string patch;
+    public @string @short;
+    public @string prerelease;
+    public @string build;
+    public @string err;
+}
+
+// IsValid reports whether v is a valid semantic version string.
+public static bool IsValid(@string v) {
+    var (_, ok) = parse(v);
+    return ok;
+}
+
+// Canonical returns the canonical formatting of the semantic version v.
+// It fills in any missing .MINOR or .PATCH and discards build metadata.
+// Two semantic versions compare equal only if their canonical formattings
+// are identical strings.
+// The canonical invalid semantic version is the empty string.
+public static @string Canonical(@string v) {
+    var (p, ok) = parse(v);
+    if (!ok) {
+        return "";
+    }
+    if (p.build != "") {
+        return v[..(int)len(v) - len(p.build)];
+    }
+    if (p.@short != "") {
+        return v + p.@short;
+    }
+    return v;
+
+}
+
+// Major returns the major version prefix of the semantic version v.
+// For example, Major("v2.1.0") == "v2".
+// If v is an invalid semantic version string, Major returns the empty string.
+public static @string Major(@string v) {
+    var (pv, ok) = parse(v);
+    if (!ok) {
+        return "";
+    }
+    return v[..(int)1 + len(pv.major)];
+
+}
+
+// MajorMinor returns the major.minor version prefix of the semantic version v.
+// For example, MajorMinor("v2.1.0") == "v2.1".
+// If v is an invalid semantic version string, MajorMinor returns the empty string.
+public static @string MajorMinor(@string v) {
+    var (pv, ok) = parse(v);
+    if (!ok) {
+        return "";
+    }
+    nint i = 1 + len(pv.major);
     {
-        // parsed returns the parsed form of a semantic version string.
-        private partial struct parsed
-        {
-            public @string major;
-            public @string minor;
-            public @string patch;
-            public @string @short;
-            public @string prerelease;
-            public @string build;
-            public @string err;
+        var j = i + 1 + len(pv.minor);
+
+        if (j <= len(v) && v[i] == '.' && v[(int)i + 1..(int)j] == pv.minor) {
+            return v[..(int)j];
         }
+    }
 
-        // IsValid reports whether v is a valid semantic version string.
-        public static bool IsValid(@string v)
-        {
-            var (_, ok) = parse(v);
-            return ok;
+    return v[..(int)i] + "." + pv.minor;
+
+}
+
+// Prerelease returns the prerelease suffix of the semantic version v.
+// For example, Prerelease("v2.1.0-pre+meta") == "-pre".
+// If v is an invalid semantic version string, Prerelease returns the empty string.
+public static @string Prerelease(@string v) {
+    var (pv, ok) = parse(v);
+    if (!ok) {
+        return "";
+    }
+    return pv.prerelease;
+
+}
+
+// Build returns the build suffix of the semantic version v.
+// For example, Build("v2.1.0+meta") == "+meta".
+// If v is an invalid semantic version string, Build returns the empty string.
+public static @string Build(@string v) {
+    var (pv, ok) = parse(v);
+    if (!ok) {
+        return "";
+    }
+    return pv.build;
+
+}
+
+// Compare returns an integer comparing two versions according to
+// semantic version precedence.
+// The result will be 0 if v == w, -1 if v < w, or +1 if v > w.
+//
+// An invalid semantic version string is considered less than a valid one.
+// All invalid semantic version strings compare equal to each other.
+public static nint Compare(@string v, @string w) {
+    var (pv, ok1) = parse(v);
+    var (pw, ok2) = parse(w);
+    if (!ok1 && !ok2) {
+        return 0;
+    }
+    if (!ok1) {
+        return -1;
+    }
+    if (!ok2) {
+        return +1;
+    }
+    {
+        var c__prev1 = c;
+
+        var c = compareInt(pv.major, pw.major);
+
+        if (c != 0) {
+            return c;
         }
+        c = c__prev1;
 
-        // Canonical returns the canonical formatting of the semantic version v.
-        // It fills in any missing .MINOR or .PATCH and discards build metadata.
-        // Two semantic versions compare equal only if their canonical formattings
-        // are identical strings.
-        // The canonical invalid semantic version is the empty string.
-        public static @string Canonical(@string v)
-        {
-            var (p, ok) = parse(v);
-            if (!ok)
-            {
-                return "";
-            }
+    }
 
-            if (p.build != "")
-            {
-                return v[..len(v) - len(p.build)];
-            }
+    {
+        var c__prev1 = c;
 
-            if (p.@short != "")
-            {
-                return v + p.@short;
-            }
+        c = compareInt(pv.minor, pw.minor);
 
-            return v;
-
+        if (c != 0) {
+            return c;
         }
+        c = c__prev1;
 
-        // Major returns the major version prefix of the semantic version v.
-        // For example, Major("v2.1.0") == "v2".
-        // If v is an invalid semantic version string, Major returns the empty string.
-        public static @string Major(@string v)
-        {
-            var (pv, ok) = parse(v);
-            if (!ok)
-            {
-                return "";
-            }
+    }
 
-            return v[..1L + len(pv.major)];
+    {
+        var c__prev1 = c;
 
+        c = compareInt(pv.patch, pw.patch);
+
+        if (c != 0) {
+            return c;
         }
+        c = c__prev1;
 
-        // MajorMinor returns the major.minor version prefix of the semantic version v.
-        // For example, MajorMinor("v2.1.0") == "v2.1".
-        // If v is an invalid semantic version string, MajorMinor returns the empty string.
-        public static @string MajorMinor(@string v)
-        {
-            var (pv, ok) = parse(v);
-            if (!ok)
-            {
-                return "";
-            }
+    }
 
-            long i = 1L + len(pv.major);
-            {
-                var j = i + 1L + len(pv.minor);
+    return comparePrerelease(pv.prerelease, pw.prerelease);
 
-                if (j <= len(v) && v[i] == '.' && v[i + 1L..j] == pv.minor)
-                {
-                    return v[..j];
-                }
+}
 
-            }
+// Max canonicalizes its arguments and then returns the version string
+// that compares greater.
+//
+// Deprecated: use Compare instead. In most cases, returning a canonicalized
+// version is not expected or desired.
+public static @string Max(@string v, @string w) {
+    v = Canonical(v);
+    w = Canonical(w);
+    if (Compare(v, w) > 0) {
+        return v;
+    }
+    return w;
 
-            return v[..i] + "." + pv.minor;
+}
 
-        }
+// ByVersion implements sort.Interface for sorting semantic version strings.
+public partial struct ByVersion { // : slice<@string>
+}
 
-        // Prerelease returns the prerelease suffix of the semantic version v.
-        // For example, Prerelease("v2.1.0-pre+meta") == "-pre".
-        // If v is an invalid semantic version string, Prerelease returns the empty string.
-        public static @string Prerelease(@string v)
-        {
-            var (pv, ok) = parse(v);
-            if (!ok)
-            {
-                return "";
-            }
+public static nint Len(this ByVersion vs) {
+    return len(vs);
+}
+public static void Swap(this ByVersion vs, nint i, nint j) {
+    (vs[i], vs[j]) = (vs[j], vs[i]);
+}
+public static bool Less(this ByVersion vs, nint i, nint j) {
+    var cmp = Compare(vs[i], vs[j]);
+    if (cmp != 0) {
+        return cmp < 0;
+    }
+    return vs[i] < vs[j];
 
-            return pv.prerelease;
+}
 
-        }
+// Sort sorts a list of semantic version strings using ByVersion.
+public static void Sort(slice<@string> list) {
+    sort.Sort(ByVersion(list));
+}
 
-        // Build returns the build suffix of the semantic version v.
-        // For example, Build("v2.1.0+meta") == "+meta".
-        // If v is an invalid semantic version string, Build returns the empty string.
-        public static @string Build(@string v)
-        {
-            var (pv, ok) = parse(v);
-            if (!ok)
-            {
-                return "";
-            }
+private static (parsed, bool) parse(@string v) {
+    parsed p = default;
+    bool ok = default;
 
-            return pv.build;
-
-        }
-
-        // Compare returns an integer comparing two versions according to
-        // semantic version precedence.
-        // The result will be 0 if v == w, -1 if v < w, or +1 if v > w.
-        //
-        // An invalid semantic version string is considered less than a valid one.
-        // All invalid semantic version strings compare equal to each other.
-        public static long Compare(@string v, @string w)
-        {
-            var (pv, ok1) = parse(v);
-            var (pw, ok2) = parse(w);
-            if (!ok1 && !ok2)
-            {
-                return 0L;
-            }
-
-            if (!ok1)
-            {
-                return -1L;
-            }
-
-            if (!ok2)
-            {
-                return +1L;
-            }
-
-            {
-                var c__prev1 = c;
-
-                var c = compareInt(pv.major, pw.major);
-
-                if (c != 0L)
-                {
-                    return c;
-                }
-
-                c = c__prev1;
-
-            }
-
-            {
-                var c__prev1 = c;
-
-                c = compareInt(pv.minor, pw.minor);
-
-                if (c != 0L)
-                {
-                    return c;
-                }
-
-                c = c__prev1;
-
-            }
-
-            {
-                var c__prev1 = c;
-
-                c = compareInt(pv.patch, pw.patch);
-
-                if (c != 0L)
-                {
-                    return c;
-                }
-
-                c = c__prev1;
-
-            }
-
-            return comparePrerelease(pv.prerelease, pw.prerelease);
-
-        }
-
-        // Max canonicalizes its arguments and then returns the version string
-        // that compares greater.
-        public static @string Max(@string v, @string w)
-        {
-            v = Canonical(v);
-            w = Canonical(w);
-            if (Compare(v, w) > 0L)
-            {
-                return v;
-            }
-
-            return w;
-
-        }
-
-        private static (parsed, bool) parse(@string v)
-        {
-            parsed p = default;
-            bool ok = default;
-
-            if (v == "" || v[0L] != 'v')
-            {
-                p.err = "missing v prefix";
-                return ;
-            }
-
-            p.major, v, ok = parseInt(v[1L..]);
-            if (!ok)
-            {
-                p.err = "bad major version";
-                return ;
-            }
-
-            if (v == "")
-            {
-                p.minor = "0";
-                p.patch = "0";
-                p.@short = ".0.0";
-                return ;
-            }
-
-            if (v[0L] != '.')
-            {
-                p.err = "bad minor prefix";
-                ok = false;
-                return ;
-            }
-
-            p.minor, v, ok = parseInt(v[1L..]);
-            if (!ok)
-            {
-                p.err = "bad minor version";
-                return ;
-            }
-
-            if (v == "")
-            {
-                p.patch = "0";
-                p.@short = ".0";
-                return ;
-            }
-
-            if (v[0L] != '.')
-            {
-                p.err = "bad patch prefix";
-                ok = false;
-                return ;
-            }
-
-            p.patch, v, ok = parseInt(v[1L..]);
-            if (!ok)
-            {
-                p.err = "bad patch version";
-                return ;
-            }
-
-            if (len(v) > 0L && v[0L] == '-')
-            {
-                p.prerelease, v, ok = parsePrerelease(v);
-                if (!ok)
-                {
-                    p.err = "bad prerelease";
-                    return ;
-                }
-
-            }
-
-            if (len(v) > 0L && v[0L] == '+')
-            {
-                p.build, v, ok = parseBuild(v);
-                if (!ok)
-                {
-                    p.err = "bad build";
-                    return ;
-                }
-
-            }
-
-            if (v != "")
-            {
-                p.err = "junk on end";
-                ok = false;
-                return ;
-            }
-
-            ok = true;
+    if (v == "" || v[0] != 'v') {
+        p.err = "missing v prefix";
+        return ;
+    }
+    p.major, v, ok = parseInt(v[(int)1..]);
+    if (!ok) {
+        p.err = "bad major version";
+        return ;
+    }
+    if (v == "") {
+        p.minor = "0";
+        p.patch = "0";
+        p.@short = ".0.0";
+        return ;
+    }
+    if (v[0] != '.') {
+        p.err = "bad minor prefix";
+        ok = false;
+        return ;
+    }
+    p.minor, v, ok = parseInt(v[(int)1..]);
+    if (!ok) {
+        p.err = "bad minor version";
+        return ;
+    }
+    if (v == "") {
+        p.patch = "0";
+        p.@short = ".0";
+        return ;
+    }
+    if (v[0] != '.') {
+        p.err = "bad patch prefix";
+        ok = false;
+        return ;
+    }
+    p.patch, v, ok = parseInt(v[(int)1..]);
+    if (!ok) {
+        p.err = "bad patch version";
+        return ;
+    }
+    if (len(v) > 0 && v[0] == '-') {
+        p.prerelease, v, ok = parsePrerelease(v);
+        if (!ok) {
+            p.err = "bad prerelease";
             return ;
-
         }
-
-        private static (@string, @string, bool) parseInt(@string v)
-        {
-            @string t = default;
-            @string rest = default;
-            bool ok = default;
-
-            if (v == "")
-            {
-                return ;
-            }
-
-            if (v[0L] < '0' || '9' < v[0L])
-            {
-                return ;
-            }
-
-            long i = 1L;
-            while (i < len(v) && '0' <= v[i] && v[i] <= '9')
-            {
-                i++;
-            }
-
-            if (v[0L] == '0' && i != 1L)
-            {
-                return ;
-            }
-
-            return (v[..i], v[i..], true);
-
+    }
+    if (len(v) > 0 && v[0] == '+') {
+        p.build, v, ok = parseBuild(v);
+        if (!ok) {
+            p.err = "bad build";
+            return ;
         }
+    }
+    if (v != "") {
+        p.err = "junk on end";
+        ok = false;
+        return ;
+    }
+    ok = true;
+    return ;
 
-        private static (@string, @string, bool) parsePrerelease(@string v)
-        {
-            @string t = default;
-            @string rest = default;
-            bool ok = default;
+}
+
+private static (@string, @string, bool) parseInt(@string v) {
+    @string t = default;
+    @string rest = default;
+    bool ok = default;
+
+    if (v == "") {
+        return ;
+    }
+    if (v[0] < '0' || '9' < v[0]) {
+        return ;
+    }
+    nint i = 1;
+    while (i < len(v) && '0' <= v[i] && v[i] <= '9') {
+        i++;
+    }
+    if (v[0] == '0' && i != 1) {
+        return ;
+    }
+    return (v[..(int)i], v[(int)i..], true);
+
+}
+
+private static (@string, @string, bool) parsePrerelease(@string v) {
+    @string t = default;
+    @string rest = default;
+    bool ok = default;
  
-            // "A pre-release version MAY be denoted by appending a hyphen and
-            // a series of dot separated identifiers immediately following the patch version.
-            // Identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-].
-            // Identifiers MUST NOT be empty. Numeric identifiers MUST NOT include leading zeroes."
-            if (v == "" || v[0L] != '-')
-            {
+    // "A pre-release version MAY be denoted by appending a hyphen and
+    // a series of dot separated identifiers immediately following the patch version.
+    // Identifiers MUST comprise only ASCII alphanumerics and hyphen [0-9A-Za-z-].
+    // Identifiers MUST NOT be empty. Numeric identifiers MUST NOT include leading zeroes."
+    if (v == "" || v[0] != '-') {
+        return ;
+    }
+    nint i = 1;
+    nint start = 1;
+    while (i < len(v) && v[i] != '+') {
+        if (!isIdentChar(v[i]) && v[i] != '.') {
+            return ;
+        }
+        if (v[i] == '.') {
+            if (start == i || isBadNum(v[(int)start..(int)i])) {
                 return ;
             }
+            start = i + 1;
+        }
+        i++;
 
-            long i = 1L;
-            long start = 1L;
-            while (i < len(v) && v[i] != '+')
-            {
-                if (!isIdentChar(v[i]) && v[i] != '.')
-                {
-                    return ;
-                }
+    }
+    if (start == i || isBadNum(v[(int)start..(int)i])) {
+        return ;
+    }
+    return (v[..(int)i], v[(int)i..], true);
 
-                if (v[i] == '.')
-                {
-                    if (start == i || isBadNum(v[start..i]))
-                    {
-                        return ;
-                    }
+}
 
-                    start = i + 1L;
+private static (@string, @string, bool) parseBuild(@string v) {
+    @string t = default;
+    @string rest = default;
+    bool ok = default;
 
-                }
-
-                i++;
-
-            }
-
-            if (start == i || isBadNum(v[start..i]))
-            {
+    if (v == "" || v[0] != '+') {
+        return ;
+    }
+    nint i = 1;
+    nint start = 1;
+    while (i < len(v)) {
+        if (!isIdentChar(v[i]) && v[i] != '.') {
+            return ;
+        }
+        if (v[i] == '.') {
+            if (start == i) {
                 return ;
             }
-
-            return (v[..i], v[i..], true);
-
+            start = i + 1;
         }
+        i++;
 
-        private static (@string, @string, bool) parseBuild(@string v)
-        {
-            @string t = default;
-            @string rest = default;
-            bool ok = default;
+    }
+    if (start == i) {
+        return ;
+    }
+    return (v[..(int)i], v[(int)i..], true);
 
-            if (v == "" || v[0L] != '+')
-            {
-                return ;
-            }
+}
 
-            long i = 1L;
-            long start = 1L;
-            while (i < len(v))
-            {
-                if (!isIdentChar(v[i]) && v[i] != '.')
-                {
-                    return ;
+private static bool isIdentChar(byte c) {
+    return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '-';
+}
+
+private static bool isBadNum(@string v) {
+    nint i = 0;
+    while (i < len(v) && '0' <= v[i] && v[i] <= '9') {
+        i++;
+    }
+    return i == len(v) && i > 1 && v[0] == '0';
+}
+
+private static bool isNum(@string v) {
+    nint i = 0;
+    while (i < len(v) && '0' <= v[i] && v[i] <= '9') {
+        i++;
+    }
+    return i == len(v);
+}
+
+private static nint compareInt(@string x, @string y) {
+    if (x == y) {
+        return 0;
+    }
+    if (len(x) < len(y)) {
+        return -1;
+    }
+    if (len(x) > len(y)) {
+        return +1;
+    }
+    if (x < y) {
+        return -1;
+    }
+    else
+ {
+        return +1;
+    }
+}
+
+private static nint comparePrerelease(@string x, @string y) { 
+    // "When major, minor, and patch are equal, a pre-release version has
+    // lower precedence than a normal version.
+    // Example: 1.0.0-alpha < 1.0.0.
+    // Precedence for two pre-release versions with the same major, minor,
+    // and patch version MUST be determined by comparing each dot separated
+    // identifier from left to right until a difference is found as follows:
+    // identifiers consisting of only digits are compared numerically and
+    // identifiers with letters or hyphens are compared lexically in ASCII
+    // sort order. Numeric identifiers always have lower precedence than
+    // non-numeric identifiers. A larger set of pre-release fields has a
+    // higher precedence than a smaller set, if all of the preceding
+    // identifiers are equal.
+    // Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta <
+    // 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0."
+    if (x == y) {
+        return 0;
+    }
+    if (x == "") {
+        return +1;
+    }
+    if (y == "") {
+        return -1;
+    }
+    while (x != "" && y != "") {
+        x = x[(int)1..]; // skip - or .
+        y = y[(int)1..]; // skip - or .
+        @string dx = default;        @string dy = default;
+
+        dx, x = nextIdent(x);
+        dy, y = nextIdent(y);
+        if (dx != dy) {
+            var ix = isNum(dx);
+            var iy = isNum(dy);
+            if (ix != iy) {
+                if (ix) {
+                    return -1;
+                }
+                else
+ {
+                    return +1;
                 }
 
-                if (v[i] == '.')
-                {
-                    if (start == i)
-                    {
-                        return ;
-                    }
+            }
 
-                    start = i + 1L;
-
+            if (ix) {
+                if (len(dx) < len(dy)) {
+                    return -1;
                 }
-
-                i++;
-
+                if (len(dx) > len(dy)) {
+                    return +1;
+                }
             }
 
-            if (start == i)
-            {
-                return ;
-            }
-
-            return (v[..i], v[i..], true);
-
-        }
-
-        private static bool isIdentChar(byte c)
-        {
-            return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9' || c == '-';
-        }
-
-        private static bool isBadNum(@string v)
-        {
-            long i = 0L;
-            while (i < len(v) && '0' <= v[i] && v[i] <= '9')
-            {
-                i++;
-            }
-
-            return i == len(v) && i > 1L && v[0L] == '0';
-
-        }
-
-        private static bool isNum(@string v)
-        {
-            long i = 0L;
-            while (i < len(v) && '0' <= v[i] && v[i] <= '9')
-            {
-                i++;
-            }
-
-            return i == len(v);
-
-        }
-
-        private static long compareInt(@string x, @string y)
-        {
-            if (x == y)
-            {
-                return 0L;
-            }
-
-            if (len(x) < len(y))
-            {
-                return -1L;
-            }
-
-            if (len(x) > len(y))
-            {
-                return +1L;
-            }
-
-            if (x < y)
-            {
-                return -1L;
+            if (dx < dy) {
+                return -1;
             }
             else
-            {
-                return +1L;
+ {
+                return +1;
             }
-
-        }
-
-        private static long comparePrerelease(@string x, @string y)
-        { 
-            // "When major, minor, and patch are equal, a pre-release version has
-            // lower precedence than a normal version.
-            // Example: 1.0.0-alpha < 1.0.0.
-            // Precedence for two pre-release versions with the same major, minor,
-            // and patch version MUST be determined by comparing each dot separated
-            // identifier from left to right until a difference is found as follows:
-            // identifiers consisting of only digits are compared numerically and
-            // identifiers with letters or hyphens are compared lexically in ASCII
-            // sort order. Numeric identifiers always have lower precedence than
-            // non-numeric identifiers. A larger set of pre-release fields has a
-            // higher precedence than a smaller set, if all of the preceding
-            // identifiers are equal.
-            // Example: 1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta <
-            // 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0."
-            if (x == y)
-            {
-                return 0L;
-            }
-
-            if (x == "")
-            {
-                return +1L;
-            }
-
-            if (y == "")
-            {
-                return -1L;
-            }
-
-            while (x != "" && y != "")
-            {
-                x = x[1L..]; // skip - or .
-                y = y[1L..]; // skip - or .
-                @string dx = default;                @string dy = default;
-
-                dx, x = nextIdent(x);
-                dy, y = nextIdent(y);
-                if (dx != dy)
-                {
-                    var ix = isNum(dx);
-                    var iy = isNum(dy);
-                    if (ix != iy)
-                    {
-                        if (ix)
-                        {
-                            return -1L;
-                        }
-                        else
-                        {
-                            return +1L;
-                        }
-
-                    }
-
-                    if (ix)
-                    {
-                        if (len(dx) < len(dy))
-                        {
-                            return -1L;
-                        }
-
-                        if (len(dx) > len(dy))
-                        {
-                            return +1L;
-                        }
-
-                    }
-
-                    if (dx < dy)
-                    {
-                        return -1L;
-                    }
-                    else
-                    {
-                        return +1L;
-                    }
-
-                }
-
-            }
-
-            if (x == "")
-            {
-                return -1L;
-            }
-            else
-            {
-                return +1L;
-            }
-
-        }
-
-        private static (@string, @string) nextIdent(@string x)
-        {
-            @string dx = default;
-            @string rest = default;
-
-            long i = 0L;
-            while (i < len(x) && x[i] != '.')
-            {
-                i++;
-            }
-
-            return (x[..i], x[i..]);
 
         }
     }
-}}}}}}
+    if (x == "") {
+        return -1;
+    }
+    else
+ {
+        return +1;
+    }
+}
+
+private static (@string, @string) nextIdent(@string x) {
+    @string dx = default;
+    @string rest = default;
+
+    nint i = 0;
+    while (i < len(x) && x[i] != '.') {
+        i++;
+    }
+    return (x[..(int)i], x[(int)i..]);
+}
+
+} // end semver_package

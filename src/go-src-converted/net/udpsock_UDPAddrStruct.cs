@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:32 UTC
+//     Generated on 2022 March 06 22:16:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
+using itoa = go.@internal.itoa_package;
 using syscall = go.syscall_package;
 
 #nullable enable
@@ -33,7 +33,7 @@ namespace go
                 this.Zone = default;
             }
 
-            public UDPAddr(IP IP = default, long Port = default, @string Zone = default)
+            public UDPAddr(IP IP = default, nint Port = default, @string Zone = default)
             {
                 this.IP = IP;
                 this.Port = Port;

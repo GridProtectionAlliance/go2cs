@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:49 UTC
+//     Generated on 2022 March 06 22:19:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using reflect = go.reflect_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -37,7 +36,7 @@ namespace encoding
                 this.isCompound = default;
             }
 
-            public tagAndLength(long @class = default, long tag = default, long length = default, bool isCompound = default)
+            public tagAndLength(nint @class = default, nint tag = default, nint length = default, bool isCompound = default)
             {
                 this.@class = @class;
                 this.tag = tag;

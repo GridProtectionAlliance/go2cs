@@ -105,69 +105,62 @@
 // The trace tool computes the latency of a task by measuring the
 // time between the task creation and the task end and provides
 // latency distributions for each task type found in the trace.
-// package trace -- go2cs converted at 2020 October 09 04:59:05 UTC
+// package trace -- go2cs converted at 2022 March 06 22:24:12 UTC
 // import "runtime/trace" ==> using trace = go.runtime.trace_package
-// Original source: C:\Go\src\runtime\trace\trace.go
+// Original source: C:\Program Files\Go\src\runtime\trace\trace.go
 using io = go.io_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
-using static go.builtin;
 using System;
 using System.Threading;
 
-namespace go {
-namespace runtime
-{
-    public static partial class trace_package
+
+namespace go.runtime;
+
+public static partial class trace_package {
+
+    // Start enables tracing for the current program.
+    // While tracing, the trace will be buffered and written to w.
+    // Start returns an error if tracing is already enabled.
+public static error Start(io.Writer w) => func((defer, _, _) => {
+    tracing.Lock();
+    defer(tracing.Unlock());
+
     {
-        // Start enables tracing for the current program.
-        // While tracing, the trace will be buffered and written to w.
-        // Start returns an error if tracing is already enabled.
-        public static error Start(io.Writer w) => func((defer, _, __) =>
-        {
-            tracing.Lock();
-            defer(tracing.Unlock());
+        var err = runtime.StartTrace();
 
-            {
-                var err = runtime.StartTrace();
-
-                if (err != null)
-                {
-                    return error.As(err)!;
-                }
-            }
-
-            go_(() => () =>
-            {
-                while (true)
-                {
-                    var data = runtime.ReadTrace();
-                    if (data == null)
-                    {
-                        break;
-                    }
-                    w.Write(data);
-
-                }
-
-            }());
-            atomic.StoreInt32(_addr_tracing.enabled, 1L);
-            return error.As(null!)!;
-
-        });
-
-        // Stop stops the current tracing, if any.
-        // Stop only returns after all the writes for the trace have completed.
-        public static void Stop() => func((defer, _, __) =>
-        {
-            tracing.Lock();
-            defer(tracing.Unlock());
-            atomic.StoreInt32(_addr_tracing.enabled, 0L);
-
-            runtime.StopTrace();
-        });
-
-        private static var tracing = default;
+        if (err != null) {
+            return error.As(err)!;
+        }
     }
-}}
+
+    go_(() => () => {
+        while (true) {
+            var data = runtime.ReadTrace();
+            if (data == null) {
+                break;
+            }
+            w.Write(data);
+
+        }
+
+    }());
+    atomic.StoreInt32(_addr_tracing.enabled, 1);
+    return error.As(null!)!;
+
+});
+
+// Stop stops the current tracing, if any.
+// Stop only returns after all the writes for the trace have completed.
+public static void Stop() => func((defer, _, _) => {
+    tracing.Lock();
+    defer(tracing.Unlock());
+    atomic.StoreInt32(_addr_tracing.enabled, 0);
+
+    runtime.StopTrace();
+});
+
+private static var tracing = default;
+
+} // end trace_package

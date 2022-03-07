@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:36 UTC
+//     Generated on 2022 March 06 22:47:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
+using constraint = go.go.build.constraint_package;
 using token = go.go.token_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -41,7 +41,7 @@ namespace go
                 this.space = default;
             }
 
-            public trimmer(io.Writer output = default, long state = default, slice<byte> space = default)
+            public trimmer(io.Writer output = default, nint state = default, slice<byte> space = default)
             {
                 this.output = output;
                 this.state = state;

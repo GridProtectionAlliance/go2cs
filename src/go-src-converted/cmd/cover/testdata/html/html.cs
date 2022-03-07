@@ -1,41 +1,33 @@
-// package html -- go2cs converted at 2020 October 09 05:44:26 UTC
+// package html -- go2cs converted at 2022 March 06 23:15:13 UTC
 // import "cmd/cover/testdata/html" ==> using html = go.cmd.cover.testdata.html_package
-// Original source: C:\Go\src\cmd\cover\testdata\html\html.go
+// Original source: C:\Program Files\Go\src\cmd\cover\testdata\html\html.go
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace cover {
-namespace testdata
-{
-    public static partial class html_package
-    {
-        // This file is tested by html_test.go.
-        // The comments below are markers for extracting the annotated source
-        // from the HTML output.
+namespace go.cmd.cover.testdata;
 
-        // This is a regression test for incorrect sorting of boundaries
-        // that coincide, specifically for empty select clauses.
-        // START f
-        private static void f()
-        {
-            var ch = make_channel<long>();
-        }
+public static partial class html_package {
 
-        // END f
+    // This file is tested by html_test.go.
+    // The comments below are markers for extracting the annotated source
+    // from the HTML output.
 
-        // https://golang.org/issue/25767
-        // START g
-        private static void g()
-        {
-            if (false)
-            {
-                fmt.Printf("Hello");
-            }
+    // This is a regression test for incorrect sorting of boundaries
+    // that coincide, specifically for empty select clauses.
+    // START f
+private static void f() {
+    var ch = make_channel<nint>();
+}
 
-        }
+// END f
 
-        // END g
+// https://golang.org/issue/25767
+// START g
+private static void g() {
+    if (false) {
+        fmt.Printf("Hello");
     }
-}}}}
+}
+
+// END g
+
+} // end html_package

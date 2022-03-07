@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -53,7 +53,7 @@ namespace issue21181
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,7 +79,7 @@ namespace issue21181
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NByPtr is null || !m_target_is_ptr)
@@ -88,12 +88,11 @@ namespace issue21181
                     return;
                 }
 
-                s_NByPtr(m_target_ptr, _p0);
+                s_NByPtr(m_target_ptr!, _p0);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Interface()
@@ -104,12 +103,12 @@ namespace issue21181
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("N");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NByPtr = extensionMethod.CreateStaticDelegate(typeof(NByPtr)) as NByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("N");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NByVal = extensionMethod.CreateStaticDelegate(typeof(NByVal)) as NByVal;
 
                 if (s_NByPtr is null && s_NByVal is null)

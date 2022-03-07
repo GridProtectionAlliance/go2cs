@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:49 UTC
+//     Generated on 2022 March 06 23:19:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using math = go.math_package;
@@ -56,7 +55,7 @@ namespace testing
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -71,27 +70,27 @@ namespace testing
                 m_target_is_ptr = true;
             }
 
-            private delegate reflect.Value GenerateByPtr(ptr<T> value, ptr<rand.Rand> rand, long size);
-            private delegate reflect.Value GenerateByVal(T value, ptr<rand.Rand> rand, long size);
+            private delegate reflect.Value GenerateByPtr(ptr<T> value, ptr<rand.Rand> rand, nint size);
+            private delegate reflect.Value GenerateByVal(T value, ptr<rand.Rand> rand, nint size);
 
             private static readonly GenerateByPtr? s_GenerateByPtr;
             private static readonly GenerateByVal? s_GenerateByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public reflect.Value Generate(ptr<rand.Rand> rand, long size)
+            public reflect.Value Generate(ptr<rand.Rand> rand, nint size)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GenerateByPtr is null || !m_target_is_ptr)
                     return s_GenerateByVal!(target, rand, size);
 
-                return s_GenerateByPtr(m_target_ptr, rand, size);
+                return s_GenerateByPtr(m_target_ptr!, rand, size);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Generator()
@@ -102,12 +101,12 @@ namespace testing
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Generate");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GenerateByPtr = extensionMethod.CreateStaticDelegate(typeof(GenerateByPtr)) as GenerateByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Generate");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GenerateByVal = extensionMethod.CreateStaticDelegate(typeof(GenerateByVal)) as GenerateByVal;
 
                 if (s_GenerateByPtr is null && s_GenerateByVal is null)

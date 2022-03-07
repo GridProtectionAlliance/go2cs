@@ -24,132 +24,112 @@
 // should be applied. See https://golang.org/s/go1.4-syscall for more
 // information.
 //
-// package syscall -- go2cs converted at 2020 October 09 05:01:33 UTC
+// package syscall -- go2cs converted at 2022 March 06 22:26:48 UTC
 // import "syscall" ==> using syscall = go.syscall_package
-// Original source: C:\Go\src\syscall\syscall.go
+// Original source: C:\Program Files\Go\src\syscall\syscall.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class syscall_package
-    {
-        //go:generate go run golang.org/x/sys/windows/mkwinsyscall -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
+namespace go;
 
-        // StringByteSlice converts a string to a NUL-terminated []byte,
-        // If s contains a NUL byte this function panics instead of
-        // returning an error.
-        //
-        // Deprecated: Use ByteSliceFromString instead.
-        public static slice<byte> StringByteSlice(@string s) => func((_, panic, __) =>
-        {
-            var (a, err) = ByteSliceFromString(s);
-            if (err != null)
-            {
-                panic("syscall: string with NUL passed to StringByteSlice");
-            }
-            return a;
+public static partial class syscall_package {
 
-        });
+    //go:generate go run ./mksyscall_windows.go -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
 
-        // ByteSliceFromString returns a NUL-terminated slice of bytes
-        // containing the text of s. If s contains a NUL byte at any
-        // location, it returns (nil, EINVAL).
-        public static (slice<byte>, error) ByteSliceFromString(@string s)
-        {
-            slice<byte> _p0 = default;
-            error _p0 = default!;
-
-            for (long i = 0L; i < len(s); i++)
-            {
-                if (s[i] == 0L)
-                {
-                    return (null, error.As(EINVAL)!);
-                }
-
-            }
-
-            var a = make_slice<byte>(len(s) + 1L);
-            copy(a, s);
-            return (a, error.As(null!)!);
-
-        }
-
-        // StringBytePtr returns a pointer to a NUL-terminated array of bytes.
-        // If s contains a NUL byte this function panics instead of returning
-        // an error.
-        //
-        // Deprecated: Use BytePtrFromString instead.
-        public static ptr<byte> StringBytePtr(@string s)
-        {
-            return _addr__addr_StringByteSlice(s)[0L]!;
-        }
-
-        // BytePtrFromString returns a pointer to a NUL-terminated array of
-        // bytes containing the text of s. If s contains a NUL byte at any
-        // location, it returns (nil, EINVAL).
-        public static (ptr<byte>, error) BytePtrFromString(@string s)
-        {
-            ptr<byte> _p0 = default!;
-            error _p0 = default!;
-
-            var (a, err) = ByteSliceFromString(s);
-            if (err != null)
-            {
-                return (_addr_null!, error.As(err)!);
-            }
-
-            return (_addr__addr_a[0L]!, error.As(null!)!);
-
-        }
-
-        // Single-word zero for use when we need a valid pointer to 0 bytes.
-        // See mksyscall.pl.
-        private static System.UIntPtr _zero = default;
-
-        // Unix returns ts as the number of seconds and nanoseconds elapsed since the
-        // Unix epoch.
-        private static (long, long) Unix(this ptr<Timespec> _addr_ts)
-        {
-            long sec = default;
-            long nsec = default;
-            ref Timespec ts = ref _addr_ts.val;
-
-            return (int64(ts.Sec), int64(ts.Nsec));
-        }
-
-        // Unix returns tv as the number of seconds and nanoseconds elapsed since the
-        // Unix epoch.
-        private static (long, long) Unix(this ptr<Timeval> _addr_tv)
-        {
-            long sec = default;
-            long nsec = default;
-            ref Timeval tv = ref _addr_tv.val;
-
-            return (int64(tv.Sec), int64(tv.Usec) * 1000L);
-        }
-
-        // Nano returns ts as the number of nanoseconds elapsed since the Unix epoch.
-        private static long Nano(this ptr<Timespec> _addr_ts)
-        {
-            ref Timespec ts = ref _addr_ts.val;
-
-            return int64(ts.Sec) * 1e9F + int64(ts.Nsec);
-        }
-
-        // Nano returns tv as the number of nanoseconds elapsed since the Unix epoch.
-        private static long Nano(this ptr<Timeval> _addr_tv)
-        {
-            ref Timeval tv = ref _addr_tv.val;
-
-            return int64(tv.Sec) * 1e9F + int64(tv.Usec) * 1000L;
-        }
-
-        // Getpagesize and Exit are provided by the runtime.
-
-        public static long Getpagesize()
-;
-        public static void Exit(long code)
-;
+    // StringByteSlice converts a string to a NUL-terminated []byte,
+    // If s contains a NUL byte this function panics instead of
+    // returning an error.
+    //
+    // Deprecated: Use ByteSliceFromString instead.
+public static slice<byte> StringByteSlice(@string s) => func((_, panic, _) => {
+    var (a, err) = ByteSliceFromString(s);
+    if (err != null) {
+        panic("syscall: string with NUL passed to StringByteSlice");
     }
+    return a;
+
+});
+
+// ByteSliceFromString returns a NUL-terminated slice of bytes
+// containing the text of s. If s contains a NUL byte at any
+// location, it returns (nil, EINVAL).
+public static (slice<byte>, error) ByteSliceFromString(@string s) {
+    slice<byte> _p0 = default;
+    error _p0 = default!;
+
+    for (nint i = 0; i < len(s); i++) {
+        if (s[i] == 0) {
+            return (null, error.As(EINVAL)!);
+        }
+    }
+    var a = make_slice<byte>(len(s) + 1);
+    copy(a, s);
+    return (a, error.As(null!)!);
+
 }
+
+// StringBytePtr returns a pointer to a NUL-terminated array of bytes.
+// If s contains a NUL byte this function panics instead of returning
+// an error.
+//
+// Deprecated: Use BytePtrFromString instead.
+public static ptr<byte> StringBytePtr(@string s) {
+    return _addr__addr_StringByteSlice(s)[0]!;
+}
+
+// BytePtrFromString returns a pointer to a NUL-terminated array of
+// bytes containing the text of s. If s contains a NUL byte at any
+// location, it returns (nil, EINVAL).
+public static (ptr<byte>, error) BytePtrFromString(@string s) {
+    ptr<byte> _p0 = default!;
+    error _p0 = default!;
+
+    var (a, err) = ByteSliceFromString(s);
+    if (err != null) {
+        return (_addr_null!, error.As(err)!);
+    }
+    return (_addr__addr_a[0]!, error.As(null!)!);
+
+}
+
+// Single-word zero for use when we need a valid pointer to 0 bytes.
+// See mksyscall.pl.
+private static System.UIntPtr _zero = default;
+
+// Unix returns the time stored in ts as seconds plus nanoseconds.
+private static (long, long) Unix(this ptr<Timespec> _addr_ts) {
+    long sec = default;
+    long nsec = default;
+    ref Timespec ts = ref _addr_ts.val;
+
+    return (int64(ts.Sec), int64(ts.Nsec));
+}
+
+// Unix returns the time stored in tv as seconds plus nanoseconds.
+private static (long, long) Unix(this ptr<Timeval> _addr_tv) {
+    long sec = default;
+    long nsec = default;
+    ref Timeval tv = ref _addr_tv.val;
+
+    return (int64(tv.Sec), int64(tv.Usec) * 1000);
+}
+
+// Nano returns the time stored in ts as nanoseconds.
+private static long Nano(this ptr<Timespec> _addr_ts) {
+    ref Timespec ts = ref _addr_ts.val;
+
+    return int64(ts.Sec) * 1e9F + int64(ts.Nsec);
+}
+
+// Nano returns the time stored in tv as nanoseconds.
+private static long Nano(this ptr<Timeval> _addr_tv) {
+    ref Timeval tv = ref _addr_tv.val;
+
+    return int64(tv.Sec) * 1e9F + int64(tv.Usec) * 1000;
+}
+
+// Getpagesize and Exit are provided by the runtime.
+
+public static nint Getpagesize();
+public static void Exit(nint code);
+
+} // end syscall_package

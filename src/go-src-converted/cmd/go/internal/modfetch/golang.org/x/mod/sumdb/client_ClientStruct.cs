@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:29 UTC
+//     Generated on 2022 March 06 23:19:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -58,7 +57,7 @@ namespace mod
                 this.tileSaved = default;
             }
 
-            public Client(ClientOps ops = default, uint didLookup = default, sync.Once initOnce = default, error initErr = default, @string name = default, note.Verifiers verifiers = default, tileReader tileReader = default, long tileHeight = default, @string nosumdb = default, parCache record = default, parCache tileCache = default, sync.Mutex latestMu = default, tlog.Tree latest = default, slice<byte> latestMsg = default, sync.Mutex tileSavedMu = default, map<tlog.Tile, bool> tileSaved = default)
+            public Client(ClientOps ops = default, uint didLookup = default, sync.Once initOnce = default, error initErr = default, @string name = default, note.Verifiers verifiers = default, tileReader tileReader = default, nint tileHeight = default, @string nosumdb = default, parCache record = default, parCache tileCache = default, sync.Mutex latestMu = default, tlog.Tree latest = default, slice<byte> latestMsg = default, sync.Mutex tileSavedMu = default, map<tlog.Tile, bool> tileSaved = default)
             {
                 this.ops = ops;
                 this.didLookup = didLookup;

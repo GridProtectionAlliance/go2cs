@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:51 UTC
+//     Generated on 2022 March 06 22:23:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using tls = go.crypto.tls_package;
 using x509 = go.crypto.x509_package;
 using flag = go.flag_package;
@@ -20,7 +19,7 @@ using fmt = go.fmt_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
-using @internal = go.net.http.@internal_package;
+using testcert = go.net.http.@internal.testcert_package;
 using os = go.os_package;
 using strings = go.strings_package;
 using sync = go.sync_package;

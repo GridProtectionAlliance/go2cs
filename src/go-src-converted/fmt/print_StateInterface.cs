@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:56 UTC
+//     Generated on 2022 March 06 22:31:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmtsort = go.@internal.fmtsort_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -53,7 +52,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteByPtr is null || !m_target_is_ptr)
                     return s_WriteByVal!(target, b);
 
-                return s_WriteByPtr(m_target_ptr, b);
+                return s_WriteByPtr(m_target_ptr!, b);
             }
 
             private delegate bool WidthByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WidthByPtr is null || !m_target_is_ptr)
                     return s_WidthByVal!(target);
 
-                return s_WidthByPtr(m_target_ptr);
+                return s_WidthByPtr(m_target_ptr!);
             }
 
             private delegate bool PrecisionByPtr(ptr<T> value);
@@ -119,36 +118,36 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PrecisionByPtr is null || !m_target_is_ptr)
                     return s_PrecisionByVal!(target);
 
-                return s_PrecisionByPtr(m_target_ptr);
+                return s_PrecisionByPtr(m_target_ptr!);
             }
 
-            private delegate bool FlagByPtr(ptr<T> value, long c);
-            private delegate bool FlagByVal(T value, long c);
+            private delegate bool FlagByPtr(ptr<T> value, nint c);
+            private delegate bool FlagByVal(T value, nint c);
 
             private static readonly FlagByPtr? s_FlagByPtr;
             private static readonly FlagByVal? s_FlagByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Flag(long c)
+            public bool Flag(nint c)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FlagByPtr is null || !m_target_is_ptr)
                     return s_FlagByVal!(target, c);
 
-                return s_FlagByPtr(m_target_ptr, c);
+                return s_FlagByPtr(m_target_ptr!, c);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static State()
@@ -159,12 +158,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Write");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
 
                 if (s_WriteByPtr is null && s_WriteByVal is null)
@@ -172,12 +171,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Width");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WidthByPtr = extensionMethod.CreateStaticDelegate(typeof(WidthByPtr)) as WidthByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Width");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
 
                 if (s_WidthByPtr is null && s_WidthByVal is null)
@@ -185,12 +184,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Precision");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrecisionByPtr = extensionMethod.CreateStaticDelegate(typeof(PrecisionByPtr)) as PrecisionByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Precision");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrecisionByVal = extensionMethod.CreateStaticDelegate(typeof(PrecisionByVal)) as PrecisionByVal;
 
                 if (s_PrecisionByPtr is null && s_PrecisionByVal is null)
@@ -198,12 +197,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Flag");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlagByPtr = extensionMethod.CreateStaticDelegate(typeof(FlagByPtr)) as FlagByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Flag");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlagByVal = extensionMethod.CreateStaticDelegate(typeof(FlagByVal)) as FlagByVal;
 
                 if (s_FlagByPtr is null && s_FlagByVal is null)

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:01 UTC
+//     Generated on 2022 March 06 23:30:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace sys
         {
             // Value of the KNOWNFOLDERID struct
             private readonly GUID m_value;
-
+            
             public KNOWNFOLDERID(GUID value) => m_value = value;
 
             // Enable implicit conversions between GUID and KNOWNFOLDERID struct

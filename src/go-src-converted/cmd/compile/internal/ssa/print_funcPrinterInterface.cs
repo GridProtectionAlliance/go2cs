@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:25:30 UTC
+//     Generated on 2022 March 06 22:50:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sha256 = go.crypto.sha256_package;
 using fmt = go.fmt_package;
@@ -55,7 +54,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,7 +80,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_headerByPtr is null || !m_target_is_ptr)
@@ -90,9 +89,8 @@ namespace @internal
                     return;
                 }
 
-                s_headerByPtr(m_target_ptr, f);
+                s_headerByPtr(m_target_ptr!, f);
                 return;
-                
             }
 
             private delegate void startBlockByPtr(ptr<T> value, ptr<Block> b, bool reachable);
@@ -106,7 +104,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_startBlockByPtr is null || !m_target_is_ptr)
@@ -115,9 +113,8 @@ namespace @internal
                     return;
                 }
 
-                s_startBlockByPtr(m_target_ptr, b, reachable);
+                s_startBlockByPtr(m_target_ptr!, b, reachable);
                 return;
-                
             }
 
             private delegate void endBlockByPtr(ptr<T> value, ptr<Block> b);
@@ -131,7 +128,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_endBlockByPtr is null || !m_target_is_ptr)
@@ -140,9 +137,8 @@ namespace @internal
                     return;
                 }
 
-                s_endBlockByPtr(m_target_ptr, b);
+                s_endBlockByPtr(m_target_ptr!, b);
                 return;
-                
             }
 
             private delegate void valueByPtr(ptr<T> value, ptr<Value> v, bool live);
@@ -156,7 +152,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_valueByPtr is null || !m_target_is_ptr)
@@ -165,9 +161,8 @@ namespace @internal
                     return;
                 }
 
-                s_valueByPtr(m_target_ptr, v, live);
+                s_valueByPtr(m_target_ptr!, v, live);
                 return;
-                
             }
 
             private delegate void startDepCycleByPtr(ptr<T> value);
@@ -181,7 +176,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_startDepCycleByPtr is null || !m_target_is_ptr)
@@ -190,9 +185,8 @@ namespace @internal
                     return;
                 }
 
-                s_startDepCycleByPtr(m_target_ptr);
+                s_startDepCycleByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void endDepCycleByPtr(ptr<T> value);
@@ -206,7 +200,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_endDepCycleByPtr is null || !m_target_is_ptr)
@@ -215,9 +209,8 @@ namespace @internal
                     return;
                 }
 
-                s_endDepCycleByPtr(m_target_ptr);
+                s_endDepCycleByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void namedByPtr(ptr<T> value, LocalSlot n, slice<ptr<Value>> vals);
@@ -231,7 +224,7 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_namedByPtr is null || !m_target_is_ptr)
@@ -240,12 +233,11 @@ namespace @internal
                     return;
                 }
 
-                s_namedByPtr(m_target_ptr, n, vals);
+                s_namedByPtr(m_target_ptr!, n, vals);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static funcPrinter()
@@ -256,12 +248,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("header");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_headerByPtr = extensionMethod.CreateStaticDelegate(typeof(headerByPtr)) as headerByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("header");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_headerByVal = extensionMethod.CreateStaticDelegate(typeof(headerByVal)) as headerByVal;
 
                 if (s_headerByPtr is null && s_headerByVal is null)
@@ -269,12 +261,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("startBlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_startBlockByPtr = extensionMethod.CreateStaticDelegate(typeof(startBlockByPtr)) as startBlockByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("startBlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_startBlockByVal = extensionMethod.CreateStaticDelegate(typeof(startBlockByVal)) as startBlockByVal;
 
                 if (s_startBlockByPtr is null && s_startBlockByVal is null)
@@ -282,12 +274,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("endBlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_endBlockByPtr = extensionMethod.CreateStaticDelegate(typeof(endBlockByPtr)) as endBlockByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("endBlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_endBlockByVal = extensionMethod.CreateStaticDelegate(typeof(endBlockByVal)) as endBlockByVal;
 
                 if (s_endBlockByPtr is null && s_endBlockByVal is null)
@@ -295,12 +287,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_valueByPtr = extensionMethod.CreateStaticDelegate(typeof(valueByPtr)) as valueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_valueByVal = extensionMethod.CreateStaticDelegate(typeof(valueByVal)) as valueByVal;
 
                 if (s_valueByPtr is null && s_valueByVal is null)
@@ -308,12 +300,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("startDepCycle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_startDepCycleByPtr = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByPtr)) as startDepCycleByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("startDepCycle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_startDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(startDepCycleByVal)) as startDepCycleByVal;
 
                 if (s_startDepCycleByPtr is null && s_startDepCycleByVal is null)
@@ -321,12 +313,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("endDepCycle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_endDepCycleByPtr = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByPtr)) as endDepCycleByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("endDepCycle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_endDepCycleByVal = extensionMethod.CreateStaticDelegate(typeof(endDepCycleByVal)) as endDepCycleByVal;
 
                 if (s_endDepCycleByPtr is null && s_endDepCycleByVal is null)
@@ -334,12 +326,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("named");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_namedByPtr = extensionMethod.CreateStaticDelegate(typeof(namedByPtr)) as namedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("named");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_namedByVal = extensionMethod.CreateStaticDelegate(typeof(namedByVal)) as namedByVal;
 
                 if (s_namedByPtr is null && s_namedByVal is null)

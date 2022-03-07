@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:23:04 UTC
+//     Generated on 2022 March 06 22:46:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using os = go.os_package;
 using strings = go.strings_package;
@@ -45,7 +44,7 @@ namespace @internal
                 this.file = default;
             }
 
-            public Tokenizer(ScanToken tok = default, ref ptr<scanner.Scanner> s = default, ref ptr<src.PosBase> @base = default, long line = default, ref ptr<os.File> file = default)
+            public Tokenizer(ScanToken tok = default, ref ptr<scanner.Scanner> s = default, ref ptr<src.PosBase> @base = default, nint line = default, ref ptr<os.File> file = default)
             {
                 this.tok = tok;
                 this.s = s;

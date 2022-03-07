@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:47 UTC
+//     Generated on 2022 March 06 23:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using go;
 
@@ -40,7 +39,7 @@ namespace dns
                 this.compression = default;
             }
 
-            public Builder(slice<byte> msg = default, section section = default, header header = default, long start = default, map<@string, long> compression = default)
+            public Builder(slice<byte> msg = default, section section = default, header header = default, nint start = default, map<@string, nint> compression = default)
             {
                 this.msg = msg;
                 this.section = section;

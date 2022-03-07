@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:23 UTC
+//     Generated on 2022 March 06 23:33:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
 using types = go.go.types_package;
@@ -55,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,13 +80,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_storeByPtr is null || !m_target_is_ptr)
                     return s_storeByVal!(target, fn, v);
 
-                return s_storeByPtr(m_target_ptr, fn, v);
+                return s_storeByPtr(m_target_ptr!, fn, v);
             }
 
             private delegate types.Type loadByPtr(ptr<T> value, ptr<Function> fn);
@@ -101,13 +100,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_loadByPtr is null || !m_target_is_ptr)
                     return s_loadByVal!(target, fn);
 
-                return s_loadByPtr(m_target_ptr, fn);
+                return s_loadByPtr(m_target_ptr!, fn);
             }
 
             private delegate types.Type addressByPtr(ptr<T> value, ptr<Function> fn);
@@ -121,13 +120,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_addressByPtr is null || !m_target_is_ptr)
                     return s_addressByVal!(target, fn);
 
-                return s_addressByPtr(m_target_ptr, fn);
+                return s_addressByPtr(m_target_ptr!, fn);
             }
 
             private delegate types.Type typByPtr(ptr<T> value);
@@ -141,16 +140,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_typByPtr is null || !m_target_is_ptr)
                     return s_typByVal!(target);
 
-                return s_typByPtr(m_target_ptr);
+                return s_typByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static lvalue()
@@ -161,12 +160,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("store");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_storeByPtr = extensionMethod.CreateStaticDelegate(typeof(storeByPtr)) as storeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("store");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_storeByVal = extensionMethod.CreateStaticDelegate(typeof(storeByVal)) as storeByVal;
 
                 if (s_storeByPtr is null && s_storeByVal is null)
@@ -174,12 +173,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("load");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_loadByPtr = extensionMethod.CreateStaticDelegate(typeof(loadByPtr)) as loadByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("load");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_loadByVal = extensionMethod.CreateStaticDelegate(typeof(loadByVal)) as loadByVal;
 
                 if (s_loadByPtr is null && s_loadByVal is null)
@@ -187,12 +186,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("address");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_addressByPtr = extensionMethod.CreateStaticDelegate(typeof(addressByPtr)) as addressByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("address");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_addressByVal = extensionMethod.CreateStaticDelegate(typeof(addressByVal)) as addressByVal;
 
                 if (s_addressByPtr is null && s_addressByVal is null)
@@ -200,12 +199,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("typ");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_typByPtr = extensionMethod.CreateStaticDelegate(typeof(typByPtr)) as typByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("typ");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_typByVal = extensionMethod.CreateStaticDelegate(typeof(typByVal)) as typByVal;
 
                 if (s_typByPtr is null && s_typByVal is null)

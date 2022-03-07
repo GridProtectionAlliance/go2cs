@@ -4,51 +4,51 @@
 
 // Simple conversions to avoid depending on strconv.
 
-// package os -- go2cs converted at 2020 October 09 05:07:27 UTC
+// package os -- go2cs converted at 2022 March 06 22:13:52 UTC
 // import "os" ==> using os = go.os_package
-// Original source: C:\Go\src\os\str.go
+// Original source: C:\Program Files\Go\src\os\str.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class os_package
-    {
-        // Convert integer to decimal string
-        private static @string itoa(long val)
-        {
-            if (val < 0L)
-            {
-                return "-" + uitoa(uint(-val));
-            }
-            return uitoa(uint(val));
+namespace go;
 
-        }
+public static partial class os_package {
 
-        // Convert unsigned integer to decimal string
-        private static @string uitoa(ulong val)
-        {
-            if (val == 0L)
-            { // avoid string allocation
-                return "0";
-
-            }
-
-            array<byte> buf = new array<byte>(20L); // big enough for 64bit value base 10
-            var i = len(buf) - 1L;
-            while (val >= 10L)
-            {
-                var q = val / 10L;
-                buf[i] = byte('0' + val - q * 10L);
-                i--;
-                val = q;
-            } 
-            // val < 10
- 
-            // val < 10
-            buf[i] = byte('0' + val);
-            return string(buf[i..]);
-
-        }
+    // itox converts val (an int) to a hexdecimal string.
+private static @string itox(nint val) {
+    if (val < 0) {
+        return "-" + uitox(uint(-val));
     }
+    return uitox(uint(val));
+
 }
+
+private static readonly @string hex = "0123456789abcdef";
+
+// uitox converts val (a uint) to a hexdecimal string.
+
+
+// uitox converts val (a uint) to a hexdecimal string.
+private static @string uitox(nuint val) {
+    if (val == 0) { // avoid string allocation
+        return "0x0";
+
+    }
+    array<byte> buf = new array<byte>(20); // big enough for 64bit value base 16 + 0x
+    var i = len(buf) - 1;
+    while (val >= 16) {
+        var q = val / 16;
+        buf[i] = hex[val % 16];
+        i--;
+        val = q;
+    } 
+    // val < 16
+    buf[i] = hex[val % 16];
+    i--;
+    buf[i] = 'x';
+    i--;
+    buf[i] = '0';
+    return string(buf[(int)i..]);
+
+}
+
+} // end os_package

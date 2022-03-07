@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2020 October 09 05:39:37 UTC
+// package ssa -- go2cs converted at 2022 March 06 23:08:47 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
-// Original source: C:\Go\src\cmd\compile\internal\ssa\stackframe.go
+// Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\stackframe.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace compile {
-namespace @internal
-{
-    public static partial class ssa_package
-    {
-        // stackframe calls back into the frontend to assign frame offsets.
-        private static void stackframe(ptr<Func> _addr_f)
-        {
-            ref Func f = ref _addr_f.val;
+namespace go.cmd.compile.@internal;
 
-            f.fe.AllocFrame(f);
-        }
-    }
-}}}}
+public static partial class ssa_package {
+
+    // stackframe calls back into the frontend to assign frame offsets.
+private static void stackframe(ptr<Func> _addr_f) {
+    ref Func f = ref _addr_f.val;
+
+    f.fe.AllocFrame(f);
+}
+
+} // end ssa_package

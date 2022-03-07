@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:44 UTC
+//     Generated on 2022 March 06 22:19:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
 using des = go.crypto.des_package;
@@ -44,7 +43,7 @@ namespace crypto
                 this.blockSize = default;
             }
 
-            public rfc1423Algo(PEMCipher cipher = default, @string name = default, Func<slice<byte>, (cipher.Block, error)> cipherFunc = default, long keySize = default, long blockSize = default)
+            public rfc1423Algo(PEMCipher cipher = default, @string name = default, Func<slice<byte>, (cipher.Block, error)> cipherFunc = default, nint keySize = default, nint blockSize = default)
             {
                 this.cipher = cipher;
                 this.name = name;

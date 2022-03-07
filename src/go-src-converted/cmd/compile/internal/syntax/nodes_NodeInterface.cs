@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,13 +77,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByPtr(m_target_ptr);
+                return s_PosByPtr(m_target_ptr!);
             }
 
             private delegate Pos aNodeByPtr(ptr<T> value);
@@ -97,16 +97,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_aNodeByPtr is null || !m_target_is_ptr)
                     return s_aNodeByVal!(target);
 
-                return s_aNodeByPtr(m_target_ptr);
+                return s_aNodeByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Node()
@@ -117,12 +117,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
                 if (s_PosByPtr is null && s_PosByVal is null)
@@ -130,12 +130,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("aNode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_aNodeByPtr = extensionMethod.CreateStaticDelegate(typeof(aNodeByPtr)) as aNodeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("aNode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_aNodeByVal = extensionMethod.CreateStaticDelegate(typeof(aNodeByVal)) as aNodeByVal;
 
                 if (s_aNodeByPtr is null && s_aNodeByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:12 UTC
+//     Generated on 2022 March 06 23:20:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using gcprog = go.cmd.@internal.gcprog_package;
 using objabi = go.cmd.@internal.objabi_package;
@@ -20,6 +19,7 @@ using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using zlib = go.compress.zlib_package;
+using elf = go.debug.elf_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using log = go.log_package;
@@ -28,6 +28,7 @@ using sort = go.sort_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using go;
 
 #nullable enable
@@ -47,13 +48,15 @@ namespace @internal
             {
                 this.name = default;
                 this.sz = default;
+                this.val = default;
                 this.sym = default;
             }
 
-            public symNameSize(@string name = default, long sz = default, loader.Sym sym = default)
+            public symNameSize(@string name = default, long sz = default, long val = default, loader.Sym sym = default)
             {
                 this.name = name;
                 this.sz = sz;
+                this.val = val;
                 this.sym = sym;
             }
 
@@ -77,7 +80,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static symNameSize symNameSize_cast(dynamic value)
         {
-            return new symNameSize(value.name, value.sz, value.sym);
+            return new symNameSize(value.name, value.sz, value.val, value.sym);
         }
     }
 }}}}

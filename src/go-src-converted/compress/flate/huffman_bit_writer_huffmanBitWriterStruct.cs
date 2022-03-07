@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:16 UTC
+//     Generated on 2022 March 06 22:15:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -44,7 +43,7 @@ namespace compress
                 this.err = default;
             }
 
-            public huffmanBitWriter(io.Writer writer = default, ulong bits = default, ulong nbits = default, array<byte> bytes = default, array<int> codegenFreq = default, long nbytes = default, slice<int> literalFreq = default, slice<int> offsetFreq = default, slice<byte> codegen = default, ref ptr<huffmanEncoder> literalEncoding = default, ref ptr<huffmanEncoder> offsetEncoding = default, ref ptr<huffmanEncoder> codegenEncoding = default, error err = default)
+            public huffmanBitWriter(io.Writer writer = default, ulong bits = default, nuint nbits = default, array<byte> bytes = default, array<int> codegenFreq = default, nint nbytes = default, slice<int> literalFreq = default, slice<int> offsetFreq = default, slice<byte> codegen = default, ref ptr<huffmanEncoder> literalEncoding = default, ref ptr<huffmanEncoder> offsetEncoding = default, ref ptr<huffmanEncoder> codegenEncoding = default, error err = default)
             {
                 this.writer = writer;
                 this.bits = bits;

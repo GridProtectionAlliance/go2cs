@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:57 UTC
+//     Generated on 2022 March 06 22:41:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -33,6 +32,7 @@ namespace go
             // Constructors
             public Config(NilType _)
             {
+                this.goVersion = default;
                 this.IgnoreFuncBodies = default;
                 this.FakeImportC = default;
                 this.go115UsesCgo = default;
@@ -42,8 +42,9 @@ namespace go
                 this.DisableUnusedImportCheck = default;
             }
 
-            public Config(bool IgnoreFuncBodies = default, bool FakeImportC = default, bool go115UsesCgo = default, Action<error> Error = default, Importer Importer = default, Sizes Sizes = default, bool DisableUnusedImportCheck = default)
+            public Config(@string goVersion = default, bool IgnoreFuncBodies = default, bool FakeImportC = default, bool go115UsesCgo = default, Action<error> Error = default, Importer Importer = default, Sizes Sizes = default, bool DisableUnusedImportCheck = default)
             {
+                this.goVersion = goVersion;
                 this.IgnoreFuncBodies = IgnoreFuncBodies;
                 this.FakeImportC = FakeImportC;
                 this.go115UsesCgo = go115UsesCgo;
@@ -73,7 +74,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Config Config_cast(dynamic value)
         {
-            return new Config(value.IgnoreFuncBodies, value.FakeImportC, value.go115UsesCgo, value.Error, value.Importer, value.Sizes, value.DisableUnusedImportCheck);
+            return new Config(value.goVersion, value.IgnoreFuncBodies, value.FakeImportC, value.go115UsesCgo, value.Error, value.Importer, value.Sizes, value.DisableUnusedImportCheck);
         }
     }
 }}

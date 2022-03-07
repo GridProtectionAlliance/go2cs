@@ -2,26 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build js && wasm
 // +build js,wasm
 
-// package poll -- go2cs converted at 2020 October 09 04:51:00 UTC
+// package poll -- go2cs converted at 2022 March 06 22:12:56 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
-// Original source: C:\Go\src\internal\poll\fcntl_js.go
+// Original source: C:\Program Files\Go\src\internal\poll\fcntl_js.go
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace @internal
-{
-    public static partial class poll_package
-    {
-        // fcntl not supported on js/wasm
-        private static (long, error) fcntl(long fd, long cmd, long arg)
-        {
-            long _p0 = default;
-            error _p0 = default!;
+namespace go.@internal;
 
-            return (0L, error.As(syscall.ENOSYS)!);
-        }
-    }
-}}
+public static partial class poll_package {
+
+    // fcntl not supported on js/wasm
+private static (nint, error) fcntl(nint fd, nint cmd, nint arg) {
+    nint _p0 = default;
+    error _p0 = default!;
+
+    return (0, error.As(syscall.ENOSYS)!);
+}
+
+} // end poll_package

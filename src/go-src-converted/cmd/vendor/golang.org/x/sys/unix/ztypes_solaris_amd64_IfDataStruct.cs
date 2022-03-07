@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,6 @@ namespace sys
                 this.Type = default;
                 this.Addrlen = default;
                 this.Hdrlen = default;
-                this._ = default;
                 this.Mtu = default;
                 this.Metric = default;
                 this.Baudrate = default;
@@ -53,12 +52,11 @@ namespace sys
                 this.Lastchange = default;
             }
 
-            public IfData(byte Type = default, byte Addrlen = default, byte Hdrlen = default, array<byte> _ = default, uint Mtu = default, uint Metric = default, uint Baudrate = default, uint Ipackets = default, uint Ierrors = default, uint Opackets = default, uint Oerrors = default, uint Collisions = default, uint Ibytes = default, uint Obytes = default, uint Imcasts = default, uint Omcasts = default, uint Iqdrops = default, uint Noproto = default, Timeval32 Lastchange = default)
+            public IfData(byte Type = default, byte Addrlen = default, byte Hdrlen = default, uint Mtu = default, uint Metric = default, uint Baudrate = default, uint Ipackets = default, uint Ierrors = default, uint Opackets = default, uint Oerrors = default, uint Collisions = default, uint Ibytes = default, uint Obytes = default, uint Imcasts = default, uint Omcasts = default, uint Iqdrops = default, uint Noproto = default, Timeval32 Lastchange = default)
             {
                 this.Type = Type;
                 this.Addrlen = Addrlen;
                 this.Hdrlen = Hdrlen;
-                this._ = _;
                 this.Mtu = Mtu;
                 this.Metric = Metric;
                 this.Baudrate = Baudrate;
@@ -96,7 +94,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static IfData IfData_cast(dynamic value)
         {
-            return new IfData(value.Type, value.Addrlen, value.Hdrlen, value._, value.Mtu, value.Metric, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Noproto, value.Lastchange);
+            return new IfData(value.Type, value.Addrlen, value.Hdrlen, value.Mtu, value.Metric, value.Baudrate, value.Ipackets, value.Ierrors, value.Opackets, value.Oerrors, value.Collisions, value.Ibytes, value.Obytes, value.Imcasts, value.Omcasts, value.Iqdrops, value.Noproto, value.Lastchange);
         }
     }
 }}}}}}

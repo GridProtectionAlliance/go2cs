@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:02 UTC
+//     Generated on 2022 March 06 22:23:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -21,8 +20,8 @@ using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
@@ -71,7 +70,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -97,7 +96,7 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FlushByPtr is null || !m_target_is_ptr)
@@ -106,12 +105,11 @@ namespace net
                     return;
                 }
 
-                s_FlushByPtr(m_target_ptr);
+                s_FlushByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Flusher()
@@ -122,12 +120,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Flush");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlushByPtr = extensionMethod.CreateStaticDelegate(typeof(FlushByPtr)) as FlushByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Flush");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FlushByVal = extensionMethod.CreateStaticDelegate(typeof(FlushByVal)) as FlushByVal;
 
                 if (s_FlushByPtr is null && s_FlushByVal is null)

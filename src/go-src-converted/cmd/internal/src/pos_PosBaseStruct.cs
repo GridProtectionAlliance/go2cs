@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:17 UTC
+//     Generated on 2022 March 06 22:31:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -41,7 +40,7 @@ namespace @internal
                 this.inl = default;
             }
 
-            public PosBase(Pos pos = default, @string filename = default, @string absFilename = default, @string symFilename = default, ulong line = default, ulong col = default, long inl = default)
+            public PosBase(Pos pos = default, @string filename = default, @string absFilename = default, @string symFilename = default, nuint line = default, nuint col = default, nint inl = default)
             {
                 this.pos = pos;
                 this.filename = filename;

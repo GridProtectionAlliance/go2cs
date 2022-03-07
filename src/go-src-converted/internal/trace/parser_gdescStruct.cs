@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:04 UTC
+//     Generated on 2022 March 06 23:22:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -47,7 +46,7 @@ namespace @internal
                 this.evMarkAssist = default;
             }
 
-            public gdesc(long state = default, ref ptr<Event> ev = default, ref ptr<Event> evStart = default, ref ptr<Event> evCreate = default, ref ptr<Event> evMarkAssist = default)
+            public gdesc(nint state = default, ref ptr<Event> ev = default, ref ptr<Event> evStart = default, ref ptr<Event> evCreate = default, ref ptr<Event> evMarkAssist = default)
             {
                 this.state = state;
                 this.ev = ev;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:11 UTC
+//     Generated on 2022 March 06 22:19:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,9 +13,9 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using list = go.container.list_package;
+using context = go.context_package;
 using crypto = go.crypto_package;
 using ecdsa = go.crypto.ecdsa_package;
 using ed25519 = go.crypto.ed25519_package;
@@ -26,7 +26,6 @@ using sha512 = go.crypto.sha512_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
-using cpu = go.@internal.cpu_package;
 using io = go.io_package;
 using net = go.net_package;
 using strings = go.strings_package;
@@ -67,7 +66,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -93,13 +92,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_marshalByPtr is null || !m_target_is_ptr)
                     return s_marshalByVal!(target);
 
-                return s_marshalByPtr(m_target_ptr);
+                return s_marshalByPtr(m_target_ptr!);
             }
 
             private delegate bool unmarshalByPtr(ptr<T> value, slice<byte> _p0);
@@ -113,16 +112,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_unmarshalByPtr is null || !m_target_is_ptr)
                     return s_unmarshalByVal!(target, _p0);
 
-                return s_unmarshalByPtr(m_target_ptr, _p0);
+                return s_unmarshalByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static handshakeMessage()
@@ -133,12 +132,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("marshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_marshalByPtr = extensionMethod.CreateStaticDelegate(typeof(marshalByPtr)) as marshalByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("marshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_marshalByVal = extensionMethod.CreateStaticDelegate(typeof(marshalByVal)) as marshalByVal;
 
                 if (s_marshalByPtr is null && s_marshalByVal is null)
@@ -146,12 +145,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("unmarshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_unmarshalByPtr = extensionMethod.CreateStaticDelegate(typeof(unmarshalByPtr)) as unmarshalByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("unmarshal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_unmarshalByVal = extensionMethod.CreateStaticDelegate(typeof(unmarshalByVal)) as unmarshalByVal;
 
                 if (s_unmarshalByPtr is null && s_unmarshalByVal is null)

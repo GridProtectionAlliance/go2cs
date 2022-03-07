@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:47 UTC
+//     Generated on 2022 March 06 22:21:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -65,7 +64,7 @@ namespace net
                 this.expected = default;
             }
 
-            public http2dataBuffer(slice<slice<byte>> chunks = default, long r = default, long w = default, long size = default, long expected = default)
+            public http2dataBuffer(slice<slice<byte>> chunks = default, nint r = default, nint w = default, nint size = default, long expected = default)
             {
                 this.chunks = chunks;
                 this.r = r;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:46 UTC
+//     Generated on 2022 March 06 23:32:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using types = go.go.types_package;
+using exec = go.@internal.execabs_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
 using go;

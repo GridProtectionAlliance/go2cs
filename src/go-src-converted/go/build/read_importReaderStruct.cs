@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:01 UTC
+//     Generated on 2022 March 06 22:42:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,17 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
+using bytes = go.bytes_package;
 using errors = go.errors_package;
+using fmt = go.fmt_package;
+using ast = go.go.ast_package;
+using parser = go.go.parser_package;
+using token = go.go.token_package;
 using io = go.io_package;
+using strconv = go.strconv_package;
+using strings = go.strings_package;
+using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go;
 
@@ -38,9 +45,10 @@ namespace go
                 this.err = default;
                 this.eof = default;
                 this.nerr = default;
+                this.pos = default;
             }
 
-            public importReader(ref ptr<bufio.Reader> b = default, slice<byte> buf = default, byte peek = default, error err = default, bool eof = default, long nerr = default)
+            public importReader(ref ptr<bufio.Reader> b = default, slice<byte> buf = default, byte peek = default, error err = default, bool eof = default, nint nerr = default, token.Position pos = default)
             {
                 this.b = b;
                 this.buf = buf;
@@ -48,6 +56,7 @@ namespace go
                 this.err = err;
                 this.eof = eof;
                 this.nerr = nerr;
+                this.pos = pos;
             }
 
             // Enable comparisons between nil and importReader struct
@@ -70,7 +79,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static importReader importReader_cast(dynamic value)
         {
-            return new importReader(ref value.b, value.buf, value.peek, value.err, value.eof, value.nerr);
+            return new importReader(ref value.b, value.buf, value.peek, value.err, value.eof, value.nerr, value.pos);
         }
     }
 }}

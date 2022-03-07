@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:49 UTC
+//     Generated on 2022 March 06 22:09:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
 
@@ -30,16 +29,16 @@ namespace go
             {
                 this.off = default;
                 this.size = default;
-                this.typ = default;
+                this.r = default;
                 this.left = default;
                 this.right = default;
             }
 
-            public stackObject(uint off = default, uint size = default, ref ptr<_type> typ = default, ref ptr<stackObject> left = default, ref ptr<stackObject> right = default)
+            public stackObject(uint off = default, uint size = default, ref ptr<stackObjectRecord> r = default, ref ptr<stackObject> left = default, ref ptr<stackObject> right = default)
             {
                 this.off = off;
                 this.size = size;
-                this.typ = typ;
+                this.r = r;
                 this.left = left;
                 this.right = right;
             }
@@ -64,7 +63,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static stackObject stackObject_cast(dynamic value)
         {
-            return new stackObject(value.off, value.size, ref value.typ, ref value.left, ref value.right);
+            return new stackObject(value.off, value.size, ref value.r, ref value.left, ref value.right);
         }
     }
 }

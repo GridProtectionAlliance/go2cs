@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:54 UTC
+//     Generated on 2022 March 06 22:17:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using subtle = go.crypto.@internal.subtle_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,16 +75,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NewCBCEncrypterByPtr is null || !m_target_is_ptr)
                     return s_NewCBCEncrypterByVal!(target, iv);
 
-                return s_NewCBCEncrypterByPtr(m_target_ptr, iv);
+                return s_NewCBCEncrypterByPtr(m_target_ptr!, iv);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static cbcEncAble()
@@ -96,12 +95,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NewCBCEncrypter");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NewCBCEncrypterByPtr = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByPtr)) as NewCBCEncrypterByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NewCBCEncrypter");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NewCBCEncrypterByVal = extensionMethod.CreateStaticDelegate(typeof(NewCBCEncrypterByVal)) as NewCBCEncrypterByVal;
 
                 if (s_NewCBCEncrypterByPtr is null && s_NewCBCEncrypterByVal is null)

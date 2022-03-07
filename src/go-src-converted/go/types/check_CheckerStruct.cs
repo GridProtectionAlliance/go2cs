@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:19 UTC
+//     Generated on 2022 March 06 22:41:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
@@ -43,6 +43,8 @@ namespace go
 
             public ref constant.Value iota => ref m_contextRef.Value.iota;
 
+            public ref positioner errpos => ref m_contextRef.Value.errpos;
+
             public ref ptr<Signature> sig => ref m_contextRef.Value.sig;
 
             public ref map<ptr<ast.CallExpr>, bool> isPanic => ref m_contextRef.Value.isPanic;
@@ -58,39 +60,45 @@ namespace go
                 this.fset = default;
                 this.pkg = default;
                 this.ptr<Info> = default;
+                this.version = default;
                 this.objMap = default;
                 this.impMap = default;
                 this.posMap = default;
-                this.pkgCnt = default;
+                this.typMap = default;
+                this.pkgPathMap = default;
+                this.seenPkgMap = default;
                 this.files = default;
-                this.unusedDotImports = default;
+                this.imports = default;
+                this.dotImportMap = default;
                 this.firstErr = default;
                 this.methods = default;
                 this.untyped = default;
                 this.delayed = default;
-                this.finals = default;
                 this.objPath = default;
                 this.m_contextRef = new ptr<context>(new context(nil));
                 this.indent = default;
             }
 
-            public Checker(ref ptr<Config> conf = default, ref ptr<token.FileSet> fset = default, ref ptr<Package> pkg = default, ref ptr<Info> ptr<Info> = default, map<Object, ptr<declInfo>> objMap = default, map<importKey, ptr<Package>> impMap = default, map<ptr<Interface>, slice<token.Pos>> posMap = default, map<@string, long> pkgCnt = default, slice<ptr<ast.File>> files = default, map<ptr<Scope>, map<ptr<Package>, token.Pos>> unusedDotImports = default, error firstErr = default, map<ptr<TypeName>, slice<ptr<Func>>> methods = default, map<ast.Expr, exprInfo> untyped = default, slice<Action> delayed = default, slice<Action> finals = default, slice<Object> objPath = default, context context = default, long indent = default)
+            public Checker(ref ptr<Config> conf = default, ref ptr<token.FileSet> fset = default, ref ptr<Package> pkg = default, ref ptr<Info> ptr<Info> = default, version version = default, map<Object, ptr<declInfo>> objMap = default, map<importKey, ptr<Package>> impMap = default, map<ptr<Interface>, slice<token.Pos>> posMap = default, map<@string, ptr<Named>> typMap = default, map<@string, map<@string, bool>> pkgPathMap = default, map<ptr<Package>, bool> seenPkgMap = default, slice<ptr<ast.File>> files = default, slice<ptr<PkgName>> imports = default, map<dotImportKey, ptr<PkgName>> dotImportMap = default, error firstErr = default, map<ptr<TypeName>, slice<ptr<Func>>> methods = default, map<ast.Expr, exprInfo> untyped = default, slice<Action> delayed = default, slice<Object> objPath = default, context context = default, nint indent = default)
             {
                 this.conf = conf;
                 this.fset = fset;
                 this.pkg = pkg;
                 this.ptr<Info> = ptr<Info>;
+                this.version = version;
                 this.objMap = objMap;
                 this.impMap = impMap;
                 this.posMap = posMap;
-                this.pkgCnt = pkgCnt;
+                this.typMap = typMap;
+                this.pkgPathMap = pkgPathMap;
+                this.seenPkgMap = seenPkgMap;
                 this.files = files;
-                this.unusedDotImports = unusedDotImports;
+                this.imports = imports;
+                this.dotImportMap = dotImportMap;
                 this.firstErr = firstErr;
                 this.methods = methods;
                 this.untyped = untyped;
                 this.delayed = delayed;
-                this.finals = finals;
                 this.objPath = objPath;
                 this.m_contextRef = new ptr<context>(context);
                 this.indent = indent;
@@ -116,7 +124,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Checker Checker_cast(dynamic value)
         {
-            return new Checker(ref value.conf, ref value.fset, ref value.pkg, ref value.ptr<Info>, value.objMap, value.impMap, value.posMap, value.pkgCnt, value.files, value.unusedDotImports, value.firstErr, value.methods, value.untyped, value.delayed, value.finals, value.objPath, value.context, value.indent);
+            return new Checker(ref value.conf, ref value.fset, ref value.pkg, ref value.ptr<Info>, value.version, value.objMap, value.impMap, value.posMap, value.typMap, value.pkgPathMap, value.seenPkgMap, value.files, value.imports, value.dotImportMap, value.firstErr, value.methods, value.untyped, value.delayed, value.objPath, value.context, value.indent);
         }
     }
 }}

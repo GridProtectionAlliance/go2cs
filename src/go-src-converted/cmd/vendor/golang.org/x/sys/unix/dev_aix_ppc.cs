@@ -2,44 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build aix
-// +build ppc
+//go:build aix && ppc
+// +build aix,ppc
 
 // Functions to access/create device major and minor numbers matching the
 // encoding used by AIX.
 
-// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:30 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_aix_ppc.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_aix_ppc.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Major returns the major component of a Linux device number.
-        public static uint Major(ulong dev)
-        {
-            return uint32((dev >> (int)(16L)) & 0xffffUL);
-        }
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        // Minor returns the minor component of a Linux device number.
-        public static uint Minor(ulong dev)
-        {
-            return uint32(dev & 0xffffUL);
-        }
+public static partial class unix_package {
 
-        // Mkdev returns a Linux device number generated from the given major and minor
-        // components.
-        public static ulong Mkdev(uint major, uint minor)
-        {
-            return uint64(((major) << (int)(16L)) | (minor));
-        }
-    }
-}}}}}}
+    // Major returns the major component of a Linux device number.
+public static uint Major(ulong dev) {
+    return uint32((dev >> 16) & 0xffff);
+}
+
+// Minor returns the minor component of a Linux device number.
+public static uint Minor(ulong dev) {
+    return uint32(dev & 0xffff);
+}
+
+// Mkdev returns a Linux device number generated from the given major and minor
+// components.
+public static ulong Mkdev(uint major, uint minor) {
+    return uint64(((major) << 16) | (minor));
+}
+
+} // end unix_package

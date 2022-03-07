@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:04:11 UTC
+//     Generated on 2022 March 06 23:34:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -64,7 +63,7 @@ namespace passes
                 this.nbytes = default;
             }
 
-            public formatState(int verb = default, @string format = default, @string name = default, slice<byte> flags = default, slice<long> argNums = default, long firstArg = default, ref ptr<analysis.Pass> pass = default, ref ptr<ast.CallExpr> call = default, long argNum = default, bool hasIndex = default, bool indexPending = default, long nbytes = default)
+            public formatState(int verb = default, @string format = default, @string name = default, slice<byte> flags = default, slice<nint> argNums = default, nint firstArg = default, ref ptr<analysis.Pass> pass = default, ref ptr<ast.CallExpr> call = default, nint argNum = default, bool hasIndex = default, bool indexPending = default, nint nbytes = default)
             {
                 this.verb = verb;
                 this.format = format;

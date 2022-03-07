@@ -4,34 +4,27 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2020 October 09 04:51:49 UTC
+// package lif -- go2cs converted at 2022 March 06 22:16:06 UTC
 // import "golang.org/x/net/lif" ==> using lif = go.golang.org.x.net.lif_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\lif\sys.go
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class lif_package
-    {
-        private static binaryByteOrder nativeEndian = default;
+namespace go.golang.org.x.net;
 
-        private static void init()
-        {
-            ref var i = ref heap(uint32(1L), out ptr<var> _addr_i);
-            ptr<array<byte>> b = new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_i));
-            if (b[0L] == 1L)
-            {
-                nativeEndian = littleEndian;
-            }
-            else
-            {
-                nativeEndian = bigEndian;
-            }
+public static partial class lif_package {
 
-        }
+private static binaryByteOrder nativeEndian = default;
+
+private static void init() {
+    ref var i = ref heap(uint32(1), out ptr<var> _addr_i);
+    ptr<array<byte>> b = new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_i));
+    if (b[0] == 1) {
+        nativeEndian = littleEndian;
     }
-}}}}
+    else
+ {
+        nativeEndian = bigEndian;
+    }
+}
+
+} // end lif_package

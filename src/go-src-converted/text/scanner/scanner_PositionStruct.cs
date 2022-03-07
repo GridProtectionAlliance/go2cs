@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:22 UTC
+//     Generated on 2022 March 06 22:43:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -40,7 +39,7 @@ namespace text
                 this.Column = default;
             }
 
-            public Position(@string Filename = default, long Offset = default, long Line = default, long Column = default)
+            public Position(@string Filename = default, nint Offset = default, nint Line = default, nint Column = default)
             {
                 this.Filename = Filename;
                 this.Offset = Offset;

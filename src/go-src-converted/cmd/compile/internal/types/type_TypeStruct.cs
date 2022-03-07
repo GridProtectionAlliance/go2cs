@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:16 UTC
+//     Generated on 2022 March 06 22:47:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using obj = go.cmd.@internal.obj_package;
+using @base = go.cmd.compile.@internal.@base_package;
 using src = go.cmd.@internal.src_package;
 using fmt = go.fmt_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -36,27 +36,29 @@ namespace @internal
                 this.Width = default;
                 this.methods = default;
                 this.allMethods = default;
-                this.Nod = default;
-                this.Orig = default;
-                this.Sym = default;
+                this.nod = default;
+                this.underlying = default;
+                this.sym = default;
                 this.Vargen = default;
-                this.Etype = default;
+                this.kind = default;
                 this.Align = default;
                 this.flags = default;
+                this.rparams = default;
             }
 
-            public Type(long Width = default, Fields methods = default, Fields allMethods = default, ref ptr<Node> Nod = default, ref ptr<Type> Orig = default, ref ptr<Sym> Sym = default, int Vargen = default, EType Etype = default, byte Align = default, bitset8 flags = default)
+            public Type(long Width = default, Fields methods = default, Fields allMethods = default, Object nod = default, ref ptr<Type> underlying = default, ref ptr<Sym> sym = default, int Vargen = default, Kind kind = default, byte Align = default, bitset8 flags = default, ref ptr<slice<ptr<Type>>> rparams = default)
             {
                 this.Width = Width;
                 this.methods = methods;
                 this.allMethods = allMethods;
-                this.Nod = Nod;
-                this.Orig = Orig;
-                this.Sym = Sym;
+                this.nod = nod;
+                this.underlying = underlying;
+                this.sym = sym;
                 this.Vargen = Vargen;
-                this.Etype = Etype;
+                this.kind = kind;
                 this.Align = Align;
                 this.flags = flags;
+                this.rparams = rparams;
             }
 
             // Enable comparisons between nil and Type struct
@@ -79,7 +81,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Type Type_cast(dynamic value)
         {
-            return new Type(value.Width, value.methods, value.allMethods, ref value.Nod, ref value.Orig, ref value.Sym, value.Vargen, value.Etype, value.Align, value.flags);
+            return new Type(value.Width, value.methods, value.allMethods, value.nod, ref value.underlying, ref value.sym, value.Vargen, value.kind, value.Align, value.flags, ref value.rparams);
         }
     }
 }}}}

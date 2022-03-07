@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:55:51 UTC
+//     Generated on 2022 March 06 23:25:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
@@ -40,7 +39,7 @@ namespace mod
 
             public ref slice<byte> buf => ref m_BufferRef.Value.buf;
 
-            public ref long off => ref m_BufferRef.Value.off;
+            public ref nint off => ref m_BufferRef.Value.off;
 
             public ref readOp lastRead => ref m_BufferRef.Value.lastRead;
 
@@ -52,7 +51,7 @@ namespace mod
                 this.margin = default;
             }
 
-            public printer(bytes.Buffer Buffer = default, slice<Comment> comment = default, long margin = default)
+            public printer(bytes.Buffer Buffer = default, slice<Comment> comment = default, nint margin = default)
             {
                 this.m_BufferRef = new ptr<bytes.Buffer>(Buffer);
                 this.comment = comment;

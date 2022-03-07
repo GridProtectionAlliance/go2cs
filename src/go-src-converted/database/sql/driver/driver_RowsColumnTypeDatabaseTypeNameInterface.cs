@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:19 UTC
+//     Generated on 2022 March 06 23:35:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
 using reflect = go.reflect_package;
@@ -53,7 +52,7 @@ namespace sql
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -68,87 +67,27 @@ namespace sql
                 m_target_is_ptr = true;
             }
 
-            private delegate @string ColumnTypeDatabaseTypeNameByPtr(ptr<T> value, long index);
-            private delegate @string ColumnTypeDatabaseTypeNameByVal(T value, long index);
+            private delegate @string ColumnTypeDatabaseTypeNameByPtr(ptr<T> value, nint index);
+            private delegate @string ColumnTypeDatabaseTypeNameByVal(T value, nint index);
 
             private static readonly ColumnTypeDatabaseTypeNameByPtr? s_ColumnTypeDatabaseTypeNameByPtr;
             private static readonly ColumnTypeDatabaseTypeNameByVal? s_ColumnTypeDatabaseTypeNameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string ColumnTypeDatabaseTypeName(long index)
+            public @string ColumnTypeDatabaseTypeName(nint index)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ColumnTypeDatabaseTypeNameByPtr is null || !m_target_is_ptr)
                     return s_ColumnTypeDatabaseTypeNameByVal!(target, index);
 
-                return s_ColumnTypeDatabaseTypeNameByPtr(m_target_ptr, index);
-            }
-
-            private delegate error ColumnsByPtr(ptr<T> value);
-            private delegate error ColumnsByVal(T value);
-
-            private static readonly ColumnsByPtr? s_ColumnsByPtr;
-            private static readonly ColumnsByVal? s_ColumnsByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Columns()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ColumnsByPtr is null || !m_target_is_ptr)
-                    return s_ColumnsByVal!(target);
-
-                return s_ColumnsByPtr(m_target_ptr);
-            }
-
-            private delegate error CloseByPtr(ptr<T> value);
-            private delegate error CloseByVal(T value);
-
-            private static readonly CloseByPtr? s_CloseByPtr;
-            private static readonly CloseByVal? s_CloseByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Close()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_CloseByPtr is null || !m_target_is_ptr)
-                    return s_CloseByVal!(target);
-
-                return s_CloseByPtr(m_target_ptr);
-            }
-
-            private delegate error NextByPtr(ptr<T> value, slice<Value> dest);
-            private delegate error NextByVal(T value, slice<Value> dest);
-
-            private static readonly NextByPtr? s_NextByPtr;
-            private static readonly NextByVal? s_NextByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Next(slice<Value> dest)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_NextByPtr is null || !m_target_is_ptr)
-                    return s_NextByVal!(target, dest);
-
-                return s_NextByPtr(m_target_ptr, dest);
+                return s_ColumnTypeDatabaseTypeNameByPtr(m_target_ptr!, index);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static RowsColumnTypeDatabaseTypeName()
@@ -159,55 +98,16 @@ namespace sql
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ColumnTypeDatabaseTypeName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColumnTypeDatabaseTypeNameByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeDatabaseTypeNameByPtr)) as ColumnTypeDatabaseTypeNameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ColumnTypeDatabaseTypeName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ColumnTypeDatabaseTypeNameByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnTypeDatabaseTypeNameByVal)) as ColumnTypeDatabaseTypeNameByVal;
 
                 if (s_ColumnTypeDatabaseTypeNameByPtr is null && s_ColumnTypeDatabaseTypeNameByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeDatabaseTypeName.ColumnTypeDatabaseTypeName method", new Exception("ColumnTypeDatabaseTypeName"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Columns");
-
-                if (!(extensionMethod is null))
-                    s_ColumnsByPtr = extensionMethod.CreateStaticDelegate(typeof(ColumnsByPtr)) as ColumnsByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Columns");
-
-                if (!(extensionMethod is null))
-                    s_ColumnsByVal = extensionMethod.CreateStaticDelegate(typeof(ColumnsByVal)) as ColumnsByVal;
-
-                if (s_ColumnsByPtr is null && s_ColumnsByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeDatabaseTypeName.Columns method", new Exception("Columns"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Close");
-
-                if (!(extensionMethod is null))
-                    s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
-
-                if (s_CloseByPtr is null && s_CloseByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeDatabaseTypeName.Close method", new Exception("Close"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Next");
-
-                if (!(extensionMethod is null))
-                    s_NextByPtr = extensionMethod.CreateStaticDelegate(typeof(NextByPtr)) as NextByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Next");
-
-                if (!(extensionMethod is null))
-                    s_NextByVal = extensionMethod.CreateStaticDelegate(typeof(NextByVal)) as NextByVal;
-
-                if (s_NextByPtr is null && s_NextByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RowsColumnTypeDatabaseTypeName.Next method", new Exception("Next"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:38 UTC
+//     Generated on 2022 March 06 22:15:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,16 +77,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SysByPtr is null || !m_target_is_ptr)
                     return s_SysByVal!(target);
 
-                return s_SysByPtr(m_target_ptr);
+                return s_SysByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Message()
@@ -97,12 +97,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Sys");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SysByPtr = extensionMethod.CreateStaticDelegate(typeof(SysByPtr)) as SysByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Sys");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SysByVal = extensionMethod.CreateStaticDelegate(typeof(SysByVal)) as SysByVal;
 
                 if (s_SysByPtr is null && s_SysByVal is null)

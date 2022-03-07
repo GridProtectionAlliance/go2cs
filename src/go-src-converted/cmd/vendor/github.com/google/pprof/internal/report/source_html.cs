@@ -12,38 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package report -- go2cs converted at 2020 October 09 05:53:47 UTC
+// package report -- go2cs converted at 2022 March 06 23:23:48 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source_html.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source_html.go
 using template = go.html.template_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace @internal
-{
-    public static partial class report_package
-    {
-        // AddSourceTemplates adds templates used by PrintWebList to t.
-        public static void AddSourceTemplates(ptr<template.Template> _addr_t)
-        {
-            ref template.Template t = ref _addr_t.val;
+namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
-            template.Must(t.Parse("{{define \"weblistcss\"}}" + weblistPageCSS + "{{end}}"));
-            template.Must(t.Parse("{{define \"weblistjs\"}}" + weblistPageScript + "{{end}}"));
-        }
+public static partial class report_package {
 
-        private static readonly @string weblistPageCSS = (@string)@"<style type=""text/css"">
-body {
+    // AddSourceTemplates adds templates used by PrintWebList to t.
+public static void AddSourceTemplates(ptr<template.Template> _addr_t) {
+    ref template.Template t = ref _addr_t.val;
+
+    template.Must(t.Parse("{{define \"weblistcss\"}}" + weblistPageCSS + "{{end}}"));
+    template.Must(t.Parse("{{define \"weblistjs\"}}" + weblistPageScript + "{{end}}"));
+}
+
+private static readonly @string weblistPageCSS = @"<style type=""text/css"">
+body #content{
 font-family: sans-serif;
 }
 h1 {
   font-size: 1.5em;
-  margin-bottom: 4px;
 }
 .legend {
   font-size: 1.25em;
@@ -54,14 +45,7 @@ h1 {
 .inlinesrc {
   color: #000066;
 }
-.deadsrc {
-cursor: pointer;
-}
-.deadsrc:hover {
-background-color: #eeeeee;
-}
 .livesrc {
-color: #0000ff;
 cursor: pointer;
 }
 .livesrc:hover {
@@ -75,7 +59,7 @@ display: none;
 
 
 
-        private static readonly @string weblistPageScript = (@string)@"<script type=""text/javascript"">
+private static readonly @string weblistPageScript = @"<script type=""text/javascript"">
 function pprof_toggle_asm(e) {
   var target;
   if (!e) e = window.event;
@@ -95,7 +79,7 @@ function pprof_toggle_asm(e) {
 
 
 
-        private static readonly @string weblistPageClosing = (@string)"\n</body>\n</html>\n";
+private static readonly @string weblistPageClosing = "\n</body>\n</html>\n";
 
-    }
-}}}}}}}
+
+} // end report_package

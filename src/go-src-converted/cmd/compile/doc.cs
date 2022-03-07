@@ -83,7 +83,8 @@ Flags:
         Without this flag, the -o output is a combination of both
         linker and compiler input.
     -m
-        Print optimization decisions.
+        Print optimization decisions. Higher values or repetition
+        produce more detail.
     -memprofile file
         Write memory profile for the compilation to file.
     -memprofilerate rate
@@ -255,7 +256,7 @@ the symbol accessible to other packages.
 Because this directive can subvert the type system and package
 modularity, it is only enabled in files that have imported "unsafe".
 */
-// package main -- go2cs converted at 2020 October 09 05:23:56 UTC
-// Original source: C:\Go\src\cmd\compile\doc.go
-    }
+// package main -- go2cs converted at 2022 March 06 22:47:32 UTC
+// Original source: C:\Program Files\Go\src\cmd\compile\doc.go
 
+} // end main_package

@@ -4,8 +4,8 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 09 05:00:54 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\catchpanic.go
+// package main -- go2cs converted at 2022 March 06 22:26:10 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\catchpanic.go
 /*
 #include <signal.h>
 #include <stdlib.h>
@@ -56,32 +56,27 @@ static void __attribute__ ((constructor)) sigsetup(void) {
 */
 
 using os = go.os_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoCatchPanic", CgoCatchPanic);
-        }
+namespace go;
 
-        // Test that the SIGABRT raised by panic can be caught by an early signal handler.
-        public static void CgoCatchPanic() => func((_, panic, __) =>
-        {
-            {
-                var (_, ok) = os.LookupEnv("CGOCATCHPANIC_EARLY_HANDLER");
+public static partial class main_package {
 
-                if (!ok)
-                {
-                    C.registerAbortHandler();
-                }
-
-            }
-
-            panic("catch me");
-
-        });
-    }
+private static void init() {
+    register("CgoCatchPanic", CgoCatchPanic);
 }
+
+// Test that the SIGABRT raised by panic can be caught by an early signal handler.
+public static void CgoCatchPanic() => func((_, panic, _) => {
+    {
+        var (_, ok) = os.LookupEnv("CGOCATCHPANIC_EARLY_HANDLER");
+
+        if (!ok) {
+            C.registerAbortHandler();
+        }
+    }
+
+    panic("catch me");
+
+});
+
+} // end main_package

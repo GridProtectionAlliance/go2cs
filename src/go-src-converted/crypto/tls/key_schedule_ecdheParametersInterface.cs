@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:00 UTC
+//     Generated on 2022 March 06 22:21:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using elliptic = go.crypto.elliptic_package;
 using hmac = go.crypto.hmac_package;
 using errors = go.errors_package;
@@ -58,7 +57,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,13 +83,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CurveIDByPtr is null || !m_target_is_ptr)
                     return s_CurveIDByVal!(target);
 
-                return s_CurveIDByPtr(m_target_ptr);
+                return s_CurveIDByPtr(m_target_ptr!);
             }
 
             private delegate slice<byte> PublicKeyByPtr(ptr<T> value);
@@ -104,13 +103,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PublicKeyByPtr is null || !m_target_is_ptr)
                     return s_PublicKeyByVal!(target);
 
-                return s_PublicKeyByPtr(m_target_ptr);
+                return s_PublicKeyByPtr(m_target_ptr!);
             }
 
             private delegate slice<byte> SharedKeyByPtr(ptr<T> value, slice<byte> peerPublicKey);
@@ -124,16 +123,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SharedKeyByPtr is null || !m_target_is_ptr)
                     return s_SharedKeyByVal!(target, peerPublicKey);
 
-                return s_SharedKeyByPtr(m_target_ptr, peerPublicKey);
+                return s_SharedKeyByPtr(m_target_ptr!, peerPublicKey);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ecdheParameters()
@@ -144,12 +143,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("CurveID");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CurveIDByPtr = extensionMethod.CreateStaticDelegate(typeof(CurveIDByPtr)) as CurveIDByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("CurveID");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CurveIDByVal = extensionMethod.CreateStaticDelegate(typeof(CurveIDByVal)) as CurveIDByVal;
 
                 if (s_CurveIDByPtr is null && s_CurveIDByVal is null)
@@ -157,12 +156,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PublicKey");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicKeyByPtr = extensionMethod.CreateStaticDelegate(typeof(PublicKeyByPtr)) as PublicKeyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PublicKey");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PublicKeyByVal = extensionMethod.CreateStaticDelegate(typeof(PublicKeyByVal)) as PublicKeyByVal;
 
                 if (s_PublicKeyByPtr is null && s_PublicKeyByVal is null)
@@ -170,12 +169,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SharedKey");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SharedKeyByPtr = extensionMethod.CreateStaticDelegate(typeof(SharedKeyByPtr)) as SharedKeyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SharedKey");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SharedKeyByVal = extensionMethod.CreateStaticDelegate(typeof(SharedKeyByVal)) as SharedKeyByVal;
 
                 if (s_SharedKeyByPtr is null && s_SharedKeyByVal is null)

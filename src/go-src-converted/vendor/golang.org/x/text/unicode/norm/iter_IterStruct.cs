@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:08:23 UTC
+//     Generated on 2022 March 06 23:38:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using utf8 = go.unicode.utf8_package;
 using go;
@@ -43,7 +42,7 @@ namespace unicode
                 this.multiSeg = default;
             }
 
-            public Iter(reorderBuffer rb = default, array<byte> buf = default, Properties info = default, iterFunc next = default, iterFunc asciiF = default, long p = default, slice<byte> multiSeg = default)
+            public Iter(reorderBuffer rb = default, array<byte> buf = default, Properties info = default, iterFunc next = default, iterFunc asciiF = default, nint p = default, slice<byte> multiSeg = default)
             {
                 this.rb = rb;
                 this.buf = buf;

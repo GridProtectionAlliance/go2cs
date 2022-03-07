@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:18 UTC
+//     Generated on 2022 March 06 23:35:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -57,7 +56,7 @@ namespace database
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,16 +82,16 @@ namespace database
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DecomposeByPtr is null || !m_target_is_ptr)
                     return s_DecomposeByVal!(target, buf);
 
-                return s_DecomposeByPtr(m_target_ptr, buf);
+                return s_DecomposeByPtr(m_target_ptr!, buf);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static decimalDecompose()
@@ -103,12 +102,12 @@ namespace database
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Decompose");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecomposeByPtr = extensionMethod.CreateStaticDelegate(typeof(DecomposeByPtr)) as DecomposeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Decompose");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecomposeByVal = extensionMethod.CreateStaticDelegate(typeof(DecomposeByVal)) as DecomposeByVal;
 
                 if (s_DecomposeByPtr is null && s_DecomposeByVal is null)

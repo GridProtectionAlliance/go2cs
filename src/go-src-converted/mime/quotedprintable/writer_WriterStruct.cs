@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:12 UTC
+//     Generated on 2022 March 06 22:21:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -36,7 +35,7 @@ namespace mime
                 this.cr = default;
             }
 
-            public Writer(bool Binary = default, io.Writer w = default, long i = default, array<byte> line = default, bool cr = default)
+            public Writer(bool Binary = default, io.Writer w = default, nint i = default, array<byte> line = default, bool cr = default)
             {
                 this.Binary = Binary;
                 this.w = w;

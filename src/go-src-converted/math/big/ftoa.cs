@@ -6,720 +6,581 @@
 // It is closely following the corresponding implementation
 // in strconv/ftoa.go, but modified and simplified for Float.
 
-// package big -- go2cs converted at 2020 October 09 04:53:25 UTC
+// package big -- go2cs converted at 2022 March 06 22:17:46 UTC
 // import "math/big" ==> using big = go.math.big_package
-// Original source: C:\Go\src\math\big\ftoa.go
+// Original source: C:\Program Files\Go\src\math\big\ftoa.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
-using static go.builtin;
 
-namespace go {
-namespace math
-{
-    public static partial class big_package
-    {
-        // Text converts the floating-point number x to a string according
-        // to the given format and precision prec. The format is one of:
-        //
-        //    'e'    -d.dddde±dd, decimal exponent, at least two (possibly 0) exponent digits
-        //    'E'    -d.ddddE±dd, decimal exponent, at least two (possibly 0) exponent digits
-        //    'f'    -ddddd.dddd, no exponent
-        //    'g'    like 'e' for large exponents, like 'f' otherwise
-        //    'G'    like 'E' for large exponents, like 'f' otherwise
-        //    'x'    -0xd.dddddp±dd, hexadecimal mantissa, decimal power of two exponent
-        //    'p'    -0x.dddp±dd, hexadecimal mantissa, decimal power of two exponent (non-standard)
-        //    'b'    -ddddddp±dd, decimal mantissa, decimal power of two exponent (non-standard)
-        //
-        // For the power-of-two exponent formats, the mantissa is printed in normalized form:
-        //
-        //    'x'    hexadecimal mantissa in [1, 2), or 0
-        //    'p'    hexadecimal mantissa in [½, 1), or 0
-        //    'b'    decimal integer mantissa using x.Prec() bits, or 0
-        //
-        // Note that the 'x' form is the one used by most other languages and libraries.
-        //
-        // If format is a different character, Text returns a "%" followed by the
-        // unrecognized format character.
-        //
-        // The precision prec controls the number of digits (excluding the exponent)
-        // printed by the 'e', 'E', 'f', 'g', 'G', and 'x' formats.
-        // For 'e', 'E', 'f', and 'x', it is the number of digits after the decimal point.
-        // For 'g' and 'G' it is the total number of digits. A negative precision selects
-        // the smallest number of decimal digits necessary to identify the value x uniquely
-        // using x.Prec() mantissa bits.
-        // The prec value is ignored for the 'b' and 'p' formats.
-        private static @string Text(this ptr<Float> _addr_x, byte format, long prec)
-        {
-            ref Float x = ref _addr_x.val;
+namespace go.math;
 
-            long cap = 10L; // TODO(gri) determine a good/better value here
-            if (prec > 0L)
-            {
-                cap += prec;
-            }
-            return string(x.Append(make_slice<byte>(0L, cap), format, prec));
+public static partial class big_package {
 
-        }
+    // Text converts the floating-point number x to a string according
+    // to the given format and precision prec. The format is one of:
+    //
+    //    'e'    -d.dddde±dd, decimal exponent, at least two (possibly 0) exponent digits
+    //    'E'    -d.ddddE±dd, decimal exponent, at least two (possibly 0) exponent digits
+    //    'f'    -ddddd.dddd, no exponent
+    //    'g'    like 'e' for large exponents, like 'f' otherwise
+    //    'G'    like 'E' for large exponents, like 'f' otherwise
+    //    'x'    -0xd.dddddp±dd, hexadecimal mantissa, decimal power of two exponent
+    //    'p'    -0x.dddp±dd, hexadecimal mantissa, decimal power of two exponent (non-standard)
+    //    'b'    -ddddddp±dd, decimal mantissa, decimal power of two exponent (non-standard)
+    //
+    // For the power-of-two exponent formats, the mantissa is printed in normalized form:
+    //
+    //    'x'    hexadecimal mantissa in [1, 2), or 0
+    //    'p'    hexadecimal mantissa in [½, 1), or 0
+    //    'b'    decimal integer mantissa using x.Prec() bits, or 0
+    //
+    // Note that the 'x' form is the one used by most other languages and libraries.
+    //
+    // If format is a different character, Text returns a "%" followed by the
+    // unrecognized format character.
+    //
+    // The precision prec controls the number of digits (excluding the exponent)
+    // printed by the 'e', 'E', 'f', 'g', 'G', and 'x' formats.
+    // For 'e', 'E', 'f', and 'x', it is the number of digits after the decimal point.
+    // For 'g' and 'G' it is the total number of digits. A negative precision selects
+    // the smallest number of decimal digits necessary to identify the value x uniquely
+    // using x.Prec() mantissa bits.
+    // The prec value is ignored for the 'b' and 'p' formats.
+private static @string Text(this ptr<Float> _addr_x, byte format, nint prec) {
+    ref Float x = ref _addr_x.val;
 
-        // String formats x like x.Text('g', 10).
-        // (String must be called explicitly, Float.Format does not support %s verb.)
-        private static @string String(this ptr<Float> _addr_x)
-        {
-            ref Float x = ref _addr_x.val;
+    nint cap = 10; // TODO(gri) determine a good/better value here
+    if (prec > 0) {
+        cap += prec;
+    }
+    return string(x.Append(make_slice<byte>(0, cap), format, prec));
 
-            return x.Text('g', 10L);
-        }
+}
 
-        // Append appends to buf the string form of the floating-point number x,
-        // as generated by x.Text, and returns the extended buffer.
-        private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte fmt, long prec)
-        {
-            ref Float x = ref _addr_x.val;
+// String formats x like x.Text('g', 10).
+// (String must be called explicitly, Float.Format does not support %s verb.)
+private static @string String(this ptr<Float> _addr_x) {
+    ref Float x = ref _addr_x.val;
+
+    return x.Text('g', 10);
+}
+
+// Append appends to buf the string form of the floating-point number x,
+// as generated by x.Text, and returns the extended buffer.
+private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte fmt, nint prec) {
+    ref Float x = ref _addr_x.val;
  
-            // sign
-            if (x.neg)
-            {
-                buf = append(buf, '-');
-            } 
+    // sign
+    if (x.neg) {
+        buf = append(buf, '-');
+    }
+    if (x.form == inf) {
+        if (!x.neg) {
+            buf = append(buf, '+');
+        }
+        return append(buf, "Inf");
 
-            // Inf
-            if (x.form == inf)
-            {
-                if (!x.neg)
-                {
-                    buf = append(buf, '+');
-                }
+    }
+    switch (fmt) {
+        case 'b': 
+            return x.fmtB(buf);
+            break;
+        case 'p': 
+            return x.fmtP(buf);
+            break;
+        case 'x': 
+            return x.fmtX(buf, prec);
+            break;
+    } 
 
-                return append(buf, "Inf");
+    // Algorithm:
+    //   1) convert Float to multiprecision decimal
+    //   2) round to desired precision
+    //   3) read digits out and format
 
-            } 
+    // 1) convert Float to multiprecision decimal
+    ref decimal d = ref heap(out ptr<decimal> _addr_d); // == 0.0
+    if (x.form == finite) { 
+        // x != 0
+        d.init(x.mant, int(x.exp) - x.mant.bitLen());
 
-            // pick off easy formats
-            switch (fmt)
-            {
-                case 'b': 
-                    return x.fmtB(buf);
-                    break;
-                case 'p': 
-                    return x.fmtP(buf);
-                    break;
-                case 'x': 
-                    return x.fmtX(buf, prec);
-                    break;
-            } 
+    }
+    var shortest = false;
+    if (prec < 0) {
+        shortest = true;
+        roundShortest(_addr_d, _addr_x); 
+        // Precision for shortest representation mode.
+        switch (fmt) {
+            case 'e': 
 
-            // Algorithm:
-            //   1) convert Float to multiprecision decimal
-            //   2) round to desired precision
-            //   3) read digits out and format
+            case 'E': 
+                prec = len(d.mant) - 1;
+                break;
+            case 'f': 
+                prec = max(len(d.mant) - d.exp, 0);
+                break;
+            case 'g': 
 
-            // 1) convert Float to multiprecision decimal
-            ref decimal d = ref heap(out ptr<decimal> _addr_d); // == 0.0
-            if (x.form == finite)
-            { 
-                // x != 0
-                d.init(x.mant, int(x.exp) - x.mant.bitLen());
-
-            } 
-
-            // 2) round to desired precision
-            var shortest = false;
-            if (prec < 0L)
-            {
-                shortest = true;
-                roundShortest(_addr_d, _addr_x); 
-                // Precision for shortest representation mode.
-                switch (fmt)
-                {
-                    case 'e': 
-
-                    case 'E': 
-                        prec = len(d.mant) - 1L;
-                        break;
-                    case 'f': 
-                        prec = max(len(d.mant) - d.exp, 0L);
-                        break;
-                    case 'g': 
-
-                    case 'G': 
-                        prec = len(d.mant);
-                        break;
-                }
-
-            }
-            else
-            { 
-                // round appropriately
-                switch (fmt)
-                {
-                    case 'e': 
-                        // one digit before and number of digits after decimal point
-
-                    case 'E': 
-                        // one digit before and number of digits after decimal point
-                        d.round(1L + prec);
-                        break;
-                    case 'f': 
-                        // number of digits before and after decimal point
-                        d.round(d.exp + prec);
-                        break;
-                    case 'g': 
-
-                    case 'G': 
-                        if (prec == 0L)
-                        {
-                            prec = 1L;
-                        }
-
-                        d.round(prec);
-                        break;
-                }
-
-            } 
-
-            // 3) read digits out and format
-            switch (fmt)
-            {
-                case 'e': 
-
-                case 'E': 
-                    return fmtE(buf, fmt, prec, d);
-                    break;
-                case 'f': 
-                    return fmtF(buf, prec, d);
-                    break;
-                case 'g': 
-                    // trim trailing fractional zeros in %e format
-
-                case 'G': 
-                    // trim trailing fractional zeros in %e format
-                    var eprec = prec;
-                    if (eprec > len(d.mant) && len(d.mant) >= d.exp)
-                    {
-                        eprec = len(d.mant);
-                    } 
-                    // %e is used if the exponent from the conversion
-                    // is less than -4 or greater than or equal to the precision.
-                    // If precision was the shortest possible, use eprec = 6 for
-                    // this decision.
-                    if (shortest)
-                    {
-                        eprec = 6L;
-                    }
-
-                    var exp = d.exp - 1L;
-                    if (exp < -4L || exp >= eprec)
-                    {
-                        if (prec > len(d.mant))
-                        {
-                            prec = len(d.mant);
-                        }
-
-                        return fmtE(buf, fmt + 'e' - 'g', prec - 1L, d);
-
-                    }
-
-                    if (prec > d.exp)
-                    {
-                        prec = len(d.mant);
-                    }
-
-                    return fmtF(buf, max(prec - d.exp, 0L), d);
-                    break;
-            } 
-
-            // unknown format
-            if (x.neg)
-            {
-                buf = buf[..len(buf) - 1L]; // sign was added prematurely - remove it again
-            }
-
-            return append(buf, '%', fmt);
-
+            case 'G': 
+                prec = len(d.mant);
+                break;
         }
 
-        private static void roundShortest(ptr<decimal> _addr_d, ptr<Float> _addr_x)
-        {
-            ref decimal d = ref _addr_d.val;
-            ref Float x = ref _addr_x.val;
+    }
+    else
+ { 
+        // round appropriately
+        switch (fmt) {
+            case 'e': 
+                // one digit before and number of digits after decimal point
+
+            case 'E': 
+                // one digit before and number of digits after decimal point
+                d.round(1 + prec);
+                break;
+            case 'f': 
+                // number of digits before and after decimal point
+                d.round(d.exp + prec);
+                break;
+            case 'g': 
+
+            case 'G': 
+                if (prec == 0) {
+                    prec = 1;
+                }
+                d.round(prec);
+                break;
+        }
+
+    }
+    switch (fmt) {
+        case 'e': 
+
+        case 'E': 
+            return fmtE(buf, fmt, prec, d);
+            break;
+        case 'f': 
+            return fmtF(buf, prec, d);
+            break;
+        case 'g': 
+            // trim trailing fractional zeros in %e format
+
+        case 'G': 
+            // trim trailing fractional zeros in %e format
+            var eprec = prec;
+            if (eprec > len(d.mant) && len(d.mant) >= d.exp) {
+                eprec = len(d.mant);
+            }
+            if (shortest) {
+                eprec = 6;
+            }
+            var exp = d.exp - 1;
+            if (exp < -4 || exp >= eprec) {
+                if (prec > len(d.mant)) {
+                    prec = len(d.mant);
+                }
+                return fmtE(buf, fmt + 'e' - 'g', prec - 1, d);
+            }
+            if (prec > d.exp) {
+                prec = len(d.mant);
+            }
+            return fmtF(buf, max(prec - d.exp, 0), d);
+
+            break;
+    } 
+
+    // unknown format
+    if (x.neg) {
+        buf = buf[..(int)len(buf) - 1]; // sign was added prematurely - remove it again
+    }
+    return append(buf, '%', fmt);
+
+}
+
+private static void roundShortest(ptr<decimal> _addr_d, ptr<Float> _addr_x) {
+    ref decimal d = ref _addr_d.val;
+    ref Float x = ref _addr_x.val;
  
-            // if the mantissa is zero, the number is zero - stop now
-            if (len(d.mant) == 0L)
-            {
-                return ;
-            } 
+    // if the mantissa is zero, the number is zero - stop now
+    if (len(d.mant) == 0) {
+        return ;
+    }
+    var mant = nat(null).set(x.mant);
+    var exp = int(x.exp) - mant.bitLen();
+    var s = mant.bitLen() - int(x.prec + 1);
 
-            // Approach: All numbers in the interval [x - 1/2ulp, x + 1/2ulp]
-            // (possibly exclusive) round to x for the given precision of x.
-            // Compute the lower and upper bound in decimal form and find the
-            // shortest decimal number d such that lower <= d <= upper.
+    if (s < 0) 
+        mant = mant.shl(mant, uint(-s));
+    else if (s > 0) 
+        mant = mant.shr(mant, uint(+s));
+        exp += s; 
+    // x = mant * 2**exp with lsb(mant) == 1/2 ulp of x.prec
 
-            // TODO(gri) strconv/ftoa.do describes a shortcut in some cases.
-            // See if we can use it (in adjusted form) here as well.
+    // 2) Compute lower bound by subtracting 1/2 ulp.
+    decimal lower = default;
+    nat tmp = default;
+    lower.init(tmp.sub(mant, natOne), exp); 
 
-            // 1) Compute normalized mantissa mant and exponent exp for x such
-            // that the lsb of mant corresponds to 1/2 ulp for the precision of
-            // x (i.e., for mant we want x.prec + 1 bits).
-            var mant = nat(null).set(x.mant);
-            var exp = int(x.exp) - mant.bitLen();
-            var s = mant.bitLen() - int(x.prec + 1L);
+    // 3) Compute upper bound by adding 1/2 ulp.
+    decimal upper = default;
+    upper.init(tmp.add(mant, natOne), exp); 
 
-            if (s < 0L) 
-                mant = mant.shl(mant, uint(-s));
-            else if (s > 0L) 
-                mant = mant.shr(mant, uint(+s));
-                        exp += s; 
-            // x = mant * 2**exp with lsb(mant) == 1/2 ulp of x.prec
+    // The upper and lower bounds are possible outputs only if
+    // the original mantissa is even, so that ToNearestEven rounding
+    // would round to the original mantissa and not the neighbors.
+    var inclusive = mant[0] & 2 == 0; // test bit 1 since original mantissa was shifted by 1
 
-            // 2) Compute lower bound by subtracting 1/2 ulp.
-            decimal lower = default;
-            nat tmp = default;
-            lower.init(tmp.sub(mant, natOne), exp); 
+    // Now we can figure out the minimum number of digits required.
+    // Walk along until d has distinguished itself from upper and lower.
+    foreach (var (i, m) in d.mant) {
+        var l = lower.at(i);
+        var u = upper.at(i); 
 
-            // 3) Compute upper bound by adding 1/2 ulp.
-            decimal upper = default;
-            upper.init(tmp.add(mant, natOne), exp); 
+        // Okay to round down (truncate) if lower has a different digit
+        // or if lower is inclusive and is exactly the result of rounding
+        // down (i.e., and we have reached the final digit of lower).
+        var okdown = l != m || inclusive && i + 1 == len(lower.mant); 
 
-            // The upper and lower bounds are possible outputs only if
-            // the original mantissa is even, so that ToNearestEven rounding
-            // would round to the original mantissa and not the neighbors.
-            var inclusive = mant[0L] & 2L == 0L; // test bit 1 since original mantissa was shifted by 1
+        // Okay to round up if upper has a different digit and either upper
+        // is inclusive or upper is bigger than the result of rounding up.
+        var okup = m != u && (inclusive || m + 1 < u || i + 1 < len(upper.mant)); 
 
-            // Now we can figure out the minimum number of digits required.
-            // Walk along until d has distinguished itself from upper and lower.
-            foreach (var (i, m) in d.mant)
-            {
-                var l = lower.at(i);
-                var u = upper.at(i); 
+        // If it's okay to do either, then round to the nearest one.
+        // If it's okay to do only one, do it.
 
-                // Okay to round down (truncate) if lower has a different digit
-                // or if lower is inclusive and is exactly the result of rounding
-                // down (i.e., and we have reached the final digit of lower).
-                var okdown = l != m || inclusive && i + 1L == len(lower.mant); 
+        if (okdown && okup) 
+            d.round(i + 1);
+            return ;
+        else if (okdown) 
+            d.roundDown(i + 1);
+            return ;
+        else if (okup) 
+            d.roundUp(i + 1);
+            return ;
+        
+    }
+}
 
-                // Okay to round up if upper has a different digit and either upper
-                // is inclusive or upper is bigger than the result of rounding up.
-                var okup = m != u && (inclusive || m + 1L < u || i + 1L < len(upper.mant)); 
+// %e: d.ddddde±dd
+private static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, decimal d) { 
+    // first digit
+    var ch = byte('0');
+    if (len(d.mant) > 0) {
+        ch = d.mant[0];
+    }
+    buf = append(buf, ch); 
 
-                // If it's okay to do either, then round to the nearest one.
-                // If it's okay to do only one, do it.
-
-                if (okdown && okup) 
-                    d.round(i + 1L);
-                    return ;
-                else if (okdown) 
-                    d.roundDown(i + 1L);
-                    return ;
-                else if (okup) 
-                    d.roundUp(i + 1L);
-                    return ;
-                
-            }
-
+    // .moredigits
+    if (prec > 0) {
+        buf = append(buf, '.');
+        nint i = 1;
+        var m = min(len(d.mant), prec + 1);
+        if (i < m) {
+            buf = append(buf, d.mant[(int)i..(int)m]);
+            i = m;
+        }
+        while (i <= prec) {
+            buf = append(buf, '0');
+            i++;
         }
 
-        // %e: d.ddddde±dd
-        private static slice<byte> fmtE(slice<byte> buf, byte fmt, long prec, decimal d)
-        { 
-            // first digit
-            var ch = byte('0');
-            if (len(d.mant) > 0L)
-            {
-                ch = d.mant[0L];
-            }
+    }
+    buf = append(buf, fmt);
+    long exp = default;
+    if (len(d.mant) > 0) {
+        exp = int64(d.exp) - 1; // -1 because first digit was printed before '.'
+    }
+    if (exp < 0) {
+        ch = '-';
+        exp = -exp;
+    }
+    else
+ {
+        ch = '+';
+    }
+    buf = append(buf, ch); 
 
-            buf = append(buf, ch); 
+    // dd...d
+    if (exp < 10) {
+        buf = append(buf, '0'); // at least 2 exponent digits
+    }
+    return strconv.AppendInt(buf, exp, 10);
 
-            // .moredigits
-            if (prec > 0L)
-            {
-                buf = append(buf, '.');
-                long i = 1L;
-                var m = min(len(d.mant), prec + 1L);
-                if (i < m)
-                {
-                    buf = append(buf, d.mant[i..m]);
-                    i = m;
-                }
+}
 
-                while (i <= prec)
-                {
-                    buf = append(buf, '0');
-                    i++;
-                }
-
-
-            } 
-
-            // e±
-            buf = append(buf, fmt);
-            long exp = default;
-            if (len(d.mant) > 0L)
-            {
-                exp = int64(d.exp) - 1L; // -1 because first digit was printed before '.'
-            }
-
-            if (exp < 0L)
-            {
-                ch = '-';
-                exp = -exp;
-            }
-            else
-            {
-                ch = '+';
-            }
-
-            buf = append(buf, ch); 
-
-            // dd...d
-            if (exp < 10L)
-            {
-                buf = append(buf, '0'); // at least 2 exponent digits
-            }
-
-            return strconv.AppendInt(buf, exp, 10L);
-
+// %f: ddddddd.ddddd
+private static slice<byte> fmtF(slice<byte> buf, nint prec, decimal d) { 
+    // integer, padded with zeros as needed
+    if (d.exp > 0) {
+        var m = min(len(d.mant), d.exp);
+        buf = append(buf, d.mant[..(int)m]);
+        while (m < d.exp) {
+            buf = append(buf, '0');
+            m++;
         }
-
-        // %f: ddddddd.ddddd
-        private static slice<byte> fmtF(slice<byte> buf, long prec, decimal d)
-        { 
-            // integer, padded with zeros as needed
-            if (d.exp > 0L)
-            {
-                var m = min(len(d.mant), d.exp);
-                buf = append(buf, d.mant[..m]);
-                while (m < d.exp)
-                {
-                    buf = append(buf, '0');
-                    m++;
-                }
-            else
+    else
 
 
-            }            {
-                buf = append(buf, '0');
-            } 
-
-            // fraction
-            if (prec > 0L)
-            {
-                buf = append(buf, '.');
-                for (long i = 0L; i < prec; i++)
-                {
-                    buf = append(buf, d.at(d.exp + i));
-                }
-
-
-            }
-
-            return buf;
-
-        }
-
-        // fmtB appends the string of x in the format mantissa "p" exponent
-        // with a decimal mantissa and a binary exponent, or 0" if x is zero,
-        // and returns the extended buffer.
-        // The mantissa is normalized such that is uses x.Prec() bits in binary
-        // representation.
-        // The sign of x is ignored, and x must not be an Inf.
-        // (The caller handles Inf before invoking fmtB.)
-        private static slice<byte> fmtB(this ptr<Float> _addr_x, slice<byte> buf) => func((_, panic, __) =>
-        {
-            ref Float x = ref _addr_x.val;
-
-            if (x.form == zero)
-            {
-                return append(buf, '0');
-            }
-
-            if (debugFloat && x.form != finite)
-            {
-                panic("non-finite float");
-            } 
-            // x != 0
-
-            // adjust mantissa to use exactly x.prec bits
-            var m = x.mant;
-            {
-                var w = uint32(len(x.mant)) * _W;
-
-
-                if (w < x.prec) 
-                    m = nat(null).shl(m, uint(x.prec - w));
-                else if (w > x.prec) 
-                    m = nat(null).shr(m, uint(w - x.prec));
-
-            }
-
-            buf = append(buf, m.utoa(10L));
-            buf = append(buf, 'p');
-            var e = int64(x.exp) - int64(x.prec);
-            if (e >= 0L)
-            {
-                buf = append(buf, '+');
-            }
-
-            return strconv.AppendInt(buf, e, 10L);
-
-        });
-
-        // fmtX appends the string of x in the format "0x1." mantissa "p" exponent
-        // with a hexadecimal mantissa and a binary exponent, or "0x0p0" if x is zero,
-        // and returns the extended buffer.
-        // A non-zero mantissa is normalized such that 1.0 <= mantissa < 2.0.
-        // The sign of x is ignored, and x must not be an Inf.
-        // (The caller handles Inf before invoking fmtX.)
-        private static slice<byte> fmtX(this ptr<Float> _addr_x, slice<byte> buf, long prec) => func((_, panic, __) =>
-        {
-            ref Float x = ref _addr_x.val;
-
-            if (x.form == zero)
-            {
-                buf = append(buf, "0x0");
-                if (prec > 0L)
-                {
-                    buf = append(buf, '.');
-                    for (long i = 0L; i < prec; i++)
-                    {
-                        buf = append(buf, '0');
-                    }
-
-
-                }
-
-                buf = append(buf, "p+00");
-                return buf;
-
-            }
-
-            if (debugFloat && x.form != finite)
-            {
-                panic("non-finite float");
-            } 
-
-            // round mantissa to n bits
-            ulong n = default;
-            if (prec < 0L)
-            {
-                n = 1L + (x.MinPrec() - 1L + 3L) / 4L * 4L; // round MinPrec up to 1 mod 4
-            }
-            else
-            {
-                n = 1L + 4L * uint(prec);
-            } 
-            // n%4 == 1
-            x = @new<Float>().SetPrec(n).SetMode(x.mode).Set(x); 
-
-            // adjust mantissa to use exactly n bits
-            var m = x.mant;
-            {
-                var w = uint(len(x.mant)) * _W;
-
-
-                if (w < n) 
-                    m = nat(null).shl(m, n - w);
-                else if (w > n) 
-                    m = nat(null).shr(m, w - n);
-
-            }
-            var exp64 = int64(x.exp) - 1L; // avoid wrap-around
-
-            var hm = m.utoa(16L);
-            if (debugFloat && hm[0L] != '1')
-            {
-                panic("incorrect mantissa: " + string(hm));
-            }
-
-            buf = append(buf, "0x1");
-            if (len(hm) > 1L)
-            {
-                buf = append(buf, '.');
-                buf = append(buf, hm[1L..]);
-            }
-
-            buf = append(buf, 'p');
-            if (exp64 >= 0L)
-            {
-                buf = append(buf, '+');
-            }
-            else
-            {
-                exp64 = -exp64;
-                buf = append(buf, '-');
-            } 
-            // Force at least two exponent digits, to match fmt.
-            if (exp64 < 10L)
-            {
-                buf = append(buf, '0');
-            }
-
-            return strconv.AppendInt(buf, exp64, 10L);
-
-        });
-
-        // fmtP appends the string of x in the format "0x." mantissa "p" exponent
-        // with a hexadecimal mantissa and a binary exponent, or "0" if x is zero,
-        // and returns the extended buffer.
-        // The mantissa is normalized such that 0.5 <= 0.mantissa < 1.0.
-        // The sign of x is ignored, and x must not be an Inf.
-        // (The caller handles Inf before invoking fmtP.)
-        private static slice<byte> fmtP(this ptr<Float> _addr_x, slice<byte> buf) => func((_, panic, __) =>
-        {
-            ref Float x = ref _addr_x.val;
-
-            if (x.form == zero)
-            {
-                return append(buf, '0');
-            }
-
-            if (debugFloat && x.form != finite)
-            {
-                panic("non-finite float");
-            } 
-            // x != 0
-
-            // remove trailing 0 words early
-            // (no need to convert to hex 0's and trim later)
-            var m = x.mant;
-            long i = 0L;
-            while (i < len(m) && m[i] == 0L)
-            {
-                i++;
-            }
-
-            m = m[i..];
-
-            buf = append(buf, "0x.");
-            buf = append(buf, bytes.TrimRight(m.utoa(16L), "0"));
-            buf = append(buf, 'p');
-            if (x.exp >= 0L)
-            {
-                buf = append(buf, '+');
-            }
-
-            return strconv.AppendInt(buf, int64(x.exp), 10L);
-
-        });
-
-        private static long min(long x, long y)
-        {
-            if (x < y)
-            {
-                return x;
-            }
-
-            return y;
-
-        }
-
-        private static fmt.Formatter _ = _addr_floatZero; // *Float must implement fmt.Formatter
-
-        // Format implements fmt.Formatter. It accepts all the regular
-        // formats for floating-point numbers ('b', 'e', 'E', 'f', 'F',
-        // 'g', 'G', 'x') as well as 'p' and 'v'. See (*Float).Text for the
-        // interpretation of 'p'. The 'v' format is handled like 'g'.
-        // Format also supports specification of the minimum precision
-        // in digits, the output field width, as well as the format flags
-        // '+' and ' ' for sign control, '0' for space or zero padding,
-        // and '-' for left or right justification. See the fmt package
-        // for details.
-        private static void Format(this ptr<Float> _addr_x, fmt.State s, int format)
-        {
-            ref Float x = ref _addr_x.val;
-
-            var (prec, hasPrec) = s.Precision();
-            if (!hasPrec)
-            {
-                prec = 6L; // default precision for 'e', 'f'
-            }
-
-
-            if (format == 'e' || format == 'E' || format == 'f' || format == 'b' || format == 'p' || format == 'x')
-            {
-                goto __switch_break0;
-            }
-            if (format == 'F') 
-            {
-                // (*Float).Text doesn't support 'F'; handle like 'f'
-                format = 'f';
-                goto __switch_break0;
-            }
-            if (format == 'v') 
-            {
-                // handle like 'g'
-                format = 'g';
-                fallthrough = true;
-            }
-            if (fallthrough || format == 'g' || format == 'G')
-            {
-                if (!hasPrec)
-                {
-                    prec = -1L; // default precision for 'g', 'G'
-                }
-
-                goto __switch_break0;
-            }
-            // default: 
-                fmt.Fprintf(s, "%%!%c(*big.Float=%s)", format, x.String());
-                return ;
-
-            __switch_break0:;
-            slice<byte> buf = default;
-            buf = x.Append(buf, byte(format), prec);
-            if (len(buf) == 0L)
-            {
-                buf = (slice<byte>)"?"; // should never happen, but don't crash
-            } 
-            // len(buf) > 0
-            @string sign = default;
-
-            if (buf[0L] == '-') 
-                sign = "-";
-                buf = buf[1L..];
-            else if (buf[0L] == '+') 
-                // +Inf
-                sign = "+";
-                if (s.Flag(' '))
-                {
-                    sign = " ";
-                }
-
-                buf = buf[1L..];
-            else if (s.Flag('+')) 
-                sign = "+";
-            else if (s.Flag(' ')) 
-                sign = " ";
-                        long padding = default;
-            {
-                var (width, hasWidth) = s.Width();
-
-                if (hasWidth && width > len(sign) + len(buf))
-                {
-                    padding = width - len(sign) - len(buf);
-                }
-
-            }
-
-
-
-            if (s.Flag('0') && !x.IsInf()) 
-                // 0-padding on left
-                writeMultiple(s, sign, 1L);
-                writeMultiple(s, "0", padding);
-                s.Write(buf);
-            else if (s.Flag('-')) 
-                // padding on right
-                writeMultiple(s, sign, 1L);
-                s.Write(buf);
-                writeMultiple(s, " ", padding);
-            else 
-                // padding on left
-                writeMultiple(s, " ", padding);
-                writeMultiple(s, sign, 1L);
-                s.Write(buf);
-            
+    } {
+        buf = append(buf, '0');
+    }
+    if (prec > 0) {
+        buf = append(buf, '.');
+        for (nint i = 0; i < prec; i++) {
+            buf = append(buf, d.at(d.exp + i));
         }
     }
-}}
+    return buf;
+
+}
+
+// fmtB appends the string of x in the format mantissa "p" exponent
+// with a decimal mantissa and a binary exponent, or 0" if x is zero,
+// and returns the extended buffer.
+// The mantissa is normalized such that is uses x.Prec() bits in binary
+// representation.
+// The sign of x is ignored, and x must not be an Inf.
+// (The caller handles Inf before invoking fmtB.)
+private static slice<byte> fmtB(this ptr<Float> _addr_x, slice<byte> buf) => func((_, panic, _) => {
+    ref Float x = ref _addr_x.val;
+
+    if (x.form == zero) {
+        return append(buf, '0');
+    }
+    if (debugFloat && x.form != finite) {
+        panic("non-finite float");
+    }
+    var m = x.mant;
+    {
+        var w = uint32(len(x.mant)) * _W;
+
+
+        if (w < x.prec) 
+            m = nat(null).shl(m, uint(x.prec - w));
+        else if (w > x.prec) 
+            m = nat(null).shr(m, uint(w - x.prec));
+
+    }
+
+    buf = append(buf, m.utoa(10));
+    buf = append(buf, 'p');
+    var e = int64(x.exp) - int64(x.prec);
+    if (e >= 0) {
+        buf = append(buf, '+');
+    }
+    return strconv.AppendInt(buf, e, 10);
+
+});
+
+// fmtX appends the string of x in the format "0x1." mantissa "p" exponent
+// with a hexadecimal mantissa and a binary exponent, or "0x0p0" if x is zero,
+// and returns the extended buffer.
+// A non-zero mantissa is normalized such that 1.0 <= mantissa < 2.0.
+// The sign of x is ignored, and x must not be an Inf.
+// (The caller handles Inf before invoking fmtX.)
+private static slice<byte> fmtX(this ptr<Float> _addr_x, slice<byte> buf, nint prec) => func((_, panic, _) => {
+    ref Float x = ref _addr_x.val;
+
+    if (x.form == zero) {
+        buf = append(buf, "0x0");
+        if (prec > 0) {
+            buf = append(buf, '.');
+            for (nint i = 0; i < prec; i++) {
+                buf = append(buf, '0');
+            }
+        }
+        buf = append(buf, "p+00");
+        return buf;
+
+    }
+    if (debugFloat && x.form != finite) {
+        panic("non-finite float");
+    }
+    nuint n = default;
+    if (prec < 0) {
+        n = 1 + (x.MinPrec() - 1 + 3) / 4 * 4; // round MinPrec up to 1 mod 4
+    }
+    else
+ {
+        n = 1 + 4 * uint(prec);
+    }
+    x = @new<Float>().SetPrec(n).SetMode(x.mode).Set(x); 
+
+    // adjust mantissa to use exactly n bits
+    var m = x.mant;
+    {
+        var w = uint(len(x.mant)) * _W;
+
+
+        if (w < n) 
+            m = nat(null).shl(m, n - w);
+        else if (w > n) 
+            m = nat(null).shr(m, w - n);
+
+    }
+    var exp64 = int64(x.exp) - 1; // avoid wrap-around
+
+    var hm = m.utoa(16);
+    if (debugFloat && hm[0] != '1') {
+        panic("incorrect mantissa: " + string(hm));
+    }
+    buf = append(buf, "0x1");
+    if (len(hm) > 1) {
+        buf = append(buf, '.');
+        buf = append(buf, hm[(int)1..]);
+    }
+    buf = append(buf, 'p');
+    if (exp64 >= 0) {
+        buf = append(buf, '+');
+    }
+    else
+ {
+        exp64 = -exp64;
+        buf = append(buf, '-');
+    }
+    if (exp64 < 10) {
+        buf = append(buf, '0');
+    }
+    return strconv.AppendInt(buf, exp64, 10);
+
+});
+
+// fmtP appends the string of x in the format "0x." mantissa "p" exponent
+// with a hexadecimal mantissa and a binary exponent, or "0" if x is zero,
+// and returns the extended buffer.
+// The mantissa is normalized such that 0.5 <= 0.mantissa < 1.0.
+// The sign of x is ignored, and x must not be an Inf.
+// (The caller handles Inf before invoking fmtP.)
+private static slice<byte> fmtP(this ptr<Float> _addr_x, slice<byte> buf) => func((_, panic, _) => {
+    ref Float x = ref _addr_x.val;
+
+    if (x.form == zero) {
+        return append(buf, '0');
+    }
+    if (debugFloat && x.form != finite) {
+        panic("non-finite float");
+    }
+    var m = x.mant;
+    nint i = 0;
+    while (i < len(m) && m[i] == 0) {
+        i++;
+    }
+    m = m[(int)i..];
+
+    buf = append(buf, "0x.");
+    buf = append(buf, bytes.TrimRight(m.utoa(16), "0"));
+    buf = append(buf, 'p');
+    if (x.exp >= 0) {
+        buf = append(buf, '+');
+    }
+    return strconv.AppendInt(buf, int64(x.exp), 10);
+
+});
+
+private static nint min(nint x, nint y) {
+    if (x < y) {
+        return x;
+    }
+    return y;
+
+}
+
+private static fmt.Formatter _ = _addr_floatZero; // *Float must implement fmt.Formatter
+
+// Format implements fmt.Formatter. It accepts all the regular
+// formats for floating-point numbers ('b', 'e', 'E', 'f', 'F',
+// 'g', 'G', 'x') as well as 'p' and 'v'. See (*Float).Text for the
+// interpretation of 'p'. The 'v' format is handled like 'g'.
+// Format also supports specification of the minimum precision
+// in digits, the output field width, as well as the format flags
+// '+' and ' ' for sign control, '0' for space or zero padding,
+// and '-' for left or right justification. See the fmt package
+// for details.
+private static void Format(this ptr<Float> _addr_x, fmt.State s, int format) {
+    ref Float x = ref _addr_x.val;
+
+    var (prec, hasPrec) = s.Precision();
+    if (!hasPrec) {
+        prec = 6; // default precision for 'e', 'f'
+    }
+
+    if (format == 'e' || format == 'E' || format == 'f' || format == 'b' || format == 'p' || format == 'x')
+    {
+        goto __switch_break0;
+    }
+    if (format == 'F') 
+    {
+        // (*Float).Text doesn't support 'F'; handle like 'f'
+        format = 'f';
+        goto __switch_break0;
+    }
+    if (format == 'v') 
+    {
+        // handle like 'g'
+        format = 'g';
+        fallthrough = true;
+    }
+    if (fallthrough || format == 'g' || format == 'G')
+    {
+        if (!hasPrec) {
+            prec = -1; // default precision for 'g', 'G'
+        }
+        goto __switch_break0;
+    }
+    // default: 
+        fmt.Fprintf(s, "%%!%c(*big.Float=%s)", format, x.String());
+        return ;
+
+    __switch_break0:;
+    slice<byte> buf = default;
+    buf = x.Append(buf, byte(format), prec);
+    if (len(buf) == 0) {
+        buf = (slice<byte>)"?"; // should never happen, but don't crash
+    }
+    @string sign = default;
+
+    if (buf[0] == '-') 
+        sign = "-";
+        buf = buf[(int)1..];
+    else if (buf[0] == '+') 
+        // +Inf
+        sign = "+";
+        if (s.Flag(' ')) {
+            sign = " ";
+        }
+        buf = buf[(int)1..];
+    else if (s.Flag('+')) 
+        sign = "+";
+    else if (s.Flag(' ')) 
+        sign = " ";
+        nint padding = default;
+    {
+        var (width, hasWidth) = s.Width();
+
+        if (hasWidth && width > len(sign) + len(buf)) {
+            padding = width - len(sign) - len(buf);
+        }
+    }
+
+
+
+    if (s.Flag('0') && !x.IsInf()) 
+        // 0-padding on left
+        writeMultiple(s, sign, 1);
+        writeMultiple(s, "0", padding);
+        s.Write(buf);
+    else if (s.Flag('-')) 
+        // padding on right
+        writeMultiple(s, sign, 1);
+        s.Write(buf);
+        writeMultiple(s, " ", padding);
+    else 
+        // padding on left
+        writeMultiple(s, " ", padding);
+        writeMultiple(s, sign, 1);
+        s.Write(buf);
+    
+}
+
+} // end big_package

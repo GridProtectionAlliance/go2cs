@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:39:50 UTC
+//     Generated on 2022 March 06 23:09:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using flag = go.flag_package;
@@ -63,10 +62,9 @@ namespace go
                 this.Alloc = default;
                 this.Loc = default;
                 this.CommuteDepth = default;
-                this.Typed = default;
             }
 
-            public RuleRewrite(BodyBase BodyBase = default, @string Match = default, @string Cond = default, @string Result = default, @string Check = default, long Alloc = default, @string Loc = default, long CommuteDepth = default, bool Typed = default)
+            public RuleRewrite(BodyBase BodyBase = default, @string Match = default, @string Cond = default, @string Result = default, @string Check = default, nint Alloc = default, @string Loc = default, nint CommuteDepth = default)
             {
                 this.m_BodyBaseRef = new ptr<BodyBase>(BodyBase);
                 this.Match = Match;
@@ -76,7 +74,6 @@ namespace go
                 this.Alloc = Alloc;
                 this.Loc = Loc;
                 this.CommuteDepth = CommuteDepth;
-                this.Typed = Typed;
             }
 
             // Enable comparisons between nil and RuleRewrite struct
@@ -99,7 +96,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RuleRewrite RuleRewrite_cast(dynamic value)
         {
-            return new RuleRewrite(value.BodyBase, value.Match, value.Cond, value.Result, value.Check, value.Alloc, value.Loc, value.CommuteDepth, value.Typed);
+            return new RuleRewrite(value.BodyBase, value.Match, value.Cond, value.Result, value.Check, value.Alloc, value.Loc, value.CommuteDepth);
         }
     }
 }

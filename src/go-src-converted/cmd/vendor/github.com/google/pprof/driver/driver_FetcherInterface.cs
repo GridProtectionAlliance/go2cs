@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -60,7 +59,7 @@ namespace pprof
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,16 +85,16 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FetchByPtr is null || !m_target_is_ptr)
                     return s_FetchByVal!(target, src, duration, timeout);
 
-                return s_FetchByPtr(m_target_ptr, src, duration, timeout);
+                return s_FetchByPtr(m_target_ptr!, src, duration, timeout);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Fetcher()
@@ -106,12 +105,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Fetch");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FetchByPtr = extensionMethod.CreateStaticDelegate(typeof(FetchByPtr)) as FetchByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Fetch");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FetchByVal = extensionMethod.CreateStaticDelegate(typeof(FetchByVal)) as FetchByVal;
 
                 if (s_FetchByPtr is null && s_FetchByVal is null)

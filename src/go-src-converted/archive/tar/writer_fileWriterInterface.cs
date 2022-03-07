@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:07 UTC
+//     Generated on 2022 March 06 22:31:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using path = go.path_package;
@@ -55,7 +54,7 @@ namespace archive
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,36 +80,16 @@ namespace archive
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadFromByPtr is null || !m_target_is_ptr)
                     return s_ReadFromByVal!(target, _p0);
 
-                return s_ReadFromByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-
-            private static readonly WriteByPtr? s_WriteByPtr;
-            private static readonly WriteByVal? s_WriteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WriteByPtr is null || !m_target_is_ptr)
-                    return s_WriteByVal!(target, p);
-
-                return s_WriteByPtr(m_target_ptr, p);
+                return s_ReadFromByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static fileWriter()
@@ -121,29 +100,16 @@ namespace archive
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFromByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadFromByPtr)) as ReadFromByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadFrom");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadFromByVal = extensionMethod.CreateStaticDelegate(typeof(ReadFromByVal)) as ReadFromByVal;
 
                 if (s_ReadFromByPtr is null && s_ReadFromByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement fileWriter.ReadFrom method", new Exception("ReadFrom"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-
-                if (s_WriteByPtr is null && s_WriteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement fileWriter.Write method", new Exception("Write"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -2,73 +2,87 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !goexperiment.staticlockranking
 // +build !goexperiment.staticlockranking
 
-// package runtime -- go2cs converted at 2020 October 09 04:46:06 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:08:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\lockrank_off.go
+// Original source: C:\Program Files\Go\src\runtime\lockrank_off.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        // // lockRankStruct is embedded in mutex, but is empty when staticklockranking is
-        // disabled (the default)
-        private partial struct lockRankStruct
-        {
-        }
+namespace go;
 
-        private static void lockInit(ptr<mutex> _addr_l, lockRank rank)
-        {
-            ref mutex l = ref _addr_l.val;
+public static partial class runtime_package {
 
-        }
-
-        private static lockRank getLockRank(ptr<mutex> _addr_l)
-        {
-            ref mutex l = ref _addr_l.val;
-
-            return 0L;
-        }
-
-        // The following functions may be called in nosplit context.
-        // Nosplit is not strictly required for lockWithRank, unlockWithRank
-        // and lockWithRankMayAcquire, but these nosplit annotations must
-        // be kept consistent with the equivalent functions in lockrank_on.go.
-
-        //go:nosplit
-        private static void lockWithRank(ptr<mutex> _addr_l, lockRank rank)
-        {
-            ref mutex l = ref _addr_l.val;
-
-            lock2(l);
-        }
-
-        //go:nosplit
-        private static void acquireLockRank(lockRank rank)
-        {
-        }
-
-        //go:nosplit
-        private static void unlockWithRank(ptr<mutex> _addr_l)
-        {
-            ref mutex l = ref _addr_l.val;
-
-            unlock2(l);
-        }
-
-        //go:nosplit
-        private static void releaseLockRank(lockRank rank)
-        {
-        }
-
-        //go:nosplit
-        private static void lockWithRankMayAcquire(ptr<mutex> _addr_l, lockRank rank)
-        {
-            ref mutex l = ref _addr_l.val;
-
-        }
-    }
+    // // lockRankStruct is embedded in mutex, but is empty when staticklockranking is
+    // disabled (the default)
+private partial struct lockRankStruct {
 }
+
+private static void lockInit(ptr<mutex> _addr_l, lockRank rank) {
+    ref mutex l = ref _addr_l.val;
+
+}
+
+private static lockRank getLockRank(ptr<mutex> _addr_l) {
+    ref mutex l = ref _addr_l.val;
+
+    return 0;
+}
+
+private static void lockWithRank(ptr<mutex> _addr_l, lockRank rank) {
+    ref mutex l = ref _addr_l.val;
+
+    lock2(l);
+}
+
+// This function may be called in nosplit context and thus must be nosplit.
+//go:nosplit
+private static void acquireLockRank(lockRank rank) {
+}
+
+private static void unlockWithRank(ptr<mutex> _addr_l) {
+    ref mutex l = ref _addr_l.val;
+
+    unlock2(l);
+}
+
+// This function may be called in nosplit context and thus must be nosplit.
+//go:nosplit
+private static void releaseLockRank(lockRank rank) {
+}
+
+private static void lockWithRankMayAcquire(ptr<mutex> _addr_l, lockRank rank) {
+    ref mutex l = ref _addr_l.val;
+
+}
+
+//go:nosplit
+private static void assertLockHeld(ptr<mutex> _addr_l) {
+    ref mutex l = ref _addr_l.val;
+
+}
+
+//go:nosplit
+private static void assertRankHeld(lockRank r) {
+}
+
+//go:nosplit
+private static void worldStopped() {
+}
+
+//go:nosplit
+private static void worldStarted() {
+}
+
+//go:nosplit
+private static void assertWorldStopped() {
+}
+
+//go:nosplit
+private static void assertWorldStoppedOrLockHeld(ptr<mutex> _addr_l) {
+    ref mutex l = ref _addr_l.val;
+
+}
+
+} // end runtime_package

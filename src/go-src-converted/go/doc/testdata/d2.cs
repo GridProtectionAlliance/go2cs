@@ -4,61 +4,55 @@
 
 // Test cases for sort order of declarations.
 
-// package d -- go2cs converted at 2020 October 09 05:19:10 UTC
+// package d -- go2cs converted at 2022 March 06 22:41:35 UTC
 // import "go/doc.d" ==> using d = go.go.doc.d_package
-// Original source: C:\Go\src\go\doc\testdata\d2.go
-
-using static go.builtin;
-
-namespace go {
-namespace go
-{
-    public static partial class d_package
-    {
-        // C1 should be second.
-        public static readonly long C1 = (long)1L;
-
-        // C0 should be first.
+// Original source: C:\Program Files\Go\src\go\doc\testdata\d2.go
 
 
-        // C0 should be first.
-        public static readonly long C0 = (long)0L;
+namespace go.go;
 
-        // V1 should be second.
+public static partial class d_package {
+
+    // C1 should be second.
+public static readonly nint C1 = 1;
+
+// C0 should be first.
 
 
-        // V1 should be second.
-        public static ulong V1 = default;
+// C0 should be first.
+public static readonly nint C0 = 0;
 
-        // V0 should be first.
-        public static System.UIntPtr V0 = default;
+// V1 should be second.
 
-        // CAx constants should appear after CBx constants.
-        public static readonly var CA2 = iota; // before CA1
-        public static readonly var CA1 = 0; // before CA0
-        public static readonly var CA0 = 1; // at end
 
-        // VAx variables should appear after VBx variables.
-        public static long VA2 = default;        public static long VA1 = default;        public static long VA0 = default;
+// V1 should be second.
+public static nuint V1 = default;
 
-        // T1 should be second.
-        public partial struct T1
-        {
-        }
+// V0 should be first.
+public static System.UIntPtr V0 = default;
 
-        // T0 should be first.
-        public partial struct T0
-        {
-        }
+// CAx constants should appear after CBx constants.
+public static readonly var CA2 = iota; // before CA1
+public static readonly var CA1 = 0; // before CA0
+public static readonly var CA0 = 1; // at end
 
-        // F1 should be second.
-        public static void F1()
-        {
-        }
+// VAx variables should appear after VBx variables.
+public static nint VA2 = default;public static nint VA1 = default;public static nint VA0 = default;
 
-        // F0 should be first.
-        public static void F0()
-        {
-        }
-    }
-}}
+// T1 should be second.
+public partial struct T1 {
+}
+
+// T0 should be first.
+public partial struct T0 {
+}
+
+// F1 should be second.
+public static void F1() {
+}
+
+// F0 should be first.
+public static void F0() {
+}
+
+} // end d_package

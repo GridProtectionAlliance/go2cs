@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:06 UTC
+//     Generated on 2022 March 06 23:35:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
@@ -64,14 +63,14 @@ namespace x
             public bool Precision() => s_PrecisionByRef?.Invoke(ref this) ?? s_PrecisionByVal?.Invoke(this) ?? State?.Precision() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // State.Flag function promotion
-            private delegate bool FlagByVal(T value, long c);
-            private delegate bool FlagByRef(ref T value, long c);
+            private delegate bool FlagByVal(T value, nint c);
+            private delegate bool FlagByRef(ref T value, nint c);
 
             private static readonly FlagByVal s_FlagByVal;
             private static readonly FlagByRef s_FlagByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Flag(long c) => s_FlagByRef?.Invoke(ref this, c) ?? s_FlagByVal?.Invoke(this, c) ?? State?.Flag(c) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public bool Flag(nint c) => s_FlagByRef?.Invoke(ref this, c) ?? s_FlagByVal?.Invoke(this, c) ?? State?.Flag(c) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static state()
@@ -81,41 +80,41 @@ namespace x
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
 
-                    if ((object)s_WriteByRef == null)
+                    if (s_WriteByRef is null)
                         s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Width");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WidthByRef = extensionMethod.CreateStaticDelegate(typeof(WidthByRef)) as WidthByRef;
 
-                    if ((object)s_WidthByRef == null)
+                    if (s_WidthByRef is null)
                         s_WidthByVal = extensionMethod.CreateStaticDelegate(typeof(WidthByVal)) as WidthByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Precision");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_PrecisionByRef = extensionMethod.CreateStaticDelegate(typeof(PrecisionByRef)) as PrecisionByRef;
 
-                    if ((object)s_PrecisionByRef == null)
+                    if (s_PrecisionByRef is null)
                         s_PrecisionByVal = extensionMethod.CreateStaticDelegate(typeof(PrecisionByVal)) as PrecisionByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Flag");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_FlagByRef = extensionMethod.CreateStaticDelegate(typeof(FlagByRef)) as FlagByRef;
 
-                    if ((object)s_FlagByRef == null)
+                    if (s_FlagByRef is null)
                         s_FlagByVal = extensionMethod.CreateStaticDelegate(typeof(FlagByVal)) as FlagByVal;
                 }
             }

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:41 UTC
+//     Generated on 2022 March 06 23:23:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,10 +26,33 @@ namespace @internal
     public static partial class plugin_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct MappingSources
+        public partial struct MappingSources : IMap
         {
             // Value of the MappingSources struct
             private readonly map<@string, slice<object>> m_value;
+            
+            public nint Length => ((IMap)m_value).Length;
+
+            object? IMap.this[object key]
+            {
+                get => ((IMap)m_value)[key];
+                set => ((IMap)m_value)[key] = value;
+            }
+
+            public slice<object> this[@string key]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value[key];
+            
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => m_value[key] = value;
+            }
+
+            public (slice<object>, bool) this[@string key, bool _]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value.TryGetValue(key, out slice<object> value) ? (value!, true) : (default!, false);
+            }
 
             public MappingSources(map<@string, slice<object>> value) => m_value = value;
 

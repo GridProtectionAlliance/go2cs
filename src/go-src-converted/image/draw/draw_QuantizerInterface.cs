@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:47 UTC
+//     Generated on 2022 March 06 23:36:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using image = go.image_package;
 using color = go.image.color_package;
 using imageutil = go.image.@internal.imageutil_package;
@@ -52,7 +51,7 @@ namespace image
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,16 +77,16 @@ namespace image
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_QuantizeByPtr is null || !m_target_is_ptr)
                     return s_QuantizeByVal!(target, p, m);
 
-                return s_QuantizeByPtr(m_target_ptr, p, m);
+                return s_QuantizeByPtr(m_target_ptr!, p, m);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Quantizer()
@@ -98,12 +97,12 @@ namespace image
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Quantize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_QuantizeByPtr = extensionMethod.CreateStaticDelegate(typeof(QuantizeByPtr)) as QuantizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Quantize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_QuantizeByVal = extensionMethod.CreateStaticDelegate(typeof(QuantizeByVal)) as QuantizeByVal;
 
                 if (s_QuantizeByPtr is null && s_QuantizeByVal is null)

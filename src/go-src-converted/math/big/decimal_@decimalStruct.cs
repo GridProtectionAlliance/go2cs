@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:17 UTC
+//     Generated on 2022 March 06 22:17:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace math
                 this.exp = default;
             }
 
-            public @decimal(slice<byte> mant = default, long exp = default)
+            public @decimal(slice<byte> mant = default, nint exp = default)
             {
                 this.mant = mant;
                 this.exp = exp;

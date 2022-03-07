@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:42 UTC
+//     Generated on 2022 March 06 22:23:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using io = go.io_package;
 using syntax = go.regexp.syntax_package;
@@ -52,7 +51,7 @@ namespace go
                 this.longest = default;
             }
 
-            public Regexp(@string expr = default, ref ptr<syntax.Prog> prog = default, ref ptr<onePassProg> onepass = default, long numSubexp = default, long maxBitStateLen = default, slice<@string> subexpNames = default, @string prefix = default, slice<byte> prefixBytes = default, int prefixRune = default, uint prefixEnd = default, long mpool = default, long matchcap = default, bool prefixComplete = default, syntax.EmptyOp cond = default, long minInputLen = default, bool longest = default)
+            public Regexp(@string expr = default, ref ptr<syntax.Prog> prog = default, ref ptr<onePassProg> onepass = default, nint numSubexp = default, nint maxBitStateLen = default, slice<@string> subexpNames = default, @string prefix = default, slice<byte> prefixBytes = default, int prefixRune = default, uint prefixEnd = default, nint mpool = default, nint matchcap = default, bool prefixComplete = default, syntax.EmptyOp cond = default, nint minInputLen = default, bool longest = default)
             {
                 this.expr = expr;
                 this.prog = prog;

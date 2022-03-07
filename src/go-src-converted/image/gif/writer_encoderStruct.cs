@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:51 UTC
+//     Generated on 2022 March 06 23:36:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using lzw = go.compress.lzw_package;
@@ -46,7 +45,7 @@ namespace image
                 this.localColorTable = default;
             }
 
-            public encoder(writer w = default, error err = default, GIF g = default, long globalCT = default, array<byte> buf = default, array<byte> globalColorTable = default, array<byte> localColorTable = default)
+            public encoder(writer w = default, error err = default, GIF g = default, nint globalCT = default, array<byte> buf = default, array<byte> globalColorTable = default, array<byte> localColorTable = default)
             {
                 this.w = w;
                 this.err = err;

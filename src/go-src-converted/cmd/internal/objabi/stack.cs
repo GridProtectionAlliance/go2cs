@@ -2,44 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2020 October 09 05:08:53 UTC
+// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
-// Original source: C:\Go\src\cmd\internal\objabi\stack.go
+// Original source: C:\Program Files\Go\src\cmd\internal\objabi\stack.go
+using buildcfg = go.@internal.buildcfg_package;
 
-using static go.builtin;
+namespace go.cmd.@internal;
 
-namespace go {
-namespace cmd {
-namespace @internal
-{
-    public static partial class objabi_package
-    {
-        // For the linkers. Must match Go definitions.
-        public static readonly long STACKSYSTEM = (long)0L;
-        public static readonly var StackSystem = STACKSYSTEM;
-        public static readonly long StackBig = (long)4096L;
-        public static readonly long StackSmall = (long)128L;
+public static partial class objabi_package {
+
+    // For the linkers. Must match Go definitions.
+public static readonly nint STACKSYSTEM = 0;
+public static readonly var StackSystem = STACKSYSTEM;
+public static readonly nint StackBig = 4096;
+public static readonly nint StackSmall = 128;
 
 
-        public static readonly long StackPreempt = (long)-1314L; // 0xfff...fade
+// Initialize StackGuard and StackLimit according to target system.
+public static nint StackGuard = 928 * stackGuardMultiplier() + StackSystem;
+public static var StackLimit = StackGuard - StackSystem - StackSmall;
 
-        // Initialize StackGuard and StackLimit according to target system.
-        public static long StackGuard = 928L * stackGuardMultiplier() + StackSystem;
-        public static var StackLimit = StackGuard - StackSystem - StackSmall;
-
-        // stackGuardMultiplier returns a multiplier to apply to the default
-        // stack guard size. Larger multipliers are used for non-optimized
-        // builds that have larger stack frames or for specific targets.
-        private static long stackGuardMultiplier()
-        { 
-            // On AIX, a larger stack is needed for syscalls.
-            if (GOOS == "aix")
-            {
-                return 2L;
-            }
-
-            return stackGuardMultiplierDefault;
-
-        }
+// stackGuardMultiplier returns a multiplier to apply to the default
+// stack guard size. Larger multipliers are used for non-optimized
+// builds that have larger stack frames or for specific targets.
+private static nint stackGuardMultiplier() { 
+    // On AIX, a larger stack is needed for syscalls.
+    if (buildcfg.GOOS == "aix") {
+        return 2;
     }
-}}}
+    return stackGuardMultiplierDefault;
+
+}
+
+} // end objabi_package

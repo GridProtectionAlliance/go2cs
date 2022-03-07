@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:36 UTC
+//     Generated on 2022 March 06 23:22:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
+using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using bits = go.math.bits_package;
 using filepath = go.path.filepath_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -35,8 +36,18 @@ namespace @internal
     public static partial class ld_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
+        [PromotedStruct(typeof(sync.Mutex))]
         private partial struct xcoffFile
         {
+            // Mutex structure promotion - sourced from value copy
+            private readonly ptr<Mutex> m_MutexRef;
+
+            private ref Mutex Mutex_val => ref m_MutexRef.Value;
+
+            public ref int state => ref m_MutexRef.Value.state;
+
+            public ref uint sema => ref m_MutexRef.Value.sema;
+
             // Constructors
             public xcoffFile(NilType _)
             {
@@ -55,9 +66,10 @@ namespace @internal
                 this.dynLibraries = default;
                 this.loaderSymbols = default;
                 this.loaderReloc = default;
+                this.m_MutexRef = new ptr<sync.Mutex>(new sync.Mutex(nil));
             }
 
-            public xcoffFile(XcoffFileHdr64 xfhdr = default, XcoffAoutHdr64 xahdr = default, slice<ptr<XcoffScnHdr64>> sections = default, ref ptr<XcoffScnHdr64> sectText = default, ref ptr<XcoffScnHdr64> sectData = default, ref ptr<XcoffScnHdr64> sectBss = default, xcoffStringTable stringTable = default, map<@string, short> sectNameToScnum = default, ulong loaderSize = default, long symtabOffset = default, uint symbolCount = default, slice<xcoffSym> symtabSym = default, map<@string, long> dynLibraries = default, slice<ptr<xcoffLoaderSymbol>> loaderSymbols = default, slice<ptr<xcoffLoaderReloc>> loaderReloc = default)
+            public xcoffFile(XcoffFileHdr64 xfhdr = default, XcoffAoutHdr64 xahdr = default, slice<ptr<XcoffScnHdr64>> sections = default, ref ptr<XcoffScnHdr64> sectText = default, ref ptr<XcoffScnHdr64> sectData = default, ref ptr<XcoffScnHdr64> sectBss = default, xcoffStringTable stringTable = default, map<@string, short> sectNameToScnum = default, ulong loaderSize = default, long symtabOffset = default, uint symbolCount = default, slice<xcoffSym> symtabSym = default, map<@string, nint> dynLibraries = default, slice<ptr<xcoffLoaderSymbol>> loaderSymbols = default, slice<ptr<xcoffLoaderReloc>> loaderReloc = default, sync.Mutex Mutex = default)
             {
                 this.xfhdr = xfhdr;
                 this.xahdr = xahdr;
@@ -74,6 +86,7 @@ namespace @internal
                 this.dynLibraries = dynLibraries;
                 this.loaderSymbols = loaderSymbols;
                 this.loaderReloc = loaderReloc;
+                this.m_MutexRef = new ptr<sync.Mutex>(Mutex);
             }
 
             // Enable comparisons between nil and xcoffFile struct
@@ -96,7 +109,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static xcoffFile xcoffFile_cast(dynamic value)
         {
-            return new xcoffFile(value.xfhdr, value.xahdr, value.sections, ref value.sectText, ref value.sectData, ref value.sectBss, value.stringTable, value.sectNameToScnum, value.loaderSize, value.symtabOffset, value.symbolCount, value.symtabSym, value.dynLibraries, value.loaderSymbols, value.loaderReloc);
+            return new xcoffFile(value.xfhdr, value.xahdr, value.sections, ref value.sectText, ref value.sectData, ref value.sectBss, value.stringTable, value.sectNameToScnum, value.loaderSize, value.symtabOffset, value.symbolCount, value.symtabSym, value.dynLibraries, value.loaderSymbols, value.loaderReloc, value.Mutex);
         }
     }
 }}}}

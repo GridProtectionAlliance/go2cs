@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:51 UTC
+//     Generated on 2022 March 06 22:22:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -77,7 +76,7 @@ namespace net
                 this.closeNotifierCh = default;
             }
 
-            public http2responseWriterState(ref ptr<http2stream> stream = default, ref ptr<Request> req = default, ref ptr<http2requestBody> body = default, ref ptr<http2serverConn> conn = default, ref ptr<bufio.Writer> bw = default, Header handlerHeader = default, Header snapHeader = default, slice<@string> trailers = default, long status = default, bool wroteHeader = default, bool sentHeader = default, bool handlerDone = default, bool dirty = default, long sentContentLen = default, long wroteBytes = default, sync.Mutex closeNotifierMu = default, channel<bool> closeNotifierCh = default)
+            public http2responseWriterState(ref ptr<http2stream> stream = default, ref ptr<Request> req = default, ref ptr<http2requestBody> body = default, ref ptr<http2serverConn> conn = default, ref ptr<bufio.Writer> bw = default, Header handlerHeader = default, Header snapHeader = default, slice<@string> trailers = default, nint status = default, bool wroteHeader = default, bool sentHeader = default, bool handlerDone = default, bool dirty = default, long sentContentLen = default, long wroteBytes = default, sync.Mutex closeNotifierMu = default, channel<bool> closeNotifierCh = default)
             {
                 this.stream = stream;
                 this.req = req;

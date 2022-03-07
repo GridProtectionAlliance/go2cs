@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:31 UTC
+//     Generated on 2022 March 06 22:23:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace regexp
         {
             // Value of the Flags struct
             private readonly ushort m_value;
-
+            
             public Flags(ushort value) => m_value = value;
 
             // Enable implicit conversions between ushort and Flags struct

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:42 UTC
+//     Generated on 2022 March 06 22:42:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using sort = go.sort_package;
+using fmt = go.fmt_package;
+using token = go.go.token_package;
+using atomic = go.sync.atomic_package;
 using go;
 
 #nullable enable
@@ -30,15 +31,21 @@ namespace go
             public Interface(NilType _)
             {
                 this.methods = default;
+                this.types = default;
                 this.embeddeds = default;
                 this.allMethods = default;
+                this.allTypes = default;
+                this.obj = default;
             }
 
-            public Interface(slice<ptr<Func>> methods = default, slice<Type> embeddeds = default, slice<ptr<Func>> allMethods = default)
+            public Interface(slice<ptr<Func>> methods = default, Type types = default, slice<Type> embeddeds = default, slice<ptr<Func>> allMethods = default, Type allTypes = default, Object obj = default)
             {
                 this.methods = methods;
+                this.types = types;
                 this.embeddeds = embeddeds;
                 this.allMethods = allMethods;
+                this.allTypes = allTypes;
+                this.obj = obj;
             }
 
             // Enable comparisons between nil and Interface struct
@@ -61,7 +68,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Interface Interface_cast(dynamic value)
         {
-            return new Interface(value.methods, value.embeddeds, value.allMethods);
+            return new Interface(value.methods, value.types, value.embeddeds, value.allMethods, value.allTypes, value.obj);
         }
     }
 }}

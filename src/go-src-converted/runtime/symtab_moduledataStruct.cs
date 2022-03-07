@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:50 UTC
+//     Generated on 2022 March 06 22:12:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -29,9 +28,13 @@ namespace go
             // Constructors
             public moduledata(NilType _)
             {
+                this.pcHeader = default;
+                this.funcnametab = default;
+                this.cutab = default;
+                this.filetab = default;
+                this.pctab = default;
                 this.pclntable = default;
                 this.ftab = default;
-                this.filetab = default;
                 this.findfunctab = default;
                 this.minpc = default;
                 this.maxpc = default;
@@ -66,11 +69,15 @@ namespace go
                 this.next = default;
             }
 
-            public moduledata(slice<byte> pclntable = default, slice<functab> ftab = default, slice<uint> filetab = default, System.UIntPtr findfunctab = default, System.UIntPtr minpc = default, System.UIntPtr maxpc = default, System.UIntPtr text = default, System.UIntPtr etext = default, System.UIntPtr noptrdata = default, System.UIntPtr enoptrdata = default, System.UIntPtr data = default, System.UIntPtr edata = default, System.UIntPtr bss = default, System.UIntPtr ebss = default, System.UIntPtr noptrbss = default, System.UIntPtr enoptrbss = default, System.UIntPtr end = default, System.UIntPtr gcdata = default, System.UIntPtr gcbss = default, System.UIntPtr types = default, System.UIntPtr etypes = default, slice<textsect> textsectmap = default, slice<int> typelinks = default, slice<ptr<itab>> itablinks = default, slice<ptabEntry> ptab = default, @string pluginpath = default, slice<modulehash> pkghashes = default, @string modulename = default, slice<modulehash> modulehashes = default, byte hasmain = default, bitvector gcdatamask = default, bitvector gcbssmask = default, map<typeOff, ptr<_type>> typemap = default, bool bad = default, ref ptr<moduledata> next = default)
+            public moduledata(ref ptr<pcHeader> pcHeader = default, slice<byte> funcnametab = default, slice<uint> cutab = default, slice<byte> filetab = default, slice<byte> pctab = default, slice<byte> pclntable = default, slice<functab> ftab = default, System.UIntPtr findfunctab = default, System.UIntPtr minpc = default, System.UIntPtr maxpc = default, System.UIntPtr text = default, System.UIntPtr etext = default, System.UIntPtr noptrdata = default, System.UIntPtr enoptrdata = default, System.UIntPtr data = default, System.UIntPtr edata = default, System.UIntPtr bss = default, System.UIntPtr ebss = default, System.UIntPtr noptrbss = default, System.UIntPtr enoptrbss = default, System.UIntPtr end = default, System.UIntPtr gcdata = default, System.UIntPtr gcbss = default, System.UIntPtr types = default, System.UIntPtr etypes = default, slice<textsect> textsectmap = default, slice<int> typelinks = default, slice<ptr<itab>> itablinks = default, slice<ptabEntry> ptab = default, @string pluginpath = default, slice<modulehash> pkghashes = default, @string modulename = default, slice<modulehash> modulehashes = default, byte hasmain = default, bitvector gcdatamask = default, bitvector gcbssmask = default, map<typeOff, ptr<_type>> typemap = default, bool bad = default, ref ptr<moduledata> next = default)
             {
+                this.pcHeader = pcHeader;
+                this.funcnametab = funcnametab;
+                this.cutab = cutab;
+                this.filetab = filetab;
+                this.pctab = pctab;
                 this.pclntable = pclntable;
                 this.ftab = ftab;
-                this.filetab = filetab;
                 this.findfunctab = findfunctab;
                 this.minpc = minpc;
                 this.maxpc = maxpc;
@@ -125,7 +132,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static moduledata moduledata_cast(dynamic value)
         {
-            return new moduledata(value.pclntable, value.ftab, value.filetab, value.findfunctab, value.minpc, value.maxpc, value.text, value.etext, value.noptrdata, value.enoptrdata, value.data, value.edata, value.bss, value.ebss, value.noptrbss, value.enoptrbss, value.end, value.gcdata, value.gcbss, value.types, value.etypes, value.textsectmap, value.typelinks, value.itablinks, value.ptab, value.pluginpath, value.pkghashes, value.modulename, value.modulehashes, value.hasmain, value.gcdatamask, value.gcbssmask, value.typemap, value.bad, ref value.next);
+            return new moduledata(ref value.pcHeader, value.funcnametab, value.cutab, value.filetab, value.pctab, value.pclntable, value.ftab, value.findfunctab, value.minpc, value.maxpc, value.text, value.etext, value.noptrdata, value.enoptrdata, value.data, value.edata, value.bss, value.ebss, value.noptrbss, value.enoptrbss, value.end, value.gcdata, value.gcbss, value.types, value.etypes, value.textsectmap, value.typelinks, value.itablinks, value.ptab, value.pluginpath, value.pkghashes, value.modulename, value.modulehashes, value.hasmain, value.gcdatamask, value.gcbssmask, value.typemap, value.bad, ref value.next);
         }
     }
 }

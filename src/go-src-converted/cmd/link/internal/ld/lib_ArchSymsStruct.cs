@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:51 UTC
+//     Generated on 2022 March 06 23:21:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -30,16 +29,15 @@ using elf = go.debug.elf_package;
 using macho = go.debug.macho_package;
 using base64 = go.encoding.base64_package;
 using binary = go.encoding.binary_package;
-using hex = go.encoding.hex_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
+using exec = go.@internal.execabs_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
 using log = go.log_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
-using sort = go.sort_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using go;
@@ -59,6 +57,12 @@ namespace @internal
             // Constructors
             public ArchSyms(NilType _)
             {
+                this.Rel = default;
+                this.Rela = default;
+                this.RelPLT = default;
+                this.RelaPLT = default;
+                this.LinkEditGOT = default;
+                this.LinkEditPLT = default;
                 this.TOC = default;
                 this.DotTOC = default;
                 this.GOT = default;
@@ -69,31 +73,17 @@ namespace @internal
                 this.Dynamic = default;
                 this.DynSym = default;
                 this.DynStr = default;
-                this.Rel = default;
-                this.Rela = default;
-                this.RelPLT = default;
-                this.RelaPLT = default;
-                this.LinkEditGOT = default;
-                this.LinkEditPLT = default;
-                this.Rel2 = default;
-                this.Rela2 = default;
-                this.RelPLT2 = default;
-                this.RelaPLT2 = default;
-                this.LinkEditGOT2 = default;
-                this.LinkEditPLT2 = default;
-                this.TOC2 = default;
-                this.DotTOC2 = default;
-                this.GOT2 = default;
-                this.PLT2 = default;
-                this.GOTPLT2 = default;
-                this.Tlsg2 = default;
-                this.Dynamic2 = default;
-                this.DynSym2 = default;
-                this.DynStr2 = default;
+                this.unreachableMethod = default;
             }
 
-            public ArchSyms(ref ptr<sym.Symbol> TOC = default, slice<ptr<sym.Symbol>> DotTOC = default, ref ptr<sym.Symbol> GOT = default, ref ptr<sym.Symbol> PLT = default, ref ptr<sym.Symbol> GOTPLT = default, ref ptr<sym.Symbol> Tlsg = default, long Tlsoffset = default, ref ptr<sym.Symbol> Dynamic = default, ref ptr<sym.Symbol> DynSym = default, ref ptr<sym.Symbol> DynStr = default, ref ptr<sym.Symbol> Rel = default, ref ptr<sym.Symbol> Rela = default, ref ptr<sym.Symbol> RelPLT = default, ref ptr<sym.Symbol> RelaPLT = default, ref ptr<sym.Symbol> LinkEditGOT = default, ref ptr<sym.Symbol> LinkEditPLT = default, loader.Sym Rel2 = default, loader.Sym Rela2 = default, loader.Sym RelPLT2 = default, loader.Sym RelaPLT2 = default, loader.Sym LinkEditGOT2 = default, loader.Sym LinkEditPLT2 = default, loader.Sym TOC2 = default, slice<loader.Sym> DotTOC2 = default, loader.Sym GOT2 = default, loader.Sym PLT2 = default, loader.Sym GOTPLT2 = default, loader.Sym Tlsg2 = default, loader.Sym Dynamic2 = default, loader.Sym DynSym2 = default, loader.Sym DynStr2 = default)
+            public ArchSyms(loader.Sym Rel = default, loader.Sym Rela = default, loader.Sym RelPLT = default, loader.Sym RelaPLT = default, loader.Sym LinkEditGOT = default, loader.Sym LinkEditPLT = default, loader.Sym TOC = default, slice<loader.Sym> DotTOC = default, loader.Sym GOT = default, loader.Sym PLT = default, loader.Sym GOTPLT = default, loader.Sym Tlsg = default, nint Tlsoffset = default, loader.Sym Dynamic = default, loader.Sym DynSym = default, loader.Sym DynStr = default, loader.Sym unreachableMethod = default)
             {
+                this.Rel = Rel;
+                this.Rela = Rela;
+                this.RelPLT = RelPLT;
+                this.RelaPLT = RelaPLT;
+                this.LinkEditGOT = LinkEditGOT;
+                this.LinkEditPLT = LinkEditPLT;
                 this.TOC = TOC;
                 this.DotTOC = DotTOC;
                 this.GOT = GOT;
@@ -104,27 +94,7 @@ namespace @internal
                 this.Dynamic = Dynamic;
                 this.DynSym = DynSym;
                 this.DynStr = DynStr;
-                this.Rel = Rel;
-                this.Rela = Rela;
-                this.RelPLT = RelPLT;
-                this.RelaPLT = RelaPLT;
-                this.LinkEditGOT = LinkEditGOT;
-                this.LinkEditPLT = LinkEditPLT;
-                this.Rel2 = Rel2;
-                this.Rela2 = Rela2;
-                this.RelPLT2 = RelPLT2;
-                this.RelaPLT2 = RelaPLT2;
-                this.LinkEditGOT2 = LinkEditGOT2;
-                this.LinkEditPLT2 = LinkEditPLT2;
-                this.TOC2 = TOC2;
-                this.DotTOC2 = DotTOC2;
-                this.GOT2 = GOT2;
-                this.PLT2 = PLT2;
-                this.GOTPLT2 = GOTPLT2;
-                this.Tlsg2 = Tlsg2;
-                this.Dynamic2 = Dynamic2;
-                this.DynSym2 = DynSym2;
-                this.DynStr2 = DynStr2;
+                this.unreachableMethod = unreachableMethod;
             }
 
             // Enable comparisons between nil and ArchSyms struct
@@ -147,7 +117,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ArchSyms ArchSyms_cast(dynamic value)
         {
-            return new ArchSyms(ref value.TOC, value.DotTOC, ref value.GOT, ref value.PLT, ref value.GOTPLT, ref value.Tlsg, value.Tlsoffset, ref value.Dynamic, ref value.DynSym, ref value.DynStr, ref value.Rel, ref value.Rela, ref value.RelPLT, ref value.RelaPLT, ref value.LinkEditGOT, ref value.LinkEditPLT, value.Rel2, value.Rela2, value.RelPLT2, value.RelaPLT2, value.LinkEditGOT2, value.LinkEditPLT2, value.TOC2, value.DotTOC2, value.GOT2, value.PLT2, value.GOTPLT2, value.Tlsg2, value.Dynamic2, value.DynSym2, value.DynStr2);
+            return new ArchSyms(value.Rel, value.Rela, value.RelPLT, value.RelaPLT, value.LinkEditGOT, value.LinkEditPLT, value.TOC, value.DotTOC, value.GOT, value.PLT, value.GOTPLT, value.Tlsg, value.Tlsoffset, value.Dynamic, value.DynSym, value.DynStr, value.unreachableMethod);
         }
     }
 }}}}

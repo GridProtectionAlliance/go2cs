@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:30 UTC
+//     Generated on 2022 March 06 23:35:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
@@ -65,21 +64,21 @@ namespace database
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Lock");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_LockByRef = extensionMethod.CreateStaticDelegate(typeof(LockByRef)) as LockByRef;
 
-                    if ((object)s_LockByRef == null)
+                    if (s_LockByRef is null)
                         s_LockByVal = extensionMethod.CreateStaticDelegate(typeof(LockByVal)) as LockByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Unlock");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_UnlockByRef = extensionMethod.CreateStaticDelegate(typeof(UnlockByRef)) as UnlockByRef;
 
-                    if ((object)s_UnlockByRef == null)
+                    if (s_UnlockByRef is null)
                         s_UnlockByVal = extensionMethod.CreateStaticDelegate(typeof(UnlockByVal)) as UnlockByVal;
                 }
             }

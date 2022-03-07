@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:12 UTC
+//     Generated on 2022 March 06 23:35:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace testdata
                 this.A = default;
             }
 
-            public StructTagTest(long A = default)
+            public StructTagTest(nint A = default)
             {
                 this.A = A;
             }

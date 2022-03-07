@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:00 UTC
+//     Generated on 2022 March 06 22:24:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,13 +13,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using log = go.log_package;
 using net = go.net_package;
 using http = go.net.http_package;
+using ascii = go.net.http.@internal.ascii_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
 using strings = go.strings_package;
@@ -62,7 +62,7 @@ namespace http
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -88,13 +88,13 @@ namespace http
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GetByPtr is null || !m_target_is_ptr)
                     return s_GetByVal!(target);
 
-                return s_GetByPtr(m_target_ptr);
+                return s_GetByPtr(m_target_ptr!);
             }
 
             private delegate slice<byte> PutByPtr(ptr<T> value, slice<byte> _p0);
@@ -108,16 +108,16 @@ namespace http
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PutByPtr is null || !m_target_is_ptr)
                     return s_PutByVal!(target, _p0);
 
-                return s_PutByPtr(m_target_ptr, _p0);
+                return s_PutByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static BufferPool()
@@ -128,12 +128,12 @@ namespace http
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Get");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
                 if (s_GetByPtr is null && s_GetByVal is null)
@@ -141,12 +141,12 @@ namespace http
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Put");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutByPtr = extensionMethod.CreateStaticDelegate(typeof(PutByPtr)) as PutByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Put");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PutByVal = extensionMethod.CreateStaticDelegate(typeof(PutByVal)) as PutByVal;
 
                 if (s_PutByPtr is null && s_PutByVal is null)

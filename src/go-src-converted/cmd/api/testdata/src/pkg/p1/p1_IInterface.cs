@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
@@ -54,7 +53,7 @@ namespace pkg
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,13 +79,13 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetByPtr is null || !m_target_is_ptr)
                     return s_SetByVal!(target, name, balance);
 
-                return s_SetByPtr(m_target_ptr, name, balance);
+                return s_SetByPtr(m_target_ptr!, name, balance);
             }
 
             private delegate long GetByPtr(ptr<T> value, @string _p0);
@@ -100,13 +99,13 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GetByPtr is null || !m_target_is_ptr)
                     return s_GetByVal!(target, _p0);
 
-                return s_GetByPtr(m_target_ptr, _p0);
+                return s_GetByPtr(m_target_ptr!, _p0);
             }
 
             private delegate long GetNamedByPtr(ptr<T> value, @string _p0);
@@ -120,13 +119,13 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GetNamedByPtr is null || !m_target_is_ptr)
                     return s_GetNamedByVal!(target, _p0);
 
-                return s_GetNamedByPtr(m_target_ptr, _p0);
+                return s_GetNamedByPtr(m_target_ptr!, _p0);
             }
 
             private delegate long privateByPtr(ptr<T> value);
@@ -140,36 +139,16 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_privateByPtr is null || !m_target_is_ptr)
                     return s_privateByVal!(target);
 
-                return s_privateByPtr(m_target_ptr);
-            }
-
-            private delegate @string NameByPtr(ptr<T> value);
-            private delegate @string NameByVal(T value);
-
-            private static readonly NameByPtr? s_NameByPtr;
-            private static readonly NameByVal? s_NameByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Name()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_NameByPtr is null || !m_target_is_ptr)
-                    return s_NameByVal!(target);
-
-                return s_NameByPtr(m_target_ptr);
+                return s_privateByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static I()
@@ -180,12 +159,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Set");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetByPtr = extensionMethod.CreateStaticDelegate(typeof(SetByPtr)) as SetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Set");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetByVal = extensionMethod.CreateStaticDelegate(typeof(SetByVal)) as SetByVal;
 
                 if (s_SetByPtr is null && s_SetByVal is null)
@@ -193,12 +172,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Get");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetByPtr = extensionMethod.CreateStaticDelegate(typeof(GetByPtr)) as GetByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Get");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetByVal = extensionMethod.CreateStaticDelegate(typeof(GetByVal)) as GetByVal;
 
                 if (s_GetByPtr is null && s_GetByVal is null)
@@ -206,12 +185,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("GetNamed");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetNamedByPtr = extensionMethod.CreateStaticDelegate(typeof(GetNamedByPtr)) as GetNamedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("GetNamed");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GetNamedByVal = extensionMethod.CreateStaticDelegate(typeof(GetNamedByVal)) as GetNamedByVal;
 
                 if (s_GetNamedByPtr is null && s_GetNamedByVal is null)
@@ -219,29 +198,16 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("private");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_privateByPtr = extensionMethod.CreateStaticDelegate(typeof(privateByPtr)) as privateByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("private");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_privateByVal = extensionMethod.CreateStaticDelegate(typeof(privateByVal)) as privateByVal;
 
                 if (s_privateByPtr is null && s_privateByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement I.private method", new Exception("private"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
-
-                if (!(extensionMethod is null))
-                    s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Name");
-
-                if (!(extensionMethod is null))
-                    s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
-
-                if (s_NameByPtr is null && s_NameByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement I.Name method", new Exception("Name"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

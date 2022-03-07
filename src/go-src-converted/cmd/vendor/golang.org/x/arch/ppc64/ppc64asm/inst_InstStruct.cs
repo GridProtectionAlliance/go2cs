@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:56 UTC
+//     Generated on 2022 March 06 23:25:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using go;
@@ -38,14 +37,16 @@ namespace ppc64
                 this.Op = default;
                 this.Enc = default;
                 this.Len = default;
+                this.SuffixEnc = default;
                 this.Args = default;
             }
 
-            public Inst(Op Op = default, uint Enc = default, long Len = default, Args Args = default)
+            public Inst(Op Op = default, uint Enc = default, nint Len = default, uint SuffixEnc = default, Args Args = default)
             {
                 this.Op = Op;
                 this.Enc = Enc;
                 this.Len = Len;
+                this.SuffixEnc = SuffixEnc;
                 this.Args = Args;
             }
 
@@ -69,7 +70,7 @@ namespace ppc64
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Inst Inst_cast(dynamic value)
         {
-            return new Inst(value.Op, value.Enc, value.Len, value.Args);
+            return new Inst(value.Op, value.Enc, value.Len, value.SuffixEnc, value.Args);
         }
     }
 }}}}}}}

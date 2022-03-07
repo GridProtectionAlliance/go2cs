@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:00 UTC
+//     Generated on 2022 March 06 23:17:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,9 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
-using str = go.cmd.go.@internal.str_package;
+using context = go.context_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -28,6 +27,9 @@ using sort = go.sort_package;
 using strings = go.strings_package;
 using unicode = go.unicode_package;
 using utf8 = go.unicode.utf8_package;
+using fsys = go.cmd.go.@internal.fsys_package;
+using str = go.cmd.go.@internal.str_package;
+using trace = go.cmd.go.@internal.trace_package;
 using go;
 
 #nullable enable

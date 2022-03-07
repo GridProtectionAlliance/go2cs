@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:51 UTC
+//     Generated on 2022 March 06 22:22:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -65,12 +64,14 @@ namespace net
                 this.AllowHTTP = default;
                 this.MaxHeaderListSize = default;
                 this.StrictMaxConcurrentStreams = default;
+                this.ReadIdleTimeout = default;
+                this.PingTimeout = default;
                 this.t1 = default;
                 this.connPoolOnce = default;
                 this.connPoolOrDef = default;
             }
 
-            public http2Transport(Func<@string, @string, ptr<tls.Config>, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, http2ClientConnPool ConnPool = default, bool DisableCompression = default, bool AllowHTTP = default, uint MaxHeaderListSize = default, bool StrictMaxConcurrentStreams = default, ref ptr<Transport> t1 = default, sync.Once connPoolOnce = default, http2ClientConnPool connPoolOrDef = default)
+            public http2Transport(Func<@string, @string, ptr<tls.Config>, (net.Conn, error)> DialTLS = default, ref ptr<tls.Config> TLSClientConfig = default, http2ClientConnPool ConnPool = default, bool DisableCompression = default, bool AllowHTTP = default, uint MaxHeaderListSize = default, bool StrictMaxConcurrentStreams = default, time.Duration ReadIdleTimeout = default, time.Duration PingTimeout = default, ref ptr<Transport> t1 = default, sync.Once connPoolOnce = default, http2ClientConnPool connPoolOrDef = default)
             {
                 this.DialTLS = DialTLS;
                 this.TLSClientConfig = TLSClientConfig;
@@ -79,6 +80,8 @@ namespace net
                 this.AllowHTTP = AllowHTTP;
                 this.MaxHeaderListSize = MaxHeaderListSize;
                 this.StrictMaxConcurrentStreams = StrictMaxConcurrentStreams;
+                this.ReadIdleTimeout = ReadIdleTimeout;
+                this.PingTimeout = PingTimeout;
                 this.t1 = t1;
                 this.connPoolOnce = connPoolOnce;
                 this.connPoolOrDef = connPoolOrDef;
@@ -104,7 +107,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2Transport http2Transport_cast(dynamic value)
         {
-            return new http2Transport(value.DialTLS, ref value.TLSClientConfig, value.ConnPool, value.DisableCompression, value.AllowHTTP, value.MaxHeaderListSize, value.StrictMaxConcurrentStreams, ref value.t1, value.connPoolOnce, value.connPoolOrDef);
+            return new http2Transport(value.DialTLS, ref value.TLSClientConfig, value.ConnPool, value.DisableCompression, value.AllowHTTP, value.MaxHeaderListSize, value.StrictMaxConcurrentStreams, value.ReadIdleTimeout, value.PingTimeout, ref value.t1, value.connPoolOnce, value.connPoolOrDef);
         }
     }
 }}

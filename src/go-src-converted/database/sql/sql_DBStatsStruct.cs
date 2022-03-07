@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:28 UTC
+//     Generated on 2022 March 06 23:35:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
@@ -51,7 +50,7 @@ namespace database
                 this.MaxLifetimeClosed = default;
             }
 
-            public DBStats(long MaxOpenConnections = default, long OpenConnections = default, long InUse = default, long Idle = default, long WaitCount = default, time.Duration WaitDuration = default, long MaxIdleClosed = default, long MaxIdleTimeClosed = default, long MaxLifetimeClosed = default)
+            public DBStats(nint MaxOpenConnections = default, nint OpenConnections = default, nint InUse = default, nint Idle = default, long WaitCount = default, time.Duration WaitDuration = default, long MaxIdleClosed = default, long MaxIdleTimeClosed = default, long MaxLifetimeClosed = default)
             {
                 this.MaxOpenConnections = MaxOpenConnections;
                 this.OpenConnections = OpenConnections;

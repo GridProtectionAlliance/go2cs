@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:58 UTC
+//     Generated on 2022 March 06 23:38:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using list = go.container.list_package;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
@@ -42,7 +41,7 @@ namespace unicode
                 this.indexes = default;
             }
 
-            public bracketPairer(Class sos = default, ref ptr<list.List> openers = default, bracketPairs pairPositions = default, slice<Class> codesIsolatedRun = default, slice<long> indexes = default)
+            public bracketPairer(Class sos = default, ref ptr<list.List> openers = default, bracketPairs pairPositions = default, slice<Class> codesIsolatedRun = default, slice<nint> indexes = default)
             {
                 this.sos = sos;
                 this.openers = openers;

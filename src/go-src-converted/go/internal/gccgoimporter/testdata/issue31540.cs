@@ -2,48 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue31540 -- go2cs converted at 2020 October 09 06:02:54 UTC
+// package issue31540 -- go2cs converted at 2022 March 06 23:32:49 UTC
 // import "go/internal/gccgoimporter.issue31540" ==> using issue31540 = go.go.@internal.gccgoimporter.issue31540_package
-// Original source: C:\Go\src\go\internal\gccgoimporter\testdata\issue31540.go
+// Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\testdata\issue31540.go
 
-using static go.builtin;
 
-namespace go {
-namespace go {
-namespace @internal
-{
-    public static partial class issue31540_package
-    {
-        public partial struct Y
-        {
-            public long q;
-        }
+namespace go.go.@internal;
 
-        public partial struct Z // : map<long, long>
-        {
-        }
+public static partial class issue31540_package {
 
-        public partial struct X // : map<Y, Z>
-        {
-        }
+public partial struct Y {
+    public nint q;
+}
 
-        public partial struct A1 // : X
-        {
-        }
+public partial struct Z { // : map<nint, nint>
+}
 
-        public partial struct A2 // : A1
-        {
-        }
+public partial struct X { // : map<Y, Z>
+}
 
-        public partial struct S
-        {
-            public long b;
-            public ref A2 A2 => ref A2_val;
-        }
+public partial struct A1 { // : X
+}
 
-        public static S Hallo()
-        {
-            return new S();
-        }
-    }
-}}}
+public partial struct A2 { // : A1
+}
+
+public partial struct S {
+    public nint b;
+    public ref A2 A2 => ref A2_val;
+}
+
+public static S Hallo() {
+    return new S();
+}
+
+} // end issue31540_package

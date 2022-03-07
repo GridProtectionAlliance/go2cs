@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:48 UTC
+//     Generated on 2022 March 06 23:36:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using lzw = go.compress.lzw_package;
 using errors = go.errors_package;
@@ -43,7 +42,7 @@ namespace image
                 this.BackgroundIndex = default;
             }
 
-            public GIF(slice<ptr<image.Paletted>> Image = default, slice<long> Delay = default, long LoopCount = default, slice<byte> Disposal = default, image.Config Config = default, byte BackgroundIndex = default)
+            public GIF(slice<ptr<image.Paletted>> Image = default, slice<nint> Delay = default, nint LoopCount = default, slice<byte> Disposal = default, image.Config Config = default, byte BackgroundIndex = default)
             {
                 this.Image = Image;
                 this.Delay = Delay;

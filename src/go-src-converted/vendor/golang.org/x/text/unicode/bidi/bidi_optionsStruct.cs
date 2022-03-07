@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:57 UTC
+//     Generated on 2022 March 06 23:38:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using bytes = go.bytes_package;
 using go;
 
 #nullable enable
@@ -32,7 +32,14 @@ namespace unicode
             // Constructors
             public options(NilType _)
             {
+                this.defaultDirection = default;
             }
+
+            public options(Direction defaultDirection = default)
+            {
+                this.defaultDirection = defaultDirection;
+            }
+
             // Enable comparisons between nil and options struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(options value, NilType nil) => value.Equals(default(options));
@@ -53,7 +60,7 @@ namespace unicode
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static options options_cast(dynamic value)
         {
-            return new options();
+            return new options(value.defaultDirection);
         }
     }
 }}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:38 UTC
+//     Generated on 2022 March 06 23:19:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
+using sysinfo = go.@internal.sysinfo_package;
 using io = go.io_package;
 using math = go.math_package;
 using os = go.os_package;
@@ -61,7 +61,7 @@ namespace go
                 this.extra = default;
             }
 
-            public B(common common = default, @string importPath = default, ref ptr<benchContext> context = default, long N = default, long previousN = default, time.Duration previousDuration = default, Action<ptr<B>> benchFunc = default, benchTimeFlag benchTime = default, long bytes = default, bool missingBytes = default, bool timerOn = default, bool showAllocResult = default, BenchmarkResult result = default, long parallelism = default, ulong startAllocs = default, ulong startBytes = default, ulong netAllocs = default, ulong netBytes = default, map<@string, double> extra = default)
+            public B(common common = default, @string importPath = default, ref ptr<benchContext> context = default, nint N = default, nint previousN = default, time.Duration previousDuration = default, Action<ptr<B>> benchFunc = default, benchTimeFlag benchTime = default, long bytes = default, bool missingBytes = default, bool timerOn = default, bool showAllocResult = default, BenchmarkResult result = default, nint parallelism = default, ulong startAllocs = default, ulong startBytes = default, ulong netAllocs = default, ulong netBytes = default, map<@string, double> extra = default)
             {
                 this.common = common;
                 this.importPath = importPath;

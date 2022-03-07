@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -46,15 +45,15 @@ namespace pprof
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
             public error Name() => s_NameByRef?.Invoke(ref this) ?? s_NameByVal?.Invoke(this) ?? ObjFile?.Name() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
-            // ObjFile.Base function promotion
-            private delegate error BaseByVal(T value);
-            private delegate error BaseByRef(ref T value);
+            // ObjFile.ObjAddr function promotion
+            private delegate error ObjAddrByVal(T value, ulong addr);
+            private delegate error ObjAddrByRef(ref T value, ulong addr);
 
-            private static readonly BaseByVal s_BaseByVal;
-            private static readonly BaseByRef s_BaseByRef;
+            private static readonly ObjAddrByVal s_ObjAddrByVal;
+            private static readonly ObjAddrByRef s_ObjAddrByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Base() => s_BaseByRef?.Invoke(ref this) ?? s_BaseByVal?.Invoke(this) ?? ObjFile?.Base() ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public error ObjAddr(ulong addr) => s_ObjAddrByRef?.Invoke(ref this, addr) ?? s_ObjAddrByVal?.Invoke(this, addr) ?? ObjFile?.ObjAddr(addr) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
 
             // ObjFile.BuildID function promotion
             private delegate error BuildIDByVal(T value);
@@ -104,61 +103,61 @@ namespace pprof
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Name");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_NameByRef = extensionMethod.CreateStaticDelegate(typeof(NameByRef)) as NameByRef;
 
-                    if ((object)s_NameByRef == null)
+                    if (s_NameByRef is null)
                         s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
                 }
                 
-                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Base");
+                extensionMethod = targetType.GetExtensionMethodSearchingPromotions("ObjAddr");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
-                    s_BaseByRef = extensionMethod.CreateStaticDelegate(typeof(BaseByRef)) as BaseByRef;
+                    s_ObjAddrByRef = extensionMethod.CreateStaticDelegate(typeof(ObjAddrByRef)) as ObjAddrByRef;
 
-                    if ((object)s_BaseByRef == null)
-                        s_BaseByVal = extensionMethod.CreateStaticDelegate(typeof(BaseByVal)) as BaseByVal;
+                    if (s_ObjAddrByRef is null)
+                        s_ObjAddrByVal = extensionMethod.CreateStaticDelegate(typeof(ObjAddrByVal)) as ObjAddrByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("BuildID");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_BuildIDByRef = extensionMethod.CreateStaticDelegate(typeof(BuildIDByRef)) as BuildIDByRef;
 
-                    if ((object)s_BuildIDByRef == null)
+                    if (s_BuildIDByRef is null)
                         s_BuildIDByVal = extensionMethod.CreateStaticDelegate(typeof(BuildIDByVal)) as BuildIDByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("SourceLine");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SourceLineByRef = extensionMethod.CreateStaticDelegate(typeof(SourceLineByRef)) as SourceLineByRef;
 
-                    if ((object)s_SourceLineByRef == null)
+                    if (s_SourceLineByRef is null)
                         s_SourceLineByVal = extensionMethod.CreateStaticDelegate(typeof(SourceLineByVal)) as SourceLineByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Symbols");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_SymbolsByRef = extensionMethod.CreateStaticDelegate(typeof(SymbolsByRef)) as SymbolsByRef;
 
-                    if ((object)s_SymbolsByRef == null)
+                    if (s_SymbolsByRef is null)
                         s_SymbolsByVal = extensionMethod.CreateStaticDelegate(typeof(SymbolsByVal)) as SymbolsByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Close");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
 
-                    if ((object)s_CloseByRef == null)
+                    if (s_CloseByRef is null)
                         s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
                 }
             }

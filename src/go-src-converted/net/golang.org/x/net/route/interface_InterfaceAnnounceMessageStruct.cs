@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:37 UTC
+//     Generated on 2022 March 06 22:15:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace net
                 this.raw = default;
             }
 
-            public InterfaceAnnounceMessage(long Version = default, long Type = default, long Index = default, @string Name = default, long What = default, slice<byte> raw = default)
+            public InterfaceAnnounceMessage(nint Version = default, nint Type = default, nint Index = default, @string Name = default, nint What = default, slice<byte> raw = default)
             {
                 this.Version = Version;
                 this.Type = Type;

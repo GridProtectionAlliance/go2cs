@@ -2,96 +2,85 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2020 October 09 06:07:46 UTC
+// package route -- go2cs converted at 2022 March 06 23:38:12 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
-// Original source: C:\Go\src\vendor\golang.org\x\net\route\interface.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\interface.go
 
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class route_package
-    {
-        // An InterfaceMessage represents an interface message.
-        public partial struct InterfaceMessage
-        {
-            public long Version; // message version
-            public long Type; // message type
-            public long Flags; // interface flags
-            public long Index; // interface index
-            public @string Name; // interface name
-            public slice<Addr> Addrs; // addresses
+namespace go.vendor.golang.org.x.net;
 
-            public long extOff; // offset of header extension
-            public slice<byte> raw; // raw message
-        }
+public static partial class route_package {
 
-        // An InterfaceAddrMessage represents an interface address message.
-        public partial struct InterfaceAddrMessage
-        {
-            public long Version; // message version
-            public long Type; // message type
-            public long Flags; // interface flags
-            public long Index; // interface index
-            public slice<Addr> Addrs; // addresses
+    // An InterfaceMessage represents an interface message.
+public partial struct InterfaceMessage {
+    public nint Version; // message version
+    public nint Type; // message type
+    public nint Flags; // interface flags
+    public nint Index; // interface index
+    public @string Name; // interface name
+    public slice<Addr> Addrs; // addresses
 
-            public slice<byte> raw; // raw message
-        }
+    public nint extOff; // offset of header extension
+    public slice<byte> raw; // raw message
+}
 
-        // Sys implements the Sys method of Message interface.
-        private static slice<Sys> Sys(this ptr<InterfaceAddrMessage> _addr_m)
-        {
-            ref InterfaceAddrMessage m = ref _addr_m.val;
+// An InterfaceAddrMessage represents an interface address message.
+public partial struct InterfaceAddrMessage {
+    public nint Version; // message version
+    public nint Type; // message type
+    public nint Flags; // interface flags
+    public nint Index; // interface index
+    public slice<Addr> Addrs; // addresses
 
-            return null;
-        }
+    public slice<byte> raw; // raw message
+}
 
-        // An InterfaceMulticastAddrMessage represents an interface multicast
-        // address message.
-        public partial struct InterfaceMulticastAddrMessage
-        {
-            public long Version; // message version
-            public long Type; // message type
-            public long Flags; // interface flags
-            public long Index; // interface index
-            public slice<Addr> Addrs; // addresses
+// Sys implements the Sys method of Message interface.
+private static slice<Sys> Sys(this ptr<InterfaceAddrMessage> _addr_m) {
+    ref InterfaceAddrMessage m = ref _addr_m.val;
 
-            public slice<byte> raw; // raw message
-        }
+    return null;
+}
 
-        // Sys implements the Sys method of Message interface.
-        private static slice<Sys> Sys(this ptr<InterfaceMulticastAddrMessage> _addr_m)
-        {
-            ref InterfaceMulticastAddrMessage m = ref _addr_m.val;
+// An InterfaceMulticastAddrMessage represents an interface multicast
+// address message.
+public partial struct InterfaceMulticastAddrMessage {
+    public nint Version; // message version
+    public nint Type; // message type
+    public nint Flags; // interface flags
+    public nint Index; // interface index
+    public slice<Addr> Addrs; // addresses
 
-            return null;
-        }
+    public slice<byte> raw; // raw message
+}
 
-        // An InterfaceAnnounceMessage represents an interface announcement
-        // message.
-        public partial struct InterfaceAnnounceMessage
-        {
-            public long Version; // message version
-            public long Type; // message type
-            public long Index; // interface index
-            public @string Name; // interface name
-            public long What; // what type of announcement
+// Sys implements the Sys method of Message interface.
+private static slice<Sys> Sys(this ptr<InterfaceMulticastAddrMessage> _addr_m) {
+    ref InterfaceMulticastAddrMessage m = ref _addr_m.val;
 
-            public slice<byte> raw; // raw message
-        }
+    return null;
+}
 
-        // Sys implements the Sys method of Message interface.
-        private static slice<Sys> Sys(this ptr<InterfaceAnnounceMessage> _addr_m)
-        {
-            ref InterfaceAnnounceMessage m = ref _addr_m.val;
+// An InterfaceAnnounceMessage represents an interface announcement
+// message.
+public partial struct InterfaceAnnounceMessage {
+    public nint Version; // message version
+    public nint Type; // message type
+    public nint Index; // interface index
+    public @string Name; // interface name
+    public nint What; // what type of announcement
 
-            return null;
-        }
-    }
-}}}}}
+    public slice<byte> raw; // raw message
+}
+
+// Sys implements the Sys method of Message interface.
+private static slice<Sys> Sys(this ptr<InterfaceAnnounceMessage> _addr_m) {
+    ref InterfaceAnnounceMessage m = ref _addr_m.val;
+
+    return null;
+}
+
+} // end route_package

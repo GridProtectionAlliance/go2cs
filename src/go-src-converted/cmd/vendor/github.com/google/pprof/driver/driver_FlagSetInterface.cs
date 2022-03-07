@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using http = go.net.http_package;
 using regexp = go.regexp_package;
@@ -60,7 +59,7 @@ namespace pprof
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,33 +85,33 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BoolByPtr is null || !m_target_is_ptr)
                     return s_BoolByVal!(target, name, def, usage);
 
-                return s_BoolByPtr(m_target_ptr, name, def, usage);
+                return s_BoolByPtr(m_target_ptr!, name, def, usage);
             }
 
-            private delegate slice<@string> IntByPtr(ptr<T> value, @string name, long def, @string usage);
-            private delegate slice<@string> IntByVal(T value, @string name, long def, @string usage);
+            private delegate slice<@string> IntByPtr(ptr<T> value, @string name, nint def, @string usage);
+            private delegate slice<@string> IntByVal(T value, @string name, nint def, @string usage);
 
             private static readonly IntByPtr? s_IntByPtr;
             private static readonly IntByVal? s_IntByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public slice<@string> Int(@string name, long def, @string usage)
+            public slice<@string> Int(@string name, nint def, @string usage)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_IntByPtr is null || !m_target_is_ptr)
                     return s_IntByVal!(target, name, def, usage);
 
-                return s_IntByPtr(m_target_ptr, name, def, usage);
+                return s_IntByPtr(m_target_ptr!, name, def, usage);
             }
 
             private delegate slice<@string> Float64ByPtr(ptr<T> value, @string name, double def, @string usage);
@@ -126,13 +125,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Float64ByPtr is null || !m_target_is_ptr)
                     return s_Float64ByVal!(target, name, def, usage);
 
-                return s_Float64ByPtr(m_target_ptr, name, def, usage);
+                return s_Float64ByPtr(m_target_ptr!, name, def, usage);
             }
 
             private delegate slice<@string> StringByPtr(ptr<T> value, @string name, @string def, @string usage);
@@ -146,13 +145,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target, name, def, usage);
 
-                return s_StringByPtr(m_target_ptr, name, def, usage);
+                return s_StringByPtr(m_target_ptr!, name, def, usage);
             }
 
             private delegate slice<@string> StringListByPtr(ptr<T> value, @string name, @string def, @string usage);
@@ -166,13 +165,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringListByPtr is null || !m_target_is_ptr)
                     return s_StringListByVal!(target, name, def, usage);
 
-                return s_StringListByPtr(m_target_ptr, name, def, usage);
+                return s_StringListByPtr(m_target_ptr!, name, def, usage);
             }
 
             private delegate slice<@string> ExtraUsageByPtr(ptr<T> value);
@@ -186,13 +185,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExtraUsageByPtr is null || !m_target_is_ptr)
                     return s_ExtraUsageByVal!(target);
 
-                return s_ExtraUsageByPtr(m_target_ptr);
+                return s_ExtraUsageByPtr(m_target_ptr!);
             }
 
             private delegate slice<@string> AddExtraUsageByPtr(ptr<T> value, @string eu);
@@ -206,13 +205,13 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AddExtraUsageByPtr is null || !m_target_is_ptr)
                     return s_AddExtraUsageByVal!(target, eu);
 
-                return s_AddExtraUsageByPtr(m_target_ptr, eu);
+                return s_AddExtraUsageByPtr(m_target_ptr!, eu);
             }
 
             private delegate slice<@string> ParseByPtr(ptr<T> value, Action usage);
@@ -226,16 +225,16 @@ namespace pprof
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ParseByPtr is null || !m_target_is_ptr)
                     return s_ParseByVal!(target, usage);
 
-                return s_ParseByPtr(m_target_ptr, usage);
+                return s_ParseByPtr(m_target_ptr!, usage);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static FlagSet()
@@ -246,12 +245,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Bool");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BoolByPtr = extensionMethod.CreateStaticDelegate(typeof(BoolByPtr)) as BoolByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Bool");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BoolByVal = extensionMethod.CreateStaticDelegate(typeof(BoolByVal)) as BoolByVal;
 
                 if (s_BoolByPtr is null && s_BoolByVal is null)
@@ -259,12 +258,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Int");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IntByPtr = extensionMethod.CreateStaticDelegate(typeof(IntByPtr)) as IntByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Int");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IntByVal = extensionMethod.CreateStaticDelegate(typeof(IntByVal)) as IntByVal;
 
                 if (s_IntByPtr is null && s_IntByVal is null)
@@ -272,12 +271,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Float64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Float64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Float64ByPtr)) as Float64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Float64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Float64ByVal = extensionMethod.CreateStaticDelegate(typeof(Float64ByVal)) as Float64ByVal;
 
                 if (s_Float64ByPtr is null && s_Float64ByVal is null)
@@ -285,12 +284,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -298,12 +297,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StringList");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringListByPtr = extensionMethod.CreateStaticDelegate(typeof(StringListByPtr)) as StringListByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StringList");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringListByVal = extensionMethod.CreateStaticDelegate(typeof(StringListByVal)) as StringListByVal;
 
                 if (s_StringListByPtr is null && s_StringListByVal is null)
@@ -311,12 +310,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ExtraUsage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExtraUsageByPtr = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByPtr)) as ExtraUsageByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ExtraUsage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExtraUsageByVal = extensionMethod.CreateStaticDelegate(typeof(ExtraUsageByVal)) as ExtraUsageByVal;
 
                 if (s_ExtraUsageByPtr is null && s_ExtraUsageByVal is null)
@@ -324,12 +323,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AddExtraUsage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddExtraUsageByPtr = extensionMethod.CreateStaticDelegate(typeof(AddExtraUsageByPtr)) as AddExtraUsageByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AddExtraUsage");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AddExtraUsageByVal = extensionMethod.CreateStaticDelegate(typeof(AddExtraUsageByVal)) as AddExtraUsageByVal;
 
                 if (s_AddExtraUsageByPtr is null && s_AddExtraUsageByVal is null)
@@ -337,12 +336,12 @@ namespace pprof
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Parse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParseByPtr = extensionMethod.CreateStaticDelegate(typeof(ParseByPtr)) as ParseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Parse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ParseByVal = extensionMethod.CreateStaticDelegate(typeof(ParseByVal)) as ParseByVal;
 
                 if (s_ParseByPtr is null && s_ParseByVal is null)

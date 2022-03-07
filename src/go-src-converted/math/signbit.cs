@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2020 October 09 05:07:46 UTC
+// package math -- go2cs converted at 2022 March 06 22:31:10 UTC
 // import "math" ==> using math = go.math_package
-// Original source: C:\Go\src\math\signbit.go
+// Original source: C:\Program Files\Go\src\math\signbit.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class math_package
-    {
-        // Signbit reports whether x is negative or negative zero.
-        public static bool Signbit(double x)
-        {
-            return Float64bits(x) & (1L << (int)(63L)) != 0L;
-        }
-    }
+namespace go;
+
+public static partial class math_package {
+
+    // Signbit reports whether x is negative or negative zero.
+public static bool Signbit(double x) {
+    return Float64bits(x) & (1 << 63) != 0;
 }
+
+} // end math_package

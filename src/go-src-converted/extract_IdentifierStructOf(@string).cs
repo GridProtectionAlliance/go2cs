@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:31 UTC
+//     Generated on 2022 March 06 23:32:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -26,7 +28,7 @@ namespace go
         {
             // Value of the Identifier struct
             private readonly @string m_value;
-
+            
             public Identifier(@string value) => m_value = value;
 
             // Enable implicit conversions between @string and Identifier struct

@@ -2,38 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build linux && (mips64 || mips64le)
+// +build linux
 // +build mips64 mips64le
 
-// package cpu -- go2cs converted at 2020 October 09 06:07:54 UTC
+// package cpu -- go2cs converted at 2022 March 06 23:38:19 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
-// Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_linux_mips64x.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu_linux_mips64x.go
 
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class cpu_package
-    {
-        // HWCAP bits. These are exposed by the Linux kernel 5.4.
+namespace go.vendor.golang.org.x.sys;
+
+public static partial class cpu_package {
+
+    // HWCAP bits. These are exposed by the Linux kernel 5.4.
  
-        // CPU features
-        private static readonly long hwcap_MIPS_MSA = (long)1L << (int)(1L);
+// CPU features
+private static readonly nint hwcap_MIPS_MSA = 1 << 1;
 
 
-        private static void doinit()
-        { 
-            // HWCAP feature bits
-            MIPS64X.HasMSA = isSet(hwCap, hwcap_MIPS_MSA);
+private static void doinit() { 
+    // HWCAP feature bits
+    MIPS64X.HasMSA = isSet(hwCap, hwcap_MIPS_MSA);
 
-        }
+}
 
-        private static bool isSet(ulong hwc, ulong value)
-        {
-            return hwc & value != 0L;
-        }
-    }
-}}}}}
+private static bool isSet(nuint hwc, nuint value) {
+    return hwc & value != 0;
+}
+
+} // end cpu_package

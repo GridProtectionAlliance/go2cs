@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:56 UTC
+//     Generated on 2022 March 06 22:22:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using tls = go.crypto.tls_package;
 using nettrace = go.@internal.nettrace_package;
@@ -54,7 +53,7 @@ namespace http
                 this.WroteRequest = default;
             }
 
-            public ClientTrace(Action<@string> GetConn = default, Action<GotConnInfo> GotConn = default, Action<error> PutIdleConn = default, Action GotFirstResponseByte = default, Action Got100Continue = default, Func<long, textproto.MIMEHeader, error> Got1xxResponse = default, Action<DNSStartInfo> DNSStart = default, Action<DNSDoneInfo> DNSDone = default, Action<@string, @string> ConnectStart = default, Action<@string, @string, error> ConnectDone = default, Action TLSHandshakeStart = default, Action<tls.ConnectionState, error> TLSHandshakeDone = default, Action<@string, slice<@string>> WroteHeaderField = default, Action WroteHeaders = default, Action Wait100Continue = default, Action<WroteRequestInfo> WroteRequest = default)
+            public ClientTrace(Action<@string> GetConn = default, Action<GotConnInfo> GotConn = default, Action<error> PutIdleConn = default, Action GotFirstResponseByte = default, Action Got100Continue = default, Func<nint, textproto.MIMEHeader, error> Got1xxResponse = default, Action<DNSStartInfo> DNSStart = default, Action<DNSDoneInfo> DNSDone = default, Action<@string, @string> ConnectStart = default, Action<@string, @string, error> ConnectDone = default, Action TLSHandshakeStart = default, Action<tls.ConnectionState, error> TLSHandshakeDone = default, Action<@string, slice<@string>> WroteHeaderField = default, Action WroteHeaders = default, Action Wait100Continue = default, Action<WroteRequestInfo> WroteRequest = default)
             {
                 this.GetConn = GetConn;
                 this.GotConn = GotConn;

@@ -2,35 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package nointerface -- go2cs converted at 2020 October 09 06:02:54 UTC
+// package nointerface -- go2cs converted at 2022 March 06 23:32:49 UTC
 // import "go/internal/gccgoimporter.nointerface" ==> using nointerface = go.go.@internal.gccgoimporter.nointerface_package
-// Original source: C:\Go\src\go\internal\gccgoimporter\testdata\nointerface.go
+// Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\testdata\nointerface.go
 
-using static go.builtin;
 
-namespace go {
-namespace go {
-namespace @internal
-{
-    public static partial class nointerface_package
-    {
-        public partial struct I // : long
-        {
-        }
+namespace go.go.@internal;
 
-        //go:nointerface
-        private static long Get(this ptr<I> _addr_p)
-        {
-            ref I p = ref _addr_p.val;
+public static partial class nointerface_package {
 
-            return int(p.val);
-        }
+public partial struct I { // : nint
+}
 
-        private static void Set(this ptr<I> _addr_p, long v)
-        {
-            ref I p = ref _addr_p.val;
+//go:nointerface
+private static nint Get(this ptr<I> _addr_p) {
+    ref I p = ref _addr_p.val;
 
-            p.val = I(v);
-        }
-    }
-}}}
+    return int(p.val);
+}
+
+private static void Set(this ptr<I> _addr_p, nint v) {
+    ref I p = ref _addr_p.val;
+
+    p.val = I(v);
+}
+
+} // end nointerface_package

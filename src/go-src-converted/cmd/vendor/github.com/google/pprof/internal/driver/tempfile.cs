@@ -12,71 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2020 October 09 05:53:32 UTC
+// package driver -- go2cs converted at 2022 March 06 23:23:31 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\tempfile.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\tempfile.go
 using fmt = go.fmt_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using sync = go.sync_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace @internal
-{
-    public static partial class driver_package
-    {
-        // newTempFile returns a new output file in dir with the provided prefix and suffix.
-        private static (ptr<os.File>, error) newTempFile(@string dir, @string prefix, @string suffix)
+namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+public static partial class driver_package {
+
+    // newTempFile returns a new output file in dir with the provided prefix and suffix.
+private static (ptr<os.File>, error) newTempFile(@string dir, @string prefix, @string suffix) {
+    ptr<os.File> _p0 = default!;
+    error _p0 = default!;
+
+    for (nint index = 1; index < 10000; index++) {
         {
-            ptr<os.File> _p0 = default!;
-            error _p0 = default!;
+            var (f, err) = os.OpenFile(filepath.Join(dir, fmt.Sprintf("%s%03d%s", prefix, index, suffix)), os.O_RDWR | os.O_CREATE | os.O_EXCL, 0666);
 
-            for (long index = 1L; index < 10000L; index++)
-            {
-                var path = filepath.Join(dir, fmt.Sprintf("%s%03d%s", prefix, index, suffix));
-                {
-                    var (_, err) = os.Stat(path);
 
-                    if (err != null)
-                    {
-                        return _addr_os.Create(path)!;
-                    }
-                }
-
-            } 
-            // Give up
-            return (_addr_null!, error.As(fmt.Errorf("could not create file of the form %s%03d%s", prefix, 1L, suffix))!);
+            if (err == null) 
+                return (_addr_f!, error.As(null!)!);
+            else if (!os.IsExist(err)) 
+                return (_addr_null!, error.As(err)!);
 
         }
 
-        private static slice<@string> tempFiles = default;
-        private static sync.Mutex tempFilesMu = new sync.Mutex();
+    } 
+    // Give up
+    return (_addr_null!, error.As(fmt.Errorf("could not create file of the form %s%03d%s", prefix, 1, suffix))!);
 
-        // deferDeleteTempFile marks a file to be deleted by next call to Cleanup()
-        private static void deferDeleteTempFile(@string path)
-        {
-            tempFilesMu.Lock();
-            tempFiles = append(tempFiles, path);
-            tempFilesMu.Unlock();
-        }
+}
 
-        // cleanupTempFiles removes any temporary files selected for deferred cleaning.
-        private static void cleanupTempFiles()
+private static slice<@string> tempFiles = default;
+private static sync.Mutex tempFilesMu = new sync.Mutex();
+
+// deferDeleteTempFile marks a file to be deleted by next call to Cleanup()
+private static void deferDeleteTempFile(@string path) {
+    tempFilesMu.Lock();
+    tempFiles = append(tempFiles, path);
+    tempFilesMu.Unlock();
+}
+
+// cleanupTempFiles removes any temporary files selected for deferred cleaning.
+private static error cleanupTempFiles() => func((defer, _, _) => {
+    tempFilesMu.Lock();
+    defer(tempFilesMu.Unlock());
+    error lastErr = default!;
+    foreach (var (_, f) in tempFiles) {
         {
-            tempFilesMu.Lock();
-            foreach (var (_, f) in tempFiles)
-            {
-                os.Remove(f);
+            var err = os.Remove(f);
+
+            if (err != null) {
+                lastErr = error.As(err)!;
             }
-            tempFiles = null;
-            tempFilesMu.Unlock();
 
         }
-    }
-}}}}}}}
+
+    }    tempFiles = null;
+    return error.As(lastErr)!;
+
+});
+
+} // end driver_package

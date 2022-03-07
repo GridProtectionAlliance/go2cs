@@ -1,223 +1,211 @@
 // created by cgo -cdefs and then converted to Go
 // cgo -cdefs defs_netbsd.go defs_netbsd_arm.go
 
-// package runtime -- go2cs converted at 2020 October 09 04:45:47 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:08:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\defs1_netbsd_arm64.go
-
-using static go.builtin;
-
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static readonly ulong _EINTR = (ulong)0x4UL;
-        private static readonly ulong _EFAULT = (ulong)0xeUL;
-        private static readonly ulong _EAGAIN = (ulong)0x23UL;
-        private static readonly ulong _ENOSYS = (ulong)0x4eUL;
-
-        private static readonly ulong _O_NONBLOCK = (ulong)0x4UL;
-        private static readonly ulong _O_CLOEXEC = (ulong)0x400000UL;
-
-        private static readonly ulong _PROT_NONE = (ulong)0x0UL;
-        private static readonly ulong _PROT_READ = (ulong)0x1UL;
-        private static readonly ulong _PROT_WRITE = (ulong)0x2UL;
-        private static readonly ulong _PROT_EXEC = (ulong)0x4UL;
-
-        private static readonly ulong _MAP_ANON = (ulong)0x1000UL;
-        private static readonly ulong _MAP_PRIVATE = (ulong)0x2UL;
-        private static readonly ulong _MAP_FIXED = (ulong)0x10UL;
-
-        private static readonly ulong _MADV_FREE = (ulong)0x6UL;
-
-        private static readonly ulong _SA_SIGINFO = (ulong)0x40UL;
-        private static readonly ulong _SA_RESTART = (ulong)0x2UL;
-        private static readonly ulong _SA_ONSTACK = (ulong)0x1UL;
-
-        private static readonly ulong _SIGHUP = (ulong)0x1UL;
-        private static readonly ulong _SIGINT = (ulong)0x2UL;
-        private static readonly ulong _SIGQUIT = (ulong)0x3UL;
-        private static readonly ulong _SIGILL = (ulong)0x4UL;
-        private static readonly ulong _SIGTRAP = (ulong)0x5UL;
-        private static readonly ulong _SIGABRT = (ulong)0x6UL;
-        private static readonly ulong _SIGEMT = (ulong)0x7UL;
-        private static readonly ulong _SIGFPE = (ulong)0x8UL;
-        private static readonly ulong _SIGKILL = (ulong)0x9UL;
-        private static readonly ulong _SIGBUS = (ulong)0xaUL;
-        private static readonly ulong _SIGSEGV = (ulong)0xbUL;
-        private static readonly ulong _SIGSYS = (ulong)0xcUL;
-        private static readonly ulong _SIGPIPE = (ulong)0xdUL;
-        private static readonly ulong _SIGALRM = (ulong)0xeUL;
-        private static readonly ulong _SIGTERM = (ulong)0xfUL;
-        private static readonly ulong _SIGURG = (ulong)0x10UL;
-        private static readonly ulong _SIGSTOP = (ulong)0x11UL;
-        private static readonly ulong _SIGTSTP = (ulong)0x12UL;
-        private static readonly ulong _SIGCONT = (ulong)0x13UL;
-        private static readonly ulong _SIGCHLD = (ulong)0x14UL;
-        private static readonly ulong _SIGTTIN = (ulong)0x15UL;
-        private static readonly ulong _SIGTTOU = (ulong)0x16UL;
-        private static readonly ulong _SIGIO = (ulong)0x17UL;
-        private static readonly ulong _SIGXCPU = (ulong)0x18UL;
-        private static readonly ulong _SIGXFSZ = (ulong)0x19UL;
-        private static readonly ulong _SIGVTALRM = (ulong)0x1aUL;
-        private static readonly ulong _SIGPROF = (ulong)0x1bUL;
-        private static readonly ulong _SIGWINCH = (ulong)0x1cUL;
-        private static readonly ulong _SIGINFO = (ulong)0x1dUL;
-        private static readonly ulong _SIGUSR1 = (ulong)0x1eUL;
-        private static readonly ulong _SIGUSR2 = (ulong)0x1fUL;
-
-        private static readonly ulong _FPE_INTDIV = (ulong)0x1UL;
-        private static readonly ulong _FPE_INTOVF = (ulong)0x2UL;
-        private static readonly ulong _FPE_FLTDIV = (ulong)0x3UL;
-        private static readonly ulong _FPE_FLTOVF = (ulong)0x4UL;
-        private static readonly ulong _FPE_FLTUND = (ulong)0x5UL;
-        private static readonly ulong _FPE_FLTRES = (ulong)0x6UL;
-        private static readonly ulong _FPE_FLTINV = (ulong)0x7UL;
-        private static readonly ulong _FPE_FLTSUB = (ulong)0x8UL;
-
-        private static readonly ulong _BUS_ADRALN = (ulong)0x1UL;
-        private static readonly ulong _BUS_ADRERR = (ulong)0x2UL;
-        private static readonly ulong _BUS_OBJERR = (ulong)0x3UL;
-
-        private static readonly ulong _SEGV_MAPERR = (ulong)0x1UL;
-        private static readonly ulong _SEGV_ACCERR = (ulong)0x2UL;
-
-        private static readonly ulong _ITIMER_REAL = (ulong)0x0UL;
-        private static readonly ulong _ITIMER_VIRTUAL = (ulong)0x1UL;
-        private static readonly ulong _ITIMER_PROF = (ulong)0x2UL;
-
-        private static readonly ulong _EV_ADD = (ulong)0x1UL;
-        private static readonly ulong _EV_DELETE = (ulong)0x2UL;
-        private static readonly ulong _EV_CLEAR = (ulong)0x20UL;
-        private static readonly long _EV_RECEIPT = (long)0L;
-        private static readonly ulong _EV_ERROR = (ulong)0x4000UL;
-        private static readonly ulong _EV_EOF = (ulong)0x8000UL;
-        private static readonly ulong _EVFILT_READ = (ulong)0x0UL;
-        private static readonly ulong _EVFILT_WRITE = (ulong)0x1UL;
+// Original source: C:\Program Files\Go\src\runtime\defs1_netbsd_arm64.go
 
 
-        private partial struct sigset
-        {
-            public array<uint> __bits;
-        }
+namespace go;
 
-        private partial struct siginfo
-        {
-            public int _signo;
-            public int _code;
-            public int _errno;
-            public System.UIntPtr _reason;
-            public array<byte> _reasonx;
-        }
+public static partial class runtime_package {
 
-        private partial struct stackt
-        {
-            public System.UIntPtr ss_sp;
-            public System.UIntPtr ss_size;
-            public int ss_flags;
-        }
+private static readonly nuint _EINTR = 0x4;
+private static readonly nuint _EFAULT = 0xe;
+private static readonly nuint _EAGAIN = 0x23;
+private static readonly nuint _ENOSYS = 0x4e;
 
-        private partial struct timespec
-        {
-            public long tv_sec;
-            public long tv_nsec;
-        }
+private static readonly nuint _O_NONBLOCK = 0x4;
+private static readonly nuint _O_CLOEXEC = 0x400000;
 
-        private static void setNsec(this ptr<timespec> _addr_ts, long ns)
-        {
-            ref timespec ts = ref _addr_ts.val;
+private static readonly nuint _PROT_NONE = 0x0;
+private static readonly nuint _PROT_READ = 0x1;
+private static readonly nuint _PROT_WRITE = 0x2;
+private static readonly nuint _PROT_EXEC = 0x4;
 
-            ts.tv_sec = ns / 1e9F;
-            ts.tv_nsec = ns % 1e9F;
-        }
+private static readonly nuint _MAP_ANON = 0x1000;
+private static readonly nuint _MAP_PRIVATE = 0x2;
+private static readonly nuint _MAP_FIXED = 0x10;
 
-        private partial struct timeval
-        {
-            public long tv_sec;
-            public int tv_usec;
-            public array<byte> _; // EABI
-        }
+private static readonly nuint _MADV_FREE = 0x6;
 
-        private static void set_usec(this ptr<timeval> _addr_tv, int x)
-        {
-            ref timeval tv = ref _addr_tv.val;
+private static readonly nuint _SA_SIGINFO = 0x40;
+private static readonly nuint _SA_RESTART = 0x2;
+private static readonly nuint _SA_ONSTACK = 0x1;
 
-            tv.tv_usec = x;
-        }
+private static readonly nuint _SIGHUP = 0x1;
+private static readonly nuint _SIGINT = 0x2;
+private static readonly nuint _SIGQUIT = 0x3;
+private static readonly nuint _SIGILL = 0x4;
+private static readonly nuint _SIGTRAP = 0x5;
+private static readonly nuint _SIGABRT = 0x6;
+private static readonly nuint _SIGEMT = 0x7;
+private static readonly nuint _SIGFPE = 0x8;
+private static readonly nuint _SIGKILL = 0x9;
+private static readonly nuint _SIGBUS = 0xa;
+private static readonly nuint _SIGSEGV = 0xb;
+private static readonly nuint _SIGSYS = 0xc;
+private static readonly nuint _SIGPIPE = 0xd;
+private static readonly nuint _SIGALRM = 0xe;
+private static readonly nuint _SIGTERM = 0xf;
+private static readonly nuint _SIGURG = 0x10;
+private static readonly nuint _SIGSTOP = 0x11;
+private static readonly nuint _SIGTSTP = 0x12;
+private static readonly nuint _SIGCONT = 0x13;
+private static readonly nuint _SIGCHLD = 0x14;
+private static readonly nuint _SIGTTIN = 0x15;
+private static readonly nuint _SIGTTOU = 0x16;
+private static readonly nuint _SIGIO = 0x17;
+private static readonly nuint _SIGXCPU = 0x18;
+private static readonly nuint _SIGXFSZ = 0x19;
+private static readonly nuint _SIGVTALRM = 0x1a;
+private static readonly nuint _SIGPROF = 0x1b;
+private static readonly nuint _SIGWINCH = 0x1c;
+private static readonly nuint _SIGINFO = 0x1d;
+private static readonly nuint _SIGUSR1 = 0x1e;
+private static readonly nuint _SIGUSR2 = 0x1f;
 
-        private partial struct itimerval
-        {
-            public timeval it_interval;
-            public timeval it_value;
-        }
+private static readonly nuint _FPE_INTDIV = 0x1;
+private static readonly nuint _FPE_INTOVF = 0x2;
+private static readonly nuint _FPE_FLTDIV = 0x3;
+private static readonly nuint _FPE_FLTOVF = 0x4;
+private static readonly nuint _FPE_FLTUND = 0x5;
+private static readonly nuint _FPE_FLTRES = 0x6;
+private static readonly nuint _FPE_FLTINV = 0x7;
+private static readonly nuint _FPE_FLTSUB = 0x8;
 
-        private partial struct mcontextt
-        {
-            public array<ulong> __gregs;
-            public array<byte> __fregs; // _NFREG * 128 + 32 + 32
-            public array<ulong> _; // future use
-        }
+private static readonly nuint _BUS_ADRALN = 0x1;
+private static readonly nuint _BUS_ADRERR = 0x2;
+private static readonly nuint _BUS_OBJERR = 0x3;
 
-        private partial struct ucontextt
-        {
-            public uint uc_flags;
-            public ptr<ucontextt> uc_link;
-            public sigset uc_sigmask;
-            public stackt uc_stack;
-            public array<byte> _; // EABI
-            public mcontextt uc_mcontext;
-            public array<int> __uc_pad;
-        }
+private static readonly nuint _SEGV_MAPERR = 0x1;
+private static readonly nuint _SEGV_ACCERR = 0x2;
 
-        private partial struct keventt
-        {
-            public ulong ident;
-            public uint filter;
-            public uint flags;
-            public uint fflags;
-            public array<byte> pad_cgo_0;
-            public long data;
-            public ptr<byte> udata;
-        }
+private static readonly nuint _ITIMER_REAL = 0x0;
+private static readonly nuint _ITIMER_VIRTUAL = 0x1;
+private static readonly nuint _ITIMER_PROF = 0x2;
 
-        // created by cgo -cdefs and then converted to Go
-        // cgo -cdefs defs_netbsd.go defs_netbsd_arm.go
+private static readonly nuint _EV_ADD = 0x1;
+private static readonly nuint _EV_DELETE = 0x2;
+private static readonly nuint _EV_CLEAR = 0x20;
+private static readonly nint _EV_RECEIPT = 0;
+private static readonly nuint _EV_ERROR = 0x4000;
+private static readonly nuint _EV_EOF = 0x8000;
+private static readonly nuint _EVFILT_READ = 0x0;
+private static readonly nuint _EVFILT_WRITE = 0x1;
 
-        private static readonly long _REG_X0 = (long)0L;
-        private static readonly long _REG_X1 = (long)1L;
-        private static readonly long _REG_X2 = (long)2L;
-        private static readonly long _REG_X3 = (long)3L;
-        private static readonly long _REG_X4 = (long)4L;
-        private static readonly long _REG_X5 = (long)5L;
-        private static readonly long _REG_X6 = (long)6L;
-        private static readonly long _REG_X7 = (long)7L;
-        private static readonly long _REG_X8 = (long)8L;
-        private static readonly long _REG_X9 = (long)9L;
-        private static readonly long _REG_X10 = (long)10L;
-        private static readonly long _REG_X11 = (long)11L;
-        private static readonly long _REG_X12 = (long)12L;
-        private static readonly long _REG_X13 = (long)13L;
-        private static readonly long _REG_X14 = (long)14L;
-        private static readonly long _REG_X15 = (long)15L;
-        private static readonly long _REG_X16 = (long)16L;
-        private static readonly long _REG_X17 = (long)17L;
-        private static readonly long _REG_X18 = (long)18L;
-        private static readonly long _REG_X19 = (long)19L;
-        private static readonly long _REG_X20 = (long)20L;
-        private static readonly long _REG_X21 = (long)21L;
-        private static readonly long _REG_X22 = (long)22L;
-        private static readonly long _REG_X23 = (long)23L;
-        private static readonly long _REG_X24 = (long)24L;
-        private static readonly long _REG_X25 = (long)25L;
-        private static readonly long _REG_X26 = (long)26L;
-        private static readonly long _REG_X27 = (long)27L;
-        private static readonly long _REG_X28 = (long)28L;
-        private static readonly long _REG_X29 = (long)29L;
-        private static readonly long _REG_X30 = (long)30L;
-        private static readonly long _REG_X31 = (long)31L;
-        private static readonly long _REG_ELR = (long)32L;
-        private static readonly long _REG_SPSR = (long)33L;
-        private static readonly long _REG_TPIDR = (long)34L;
 
-    }
+private partial struct sigset {
+    public array<uint> __bits;
 }
+
+private partial struct siginfo {
+    public int _signo;
+    public int _code;
+    public int _errno;
+    public System.UIntPtr _reason;
+    public array<byte> _reasonx;
+}
+
+private partial struct stackt {
+    public System.UIntPtr ss_sp;
+    public System.UIntPtr ss_size;
+    public int ss_flags;
+}
+
+private partial struct timespec {
+    public long tv_sec;
+    public long tv_nsec;
+}
+
+private static void setNsec(this ptr<timespec> _addr_ts, long ns) {
+    ref timespec ts = ref _addr_ts.val;
+
+    ts.tv_sec = ns / 1e9F;
+    ts.tv_nsec = ns % 1e9F;
+}
+
+private partial struct timeval {
+    public long tv_sec;
+    public int tv_usec;
+    public array<byte> _; // EABI
+}
+
+private static void set_usec(this ptr<timeval> _addr_tv, int x) {
+    ref timeval tv = ref _addr_tv.val;
+
+    tv.tv_usec = x;
+}
+
+private partial struct itimerval {
+    public timeval it_interval;
+    public timeval it_value;
+}
+
+private partial struct mcontextt {
+    public array<ulong> __gregs;
+    public array<byte> __fregs; // _NFREG * 128 + 32 + 32
+    public array<ulong> _; // future use
+}
+
+private partial struct ucontextt {
+    public uint uc_flags;
+    public ptr<ucontextt> uc_link;
+    public sigset uc_sigmask;
+    public stackt uc_stack;
+    public array<byte> _; // EABI
+    public mcontextt uc_mcontext;
+    public array<int> __uc_pad;
+}
+
+private partial struct keventt {
+    public ulong ident;
+    public uint filter;
+    public uint flags;
+    public uint fflags;
+    public array<byte> pad_cgo_0;
+    public long data;
+    public ptr<byte> udata;
+}
+
+// created by cgo -cdefs and then converted to Go
+// cgo -cdefs defs_netbsd.go defs_netbsd_arm.go
+
+private static readonly nint _REG_X0 = 0;
+private static readonly nint _REG_X1 = 1;
+private static readonly nint _REG_X2 = 2;
+private static readonly nint _REG_X3 = 3;
+private static readonly nint _REG_X4 = 4;
+private static readonly nint _REG_X5 = 5;
+private static readonly nint _REG_X6 = 6;
+private static readonly nint _REG_X7 = 7;
+private static readonly nint _REG_X8 = 8;
+private static readonly nint _REG_X9 = 9;
+private static readonly nint _REG_X10 = 10;
+private static readonly nint _REG_X11 = 11;
+private static readonly nint _REG_X12 = 12;
+private static readonly nint _REG_X13 = 13;
+private static readonly nint _REG_X14 = 14;
+private static readonly nint _REG_X15 = 15;
+private static readonly nint _REG_X16 = 16;
+private static readonly nint _REG_X17 = 17;
+private static readonly nint _REG_X18 = 18;
+private static readonly nint _REG_X19 = 19;
+private static readonly nint _REG_X20 = 20;
+private static readonly nint _REG_X21 = 21;
+private static readonly nint _REG_X22 = 22;
+private static readonly nint _REG_X23 = 23;
+private static readonly nint _REG_X24 = 24;
+private static readonly nint _REG_X25 = 25;
+private static readonly nint _REG_X26 = 26;
+private static readonly nint _REG_X27 = 27;
+private static readonly nint _REG_X28 = 28;
+private static readonly nint _REG_X29 = 29;
+private static readonly nint _REG_X30 = 30;
+private static readonly nint _REG_X31 = 31;
+private static readonly nint _REG_ELR = 32;
+private static readonly nint _REG_SPSR = 33;
+private static readonly nint _REG_TPIDR = 34;
+
+
+} // end runtime_package

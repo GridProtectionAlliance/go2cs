@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:05 UTC
+//     Generated on 2022 March 06 22:14:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -34,17 +33,17 @@ namespace compress
 
             private ref compressionLevel compressionLevel_val => ref m_compressionLevelRef.Value;
 
-            public ref long level => ref m_compressionLevelRef.Value.level;
+            public ref nint level => ref m_compressionLevelRef.Value.level;
 
-            public ref long good => ref m_compressionLevelRef.Value.good;
+            public ref nint good => ref m_compressionLevelRef.Value.good;
 
-            public ref long lazy => ref m_compressionLevelRef.Value.lazy;
+            public ref nint lazy => ref m_compressionLevelRef.Value.lazy;
 
-            public ref long nice => ref m_compressionLevelRef.Value.nice;
+            public ref nint nice => ref m_compressionLevelRef.Value.nice;
 
-            public ref long chain => ref m_compressionLevelRef.Value.chain;
+            public ref nint chain => ref m_compressionLevelRef.Value.chain;
 
-            public ref long fastSkipHashing => ref m_compressionLevelRef.Value.fastSkipHashing;
+            public ref nint fastSkipHashing => ref m_compressionLevelRef.Value.fastSkipHashing;
 
             // Constructors
             public compressor(NilType _)
@@ -74,7 +73,7 @@ namespace compress
                 this.hashMatch = default;
             }
 
-            public compressor(compressionLevel compressionLevel = default, ref ptr<huffmanBitWriter> w = default, Action<slice<byte>, slice<uint>> bulkHasher = default, Func<ptr<compressor>, slice<byte>, long> fill = default, Action<ptr<compressor>> step = default, bool sync = default, ref ptr<deflateFast> bestSpeed = default, long chainHead = default, array<uint> hashHead = default, array<uint> hashPrev = default, long hashOffset = default, long index = default, slice<byte> window = default, long windowEnd = default, long blockStart = default, bool byteAvailable = default, slice<token> tokens = default, long length = default, long offset = default, uint hash = default, long maxInsertIndex = default, error err = default, array<uint> hashMatch = default)
+            public compressor(compressionLevel compressionLevel = default, ref ptr<huffmanBitWriter> w = default, Action<slice<byte>, slice<uint>> bulkHasher = default, Func<ptr<compressor>, slice<byte>, nint> fill = default, Action<ptr<compressor>> step = default, bool sync = default, ref ptr<deflateFast> bestSpeed = default, nint chainHead = default, array<uint> hashHead = default, array<uint> hashPrev = default, nint hashOffset = default, nint index = default, slice<byte> window = default, nint windowEnd = default, nint blockStart = default, bool byteAvailable = default, slice<token> tokens = default, nint length = default, nint offset = default, uint hash = default, nint maxInsertIndex = default, error err = default, array<uint> hashMatch = default)
             {
                 this.m_compressionLevelRef = new ptr<compressionLevel>(compressionLevel);
                 this.w = w;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:45:39 UTC
+//     Generated on 2022 March 06 22:08:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using math = go.runtime.@internal.math_package;
 using @unsafe = go.@unsafe_package;
@@ -42,7 +41,7 @@ namespace go
                 this.@lock = default;
             }
 
-            public hchan(ulong qcount = default, ulong dataqsiz = default, unsafe.Pointer buf = default, ushort elemsize = default, uint closed = default, ref ptr<_type> elemtype = default, ulong sendx = default, ulong recvx = default, waitq recvq = default, waitq sendq = default, mutex @lock = default)
+            public hchan(nuint qcount = default, nuint dataqsiz = default, unsafe.Pointer buf = default, ushort elemsize = default, uint closed = default, ref ptr<_type> elemtype = default, nuint sendx = default, nuint recvx = default, waitq recvq = default, waitq sendq = default, mutex @lock = default)
             {
                 this.qcount = qcount;
                 this.dataqsiz = dataqsiz;

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:54 UTC
+//     Generated on 2022 March 06 23:37:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -26,7 +28,7 @@ namespace net
         {
             // Value of the runeError struct
             private readonly int m_value;
-
+            
             public runeError(int value) => m_value = value;
 
             // Enable implicit conversions between int and runeError struct

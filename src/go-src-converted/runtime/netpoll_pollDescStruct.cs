@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:47:13 UTC
+//     Generated on 2022 March 06 22:10:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using @unsafe = go.@unsafe_package;
 
@@ -42,9 +41,10 @@ namespace go
                 this.wg = default;
                 this.wt = default;
                 this.wd = default;
+                this.self = default;
             }
 
-            public pollDesc(ref ptr<pollDesc> link = default, mutex @lock = default, System.UIntPtr fd = default, bool closing = default, bool everr = default, uint user = default, System.UIntPtr rseq = default, System.UIntPtr rg = default, timer rt = default, long rd = default, System.UIntPtr wseq = default, System.UIntPtr wg = default, timer wt = default, long wd = default)
+            public pollDesc(ref ptr<pollDesc> link = default, mutex @lock = default, System.UIntPtr fd = default, bool closing = default, bool everr = default, uint user = default, System.UIntPtr rseq = default, System.UIntPtr rg = default, timer rt = default, long rd = default, System.UIntPtr wseq = default, System.UIntPtr wg = default, timer wt = default, long wd = default, ref ptr<pollDesc> self = default)
             {
                 this.link = link;
                 this.@lock = @lock;
@@ -60,6 +60,7 @@ namespace go
                 this.wg = wg;
                 this.wt = wt;
                 this.wd = wd;
+                this.self = self;
             }
 
             // Enable comparisons between nil and pollDesc struct
@@ -82,7 +83,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static pollDesc pollDesc_cast(dynamic value)
         {
-            return new pollDesc(ref value.link, value.@lock, value.fd, value.closing, value.everr, value.user, value.rseq, value.rg, value.rt, value.rd, value.wseq, value.wg, value.wt, value.wd);
+            return new pollDesc(ref value.link, value.@lock, value.fd, value.closing, value.everr, value.user, value.rseq, value.rg, value.rt, value.rd, value.wseq, value.wg, value.wt, value.wd, ref value.self);
         }
     }
 }

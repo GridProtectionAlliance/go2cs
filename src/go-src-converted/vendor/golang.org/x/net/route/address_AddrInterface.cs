@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:45 UTC
+//     Generated on 2022 March 06 23:38:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using runtime = go.runtime_package;
 using go;
 
@@ -53,7 +52,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -68,27 +67,27 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate long FamilyByPtr(ptr<T> value);
-            private delegate long FamilyByVal(T value);
+            private delegate nint FamilyByPtr(ptr<T> value);
+            private delegate nint FamilyByVal(T value);
 
             private static readonly FamilyByPtr? s_FamilyByPtr;
             private static readonly FamilyByVal? s_FamilyByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Family()
+            public nint Family()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FamilyByPtr is null || !m_target_is_ptr)
                     return s_FamilyByVal!(target);
 
-                return s_FamilyByPtr(m_target_ptr);
+                return s_FamilyByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Addr()
@@ -99,12 +98,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Family");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FamilyByPtr = extensionMethod.CreateStaticDelegate(typeof(FamilyByPtr)) as FamilyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Family");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FamilyByVal = extensionMethod.CreateStaticDelegate(typeof(FamilyByVal)) as FamilyByVal;
 
                 if (s_FamilyByPtr is null && s_FamilyByVal is null)

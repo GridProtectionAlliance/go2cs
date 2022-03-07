@@ -3,24 +3,17 @@
 // See LICENSE file for license details
 // Custom build for pprof (https://github.com/spiermar/d3-pprof)
 
-// package d3 -- go2cs converted at 2020 October 09 05:54:03 UTC
+// package d3 -- go2cs converted at 2022 March 06 23:24:05 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/d3" ==> using d3 = go.cmd.vendor.github.com.google.pprof.third_party.d3_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3\d3.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3\d3.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof {
-namespace third_party
-{
-    public static partial class d3_package
-    {
-        // JSSource returns the d3.js file
-        public static readonly @string JSSource = (@string)"\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
+namespace go.cmd.vendor.github.com.google.pprof.third_party;
+
+public static partial class d3_package {
+
+    // JSSource returns the d3.js file
+public static readonly @string JSSource = "\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
     "\'undefined\' ? factory(exports) :\n\ttypeof define === \'function\' && define.amd ? d" +
     "efine([\'exports\'], factory) :\n\t(factory((global.d3 = {})));\n}(this, (function (e" +
     "xports) { \'use strict\';\n\nvar xhtml = \"http://www.w3.org/1999/xhtml\";\n\nvar namesp" +
@@ -1714,5 +1707,5 @@ namespace third_party
     "orts.transition = transition;\n\nObject.defineProperty(exports, \'__esModule\', { va" +
     "lue: true });\n\n})));\n";
 
-    }
-}}}}}}}
+
+} // end d3_package

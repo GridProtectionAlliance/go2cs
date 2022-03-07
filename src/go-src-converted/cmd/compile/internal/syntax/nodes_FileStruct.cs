@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,16 +41,16 @@ namespace @internal
                 this.Pragma = default;
                 this.PkgName = default;
                 this.DeclList = default;
-                this.Lines = default;
+                this.EOF = default;
                 this.m_nodeRef = new ptr<node>(new node(nil));
             }
 
-            public File(Pragma Pragma = default, ref ptr<Name> PkgName = default, slice<Decl> DeclList = default, ulong Lines = default, node node = default)
+            public File(Pragma Pragma = default, ref ptr<Name> PkgName = default, slice<Decl> DeclList = default, Pos EOF = default, node node = default)
             {
                 this.Pragma = Pragma;
                 this.PkgName = PkgName;
                 this.DeclList = DeclList;
-                this.Lines = Lines;
+                this.EOF = EOF;
                 this.m_nodeRef = new ptr<node>(node);
             }
 
@@ -74,7 +74,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static File File_cast(dynamic value)
         {
-            return new File(value.Pragma, ref value.PkgName, value.DeclList, value.Lines, value.node);
+            return new File(value.Pragma, ref value.PkgName, value.DeclList, value.EOF, value.node);
         }
     }
 }}}}

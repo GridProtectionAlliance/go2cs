@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:17 UTC
+//     Generated on 2022 March 06 22:26:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using itoa = go.@internal.itoa_package;
 using runtime = go.runtime_package;
 using sync = go.sync_package;
 using @unsafe = go.@unsafe_package;
@@ -33,7 +33,7 @@ namespace go
                 this.err = default;
             }
 
-            public forkRet(long pid = default, error err = default)
+            public forkRet(nint pid = default, error err = default)
             {
                 this.pid = pid;
                 this.err = err;

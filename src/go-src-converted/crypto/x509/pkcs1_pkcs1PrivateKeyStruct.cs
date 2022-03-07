@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:45 UTC
+//     Generated on 2022 March 06 22:19:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using rsa = go.crypto.rsa_package;
 using asn1 = go.encoding.asn1_package;
 using errors = go.errors_package;
@@ -44,7 +43,7 @@ namespace crypto
                 this.AdditionalPrimes = default;
             }
 
-            public pkcs1PrivateKey(long Version = default, ref ptr<big.Int> N = default, long E = default, ref ptr<big.Int> D = default, ref ptr<big.Int> P = default, ref ptr<big.Int> Q = default, ref ptr<big.Int> Dp = default, ref ptr<big.Int> Dq = default, ref ptr<big.Int> Qinv = default, slice<pkcs1AdditionalRSAPrime> AdditionalPrimes = default)
+            public pkcs1PrivateKey(nint Version = default, ref ptr<big.Int> N = default, nint E = default, ref ptr<big.Int> D = default, ref ptr<big.Int> P = default, ref ptr<big.Int> Q = default, ref ptr<big.Int> Dp = default, ref ptr<big.Int> Dq = default, ref ptr<big.Int> Qinv = default, slice<pkcs1AdditionalRSAPrime> AdditionalPrimes = default)
             {
                 this.Version = Version;
                 this.N = N;

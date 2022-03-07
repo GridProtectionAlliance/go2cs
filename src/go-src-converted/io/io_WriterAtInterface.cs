@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:26 UTC
+//     Generated on 2022 March 06 22:12:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using sync = go.sync_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -48,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -63,27 +63,27 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteAtByPtr(ptr<T> value, slice<byte> p, long off);
-            private delegate (long, error) WriteAtByVal(T value, slice<byte> p, long off);
+            private delegate (nint, error) WriteAtByPtr(ptr<T> value, slice<byte> p, long off);
+            private delegate (nint, error) WriteAtByVal(T value, slice<byte> p, long off);
 
             private static readonly WriteAtByPtr? s_WriteAtByPtr;
             private static readonly WriteAtByVal? s_WriteAtByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) WriteAt(slice<byte> p, long off)
+            public (nint, error) WriteAt(slice<byte> p, long off)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteAtByPtr is null || !m_target_is_ptr)
                     return s_WriteAtByVal!(target, p, off);
 
-                return s_WriteAtByPtr(m_target_ptr, p, off);
+                return s_WriteAtByPtr(m_target_ptr!, p, off);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static WriterAt()
@@ -94,12 +94,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteAt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteAtByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteAtByPtr)) as WriteAtByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteAt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteAtByVal = extensionMethod.CreateStaticDelegate(typeof(WriteAtByVal)) as WriteAtByVal;
 
                 if (s_WriteAtByPtr is null && s_WriteAtByVal is null)

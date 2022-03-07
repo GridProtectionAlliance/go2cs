@@ -2,28 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2020 October 09 04:45:29 UTC
+// package sys -- go2cs converted at 2022 March 06 22:08:17 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
-// Original source: C:\Go\src\runtime\internal\sys\arch_arm.go
-
-using static go.builtin;
-
-namespace go {
-namespace runtime {
-namespace @internal
-{
-    public static partial class sys_package
-    {
-        public static readonly var ArchFamily = ARM;
-        public static readonly var BigEndian = false;
-        public static readonly long DefaultPhysPageSize = (long)65536L;
-        public static readonly long PCQuantum = (long)4L;
-        public static readonly long Int64Align = (long)4L;
-        public static readonly long MinFrameSize = (long)4L;
+// Original source: C:\Program Files\Go\src\runtime\internal\sys\arch_arm.go
 
 
-        public partial struct Uintreg // : uint
-        {
-        }
-    }
-}}}
+namespace go.runtime.@internal;
+
+public static partial class sys_package {
+
+private static readonly var _ArchFamily = ARM;
+private static readonly nint _DefaultPhysPageSize = 65536;
+private static readonly nint _PCQuantum = 4;
+private static readonly nint _MinFrameSize = 4;
+private static readonly var _StackAlign = PtrSize;
+
+
+} // end sys_package

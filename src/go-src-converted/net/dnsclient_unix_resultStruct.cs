@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:50 UTC
+//     Generated on 2022 March 06 22:15:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using errors = go.errors_package;
+using itoa = go.@internal.itoa_package;
 using io = go.io_package;
-using rand = go.math.rand_package;
 using os = go.os_package;
 using sync = go.sync_package;
 using time = go.time_package;
@@ -49,11 +48,11 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Error");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_ErrorByRef = extensionMethod.CreateStaticDelegate(typeof(ErrorByRef)) as ErrorByRef;
 
-                    if ((object)s_ErrorByRef == null)
+                    if (s_ErrorByRef is null)
                         s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
                 }
             }

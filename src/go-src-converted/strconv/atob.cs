@@ -2,80 +2,71 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2020 October 09 04:45:17 UTC
+// package strconv -- go2cs converted at 2022 March 06 22:08:02 UTC
 // import "strconv" ==> using strconv = go.strconv_package
-// Original source: C:\Go\src\strconv\atob.go
+// Original source: C:\Program Files\Go\src\strconv\atob.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class strconv_package
-    {
-        // ParseBool returns the boolean value represented by the string.
-        // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
-        // Any other value returns an error.
-        public static (bool, error) ParseBool(@string str)
-        {
-            bool _p0 = default;
-            error _p0 = default!;
+namespace go;
 
-            switch (str)
-            {
-                case "1": 
+public static partial class strconv_package {
 
-                case "t": 
+    // ParseBool returns the boolean value represented by the string.
+    // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
+    // Any other value returns an error.
+public static (bool, error) ParseBool(@string str) {
+    bool _p0 = default;
+    error _p0 = default!;
 
-                case "T": 
+    switch (str) {
+        case "1": 
 
-                case "true": 
+        case "t": 
 
-                case "TRUE": 
+        case "T": 
 
-                case "True": 
-                    return (true, error.As(null!)!);
-                    break;
-                case "0": 
+        case "true": 
 
-                case "f": 
+        case "TRUE": 
 
-                case "F": 
+        case "True": 
+            return (true, error.As(null!)!);
+            break;
+        case "0": 
 
-                case "false": 
+        case "f": 
 
-                case "FALSE": 
+        case "F": 
 
-                case "False": 
-                    return (false, error.As(null!)!);
-                    break;
-            }
-            return (false, error.As(syntaxError("ParseBool", str))!);
+        case "false": 
 
-        }
+        case "FALSE": 
 
-        // FormatBool returns "true" or "false" according to the value of b.
-        public static @string FormatBool(bool b)
-        {
-            if (b)
-            {
-                return "true";
-            }
-
-            return "false";
-
-        }
-
-        // AppendBool appends "true" or "false", according to the value of b,
-        // to dst and returns the extended buffer.
-        public static slice<byte> AppendBool(slice<byte> dst, bool b)
-        {
-            if (b)
-            {
-                return append(dst, "true");
-            }
-
-            return append(dst, "false");
-
-        }
+        case "False": 
+            return (false, error.As(null!)!);
+            break;
     }
+    return (false, error.As(syntaxError("ParseBool", str))!);
+
 }
+
+// FormatBool returns "true" or "false" according to the value of b.
+public static @string FormatBool(bool b) {
+    if (b) {
+        return "true";
+    }
+    return "false";
+
+}
+
+// AppendBool appends "true" or "false", according to the value of b,
+// to dst and returns the extended buffer.
+public static slice<byte> AppendBool(slice<byte> dst, bool b) {
+    if (b) {
+        return append(dst, "true");
+    }
+    return append(dst, "false");
+
+}
+
+} // end strconv_package

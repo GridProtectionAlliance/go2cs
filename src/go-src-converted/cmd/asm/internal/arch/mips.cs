@@ -6,123 +6,103 @@
 // MIPS (MIPS64) instruction set, to minimize its interaction
 // with the core of the assembler.
 
-// package arch -- go2cs converted at 2020 October 09 05:23:10 UTC
+// package arch -- go2cs converted at 2022 March 06 22:46:38 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
-// Original source: C:\Go\src\cmd\asm\internal\arch\mips.go
+// Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\mips.go
 using obj = go.cmd.@internal.obj_package;
 using mips = go.cmd.@internal.obj.mips_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace asm {
-namespace @internal
-{
-    public static partial class arch_package
-    {
-        private static bool jumpMIPS(@string word)
-        {
-            switch (word)
-            {
-                case "BEQ": 
+namespace go.cmd.asm.@internal;
 
-                case "BFPF": 
+public static partial class arch_package {
 
-                case "BFPT": 
+private static bool jumpMIPS(@string word) {
+    switch (word) {
+        case "BEQ": 
 
-                case "BGEZ": 
+        case "BFPF": 
 
-                case "BGEZAL": 
+        case "BFPT": 
 
-                case "BGTZ": 
+        case "BGEZ": 
 
-                case "BLEZ": 
+        case "BGEZAL": 
 
-                case "BLTZ": 
+        case "BGTZ": 
 
-                case "BLTZAL": 
+        case "BLEZ": 
 
-                case "BNE": 
+        case "BLTZ": 
 
-                case "JMP": 
+        case "BLTZAL": 
 
-                case "JAL": 
+        case "BNE": 
 
-                case "CALL": 
-                    return true;
-                    break;
-            }
-            return false;
+        case "JMP": 
 
-        }
+        case "JAL": 
 
-        // IsMIPSCMP reports whether the op (as defined by an mips.A* constant) is
-        // one of the CMP instructions that require special handling.
-        public static bool IsMIPSCMP(obj.As op)
-        {
-
-            if (op == mips.ACMPEQF || op == mips.ACMPEQD || op == mips.ACMPGEF || op == mips.ACMPGED || op == mips.ACMPGTF || op == mips.ACMPGTD) 
-                return true;
-                        return false;
-
-        }
-
-        // IsMIPSMUL reports whether the op (as defined by an mips.A* constant) is
-        // one of the MUL/DIV/REM/MADD/MSUB instructions that require special handling.
-        public static bool IsMIPSMUL(obj.As op)
-        {
-
-            if (op == mips.AMUL || op == mips.AMULU || op == mips.AMULV || op == mips.AMULVU || op == mips.ADIV || op == mips.ADIVU || op == mips.ADIVV || op == mips.ADIVVU || op == mips.AREM || op == mips.AREMU || op == mips.AREMV || op == mips.AREMVU || op == mips.AMADD || op == mips.AMSUB) 
-                return true;
-                        return false;
-
-        }
-
-        private static (short, bool) mipsRegisterNumber(@string name, short n)
-        {
-            short _p0 = default;
-            bool _p0 = default;
-
-            switch (name)
-            {
-                case "F": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (mips.REG_F0 + n, true);
-                    }
-
-                    break;
-                case "FCR": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (mips.REG_FCR0 + n, true);
-                    }
-
-                    break;
-                case "M": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (mips.REG_M0 + n, true);
-                    }
-
-                    break;
-                case "R": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (mips.REG_R0 + n, true);
-                    }
-
-                    break;
-                case "W": 
-                    if (0L <= n && n <= 31L)
-                    {
-                        return (mips.REG_W0 + n, true);
-                    }
-
-                    break;
-            }
-            return (0L, false);
-
-        }
+        case "CALL": 
+            return true;
+            break;
     }
-}}}}
+    return false;
+
+}
+
+// IsMIPSCMP reports whether the op (as defined by an mips.A* constant) is
+// one of the CMP instructions that require special handling.
+public static bool IsMIPSCMP(obj.As op) {
+
+    if (op == mips.ACMPEQF || op == mips.ACMPEQD || op == mips.ACMPGEF || op == mips.ACMPGED || op == mips.ACMPGTF || op == mips.ACMPGTD) 
+        return true;
+        return false;
+
+}
+
+// IsMIPSMUL reports whether the op (as defined by an mips.A* constant) is
+// one of the MUL/DIV/REM/MADD/MSUB instructions that require special handling.
+public static bool IsMIPSMUL(obj.As op) {
+
+    if (op == mips.AMUL || op == mips.AMULU || op == mips.AMULV || op == mips.AMULVU || op == mips.ADIV || op == mips.ADIVU || op == mips.ADIVV || op == mips.ADIVVU || op == mips.AREM || op == mips.AREMU || op == mips.AREMV || op == mips.AREMVU || op == mips.AMADD || op == mips.AMSUB) 
+        return true;
+        return false;
+
+}
+
+private static (short, bool) mipsRegisterNumber(@string name, short n) {
+    short _p0 = default;
+    bool _p0 = default;
+
+    switch (name) {
+        case "F": 
+            if (0 <= n && n <= 31) {
+                return (mips.REG_F0 + n, true);
+            }
+            break;
+        case "FCR": 
+            if (0 <= n && n <= 31) {
+                return (mips.REG_FCR0 + n, true);
+            }
+            break;
+        case "M": 
+            if (0 <= n && n <= 31) {
+                return (mips.REG_M0 + n, true);
+            }
+            break;
+        case "R": 
+            if (0 <= n && n <= 31) {
+                return (mips.REG_R0 + n, true);
+            }
+            break;
+        case "W": 
+            if (0 <= n && n <= 31) {
+                return (mips.REG_W0 + n, true);
+            }
+            break;
+    }
+    return (0, false);
+
+}
+
+} // end arch_package

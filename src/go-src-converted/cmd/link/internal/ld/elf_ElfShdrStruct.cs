@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:37 UTC
+//     Generated on 2022 March 06 23:21:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,16 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using sha1 = go.crypto.sha1_package;
+using elf = go.debug.elf_package;
 using binary = go.encoding.binary_package;
 using hex = go.encoding.hex_package;
-using io = go.io_package;
+using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using filepath = go.path.filepath_package;
+using runtime = go.runtime_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
 using go;
@@ -36,36 +38,44 @@ namespace @internal
     public static partial class ld_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
+        [PromotedStruct(typeof(elf.Section64))]
         public partial struct ElfShdr
         {
+            // Section64 structure promotion - sourced from value copy
+            private readonly ptr<Section64> m_Section64Ref;
+
+            private ref Section64 Section64_val => ref m_Section64Ref.Value;
+
+            public ref uint Name => ref m_Section64Ref.Value.Name;
+
+            public ref uint Type => ref m_Section64Ref.Value.Type;
+
+            public ref ulong Flags => ref m_Section64Ref.Value.Flags;
+
+            public ref ulong Addr => ref m_Section64Ref.Value.Addr;
+
+            public ref ulong Off => ref m_Section64Ref.Value.Off;
+
+            public ref ulong Size => ref m_Section64Ref.Value.Size;
+
+            public ref uint Link => ref m_Section64Ref.Value.Link;
+
+            public ref uint Info => ref m_Section64Ref.Value.Info;
+
+            public ref ulong Addralign => ref m_Section64Ref.Value.Addralign;
+
+            public ref ulong Entsize => ref m_Section64Ref.Value.Entsize;
+
             // Constructors
             public ElfShdr(NilType _)
             {
-                this.name = default;
-                this.type_ = default;
-                this.flags = default;
-                this.addr = default;
-                this.off = default;
-                this.size = default;
-                this.link = default;
-                this.info = default;
-                this.addralign = default;
-                this.entsize = default;
+                this.m_Section64Ref = new ptr<elf.Section64>(new elf.Section64(nil));
                 this.shnum = default;
             }
 
-            public ElfShdr(uint name = default, uint type_ = default, ulong flags = default, ulong addr = default, ulong off = default, ulong size = default, uint link = default, uint info = default, ulong addralign = default, ulong entsize = default, long shnum = default)
+            public ElfShdr(elf.Section64 Section64 = default, elf.SectionIndex shnum = default)
             {
-                this.name = name;
-                this.type_ = type_;
-                this.flags = flags;
-                this.addr = addr;
-                this.off = off;
-                this.size = size;
-                this.link = link;
-                this.info = info;
-                this.addralign = addralign;
-                this.entsize = entsize;
+                this.m_Section64Ref = new ptr<elf.Section64>(Section64);
                 this.shnum = shnum;
             }
 
@@ -89,7 +99,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static ElfShdr ElfShdr_cast(dynamic value)
         {
-            return new ElfShdr(value.name, value.type_, value.flags, value.addr, value.off, value.size, value.link, value.info, value.addralign, value.entsize, value.shnum);
+            return new ElfShdr(value.Section64, value.shnum);
         }
     }
 }}}}

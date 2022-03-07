@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:06 UTC
+//     Generated on 2022 March 06 22:17:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using windows = go.@internal.syscall.windows_package;
 using os = go.os_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
 using go;
 
 #nullable enable
@@ -33,18 +29,7 @@ namespace crypto
             // Constructors
             public rngReader(NilType _)
             {
-                this.used = default;
-                this.prov = default;
-                this.mu = default;
             }
-
-            public rngReader(int used = default, syscall.Handle prov = default, sync.Mutex mu = default)
-            {
-                this.used = used;
-                this.prov = prov;
-                this.mu = mu;
-            }
-
             // Enable comparisons between nil and rngReader struct
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(rngReader value, NilType nil) => value.Equals(default(rngReader));
@@ -65,7 +50,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static rngReader rngReader_cast(dynamic value)
         {
-            return new rngReader(value.used, value.prov, value.mu);
+            return new rngReader();
         }
     }
 }}

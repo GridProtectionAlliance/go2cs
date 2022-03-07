@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:45 UTC
+//     Generated on 2022 March 06 23:33:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the N struct
             private readonly System.Numerics.Complex128 m_value;
-
+            
             public N(System.Numerics.Complex128 value) => m_value = value;
 
             // Enable implicit conversions between System.Numerics.Complex128 and N struct

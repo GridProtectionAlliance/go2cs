@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:26 UTC
+//     Generated on 2022 March 06 22:12:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using sync = go.sync_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -48,7 +48,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,36 +74,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnreadRuneByPtr is null || !m_target_is_ptr)
                     return s_UnreadRuneByVal!(target);
 
-                return s_UnreadRuneByPtr(m_target_ptr);
-            }
-
-            private delegate (int, long, error) ReadRuneByPtr(ptr<T> value);
-            private delegate (int, long, error) ReadRuneByVal(T value);
-
-            private static readonly ReadRuneByPtr? s_ReadRuneByPtr;
-            private static readonly ReadRuneByVal? s_ReadRuneByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (int, long, error) ReadRune()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadRuneByPtr is null || !m_target_is_ptr)
-                    return s_ReadRuneByVal!(target);
-
-                return s_ReadRuneByPtr(m_target_ptr);
+                return s_UnreadRuneByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static RuneScanner()
@@ -114,29 +94,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("UnreadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByPtr)) as UnreadRuneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("UnreadRune");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnreadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(UnreadRuneByVal)) as UnreadRuneByVal;
 
                 if (s_UnreadRuneByPtr is null && s_UnreadRuneByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement RuneScanner.UnreadRune method", new Exception("UnreadRune"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRune");
-
-                if (!(extensionMethod is null))
-                    s_ReadRuneByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByPtr)) as ReadRuneByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("ReadRune");
-
-                if (!(extensionMethod is null))
-                    s_ReadRuneByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRuneByVal)) as ReadRuneByVal;
-
-                if (s_ReadRuneByPtr is null && s_ReadRuneByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement RuneScanner.ReadRune method", new Exception("ReadRune"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

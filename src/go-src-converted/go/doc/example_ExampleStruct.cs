@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:05 UTC
+//     Generated on 2022 March 06 22:41:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
 using lazyregexp = go.@internal.lazyregexp_package;
@@ -49,7 +48,7 @@ namespace go
                 this.Order = default;
             }
 
-            public Example(@string Name = default, @string Suffix = default, @string Doc = default, ast.Node Code = default, ref ptr<ast.File> Play = default, slice<ptr<ast.CommentGroup>> Comments = default, @string Output = default, bool Unordered = default, bool EmptyOutput = default, long Order = default)
+            public Example(@string Name = default, @string Suffix = default, @string Doc = default, ast.Node Code = default, ref ptr<ast.File> Play = default, slice<ptr<ast.CommentGroup>> Comments = default, @string Output = default, bool Unordered = default, bool EmptyOutput = default, nint Order = default)
             {
                 this.Name = Name;
                 this.Suffix = Suffix;

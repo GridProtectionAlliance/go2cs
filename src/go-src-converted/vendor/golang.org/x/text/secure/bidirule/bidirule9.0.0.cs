@@ -2,33 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !go1.10
 // +build !go1.10
 
-// package bidirule -- go2cs converted at 2020 October 09 06:07:56 UTC
+// package bidirule -- go2cs converted at 2022 March 06 23:38:23 UTC
 // import "vendor/golang.org/x/text/secure/bidirule" ==> using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package
-// Original source: C:\Go\src\vendor\golang.org\x\text\secure\bidirule\bidirule9.0.0.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\secure\bidirule\bidirule9.0.0.go
 
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace text {
-namespace secure
-{
-    public static partial class bidirule_package
-    {
-        private static bool isFinal(this ptr<Transformer> _addr_t)
-        {
-            ref Transformer t = ref _addr_t.val;
+namespace go.vendor.golang.org.x.text.secure;
 
-            if (!t.isRTL())
-            {
-                return true;
-            }
-            return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
+public static partial class bidirule_package {
 
-        }
+private static bool isFinal(this ptr<Transformer> _addr_t) {
+    ref Transformer t = ref _addr_t.val;
+
+    if (!t.isRTL()) {
+        return true;
     }
-}}}}}}
+    return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
+
+}
+
+} // end bidirule_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:00 UTC
+//     Generated on 2022 March 06 22:31:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -42,7 +41,7 @@ namespace go
                 this.maxWid = default;
             }
 
-            public ssave(bool validSave = default, bool nlIsEnd = default, bool nlIsSpace = default, long argLimit = default, long limit = default, long maxWid = default)
+            public ssave(bool validSave = default, bool nlIsEnd = default, bool nlIsSpace = default, nint argLimit = default, nint limit = default, nint maxWid = default)
             {
                 this.validSave = validSave;
                 this.nlIsEnd = nlIsEnd;

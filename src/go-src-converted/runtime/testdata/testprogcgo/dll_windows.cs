@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:00:56 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\dll_windows.go
+// package main -- go2cs converted at 2022 March 06 22:26:11 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\dll_windows.go
 /*
 #include <windows.h>
 
@@ -20,22 +20,19 @@ DWORD getthread() {
 */
 
 using windows = go.runtime.testdata.testprogcgo.windows_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoDLLImportsMain", CgoDLLImportsMain);
-        }
+namespace go;
 
-        public static void CgoDLLImportsMain()
-        {
-            C.getthread();
-            windows.GetThread();
-            println("OK");
-        }
-    }
+public static partial class main_package {
+
+private static void init() {
+    register("CgoDLLImportsMain", CgoDLLImportsMain);
 }
+
+public static void CgoDLLImportsMain() {
+    C.getthread();
+    windows.GetThread();
+    println("OK");
+}
+
+} // end main_package

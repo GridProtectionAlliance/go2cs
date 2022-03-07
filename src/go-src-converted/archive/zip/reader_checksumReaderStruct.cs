@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:10 UTC
+//     Generated on 2022 March 06 22:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
+using path = go.path_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
@@ -40,17 +44,15 @@ namespace archive
                 this.hash = default;
                 this.nread = default;
                 this.f = default;
-                this.desr = default;
                 this.err = default;
             }
 
-            public checksumReader(io.ReadCloser rc = default, hash.Hash32 hash = default, ulong nread = default, ref ptr<File> f = default, io.Reader desr = default, error err = default)
+            public checksumReader(io.ReadCloser rc = default, hash.Hash32 hash = default, ulong nread = default, ref ptr<File> f = default, error err = default)
             {
                 this.rc = rc;
                 this.hash = hash;
                 this.nread = nread;
                 this.f = f;
-                this.desr = desr;
                 this.err = err;
             }
 
@@ -74,7 +76,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static checksumReader checksumReader_cast(dynamic value)
         {
-            return new checksumReader(value.rc, value.hash, value.nread, ref value.f, value.desr, value.err);
+            return new checksumReader(value.rc, value.hash, value.nread, ref value.f, value.err);
         }
     }
 }}

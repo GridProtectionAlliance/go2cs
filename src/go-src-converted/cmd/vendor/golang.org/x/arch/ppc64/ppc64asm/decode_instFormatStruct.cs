@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:54 UTC
+//     Generated on 2022 March 06 23:25:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
 using log = go.log_package;
@@ -43,7 +42,7 @@ namespace ppc64
                 this.Args = default;
             }
 
-            public instFormat(Op Op = default, uint Mask = default, uint Value = default, uint DontCare = default, array<ptr<argField>> Args = default)
+            public instFormat(Op Op = default, ulong Mask = default, ulong Value = default, ulong DontCare = default, array<ptr<argField>> Args = default)
             {
                 this.Op = Op;
                 this.Mask = Mask;

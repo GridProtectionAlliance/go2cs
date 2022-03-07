@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:09 UTC
+//     Generated on 2022 March 06 22:11:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -21,7 +23,7 @@ namespace go
         {
             // Value of the waitReason struct
             private readonly byte m_value;
-
+            
             public waitReason(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and waitReason struct

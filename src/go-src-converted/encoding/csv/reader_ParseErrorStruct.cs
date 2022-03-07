@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:45 UTC
+//     Generated on 2022 March 06 22:24:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
@@ -41,7 +40,7 @@ namespace encoding
                 this.Err = default;
             }
 
-            public ParseError(long StartLine = default, long Line = default, long Column = default, error Err = default)
+            public ParseError(nint StartLine = default, nint Line = default, nint Column = default, error Err = default)
             {
                 this.StartLine = StartLine;
                 this.Line = Line;

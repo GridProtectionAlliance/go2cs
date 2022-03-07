@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:15 UTC
+//     Generated on 2022 March 06 23:31:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -61,7 +60,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,13 +86,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PosByPtr is null || !m_target_is_ptr)
                     return s_PosByVal!(target);
 
-                return s_PosByPtr(m_target_ptr);
+                return s_PosByPtr(m_target_ptr!);
             }
 
             private delegate token.Pos EndByPtr(ptr<T> value);
@@ -107,16 +106,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_EndByPtr is null || !m_target_is_ptr)
                     return s_EndByVal!(target);
 
-                return s_EndByPtr(m_target_ptr);
+                return s_EndByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Range()
@@ -127,12 +126,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Pos");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
 
                 if (s_PosByPtr is null && s_PosByVal is null)
@@ -140,12 +139,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("End");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EndByPtr = extensionMethod.CreateStaticDelegate(typeof(EndByPtr)) as EndByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("End");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EndByVal = extensionMethod.CreateStaticDelegate(typeof(EndByVal)) as EndByVal;
 
                 if (s_EndByPtr is null && s_EndByVal is null)

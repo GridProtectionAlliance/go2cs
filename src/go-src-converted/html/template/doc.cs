@@ -238,8 +238,8 @@ Least Surprise Property:
 knows that contextual autoescaping happens should be able to look at a {{.}}
 and correctly infer what sanitization happens."
 */
-// package template -- go2cs converted at 2020 October 09 04:59:15 UTC
+// package template -- go2cs converted at 2022 March 06 22:24:23 UTC
 // import "html/template" ==> using template = go.html.template_package
-// Original source: C:\Go\src\html\template\doc.go
-    }
+// Original source: C:\Program Files\Go\src\html\template\doc.go
 
+} // end template_package

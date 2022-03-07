@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:17 UTC
+//     Generated on 2022 March 06 22:12:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using unsafeheader = go.@internal.unsafeheader_package;
 using @unsafe = go.@unsafe_package;
 using go;
@@ -51,7 +50,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,13 +76,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> PkgPathByPtr(ptr<T> value);
@@ -97,13 +96,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PkgPathByPtr is null || !m_target_is_ptr)
                     return s_PkgPathByVal!(target);
 
-                return s_PkgPathByPtr(m_target_ptr);
+                return s_PkgPathByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> SizeByPtr(ptr<T> value);
@@ -117,13 +116,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SizeByPtr is null || !m_target_is_ptr)
                     return s_SizeByVal!(target);
 
-                return s_SizeByPtr(m_target_ptr);
+                return s_SizeByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> KindByPtr(ptr<T> value);
@@ -137,13 +136,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_KindByPtr is null || !m_target_is_ptr)
                     return s_KindByVal!(target);
 
-                return s_KindByPtr(m_target_ptr);
+                return s_KindByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> ImplementsByPtr(ptr<T> value, Type u);
@@ -157,13 +156,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ImplementsByPtr is null || !m_target_is_ptr)
                     return s_ImplementsByVal!(target, u);
 
-                return s_ImplementsByPtr(m_target_ptr, u);
+                return s_ImplementsByPtr(m_target_ptr!, u);
             }
 
             private delegate ptr<uncommonType> AssignableToByPtr(ptr<T> value, Type u);
@@ -177,13 +176,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AssignableToByPtr is null || !m_target_is_ptr)
                     return s_AssignableToByVal!(target, u);
 
-                return s_AssignableToByPtr(m_target_ptr, u);
+                return s_AssignableToByPtr(m_target_ptr!, u);
             }
 
             private delegate ptr<uncommonType> ComparableByPtr(ptr<T> value);
@@ -197,13 +196,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ComparableByPtr is null || !m_target_is_ptr)
                     return s_ComparableByVal!(target);
 
-                return s_ComparableByPtr(m_target_ptr);
+                return s_ComparableByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> StringByPtr(ptr<T> value);
@@ -217,13 +216,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> ElemByPtr(ptr<T> value);
@@ -237,13 +236,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ElemByPtr is null || !m_target_is_ptr)
                     return s_ElemByVal!(target);
 
-                return s_ElemByPtr(m_target_ptr);
+                return s_ElemByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> commonByPtr(ptr<T> value);
@@ -257,13 +256,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_commonByPtr is null || !m_target_is_ptr)
                     return s_commonByVal!(target);
 
-                return s_commonByPtr(m_target_ptr);
+                return s_commonByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> uncommonByPtr(ptr<T> value);
@@ -277,16 +276,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_uncommonByPtr is null || !m_target_is_ptr)
                     return s_uncommonByVal!(target);
 
-                return s_uncommonByPtr(m_target_ptr);
+                return s_uncommonByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Type()
@@ -297,12 +296,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -310,12 +309,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PkgPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgPathByPtr = extensionMethod.CreateStaticDelegate(typeof(PkgPathByPtr)) as PkgPathByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PkgPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgPathByVal = extensionMethod.CreateStaticDelegate(typeof(PkgPathByVal)) as PkgPathByVal;
 
                 if (s_PkgPathByPtr is null && s_PkgPathByVal is null)
@@ -323,12 +322,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Size");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
                 if (s_SizeByPtr is null && s_SizeByVal is null)
@@ -336,12 +335,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByPtr = extensionMethod.CreateStaticDelegate(typeof(KindByPtr)) as KindByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
 
                 if (s_KindByPtr is null && s_KindByVal is null)
@@ -349,12 +348,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Implements");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImplementsByPtr = extensionMethod.CreateStaticDelegate(typeof(ImplementsByPtr)) as ImplementsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Implements");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImplementsByVal = extensionMethod.CreateStaticDelegate(typeof(ImplementsByVal)) as ImplementsByVal;
 
                 if (s_ImplementsByPtr is null && s_ImplementsByVal is null)
@@ -362,12 +361,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AssignableTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AssignableToByPtr = extensionMethod.CreateStaticDelegate(typeof(AssignableToByPtr)) as AssignableToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AssignableTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AssignableToByVal = extensionMethod.CreateStaticDelegate(typeof(AssignableToByVal)) as AssignableToByVal;
 
                 if (s_AssignableToByPtr is null && s_AssignableToByVal is null)
@@ -375,12 +374,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Comparable");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ComparableByPtr = extensionMethod.CreateStaticDelegate(typeof(ComparableByPtr)) as ComparableByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Comparable");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ComparableByVal = extensionMethod.CreateStaticDelegate(typeof(ComparableByVal)) as ComparableByVal;
 
                 if (s_ComparableByPtr is null && s_ComparableByVal is null)
@@ -388,12 +387,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -401,12 +400,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByPtr = extensionMethod.CreateStaticDelegate(typeof(ElemByPtr)) as ElemByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByVal = extensionMethod.CreateStaticDelegate(typeof(ElemByVal)) as ElemByVal;
 
                 if (s_ElemByPtr is null && s_ElemByVal is null)
@@ -414,12 +413,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_commonByPtr = extensionMethod.CreateStaticDelegate(typeof(commonByPtr)) as commonByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_commonByVal = extensionMethod.CreateStaticDelegate(typeof(commonByVal)) as commonByVal;
 
                 if (s_commonByPtr is null && s_commonByVal is null)
@@ -427,12 +426,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("uncommon");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_uncommonByPtr = extensionMethod.CreateStaticDelegate(typeof(uncommonByPtr)) as uncommonByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("uncommon");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_uncommonByVal = extensionMethod.CreateStaticDelegate(typeof(uncommonByVal)) as uncommonByVal;
 
                 if (s_uncommonByPtr is null && s_uncommonByVal is null)

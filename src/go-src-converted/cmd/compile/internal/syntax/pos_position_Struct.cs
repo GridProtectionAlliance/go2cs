@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:41:00 UTC
+//     Generated on 2022 March 06 23:13:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using go;
 
@@ -36,7 +35,7 @@ namespace @internal
                 this.col = default;
             }
 
-            public position_(@string filename = default, ulong line = default, ulong col = default)
+            public position_(@string filename = default, nuint line = default, nuint col = default)
             {
                 this.filename = filename;
                 this.line = line;

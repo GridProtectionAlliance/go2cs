@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:09:00 UTC
+//     Generated on 2022 March 06 22:32:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -20,10 +22,40 @@ namespace @internal
     public static partial class objfile_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct byAddr
+        private partial struct byAddr : ISlice
         {
             // Value of the byAddr struct
             private readonly slice<Sym> m_value;
+            
+            public Array Array => ((ISlice)m_value).Array;
+
+            public nint Low => ((ISlice)m_value).Low;
+
+            public nint High => ((ISlice)m_value).High;
+
+            public nint Capacity => ((ISlice)m_value).Capacity;
+
+            public nint Available => ((ISlice)m_value).Available;
+
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+            
+            public ref Sym this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+            
+            public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public byAddr(slice<Sym> value) => m_value = value;
 

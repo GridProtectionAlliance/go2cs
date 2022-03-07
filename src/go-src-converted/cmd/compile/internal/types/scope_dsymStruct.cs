@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:12 UTC
+//     Generated on 2022 March 06 22:47:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using @base = go.cmd.compile.@internal.@base_package;
 using src = go.cmd.@internal.src_package;
 using go;
 
@@ -37,7 +37,7 @@ namespace @internal
                 this.lastlineno = default;
             }
 
-            public dsym(ref ptr<Sym> sym = default, ref ptr<Node> def = default, int block = default, src.XPos lastlineno = default)
+            public dsym(ref ptr<Sym> sym = default, Object def = default, int block = default, src.XPos lastlineno = default)
             {
                 this.sym = sym;
                 this.def = def;
@@ -65,7 +65,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static dsym dsym_cast(dynamic value)
         {
-            return new dsym(ref value.sym, ref value.def, value.block, value.lastlineno);
+            return new dsym(ref value.sym, value.def, value.block, value.lastlineno);
         }
     }
 }}}}

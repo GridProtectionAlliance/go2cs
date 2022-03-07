@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:27 UTC
+//     Generated on 2022 March 06 22:49:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using buildcfg = go.@internal.buildcfg_package;
 using go;
 
 #nullable enable
@@ -47,6 +48,10 @@ namespace @internal
                 this.fp32RegMask = default;
                 this.fp64RegMask = default;
                 this.specialRegMask = default;
+                this.intParamRegs = default;
+                this.floatParamRegs = default;
+                this.ABI1 = default;
+                this.ABI0 = default;
                 this.GCRegMap = default;
                 this.FPReg = default;
                 this.LinkReg = default;
@@ -57,15 +62,13 @@ namespace @internal
                 this.useSSE = default;
                 this.useAvg = default;
                 this.useHmul = default;
-                this.use387 = default;
                 this.SoftFloat = default;
                 this.Race = default;
-                this.NeedsFpScratch = default;
                 this.BigEndian = default;
                 this.UseFMA = default;
             }
 
-            public Config(@string arch = default, long PtrSize = default, long RegSize = default, Types Types = default, blockRewriter lowerBlock = default, valueRewriter lowerValue = default, valueRewriter splitLoad = default, slice<Register> registers = default, regMask gpRegMask = default, regMask fpRegMask = default, regMask fp32RegMask = default, regMask fp64RegMask = default, regMask specialRegMask = default, slice<ptr<Register>> GCRegMap = default, sbyte FPReg = default, sbyte LinkReg = default, bool hasGReg = default, ref ptr<obj.Link> ctxt = default, bool optimize = default, bool noDuffDevice = default, bool useSSE = default, bool useAvg = default, bool useHmul = default, bool use387 = default, bool SoftFloat = default, bool Race = default, bool NeedsFpScratch = default, bool BigEndian = default, bool UseFMA = default)
+            public Config(@string arch = default, long PtrSize = default, long RegSize = default, Types Types = default, blockRewriter lowerBlock = default, valueRewriter lowerValue = default, valueRewriter splitLoad = default, slice<Register> registers = default, regMask gpRegMask = default, regMask fpRegMask = default, regMask fp32RegMask = default, regMask fp64RegMask = default, regMask specialRegMask = default, slice<sbyte> intParamRegs = default, slice<sbyte> floatParamRegs = default, ref ptr<abi.ABIConfig> ABI1 = default, ref ptr<abi.ABIConfig> ABI0 = default, slice<ptr<Register>> GCRegMap = default, sbyte FPReg = default, sbyte LinkReg = default, bool hasGReg = default, ref ptr<obj.Link> ctxt = default, bool optimize = default, bool noDuffDevice = default, bool useSSE = default, bool useAvg = default, bool useHmul = default, bool SoftFloat = default, bool Race = default, bool BigEndian = default, bool UseFMA = default)
             {
                 this.arch = arch;
                 this.PtrSize = PtrSize;
@@ -80,6 +83,10 @@ namespace @internal
                 this.fp32RegMask = fp32RegMask;
                 this.fp64RegMask = fp64RegMask;
                 this.specialRegMask = specialRegMask;
+                this.intParamRegs = intParamRegs;
+                this.floatParamRegs = floatParamRegs;
+                this.ABI1 = ABI1;
+                this.ABI0 = ABI0;
                 this.GCRegMap = GCRegMap;
                 this.FPReg = FPReg;
                 this.LinkReg = LinkReg;
@@ -90,10 +97,8 @@ namespace @internal
                 this.useSSE = useSSE;
                 this.useAvg = useAvg;
                 this.useHmul = useHmul;
-                this.use387 = use387;
                 this.SoftFloat = SoftFloat;
                 this.Race = Race;
-                this.NeedsFpScratch = NeedsFpScratch;
                 this.BigEndian = BigEndian;
                 this.UseFMA = UseFMA;
             }
@@ -118,7 +123,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Config Config_cast(dynamic value)
         {
-            return new Config(value.arch, value.PtrSize, value.RegSize, value.Types, value.lowerBlock, value.lowerValue, value.splitLoad, value.registers, value.gpRegMask, value.fpRegMask, value.fp32RegMask, value.fp64RegMask, value.specialRegMask, value.GCRegMap, value.FPReg, value.LinkReg, value.hasGReg, ref value.ctxt, value.optimize, value.noDuffDevice, value.useSSE, value.useAvg, value.useHmul, value.use387, value.SoftFloat, value.Race, value.NeedsFpScratch, value.BigEndian, value.UseFMA);
+            return new Config(value.arch, value.PtrSize, value.RegSize, value.Types, value.lowerBlock, value.lowerValue, value.splitLoad, value.registers, value.gpRegMask, value.fpRegMask, value.fp32RegMask, value.fp64RegMask, value.specialRegMask, value.intParamRegs, value.floatParamRegs, ref value.ABI1, ref value.ABI0, value.GCRegMap, value.FPReg, value.LinkReg, value.hasGReg, ref value.ctxt, value.optimize, value.noDuffDevice, value.useSSE, value.useAvg, value.useHmul, value.SoftFloat, value.Race, value.BigEndian, value.UseFMA);
         }
     }
 }}}}

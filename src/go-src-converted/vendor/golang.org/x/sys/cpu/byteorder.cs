@@ -2,117 +2,113 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cpu -- go2cs converted at 2020 October 09 06:07:53 UTC
+// package cpu -- go2cs converted at 2022 March 06 23:38:18 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
-// Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\byteorder.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\byteorder.go
 using runtime = go.runtime_package;
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class cpu_package
-    {
-        // byteOrder is a subset of encoding/binary.ByteOrder.
-        private partial interface byteOrder
-        {
-            ulong Uint32(slice<byte> _p0);
-            ulong Uint64(slice<byte> _p0);
-        }
+namespace go.vendor.golang.org.x.sys;
 
-        private partial struct littleEndian
-        {
-        }
-        private partial struct bigEndian
-        {
-        }
+public static partial class cpu_package {
 
-        private static uint Uint32(this littleEndian _p0, slice<byte> b)
-        {
-            _ = b[3L]; // bounds check hint to compiler; see golang.org/issue/14808
-            return uint32(b[0L]) | uint32(b[1L]) << (int)(8L) | uint32(b[2L]) << (int)(16L) | uint32(b[3L]) << (int)(24L);
+    // byteOrder is a subset of encoding/binary.ByteOrder.
+private partial interface byteOrder {
+    ulong Uint32(slice<byte> _p0);
+    ulong Uint64(slice<byte> _p0);
+}
 
-        }
+private partial struct littleEndian {
+}
+private partial struct bigEndian {
+}
 
-        private static ulong Uint64(this littleEndian _p0, slice<byte> b)
-        {
-            _ = b[7L]; // bounds check hint to compiler; see golang.org/issue/14808
-            return uint64(b[0L]) | uint64(b[1L]) << (int)(8L) | uint64(b[2L]) << (int)(16L) | uint64(b[3L]) << (int)(24L) | uint64(b[4L]) << (int)(32L) | uint64(b[5L]) << (int)(40L) | uint64(b[6L]) << (int)(48L) | uint64(b[7L]) << (int)(56L);
+private static uint Uint32(this littleEndian _p0, slice<byte> b) {
+    _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
+    return uint32(b[0]) | uint32(b[1]) << 8 | uint32(b[2]) << 16 | uint32(b[3]) << 24;
 
-        }
+}
 
-        private static uint Uint32(this bigEndian _p0, slice<byte> b)
-        {
-            _ = b[3L]; // bounds check hint to compiler; see golang.org/issue/14808
-            return uint32(b[3L]) | uint32(b[2L]) << (int)(8L) | uint32(b[1L]) << (int)(16L) | uint32(b[0L]) << (int)(24L);
+private static ulong Uint64(this littleEndian _p0, slice<byte> b) {
+    _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
+    return uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56;
 
-        }
+}
 
-        private static ulong Uint64(this bigEndian _p0, slice<byte> b)
-        {
-            _ = b[7L]; // bounds check hint to compiler; see golang.org/issue/14808
-            return uint64(b[7L]) | uint64(b[6L]) << (int)(8L) | uint64(b[5L]) << (int)(16L) | uint64(b[4L]) << (int)(24L) | uint64(b[3L]) << (int)(32L) | uint64(b[2L]) << (int)(40L) | uint64(b[1L]) << (int)(48L) | uint64(b[0L]) << (int)(56L);
+private static uint Uint32(this bigEndian _p0, slice<byte> b) {
+    _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
+    return uint32(b[3]) | uint32(b[2]) << 8 | uint32(b[1]) << 16 | uint32(b[0]) << 24;
 
-        }
+}
 
-        // hostByteOrder returns binary.LittleEndian on little-endian machines and
-        // binary.BigEndian on big-endian machines.
-        private static byteOrder hostByteOrder() => func((_, panic, __) =>
-        {
-            switch (runtime.GOARCH)
-            {
-                case "386": 
+private static ulong Uint64(this bigEndian _p0, slice<byte> b) {
+    _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
+    return uint64(b[7]) | uint64(b[6]) << 8 | uint64(b[5]) << 16 | uint64(b[4]) << 24 | uint64(b[3]) << 32 | uint64(b[2]) << 40 | uint64(b[1]) << 48 | uint64(b[0]) << 56;
 
-                case "amd64": 
+}
 
-                case "amd64p32": 
+// hostByteOrder returns littleEndian on little-endian machines and
+// bigEndian on big-endian machines.
+private static byteOrder hostByteOrder() => func((_, panic, _) => {
+    switch (runtime.GOARCH) {
+        case "386": 
 
-                case "arm": 
+        case "amd64": 
 
-                case "arm64": 
+        case "amd64p32": 
 
-                case "mipsle": 
+        case "alpha": 
 
-                case "mips64le": 
+        case "arm": 
 
-                case "mips64p32le": 
+        case "arm64": 
 
-                case "ppc64le": 
+        case "mipsle": 
 
-                case "riscv": 
+        case "mips64le": 
 
-                case "riscv64": 
-                    return new littleEndian();
-                    break;
-                case "armbe": 
+        case "mips64p32le": 
 
-                case "arm64be": 
+        case "nios2": 
 
-                case "mips": 
+        case "ppc64le": 
 
-                case "mips64": 
+        case "riscv": 
 
-                case "mips64p32": 
+        case "riscv64": 
 
-                case "ppc": 
+        case "sh": 
+            return new littleEndian();
+            break;
+        case "armbe": 
 
-                case "ppc64": 
+        case "arm64be": 
 
-                case "s390": 
+        case "m68k": 
 
-                case "s390x": 
+        case "mips": 
 
-                case "sparc": 
+        case "mips64": 
 
-                case "sparc64": 
-                    return new bigEndian();
-                    break;
-            }
-            panic("unknown architecture");
+        case "mips64p32": 
 
-        });
+        case "ppc": 
+
+        case "ppc64": 
+
+        case "s390": 
+
+        case "s390x": 
+
+        case "shbe": 
+
+        case "sparc": 
+
+        case "sparc64": 
+            return new bigEndian();
+            break;
     }
-}}}}}
+    panic("unknown architecture");
+
+});
+
+} // end cpu_package

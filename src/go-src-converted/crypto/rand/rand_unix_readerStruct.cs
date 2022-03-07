@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:06 UTC
+//     Generated on 2022 March 06 22:17:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using aes = go.crypto.aes_package;
 using cipher = go.crypto.cipher_package;
@@ -48,7 +47,7 @@ namespace crypto
                 this.key = default;
             }
 
-            public reader(sync.Mutex mu = default, long budget = default, cipher.Block cipher = default, io.Reader entropy = default, array<byte> time = default, array<byte> seed = default, array<byte> dst = default, array<byte> key = default)
+            public reader(sync.Mutex mu = default, nint budget = default, cipher.Block cipher = default, io.Reader entropy = default, array<byte> time = default, array<byte> seed = default, array<byte> dst = default, array<byte> key = default)
             {
                 this.mu = mu;
                 this.budget = budget;

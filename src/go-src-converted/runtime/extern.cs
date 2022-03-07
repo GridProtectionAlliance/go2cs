@@ -78,10 +78,23 @@ It is a comma-separated list of name=val pairs setting these named variables:
     If the line ends with "(forced)", this GC was forced by a
     runtime.GC() call.
 
-    madvdontneed: setting madvdontneed=1 will use MADV_DONTNEED
-    instead of MADV_FREE on Linux when returning memory to the
-    kernel. This is less efficient, but causes RSS numbers to drop
-    more quickly.
+    inittrace: setting inittrace=1 causes the runtime to emit a single line to standard
+    error for each package with init work, summarizing the execution time and memory
+    allocation. No information is printed for inits executed as part of plugin loading
+    and for packages without both user defined and compiler generated init work.
+    The format of this line is subject to change. Currently, it is:
+        init # @#ms, # ms clock, # bytes, # allocs
+    where the fields are as follows:
+        init #      the package name
+        @# ms       time in milliseconds when the init started since program start
+        # clock     wall-clock time for package initialization work
+        # bytes     memory allocated on the heap
+        # allocs    number of heap allocations
+
+    madvdontneed: setting madvdontneed=0 will use MADV_FREE
+    instead of MADV_DONTNEED on Linux when returning memory to the
+    kernel. This is more efficient, but means RSS numbers will
+    drop only when the OS is under memory pressure.
 
     memprofilerate: setting memprofilerate=X will update the value of runtime.MemProfileRate.
     When set to 0 memory profiling is disabled.  Refer to the description of
@@ -96,8 +109,6 @@ It is a comma-separated list of name=val pairs setting these named variables:
     sbrk: setting sbrk=1 replaces the memory allocator and garbage collector
     with a trivial allocator that obtains memory from the operating system and
     never reclaims any memory.
-
-    scavenge: scavenge=1 enables debugging mode of heap scavenger.
 
     scavtrace: setting scavtrace=1 causes the runtime to emit a single line to standard
     error, roughly once per GC cycle, summarizing the amount of work done by the
@@ -173,102 +184,104 @@ GOARCH, GOOS, and GOROOT are recorded at compile time and made available by
 constants or functions in this package, but they do not influence the execution
 of the run-time system.
 */
-// package runtime -- go2cs converted at 2020 October 09 04:45:57 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:08:40 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\extern.go
+// Original source: C:\Program Files\Go\src\runtime\extern.go
 using sys = go.runtime.@internal.sys_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        // Caller reports file and line number information about function invocations on
-        // the calling goroutine's stack. The argument skip is the number of stack frames
-        // to ascend, with 0 identifying the caller of Caller.  (For historical reasons the
-        // meaning of skip differs between Caller and Callers.) The return values report the
-        // program counter, file name, and line number within the file of the corresponding
-        // call. The boolean ok is false if it was not possible to recover the information.
-        public static (System.UIntPtr, @string, long, bool) Caller(long skip)
-        {
-            System.UIntPtr pc = default;
-            @string file = default;
-            long line = default;
-            bool ok = default;
+namespace go;
 
-            var rpc = make_slice<System.UIntPtr>(1L);
-            var n = callers(skip + 1L, rpc[..]);
-            if (n < 1L)
-            {
-                return ;
-            }
-            var (frame, _) = CallersFrames(rpc).Next();
-            return (frame.PC, frame.File, frame.Line, frame.PC != 0L);
+public static partial class runtime_package {
 
-        }
+    // Caller reports file and line number information about function invocations on
+    // the calling goroutine's stack. The argument skip is the number of stack frames
+    // to ascend, with 0 identifying the caller of Caller.  (For historical reasons the
+    // meaning of skip differs between Caller and Callers.) The return values report the
+    // program counter, file name, and line number within the file of the corresponding
+    // call. The boolean ok is false if it was not possible to recover the information.
+public static (System.UIntPtr, @string, nint, bool) Caller(nint skip) {
+    System.UIntPtr pc = default;
+    @string file = default;
+    nint line = default;
+    bool ok = default;
 
-        // Callers fills the slice pc with the return program counters of function invocations
-        // on the calling goroutine's stack. The argument skip is the number of stack frames
-        // to skip before recording in pc, with 0 identifying the frame for Callers itself and
-        // 1 identifying the caller of Callers.
-        // It returns the number of entries written to pc.
-        //
-        // To translate these PCs into symbolic information such as function
-        // names and line numbers, use CallersFrames. CallersFrames accounts
-        // for inlined functions and adjusts the return program counters into
-        // call program counters. Iterating over the returned slice of PCs
-        // directly is discouraged, as is using FuncForPC on any of the
-        // returned PCs, since these cannot account for inlining or return
-        // program counter adjustment.
-        public static long Callers(long skip, slice<System.UIntPtr> pc)
-        { 
-            // runtime.callers uses pc.array==nil as a signal
-            // to print a stack trace. Pick off 0-length pc here
-            // so that we don't let a nil pc slice get to it.
-            if (len(pc) == 0L)
-            {
-                return 0L;
-            }
-
-            return callers(skip, pc);
-
-        }
-
-        // GOROOT returns the root of the Go tree. It uses the
-        // GOROOT environment variable, if set at process start,
-        // or else the root used during the Go build.
-        public static @string GOROOT()
-        {
-            var s = gogetenv("GOROOT");
-            if (s != "")
-            {
-                return s;
-            }
-
-            return sys.DefaultGoroot;
-
-        }
-
-        // Version returns the Go tree's version string.
-        // It is either the commit hash and date at the time of the build or,
-        // when possible, a release tag like "go1.3".
-        public static @string Version()
-        {
-            return sys.TheVersion;
-        }
-
-        // GOOS is the running program's operating system target:
-        // one of darwin, freebsd, linux, and so on.
-        // To view possible combinations of GOOS and GOARCH, run "go tool dist list".
-        public static readonly @string GOOS = (@string)sys.GOOS;
-
-        // GOARCH is the running program's architecture target:
-        // one of 386, amd64, arm, s390x, and so on.
-
-
-        // GOARCH is the running program's architecture target:
-        // one of 386, amd64, arm, s390x, and so on.
-        public static readonly @string GOARCH = (@string)sys.GOARCH;
-
+    var rpc = make_slice<System.UIntPtr>(1);
+    var n = callers(skip + 1, rpc[..]);
+    if (n < 1) {
+        return ;
     }
+    var (frame, _) = CallersFrames(rpc).Next();
+    return (frame.PC, frame.File, frame.Line, frame.PC != 0);
+
 }
+
+// Callers fills the slice pc with the return program counters of function invocations
+// on the calling goroutine's stack. The argument skip is the number of stack frames
+// to skip before recording in pc, with 0 identifying the frame for Callers itself and
+// 1 identifying the caller of Callers.
+// It returns the number of entries written to pc.
+//
+// To translate these PCs into symbolic information such as function
+// names and line numbers, use CallersFrames. CallersFrames accounts
+// for inlined functions and adjusts the return program counters into
+// call program counters. Iterating over the returned slice of PCs
+// directly is discouraged, as is using FuncForPC on any of the
+// returned PCs, since these cannot account for inlining or return
+// program counter adjustment.
+public static nint Callers(nint skip, slice<System.UIntPtr> pc) { 
+    // runtime.callers uses pc.array==nil as a signal
+    // to print a stack trace. Pick off 0-length pc here
+    // so that we don't let a nil pc slice get to it.
+    if (len(pc) == 0) {
+        return 0;
+    }
+    return callers(skip, pc);
+
+}
+
+private static @string defaultGOROOT = default; // set by cmd/link
+
+// GOROOT returns the root of the Go tree. It uses the
+// GOROOT environment variable, if set at process start,
+// or else the root used during the Go build.
+public static @string GOROOT() {
+    var s = gogetenv("GOROOT");
+    if (s != "") {
+        return s;
+    }
+    return defaultGOROOT;
+
+}
+
+// buildVersion is the Go tree's version string at build time.
+//
+// If any GOEXPERIMENTs are set to non-default values, it will include
+// "X:<GOEXPERIMENT>".
+//
+// This is set by the linker.
+//
+// This is accessed by "go version <binary>".
+private static @string buildVersion = default;
+
+// Version returns the Go tree's version string.
+// It is either the commit hash and date at the time of the build or,
+// when possible, a release tag like "go1.3".
+public static @string Version() {
+    return buildVersion;
+}
+
+// GOOS is the running program's operating system target:
+// one of darwin, freebsd, linux, and so on.
+// To view possible combinations of GOOS and GOARCH, run "go tool dist list".
+public static readonly @string GOOS = sys.GOOS;
+
+// GOARCH is the running program's architecture target:
+// one of 386, amd64, arm, s390x, and so on.
+
+
+// GOARCH is the running program's architecture target:
+// one of 386, amd64, arm, s390x, and so on.
+public static readonly @string GOARCH = sys.GOARCH;
+
+
+} // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:18:58 UTC
+//     Generated on 2022 March 06 22:41:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using lazyregexp = go.@internal.lazyregexp_package;
 using io = go.io_package;
@@ -43,7 +42,7 @@ namespace go
                 this.pendSpace = default;
             }
 
-            public lineWrapper(io.Writer @out = default, bool printed = default, long width = default, @string indent = default, long n = default, long pendSpace = default)
+            public lineWrapper(io.Writer @out = default, bool printed = default, nint width = default, @string indent = default, nint n = default, nint pendSpace = default)
             {
                 this.@out = @out;
                 this.printed = printed;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:11 UTC
+//     Generated on 2022 March 06 22:16:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using os = go.os_package;
 using sync = go.sync_package;
@@ -42,7 +41,7 @@ namespace go
                 this.writeDeadline = default;
             }
 
-            public pipe(sync.Mutex wrMu = default, channel<slice<byte>> rdRx = default, channel<long> rdTx = default, channel<slice<byte>> wrTx = default, channel<long> wrRx = default, sync.Once once = default, channel<object> localDone = default, channel<object> remoteDone = default, pipeDeadline readDeadline = default, pipeDeadline writeDeadline = default)
+            public pipe(sync.Mutex wrMu = default, channel<slice<byte>> rdRx = default, channel<nint> rdTx = default, channel<slice<byte>> wrTx = default, channel<nint> wrRx = default, sync.Once once = default, channel<object> localDone = default, channel<object> remoteDone = default, pipeDeadline readDeadline = default, pipeDeadline writeDeadline = default)
             {
                 this.wrMu = wrMu;
                 this.rdRx = rdRx;

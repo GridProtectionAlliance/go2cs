@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:42:31 UTC
+//     Generated on 2022 March 06 23:09:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using go;
@@ -39,7 +38,7 @@ namespace @internal
                 this.debugBuf = default;
             }
 
-            public Writer(Action<byte> writeByte = default, long index = default, array<byte> b = default, long nb = default, io.Writer debug = default, slice<byte> debugBuf = default)
+            public Writer(Action<byte> writeByte = default, long index = default, array<byte> b = default, nint nb = default, io.Writer debug = default, slice<byte> debugBuf = default)
             {
                 this.writeByte = writeByte;
                 this.index = index;

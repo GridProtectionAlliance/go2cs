@@ -2,68 +2,61 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// The standard GNU/Linux sigset type on big-endian 64-bit machines.
+// The standard Linux sigset type on big-endian 64-bit machines.
 
+//go:build linux && (ppc64 || s390x)
 // +build linux
 // +build ppc64 s390x
 
-// package runtime -- go2cs converted at 2020 October 09 04:47:29 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\os_linux_be64.go
-
-using static go.builtin;
-
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static readonly long _SS_DISABLE = (long)2L;
-        private static readonly long _NSIG = (long)65L;
-        private static readonly long _SI_USER = (long)0L;
-        private static readonly long _SIG_BLOCK = (long)0L;
-        private static readonly long _SIG_UNBLOCK = (long)1L;
-        private static readonly long _SIG_SETMASK = (long)2L;
+// Original source: C:\Program Files\Go\src\runtime\os_linux_be64.go
 
 
-        private partial struct sigset // : ulong
-        {
-        }
+namespace go;
 
-        private static var sigset_all = sigset(~uint64(0L));
+public static partial class runtime_package {
 
-        //go:nosplit
-        //go:nowritebarrierrec
-        private static void sigaddset(ptr<sigset> _addr_mask, long i)
-        {
-            ref sigset mask = ref _addr_mask.val;
+private static readonly nint _SS_DISABLE = 2;
+private static readonly nint _NSIG = 65;
+private static readonly nint _SI_USER = 0;
+private static readonly nint _SIG_BLOCK = 0;
+private static readonly nint _SIG_UNBLOCK = 1;
+private static readonly nint _SIG_SETMASK = 2;
 
-            if (i > 64L)
-            {
-                throw("unexpected signal greater than 64");
-            }
 
-            mask |= 1L << (int)((uint(i) - 1L));
-
-        }
-
-        private static void sigdelset(ptr<sigset> _addr_mask, long i)
-        {
-            ref sigset mask = ref _addr_mask.val;
-
-            if (i > 64L)
-            {
-                throw("unexpected signal greater than 64");
-            }
-
-            mask &= 1L << (int)((uint(i) - 1L));
-
-        }
-
-        private static void sigfillset(ptr<ulong> _addr_mask)
-        {
-            ref ulong mask = ref _addr_mask.val;
-
-            mask = ~uint64(0L);
-        }
-    }
+private partial struct sigset { // : ulong
 }
+
+private static var sigset_all = sigset(~uint64(0));
+
+//go:nosplit
+//go:nowritebarrierrec
+private static void sigaddset(ptr<sigset> _addr_mask, nint i) {
+    ref sigset mask = ref _addr_mask.val;
+
+    if (i > 64) {
+        throw("unexpected signal greater than 64");
+    }
+    mask |= 1 << (int)((uint(i) - 1));
+
+}
+
+private static void sigdelset(ptr<sigset> _addr_mask, nint i) {
+    ref sigset mask = ref _addr_mask.val;
+
+    if (i > 64) {
+        throw("unexpected signal greater than 64");
+    }
+    mask &= 1 << (int)((uint(i) - 1));
+
+}
+
+//go:nosplit
+private static void sigfillset(ptr<ulong> _addr_mask) {
+    ref ulong mask = ref _addr_mask.val;
+
+    mask = ~uint64(0);
+}
+
+} // end runtime_package

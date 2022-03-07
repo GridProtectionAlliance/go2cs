@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:12 UTC
+//     Generated on 2022 March 06 23:24:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -55,7 +53,7 @@ namespace ianlancetaylor
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,7 +79,7 @@ namespace ianlancetaylor
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_printInnerByPtr is null || !m_target_is_ptr)
@@ -90,12 +88,11 @@ namespace ianlancetaylor
                     return;
                 }
 
-                s_printInnerByPtr(m_target_ptr, _p0);
+                s_printInnerByPtr(m_target_ptr!, _p0);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static innerPrinter()
@@ -106,12 +103,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("printInner");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_printInnerByPtr = extensionMethod.CreateStaticDelegate(typeof(printInnerByPtr)) as printInnerByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("printInner");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_printInnerByVal = extensionMethod.CreateStaticDelegate(typeof(printInnerByVal)) as printInnerByVal;
 
                 if (s_printInnerByPtr is null && s_printInnerByVal is null)

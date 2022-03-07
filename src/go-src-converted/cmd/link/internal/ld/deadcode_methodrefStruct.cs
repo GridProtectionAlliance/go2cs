@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:49:16 UTC
+//     Generated on 2022 March 06 23:20:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,15 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using bytes = go.bytes_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
-using heap = go.container.heap_package;
 using fmt = go.fmt_package;
+using buildcfg = go.@internal.buildcfg_package;
 using unicode = go.unicode_package;
 using go;
 
@@ -44,7 +42,7 @@ namespace @internal
                 this.r = default;
             }
 
-            public methodref(methodsig m = default, loader.Sym src = default, long r = default)
+            public methodref(methodsig m = default, loader.Sym src = default, nint r = default)
             {
                 this.m = m;
                 this.src = src;

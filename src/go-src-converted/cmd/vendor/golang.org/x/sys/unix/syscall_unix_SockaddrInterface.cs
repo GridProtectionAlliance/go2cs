@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:57:00 UTC
+//     Generated on 2022 March 06 23:27:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sort = go.sort_package;
 using sync = go.sync_package;
@@ -59,7 +58,7 @@ namespace sys
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,16 +84,16 @@ namespace sys
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_sockaddrByPtr is null || !m_target_is_ptr)
                     return s_sockaddrByVal!(target);
 
-                return s_sockaddrByPtr(m_target_ptr);
+                return s_sockaddrByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Sockaddr()
@@ -105,12 +104,12 @@ namespace sys
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("sockaddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sockaddrByPtr = extensionMethod.CreateStaticDelegate(typeof(sockaddrByPtr)) as sockaddrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("sockaddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_sockaddrByVal = extensionMethod.CreateStaticDelegate(typeof(sockaddrByVal)) as sockaddrByVal;
 
                 if (s_sockaddrByPtr is null && s_sockaddrByVal is null)

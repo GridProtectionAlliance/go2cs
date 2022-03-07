@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:48 UTC
+//     Generated on 2022 March 06 22:21:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -68,7 +67,7 @@ namespace net
                 this.readFn = default;
             }
 
-            public http2pipe(sync.Mutex mu = default, sync.Cond c = default, http2pipeBuffer b = default, long unread = default, error err = default, error breakErr = default, channel<object> donec = default, Action readFn = default)
+            public http2pipe(sync.Mutex mu = default, sync.Cond c = default, http2pipeBuffer b = default, nint unread = default, error err = default, error breakErr = default, channel<object> donec = default, Action readFn = default)
             {
                 this.mu = mu;
                 this.c = c;

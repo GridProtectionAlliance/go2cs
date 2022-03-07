@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:48 UTC
+//     Generated on 2022 March 06 22:21:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -79,7 +78,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -94,27 +93,27 @@ namespace net
                 m_target_is_ptr = true;
             }
 
-            private delegate (long, error) WriteStringByPtr(ptr<T> value, @string s);
-            private delegate (long, error) WriteStringByVal(T value, @string s);
+            private delegate (nint, error) WriteStringByPtr(ptr<T> value, @string s);
+            private delegate (nint, error) WriteStringByVal(T value, @string s);
 
             private static readonly WriteStringByPtr? s_WriteStringByPtr;
             private static readonly WriteStringByVal? s_WriteStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) WriteString(@string s)
+            public (nint, error) WriteString(@string s)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteStringByPtr is null || !m_target_is_ptr)
                     return s_WriteStringByVal!(target, s);
 
-                return s_WriteStringByPtr(m_target_ptr, s);
+                return s_WriteStringByPtr(m_target_ptr!, s);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static http2stringWriter()
@@ -125,12 +124,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteStringByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteStringByPtr)) as WriteStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteStringByVal = extensionMethod.CreateStaticDelegate(typeof(WriteStringByVal)) as WriteStringByVal;
 
                 if (s_WriteStringByPtr is null && s_WriteStringByVal is null)

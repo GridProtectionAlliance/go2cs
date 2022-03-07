@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:34 UTC
+//     Generated on 2022 March 06 23:30:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,13 +35,19 @@ namespace sys
                 this.Rx_dropped = default;
                 this.Rx_invalid_descs = default;
                 this.Tx_invalid_descs = default;
+                this.Rx_ring_full = default;
+                this.Rx_fill_ring_empty_descs = default;
+                this.Tx_ring_empty_descs = default;
             }
 
-            public XDPStatistics(ulong Rx_dropped = default, ulong Rx_invalid_descs = default, ulong Tx_invalid_descs = default)
+            public XDPStatistics(ulong Rx_dropped = default, ulong Rx_invalid_descs = default, ulong Tx_invalid_descs = default, ulong Rx_ring_full = default, ulong Rx_fill_ring_empty_descs = default, ulong Tx_ring_empty_descs = default)
             {
                 this.Rx_dropped = Rx_dropped;
                 this.Rx_invalid_descs = Rx_invalid_descs;
                 this.Tx_invalid_descs = Tx_invalid_descs;
+                this.Rx_ring_full = Rx_ring_full;
+                this.Rx_fill_ring_empty_descs = Rx_fill_ring_empty_descs;
+                this.Tx_ring_empty_descs = Tx_ring_empty_descs;
             }
 
             // Enable comparisons between nil and XDPStatistics struct
@@ -64,7 +70,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static XDPStatistics XDPStatistics_cast(dynamic value)
         {
-            return new XDPStatistics(value.Rx_dropped, value.Rx_invalid_descs, value.Tx_invalid_descs);
+            return new XDPStatistics(value.Rx_dropped, value.Rx_invalid_descs, value.Tx_invalid_descs, value.Rx_ring_full, value.Rx_fill_ring_empty_descs, value.Tx_ring_empty_descs);
         }
     }
 }}}}}}

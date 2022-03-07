@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:48 UTC
+//     Generated on 2022 March 06 23:22:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
 using strings = go.strings_package;
 using driver = go.github.com.google.pprof.driver_package;
-using terminal = go.golang.org.x.crypto.ssh.terminal_package;
+using term = go.golang.org.x.term_package;
 
 #nullable enable
 
@@ -35,7 +34,7 @@ namespace go
                 this.term = default;
             }
 
-            public readlineUI(ref ptr<terminal.Terminal> term = default)
+            public readlineUI(ref ptr<term.Terminal> term = default)
             {
                 this.term = term;
             }

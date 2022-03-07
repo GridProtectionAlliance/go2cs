@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:39 UTC
+//     Generated on 2022 March 06 23:23:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using math = go.math_package;
 using filepath = go.path.filepath_package;
@@ -50,7 +49,7 @@ namespace @internal
                 this.Objfile = default;
             }
 
-            public NodeInfo(@string Name = default, @string OrigName = default, ulong Address = default, @string File = default, long StartLine = default, long Lineno = default, @string Objfile = default)
+            public NodeInfo(@string Name = default, @string OrigName = default, ulong Address = default, @string File = default, nint StartLine = default, nint Lineno = default, @string Objfile = default)
             {
                 this.Name = Name;
                 this.OrigName = OrigName;

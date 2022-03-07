@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:55:17 UTC
+//     Generated on 2022 March 06 22:20:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,14 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using cipher = go.crypto.cipher_package;
 using subtle = go.crypto.subtle_package;
 using x509 = go.crypto.x509_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using hash = go.hash_package;
 using io = go.io_package;
 using net = go.net_package;
 using sync = go.sync_package;
@@ -66,13 +67,11 @@ namespace crypto
                 this.clientFinished = default;
                 this.serverFinished = default;
                 this.clientProtocol = default;
-                this.clientProtocolFallback = default;
                 this.@in = default;
                 this.@out = default;
                 this.rawInput = default;
                 this.input = default;
                 this.hand = default;
-                this.outBuf = default;
                 this.buffering = default;
                 this.sendBuf = default;
                 this.bytesSent = default;
@@ -82,7 +81,7 @@ namespace crypto
                 this.tmp = default;
             }
 
-            public Conn(net.Conn conn = default, bool isClient = default, Func<error> handshakeFn = default, uint handshakeStatus = default, sync.Mutex handshakeMutex = default, error handshakeErr = default, ushort vers = default, bool haveVers = default, ref ptr<Config> config = default, long handshakes = default, bool didResume = default, ushort cipherSuite = default, slice<byte> ocspResponse = default, slice<slice<byte>> scts = default, slice<ptr<x509.Certificate>> peerCertificates = default, slice<slice<ptr<x509.Certificate>>> verifiedChains = default, @string serverName = default, bool secureRenegotiation = default, Func<@string, slice<byte>, long, (slice<byte>, error)> ekm = default, slice<byte> resumptionSecret = default, slice<ticketKey> ticketKeys = default, bool clientFinishedIsFirst = default, error closeNotifyErr = default, bool closeNotifySent = default, array<byte> clientFinished = default, array<byte> serverFinished = default, @string clientProtocol = default, bool clientProtocolFallback = default, halfConn @in = default, halfConn @out = default, bytes.Buffer rawInput = default, bytes.Reader input = default, bytes.Buffer hand = default, slice<byte> outBuf = default, bool buffering = default, slice<byte> sendBuf = default, long bytesSent = default, long packetsSent = default, long retryCount = default, int activeCall = default, array<byte> tmp = default)
+            public Conn(net.Conn conn = default, bool isClient = default, Func<context.Context, error> handshakeFn = default, uint handshakeStatus = default, sync.Mutex handshakeMutex = default, error handshakeErr = default, ushort vers = default, bool haveVers = default, ref ptr<Config> config = default, nint handshakes = default, bool didResume = default, ushort cipherSuite = default, slice<byte> ocspResponse = default, slice<slice<byte>> scts = default, slice<ptr<x509.Certificate>> peerCertificates = default, slice<slice<ptr<x509.Certificate>>> verifiedChains = default, @string serverName = default, bool secureRenegotiation = default, Func<@string, slice<byte>, nint, (slice<byte>, error)> ekm = default, slice<byte> resumptionSecret = default, slice<ticketKey> ticketKeys = default, bool clientFinishedIsFirst = default, error closeNotifyErr = default, bool closeNotifySent = default, array<byte> clientFinished = default, array<byte> serverFinished = default, @string clientProtocol = default, halfConn @in = default, halfConn @out = default, bytes.Buffer rawInput = default, bytes.Reader input = default, bytes.Buffer hand = default, bool buffering = default, slice<byte> sendBuf = default, long bytesSent = default, long packetsSent = default, nint retryCount = default, int activeCall = default, array<byte> tmp = default)
             {
                 this.conn = conn;
                 this.isClient = isClient;
@@ -111,13 +110,11 @@ namespace crypto
                 this.clientFinished = clientFinished;
                 this.serverFinished = serverFinished;
                 this.clientProtocol = clientProtocol;
-                this.clientProtocolFallback = clientProtocolFallback;
                 this.@in = @in;
                 this.@out = @out;
                 this.rawInput = rawInput;
                 this.input = input;
                 this.hand = hand;
-                this.outBuf = outBuf;
                 this.buffering = buffering;
                 this.sendBuf = sendBuf;
                 this.bytesSent = bytesSent;
@@ -147,7 +144,7 @@ namespace crypto
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Conn Conn_cast(dynamic value)
         {
-            return new Conn(value.conn, value.isClient, value.handshakeFn, value.handshakeStatus, value.handshakeMutex, value.handshakeErr, value.vers, value.haveVers, ref value.config, value.handshakes, value.didResume, value.cipherSuite, value.ocspResponse, value.scts, value.peerCertificates, value.verifiedChains, value.serverName, value.secureRenegotiation, value.ekm, value.resumptionSecret, value.ticketKeys, value.clientFinishedIsFirst, value.closeNotifyErr, value.closeNotifySent, value.clientFinished, value.serverFinished, value.clientProtocol, value.clientProtocolFallback, value.@in, value.@out, value.rawInput, value.input, value.hand, value.outBuf, value.buffering, value.sendBuf, value.bytesSent, value.packetsSent, value.retryCount, value.activeCall, value.tmp);
+            return new Conn(value.conn, value.isClient, value.handshakeFn, value.handshakeStatus, value.handshakeMutex, value.handshakeErr, value.vers, value.haveVers, ref value.config, value.handshakes, value.didResume, value.cipherSuite, value.ocspResponse, value.scts, value.peerCertificates, value.verifiedChains, value.serverName, value.secureRenegotiation, value.ekm, value.resumptionSecret, value.ticketKeys, value.clientFinishedIsFirst, value.closeNotifyErr, value.closeNotifySent, value.clientFinished, value.serverFinished, value.clientProtocol, value.@in, value.@out, value.rawInput, value.input, value.hand, value.buffering, value.sendBuf, value.bytesSent, value.packetsSent, value.retryCount, value.activeCall, value.tmp);
         }
     }
 }}

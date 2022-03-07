@@ -2,1484 +2,1234 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:45:03 UTC
-// Original source: C:\Go\src\cmd\fix\typecheck.go
+// package main -- go2cs converted at 2022 March 06 23:15:53 UTC
+// Original source: C:\Program Files\Go\src\cmd\fix\typecheck.go
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using parser = go.go.parser_package;
 using token = go.go.token_package;
-using ioutil = go.io.ioutil_package;
+using exec = go.@internal.execabs_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using reflect = go.reflect_package;
 using runtime = go.runtime_package;
 using strings = go.strings_package;
-using static go.builtin;
 using System;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        // Partial type checker.
-        //
-        // The fact that it is partial is very important: the input is
-        // an AST and a description of some type information to
-        // assume about one or more packages, but not all the
-        // packages that the program imports. The checker is
-        // expected to do as much as it can with what it has been
-        // given. There is not enough information supplied to do
-        // a full type check, but the type checker is expected to
-        // apply information that can be derived from variable
-        // declarations, function and method returns, and type switches
-        // as far as it can, so that the caller can still tell the types
-        // of expression relevant to a particular fix.
-        //
-        // TODO(rsc,gri): Replace with go/typechecker.
-        // Doing that could be an interesting test case for go/typechecker:
-        // the constraints about working with partial information will
-        // likely exercise it in interesting ways. The ideal interface would
-        // be to pass typecheck a map from importpath to package API text
-        // (Go source code), but for now we use data structures (TypeConfig, Type).
-        //
-        // The strings mostly use gofmt form.
-        //
-        // A Field or FieldList has as its type a comma-separated list
-        // of the types of the fields. For example, the field list
-        //    x, y, z int
-        // has type "int, int, int".
 
-        // The prefix "type " is the type of a type.
-        // For example, given
-        //    var x int
-        //    type T int
-        // x's type is "int" but T's type is "type int".
-        // mkType inserts the "type " prefix.
-        // getType removes it.
-        // isType tests for it.
-        private static @string mkType(@string t)
-        {
-            return "type " + t;
-        }
+namespace go;
 
-        private static @string getType(@string t)
-        {
-            if (!isType(t))
-            {
-                return "";
-            }
+public static partial class main_package {
 
-            return t[len("type ")..];
+    // Partial type checker.
+    //
+    // The fact that it is partial is very important: the input is
+    // an AST and a description of some type information to
+    // assume about one or more packages, but not all the
+    // packages that the program imports. The checker is
+    // expected to do as much as it can with what it has been
+    // given. There is not enough information supplied to do
+    // a full type check, but the type checker is expected to
+    // apply information that can be derived from variable
+    // declarations, function and method returns, and type switches
+    // as far as it can, so that the caller can still tell the types
+    // of expression relevant to a particular fix.
+    //
+    // TODO(rsc,gri): Replace with go/typechecker.
+    // Doing that could be an interesting test case for go/typechecker:
+    // the constraints about working with partial information will
+    // likely exercise it in interesting ways. The ideal interface would
+    // be to pass typecheck a map from importpath to package API text
+    // (Go source code), but for now we use data structures (TypeConfig, Type).
+    //
+    // The strings mostly use gofmt form.
+    //
+    // A Field or FieldList has as its type a comma-separated list
+    // of the types of the fields. For example, the field list
+    //    x, y, z int
+    // has type "int, int, int".
 
-        }
+    // The prefix "type " is the type of a type.
+    // For example, given
+    //    var x int
+    //    type T int
+    // x's type is "int" but T's type is "type int".
+    // mkType inserts the "type " prefix.
+    // getType removes it.
+    // isType tests for it.
+private static @string mkType(@string t) {
+    return "type " + t;
+}
 
-        private static bool isType(@string t)
-        {
-            return strings.HasPrefix(t, "type ");
-        }
+private static @string getType(@string t) {
+    if (!isType(t)) {
+        return "";
+    }
+    return t[(int)len("type ")..];
 
-        // TypeConfig describes the universe of relevant types.
-        // For ease of creation, the types are all referred to by string
-        // name (e.g., "reflect.Value").  TypeByName is the only place
-        // where the strings are resolved.
+}
 
-        public partial struct TypeConfig
-        {
-            public map<@string, ptr<Type>> Type;
-            public map<@string, @string> Var;
-            public map<@string, @string> Func; // External maps from a name to its type.
+private static bool isType(@string t) {
+    return strings.HasPrefix(t, "type ");
+}
+
+// TypeConfig describes the universe of relevant types.
+// For ease of creation, the types are all referred to by string
+// name (e.g., "reflect.Value").  TypeByName is the only place
+// where the strings are resolved.
+
+public partial struct TypeConfig {
+    public map<@string, ptr<Type>> Type;
+    public map<@string, @string> Var;
+    public map<@string, @string> Func; // External maps from a name to its type.
 // It provides additional typings not present in the Go source itself.
 // For now, the only additional typings are those generated by cgo.
-            public map<@string, @string> External;
-        }
+    public map<@string, @string> External;
+}
 
-        // typeof returns the type of the given name, which may be of
-        // the form "x" or "p.X".
-        private static @string @typeof(this ptr<TypeConfig> _addr_cfg, @string name)
+// typeof returns the type of the given name, which may be of
+// the form "x" or "p.X".
+private static @string @typeof(this ptr<TypeConfig> _addr_cfg, @string name) {
+    ref TypeConfig cfg = ref _addr_cfg.val;
+
+    if (cfg.Var != null) {
         {
-            ref TypeConfig cfg = ref _addr_cfg.val;
+            var t__prev2 = t;
 
-            if (cfg.Var != null)
-            {
-                {
-                    var t__prev2 = t;
+            var t = cfg.Var[name];
 
-                    var t = cfg.Var[name];
-
-                    if (t != "")
-                    {
-                        return t;
-                    }
-
-                    t = t__prev2;
-
-                }
-
+            if (t != "") {
+                return t;
             }
 
-            if (cfg.Func != null)
-            {
-                {
-                    var t__prev2 = t;
-
-                    t = cfg.Func[name];
-
-                    if (t != "")
-                    {
-                        return "func()" + t;
-                    }
-
-                    t = t__prev2;
-
-                }
-
-            }
-
-            return "";
+            t = t__prev2;
 
         }
 
-        // Type describes the Fields and Methods of a type.
-        // If the field or method cannot be found there, it is next
-        // looked for in the Embed list.
-        public partial struct Type
+    }
+    if (cfg.Func != null) {
         {
-            public map<@string, @string> Field; // map field name to type
-            public map<@string, @string> Method; // map method name to comma-separated return types (should start with "func ")
-            public slice<@string> Embed; // list of types this type embeds (for extra methods)
-            public @string Def; // definition of named type
-        }
+            var t__prev2 = t;
 
-        // dot returns the type of "typ.name", making its decision
-        // using the type information in cfg.
-        private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, @string name)
-        {
-            ref Type typ = ref _addr_typ.val;
-            ref TypeConfig cfg = ref _addr_cfg.val;
+            t = cfg.Func[name];
 
-            if (typ.Field != null)
-            {
-                {
-                    var t__prev2 = t;
-
-                    var t = typ.Field[name];
-
-                    if (t != "")
-                    {
-                        return t;
-                    }
-
-                    t = t__prev2;
-
-                }
-
+            if (t != "") {
+                return "func()" + t;
             }
 
-            if (typ.Method != null)
-            {
-                {
-                    var t__prev2 = t;
-
-                    t = typ.Method[name];
-
-                    if (t != "")
-                    {
-                        return t;
-                    }
-
-                    t = t__prev2;
-
-                }
-
-            }
-
-            foreach (var (_, e) in typ.Embed)
-            {
-                var etyp = cfg.Type[e];
-                if (etyp != null)
-                {
-                    {
-                        var t__prev2 = t;
-
-                        t = etyp.dot(cfg, name);
-
-                        if (t != "")
-                        {
-                            return t;
-                        }
-
-                        t = t__prev2;
-
-                    }
-
-                }
-
-            }
-            return "";
+            t = t__prev2;
 
         }
 
-        // typecheck type checks the AST f assuming the information in cfg.
-        // It returns two maps with type information:
-        // typeof maps AST nodes to type information in gofmt string form.
-        // assign maps type strings to lists of expressions that were assigned
-        // to values of another type that were assigned to that type.
-        private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _addr_cfg, ptr<ast.File> _addr_f) => func((defer, _, __) =>
+    }
+    return "";
+
+}
+
+// Type describes the Fields and Methods of a type.
+// If the field or method cannot be found there, it is next
+// looked for in the Embed list.
+public partial struct Type {
+    public map<@string, @string> Field; // map field name to type
+    public map<@string, @string> Method; // map method name to comma-separated return types (should start with "func ")
+    public slice<@string> Embed; // list of types this type embeds (for extra methods)
+    public @string Def; // definition of named type
+}
+
+// dot returns the type of "typ.name", making its decision
+// using the type information in cfg.
+private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, @string name) {
+    ref Type typ = ref _addr_typ.val;
+    ref TypeConfig cfg = ref _addr_cfg.val;
+
+    if (typ.Field != null) {
         {
-            object @typeof = default;
-            map<@string, slice<object>> assign = default;
-            ref TypeConfig cfg = ref _addr_cfg.val;
-            ref ast.File f = ref _addr_f.val;
+            var t__prev2 = t;
 
-            typeof = make();
-            assign = make_map<@string, slice<object>>();
-            ptr<TypeConfig> cfg1 = addr(new TypeConfig());
-            cfg1.val = cfg; // make copy so we can add locally
-            var copied = false; 
+            var t = typ.Field[name];
 
-            // If we import "C", add types of cgo objects.
-            cfg.External = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
-            cfg1.External = cfg.External;
-            if (imports(f, "C"))
-            { 
-                // Run cgo on gofmtFile(f)
-                // Parse, extract decls from _cgo_gotypes.go
-                // Map _Ctype_* types to C.* types.
-                Func<error> err = () =>
-                {
-                    var (txt, err) = gofmtFile(f);
-                    if (err != null)
-                    {
-                        return err;
-                    }
+            if (t != "") {
+                return t;
+            }
 
-                    var (dir, err) = ioutil.TempDir(os.TempDir(), "fix_cgo_typecheck");
-                    if (err != null)
-                    {
-                        return err;
-                    }
+            t = t__prev2;
 
-                    defer(os.RemoveAll(dir));
-                    err = ioutil.WriteFile(filepath.Join(dir, "in.go"), txt, 0600L);
-                    if (err != null)
-                    {
-                        return err;
-                    }
+        }
 
-                    var cmd = exec.Command(filepath.Join(runtime.GOROOT(), "bin", "go"), "tool", "cgo", "-objdir", dir, "-srcdir", dir, "in.go");
-                    err = cmd.Run();
-                    if (err != null)
-                    {
-                        return err;
-                    }
+    }
+    if (typ.Method != null) {
+        {
+            var t__prev2 = t;
 
-                    var (out, err) = ioutil.ReadFile(filepath.Join(dir, "_cgo_gotypes.go"));
-                    if (err != null)
-                    {
-                        return err;
-                    }
+            t = typ.Method[name];
 
-                    var (cgo, err) = parser.ParseFile(token.NewFileSet(), "cgo.go", out, 0L);
-                    if (err != null)
-                    {
-                        return err;
-                    }
+            if (t != "") {
+                return t;
+            }
 
-                    {
-                        var decl__prev1 = decl;
+            t = t__prev2;
 
-                        foreach (var (_, __decl) in cgo.Decls)
-                        {
-                            decl = __decl;
-                            ptr<ast.FuncDecl> (fn, ok) = decl._<ptr<ast.FuncDecl>>();
-                            if (!ok)
-                            {
-                                continue;
-                            }
+        }
 
-                            if (strings.HasPrefix(fn.Name.Name, "_Cfunc_"))
-                            {
-                                slice<@string> @params = default;                                slice<@string> results = default;
+    }
+    foreach (var (_, e) in typ.Embed) {
+        var etyp = cfg.Type[e];
+        if (etyp != null) {
+            {
+                var t__prev2 = t;
 
-                                foreach (var (_, p) in fn.Type.Params.List)
-                                {
-                                    var t = gofmt(p.Type);
-                                    t = strings.ReplaceAll(t, "_Ctype_", "C.");
-                                    params = append(params, t);
-                                }
-                                foreach (var (_, r) in fn.Type.Results.List)
-                                {
-                                    t = gofmt(r.Type);
-                                    t = strings.ReplaceAll(t, "_Ctype_", "C.");
-                                    results = append(results, t);
-                                }
-                                cfg.External["C." + fn.Name.Name[7L..]] = joinFunc(params, results);
+                t = etyp.dot(cfg, name);
 
-                            }
-
-                        }
-
-                        decl = decl__prev1;
-                    }
-
-                    return null;
-
-                }();
-                if (err != null)
-                {
-                    fmt.Printf("warning: no cgo types: %s\n", err);
+                if (t != "") {
+                    return t;
                 }
 
-            } 
+                t = t__prev2;
 
-            // gather function declarations
+            }
+
+        }
+    }    return "";
+
+}
+
+// typecheck type checks the AST f assuming the information in cfg.
+// It returns two maps with type information:
+// typeof maps AST nodes to type information in gofmt string form.
+// assign maps type strings to lists of expressions that were assigned
+// to values of another type that were assigned to that type.
+private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _addr_cfg, ptr<ast.File> _addr_f) => func((defer, _, _) => {
+    object @typeof = default;
+    map<@string, slice<object>> assign = default;
+    ref TypeConfig cfg = ref _addr_cfg.val;
+    ref ast.File f = ref _addr_f.val;
+
+    typeof = make();
+    assign = make_map<@string, slice<object>>();
+    ptr<TypeConfig> cfg1 = addr(new TypeConfig());
+    cfg1.val = cfg; // make copy so we can add locally
+    var copied = false; 
+
+    // If we import "C", add types of cgo objects.
+    cfg.External = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
+    cfg1.External = cfg.External;
+    if (imports(f, "C")) { 
+        // Run cgo on gofmtFile(f)
+        // Parse, extract decls from _cgo_gotypes.go
+        // Map _Ctype_* types to C.* types.
+        Func<error> err = () => {
+            var (txt, err) = gofmtFile(f);
+            if (err != null) {
+                return err;
+            }
+            var (dir, err) = os.MkdirTemp(os.TempDir(), "fix_cgo_typecheck");
+            if (err != null) {
+                return err;
+            }
+            defer(os.RemoveAll(dir));
+            err = os.WriteFile(filepath.Join(dir, "in.go"), txt, 0600);
+            if (err != null) {
+                return err;
+            }
+            var cmd = exec.Command(filepath.Join(runtime.GOROOT(), "bin", "go"), "tool", "cgo", "-objdir", dir, "-srcdir", dir, "in.go");
+            err = cmd.Run();
+            if (err != null) {
+                return err;
+            }
+            var (out, err) = os.ReadFile(filepath.Join(dir, "_cgo_gotypes.go"));
+            if (err != null) {
+                return err;
+            }
+            var (cgo, err) = parser.ParseFile(token.NewFileSet(), "cgo.go", out, 0);
+            if (err != null) {
+                return err;
+            }
             {
                 var decl__prev1 = decl;
 
-                foreach (var (_, __decl) in f.Decls)
-                {
+                foreach (var (_, __decl) in cgo.Decls) {
                     decl = __decl;
-                    (fn, ok) = decl._<ptr<ast.FuncDecl>>();
-                    if (!ok)
-                    {
+                    ptr<ast.FuncDecl> (fn, ok) = decl._<ptr<ast.FuncDecl>>();
+                    if (!ok) {
                         continue;
                     }
+                    if (strings.HasPrefix(fn.Name.Name, "_Cfunc_")) {
+                        slice<@string> @params = default;                        slice<@string> results = default;
 
-                    typecheck1(_addr_cfg, fn.Type, typeof, assign);
-                    t = typeof[fn.Type];
-                    if (fn.Recv != null)
-                    { 
-                        // The receiver must be a type.
-                        var rcvr = typeof[fn.Recv];
-                        if (!isType(rcvr))
-                        {
-                            if (len(fn.Recv.List) != 1L)
-                            {
-                                continue;
-                            }
-
-                            rcvr = mkType(gofmt(fn.Recv.List[0L].Type));
-                            typeof[fn.Recv.List[0L].Type] = rcvr;
-
+                        foreach (var (_, p) in fn.Type.Params.List) {
+                            var t = gofmt(p.Type);
+                            t = strings.ReplaceAll(t, "_Ctype_", "C.");
+                            params = append(params, t);
                         }
-
-                        rcvr = getType(rcvr);
-                        if (rcvr != "" && rcvr[0L] == '*')
-                        {
-                            rcvr = rcvr[1L..];
+                        foreach (var (_, r) in fn.Type.Results.List) {
+                            t = gofmt(r.Type);
+                            t = strings.ReplaceAll(t, "_Ctype_", "C.");
+                            results = append(results, t);
                         }
-
-                        typeof[rcvr + "." + fn.Name.Name] = t;
-
+                        cfg.External["C." + fn.Name.Name[(int)7..]] = joinFunc(params, results);
                     }
-                    else
-                    {
-                        if (isType(t))
-                        {
-                            t = getType(t);
-                        }
-                        else
-                        {
-                            t = gofmt(fn.Type);
-                        }
-
-                        typeof[fn.Name] = t; 
-
-                        // Record typeof[fn.Name.Obj] for future references to fn.Name.
-                        typeof[fn.Name.Obj] = t;
-
-                    }
-
-                } 
-
-                // gather struct declarations
-
-                decl = decl__prev1;
-            }
-
-            {
-                var decl__prev1 = decl;
-
-                foreach (var (_, __decl) in f.Decls)
-                {
-                    decl = __decl;
-                    ptr<ast.GenDecl> (d, ok) = decl._<ptr<ast.GenDecl>>();
-                    if (ok)
-                    {
-                        {
-                            var s__prev2 = s;
-
-                            foreach (var (_, __s) in d.Specs)
-                            {
-                                s = __s;
-                                switch (s.type())
-                                {
-                                    case ptr<ast.TypeSpec> s:
-                                        if (cfg1.Type[s.Name.Name] != null)
-                                        {
-                                            break;
-                                        }
-
-                                        if (!copied)
-                                        {
-                                            copied = true; 
-                                            // Copy map lazily: it's time.
-                                            cfg1.Type = make_map<@string, ptr<Type>>();
-                                            foreach (var (k, v) in cfg.Type)
-                                            {
-                                                cfg1.Type[k] = v;
-                                            }
-
-                                        }
-
-                                        t = addr(new Type(Field:map[string]string{}));
-                                        cfg1.Type[s.Name.Name] = t;
-                                        switch (s.Type.type())
-                                        {
-                                            case ptr<ast.StructType> st:
-                                                foreach (var (_, f) in st.Fields.List)
-                                                {
-                                                    foreach (var (_, n) in f.Names)
-                                                    {
-                                                        t.Field[n.Name] = gofmt(f.Type);
-                                                    }
-
-                                                }
-                                                break;
-                                            case ptr<ast.ArrayType> st:
-                                                t.Def = gofmt(st);
-                                                break;
-                                            case ptr<ast.StarExpr> st:
-                                                t.Def = gofmt(st);
-                                                break;
-                                            case ptr<ast.MapType> st:
-                                                t.Def = gofmt(st);
-                                                break;
-                                        }
-                                        break;
-                                }
-
-                            }
-
-                            s = s__prev2;
-                        }
-                    }
-
                 }
 
                 decl = decl__prev1;
             }
 
-            typecheck1(cfg1, f, typeof, assign);
-            return (typeof, assign);
+            return null;
 
-        });
+        }();
+        if (err != null) {
+            fmt.Fprintf(os.Stderr, "go fix: warning: no cgo types: %s\n", err);
+        }
+    }
+    {
+        var decl__prev1 = decl;
 
-        private static slice<ast.Expr> makeExprList(slice<ptr<ast.Ident>> a)
-        {
-            slice<ast.Expr> b = default;
-            foreach (var (_, x) in a)
-            {
-                b = append(b, x);
+        foreach (var (_, __decl) in f.Decls) {
+            decl = __decl;
+            (fn, ok) = decl._<ptr<ast.FuncDecl>>();
+            if (!ok) {
+                continue;
             }
-            return b;
+            typecheck1(_addr_cfg, fn.Type, typeof, assign);
+            t = typeof[fn.Type];
+            if (fn.Recv != null) { 
+                // The receiver must be a type.
+                var rcvr = typeof[fn.Recv];
+                if (!isType(rcvr)) {
+                    if (len(fn.Recv.List) != 1) {
+                        continue;
+                    }
+                    rcvr = mkType(gofmt(fn.Recv.List[0].Type));
+                    typeof[fn.Recv.List[0].Type] = rcvr;
+                }
+
+                rcvr = getType(rcvr);
+                if (rcvr != "" && rcvr[0] == '*') {
+                    rcvr = rcvr[(int)1..];
+                }
+
+                typeof[rcvr + "." + fn.Name.Name] = t;
+
+            }
+            else
+ {
+                if (isType(t)) {
+                    t = getType(t);
+                }
+                else
+ {
+                    t = gofmt(fn.Type);
+                }
+
+                typeof[fn.Name] = t; 
+
+                // Record typeof[fn.Name.Obj] for future references to fn.Name.
+                typeof[fn.Name.Obj] = t;
+
+            }
+
+        }
+        decl = decl__prev1;
+    }
+
+    {
+        var decl__prev1 = decl;
+
+        foreach (var (_, __decl) in f.Decls) {
+            decl = __decl;
+            ptr<ast.GenDecl> (d, ok) = decl._<ptr<ast.GenDecl>>();
+            if (ok) {
+                {
+                    var s__prev2 = s;
+
+                    foreach (var (_, __s) in d.Specs) {
+                        s = __s;
+                        switch (s.type()) {
+                            case ptr<ast.TypeSpec> s:
+                                if (cfg1.Type[s.Name.Name] != null) {
+                                    break;
+                                }
+                                if (!copied) {
+                                    copied = true; 
+                                    // Copy map lazily: it's time.
+                                    cfg1.Type = make_map<@string, ptr<Type>>();
+                                    foreach (var (k, v) in cfg.Type) {
+                                        cfg1.Type[k] = v;
+                                    }
+
+                                }
+
+                                t = addr(new Type(Field:map[string]string{}));
+                                cfg1.Type[s.Name.Name] = t;
+                                switch (s.Type.type()) {
+                                    case ptr<ast.StructType> st:
+                                        foreach (var (_, f) in st.Fields.List) {
+                                            foreach (var (_, n) in f.Names) {
+                                                t.Field[n.Name] = gofmt(f.Type);
+                                            }
+                                        }
+                                        break;
+                                    case ptr<ast.ArrayType> st:
+                                        t.Def = gofmt(st);
+                                        break;
+                                    case ptr<ast.StarExpr> st:
+                                        t.Def = gofmt(st);
+                                        break;
+                                    case ptr<ast.MapType> st:
+                                        t.Def = gofmt(st);
+                                        break;
+                                }
+                                break;
+                        }
+
+                    }
+
+                    s = s__prev2;
+                }
+            }
+
+        }
+        decl = decl__prev1;
+    }
+
+    typecheck1(cfg1, f, typeof, assign);
+    return (typeof, assign);
+
+});
+
+private static slice<ast.Expr> makeExprList(slice<ptr<ast.Ident>> a) {
+    slice<ast.Expr> b = default;
+    foreach (var (_, x) in a) {
+        b = append(b, x);
+    }    return b;
+}
+
+// Typecheck1 is the recursive form of typecheck.
+// It is like typecheck but adds to the information in typeof
+// instead of allocating a new map.
+private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @typeof, map<@string, slice<object>> assign) => func((defer, _, _) => {
+    ref TypeConfig cfg = ref _addr_cfg.val;
+ 
+    // set sets the type of n to typ.
+    // If isDecl is true, n is being declared.
+    Action<ast.Expr, @string, bool> set = (n, typ, isDecl) => {
+        if (typeof[n] != "" || typ == "") {
+            if (typeof[n] != typ) {
+                assign[typ] = append(assign[typ], n);
+            }
+            return ;
+        }
+        typeof[n] = typ; 
+
+        // If we obtained typ from the declaration of x
+        // propagate the type to all the uses.
+        // The !isDecl case is a cheat here, but it makes
+        // up in some cases for not paying attention to
+        // struct fields. The real type checker will be
+        // more accurate so we won't need the cheat.
+        {
+            ptr<ast.Ident> id__prev1 = id;
+
+            ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
+
+            if (ok && id.Obj != null && (isDecl || typeof[id.Obj] == "")) {
+                typeof[id.Obj] = typ;
+            }
+
+            id = id__prev1;
 
         }
 
-        // Typecheck1 is the recursive form of typecheck.
-        // It is like typecheck but adds to the information in typeof
-        // instead of allocating a new map.
-        private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @typeof, map<@string, slice<object>> assign) => func((defer, _, __) =>
-        {
-            ref TypeConfig cfg = ref _addr_cfg.val;
- 
-            // set sets the type of n to typ.
-            // If isDecl is true, n is being declared.
-            Action<ast.Expr, @string, bool> set = (n, typ, isDecl) =>
-            {
-                if (typeof[n] != "" || typ == "")
-                {
-                    if (typeof[n] != typ)
-                    {
-                        assign[typ] = append(assign[typ], n);
-                    }
+    }; 
 
+    // Type-check an assignment lhs = rhs.
+    // If isDecl is true, this is := so we can update
+    // the types of the objects that lhs refers to.
+    Action<slice<ast.Expr>, slice<ast.Expr>, bool> typecheckAssign = (lhs, rhs, isDecl) => {
+        if (len(lhs) > 1 && len(rhs) == 1) {
+            {
+                ptr<ast.CallExpr> (_, ok) = rhs[0]._<ptr<ast.CallExpr>>();
+
+                if (ok) {
+                    var t = split(typeof[rhs[0]]); 
+                    // Lists should have same length but may not; pair what can be paired.
+                    {
+                        nint i__prev1 = i;
+
+                        for (nint i = 0; i < len(lhs) && i < len(t); i++) {
+                            set(lhs[i], t[i], isDecl);
+                        }
+
+
+                        i = i__prev1;
+                    }
                     return ;
 
-                }
-
-                typeof[n] = typ; 
-
-                // If we obtained typ from the declaration of x
-                // propagate the type to all the uses.
-                // The !isDecl case is a cheat here, but it makes
-                // up in some cases for not paying attention to
-                // struct fields. The real type checker will be
-                // more accurate so we won't need the cheat.
-                {
-                    ptr<ast.Ident> id__prev1 = id;
-
-                    ptr<ast.Ident> (id, ok) = n._<ptr<ast.Ident>>();
-
-                    if (ok && id.Obj != null && (isDecl || typeof[id.Obj] == ""))
-                    {
-                        typeof[id.Obj] = typ;
-                    }
-
-                    id = id__prev1;
-
-                }
-
-            } 
-
-            // Type-check an assignment lhs = rhs.
-            // If isDecl is true, this is := so we can update
-            // the types of the objects that lhs refers to.
-; 
-
-            // Type-check an assignment lhs = rhs.
-            // If isDecl is true, this is := so we can update
-            // the types of the objects that lhs refers to.
-            Action<slice<ast.Expr>, slice<ast.Expr>, bool> typecheckAssign = (lhs, rhs, isDecl) =>
-            {
-                if (len(lhs) > 1L && len(rhs) == 1L)
-                {
-                    {
-                        ptr<ast.CallExpr> (_, ok) = rhs[0L]._<ptr<ast.CallExpr>>();
-
-                        if (ok)
-                        {
-                            var t = split(typeof[rhs[0L]]); 
-                            // Lists should have same length but may not; pair what can be paired.
-                            {
-                                long i__prev1 = i;
-
-                                for (long i = 0L; i < len(lhs) && i < len(t); i++)
-                                {
-                                    set(lhs[i], t[i], isDecl);
-                                }
-
-
-                                i = i__prev1;
-                            }
-                            return ;
-
-                        }
-
-                    }
-
-                }
-
-                if (len(lhs) == 1L && len(rhs) == 2L)
-                { 
-                    // x = y, ok
-                    rhs = rhs[..1L];
-
-                }
-                else if (len(lhs) == 2L && len(rhs) == 1L)
-                { 
-                    // x, ok = y
-                    lhs = lhs[..1L];
-
-                } 
-
-                // Match as much as we can.
-                {
-                    long i__prev1 = i;
-
-                    for (i = 0L; i < len(lhs) && i < len(rhs); i++)
-                    {
-                        var x = lhs[i];
-                        var y = rhs[i];
-                        if (typeof[y] != "")
-                        {
-                            set(x, typeof[y], isDecl);
-                        }
-                        else
-                        {
-                            set(y, typeof[x], false);
-                        }
-
-                    }
-
-
-                    i = i__prev1;
                 }
 
             }
-;
 
-            Func<@string, @string> expand = s =>
-            {
-                var typ = cfg.Type[s];
-                if (typ != null && typ.Def != "")
-                {
-                    return typ.Def;
+        }
+        if (len(lhs) == 1 && len(rhs) == 2) { 
+            // x = y, ok
+            rhs = rhs[..(int)1];
+
+        }
+        else if (len(lhs) == 2 && len(rhs) == 1) { 
+            // x, ok = y
+            lhs = lhs[..(int)1];
+
+        }
+        {
+            nint i__prev1 = i;
+
+            for (i = 0; i < len(lhs) && i < len(rhs); i++) {
+                var x = lhs[i];
+                var y = rhs[i];
+                if (typeof[y] != "") {
+                    set(x, typeof[y], isDecl);
+                }
+                else
+ {
+                    set(y, typeof[x], false);
                 }
 
-                return s;
+            }
 
-            } 
 
-            // The main type check is a recursive algorithm implemented
-            // by walkBeforeAfter(n, before, after).
-            // Most of it is bottom-up, but in a few places we need
-            // to know the type of the function we are checking.
-            // The before function records that information on
-            // the curfn stack.
-; 
+            i = i__prev1;
+        }
 
-            // The main type check is a recursive algorithm implemented
-            // by walkBeforeAfter(n, before, after).
-            // Most of it is bottom-up, but in a few places we need
-            // to know the type of the function we are checking.
-            // The before function records that information on
-            // the curfn stack.
-            slice<ptr<ast.FuncType>> curfn = default;
+    };
 
-            Action<object> before = n =>
-            { 
-                // push function type on stack
-                switch (n.type())
+    Func<@string, @string> expand = s => {
+        var typ = cfg.Type[s];
+        if (typ != null && typ.Def != "") {
+            return typ.Def;
+        }
+        return s;
+
+    }; 
+
+    // The main type check is a recursive algorithm implemented
+    // by walkBeforeAfter(n, before, after).
+    // Most of it is bottom-up, but in a few places we need
+    // to know the type of the function we are checking.
+    // The before function records that information on
+    // the curfn stack.
+    slice<ptr<ast.FuncType>> curfn = default;
+
+    Action<object> before = n => { 
+        // push function type on stack
+        switch (n.type()) {
+            case ptr<ast.FuncDecl> n:
+                curfn = append(curfn, n.Type);
+                break;
+            case ptr<ast.FuncLit> n:
+                curfn = append(curfn, n.Type);
+                break;
+        }
+
+    }; 
+
+    // After is the real type checker.
+    Action<object> after = n => {
+        if (n == null) {
+            return ;
+        }
+        if (false && reflect.TypeOf(n).Kind() == reflect.Ptr) { // debugging trace
+            defer(() => {
                 {
-                    case ptr<ast.FuncDecl> n:
-                        curfn = append(curfn, n.Type);
-                        break;
-                    case ptr<ast.FuncLit> n:
-                        curfn = append(curfn, n.Type);
-                        break;
+                    var t__prev2 = t;
+
+                    t = typeof[n];
+
+                    if (t != "") {
+                        var pos = fset.Position(n._<ast.Node>().Pos());
+                        fmt.Fprintf(os.Stderr, "%s: typeof[%s] = %s\n", pos, gofmt(n), t);
+                    }
+
+                    t = t__prev2;
+
                 }
 
-            } 
+            }());
 
-            // After is the real type checker.
-; 
+        }
+        switch (n.type()) {
+            case ptr<ast.FuncDecl> n:
+                curfn = curfn[..(int)len(curfn) - 1];
+                break;
+            case ptr<ast.FuncLit> n:
+                curfn = curfn[..(int)len(curfn) - 1];
+                break;
+            case ptr<ast.FuncType> n:
+                typeof[n] = mkType(joinFunc(split(typeof[n.Params]), split(typeof[n.Results])));
+                break;
+            case ptr<ast.FieldList> n:
+                t = "";
+                foreach (var (_, field) in n.List) {
+                    if (t != "") {
+                        t += ", ";
+                    }
+                    t += typeof[field];
+                }
+                typeof[n] = t;
+                break;
+            case ptr<ast.Field> n:
+                @string all = "";
+                t = typeof[n.Type];
+                if (!isType(t)) { 
+                    // Create a type, because it is typically *T or *p.T
+                    // and we might care about that type.
+                    t = mkType(gofmt(n.Type));
+                    typeof[n.Type] = t;
 
-            // After is the real type checker.
-            Action<object> after = n =>
-            {
-                if (n == null)
-                {
-                    return ;
                 }
 
-                if (false && reflect.TypeOf(n).Kind() == reflect.Ptr)
-                { // debugging trace
-                    defer(() =>
+                t = getType(t);
+                if (len(n.Names) == 0) {
+                    all = t;
+                }
+                else
+ {
                     {
+                        ptr<ast.Ident> id__prev1 = id;
+
+                        foreach (var (_, __id) in n.Names) {
+                            id = __id;
+                            if (all != "") {
+                                all += ", ";
+                            }
+                            all += t;
+                            typeof[id.Obj] = t;
+                            typeof[id] = t;
+                        }
+
+                        id = id__prev1;
+                    }
+                }
+
+                typeof[n] = all;
+                break;
+            case ptr<ast.ValueSpec> n:
+                if (n.Type != null) {
+                    t = typeof[n.Type];
+                    if (!isType(t)) {
+                        t = mkType(gofmt(n.Type));
+                        typeof[n.Type] = t;
+                    }
+                    t = getType(t);
+                    {
+                        ptr<ast.Ident> id__prev1 = id;
+
+                        foreach (var (_, __id) in n.Names) {
+                            id = __id;
+                            set(id, t, true);
+                        }
+
+                        id = id__prev1;
+                    }
+                } 
+                // Now treat same as assignment.
+                typecheckAssign(makeExprList(n.Names), n.Values, true);
+                break;
+            case ptr<ast.AssignStmt> n:
+                typecheckAssign(n.Lhs, n.Rhs, n.Tok == token.DEFINE);
+                break;
+            case ptr<ast.Ident> n:
+                {
+                    var t__prev1 = t;
+
+                    t = typeof[n.Obj];
+
+                    if (t != "") {
+                        typeof[n] = t;
+                    }
+
+                    t = t__prev1;
+
+                }
+
+
+                break;
+            case ptr<ast.SelectorExpr> n:
+                var name = n.Sel.Name;
+                {
+                    var t__prev1 = t;
+
+                    t = typeof[n.X];
+
+                    if (t != "") {
+                        t = strings.TrimPrefix(t, "*"); // implicit *
+                        {
+                            var typ__prev2 = typ;
+
+                            typ = cfg.Type[t];
+
+                            if (typ != null) {
+                                {
+                                    var t__prev3 = t;
+
+                                    t = typ.dot(cfg, name);
+
+                                    if (t != "") {
+                                        typeof[n] = t;
+                                        return ;
+                                    }
+
+                                    t = t__prev3;
+
+                                }
+
+                            }
+
+                            typ = typ__prev2;
+
+                        }
+
+                        var tt = typeof[t + "." + name];
+                        if (isType(tt)) {
+                            typeof[n] = getType(tt);
+                            return ;
+                        }
+
+                    } 
+                    // Package selector.
+
+                    t = t__prev1;
+
+                } 
+                // Package selector.
+                {
+                    var x__prev1 = x;
+
+                    ptr<ast.Ident> (x, ok) = n.X._<ptr<ast.Ident>>();
+
+                    if (ok && x.Obj == null) {
+                        var str = x.Name + "." + name;
+                        if (cfg.Type[str] != null) {
+                            typeof[n] = mkType(str);
+                            return ;
+                        }
                         {
                             var t__prev2 = t;
 
-                            t = typeof[n];
+                            t = cfg.@typeof(x.Name + "." + name);
 
-                            if (t != "")
-                            {
-                                var pos = fset.Position(n._<ast.Node>().Pos());
-                                fmt.Fprintf(os.Stderr, "%s: typeof[%s] = %s\n", pos, gofmt(n), t);
+                            if (t != "") {
+                                typeof[n] = t;
+                                return ;
                             }
 
                             t = t__prev2;
 
                         }
 
-                    }());
+                    }
+
+                    x = x__prev1;
 
                 }
 
-                switch (n.type())
+
+                break;
+            case ptr<ast.CallExpr> n:
+                if (isTopName(n.Fun, "make") && len(n.Args) >= 1) {
+                    typeof[n] = gofmt(n.Args[0]);
+                    return ;
+                } 
+                // new(T) has type *T
+                if (isTopName(n.Fun, "new") && len(n.Args) == 1) {
+                    typeof[n] = "*" + gofmt(n.Args[0]);
+                    return ;
+                } 
+                // Otherwise, use type of function to determine arguments.
+                t = typeof[n.Fun];
+                if (t == "") {
+                    t = cfg.External[gofmt(n.Fun)];
+                }
+
+                var (in, out) = splitFunc(t);
+                if (in == null && out == null) {
+                    return ;
+                }
+
+                typeof[n] = join(out);
                 {
-                    case ptr<ast.FuncDecl> n:
-                        curfn = curfn[..len(curfn) - 1L];
-                        break;
-                    case ptr<ast.FuncLit> n:
-                        curfn = curfn[..len(curfn) - 1L];
-                        break;
-                    case ptr<ast.FuncType> n:
-                        typeof[n] = mkType(joinFunc(split(typeof[n.Params]), split(typeof[n.Results])));
-                        break;
-                    case ptr<ast.FieldList> n:
-                        t = "";
-                        foreach (var (_, field) in n.List)
-                        {
-                            if (t != "")
-                            {
-                                t += ", ";
-                            }
+                    nint i__prev1 = i;
 
-                            t += typeof[field];
-
+                    foreach (var (__i, __arg) in n.Args) {
+                        i = __i;
+                        arg = __arg;
+                        if (i >= len(in)) {
+                            break;
                         }
-                        typeof[n] = t;
-                        break;
-                    case ptr<ast.Field> n:
-                        @string all = "";
-                        t = typeof[n.Type];
-                        if (!isType(t))
-                        { 
-                            // Create a type, because it is typically *T or *p.T
-                            // and we might care about that type.
-                            t = mkType(gofmt(n.Type));
-                            typeof[n.Type] = t;
-
+                        if (typeof[arg] == "") {
+                            typeof[arg] = in[i];
                         }
+                    }
 
-                        t = getType(t);
-                        if (len(n.Names) == 0L)
-                        {
-                            all = t;
-                        }
-                        else
-                        {
-                            {
-                                ptr<ast.Ident> id__prev1 = id;
-
-                                foreach (var (_, __id) in n.Names)
-                                {
-                                    id = __id;
-                                    if (all != "")
-                                    {
-                                        all += ", ";
-                                    }
-
-                                    all += t;
-                                    typeof[id.Obj] = t;
-                                    typeof[id] = t;
-
-                                }
-
-                                id = id__prev1;
-                            }
-                        }
-
-                        typeof[n] = all;
-                        break;
-                    case ptr<ast.ValueSpec> n:
-                        if (n.Type != null)
-                        {
-                            t = typeof[n.Type];
-                            if (!isType(t))
-                            {
-                                t = mkType(gofmt(n.Type));
-                                typeof[n.Type] = t;
-                            }
-
-                            t = getType(t);
-                            {
-                                ptr<ast.Ident> id__prev1 = id;
-
-                                foreach (var (_, __id) in n.Names)
-                                {
-                                    id = __id;
-                                    set(id, t, true);
-                                }
-
-                                id = id__prev1;
-                            }
-                        } 
-                        // Now treat same as assignment.
-                        typecheckAssign(makeExprList(n.Names), n.Values, true);
-                        break;
-                    case ptr<ast.AssignStmt> n:
-                        typecheckAssign(n.Lhs, n.Rhs, n.Tok == token.DEFINE);
-                        break;
-                    case ptr<ast.Ident> n:
-                        {
-                            var t__prev1 = t;
-
-                            t = typeof[n.Obj];
-
-                            if (t != "")
-                            {
-                                typeof[n] = t;
-                            }
-
-                            t = t__prev1;
-
-                        }
-
-
-                        break;
-                    case ptr<ast.SelectorExpr> n:
-                        var name = n.Sel.Name;
-                        {
-                            var t__prev1 = t;
-
-                            t = typeof[n.X];
-
-                            if (t != "")
-                            {
-                                t = strings.TrimPrefix(t, "*"); // implicit *
-                                {
-                                    var typ__prev2 = typ;
-
-                                    typ = cfg.Type[t];
-
-                                    if (typ != null)
-                                    {
-                                        {
-                                            var t__prev3 = t;
-
-                                            t = typ.dot(cfg, name);
-
-                                            if (t != "")
-                                            {
-                                                typeof[n] = t;
-                                                return ;
-                                            }
-
-                                            t = t__prev3;
-
-                                        }
-
-                                    }
-
-                                    typ = typ__prev2;
-
-                                }
-
-                                var tt = typeof[t + "." + name];
-                                if (isType(tt))
-                                {
-                                    typeof[n] = getType(tt);
-                                    return ;
-                                }
-
-                            } 
-                            // Package selector.
-
-                            t = t__prev1;
-
-                        } 
-                        // Package selector.
-                        {
-                            var x__prev1 = x;
-
-                            ptr<ast.Ident> (x, ok) = n.X._<ptr<ast.Ident>>();
-
-                            if (ok && x.Obj == null)
-                            {
-                                var str = x.Name + "." + name;
-                                if (cfg.Type[str] != null)
-                                {
-                                    typeof[n] = mkType(str);
-                                    return ;
-                                }
-
-                                {
-                                    var t__prev2 = t;
-
-                                    t = cfg.@typeof(x.Name + "." + name);
-
-                                    if (t != "")
-                                    {
-                                        typeof[n] = t;
-                                        return ;
-                                    }
-
-                                    t = t__prev2;
-
-                                }
-
-                            }
-
-                            x = x__prev1;
-
-                        }
-
-
-                        break;
-                    case ptr<ast.CallExpr> n:
-                        if (isTopName(n.Fun, "make") && len(n.Args) >= 1L)
-                        {
-                            typeof[n] = gofmt(n.Args[0L]);
-                            return ;
-                        } 
-                        // new(T) has type *T
-                        if (isTopName(n.Fun, "new") && len(n.Args) == 1L)
-                        {
-                            typeof[n] = "*" + gofmt(n.Args[0L]);
-                            return ;
-                        } 
-                        // Otherwise, use type of function to determine arguments.
-                        t = typeof[n.Fun];
-                        if (t == "")
-                        {
-                            t = cfg.External[gofmt(n.Fun)];
-                        }
-
-                        var (in, out) = splitFunc(t);
-                        if (in == null && out == null)
-                        {
-                            return ;
-                        }
-
-                        typeof[n] = join(out);
-                        {
-                            long i__prev1 = i;
-
-                            foreach (var (__i, __arg) in n.Args)
-                            {
-                                i = __i;
-                                arg = __arg;
-                                if (i >= len(in))
-                                {
-                                    break;
-                                }
-
-                                if (typeof[arg] == "")
-                                {
-                                    typeof[arg] = in[i];
-                                }
-
-                            }
-
-                            i = i__prev1;
-                        }
-                        break;
-                    case ptr<ast.TypeAssertExpr> n:
-                        if (n.Type == null)
-                        {
-                            typeof[n] = typeof[n.X];
-                            return ;
-                        } 
-                        // x.(T) has type T.
-                        {
-                            var t__prev1 = t;
-
-                            t = typeof[n.Type];
-
-                            if (isType(t))
-                            {
-                                typeof[n] = getType(t);
-                            }
-                            else
-                            {
-                                typeof[n] = gofmt(n.Type);
-                            }
-
-                            t = t__prev1;
-
-                        }
-
-
-                        break;
-                    case ptr<ast.SliceExpr> n:
-                        typeof[n] = typeof[n.X];
-                        break;
-                    case ptr<ast.IndexExpr> n:
-                        t = expand(typeof[n.X]);
-                        if (strings.HasPrefix(t, "[") || strings.HasPrefix(t, "map["))
-                        { 
-                            // Lazy: assume there are no nested [] in the array
-                            // length or map key type.
-                            {
-                                long i__prev2 = i;
-
-                                i = strings.Index(t, "]");
-
-                                if (i >= 0L)
-                                {
-                                    typeof[n] = t[i + 1L..];
-                                }
-
-                                i = i__prev2;
-
-                            }
-
-                        }
-
-                        break;
-                    case ptr<ast.StarExpr> n:
-                        t = expand(typeof[n.X]);
-                        if (isType(t))
-                        {
-                            typeof[n] = "type *" + getType(t);
-                        }
-                        else if (strings.HasPrefix(t, "*"))
-                        {
-                            typeof[n] = t[len("*")..];
-                        }
-
-                        break;
-                    case ptr<ast.UnaryExpr> n:
-                        t = typeof[n.X];
-                        if (t != "" && n.Op == token.AND)
-                        {
-                            typeof[n] = "*" + t;
-                        }
-
-                        break;
-                    case ptr<ast.CompositeLit> n:
-                        typeof[n] = gofmt(n.Type); 
-
-                        // Propagate types down to values used in the composite literal.
-                        t = expand(typeof[n]);
-                        if (strings.HasPrefix(t, "["))
-                        { // array or slice
-                            // Lazy: assume there are no nested [] in the array length.
-                            {
-                                long i__prev2 = i;
-
-                                i = strings.Index(t, "]");
-
-                                if (i >= 0L)
-                                {
-                                    var et = t[i + 1L..];
-                                    {
-                                        var e__prev1 = e;
-
-                                        foreach (var (_, __e) in n.Elts)
-                                        {
-                                            e = __e;
-                                            {
-                                                ptr<ast.KeyValueExpr> kv__prev3 = kv;
-
-                                                ptr<ast.KeyValueExpr> (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
-
-                                                if (ok)
-                                                {
-                                                    e = kv.Value;
-                                                }
-
-                                                kv = kv__prev3;
-
-                                            }
-
-                                            if (typeof[e] == "")
-                                            {
-                                                typeof[e] = et;
-                                            }
-
-                                        }
-
-                                        e = e__prev1;
-                                    }
-                                }
-
-                                i = i__prev2;
-
-                            }
-
-                        }
-
-                        if (strings.HasPrefix(t, "map["))
-                        { // map
-                            // Lazy: assume there are no nested [] in the map key type.
-                            {
-                                long i__prev2 = i;
-
-                                i = strings.Index(t, "]");
-
-                                if (i >= 0L)
-                                {
-                                    var kt = t[4L..i];
-                                    var vt = t[i + 1L..];
-                                    {
-                                        var e__prev1 = e;
-
-                                        foreach (var (_, __e) in n.Elts)
-                                        {
-                                            e = __e;
-                                            {
-                                                ptr<ast.KeyValueExpr> kv__prev3 = kv;
-
-                                                (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
-
-                                                if (ok)
-                                                {
-                                                    if (typeof[kv.Key] == "")
-                                                    {
-                                                        typeof[kv.Key] = kt;
-                                                    }
-
-                                                    if (typeof[kv.Value] == "")
-                                                    {
-                                                        typeof[kv.Value] = vt;
-                                                    }
-
-                                                }
-
-                                                kv = kv__prev3;
-
-                                            }
-
-                                        }
-
-                                        e = e__prev1;
-                                    }
-                                }
-
-                                i = i__prev2;
-
-                            }
-
-                        }
-
-                        {
-                            var typ__prev1 = typ;
-
-                            typ = cfg.Type[t];
-
-                            if (typ != null && len(typ.Field) > 0L)
-                            { // struct
-                                {
-                                    var e__prev1 = e;
-
-                                    foreach (var (_, __e) in n.Elts)
-                                    {
-                                        e = __e;
-                                        {
-                                            ptr<ast.KeyValueExpr> kv__prev2 = kv;
-
-                                            (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
-
-                                            if (ok)
-                                            {
-                                                {
-                                                    var ft = typ.Field[fmt.Sprintf("%s", kv.Key)];
-
-                                                    if (ft != "")
-                                                    {
-                                                        if (typeof[kv.Value] == "")
-                                                        {
-                                                            typeof[kv.Value] = ft;
-                                                        }
-
-                                                    }
-
-                                                }
-
-                                            }
-
-                                            kv = kv__prev2;
-
-                                        }
-
-                                    }
-
-                                    e = e__prev1;
-                                }
-                            }
-
-                            typ = typ__prev1;
-
-                        }
-
-
-                        break;
-                    case ptr<ast.ParenExpr> n:
-                        typeof[n] = typeof[n.X];
-                        break;
-                    case ptr<ast.RangeStmt> n:
-                        t = expand(typeof[n.X]);
-                        if (t == "")
-                        {
-                            return ;
-                        }
-
-                        @string key = default;                        @string value = default;
-
-                        if (t == "string")
-                        {
-                            key = "int";
-                            value = "rune";
-
-                        }
-                        else if (strings.HasPrefix(t, "["))
-                        {
-                            key = "int";
-                            {
-                                long i__prev3 = i;
-
-                                i = strings.Index(t, "]");
-
-                                if (i >= 0L)
-                                {
-                                    value = t[i + 1L..];
-                                }
-
-                                i = i__prev3;
-
-                            }
-
-                        }
-                        else if (strings.HasPrefix(t, "map["))
-                        {
-                            {
-                                long i__prev4 = i;
-
-                                i = strings.Index(t, "]");
-
-                                if (i >= 0L)
-                                {
-                                    key = t[4L..i];
-                                    value = t[i + 1L..];
-
-                                }
-
-                                i = i__prev4;
-
-                            }
-
-                        }
-
-                        var changed = false;
-                        if (n.Key != null && key != "")
-                        {
-                            changed = true;
-                            set(n.Key, key, n.Tok == token.DEFINE);
-                        }
-
-                        if (n.Value != null && value != "")
-                        {
-                            changed = true;
-                            set(n.Value, value, n.Tok == token.DEFINE);
-                        } 
-                        // Ugly failure of vision: already type-checked body.
-                        // Do it again now that we have that type info.
-                        if (changed)
-                        {
-                            typecheck1(_addr_cfg, n.Body, typeof, assign);
-                        }
-
-                        break;
-                    case ptr<ast.TypeSwitchStmt> n:
-                        ptr<ast.AssignStmt> (as, ok) = n.Assign._<ptr<ast.AssignStmt>>();
-                        if (!ok)
-                        {
-                            return ;
-                        }
-
-                        ptr<ast.Ident> (varx, ok) = @as.Lhs[0L]._<ptr<ast.Ident>>();
-                        if (!ok)
-                        {
-                            return ;
-                        }
-
-                        t = typeof[varx];
-                        {
-                            var cas__prev1 = cas;
-
-                            foreach (var (_, __cas) in n.Body.List)
-                            {
-                                cas = __cas;
-                                ptr<ast.CaseClause> cas = cas._<ptr<ast.CaseClause>>();
-                                if (len(cas.List) == 1L)
-                                { 
-                                    // Variable has specific type only when there is
-                                    // exactly one type in the case list.
-                                    {
-                                        var tt__prev2 = tt;
-
-                                        tt = typeof[cas.List[0L]];
-
-                                        if (isType(tt))
-                                        {
-                                            tt = getType(tt);
-                                            typeof[varx] = tt;
-                                            typeof[varx.Obj] = tt;
-                                            typecheck1(_addr_cfg, cas.Body, typeof, assign);
-                                        }
-
-                                        tt = tt__prev2;
-
-                                    }
-
-                                }
-
-                            } 
-                            // Restore t.
-
-                            cas = cas__prev1;
-                        }
-
-                        typeof[varx] = t;
-                        typeof[varx.Obj] = t;
-                        break;
-                    case ptr<ast.ReturnStmt> n:
-                        if (len(curfn) == 0L)
-                        { 
-                            // Probably can't happen.
-                            return ;
-
-                        }
-
-                        var f = curfn[len(curfn) - 1L];
-                        var res = n.Results;
-                        if (f.Results != null)
-                        {
-                            t = split(typeof[f.Results]);
-                            {
-                                long i__prev1 = i;
-
-                                for (i = 0L; i < len(res) && i < len(t); i++)
-                                {
-                                    set(res[i], t[i], false);
-                                }
-
-
-                                i = i__prev1;
-                            }
-
-                        }
-
-                        break;
-                    case ptr<ast.BinaryExpr> n:
-
-                        if (n.Op == token.EQL || n.Op == token.NEQ) // TODO: more cases. This is enough for the cftype fix.
-                            if (typeof[n.X] != "" && typeof[n.Y] == "")
-                            {
-                                typeof[n.Y] = typeof[n.X];
-                            }
-
-                            if (typeof[n.X] == "" && typeof[n.Y] != "")
-                            {
-                                typeof[n.X] = typeof[n.Y];
-                            }
-
-                                                break;
+                    i = i__prev1;
                 }
-
-            }
-;
-            walkBeforeAfter(f, before, after);
-
-        });
-
-        // Convert between function type strings and lists of types.
-        // Using strings makes this a little harder, but it makes
-        // a lot of the rest of the code easier. This will all go away
-        // when we can use go/typechecker directly.
-
-        // splitFunc splits "func(x,y,z) (a,b,c)" into ["x", "y", "z"] and ["a", "b", "c"].
-        private static (slice<@string>, slice<@string>) splitFunc(@string s)
-        {
-            slice<@string> @in = default;
-            slice<@string> @out = default;
-
-            if (!strings.HasPrefix(s, "func("))
-            {
-                return (null, null);
-            }
-
-            var i = len("func("); // index of beginning of 'in' arguments
-            long nparen = 0L;
-            for (var j = i; j < len(s); j++)
-            {
-                switch (s[j])
+                break;
+            case ptr<ast.TypeAssertExpr> n:
+                if (n.Type == null) {
+                    typeof[n] = typeof[n.X];
+                    return ;
+                } 
+                // x.(T) has type T.
                 {
-                    case '(': 
-                        nparen++;
-                        break;
-                    case ')': 
-                        nparen--;
-                        if (nparen < 0L)
-                        { 
-                            // found end of parameter list
-                            var @out = strings.TrimSpace(s[j + 1L..]);
-                            if (len(out) >= 2L && out[0L] == '(' && out[len(out) - 1L] == ')')
-                            {
-                                out = out[1L..len(out) - 1L];
-                            }
+                    var t__prev1 = t;
 
-                            return (split(s[i..j]), split(out));
+                    t = typeof[n.Type];
 
-                        }
+                    if (isType(t)) {
+                        typeof[n] = getType(t);
+                    }
+                    else
+ {
+                        typeof[n] = gofmt(n.Type);
+                    }
 
-                        break;
+                    t = t__prev1;
+
                 }
 
-            }
 
-            return (null, null);
+                break;
+            case ptr<ast.SliceExpr> n:
+                typeof[n] = typeof[n.X];
+                break;
+            case ptr<ast.IndexExpr> n:
+                t = expand(typeof[n.X]);
+                if (strings.HasPrefix(t, "[") || strings.HasPrefix(t, "map[")) { 
+                    // Lazy: assume there are no nested [] in the array
+                    // length or map key type.
+                    {
+                        nint i__prev2 = i;
 
-        }
+                        i = strings.Index(t, "]");
 
-        // joinFunc is the inverse of splitFunc.
-        private static @string joinFunc(slice<@string> @in, slice<@string> @out)
-        {
-            @string outs = "";
-            if (len(out) == 1L)
-            {
-                outs = " " + out[0L];
-            }
-            else if (len(out) > 1L)
-            {
-                outs = " (" + join(out) + ")";
-            }
+                        if (i >= 0) {
+                            typeof[n] = t[(int)i + 1..];
+                        }
 
-            return "func(" + join(in) + ")" + outs;
+                        i = i__prev2;
 
-        }
+                    }
 
-        // split splits "int, float" into ["int", "float"] and splits "" into [].
-        private static slice<@string> split(@string s)
-        {
-            @string @out = new slice<@string>(new @string[] {  });
-            long i = 0L; // current type being scanned is s[i:j].
-            long nparen = 0L;
-            for (long j = 0L; j < len(s); j++)
-            {
-                switch (s[j])
+                }
+
+                break;
+            case ptr<ast.StarExpr> n:
+                t = expand(typeof[n.X]);
+                if (isType(t)) {
+                    typeof[n] = "type *" + getType(t);
+                }
+                else if (strings.HasPrefix(t, "*")) {
+                    typeof[n] = t[(int)len("*")..];
+                }
+
+                break;
+            case ptr<ast.UnaryExpr> n:
+                t = typeof[n.X];
+                if (t != "" && n.Op == token.AND) {
+                    typeof[n] = "*" + t;
+                }
+                break;
+            case ptr<ast.CompositeLit> n:
+                typeof[n] = gofmt(n.Type); 
+
+                // Propagate types down to values used in the composite literal.
+                t = expand(typeof[n]);
+                if (strings.HasPrefix(t, "[")) { // array or slice
+                    // Lazy: assume there are no nested [] in the array length.
+                    {
+                        nint i__prev2 = i;
+
+                        i = strings.Index(t, "]");
+
+                        if (i >= 0) {
+                            var et = t[(int)i + 1..];
+                            {
+                                var e__prev1 = e;
+
+                                foreach (var (_, __e) in n.Elts) {
+                                    e = __e;
+                                    {
+                                        ptr<ast.KeyValueExpr> kv__prev3 = kv;
+
+                                        ptr<ast.KeyValueExpr> (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
+
+                                        if (ok) {
+                                            e = kv.Value;
+                                        }
+
+                                        kv = kv__prev3;
+
+                                    }
+
+                                    if (typeof[e] == "") {
+                                        typeof[e] = et;
+                                    }
+
+                                }
+
+                                e = e__prev1;
+                            }
+                        }
+
+                        i = i__prev2;
+
+                    }
+
+                }
+
+                if (strings.HasPrefix(t, "map[")) { // map
+                    // Lazy: assume there are no nested [] in the map key type.
+                    {
+                        nint i__prev2 = i;
+
+                        i = strings.Index(t, "]");
+
+                        if (i >= 0) {
+                            var kt = t[(int)4..(int)i];
+                            var vt = t[(int)i + 1..];
+                            {
+                                var e__prev1 = e;
+
+                                foreach (var (_, __e) in n.Elts) {
+                                    e = __e;
+                                    {
+                                        ptr<ast.KeyValueExpr> kv__prev3 = kv;
+
+                                        (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
+
+                                        if (ok) {
+                                            if (typeof[kv.Key] == "") {
+                                                typeof[kv.Key] = kt;
+                                            }
+                                            if (typeof[kv.Value] == "") {
+                                                typeof[kv.Value] = vt;
+                                            }
+                                        }
+
+                                        kv = kv__prev3;
+
+                                    }
+
+                                }
+
+                                e = e__prev1;
+                            }
+                        }
+
+                        i = i__prev2;
+
+                    }
+
+                }
+
                 {
-                    case ' ': 
-                        if (i == j)
+                    var typ__prev1 = typ;
+
+                    typ = cfg.Type[t];
+
+                    if (typ != null && len(typ.Field) > 0) { // struct
                         {
-                            i++;
-                        }
+                            var e__prev1 = e;
 
-                        break;
-                    case '(': 
-                        nparen++;
-                        break;
-                    case ')': 
-                        nparen--;
-                        if (nparen < 0L)
-                        { 
-                            // probably can't happen
-                            return null;
+                            foreach (var (_, __e) in n.Elts) {
+                                e = __e;
+                                {
+                                    ptr<ast.KeyValueExpr> kv__prev2 = kv;
 
-                        }
+                                    (kv, ok) = e._<ptr<ast.KeyValueExpr>>();
 
-                        break;
-                    case ',': 
-                        if (nparen == 0L)
-                        {
-                            if (i < j)
-                            {
-                                out = append(out, s[i..j]);
+                                    if (ok) {
+                                        {
+                                            var ft = typ.Field[fmt.Sprintf("%s", kv.Key)];
+
+                                            if (ft != "") {
+                                                if (typeof[kv.Value] == "") {
+                                                    typeof[kv.Value] = ft;
+                                                }
+                                            }
+
+                                        }
+
+                                    }
+
+                                    kv = kv__prev2;
+
+                                }
+
                             }
 
-                            i = j + 1L;
+                            e = e__prev1;
+                        }
+                    }
+
+                    typ = typ__prev1;
+
+                }
+
+
+                break;
+            case ptr<ast.ParenExpr> n:
+                typeof[n] = typeof[n.X];
+                break;
+            case ptr<ast.RangeStmt> n:
+                t = expand(typeof[n.X]);
+                if (t == "") {
+                    return ;
+                }
+                @string key = default;                @string value = default;
+
+                if (t == "string") {
+                    (key, value) = ("int", "rune");
+                }
+                else if (strings.HasPrefix(t, "[")) {
+                    key = "int";
+                    {
+                        nint i__prev3 = i;
+
+                        i = strings.Index(t, "]");
+
+                        if (i >= 0) {
+                            value = t[(int)i + 1..];
+                        }
+
+                        i = i__prev3;
+
+                    }
+
+                }
+                else if (strings.HasPrefix(t, "map[")) {
+                    {
+                        nint i__prev4 = i;
+
+                        i = strings.Index(t, "]");
+
+                        if (i >= 0) {
+                            (key, value) = (t[(int)4..(int)i], t[(int)i + 1..]);
+                        }
+
+                        i = i__prev4;
+
+                    }
+
+                }
+
+                var changed = false;
+                if (n.Key != null && key != "") {
+                    changed = true;
+                    set(n.Key, key, n.Tok == token.DEFINE);
+                }
+
+                if (n.Value != null && value != "") {
+                    changed = true;
+                    set(n.Value, value, n.Tok == token.DEFINE);
+                } 
+                // Ugly failure of vision: already type-checked body.
+                // Do it again now that we have that type info.
+                if (changed) {
+                    typecheck1(_addr_cfg, n.Body, typeof, assign);
+                }
+
+                break;
+            case ptr<ast.TypeSwitchStmt> n:
+                ptr<ast.AssignStmt> (as, ok) = n.Assign._<ptr<ast.AssignStmt>>();
+                if (!ok) {
+                    return ;
+                }
+                ptr<ast.Ident> (varx, ok) = @as.Lhs[0]._<ptr<ast.Ident>>();
+                if (!ok) {
+                    return ;
+                }
+                t = typeof[varx];
+                {
+                    var cas__prev1 = cas;
+
+                    foreach (var (_, __cas) in n.Body.List) {
+                        cas = __cas;
+                        ptr<ast.CaseClause> cas = cas._<ptr<ast.CaseClause>>();
+                        if (len(cas.List) == 1) { 
+                            // Variable has specific type only when there is
+                            // exactly one type in the case list.
+                            {
+                                var tt__prev2 = tt;
+
+                                tt = typeof[cas.List[0]];
+
+                                if (isType(tt)) {
+                                    tt = getType(tt);
+                                    typeof[varx] = tt;
+                                    typeof[varx.Obj] = tt;
+                                    typecheck1(_addr_cfg, cas.Body, typeof, assign);
+                                }
+
+                                tt = tt__prev2;
+
+                            }
 
                         }
 
-                        break;
+                    } 
+                    // Restore t.
+
+                    cas = cas__prev1;
                 }
 
-            }
+                typeof[varx] = t;
+                typeof[varx.Obj] = t;
+                break;
+            case ptr<ast.ReturnStmt> n:
+                if (len(curfn) == 0) { 
+                    // Probably can't happen.
+                    return ;
 
-            if (nparen != 0L)
-            { 
-                // probably can't happen
-                return null;
+                }
 
-            }
+                var f = curfn[len(curfn) - 1];
+                var res = n.Results;
+                if (f.Results != null) {
+                    t = split(typeof[f.Results]);
+                    {
+                        nint i__prev1 = i;
 
-            if (i < len(s))
-            {
-                out = append(out, s[i..]);
-            }
+                        for (i = 0; i < len(res) && i < len(t); i++) {
+                            set(res[i], t[i], false);
+                        }
 
-            return out;
 
+                        i = i__prev1;
+                    }
+
+                }
+
+                break;
+            case ptr<ast.BinaryExpr> n:
+
+                if (n.Op == token.EQL || n.Op == token.NEQ) // TODO: more cases. This is enough for the cftype fix.
+                    if (typeof[n.X] != "" && typeof[n.Y] == "") {
+                        typeof[n.Y] = typeof[n.X];
+                    }
+                    if (typeof[n.X] == "" && typeof[n.Y] != "") {
+                        typeof[n.X] = typeof[n.Y];
+                    }
+                                break;
         }
 
-        // join is the inverse of split.
-        private static @string join(slice<@string> x)
-        {
-            return strings.Join(x, ", ");
-        }
+    };
+    walkBeforeAfter(f, before, after);
+
+});
+
+// Convert between function type strings and lists of types.
+// Using strings makes this a little harder, but it makes
+// a lot of the rest of the code easier. This will all go away
+// when we can use go/typechecker directly.
+
+// splitFunc splits "func(x,y,z) (a,b,c)" into ["x", "y", "z"] and ["a", "b", "c"].
+private static (slice<@string>, slice<@string>) splitFunc(@string s) {
+    slice<@string> @in = default;
+    slice<@string> @out = default;
+
+    if (!strings.HasPrefix(s, "func(")) {
+        return (null, null);
     }
+    var i = len("func("); // index of beginning of 'in' arguments
+    nint nparen = 0;
+    for (var j = i; j < len(s); j++) {
+        switch (s[j]) {
+            case '(': 
+                nparen++;
+                break;
+            case ')': 
+                nparen--;
+                if (nparen < 0) { 
+                    // found end of parameter list
+                    var @out = strings.TrimSpace(s[(int)j + 1..]);
+                    if (len(out) >= 2 && out[0] == '(' && out[len(out) - 1] == ')') {
+                        out = out[(int)1..(int)len(out) - 1];
+                    }
+
+                    return (split(s[(int)i..(int)j]), split(out));
+
+                }
+
+                break;
+        }
+
+    }
+    return (null, null);
+
 }
+
+// joinFunc is the inverse of splitFunc.
+private static @string joinFunc(slice<@string> @in, slice<@string> @out) {
+    @string outs = "";
+    if (len(out) == 1) {
+        outs = " " + out[0];
+    }
+    else if (len(out) > 1) {
+        outs = " (" + join(out) + ")";
+    }
+    return "func(" + join(in) + ")" + outs;
+
+}
+
+// split splits "int, float" into ["int", "float"] and splits "" into [].
+private static slice<@string> split(@string s) {
+    @string @out = new slice<@string>(new @string[] {  });
+    nint i = 0; // current type being scanned is s[i:j].
+    nint nparen = 0;
+    for (nint j = 0; j < len(s); j++) {
+        switch (s[j]) {
+            case ' ': 
+                if (i == j) {
+                    i++;
+                }
+                break;
+            case '(': 
+                nparen++;
+                break;
+            case ')': 
+                nparen--;
+                if (nparen < 0) { 
+                    // probably can't happen
+                    return null;
+
+                }
+
+                break;
+            case ',': 
+                if (nparen == 0) {
+                    if (i < j) {
+                        out = append(out, s[(int)i..(int)j]);
+                    }
+                    i = j + 1;
+                }
+                break;
+        }
+
+    }
+    if (nparen != 0) { 
+        // probably can't happen
+        return null;
+
+    }
+    if (i < len(s)) {
+        out = append(out, s[(int)i..]);
+    }
+    return out;
+
+}
+
+// join is the inverse of split.
+private static @string join(slice<@string> x) {
+    return strings.Join(x, ", ");
+}
+
+} // end main_package

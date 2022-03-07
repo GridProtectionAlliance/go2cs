@@ -8,40 +8,35 @@
 //go:a
 
 //go:b
-// package main -- go2cs converted at 2020 October 09 05:44:25 UTC
-// Original source: C:\Go\src\cmd\cover\testdata\directives.go
+// package main -- go2cs converted at 2022 March 06 23:15:11 UTC
+// Original source: C:\Program Files\Go\src\cmd\cover\testdata\directives.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        //go:c1
+namespace go;
 
-        //go:c2
-        //doc
-        private static void c()
-        {
-        }
+public static partial class main_package {
 
-        //go:d1
+    //go:c1
 
-        //doc
-        //go:d2
-        private partial struct d // : long
-        {
-        }
-
-        //go:e1
-
-        //doc
-        //go:e2
-        private partial struct e // : long
-        {
-        }
-        private partial struct f // : long
-        {
-        }
-    }
+    //go:c2
+    //doc
+private static void c() {
 }
+
+//go:d1
+
+//doc
+//go:d2
+private partial struct d { // : nint
+}
+
+//go:e1
+
+//doc
+//go:e2
+private partial struct e { // : nint
+}
+private partial struct f { // : nint
+}
+
+} // end main_package

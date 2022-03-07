@@ -1,41 +1,31 @@
-// package b -- go2cs converted at 2020 October 09 05:50:37 UTC
+// package b -- go2cs converted at 2022 March 06 23:22:34 UTC
 // import "cmd/link/internal/ld/testdata/issue26237.b" ==> using b = go.cmd.link.@internal.ld.testdata.issue26237.b_package
-// Original source: C:\Go\src\cmd\link\internal\ld\testdata\issue26237\b.dir\b.go
+// Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\issue26237\b.dir\b.go
 
-using static go.builtin;
 using System;
 
-namespace go {
-namespace cmd {
-namespace link {
-namespace @internal {
-namespace ld {
-namespace testdata
-{
-    public static partial class b_package
-    {
-        private static long q = default;
 
-        public static long Top(long x)
-        {
-            q += 1L;
-            if (q != x)
-            {
-                return 3L;
-            }
+namespace go.cmd.link.@internal.ld.testdata;
 
-            return 4L;
+public static partial class b_package {
 
-        }
+private static nint q = default;
 
-        public static long OOO(long x) => func((defer, _, __) =>
-        {
-            defer(() =>
-            {
-                q += x & 7L;
-            }());
-            return Top(x + 1L);
-
-        });
+public static nint Top(nint x) {
+    q += 1;
+    if (q != x) {
+        return 3;
     }
-}}}}}}
+    return 4;
+
+}
+
+public static nint OOO(nint x) => func((defer, _, _) => {
+    defer(() => {
+        q += x & 7;
+    }());
+    return Top(x + 1);
+
+});
+
+} // end b_package

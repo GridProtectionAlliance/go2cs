@@ -13,7 +13,7 @@
 // exporter that understands the special contexts returned by NewContext.
 // This means you should not import this package if you are not going to call
 // NewContext.
-// package eventtest -- go2cs converted at 2020 October 09 06:01:46 UTC
+// package eventtest -- go2cs converted at 2022 March 06 23:31:38 UTC
 // import "golang.org/x/tools/internal/event/export/eventtest" ==> using eventtest = go.golang.org.x.tools.@internal.@event.export.eventtest_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\internal\event\export\eventtest\eventtest.go
 using bytes = go.bytes_package;
@@ -25,66 +25,52 @@ using @event = go.golang.org.x.tools.@internal.@event_package;
 using core = go.golang.org.x.tools.@internal.@event.core_package;
 using export = go.golang.org.x.tools.@internal.@event.export_package;
 using label = go.golang.org.x.tools.@internal.@event.label_package;
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace @internal {
-namespace @event {
-namespace export
-{
-    public static partial class eventtest_package
-    {
-        private static void init()
-        {
-            ptr<testExporter> e = addr(new testExporter(buffer:&bytes.Buffer{}));
-            e.logger = export.LogWriter(e.buffer, false);
+namespace go.golang.org.x.tools.@internal.@event.export;
 
-            @event.SetExporter(export.Spans(e.processEvent));
-        }
+public static partial class eventtest_package {
 
-        private partial struct testingKeyType // : long
-        {
-        }
+private static void init() {
+    ptr<testExporter> e = addr(new testExporter(buffer:&bytes.Buffer{}));
+    e.logger = export.LogWriter(e.buffer, false);
 
-        private static readonly var testingKey = testingKeyType(0L);
+    @event.SetExporter(export.Spans(e.processEvent));
+}
 
-        // NewContext returns a context you should use for the active test.
+private partial struct testingKeyType { // : nint
+}
+
+private static readonly var testingKey = testingKeyType(0);
+
+// NewContext returns a context you should use for the active test.
 
 
-        // NewContext returns a context you should use for the active test.
-        public static context.Context NewContext(context.Context ctx, testing.TB t)
-        {
-            return context.WithValue(ctx, testingKey, t);
-        }
+// NewContext returns a context you should use for the active test.
+public static context.Context NewContext(context.Context ctx, testing.TB t) {
+    return context.WithValue(ctx, testingKey, t);
+}
 
-        private partial struct testExporter
-        {
-            public sync.Mutex mu;
-            public ptr<bytes.Buffer> buffer;
-            public event.Exporter logger;
-        }
+private partial struct testExporter {
+    public sync.Mutex mu;
+    public ptr<bytes.Buffer> buffer;
+    public event.Exporter logger;
+}
 
-        private static context.Context processEvent(this ptr<testExporter> _addr_w, context.Context ctx, core.Event ev, label.Map tm) => func((defer, _, __) =>
-        {
-            ref testExporter w = ref _addr_w.val;
+private static context.Context processEvent(this ptr<testExporter> _addr_w, context.Context ctx, core.Event ev, label.Map tm) => func((defer, _, _) => {
+    ref testExporter w = ref _addr_w.val;
 
-            w.mu.Lock();
-            defer(w.mu.Unlock()); 
-            // build our log message in buffer
-            var result = w.logger(ctx, ev, tm);
-            var v = ctx.Value(testingKey); 
-            // get the testing.TB
-            if (w.buffer.Len() > 0L && v != null)
-            {
-                v._<testing.TB>().Log(w.buffer);
-            }
-
-            w.buffer.Truncate(0L);
-            return result;
-
-        });
+    w.mu.Lock();
+    defer(w.mu.Unlock()); 
+    // build our log message in buffer
+    var result = w.logger(ctx, ev, tm);
+    var v = ctx.Value(testingKey); 
+    // get the testing.TB
+    if (w.buffer.Len() > 0 && v != null) {
+        v._<testing.TB>().Log(w.buffer);
     }
-}}}}}}}
+    w.buffer.Truncate(0);
+    return result;
+
+});
+
+} // end eventtest_package

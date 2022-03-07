@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:39 UTC
+//     Generated on 2022 March 06 23:20:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,12 +13,12 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using ld = go.cmd.link.@internal.ld_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
+using buildcfg = go.@internal.buildcfg_package;
 using io = go.io_package;
 using regexp = go.regexp_package;
 using go;
@@ -58,7 +58,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -72,48 +72,8 @@ namespace @internal
                 m_target_ptr = target_ptr;
                 m_target_is_ptr = true;
             }
-
-            private delegate error WriteByteByPtr(ptr<T> value, byte c);
-            private delegate error WriteByteByVal(T value, byte c);
-
-            private static readonly WriteByteByPtr? s_WriteByteByPtr;
-            private static readonly WriteByteByVal? s_WriteByteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error WriteByte(byte c)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WriteByteByPtr is null || !m_target_is_ptr)
-                    return s_WriteByteByVal!(target, c);
-
-                return s_WriteByteByPtr(m_target_ptr, c);
-            }
-
-            private delegate (long, error) WriteByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-
-            private static readonly WriteByPtr? s_WriteByPtr;
-            private static readonly WriteByVal? s_WriteByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_WriteByPtr is null || !m_target_is_ptr)
-                    return s_WriteByVal!(target, p);
-
-                return s_WriteByPtr(m_target_ptr, p);
-            }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static nameWriter()
@@ -121,32 +81,6 @@ namespace @internal
                 Type targetType = typeof(T);
                 Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteByte");
-
-                if (!(extensionMethod is null))
-                    s_WriteByteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByteByPtr)) as WriteByteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("WriteByte");
-
-                if (!(extensionMethod is null))
-                    s_WriteByteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByteByVal)) as WriteByteByVal;
-
-                if (s_WriteByteByPtr is null && s_WriteByteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement nameWriter.WriteByte method", new Exception("WriteByte"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteByPtr)) as WriteByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Write");
-
-                if (!(extensionMethod is null))
-                    s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
-
-                if (s_WriteByPtr is null && s_WriteByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement nameWriter.Write method", new Exception("Write"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

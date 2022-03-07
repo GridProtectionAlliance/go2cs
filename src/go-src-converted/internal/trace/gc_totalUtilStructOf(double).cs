@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:57 UTC
+//     Generated on 2022 March 06 23:22:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace @internal
         {
             // Value of the totalUtil struct
             private readonly double m_value;
-
+            
             public totalUtil(double value) => m_value = value;
 
             // Enable implicit conversions between double and totalUtil struct

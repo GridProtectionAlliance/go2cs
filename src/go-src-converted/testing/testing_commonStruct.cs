@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:47 UTC
+//     Generated on 2022 March 06 23:19:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -29,6 +28,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
+using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 
@@ -49,12 +50,12 @@ namespace go
                 this.failed = default;
                 this.skipped = default;
                 this.done = default;
-                this.cleanup = default;
+                this.cleanups = default;
                 this.cleanupName = default;
                 this.cleanupPc = default;
+                this.finished = default;
                 this.chatty = default;
                 this.bench = default;
-                this.finished = default;
                 this.hasSub = default;
                 this.raceErrors = default;
                 this.runner = default;
@@ -67,13 +68,13 @@ namespace go
                 this.barrier = default;
                 this.signal = default;
                 this.sub = default;
-                this.tempDirOnce = default;
+                this.tempDirMu = default;
                 this.tempDir = default;
                 this.tempDirErr = default;
                 this.tempDirSeq = default;
             }
 
-            public common(sync.RWMutex mu = default, slice<byte> output = default, io.Writer w = default, bool ran = default, bool failed = default, bool skipped = default, bool done = default, Action cleanup = default, @string cleanupName = default, slice<System.UIntPtr> cleanupPc = default, bool chatty = default, bool bench = default, bool finished = default, int hasSub = default, long raceErrors = default, @string runner = default, ref ptr<common> parent = default, long level = default, slice<System.UIntPtr> creator = default, @string name = default, time.Time start = default, time.Duration duration = default, channel<bool> barrier = default, channel<bool> signal = default, slice<ptr<T>> sub = default, sync.Once tempDirOnce = default, @string tempDir = default, error tempDirErr = default, int tempDirSeq = default)
+            public common(sync.RWMutex mu = default, slice<byte> output = default, io.Writer w = default, bool ran = default, bool failed = default, bool skipped = default, bool done = default, slice<Action> cleanups = default, @string cleanupName = default, slice<System.UIntPtr> cleanupPc = default, bool finished = default, ref ptr<chattyPrinter> chatty = default, bool bench = default, int hasSub = default, nint raceErrors = default, @string runner = default, ref ptr<common> parent = default, nint level = default, slice<System.UIntPtr> creator = default, @string name = default, time.Time start = default, time.Duration duration = default, channel<bool> barrier = default, channel<bool> signal = default, slice<ptr<T>> sub = default, sync.Mutex tempDirMu = default, @string tempDir = default, error tempDirErr = default, int tempDirSeq = default)
             {
                 this.mu = mu;
                 this.output = output;
@@ -82,12 +83,12 @@ namespace go
                 this.failed = failed;
                 this.skipped = skipped;
                 this.done = done;
-                this.cleanup = cleanup;
+                this.cleanups = cleanups;
                 this.cleanupName = cleanupName;
                 this.cleanupPc = cleanupPc;
+                this.finished = finished;
                 this.chatty = chatty;
                 this.bench = bench;
-                this.finished = finished;
                 this.hasSub = hasSub;
                 this.raceErrors = raceErrors;
                 this.runner = runner;
@@ -100,7 +101,7 @@ namespace go
                 this.barrier = barrier;
                 this.signal = signal;
                 this.sub = sub;
-                this.tempDirOnce = tempDirOnce;
+                this.tempDirMu = tempDirMu;
                 this.tempDir = tempDir;
                 this.tempDirErr = tempDirErr;
                 this.tempDirSeq = tempDirSeq;
@@ -126,7 +127,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static common common_cast(dynamic value)
         {
-            return new common(value.mu, value.output, value.w, value.ran, value.failed, value.skipped, value.done, value.cleanup, value.cleanupName, value.cleanupPc, value.chatty, value.bench, value.finished, value.hasSub, value.raceErrors, value.runner, ref value.parent, value.level, value.creator, value.name, value.start, value.duration, value.barrier, value.signal, value.sub, value.tempDirOnce, value.tempDir, value.tempDirErr, value.tempDirSeq);
+            return new common(value.mu, value.output, value.w, value.ran, value.failed, value.skipped, value.done, value.cleanups, value.cleanupName, value.cleanupPc, value.finished, ref value.chatty, value.bench, value.hasSub, value.raceErrors, value.runner, ref value.parent, value.level, value.creator, value.name, value.start, value.duration, value.barrier, value.signal, value.sub, value.tempDirMu, value.tempDir, value.tempDirErr, value.tempDirSeq);
         }
     }
 }

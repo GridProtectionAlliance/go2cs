@@ -2,27 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 09 04:45:40 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:08:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\cpuflags_amd64.go
+// Original source: C:\Program Files\Go\src\runtime\cpuflags_amd64.go
 using cpu = go.@internal.cpu_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static bool useAVXmemmove = default;
+namespace go;
 
-        private static void init()
-        { 
-            // Let's remove stepping and reserved fields
-            var processor = processorVersionInfo & 0x0FFF3FF0UL;
+public static partial class runtime_package {
 
-            var isIntelBridgeFamily = isIntel && processor == 0x206A0UL || processor == 0x206D0UL || processor == 0x306A0UL || processor == 0x306E0UL;
+private static bool useAVXmemmove = default;
 
-            useAVXmemmove = cpu.X86.HasAVX && !isIntelBridgeFamily;
+private static void init() { 
+    // Let's remove stepping and reserved fields
+    var processor = processorVersionInfo & 0x0FFF3FF0;
 
-        }
-    }
+    var isIntelBridgeFamily = isIntel && processor == 0x206A0 || processor == 0x206D0 || processor == 0x306A0 || processor == 0x306E0;
+
+    useAVXmemmove = cpu.X86.HasAVX && !isIntelBridgeFamily;
+
 }
+
+} // end runtime_package

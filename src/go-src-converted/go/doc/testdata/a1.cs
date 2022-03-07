@@ -3,8 +3,8 @@
 // license that can be found in the LICENSE file.
 
 // comment 1
-// package a -- go2cs converted at 2020 October 09 05:19:09 UTC
+// package a -- go2cs converted at 2022 March 06 22:41:33 UTC
 // import "go/doc.a" ==> using a = go.go.doc.a_package
-// Original source: C:\Go\src\go\doc\testdata\a1.go
-    }
+// Original source: C:\Program Files\Go\src\go\doc\testdata\a1.go
 
+} // end a_package

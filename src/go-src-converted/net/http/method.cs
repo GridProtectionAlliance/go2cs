@@ -2,29 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2020 October 09 04:57:45 UTC
+// package http -- go2cs converted at 2022 March 06 22:22:49 UTC
 // import "net/http" ==> using http = go.net.http_package
-// Original source: C:\Go\src\net\http\method.go
+// Original source: C:\Program Files\Go\src\net\http\method.go
 
-using static go.builtin;
 
-namespace go {
-namespace net
-{
-    public static partial class http_package
-    {
-        // Common HTTP methods.
-        //
-        // Unless otherwise noted, these are defined in RFC 7231 section 4.3.
-        public static readonly @string MethodGet = (@string)"GET";
-        public static readonly @string MethodHead = (@string)"HEAD";
-        public static readonly @string MethodPost = (@string)"POST";
-        public static readonly @string MethodPut = (@string)"PUT";
-        public static readonly @string MethodPatch = (@string)"PATCH"; // RFC 5789
-        public static readonly @string MethodDelete = (@string)"DELETE";
-        public static readonly @string MethodConnect = (@string)"CONNECT";
-        public static readonly @string MethodOptions = (@string)"OPTIONS";
-        public static readonly @string MethodTrace = (@string)"TRACE";
+namespace go.net;
 
-    }
-}}
+public static partial class http_package {
+
+    // Common HTTP methods.
+    //
+    // Unless otherwise noted, these are defined in RFC 7231 section 4.3.
+public static readonly @string MethodGet = "GET";
+public static readonly @string MethodHead = "HEAD";
+public static readonly @string MethodPost = "POST";
+public static readonly @string MethodPut = "PUT";
+public static readonly @string MethodPatch = "PATCH"; // RFC 5789
+public static readonly @string MethodDelete = "DELETE";
+public static readonly @string MethodConnect = "CONNECT";
+public static readonly @string MethodOptions = "OPTIONS";
+public static readonly @string MethodTrace = "TRACE";
+
+
+} // end http_package

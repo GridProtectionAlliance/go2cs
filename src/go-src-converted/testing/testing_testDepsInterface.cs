@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:47 UTC
+//     Generated on 2022 March 06 23:19:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,14 +13,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using race = go.@internal.race_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using rand = go.math.rand_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using debug = go.runtime.debug_package;
@@ -30,6 +29,8 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using atomic = go.sync.atomic_package;
 using time = go.time_package;
+using unicode = go.unicode_package;
+using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661
@@ -63,7 +64,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -89,13 +90,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ImportPathByPtr is null || !m_target_is_ptr)
                     return s_ImportPathByVal!(target);
 
-                return s_ImportPathByPtr(m_target_ptr);
+                return s_ImportPathByPtr(m_target_ptr!);
             }
 
             private delegate error MatchStringByPtr(ptr<T> value, @string pat, @string str);
@@ -109,13 +110,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MatchStringByPtr is null || !m_target_is_ptr)
                     return s_MatchStringByVal!(target, pat, str);
 
-                return s_MatchStringByPtr(m_target_ptr, pat, str);
+                return s_MatchStringByPtr(m_target_ptr!, pat, str);
+            }
+
+            private delegate error SetPanicOnExit0ByPtr(ptr<T> value, bool _p0);
+            private delegate error SetPanicOnExit0ByVal(T value, bool _p0);
+
+            private static readonly SetPanicOnExit0ByPtr? s_SetPanicOnExit0ByPtr;
+            private static readonly SetPanicOnExit0ByVal? s_SetPanicOnExit0ByVal;
+
+            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public error SetPanicOnExit0(bool _p0)
+            {
+                T target = m_target;
+
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    target = m_target_ptr.val;
+
+                if (s_SetPanicOnExit0ByPtr is null || !m_target_is_ptr)
+                    return s_SetPanicOnExit0ByVal!(target, _p0);
+
+                return s_SetPanicOnExit0ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error StartCPUProfileByPtr(ptr<T> value, io.Writer _p0);
@@ -129,13 +150,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StartCPUProfileByPtr is null || !m_target_is_ptr)
                     return s_StartCPUProfileByVal!(target, _p0);
 
-                return s_StartCPUProfileByPtr(m_target_ptr, _p0);
+                return s_StartCPUProfileByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error StopCPUProfileByPtr(ptr<T> value);
@@ -149,13 +170,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StopCPUProfileByPtr is null || !m_target_is_ptr)
                     return s_StopCPUProfileByVal!(target);
 
-                return s_StopCPUProfileByPtr(m_target_ptr);
+                return s_StopCPUProfileByPtr(m_target_ptr!);
             }
 
             private delegate error StartTestLogByPtr(ptr<T> value, io.Writer _p0);
@@ -169,13 +190,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StartTestLogByPtr is null || !m_target_is_ptr)
                     return s_StartTestLogByVal!(target, _p0);
 
-                return s_StartTestLogByPtr(m_target_ptr, _p0);
+                return s_StartTestLogByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error StopTestLogByPtr(ptr<T> value);
@@ -189,36 +210,36 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StopTestLogByPtr is null || !m_target_is_ptr)
                     return s_StopTestLogByVal!(target);
 
-                return s_StopTestLogByPtr(m_target_ptr);
+                return s_StopTestLogByPtr(m_target_ptr!);
             }
 
-            private delegate error WriteProfileToByPtr(ptr<T> value, @string _p0, io.Writer _p0, long _p0);
-            private delegate error WriteProfileToByVal(T value, @string _p0, io.Writer _p0, long _p0);
+            private delegate error WriteProfileToByPtr(ptr<T> value, @string _p0, io.Writer _p0, nint _p0);
+            private delegate error WriteProfileToByVal(T value, @string _p0, io.Writer _p0, nint _p0);
 
             private static readonly WriteProfileToByPtr? s_WriteProfileToByPtr;
             private static readonly WriteProfileToByVal? s_WriteProfileToByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error WriteProfileTo(@string _p0, io.Writer _p0, long _p0)
+            public error WriteProfileTo(@string _p0, io.Writer _p0, nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteProfileToByPtr is null || !m_target_is_ptr)
                     return s_WriteProfileToByVal!(target, _p0, _p0, _p0);
 
-                return s_WriteProfileToByPtr(m_target_ptr, _p0, _p0, _p0);
+                return s_WriteProfileToByPtr(m_target_ptr!, _p0, _p0, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static testDeps()
@@ -229,12 +250,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ImportPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportPathByPtr = extensionMethod.CreateStaticDelegate(typeof(ImportPathByPtr)) as ImportPathByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ImportPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImportPathByVal = extensionMethod.CreateStaticDelegate(typeof(ImportPathByVal)) as ImportPathByVal;
 
                 if (s_ImportPathByPtr is null && s_ImportPathByVal is null)
@@ -242,25 +263,38 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("MatchString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MatchStringByPtr = extensionMethod.CreateStaticDelegate(typeof(MatchStringByPtr)) as MatchStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("MatchString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MatchStringByVal = extensionMethod.CreateStaticDelegate(typeof(MatchStringByVal)) as MatchStringByVal;
 
                 if (s_MatchStringByPtr is null && s_MatchStringByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.MatchString method", new Exception("MatchString"));
 
+               extensionMethod = targetTypeByPtr.GetExtensionMethod("SetPanicOnExit0");
+
+                if (extensionMethod is not null)
+                    s_SetPanicOnExit0ByPtr = extensionMethod.CreateStaticDelegate(typeof(SetPanicOnExit0ByPtr)) as SetPanicOnExit0ByPtr;
+
+                extensionMethod = targetType.GetExtensionMethod("SetPanicOnExit0");
+
+                if (extensionMethod is not null)
+                    s_SetPanicOnExit0ByVal = extensionMethod.CreateStaticDelegate(typeof(SetPanicOnExit0ByVal)) as SetPanicOnExit0ByVal;
+
+                if (s_SetPanicOnExit0ByPtr is null && s_SetPanicOnExit0ByVal is null)
+                    throw new NotImplementedException($"{targetType.FullName} does not implement testDeps.SetPanicOnExit0 method", new Exception("SetPanicOnExit0"));
+
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StartCPUProfile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartCPUProfileByPtr = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByPtr)) as StartCPUProfileByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StartCPUProfile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StartCPUProfileByVal)) as StartCPUProfileByVal;
 
                 if (s_StartCPUProfileByPtr is null && s_StartCPUProfileByVal is null)
@@ -268,12 +302,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StopCPUProfile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StopCPUProfileByPtr = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByPtr)) as StopCPUProfileByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StopCPUProfile");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StopCPUProfileByVal = extensionMethod.CreateStaticDelegate(typeof(StopCPUProfileByVal)) as StopCPUProfileByVal;
 
                 if (s_StopCPUProfileByPtr is null && s_StopCPUProfileByVal is null)
@@ -281,12 +315,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StartTestLog");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartTestLogByPtr = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByPtr)) as StartTestLogByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StartTestLog");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StartTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StartTestLogByVal)) as StartTestLogByVal;
 
                 if (s_StartTestLogByPtr is null && s_StartTestLogByVal is null)
@@ -294,12 +328,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("StopTestLog");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StopTestLogByPtr = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByPtr)) as StopTestLogByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("StopTestLog");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StopTestLogByVal = extensionMethod.CreateStaticDelegate(typeof(StopTestLogByVal)) as StopTestLogByVal;
 
                 if (s_StopTestLogByPtr is null && s_StopTestLogByVal is null)
@@ -307,12 +341,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteProfileTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteProfileToByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByPtr)) as WriteProfileToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteProfileTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteProfileToByVal = extensionMethod.CreateStaticDelegate(typeof(WriteProfileToByVal)) as WriteProfileToByVal;
 
                 if (s_WriteProfileToByPtr is null && s_WriteProfileToByVal is null)

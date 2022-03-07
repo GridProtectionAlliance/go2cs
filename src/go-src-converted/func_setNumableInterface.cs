@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:20 UTC
+//     Generated on 2022 March 06 23:33:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
@@ -60,7 +59,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -75,18 +74,18 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate void setNumByPtr(ptr<T> value, long _p0);
-            private delegate void setNumByVal(T value, long _p0);
+            private delegate void setNumByPtr(ptr<T> value, nint _p0);
+            private delegate void setNumByVal(T value, nint _p0);
 
             private static readonly setNumByPtr? s_setNumByPtr;
             private static readonly setNumByVal? s_setNumByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public void setNum(long _p0)
+            public void setNum(nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_setNumByPtr is null || !m_target_is_ptr)
@@ -95,12 +94,11 @@ namespace go
                     return;
                 }
 
-                s_setNumByPtr(m_target_ptr, _p0);
+                s_setNumByPtr(m_target_ptr!, _p0);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static setNumable()
@@ -111,12 +109,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("setNum");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setNumByPtr = extensionMethod.CreateStaticDelegate(typeof(setNumByPtr)) as setNumByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("setNum");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_setNumByVal = extensionMethod.CreateStaticDelegate(typeof(setNumByVal)) as setNumByVal;
 
                 if (s_setNumByPtr is null && s_setNumByVal is null)

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:18 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace pprof
         {
             // Value of the HTTPServerArgs struct
             private readonly plugin.HTTPServerArgs m_value;
-
+            
             public HTTPServerArgs(plugin.HTTPServerArgs value) => m_value = value;
 
             // Enable implicit conversions between plugin.HTTPServerArgs and HTTPServerArgs struct

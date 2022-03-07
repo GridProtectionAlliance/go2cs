@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:12 UTC
+//     Generated on 2022 March 06 22:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using race = go.@internal.race_package;
 using windows = go.@internal.syscall.windows_package;
@@ -55,7 +54,7 @@ namespace @internal
                 this.kind = default;
             }
 
-            public FD(fdMutex fdmu = default, syscall.Handle Sysfd = default, operation rop = default, operation wop = default, pollDesc pd = default, sync.Mutex l = default, slice<byte> lastbits = default, slice<ushort> readuint16 = default, slice<byte> readbyte = default, long readbyteOffset = default, uint csema = default, bool skipSyncNotif = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default, fileKind kind = default)
+            public FD(fdMutex fdmu = default, syscall.Handle Sysfd = default, operation rop = default, operation wop = default, pollDesc pd = default, sync.Mutex l = default, slice<byte> lastbits = default, slice<ushort> readuint16 = default, slice<byte> readbyte = default, nint readbyteOffset = default, uint csema = default, bool skipSyncNotif = default, bool IsStream = default, bool ZeroReadIsEOF = default, bool isFile = default, fileKind kind = default)
             {
                 this.fdmu = fdmu;
                 this.Sysfd = Sysfd;

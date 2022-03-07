@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:17 UTC
+//     Generated on 2022 March 06 22:15:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,40 @@ namespace compress
     public static partial class flate_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        private partial struct byFreq
+        private partial struct byFreq : ISlice
         {
             // Value of the byFreq struct
             private readonly slice<literalNode> m_value;
+            
+            public Array Array => ((ISlice)m_value).Array;
+
+            public nint Low => ((ISlice)m_value).Low;
+
+            public nint High => ((ISlice)m_value).High;
+
+            public nint Capacity => ((ISlice)m_value).Capacity;
+
+            public nint Available => ((ISlice)m_value).Available;
+
+            public nint Length => ((IArray)m_value).Length;
+
+            object? IArray.this[nint index]
+            {
+                get => ((IArray)m_value)[index];
+                set => ((IArray)m_value)[index] = value;
+            }
+            
+            public ref literalNode this[nint index]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => ref m_value[index];
+            }
+            
+            public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+
+            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+
+            public object Clone() => ((ICloneable)m_value).Clone();
 
             public byFreq(slice<literalNode> value) => m_value = value;
 

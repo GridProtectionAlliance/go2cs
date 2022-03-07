@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:29 UTC
+//     Generated on 2022 March 06 22:42:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using heap = go.container.heap_package;
 using fmt = go.fmt_package;
 using go;
@@ -51,7 +50,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -77,7 +76,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_isDependencyByPtr is null || !m_target_is_ptr)
@@ -86,12 +85,11 @@ namespace go
                     return;
                 }
 
-                s_isDependencyByPtr(m_target_ptr);
+                s_isDependencyByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static dependency()
@@ -102,12 +100,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("isDependency");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isDependencyByPtr = extensionMethod.CreateStaticDelegate(typeof(isDependencyByPtr)) as isDependencyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("isDependency");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_isDependencyByVal = extensionMethod.CreateStaticDelegate(typeof(isDependencyByVal)) as isDependencyByVal;
 
                 if (s_isDependencyByPtr is null && s_isDependencyByVal is null)

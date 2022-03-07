@@ -4,26 +4,21 @@
 
 // This file contains tests for the dead code checker.
 
-// package deadcode -- go2cs converted at 2020 October 09 06:05:08 UTC
+// package deadcode -- go2cs converted at 2022 March 06 23:35:18 UTC
 // import "cmd/vet/testdata/deadcode" ==> using deadcode = go.cmd.vet.testdata.deadcode_package
-// Original source: C:\Go\src\cmd\vet\testdata\deadcode\deadcode.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\deadcode\deadcode.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class deadcode_package
-    {
-        private static long _()
-        {
-            print(1L);
-            return 2L;
-            println(); // ERROR "unreachable code"
-            return 3L;
+namespace go.cmd.vet.testdata;
 
-        }
-    }
-}}}}
+public static partial class deadcode_package {
+
+private static nint _() {
+    print(1);
+    return 2;
+    println(); // ERROR "unreachable code"
+    return 3;
+
+}
+
+} // end deadcode_package

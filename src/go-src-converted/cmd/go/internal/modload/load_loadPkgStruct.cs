@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:46:52 UTC
+//     Generated on 2022 March 06 23:18:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,25 +12,32 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
+using errors = go.errors_package;
+using fmt = go.fmt_package;
+using build = go.go.build_package;
+using fs = go.io.fs_package;
+using os = go.os_package;
+using path = go.path_package;
+using filepath = go.path.filepath_package;
+using reflect = go.reflect_package;
+using runtime = go.runtime_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
+using atomic = go.sync.atomic_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
 using imports = go.cmd.go.@internal.imports_package;
 using modfetch = go.cmd.go.@internal.modfetch_package;
 using mvs = go.cmd.go.@internal.mvs_package;
 using par = go.cmd.go.@internal.par_package;
 using search = go.cmd.go.@internal.search_package;
 using str = go.cmd.go.@internal.str_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
 using module = go.golang.org.x.mod.module_package;
+using semver = go.golang.org.x.mod.semver_package;
 using go;
 
 #nullable enable
@@ -49,27 +56,33 @@ namespace @internal
             public loadPkg(NilType _)
             {
                 this.path = default;
+                this.testOf = default;
+                this.flags = default;
                 this.mod = default;
                 this.dir = default;
-                this.imports = default;
                 this.err = default;
-                this.stack = default;
-                this.test = default;
-                this.testOf = default;
+                this.imports = default;
                 this.testImports = default;
+                this.inStd = default;
+                this.testOnce = default;
+                this.test = default;
+                this.stack = default;
             }
 
-            public loadPkg(@string path = default, module.Version mod = default, @string dir = default, slice<ptr<loadPkg>> imports = default, error err = default, ref ptr<loadPkg> stack = default, ref ptr<loadPkg> test = default, ref ptr<loadPkg> testOf = default, slice<@string> testImports = default)
+            public loadPkg(@string path = default, ref ptr<loadPkg> testOf = default, atomicLoadPkgFlags flags = default, module.Version mod = default, @string dir = default, error err = default, slice<ptr<loadPkg>> imports = default, slice<@string> testImports = default, bool inStd = default, sync.Once testOnce = default, ref ptr<loadPkg> test = default, ref ptr<loadPkg> stack = default)
             {
                 this.path = path;
+                this.testOf = testOf;
+                this.flags = flags;
                 this.mod = mod;
                 this.dir = dir;
-                this.imports = imports;
                 this.err = err;
-                this.stack = stack;
-                this.test = test;
-                this.testOf = testOf;
+                this.imports = imports;
                 this.testImports = testImports;
+                this.inStd = inStd;
+                this.testOnce = testOnce;
+                this.test = test;
+                this.stack = stack;
             }
 
             // Enable comparisons between nil and loadPkg struct
@@ -92,7 +105,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static loadPkg loadPkg_cast(dynamic value)
         {
-            return new loadPkg(value.path, value.mod, value.dir, value.imports, value.err, ref value.stack, ref value.test, ref value.testOf, value.testImports);
+            return new loadPkg(value.path, ref value.testOf, value.flags, value.mod, value.dir, value.err, value.imports, value.testImports, value.inStd, value.testOnce, ref value.test, ref value.stack);
         }
     }
 }}}}

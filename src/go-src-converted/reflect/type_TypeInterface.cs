@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:45 UTC
+//     Generated on 2022 March 06 22:30:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using unsafeheader = go.@internal.unsafeheader_package;
 using strconv = go.strconv_package;
 using sync = go.sync_package;
@@ -53,7 +52,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AlignByPtr is null || !m_target_is_ptr)
                     return s_AlignByVal!(target);
 
-                return s_AlignByPtr(m_target_ptr);
+                return s_AlignByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> FieldAlignByPtr(ptr<T> value);
@@ -99,33 +98,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FieldAlignByPtr is null || !m_target_is_ptr)
                     return s_FieldAlignByVal!(target);
 
-                return s_FieldAlignByPtr(m_target_ptr);
+                return s_FieldAlignByPtr(m_target_ptr!);
             }
 
-            private delegate ptr<uncommonType> MethodByPtr(ptr<T> value, long _p0);
-            private delegate ptr<uncommonType> MethodByVal(T value, long _p0);
+            private delegate ptr<uncommonType> MethodByPtr(ptr<T> value, nint _p0);
+            private delegate ptr<uncommonType> MethodByVal(T value, nint _p0);
 
             private static readonly MethodByPtr? s_MethodByPtr;
             private static readonly MethodByVal? s_MethodByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<uncommonType> Method(long _p0)
+            public ptr<uncommonType> Method(nint _p0)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MethodByPtr is null || !m_target_is_ptr)
                     return s_MethodByVal!(target, _p0);
 
-                return s_MethodByPtr(m_target_ptr, _p0);
+                return s_MethodByPtr(m_target_ptr!, _p0);
             }
 
             private delegate ptr<uncommonType> MethodByNameByPtr(ptr<T> value, @string _p0);
@@ -139,13 +138,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_MethodByNameByPtr is null || !m_target_is_ptr)
                     return s_MethodByNameByVal!(target, _p0);
 
-                return s_MethodByNameByPtr(m_target_ptr, _p0);
+                return s_MethodByNameByPtr(m_target_ptr!, _p0);
             }
 
             private delegate ptr<uncommonType> NumMethodByPtr(ptr<T> value);
@@ -159,13 +158,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumMethodByPtr is null || !m_target_is_ptr)
                     return s_NumMethodByVal!(target);
 
-                return s_NumMethodByPtr(m_target_ptr);
+                return s_NumMethodByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> NameByPtr(ptr<T> value);
@@ -179,13 +178,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> PkgPathByPtr(ptr<T> value);
@@ -199,13 +198,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PkgPathByPtr is null || !m_target_is_ptr)
                     return s_PkgPathByVal!(target);
 
-                return s_PkgPathByPtr(m_target_ptr);
+                return s_PkgPathByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> SizeByPtr(ptr<T> value);
@@ -219,13 +218,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SizeByPtr is null || !m_target_is_ptr)
                     return s_SizeByVal!(target);
 
-                return s_SizeByPtr(m_target_ptr);
+                return s_SizeByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> StringByPtr(ptr<T> value);
@@ -239,13 +238,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StringByPtr is null || !m_target_is_ptr)
                     return s_StringByVal!(target);
 
-                return s_StringByPtr(m_target_ptr);
+                return s_StringByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> KindByPtr(ptr<T> value);
@@ -259,13 +258,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_KindByPtr is null || !m_target_is_ptr)
                     return s_KindByVal!(target);
 
-                return s_KindByPtr(m_target_ptr);
+                return s_KindByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> ImplementsByPtr(ptr<T> value, Type u);
@@ -279,13 +278,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ImplementsByPtr is null || !m_target_is_ptr)
                     return s_ImplementsByVal!(target, u);
 
-                return s_ImplementsByPtr(m_target_ptr, u);
+                return s_ImplementsByPtr(m_target_ptr!, u);
             }
 
             private delegate ptr<uncommonType> AssignableToByPtr(ptr<T> value, Type u);
@@ -299,13 +298,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AssignableToByPtr is null || !m_target_is_ptr)
                     return s_AssignableToByVal!(target, u);
 
-                return s_AssignableToByPtr(m_target_ptr, u);
+                return s_AssignableToByPtr(m_target_ptr!, u);
             }
 
             private delegate ptr<uncommonType> ConvertibleToByPtr(ptr<T> value, Type u);
@@ -319,13 +318,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ConvertibleToByPtr is null || !m_target_is_ptr)
                     return s_ConvertibleToByVal!(target, u);
 
-                return s_ConvertibleToByPtr(m_target_ptr, u);
+                return s_ConvertibleToByPtr(m_target_ptr!, u);
             }
 
             private delegate ptr<uncommonType> ComparableByPtr(ptr<T> value);
@@ -339,13 +338,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ComparableByPtr is null || !m_target_is_ptr)
                     return s_ComparableByVal!(target);
 
-                return s_ComparableByPtr(m_target_ptr);
+                return s_ComparableByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> BitsByPtr(ptr<T> value);
@@ -359,13 +358,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BitsByPtr is null || !m_target_is_ptr)
                     return s_BitsByVal!(target);
 
-                return s_BitsByPtr(m_target_ptr);
+                return s_BitsByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> ChanDirByPtr(ptr<T> value);
@@ -379,13 +378,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ChanDirByPtr is null || !m_target_is_ptr)
                     return s_ChanDirByVal!(target);
 
-                return s_ChanDirByPtr(m_target_ptr);
+                return s_ChanDirByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> IsVariadicByPtr(ptr<T> value);
@@ -399,13 +398,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_IsVariadicByPtr is null || !m_target_is_ptr)
                     return s_IsVariadicByVal!(target);
 
-                return s_IsVariadicByPtr(m_target_ptr);
+                return s_IsVariadicByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> ElemByPtr(ptr<T> value);
@@ -419,53 +418,53 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ElemByPtr is null || !m_target_is_ptr)
                     return s_ElemByVal!(target);
 
-                return s_ElemByPtr(m_target_ptr);
+                return s_ElemByPtr(m_target_ptr!);
             }
 
-            private delegate ptr<uncommonType> FieldByPtr(ptr<T> value, long i);
-            private delegate ptr<uncommonType> FieldByVal(T value, long i);
+            private delegate ptr<uncommonType> FieldByPtr(ptr<T> value, nint i);
+            private delegate ptr<uncommonType> FieldByVal(T value, nint i);
 
             private static readonly FieldByPtr? s_FieldByPtr;
             private static readonly FieldByVal? s_FieldByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<uncommonType> Field(long i)
+            public ptr<uncommonType> Field(nint i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FieldByPtr is null || !m_target_is_ptr)
                     return s_FieldByVal!(target, i);
 
-                return s_FieldByPtr(m_target_ptr, i);
+                return s_FieldByPtr(m_target_ptr!, i);
             }
 
-            private delegate ptr<uncommonType> FieldByIndexByPtr(ptr<T> value, slice<long> index);
-            private delegate ptr<uncommonType> FieldByIndexByVal(T value, slice<long> index);
+            private delegate ptr<uncommonType> FieldByIndexByPtr(ptr<T> value, slice<nint> index);
+            private delegate ptr<uncommonType> FieldByIndexByVal(T value, slice<nint> index);
 
             private static readonly FieldByIndexByPtr? s_FieldByIndexByPtr;
             private static readonly FieldByIndexByVal? s_FieldByIndexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<uncommonType> FieldByIndex(slice<long> index)
+            public ptr<uncommonType> FieldByIndex(slice<nint> index)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FieldByIndexByPtr is null || !m_target_is_ptr)
                     return s_FieldByIndexByVal!(target, index);
 
-                return s_FieldByIndexByPtr(m_target_ptr, index);
+                return s_FieldByIndexByPtr(m_target_ptr!, index);
             }
 
             private delegate ptr<uncommonType> FieldByNameByPtr(ptr<T> value, @string name);
@@ -479,13 +478,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FieldByNameByPtr is null || !m_target_is_ptr)
                     return s_FieldByNameByVal!(target, name);
 
-                return s_FieldByNameByPtr(m_target_ptr, name);
+                return s_FieldByNameByPtr(m_target_ptr!, name);
             }
 
             private delegate ptr<uncommonType> FieldByNameFuncByPtr(ptr<T> value, Func<@string, bool> match);
@@ -499,33 +498,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FieldByNameFuncByPtr is null || !m_target_is_ptr)
                     return s_FieldByNameFuncByVal!(target, match);
 
-                return s_FieldByNameFuncByPtr(m_target_ptr, match);
+                return s_FieldByNameFuncByPtr(m_target_ptr!, match);
             }
 
-            private delegate ptr<uncommonType> InByPtr(ptr<T> value, long i);
-            private delegate ptr<uncommonType> InByVal(T value, long i);
+            private delegate ptr<uncommonType> InByPtr(ptr<T> value, nint i);
+            private delegate ptr<uncommonType> InByVal(T value, nint i);
 
             private static readonly InByPtr? s_InByPtr;
             private static readonly InByVal? s_InByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<uncommonType> In(long i)
+            public ptr<uncommonType> In(nint i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_InByPtr is null || !m_target_is_ptr)
                     return s_InByVal!(target, i);
 
-                return s_InByPtr(m_target_ptr, i);
+                return s_InByPtr(m_target_ptr!, i);
             }
 
             private delegate ptr<uncommonType> KeyByPtr(ptr<T> value);
@@ -539,13 +538,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_KeyByPtr is null || !m_target_is_ptr)
                     return s_KeyByVal!(target);
 
-                return s_KeyByPtr(m_target_ptr);
+                return s_KeyByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> LenByPtr(ptr<T> value);
@@ -559,13 +558,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByPtr(m_target_ptr);
+                return s_LenByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> NumFieldByPtr(ptr<T> value);
@@ -579,13 +578,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumFieldByPtr is null || !m_target_is_ptr)
                     return s_NumFieldByVal!(target);
 
-                return s_NumFieldByPtr(m_target_ptr);
+                return s_NumFieldByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> NumInByPtr(ptr<T> value);
@@ -599,13 +598,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumInByPtr is null || !m_target_is_ptr)
                     return s_NumInByVal!(target);
 
-                return s_NumInByPtr(m_target_ptr);
+                return s_NumInByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> NumOutByPtr(ptr<T> value);
@@ -619,33 +618,33 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NumOutByPtr is null || !m_target_is_ptr)
                     return s_NumOutByVal!(target);
 
-                return s_NumOutByPtr(m_target_ptr);
+                return s_NumOutByPtr(m_target_ptr!);
             }
 
-            private delegate ptr<uncommonType> OutByPtr(ptr<T> value, long i);
-            private delegate ptr<uncommonType> OutByVal(T value, long i);
+            private delegate ptr<uncommonType> OutByPtr(ptr<T> value, nint i);
+            private delegate ptr<uncommonType> OutByVal(T value, nint i);
 
             private static readonly OutByPtr? s_OutByPtr;
             private static readonly OutByVal? s_OutByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<uncommonType> Out(long i)
+            public ptr<uncommonType> Out(nint i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OutByPtr is null || !m_target_is_ptr)
                     return s_OutByVal!(target, i);
 
-                return s_OutByPtr(m_target_ptr, i);
+                return s_OutByPtr(m_target_ptr!, i);
             }
 
             private delegate ptr<uncommonType> commonByPtr(ptr<T> value);
@@ -659,13 +658,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_commonByPtr is null || !m_target_is_ptr)
                     return s_commonByVal!(target);
 
-                return s_commonByPtr(m_target_ptr);
+                return s_commonByPtr(m_target_ptr!);
             }
 
             private delegate ptr<uncommonType> uncommonByPtr(ptr<T> value);
@@ -679,16 +678,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_uncommonByPtr is null || !m_target_is_ptr)
                     return s_uncommonByVal!(target);
 
-                return s_uncommonByPtr(m_target_ptr);
+                return s_uncommonByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Type()
@@ -699,12 +698,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Align");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AlignByPtr = extensionMethod.CreateStaticDelegate(typeof(AlignByPtr)) as AlignByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Align");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AlignByVal = extensionMethod.CreateStaticDelegate(typeof(AlignByVal)) as AlignByVal;
 
                 if (s_AlignByPtr is null && s_AlignByVal is null)
@@ -712,12 +711,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldAlign");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldAlignByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByPtr)) as FieldAlignByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("FieldAlign");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldAlignByVal = extensionMethod.CreateStaticDelegate(typeof(FieldAlignByVal)) as FieldAlignByVal;
 
                 if (s_FieldAlignByPtr is null && s_FieldAlignByVal is null)
@@ -725,12 +724,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Method");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByPtr = extensionMethod.CreateStaticDelegate(typeof(MethodByPtr)) as MethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Method");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByVal)) as MethodByVal;
 
                 if (s_MethodByPtr is null && s_MethodByVal is null)
@@ -738,12 +737,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("MethodByName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByNameByPtr = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByPtr)) as MethodByNameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("MethodByName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_MethodByNameByVal = extensionMethod.CreateStaticDelegate(typeof(MethodByNameByVal)) as MethodByNameByVal;
 
                 if (s_MethodByNameByPtr is null && s_MethodByNameByVal is null)
@@ -751,12 +750,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumMethodByPtr = extensionMethod.CreateStaticDelegate(typeof(NumMethodByPtr)) as NumMethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumMethodByVal = extensionMethod.CreateStaticDelegate(typeof(NumMethodByVal)) as NumMethodByVal;
 
                 if (s_NumMethodByPtr is null && s_NumMethodByVal is null)
@@ -764,12 +763,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -777,12 +776,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PkgPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgPathByPtr = extensionMethod.CreateStaticDelegate(typeof(PkgPathByPtr)) as PkgPathByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PkgPath");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PkgPathByVal = extensionMethod.CreateStaticDelegate(typeof(PkgPathByVal)) as PkgPathByVal;
 
                 if (s_PkgPathByPtr is null && s_PkgPathByVal is null)
@@ -790,12 +789,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Size");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeByPtr)) as SizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Size");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeByVal = extensionMethod.CreateStaticDelegate(typeof(SizeByVal)) as SizeByVal;
 
                 if (s_SizeByPtr is null && s_SizeByVal is null)
@@ -803,12 +802,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("String");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
 
                 if (s_StringByPtr is null && s_StringByVal is null)
@@ -816,12 +815,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByPtr = extensionMethod.CreateStaticDelegate(typeof(KindByPtr)) as KindByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Kind");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KindByVal = extensionMethod.CreateStaticDelegate(typeof(KindByVal)) as KindByVal;
 
                 if (s_KindByPtr is null && s_KindByVal is null)
@@ -829,12 +828,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Implements");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImplementsByPtr = extensionMethod.CreateStaticDelegate(typeof(ImplementsByPtr)) as ImplementsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Implements");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ImplementsByVal = extensionMethod.CreateStaticDelegate(typeof(ImplementsByVal)) as ImplementsByVal;
 
                 if (s_ImplementsByPtr is null && s_ImplementsByVal is null)
@@ -842,12 +841,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("AssignableTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AssignableToByPtr = extensionMethod.CreateStaticDelegate(typeof(AssignableToByPtr)) as AssignableToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("AssignableTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AssignableToByVal = extensionMethod.CreateStaticDelegate(typeof(AssignableToByVal)) as AssignableToByVal;
 
                 if (s_AssignableToByPtr is null && s_AssignableToByVal is null)
@@ -855,12 +854,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ConvertibleTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConvertibleToByPtr = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByPtr)) as ConvertibleToByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ConvertibleTo");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ConvertibleToByVal = extensionMethod.CreateStaticDelegate(typeof(ConvertibleToByVal)) as ConvertibleToByVal;
 
                 if (s_ConvertibleToByPtr is null && s_ConvertibleToByVal is null)
@@ -868,12 +867,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Comparable");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ComparableByPtr = extensionMethod.CreateStaticDelegate(typeof(ComparableByPtr)) as ComparableByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Comparable");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ComparableByVal = extensionMethod.CreateStaticDelegate(typeof(ComparableByVal)) as ComparableByVal;
 
                 if (s_ComparableByPtr is null && s_ComparableByVal is null)
@@ -881,12 +880,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Bits");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BitsByPtr = extensionMethod.CreateStaticDelegate(typeof(BitsByPtr)) as BitsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Bits");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BitsByVal = extensionMethod.CreateStaticDelegate(typeof(BitsByVal)) as BitsByVal;
 
                 if (s_BitsByPtr is null && s_BitsByVal is null)
@@ -894,12 +893,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ChanDir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ChanDirByPtr = extensionMethod.CreateStaticDelegate(typeof(ChanDirByPtr)) as ChanDirByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ChanDir");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ChanDirByVal = extensionMethod.CreateStaticDelegate(typeof(ChanDirByVal)) as ChanDirByVal;
 
                 if (s_ChanDirByPtr is null && s_ChanDirByVal is null)
@@ -907,12 +906,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("IsVariadic");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsVariadicByPtr = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByPtr)) as IsVariadicByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("IsVariadic");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_IsVariadicByVal = extensionMethod.CreateStaticDelegate(typeof(IsVariadicByVal)) as IsVariadicByVal;
 
                 if (s_IsVariadicByPtr is null && s_IsVariadicByVal is null)
@@ -920,12 +919,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByPtr = extensionMethod.CreateStaticDelegate(typeof(ElemByPtr)) as ElemByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByVal = extensionMethod.CreateStaticDelegate(typeof(ElemByVal)) as ElemByVal;
 
                 if (s_ElemByPtr is null && s_ElemByVal is null)
@@ -933,12 +932,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Field");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByPtr)) as FieldByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Field");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByVal)) as FieldByVal;
 
                 if (s_FieldByPtr is null && s_FieldByVal is null)
@@ -946,12 +945,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByIndex");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByIndexByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByPtr)) as FieldByIndexByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("FieldByIndex");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByIndexByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByIndexByVal)) as FieldByIndexByVal;
 
                 if (s_FieldByIndexByPtr is null && s_FieldByIndexByVal is null)
@@ -959,12 +958,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByNameByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByPtr)) as FieldByNameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("FieldByName");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByNameByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameByVal)) as FieldByNameByVal;
 
                 if (s_FieldByNameByPtr is null && s_FieldByNameByVal is null)
@@ -972,12 +971,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("FieldByNameFunc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByNameFuncByPtr = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByPtr)) as FieldByNameFuncByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("FieldByNameFunc");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FieldByNameFuncByVal = extensionMethod.CreateStaticDelegate(typeof(FieldByNameFuncByVal)) as FieldByNameFuncByVal;
 
                 if (s_FieldByNameFuncByPtr is null && s_FieldByNameFuncByVal is null)
@@ -985,12 +984,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("In");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_InByPtr = extensionMethod.CreateStaticDelegate(typeof(InByPtr)) as InByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("In");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_InByVal = extensionMethod.CreateStaticDelegate(typeof(InByVal)) as InByVal;
 
                 if (s_InByPtr is null && s_InByVal is null)
@@ -998,12 +997,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Key");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KeyByPtr = extensionMethod.CreateStaticDelegate(typeof(KeyByPtr)) as KeyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Key");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KeyByVal = extensionMethod.CreateStaticDelegate(typeof(KeyByVal)) as KeyByVal;
 
                 if (s_KeyByPtr is null && s_KeyByVal is null)
@@ -1011,12 +1010,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
                 if (s_LenByPtr is null && s_LenByVal is null)
@@ -1024,12 +1023,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumField");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumFieldByPtr = extensionMethod.CreateStaticDelegate(typeof(NumFieldByPtr)) as NumFieldByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumField");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumFieldByVal = extensionMethod.CreateStaticDelegate(typeof(NumFieldByVal)) as NumFieldByVal;
 
                 if (s_NumFieldByPtr is null && s_NumFieldByVal is null)
@@ -1037,12 +1036,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumIn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumInByPtr = extensionMethod.CreateStaticDelegate(typeof(NumInByPtr)) as NumInByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumIn");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumInByVal = extensionMethod.CreateStaticDelegate(typeof(NumInByVal)) as NumInByVal;
 
                 if (s_NumInByPtr is null && s_NumInByVal is null)
@@ -1050,12 +1049,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NumOut");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumOutByPtr = extensionMethod.CreateStaticDelegate(typeof(NumOutByPtr)) as NumOutByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NumOut");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NumOutByVal = extensionMethod.CreateStaticDelegate(typeof(NumOutByVal)) as NumOutByVal;
 
                 if (s_NumOutByPtr is null && s_NumOutByVal is null)
@@ -1063,12 +1062,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Out");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OutByPtr = extensionMethod.CreateStaticDelegate(typeof(OutByPtr)) as OutByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Out");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OutByVal = extensionMethod.CreateStaticDelegate(typeof(OutByVal)) as OutByVal;
 
                 if (s_OutByPtr is null && s_OutByVal is null)
@@ -1076,12 +1075,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_commonByPtr = extensionMethod.CreateStaticDelegate(typeof(commonByPtr)) as commonByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_commonByVal = extensionMethod.CreateStaticDelegate(typeof(commonByVal)) as commonByVal;
 
                 if (s_commonByPtr is null && s_commonByVal is null)
@@ -1089,12 +1088,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("uncommon");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_uncommonByPtr = extensionMethod.CreateStaticDelegate(typeof(uncommonByPtr)) as uncommonByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("uncommon");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_uncommonByVal = extensionMethod.CreateStaticDelegate(typeof(uncommonByVal)) as uncommonByVal;
 
                 if (s_uncommonByPtr is null && s_uncommonByVal is null)

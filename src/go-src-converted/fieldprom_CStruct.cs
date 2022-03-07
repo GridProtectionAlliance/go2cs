@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,9 +29,9 @@ namespace go
 
             private ref A A_val => ref m_ARef.Value;
 
-            public ref long x => ref m_ARef.Value.x;
+            public ref nint x => ref m_ARef.Value.x;
 
-            public ref ptr<long> y => ref m_ARef.Value.y;
+            public ref ptr<nint> y => ref m_ARef.Value.y;
 
             // Constructors
             public C(NilType _)

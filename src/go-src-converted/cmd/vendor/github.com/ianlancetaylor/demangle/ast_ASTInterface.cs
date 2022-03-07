@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:11 UTC
+//     Generated on 2022 March 06 23:24:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
-using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -55,7 +53,7 @@ namespace ianlancetaylor
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,13 +79,13 @@ namespace ianlancetaylor
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_printByPtr is null || !m_target_is_ptr)
                     return s_printByVal!(target, _p0);
 
-                return s_printByPtr(m_target_ptr, _p0);
+                return s_printByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string TraverseByPtr(ptr<T> value, Func<AST, bool> _p0);
@@ -101,13 +99,13 @@ namespace ianlancetaylor
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_TraverseByPtr is null || !m_target_is_ptr)
                     return s_TraverseByVal!(target, _p0);
 
-                return s_TraverseByPtr(m_target_ptr, _p0);
+                return s_TraverseByPtr(m_target_ptr!, _p0);
             }
 
             private delegate @string CopyByPtr(ptr<T> value, Func<AST, AST> copy, Func<AST, bool> skip);
@@ -121,13 +119,13 @@ namespace ianlancetaylor
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CopyByPtr is null || !m_target_is_ptr)
                     return s_CopyByVal!(target, copy, skip);
 
-                return s_CopyByPtr(m_target_ptr, copy, skip);
+                return s_CopyByPtr(m_target_ptr!, copy, skip);
             }
 
             private delegate @string GoStringByPtr(ptr<T> value);
@@ -141,36 +139,36 @@ namespace ianlancetaylor
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GoStringByPtr is null || !m_target_is_ptr)
                     return s_GoStringByVal!(target);
 
-                return s_GoStringByPtr(m_target_ptr);
+                return s_GoStringByPtr(m_target_ptr!);
             }
 
-            private delegate @string goStringByPtr(ptr<T> value, long indent, @string field);
-            private delegate @string goStringByVal(T value, long indent, @string field);
+            private delegate @string goStringByPtr(ptr<T> value, nint indent, @string field);
+            private delegate @string goStringByVal(T value, nint indent, @string field);
 
             private static readonly goStringByPtr? s_goStringByPtr;
             private static readonly goStringByVal? s_goStringByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string goString(long indent, @string field)
+            public @string goString(nint indent, @string field)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_goStringByPtr is null || !m_target_is_ptr)
                     return s_goStringByVal!(target, indent, field);
 
-                return s_goStringByPtr(m_target_ptr, indent, field);
+                return s_goStringByPtr(m_target_ptr!, indent, field);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static AST()
@@ -181,12 +179,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_printByPtr = extensionMethod.CreateStaticDelegate(typeof(printByPtr)) as printByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_printByVal = extensionMethod.CreateStaticDelegate(typeof(printByVal)) as printByVal;
 
                 if (s_printByPtr is null && s_printByVal is null)
@@ -194,12 +192,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Traverse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TraverseByPtr = extensionMethod.CreateStaticDelegate(typeof(TraverseByPtr)) as TraverseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Traverse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_TraverseByVal = extensionMethod.CreateStaticDelegate(typeof(TraverseByVal)) as TraverseByVal;
 
                 if (s_TraverseByPtr is null && s_TraverseByVal is null)
@@ -207,12 +205,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Copy");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CopyByPtr = extensionMethod.CreateStaticDelegate(typeof(CopyByPtr)) as CopyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Copy");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CopyByVal = extensionMethod.CreateStaticDelegate(typeof(CopyByVal)) as CopyByVal;
 
                 if (s_CopyByPtr is null && s_CopyByVal is null)
@@ -220,12 +218,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("GoString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoStringByPtr = extensionMethod.CreateStaticDelegate(typeof(GoStringByPtr)) as GoStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("GoString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GoStringByVal = extensionMethod.CreateStaticDelegate(typeof(GoStringByVal)) as GoStringByVal;
 
                 if (s_GoStringByPtr is null && s_GoStringByVal is null)
@@ -233,12 +231,12 @@ namespace ianlancetaylor
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("goString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_goStringByPtr = extensionMethod.CreateStaticDelegate(typeof(goStringByPtr)) as goStringByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("goString");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_goStringByVal = extensionMethod.CreateStaticDelegate(typeof(goStringByVal)) as goStringByVal;
 
                 if (s_goStringByPtr is null && s_goStringByVal is null)

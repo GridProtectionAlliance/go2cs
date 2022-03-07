@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:42 UTC
+//     Generated on 2022 March 06 22:18:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -64,67 +64,67 @@ namespace crypto
                 m_target_is_ptr = true;
             }
 
-            private delegate long BlockSizeByPtr(ptr<T> value);
-            private delegate long BlockSizeByVal(T value);
+            private delegate nint BlockSizeByPtr(ptr<T> value);
+            private delegate nint BlockSizeByVal(T value);
 
             private static readonly BlockSizeByPtr? s_BlockSizeByPtr;
             private static readonly BlockSizeByVal? s_BlockSizeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long BlockSize()
+            public nint BlockSize()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_BlockSizeByPtr is null || !m_target_is_ptr)
                     return s_BlockSizeByVal!(target);
 
-                return s_BlockSizeByPtr(m_target_ptr);
+                return s_BlockSizeByPtr(m_target_ptr!);
             }
 
-            private delegate long EncryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
-            private delegate long EncryptByVal(T value, slice<byte> dst, slice<byte> src);
+            private delegate nint EncryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
+            private delegate nint EncryptByVal(T value, slice<byte> dst, slice<byte> src);
 
             private static readonly EncryptByPtr? s_EncryptByPtr;
             private static readonly EncryptByVal? s_EncryptByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Encrypt(slice<byte> dst, slice<byte> src)
+            public nint Encrypt(slice<byte> dst, slice<byte> src)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_EncryptByPtr is null || !m_target_is_ptr)
                     return s_EncryptByVal!(target, dst, src);
 
-                return s_EncryptByPtr(m_target_ptr, dst, src);
+                return s_EncryptByPtr(m_target_ptr!, dst, src);
             }
 
-            private delegate long DecryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
-            private delegate long DecryptByVal(T value, slice<byte> dst, slice<byte> src);
+            private delegate nint DecryptByPtr(ptr<T> value, slice<byte> dst, slice<byte> src);
+            private delegate nint DecryptByVal(T value, slice<byte> dst, slice<byte> src);
 
             private static readonly DecryptByPtr? s_DecryptByPtr;
             private static readonly DecryptByVal? s_DecryptByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Decrypt(slice<byte> dst, slice<byte> src)
+            public nint Decrypt(slice<byte> dst, slice<byte> src)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DecryptByPtr is null || !m_target_is_ptr)
                     return s_DecryptByVal!(target, dst, src);
 
-                return s_DecryptByPtr(m_target_ptr, dst, src);
+                return s_DecryptByPtr(m_target_ptr!, dst, src);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Block()
@@ -135,12 +135,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("BlockSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BlockSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByPtr)) as BlockSizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("BlockSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_BlockSizeByVal = extensionMethod.CreateStaticDelegate(typeof(BlockSizeByVal)) as BlockSizeByVal;
 
                 if (s_BlockSizeByPtr is null && s_BlockSizeByVal is null)
@@ -148,12 +148,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Encrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EncryptByPtr = extensionMethod.CreateStaticDelegate(typeof(EncryptByPtr)) as EncryptByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Encrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EncryptByVal = extensionMethod.CreateStaticDelegate(typeof(EncryptByVal)) as EncryptByVal;
 
                 if (s_EncryptByPtr is null && s_EncryptByVal is null)
@@ -161,12 +161,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Decrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecryptByPtr = extensionMethod.CreateStaticDelegate(typeof(DecryptByPtr)) as DecryptByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Decrypt");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DecryptByVal = extensionMethod.CreateStaticDelegate(typeof(DecryptByVal)) as DecryptByVal;
 
                 if (s_DecryptByPtr is null && s_DecryptByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:47 UTC
+//     Generated on 2022 March 06 22:21:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -60,15 +59,17 @@ namespace net
             {
                 this._ = default;
                 this.p = default;
+                this.ctx = default;
                 this.done = default;
                 this.res = default;
                 this.err = default;
             }
 
-            public http2dialCall(http2incomparable _ = default, ref ptr<http2clientConnPool> p = default, channel<object> done = default, ref ptr<http2ClientConn> res = default, error err = default)
+            public http2dialCall(http2incomparable _ = default, ref ptr<http2clientConnPool> p = default, context.Context ctx = default, channel<object> done = default, ref ptr<http2ClientConn> res = default, error err = default)
             {
                 this._ = _;
                 this.p = p;
+                this.ctx = ctx;
                 this.done = done;
                 this.res = res;
                 this.err = err;
@@ -94,7 +95,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2dialCall http2dialCall_cast(dynamic value)
         {
-            return new http2dialCall(value._, ref value.p, value.done, ref value.res, value.err);
+            return new http2dialCall(value._, ref value.p, value.ctx, value.done, ref value.res, value.err);
         }
     }
 }}

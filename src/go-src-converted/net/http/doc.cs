@@ -21,7 +21,7 @@ The client must close the response body when finished with it:
         // handle error
     }
     defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
+    body, err := io.ReadAll(resp.Body)
     // ...
 
 For control over HTTP client headers, redirect policy, and other
@@ -104,8 +104,8 @@ package takes precedence over the net/http package's built-in HTTP/2
 support.
 
 */
-// package http -- go2cs converted at 2020 October 09 04:56:17 UTC
+// package http -- go2cs converted at 2022 March 06 22:21:20 UTC
 // import "net/http" ==> using http = go.net.http_package
-// Original source: C:\Go\src\net\http\doc.go
-    }
+// Original source: C:\Program Files\Go\src\net\http\doc.go
 
+} // end http_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:33 UTC
+//     Generated on 2022 March 06 23:30:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,15 +36,17 @@ namespace sys
                 this.Reserved1 = default;
                 this.Port = default;
                 this.Cid = default;
+                this.Flags = default;
                 this.Zero = default;
             }
 
-            public RawSockaddrVM(ushort Family = default, ushort Reserved1 = default, uint Port = default, uint Cid = default, array<byte> Zero = default)
+            public RawSockaddrVM(ushort Family = default, ushort Reserved1 = default, uint Port = default, uint Cid = default, byte Flags = default, array<byte> Zero = default)
             {
                 this.Family = Family;
                 this.Reserved1 = Reserved1;
                 this.Port = Port;
                 this.Cid = Cid;
+                this.Flags = Flags;
                 this.Zero = Zero;
             }
 
@@ -68,7 +70,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static RawSockaddrVM RawSockaddrVM_cast(dynamic value)
         {
-            return new RawSockaddrVM(value.Family, value.Reserved1, value.Port, value.Cid, value.Zero);
+            return new RawSockaddrVM(value.Family, value.Reserved1, value.Port, value.Cid, value.Flags, value.Zero);
         }
     }
 }}}}}}

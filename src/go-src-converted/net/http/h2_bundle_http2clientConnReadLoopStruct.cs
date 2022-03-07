@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:53 UTC
+//     Generated on 2022 March 06 22:22:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
@@ -60,14 +59,12 @@ namespace net
             {
                 this._ = default;
                 this.cc = default;
-                this.closeWhenIdle = default;
             }
 
-            public http2clientConnReadLoop(http2incomparable _ = default, ref ptr<http2ClientConn> cc = default, bool closeWhenIdle = default)
+            public http2clientConnReadLoop(http2incomparable _ = default, ref ptr<http2ClientConn> cc = default)
             {
                 this._ = _;
                 this.cc = cc;
-                this.closeWhenIdle = closeWhenIdle;
             }
 
             // Enable comparisons between nil and http2clientConnReadLoop struct
@@ -90,7 +87,7 @@ namespace net
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static http2clientConnReadLoop http2clientConnReadLoop_cast(dynamic value)
         {
-            return new http2clientConnReadLoop(value._, ref value.cc, value.closeWhenIdle);
+            return new http2clientConnReadLoop(value._, ref value.cc);
         }
     }
 }}

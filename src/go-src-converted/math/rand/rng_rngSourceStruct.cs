@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:47 UTC
+//     Generated on 2022 March 06 22:17:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace math
                 this.vec = default;
             }
 
-            public rngSource(long tap = default, long feed = default, array<long> vec = default)
+            public rngSource(nint tap = default, nint feed = default, array<long> vec = default)
             {
                 this.tap = tap;
                 this.feed = feed;

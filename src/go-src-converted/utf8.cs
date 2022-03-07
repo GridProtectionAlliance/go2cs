@@ -1,34 +1,22 @@
-// package utf8 -- go2cs converted at 2020 October 09 06:03:48 UTC
+// package utf8 -- go2cs converted at 2022 March 06 23:33:46 UTC
 // import "golang.org/x/tools/go/ssa/interp/testdata/src/unicode/utf8" ==> using utf8 = go.golang.org.x.tools.go.ssa.interp.testdata.src.unicode.utf8_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\testdata\src\unicode\utf8\utf8.go
 
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go {
-namespace ssa {
-namespace interp {
-namespace testdata {
-namespace src {
-namespace unicode
-{
-    public static partial class utf8_package
-    {
-        public static (int, long) DecodeRuneInString(@string _p0)
-;
+namespace go.golang.org.x.tools.go.ssa.interp.testdata.src.unicode;
 
-        public static (int, long) DecodeRune(slice<byte> b)
-        {
-            int _p0 = default;
-            long _p0 = default;
+public static partial class utf8_package {
 
-            return DecodeRuneInString(string(b));
-        }
+public static (int, nint) DecodeRuneInString(@string _p0);
 
-        public static readonly char RuneError = (char)'\uFFFD';
+public static (int, nint) DecodeRune(slice<byte> b) {
+    int _p0 = default;
+    nint _p0 = default;
 
-    }
-}}}}}}}}}}
+    return DecodeRuneInString(string(b));
+}
+
+public static readonly char RuneError = '\uFFFD';
+
+
+} // end utf8_package

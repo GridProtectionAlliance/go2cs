@@ -4,39 +4,30 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2020 October 09 06:07:39 UTC
+// package lif -- go2cs converted at 2022 March 06 23:38:05 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
-// Original source: C:\Go\src\vendor\golang.org\x\net\lif\syscall.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\lif\syscall.go
 using syscall = go.syscall_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class lif_package
-    {
-        //go:cgo_import_dynamic libc_ioctl ioctl "libc.so"
+namespace go.vendor.golang.org.x.net;
 
-        //go:linkname procIoctl libc_ioctl
-        private static System.UIntPtr procIoctl = default;
+public static partial class lif_package {
 
-        private static (System.UIntPtr, System.UIntPtr, syscall.Errno) sysvicall6(System.UIntPtr trap, System.UIntPtr nargs, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6)
-;
+    //go:cgo_import_dynamic libc_ioctl ioctl "libc.so"
 
-        private static error ioctl(System.UIntPtr s, System.UIntPtr ioc, unsafe.Pointer arg)
-        {
-            var (_, _, errno) = sysvicall6(uintptr(@unsafe.Pointer(_addr_procIoctl)), 3L, s, ioc, uintptr(arg), 0L, 0L, 0L);
-            if (errno != 0L)
-            {>>MARKER:FUNCTION_sysvicall6_BLOCK_PREFIX<<
-                return error.As(error(errno))!;
-            }
+    //go:linkname procIoctl libc_ioctl
+private static System.UIntPtr procIoctl = default;
 
-            return error.As(null!)!;
+private static (System.UIntPtr, System.UIntPtr, syscall.Errno) sysvicall6(System.UIntPtr trap, System.UIntPtr nargs, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6);
 
-        }
+private static error ioctl(System.UIntPtr s, System.UIntPtr ioc, unsafe.Pointer arg) {
+    var (_, _, errno) = sysvicall6(uintptr(@unsafe.Pointer(_addr_procIoctl)), 3, s, ioc, uintptr(arg), 0, 0, 0);
+    if (errno != 0) {>>MARKER:FUNCTION_sysvicall6_BLOCK_PREFIX<<
+        return error.As(error(errno))!;
     }
-}}}}}
+    return error.As(null!)!;
+
+}
+
+} // end lif_package

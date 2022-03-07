@@ -2,80 +2,71 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2020 October 09 05:48:04 UTC
+// package @base -- go2cs converted at 2022 March 06 23:19:43 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
-// Original source: C:\Go\src\cmd\go\internal\base\path.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\base\path.go
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using strings = go.strings_package;
-using static go.builtin;
+using sync = go.sync_package;
+using System;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class @base_package
+
+namespace go.cmd.go.@internal;
+
+public static partial class @base_package {
+
+private static @string cwd = default;
+private static sync.Once cwdOnce = default;
+
+// Cwd returns the current working directory at the time of the first call.
+public static @string Cwd() {
+    cwdOnce.Do(() => {
+        error err = default!;
+        cwd, err = os.Getwd();
+        if (err != null) {
+            Fatalf("cannot determine current directory: %v", err);
+        }
+    });
+    return cwd;
+
+}
+
+// ShortPath returns an absolute or relative name for path, whatever is shorter.
+public static @string ShortPath(@string path) {
     {
-        private static @string getwd()
-        {
-            var (wd, err) = os.Getwd();
-            if (err != null)
-            {
-                Fatalf("cannot determine current directory: %v", err);
-            }
-            return wd;
+        var (rel, err) = filepath.Rel(Cwd(), path);
 
-        }
-
-        public static var Cwd = getwd();
-
-        // ShortPath returns an absolute or relative name for path, whatever is shorter.
-        public static @string ShortPath(@string path)
-        {
-            {
-                var (rel, err) = filepath.Rel(Cwd, path);
-
-                if (err == null && len(rel) < len(path))
-                {
-                    return rel;
-                }
-
-            }
-
-            return path;
-
-        }
-
-        // RelPaths returns a copy of paths with absolute paths
-        // made relative to the current directory if they would be shorter.
-        public static slice<@string> RelPaths(slice<@string> paths)
-        {
-            slice<@string> @out = default; 
-            // TODO(rsc): Can this use Cwd from above?
-            var (pwd, _) = os.Getwd();
-            foreach (var (_, p) in paths)
-            {
-                var (rel, err) = filepath.Rel(pwd, p);
-                if (err == null && len(rel) < len(p))
-                {
-                    p = rel;
-                }
-
-                out = append(out, p);
-
-            }
-            return out;
-
-        }
-
-        // IsTestFile reports whether the source file is a set of tests and should therefore
-        // be excluded from coverage analysis.
-        public static bool IsTestFile(@string file)
-        { 
-            // We don't cover tests, only the code they test.
-            return strings.HasSuffix(file, "_test.go");
-
+        if (err == null && len(rel) < len(path)) {
+            return rel;
         }
     }
-}}}}
+
+    return path;
+
+}
+
+// RelPaths returns a copy of paths with absolute paths
+// made relative to the current directory if they would be shorter.
+public static slice<@string> RelPaths(slice<@string> paths) {
+    slice<@string> @out = default;
+    foreach (var (_, p) in paths) {
+        var (rel, err) = filepath.Rel(Cwd(), p);
+        if (err == null && len(rel) < len(p)) {
+            p = rel;
+        }
+        out = append(out, p);
+
+    }    return out;
+
+}
+
+// IsTestFile reports whether the source file is a set of tests and should therefore
+// be excluded from coverage analysis.
+public static bool IsTestFile(@string file) { 
+    // We don't cover tests, only the code they test.
+    return strings.HasSuffix(file, "_test.go");
+
+}
+
+} // end @base_package

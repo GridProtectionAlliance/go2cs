@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:04 UTC
+//     Generated on 2022 March 06 23:22:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using go;
 
@@ -34,7 +33,7 @@ namespace @internal
 
             public ref slice<byte> buf => ref m_BufferRef.Value.buf;
 
-            public ref long off => ref m_BufferRef.Value.off;
+            public ref nint off => ref m_BufferRef.Value.off;
 
             public ref readOp lastRead => ref m_BufferRef.Value.lastRead;
 

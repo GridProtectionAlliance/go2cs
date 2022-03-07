@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:42 UTC
+//     Generated on 2022 March 06 22:23:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using io = go.io_package;
 using syntax = go.regexp.syntax_package;
@@ -55,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -70,24 +69,24 @@ namespace go
                 m_target_is_ptr = true;
             }
 
-            private delegate lazyFlag stepByPtr(ptr<T> value, long pos);
-            private delegate lazyFlag stepByVal(T value, long pos);
+            private delegate lazyFlag stepByPtr(ptr<T> value, nint pos);
+            private delegate lazyFlag stepByVal(T value, nint pos);
 
             private static readonly stepByPtr? s_stepByPtr;
             private static readonly stepByVal? s_stepByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public lazyFlag step(long pos)
+            public lazyFlag step(nint pos)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_stepByPtr is null || !m_target_is_ptr)
                     return s_stepByVal!(target, pos);
 
-                return s_stepByPtr(m_target_ptr, pos);
+                return s_stepByPtr(m_target_ptr!, pos);
             }
 
             private delegate lazyFlag canCheckPrefixByPtr(ptr<T> value);
@@ -101,13 +100,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_canCheckPrefixByPtr is null || !m_target_is_ptr)
                     return s_canCheckPrefixByVal!(target);
 
-                return s_canCheckPrefixByPtr(m_target_ptr);
+                return s_canCheckPrefixByPtr(m_target_ptr!);
             }
 
             private delegate lazyFlag hasPrefixByPtr(ptr<T> value, ptr<Regexp> re);
@@ -121,56 +120,56 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_hasPrefixByPtr is null || !m_target_is_ptr)
                     return s_hasPrefixByVal!(target, re);
 
-                return s_hasPrefixByPtr(m_target_ptr, re);
+                return s_hasPrefixByPtr(m_target_ptr!, re);
             }
 
-            private delegate lazyFlag indexByPtr(ptr<T> value, ptr<Regexp> re, long pos);
-            private delegate lazyFlag indexByVal(T value, ptr<Regexp> re, long pos);
+            private delegate lazyFlag indexByPtr(ptr<T> value, ptr<Regexp> re, nint pos);
+            private delegate lazyFlag indexByVal(T value, ptr<Regexp> re, nint pos);
 
             private static readonly indexByPtr? s_indexByPtr;
             private static readonly indexByVal? s_indexByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public lazyFlag index(ptr<Regexp> re, long pos)
+            public lazyFlag index(ptr<Regexp> re, nint pos)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_indexByPtr is null || !m_target_is_ptr)
                     return s_indexByVal!(target, re, pos);
 
-                return s_indexByPtr(m_target_ptr, re, pos);
+                return s_indexByPtr(m_target_ptr!, re, pos);
             }
 
-            private delegate lazyFlag contextByPtr(ptr<T> value, long pos);
-            private delegate lazyFlag contextByVal(T value, long pos);
+            private delegate lazyFlag contextByPtr(ptr<T> value, nint pos);
+            private delegate lazyFlag contextByVal(T value, nint pos);
 
             private static readonly contextByPtr? s_contextByPtr;
             private static readonly contextByVal? s_contextByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public lazyFlag context(long pos)
+            public lazyFlag context(nint pos)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_contextByPtr is null || !m_target_is_ptr)
                     return s_contextByVal!(target, pos);
 
-                return s_contextByPtr(m_target_ptr, pos);
+                return s_contextByPtr(m_target_ptr!, pos);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static input()
@@ -181,12 +180,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("step");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_stepByPtr = extensionMethod.CreateStaticDelegate(typeof(stepByPtr)) as stepByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("step");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_stepByVal = extensionMethod.CreateStaticDelegate(typeof(stepByVal)) as stepByVal;
 
                 if (s_stepByPtr is null && s_stepByVal is null)
@@ -194,12 +193,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("canCheckPrefix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_canCheckPrefixByPtr = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByPtr)) as canCheckPrefixByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("canCheckPrefix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_canCheckPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(canCheckPrefixByVal)) as canCheckPrefixByVal;
 
                 if (s_canCheckPrefixByPtr is null && s_canCheckPrefixByVal is null)
@@ -207,12 +206,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("hasPrefix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_hasPrefixByPtr = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByPtr)) as hasPrefixByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("hasPrefix");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_hasPrefixByVal = extensionMethod.CreateStaticDelegate(typeof(hasPrefixByVal)) as hasPrefixByVal;
 
                 if (s_hasPrefixByPtr is null && s_hasPrefixByVal is null)
@@ -220,12 +219,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("index");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_indexByPtr = extensionMethod.CreateStaticDelegate(typeof(indexByPtr)) as indexByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("index");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_indexByVal = extensionMethod.CreateStaticDelegate(typeof(indexByVal)) as indexByVal;
 
                 if (s_indexByPtr is null && s_indexByVal is null)
@@ -233,12 +232,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("context");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_contextByPtr = extensionMethod.CreateStaticDelegate(typeof(contextByPtr)) as contextByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("context");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_contextByVal = extensionMethod.CreateStaticDelegate(typeof(contextByVal)) as contextByVal;
 
                 if (s_contextByPtr is null && s_contextByVal is null)

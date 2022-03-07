@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:02:02 UTC
+//     Generated on 2022 March 06 22:27:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errorspkg = go.errors_package;
+using itoa = go.@internal.itoa_package;
 using oserror = go.@internal.oserror_package;
 using race = go.@internal.race_package;
 using unsafeheader = go.@internal.unsafeheader_package;
@@ -39,7 +39,7 @@ namespace go
                 this.raw = default;
             }
 
-            public SockaddrInet4(long Port = default, array<byte> Addr = default, RawSockaddrInet4 raw = default)
+            public SockaddrInet4(nint Port = default, array<byte> Addr = default, RawSockaddrInet4 raw = default)
             {
                 this.Port = Port;
                 this.Addr = Addr;

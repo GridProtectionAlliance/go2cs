@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:26 UTC
+//     Generated on 2022 March 06 23:19:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using sha256 = go.crypto.sha256_package;
 using base64 = go.encoding.base64_package;
@@ -64,7 +63,7 @@ namespace sumdb
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -90,13 +89,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
             private delegate (slice<byte>, error) KeyHashByPtr(ptr<T> value);
@@ -110,13 +109,13 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_KeyHashByPtr is null || !m_target_is_ptr)
                     return s_KeyHashByVal!(target);
 
-                return s_KeyHashByPtr(m_target_ptr);
+                return s_KeyHashByPtr(m_target_ptr!);
             }
 
             private delegate (slice<byte>, error) SignByPtr(ptr<T> value, slice<byte> msg);
@@ -130,16 +129,16 @@ namespace sumdb
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SignByPtr is null || !m_target_is_ptr)
                     return s_SignByVal!(target, msg);
 
-                return s_SignByPtr(m_target_ptr, msg);
+                return s_SignByPtr(m_target_ptr!, msg);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Signer()
@@ -150,12 +149,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -163,12 +162,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("KeyHash");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KeyHashByPtr = extensionMethod.CreateStaticDelegate(typeof(KeyHashByPtr)) as KeyHashByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("KeyHash");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_KeyHashByVal = extensionMethod.CreateStaticDelegate(typeof(KeyHashByVal)) as KeyHashByVal;
 
                 if (s_KeyHashByPtr is null && s_KeyHashByVal is null)
@@ -176,12 +175,12 @@ namespace sumdb
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Sign");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SignByPtr = extensionMethod.CreateStaticDelegate(typeof(SignByPtr)) as SignByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Sign");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SignByVal = extensionMethod.CreateStaticDelegate(typeof(SignByVal)) as SignByVal;
 
                 if (s_SignByPtr is null && s_SignByVal is null)

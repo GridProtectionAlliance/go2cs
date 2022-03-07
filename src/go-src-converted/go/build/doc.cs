@@ -59,7 +59,7 @@
 //
 // A build constraint, also known as a build tag, is a line comment that begins
 //
-//     // +build
+//     //go:build
 //
 // that lists the conditions under which a file should be included in the
 // package. Build constraints may also be part of a file's name
@@ -95,8 +95,8 @@
 // Import and ImportDir will still set the BinaryOnly flag in packages
 // containing these comments for use in tools and error messages.
 //
-// package build -- go2cs converted at 2020 October 09 05:20:00 UTC
+// package build -- go2cs converted at 2022 March 06 22:42:52 UTC
 // import "go/build" ==> using build = go.go.build_package
-// Original source: C:\Go\src\go\build\doc.go
-    }
+// Original source: C:\Program Files\Go\src\go\build\doc.go
 
+} // end build_package

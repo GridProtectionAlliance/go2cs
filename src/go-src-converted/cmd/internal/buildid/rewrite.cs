@@ -2,121 +2,199 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2020 October 09 05:23:13 UTC
+// package buildid -- go2cs converted at 2022 March 06 22:46:42 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
-// Original source: C:\Go\src\cmd\internal\buildid\rewrite.go
+// Original source: C:\Program Files\Go\src\cmd\internal\buildid\rewrite.go
 using bytes = go.bytes_package;
+using codesign = go.cmd.@internal.codesign_package;
 using sha256 = go.crypto.sha256_package;
+using macho = go.debug.macho_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace @internal
-{
-    public static partial class buildid_package
+namespace go.cmd.@internal;
+
+public static partial class buildid_package {
+
+    // FindAndHash reads all of r and returns the offsets of occurrences of id.
+    // While reading, findAndHash also computes and returns
+    // a hash of the content of r, but with occurrences of id replaced by zeros.
+    // FindAndHash reads bufSize bytes from r at a time.
+    // If bufSize == 0, FindAndHash uses a reasonable default.
+public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string id, nint bufSize) {
+    slice<long> matches = default;
+    array<byte> hash = default;
+    error err = default!;
+
+    if (bufSize == 0) {
+        bufSize = 31 * 1024; // bufSize+little will likely fit in 32 kB
+    }
+    if (len(id) > bufSize) {
+        return (null, new array<byte>(new byte[] {  }), error.As(fmt.Errorf("buildid.FindAndHash: buffer too small"))!);
+    }
+    var zeros = make_slice<byte>(len(id));
+    slice<byte> idBytes = (slice<byte>)id; 
+
+    // For Mach-O files, we want to exclude the code signature.
+    // The code signature contains hashes of the whole file (except the signature
+    // itself), including the buildid. So the buildid cannot contain the signature.
+    r = excludeMachoCodeSignature(r); 
+
+    // The strategy is to read the file through buf, looking for id,
+    // but we need to worry about what happens if id is broken up
+    // and returned in parts by two different reads.
+    // We allocate a tiny buffer (at least len(id)) and a big buffer (bufSize bytes)
+    // next to each other in memory and then copy the tail of
+    // one read into the tiny buffer before reading new data into the big buffer.
+    // The search for id is over the entire tiny+big buffer.
+    var tiny = (len(id) + 127) & ~127; // round up to 128-aligned
+    var buf = make_slice<byte>(tiny + bufSize);
+    var h = sha256.New();
+    var start = tiny;
     {
-        // FindAndHash reads all of r and returns the offsets of occurrences of id.
-        // While reading, findAndHash also computes and returns
-        // a hash of the content of r, but with occurrences of id replaced by zeros.
-        // FindAndHash reads bufSize bytes from r at a time.
-        // If bufSize == 0, FindAndHash uses a reasonable default.
-        public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string id, long bufSize)
-        {
-            slice<long> matches = default;
-            array<byte> hash = default;
-            error err = default!;
+        var offset = int64(0);
 
-            if (bufSize == 0L)
-            {
-                bufSize = 31L * 1024L; // bufSize+little will likely fit in 32 kB
+        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) { 
+            // The file offset maintained by the loop corresponds to &buf[tiny].
+            // buf[start:tiny] is left over from previous iteration.
+            // After reading n bytes into buf[tiny:], we process buf[start:tiny+n].
+            var (n, err) = io.ReadFull(r, buf[(int)tiny..]);
+            if (err != io.ErrUnexpectedEOF && err != io.EOF && err != null) {
+                return (null, new array<byte>(new byte[] {  }), error.As(err)!);
             }
-            if (len(id) > bufSize)
-            {
-                return (null, new array<byte>(new byte[] {  }), error.As(fmt.Errorf("buildid.FindAndHash: buffer too small"))!);
-            }
-            var zeros = make_slice<byte>(len(id));
-            slice<byte> idBytes = (slice<byte>)id; 
-
-            // The strategy is to read the file through buf, looking for id,
-            // but we need to worry about what happens if id is broken up
-            // and returned in parts by two different reads.
-            // We allocate a tiny buffer (at least len(id)) and a big buffer (bufSize bytes)
-            // next to each other in memory and then copy the tail of
-            // one read into the tiny buffer before reading new data into the big buffer.
-            // The search for id is over the entire tiny+big buffer.
-            var tiny = (len(id) + 127L) & ~127L; // round up to 128-aligned
-            var buf = make_slice<byte>(tiny + bufSize);
-            var h = sha256.New();
-            var start = tiny;
-            {
-                var offset = int64(0L);
-
-                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
-                { 
-                    // The file offset maintained by the loop corresponds to &buf[tiny].
-                    // buf[start:tiny] is left over from previous iteration.
-                    // After reading n bytes into buf[tiny:], we process buf[start:tiny+n].
-                    var (n, err) = io.ReadFull(r, buf[tiny..]);
-                    if (err != io.ErrUnexpectedEOF && err != io.EOF && err != null)
-                    {
-                        return (null, new array<byte>(new byte[] {  }), error.As(err)!);
-                    }
-                    while (true)
-                    {
-                        var i = bytes.Index(buf[start..tiny + n], idBytes);
-                        if (i < 0L)
-                        {
-                            break;
-                        }
-                        matches = append(matches, offset + int64(start + i - tiny));
-                        h.Write(buf[start..start + i]);
-                        h.Write(zeros);
-                        start += i + len(id);
-
-                    }
-                    if (n < bufSize)
-                    { 
-                        // Did not fill buffer, must be at end of file.
-                        h.Write(buf[start..tiny + n]);
-                        break;
-
-                    }
-                    if (start < len(buf) - tiny)
-                    {
-                        h.Write(buf[start..len(buf) - tiny]);
-                        start = len(buf) - tiny;
-                    }
-                    copy(buf[0L..], buf[bufSize..]);
-                    start -= bufSize;
-                    offset += int64(bufSize);
-
+            while (true) {
+                var i = bytes.Index(buf[(int)start..(int)tiny + n], idBytes);
+                if (i < 0) {
+                    break;
                 }
+                matches = append(matches, offset + int64(start + i - tiny));
+                h.Write(buf[(int)start..(int)start + i]);
+                h.Write(zeros);
+                start += i + len(id);
+
             }
-            h.Sum(hash[..0L]);
-            return (matches, hash, error.As(null!)!);
+            if (n < bufSize) { 
+                // Did not fill buffer, must be at end of file.
+                h.Write(buf[(int)start..(int)tiny + n]);
+                break;
+
+            }
+            if (start < len(buf) - tiny) {
+                h.Write(buf[(int)start..(int)len(buf) - tiny]);
+                start = len(buf) - tiny;
+            }
+            copy(buf[(int)0..], buf[(int)bufSize..]);
+            start -= bufSize;
+            offset += int64(bufSize);
+
+        }
+    }
+    h.Sum(hash[..(int)0]);
+    return (matches, hash, error.As(null!)!);
+
+}
+
+public static error Rewrite(io.WriterAt w, slice<long> pos, @string id) {
+    slice<byte> b = (slice<byte>)id;
+    foreach (var (_, p) in pos) {
+        {
+            var (_, err) = w.WriteAt(b, p);
+
+            if (err != null) {
+                return error.As(err)!;
+            }
 
         }
 
-        public static error Rewrite(io.WriterAt w, slice<long> pos, @string id)
-        {
-            slice<byte> b = (slice<byte>)id;
-            foreach (var (_, p) in pos)
-            {
-                {
-                    var (_, err) = w.WriteAt(b, p);
+    }    {
+        var (f, cmd, ok) = findMachoCodeSignature(w);
 
-                    if (err != null)
-                    {
+        if (ok) {
+            if (codesign.Size(int64(cmd.Dataoff), "a.out") == int64(cmd.Datasize)) { 
+                // Update the signature if the size matches, so we don't need to
+                // fix up headers. Binaries generated by the Go linker should have
+                // the expected size. Otherwise skip.
+                var text = f.Segment("__TEXT");
+                var cs = make_slice<byte>(cmd.Datasize);
+                codesign.Sign(cs, w._<io.Reader>(), "a.out", int64(cmd.Dataoff), int64(text.Offset), int64(text.Filesz), f.Type == macho.TypeExec);
+                {
+                    (_, err) = w.WriteAt(cs, int64(cmd.Dataoff));
+
+                    if (err != null) {
                         return error.As(err)!;
                     }
 
                 }
 
             }
-            return error.As(null!)!;
 
         }
     }
-}}}
+
+
+    return error.As(null!)!;
+
+}
+
+private static io.Reader excludeMachoCodeSignature(io.Reader r) {
+    var (_, cmd, ok) = findMachoCodeSignature(r);
+    if (!ok) {
+        return r;
+    }
+    return addr(new excludedReader(r,0,int64(cmd.Dataoff),int64(cmd.Dataoff+cmd.Datasize)));
+
+}
+
+// excludedReader wraps an io.Reader. Reading from it returns the bytes from
+// the underlying reader, except that when the byte offset is within the
+// range between start and end, it returns zero bytes.
+private partial struct excludedReader {
+    public io.Reader r;
+    public long off; // current offset
+    public long start; // the range to be excluded (read as zero)
+    public long end; // the range to be excluded (read as zero)
+}
+
+private static (nint, error) Read(this ptr<excludedReader> _addr_r, slice<byte> p) {
+    nint _p0 = default;
+    error _p0 = default!;
+    ref excludedReader r = ref _addr_r.val;
+
+    var (n, err) = r.r.Read(p);
+    if (n > 0 && r.off + int64(n) > r.start && r.off < r.end) {
+        var cstart = r.start - r.off;
+        if (cstart < 0) {
+            cstart = 0;
+        }
+        var cend = r.end - r.off;
+        if (cend > int64(n)) {
+            cend = int64(n);
+        }
+        var zeros = make_slice<byte>(cend - cstart);
+        copy(p[(int)cstart..(int)cend], zeros);
+
+    }
+    r.off += int64(n);
+    return (n, error.As(err)!);
+
+}
+
+private static (ptr<macho.File>, codesign.CodeSigCmd, bool) findMachoCodeSignature(object r) {
+    ptr<macho.File> _p0 = default!;
+    codesign.CodeSigCmd _p0 = default;
+    bool _p0 = default;
+
+    io.ReaderAt (ra, ok) = r._<io.ReaderAt>();
+    if (!ok) {
+        return (_addr_null!, new codesign.CodeSigCmd(), false);
+    }
+    var (f, err) = macho.NewFile(ra);
+    if (err != null) {
+        return (_addr_null!, new codesign.CodeSigCmd(), false);
+    }
+    var (cmd, ok) = codesign.FindCodeSigCmd(f);
+    return (_addr_f!, cmd, ok);
+
+}
+
+} // end buildid_package

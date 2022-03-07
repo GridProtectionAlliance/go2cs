@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:57:45 UTC
+//     Generated on 2022 March 06 22:22:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using url = go.net.url_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,13 +75,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SetCookiesByPtr is null || !m_target_is_ptr)
                     return s_SetCookiesByVal!(target, u, cookies);
 
-                return s_SetCookiesByPtr(m_target_ptr, u, cookies);
+                return s_SetCookiesByPtr(m_target_ptr!, u, cookies);
             }
 
             private delegate slice<ptr<Cookie>> CookiesByPtr(ptr<T> value, ptr<url.URL> u);
@@ -96,16 +95,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CookiesByPtr is null || !m_target_is_ptr)
                     return s_CookiesByVal!(target, u);
 
-                return s_CookiesByPtr(m_target_ptr, u);
+                return s_CookiesByPtr(m_target_ptr!, u);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static CookieJar()
@@ -116,12 +115,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("SetCookies");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetCookiesByPtr = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByPtr)) as SetCookiesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("SetCookies");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SetCookiesByVal = extensionMethod.CreateStaticDelegate(typeof(SetCookiesByVal)) as SetCookiesByVal;
 
                 if (s_SetCookiesByPtr is null && s_SetCookiesByVal is null)
@@ -129,12 +128,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Cookies");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CookiesByPtr = extensionMethod.CreateStaticDelegate(typeof(CookiesByPtr)) as CookiesByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Cookies");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CookiesByVal = extensionMethod.CreateStaticDelegate(typeof(CookiesByVal)) as CookiesByVal;
 
                 if (s_CookiesByPtr is null && s_CookiesByVal is null)

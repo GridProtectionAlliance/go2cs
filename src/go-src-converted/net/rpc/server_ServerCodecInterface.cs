@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:36 UTC
+//     Generated on 2022 March 06 22:25:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using gob = go.encoding.gob_package;
 using errors = go.errors_package;
@@ -60,7 +59,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,13 +85,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadRequestHeaderByPtr is null || !m_target_is_ptr)
                     return s_ReadRequestHeaderByVal!(target, _p0);
 
-                return s_ReadRequestHeaderByPtr(m_target_ptr, _p0);
+                return s_ReadRequestHeaderByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error ReadRequestBodyByPtr(ptr<T> value, object _p0);
@@ -106,13 +105,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ReadRequestBodyByPtr is null || !m_target_is_ptr)
                     return s_ReadRequestBodyByVal!(target, _p0);
 
-                return s_ReadRequestBodyByPtr(m_target_ptr, _p0);
+                return s_ReadRequestBodyByPtr(m_target_ptr!, _p0);
             }
 
             private delegate error WriteResponseByPtr(ptr<T> value, ptr<Response> _p0, object _p0);
@@ -126,13 +125,13 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WriteResponseByPtr is null || !m_target_is_ptr)
                     return s_WriteResponseByVal!(target, _p0, _p0);
 
-                return s_WriteResponseByPtr(m_target_ptr, _p0, _p0);
+                return s_WriteResponseByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate error CloseByPtr(ptr<T> value);
@@ -146,16 +145,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CloseByPtr is null || !m_target_is_ptr)
                     return s_CloseByVal!(target);
 
-                return s_CloseByPtr(m_target_ptr);
+                return s_CloseByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ServerCodec()
@@ -166,12 +165,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRequestHeader");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRequestHeaderByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRequestHeaderByPtr)) as ReadRequestHeaderByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadRequestHeader");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRequestHeaderByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRequestHeaderByVal)) as ReadRequestHeaderByVal;
 
                 if (s_ReadRequestHeaderByPtr is null && s_ReadRequestHeaderByVal is null)
@@ -179,12 +178,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ReadRequestBody");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRequestBodyByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadRequestBodyByPtr)) as ReadRequestBodyByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ReadRequestBody");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ReadRequestBodyByVal = extensionMethod.CreateStaticDelegate(typeof(ReadRequestBodyByVal)) as ReadRequestBodyByVal;
 
                 if (s_ReadRequestBodyByPtr is null && s_ReadRequestBodyByVal is null)
@@ -192,12 +191,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("WriteResponse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteResponseByPtr = extensionMethod.CreateStaticDelegate(typeof(WriteResponseByPtr)) as WriteResponseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("WriteResponse");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WriteResponseByVal = extensionMethod.CreateStaticDelegate(typeof(WriteResponseByVal)) as WriteResponseByVal;
 
                 if (s_WriteResponseByPtr is null && s_WriteResponseByVal is null)
@@ -205,12 +204,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByPtr = extensionMethod.CreateStaticDelegate(typeof(CloseByPtr)) as CloseByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Close");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
 
                 if (s_CloseByPtr is null && s_CloseByVal is null)

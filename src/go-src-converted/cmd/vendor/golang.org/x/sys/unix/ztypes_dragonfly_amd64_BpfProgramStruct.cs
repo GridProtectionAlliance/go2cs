@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:30 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,14 +33,12 @@ namespace sys
             public BpfProgram(NilType _)
             {
                 this.Len = default;
-                this._ = default;
                 this.Insns = default;
             }
 
-            public BpfProgram(uint Len = default, array<byte> _ = default, ref ptr<BpfInsn> Insns = default)
+            public BpfProgram(uint Len = default, ref ptr<BpfInsn> Insns = default)
             {
                 this.Len = Len;
-                this._ = _;
                 this.Insns = Insns;
             }
 
@@ -64,7 +62,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static BpfProgram BpfProgram_cast(dynamic value)
         {
-            return new BpfProgram(value.Len, value._, ref value.Insns);
+            return new BpfProgram(value.Len, ref value.Insns);
         }
     }
 }}}}}}

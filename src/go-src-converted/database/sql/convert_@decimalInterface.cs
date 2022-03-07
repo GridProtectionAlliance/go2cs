@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:18 UTC
+//     Generated on 2022 March 06 23:35:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -57,7 +56,7 @@ namespace database
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -71,48 +70,8 @@ namespace database
                 m_target_ptr = target_ptr;
                 m_target_is_ptr = true;
             }
-
-            private delegate (byte, bool, slice<byte>, int) DecomposeByPtr(ptr<T> value, slice<byte> buf);
-            private delegate (byte, bool, slice<byte>, int) DecomposeByVal(T value, slice<byte> buf);
-
-            private static readonly DecomposeByPtr? s_DecomposeByPtr;
-            private static readonly DecomposeByVal? s_DecomposeByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (byte, bool, slice<byte>, int) Decompose(slice<byte> buf)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_DecomposeByPtr is null || !m_target_is_ptr)
-                    return s_DecomposeByVal!(target, buf);
-
-                return s_DecomposeByPtr(m_target_ptr, buf);
-            }
-
-            private delegate error ComposeByPtr(ptr<T> value, byte form, bool negative, slice<byte> coefficient, int exponent);
-            private delegate error ComposeByVal(T value, byte form, bool negative, slice<byte> coefficient, int exponent);
-
-            private static readonly ComposeByPtr? s_ComposeByPtr;
-            private static readonly ComposeByVal? s_ComposeByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public error Compose(byte form, bool negative, slice<byte> coefficient, int exponent)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ComposeByPtr is null || !m_target_is_ptr)
-                    return s_ComposeByVal!(target, form, negative, coefficient, exponent);
-
-                return s_ComposeByPtr(m_target_ptr, form, negative, coefficient, exponent);
-            }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static @decimal()
@@ -120,32 +79,6 @@ namespace database
                 Type targetType = typeof(T);
                 Type targetTypeByPtr = typeof(ptr<T>);
                 MethodInfo extensionMethod;
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Decompose");
-
-                if (!(extensionMethod is null))
-                    s_DecomposeByPtr = extensionMethod.CreateStaticDelegate(typeof(DecomposeByPtr)) as DecomposeByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Decompose");
-
-                if (!(extensionMethod is null))
-                    s_DecomposeByVal = extensionMethod.CreateStaticDelegate(typeof(DecomposeByVal)) as DecomposeByVal;
-
-                if (s_DecomposeByPtr is null && s_DecomposeByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement @decimal.Decompose method", new Exception("Decompose"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Compose");
-
-                if (!(extensionMethod is null))
-                    s_ComposeByPtr = extensionMethod.CreateStaticDelegate(typeof(ComposeByPtr)) as ComposeByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Compose");
-
-                if (!(extensionMethod is null))
-                    s_ComposeByVal = extensionMethod.CreateStaticDelegate(typeof(ComposeByVal)) as ComposeByVal;
-
-                if (s_ComposeByPtr is null && s_ComposeByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement @decimal.Compose method", new Exception("Compose"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

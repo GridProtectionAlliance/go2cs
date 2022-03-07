@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:54:51 UTC
+//     Generated on 2022 March 06 22:19:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -57,7 +56,7 @@ namespace encoding
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -72,47 +71,47 @@ namespace encoding
                 m_target_is_ptr = true;
             }
 
-            private delegate long LenByPtr(ptr<T> value);
-            private delegate long LenByVal(T value);
+            private delegate nint LenByPtr(ptr<T> value);
+            private delegate nint LenByVal(T value);
 
             private static readonly LenByPtr? s_LenByPtr;
             private static readonly LenByVal? s_LenByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Len()
+            public nint Len()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByPtr(m_target_ptr);
+                return s_LenByPtr(m_target_ptr!);
             }
 
-            private delegate long EncodeByPtr(ptr<T> value, slice<byte> dst);
-            private delegate long EncodeByVal(T value, slice<byte> dst);
+            private delegate nint EncodeByPtr(ptr<T> value, slice<byte> dst);
+            private delegate nint EncodeByVal(T value, slice<byte> dst);
 
             private static readonly EncodeByPtr? s_EncodeByPtr;
             private static readonly EncodeByVal? s_EncodeByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Encode(slice<byte> dst)
+            public nint Encode(slice<byte> dst)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_EncodeByPtr is null || !m_target_is_ptr)
                     return s_EncodeByVal!(target, dst);
 
-                return s_EncodeByPtr(m_target_ptr, dst);
+                return s_EncodeByPtr(m_target_ptr!, dst);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static encoder()
@@ -123,12 +122,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
                 if (s_LenByPtr is null && s_LenByVal is null)
@@ -136,12 +135,12 @@ namespace encoding
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Encode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EncodeByPtr = extensionMethod.CreateStaticDelegate(typeof(EncodeByPtr)) as EncodeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Encode");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_EncodeByVal = extensionMethod.CreateStaticDelegate(typeof(EncodeByVal)) as EncodeByVal;
 
                 if (s_EncodeByPtr is null && s_EncodeByVal is null)

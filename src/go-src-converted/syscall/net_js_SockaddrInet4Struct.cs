@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:25 UTC
+//     Generated on 2022 March 06 22:26:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.Addr = default;
             }
 
-            public SockaddrInet4(long Port = default, array<byte> Addr = default)
+            public SockaddrInet4(nint Port = default, array<byte> Addr = default)
             {
                 this.Port = Port;
                 this.Addr = Addr;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:06 UTC
+//     Generated on 2022 March 06 23:15:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using context = go.context_package;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
+using exec = go.@internal.execabs_package;
 using log = go.log_package;
 using os = go.os_package;
-using exec = go.os.exec_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using cfg = go.cmd.go.@internal.cfg_package;
@@ -48,7 +48,7 @@ namespace @internal
                 this.Commands = default;
             }
 
-            public Command(Action<ptr<Command>, slice<@string>> Run = default, @string UsageLine = default, @string Short = default, @string Long = default, flag.FlagSet Flag = default, bool CustomFlags = default, slice<ptr<Command>> Commands = default)
+            public Command(Action<context.Context, ptr<Command>, slice<@string>> Run = default, @string UsageLine = default, @string Short = default, @string Long = default, flag.FlagSet Flag = default, bool CustomFlags = default, slice<ptr<Command>> Commands = default)
             {
                 this.Run = Run;
                 this.UsageLine = UsageLine;

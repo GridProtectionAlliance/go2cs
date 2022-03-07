@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:50 UTC
+//     Generated on 2022 March 06 23:31:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -55,7 +55,7 @@ namespace ocagent
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,7 +81,7 @@ namespace ocagent
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_labelAttributeByPtr is null || !m_target_is_ptr)
@@ -90,12 +90,11 @@ namespace ocagent
                     return;
                 }
 
-                s_labelAttributeByPtr(m_target_ptr);
+                s_labelAttributeByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Attribute()
@@ -106,12 +105,12 @@ namespace ocagent
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("labelAttribute");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_labelAttributeByPtr = extensionMethod.CreateStaticDelegate(typeof(labelAttributeByPtr)) as labelAttributeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("labelAttribute");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_labelAttributeByVal = extensionMethod.CreateStaticDelegate(typeof(labelAttributeByVal)) as labelAttributeByVal;
 
                 if (s_labelAttributeByPtr is null && s_labelAttributeByVal is null)

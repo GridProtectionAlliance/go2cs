@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:59 UTC
+//     Generated on 2022 March 06 22:22:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using utf8 = go.unicode.utf8_package;
@@ -43,7 +42,7 @@ namespace net
                 this.i = default;
             }
 
-            public labelIter(@string orig = default, slice<@string> slice = default, long curStart = default, long curEnd = default, long i = default)
+            public labelIter(@string orig = default, slice<@string> slice = default, nint curStart = default, nint curEnd = default, nint i = default)
             {
                 this.orig = orig;
                 this.slice = slice;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:50 UTC
+//     Generated on 2022 March 06 22:14:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using reflectlite = go.@internal.reflectlite_package;
 using sync = go.sync_package;
@@ -52,7 +51,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,7 +77,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DeadlineByPtr is null || !m_target_is_ptr)
@@ -87,9 +86,8 @@ namespace go
                     return;
                 }
 
-                s_DeadlineByPtr(m_target_ptr);
+                s_DeadlineByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void DoneByPtr(ptr<T> value);
@@ -103,7 +101,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DoneByPtr is null || !m_target_is_ptr)
@@ -112,9 +110,8 @@ namespace go
                     return;
                 }
 
-                s_DoneByPtr(m_target_ptr);
+                s_DoneByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void ErrByPtr(ptr<T> value);
@@ -128,7 +125,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ErrByPtr is null || !m_target_is_ptr)
@@ -137,9 +134,8 @@ namespace go
                     return;
                 }
 
-                s_ErrByPtr(m_target_ptr);
+                s_ErrByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void ValueByPtr(ptr<T> value, object key);
@@ -153,7 +149,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ValueByPtr is null || !m_target_is_ptr)
@@ -162,12 +158,11 @@ namespace go
                     return;
                 }
 
-                s_ValueByPtr(m_target_ptr, key);
+                s_ValueByPtr(m_target_ptr!, key);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Context()
@@ -178,12 +173,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Deadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DeadlineByPtr = extensionMethod.CreateStaticDelegate(typeof(DeadlineByPtr)) as DeadlineByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Deadline");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DeadlineByVal = extensionMethod.CreateStaticDelegate(typeof(DeadlineByVal)) as DeadlineByVal;
 
                 if (s_DeadlineByPtr is null && s_DeadlineByVal is null)
@@ -191,12 +186,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Done");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoneByPtr = extensionMethod.CreateStaticDelegate(typeof(DoneByPtr)) as DoneByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Done");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DoneByVal = extensionMethod.CreateStaticDelegate(typeof(DoneByVal)) as DoneByVal;
 
                 if (s_DoneByPtr is null && s_DoneByVal is null)
@@ -204,12 +199,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Err");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrByPtr)) as ErrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Err");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ErrByVal = extensionMethod.CreateStaticDelegate(typeof(ErrByVal)) as ErrByVal;
 
                 if (s_ErrByPtr is null && s_ErrByVal is null)
@@ -217,12 +212,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ValueByPtr)) as ValueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
 
                 if (s_ValueByPtr is null && s_ValueByVal is null)

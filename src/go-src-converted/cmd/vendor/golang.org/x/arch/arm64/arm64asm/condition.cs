@@ -5,433 +5,333 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2020 October 09 05:54:31 UTC
+// package arm64asm -- go2cs converted at 2022 March 06 23:24:40 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\condition.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\condition.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace arch {
-namespace arm64
-{
-    public static partial class arm64asm_package
-    {
-        // Following functions are used as the predicator: canDecode of according instruction
-        // Refer to instFormat inside decode.go for more details
-        private static bool at_sys_cr_system_cond(uint instr)
-        {
-            return sys_op_4((instr >> (int)(16L)) & 0x7UL, 0x7UL, 0x8UL, (instr >> (int)(5L)) & 0x7UL) == Sys_AT;
-        }
+namespace go.cmd.vendor.golang.org.x.arch.arm64;
 
-        private static bool bfi_bfm_32m_bitfield_cond(uint instr)
-        {
-            return (instr >> (int)(5L)) & 0x1fUL != 0x1fUL && uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+public static partial class arm64asm_package {
 
-        private static bool bfi_bfm_64m_bitfield_cond(uint instr)
-        {
-            return (instr >> (int)(5L)) & 0x1fUL != 0x1fUL && uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+    // Following functions are used as the predicator: canDecode of according instruction
+    // Refer to instFormat inside decode.go for more details
+private static bool at_sys_cr_system_cond(uint instr) {
+    return sys_op_4((instr >> 16) & 0x7, 0x7, 0x8, (instr >> 5) & 0x7) == Sys_AT;
+}
 
-        private static bool bfxil_bfm_32m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) >= uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool bfi_bfm_32m_bitfield_cond(uint instr) {
+    return (instr >> 5) & 0x1f != 0x1f && uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool bfxil_bfm_64m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) >= uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool bfi_bfm_64m_bitfield_cond(uint instr) {
+    return (instr >> 5) & 0x1f != 0x1f && uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool cinc_csinc_32_condsel_cond(uint instr)
-        {
-            return instr & 0x1f0000UL != 0x1f0000UL && instr & 0xe000UL != 0xe000UL && instr & 0x3e0UL != 0x3e0UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool bfxil_bfm_32m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) >= uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool cinc_csinc_64_condsel_cond(uint instr)
-        {
-            return instr & 0x1f0000UL != 0x1f0000UL && instr & 0xe000UL != 0xe000UL && instr & 0x3e0UL != 0x3e0UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool bfxil_bfm_64m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) >= uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool cinv_csinv_32_condsel_cond(uint instr)
-        {
-            return instr & 0x1f0000UL != 0x1f0000UL && instr & 0xe000UL != 0xe000UL && instr & 0x3e0UL != 0x3e0UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool cinc_csinc_32_condsel_cond(uint instr) {
+    return instr & 0x1f0000 != 0x1f0000 && instr & 0xe000 != 0xe000 && instr & 0x3e0 != 0x3e0 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool cinv_csinv_64_condsel_cond(uint instr)
-        {
-            return instr & 0x1f0000UL != 0x1f0000UL && instr & 0xe000UL != 0xe000UL && instr & 0x3e0UL != 0x3e0UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool cinc_csinc_64_condsel_cond(uint instr) {
+    return instr & 0x1f0000 != 0x1f0000 && instr & 0xe000 != 0xe000 && instr & 0x3e0 != 0x3e0 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool cneg_csneg_32_condsel_cond(uint instr)
-        {
-            return instr & 0xe000UL != 0xe000UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool cinv_csinv_32_condsel_cond(uint instr) {
+    return instr & 0x1f0000 != 0x1f0000 && instr & 0xe000 != 0xe000 && instr & 0x3e0 != 0x3e0 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool cneg_csneg_64_condsel_cond(uint instr)
-        {
-            return instr & 0xe000UL != 0xe000UL && (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool cinv_csinv_64_condsel_cond(uint instr) {
+    return instr & 0x1f0000 != 0x1f0000 && instr & 0xe000 != 0xe000 && instr & 0x3e0 != 0x3e0 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool csinc_general_cond(uint instr)
-        {
-            return instr & 0xe000UL != 0xe000UL;
-        }
-        private static bool csinv_general_cond(uint instr)
-        {
-            return instr & 0xe000UL != 0xe000UL;
-        }
-        private static bool dc_sys_cr_system_cond(uint instr)
-        {
-            return sys_op_4((instr >> (int)(16L)) & 0x7UL, 0x7UL, (instr >> (int)(8L)) & 0xfUL, (instr >> (int)(5L)) & 0x7UL) == Sys_DC;
-        }
+private static bool cneg_csneg_32_condsel_cond(uint instr) {
+    return instr & 0xe000 != 0xe000 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool ic_sys_cr_system_cond(uint instr)
-        {
-            return sys_op_4((instr >> (int)(16L)) & 0x7UL, 0x7UL, (instr >> (int)(8L)) & 0xfUL, (instr >> (int)(5L)) & 0x7UL) == Sys_IC;
-        }
+private static bool cneg_csneg_64_condsel_cond(uint instr) {
+    return instr & 0xe000 != 0xe000 && (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool lsl_ubfm_32m_bitfield_cond(uint instr)
-        {
-            return instr & 0xfc00UL != 0x7c00UL && (instr >> (int)(10L)) & 0x3fUL + 1L == (instr >> (int)(16L)) & 0x3fUL;
-        }
+private static bool csinc_general_cond(uint instr) {
+    return instr & 0xe000 != 0xe000;
+}
+private static bool csinv_general_cond(uint instr) {
+    return instr & 0xe000 != 0xe000;
+}
+private static bool dc_sys_cr_system_cond(uint instr) {
+    return sys_op_4((instr >> 16) & 0x7, 0x7, (instr >> 8) & 0xf, (instr >> 5) & 0x7) == Sys_DC;
+}
 
-        private static bool lsl_ubfm_64m_bitfield_cond(uint instr)
-        {
-            return instr & 0xfc00UL != 0xfc00UL && (instr >> (int)(10L)) & 0x3fUL + 1L == (instr >> (int)(16L)) & 0x3fUL;
-        }
+private static bool ic_sys_cr_system_cond(uint instr) {
+    return sys_op_4((instr >> 16) & 0x7, 0x7, (instr >> 8) & 0xf, (instr >> 5) & 0x7) == Sys_IC;
+}
 
-        private static bool mov_orr_32_log_imm_cond(uint instr)
-        {
-            return !move_wide_preferred_4((instr >> (int)(31L)) & 0x1UL, (instr >> (int)(22L)) & 0x1UL, (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool lsl_ubfm_32m_bitfield_cond(uint instr) {
+    return instr & 0xfc00 != 0x7c00 && (instr >> 10) & 0x3f + 1 == (instr >> 16) & 0x3f;
+}
 
-        private static bool mov_orr_64_log_imm_cond(uint instr)
-        {
-            return !move_wide_preferred_4((instr >> (int)(31L)) & 0x1UL, (instr >> (int)(22L)) & 0x1UL, (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool lsl_ubfm_64m_bitfield_cond(uint instr) {
+    return instr & 0xfc00 != 0xfc00 && (instr >> 10) & 0x3f + 1 == (instr >> 16) & 0x3f;
+}
 
-        private static bool mov_movn_32_movewide_cond(uint instr)
-        {
-            return !(is_zero((instr >> (int)(5L)) & 0xffffUL) && (instr >> (int)(21L)) & 0x3UL != 0x0UL) && !is_ones_n16((instr >> (int)(5L)) & 0xffffUL);
-        }
+private static bool mov_orr_32_log_imm_cond(uint instr) {
+    return !move_wide_preferred_4((instr >> 31) & 0x1, (instr >> 22) & 0x1, (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool mov_movn_64_movewide_cond(uint instr)
-        {
-            return !(is_zero((instr >> (int)(5L)) & 0xffffUL) && (instr >> (int)(21L)) & 0x3UL != 0x0UL);
-        }
+private static bool mov_orr_64_log_imm_cond(uint instr) {
+    return !move_wide_preferred_4((instr >> 31) & 0x1, (instr >> 22) & 0x1, (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool mov_add_32_addsub_imm_cond(uint instr)
-        {
-            return instr & 0x1fUL == 0x1fUL || (instr >> (int)(5L)) & 0x1fUL == 0x1fUL;
-        }
+private static bool mov_movn_32_movewide_cond(uint instr) {
+    return !(is_zero((instr >> 5) & 0xffff) && (instr >> 21) & 0x3 != 0x0) && !is_ones_n16((instr >> 5) & 0xffff);
+}
 
-        private static bool mov_add_64_addsub_imm_cond(uint instr)
-        {
-            return instr & 0x1fUL == 0x1fUL || (instr >> (int)(5L)) & 0x1fUL == 0x1fUL;
-        }
+private static bool mov_movn_64_movewide_cond(uint instr) {
+    return !(is_zero((instr >> 5) & 0xffff) && (instr >> 21) & 0x3 != 0x0);
+}
 
-        private static bool mov_movz_32_movewide_cond(uint instr)
-        {
-            return !(is_zero((instr >> (int)(5L)) & 0xffffUL) && (instr >> (int)(21L)) & 0x3UL != 0x0UL);
-        }
+private static bool mov_add_32_addsub_imm_cond(uint instr) {
+    return instr & 0x1f == 0x1f || (instr >> 5) & 0x1f == 0x1f;
+}
 
-        private static bool mov_movz_64_movewide_cond(uint instr)
-        {
-            return !(is_zero((instr >> (int)(5L)) & 0xffffUL) && (instr >> (int)(21L)) & 0x3UL != 0x0UL);
-        }
+private static bool mov_add_64_addsub_imm_cond(uint instr) {
+    return instr & 0x1f == 0x1f || (instr >> 5) & 0x1f == 0x1f;
+}
 
-        private static bool ror_extr_32_extract_cond(uint instr)
-        {
-            return (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool mov_movz_32_movewide_cond(uint instr) {
+    return !(is_zero((instr >> 5) & 0xffff) && (instr >> 21) & 0x3 != 0x0);
+}
 
-        private static bool ror_extr_64_extract_cond(uint instr)
-        {
-            return (instr >> (int)(5L)) & 0x1fUL == (instr >> (int)(16L)) & 0x1fUL;
-        }
+private static bool mov_movz_64_movewide_cond(uint instr) {
+    return !(is_zero((instr >> 5) & 0xffff) && (instr >> 21) & 0x3 != 0x0);
+}
 
-        private static bool sbfiz_sbfm_32m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool ror_extr_32_extract_cond(uint instr) {
+    return (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool sbfiz_sbfm_64m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool ror_extr_64_extract_cond(uint instr) {
+    return (instr >> 5) & 0x1f == (instr >> 16) & 0x1f;
+}
 
-        private static bool sbfx_sbfm_32m_bitfield_cond(uint instr)
-        {
-            return bfxpreferred_4((instr >> (int)(31L)) & 0x1UL, extract_bit((instr >> (int)(29L)) & 0x3UL, 1L), (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool sbfiz_sbfm_32m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool sbfx_sbfm_64m_bitfield_cond(uint instr)
-        {
-            return bfxpreferred_4((instr >> (int)(31L)) & 0x1UL, extract_bit((instr >> (int)(29L)) & 0x3UL, 1L), (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool sbfiz_sbfm_64m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool tlbi_sys_cr_system_cond(uint instr)
-        {
-            return sys_op_4((instr >> (int)(16L)) & 0x7UL, 0x8UL, (instr >> (int)(8L)) & 0xfUL, (instr >> (int)(5L)) & 0x7UL) == Sys_TLBI;
-        }
+private static bool sbfx_sbfm_32m_bitfield_cond(uint instr) {
+    return bfxpreferred_4((instr >> 31) & 0x1, extract_bit((instr >> 29) & 0x3, 1), (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool ubfiz_ubfm_32m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool sbfx_sbfm_64m_bitfield_cond(uint instr) {
+    return bfxpreferred_4((instr >> 31) & 0x1, extract_bit((instr >> 29) & 0x3, 1), (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool ubfiz_ubfm_64m_bitfield_cond(uint instr)
-        {
-            return uint8((instr >> (int)(10L)) & 0x3fUL) < uint8((instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool tlbi_sys_cr_system_cond(uint instr) {
+    return sys_op_4((instr >> 16) & 0x7, 0x8, (instr >> 8) & 0xf, (instr >> 5) & 0x7) == Sys_TLBI;
+}
 
-        private static bool ubfx_ubfm_32m_bitfield_cond(uint instr)
-        {
-            return bfxpreferred_4((instr >> (int)(31L)) & 0x1UL, extract_bit((instr >> (int)(29L)) & 0x3UL, 1L), (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool ubfiz_ubfm_32m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool ubfx_ubfm_64m_bitfield_cond(uint instr)
-        {
-            return bfxpreferred_4((instr >> (int)(31L)) & 0x1UL, extract_bit((instr >> (int)(29L)) & 0x3UL, 1L), (instr >> (int)(10L)) & 0x3fUL, (instr >> (int)(16L)) & 0x3fUL);
-        }
+private static bool ubfiz_ubfm_64m_bitfield_cond(uint instr) {
+    return uint8((instr >> 10) & 0x3f) < uint8((instr >> 16) & 0x3f);
+}
 
-        private static bool fcvtzs_asisdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool fcvtzs_asimdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool fcvtzu_asisdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool fcvtzu_asimdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool mov_umov_asimdins_w_w_cond(uint instr)
-        {
-            return ((instr >> (int)(16L)) & 0x1fUL) & 0x7UL == 0x4UL;
-        }
+private static bool ubfx_ubfm_32m_bitfield_cond(uint instr) {
+    return bfxpreferred_4((instr >> 31) & 0x1, extract_bit((instr >> 29) & 0x3, 1), (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool mov_umov_asimdins_x_x_cond(uint instr)
-        {
-            return ((instr >> (int)(16L)) & 0x1fUL) & 0xfUL == 0x8UL;
-        }
+private static bool ubfx_ubfm_64m_bitfield_cond(uint instr) {
+    return bfxpreferred_4((instr >> 31) & 0x1, extract_bit((instr >> 29) & 0x3, 1), (instr >> 10) & 0x3f, (instr >> 16) & 0x3f);
+}
 
-        private static bool mov_orr_asimdsame_only_cond(uint instr)
-        {
-            return (instr >> (int)(16L)) & 0x1fUL == (instr >> (int)(5L)) & 0x1fUL;
-        }
+private static bool fcvtzs_asisdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool fcvtzs_asimdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool fcvtzu_asisdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool fcvtzu_asimdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool mov_umov_asimdins_w_w_cond(uint instr) {
+    return ((instr >> 16) & 0x1f) & 0x7 == 0x4;
+}
 
-        private static bool rshrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool scvtf_asisdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool scvtf_asimdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool shl_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool shl_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool shrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sli_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sli_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqrshrn_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqrshrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqrshrun_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqrshrun_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshl_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshl_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshlu_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshlu_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshrn_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshrun_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sqshrun_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sri_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sri_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool srshr_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool srshr_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool srsra_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool srsra_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sshll_asimdshf_l_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sshr_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sshr_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ssra_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ssra_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool sxtl_sshll_asimdshf_l_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL && bit_count((instr >> (int)(19L)) & 0xfUL) == 1L;
-        }
+private static bool mov_umov_asimdins_x_x_cond(uint instr) {
+    return ((instr >> 16) & 0x1f) & 0xf == 0x8;
+}
 
-        private static bool ucvtf_asisdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ucvtf_asimdshf_c_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqrshrn_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqrshrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqshl_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqshl_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqshrn_asisdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uqshrn_asimdshf_n_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool urshr_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool urshr_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ursra_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ursra_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ushll_asimdshf_l_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ushr_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool ushr_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool usra_asisdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool usra_asimdshf_r_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL;
-        }
-        private static bool uxtl_ushll_asimdshf_l_cond(uint instr)
-        {
-            return instr & 0x780000UL != 0x0UL && bit_count((instr >> (int)(19L)) & 0xfUL) == 1L;
-        }
-    }
-}}}}}}}
+private static bool mov_orr_asimdsame_only_cond(uint instr) {
+    return (instr >> 16) & 0x1f == (instr >> 5) & 0x1f;
+}
+
+private static bool rshrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool scvtf_asisdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool scvtf_asimdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool shl_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool shl_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool shrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sli_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sli_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqrshrn_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqrshrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqrshrun_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqrshrun_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshl_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshl_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshlu_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshlu_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshrn_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshrun_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sqshrun_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sri_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sri_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool srshr_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool srshr_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool srsra_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool srsra_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sshll_asimdshf_l_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sshr_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sshr_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ssra_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ssra_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool sxtl_sshll_asimdshf_l_cond(uint instr) {
+    return instr & 0x780000 != 0x0 && bit_count((instr >> 19) & 0xf) == 1;
+}
+
+private static bool ucvtf_asisdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ucvtf_asimdshf_c_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqrshrn_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqrshrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqshl_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqshl_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqshrn_asisdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uqshrn_asimdshf_n_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool urshr_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool urshr_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ursra_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ursra_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ushll_asimdshf_l_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ushr_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool ushr_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool usra_asisdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool usra_asimdshf_r_cond(uint instr) {
+    return instr & 0x780000 != 0x0;
+}
+private static bool uxtl_ushll_asimdshf_l_cond(uint instr) {
+    return instr & 0x780000 != 0x0 && bit_count((instr >> 19) & 0xf) == 1;
+}
+
+} // end arm64asm_package

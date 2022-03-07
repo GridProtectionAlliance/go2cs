@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:24 UTC
+//     Generated on 2022 March 06 23:31:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using gob = go.encoding.gob_package;
 using flag = go.flag_package;
@@ -62,7 +61,7 @@ namespace @internal
                 this.newText = default;
             }
 
-            public offsetedit(long start = default, long end = default, slice<byte> newText = default)
+            public offsetedit(nint start = default, nint end = default, slice<byte> newText = default)
             {
                 this.start = start;
                 this.end = end;

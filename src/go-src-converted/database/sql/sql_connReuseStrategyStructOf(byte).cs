@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:28 UTC
+//     Generated on 2022 March 06 23:35:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -23,7 +25,7 @@ namespace database
         {
             // Value of the connReuseStrategy struct
             private readonly byte m_value;
-
+            
             public connReuseStrategy(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and connReuseStrategy struct

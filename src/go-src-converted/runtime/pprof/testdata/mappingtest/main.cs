@@ -8,8 +8,8 @@
 //
 // If SETCGOTRACEBACK=1 is set, the CPU profile will includes
 // PCs from C side but they will not be symbolized.
-// package main -- go2cs converted at 2020 October 09 04:50:22 UTC
-// Original source: C:\Go\src\runtime\pprof\testdata\mappingtest\main.go
+// package main -- go2cs converted at 2022 March 06 22:15:10 UTC
+// Original source: C:\Program Files\Go\src\runtime\pprof\testdata\mappingtest\main.go
 /*
 #include <stdint.h>
 #include <stdlib.h>
@@ -92,107 +92,91 @@ using runtime = go.runtime_package;
 using pprof = go.runtime.pprof_package;
 using time = go.time_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 using System.Threading;
 
-namespace go
-{
-    public static partial class main_package
+
+namespace go;
+
+public static partial class main_package {
+
+private static void init() {
     {
-        private static void init()
-        {
-            {
-                var v = os.Getenv("SETCGOTRACEBACK");
+        var v = os.Getenv("SETCGOTRACEBACK");
 
-                if (v == "1")
-                { 
-                    // Collect some PCs from C-side, but don't symbolize.
-                    runtime.SetCgoTraceback(0L, @unsafe.Pointer(C.CollectCgoTraceback), null, null);
-
-                }
-            }
-
-        }
-
-        private static void Main()
-        {
-            go_(() => cpuHogGoFunction());
-            go_(() => cpuHogCFunction());
-            runtime.Gosched();
-
-            {
-                var err__prev1 = err;
-
-                var err = pprof.StartCPUProfile(os.Stdout);
-
-                if (err != null)
-                {
-                    log.Fatal("can't start CPU profile: ", err);
-                }
-
-                err = err__prev1;
-
-            }
-
-            time.Sleep(200L * time.Millisecond);
-            pprof.StopCPUProfile();
-
-            {
-                var err__prev1 = err;
-
-                err = os.Stdout.Close();
-
-                if (err != null)
-                {
-                    log.Fatal("can't write CPU profile: ", err);
-                }
-
-                err = err__prev1;
-
-            }
-
-        }
-
-        private static long salt1 = default;
-        private static long salt2 = default;
-
-        private static void cpuHogGoFunction()
-        {
-            while (true)
-            {
-                var foo = salt1;
-                for (long i = 0L; i < 1e5F; i++)
-                {
-                    if (foo > 0L)
-                    {
-                        foo *= foo;
-                    }
-                    else
-                    {
-                        foo *= foo + 1L;
-                    }
-
-                    salt2 = foo;
-
-                }
-
-                runtime.Gosched();
-
-            }
-
-
-        }
-
-        private static void cpuHogCFunction()
-        { 
-            // Generates CPU profile samples including a Cgo call path.
-            while (true)
-            {
-                C.CPUHogCFunction();
-                runtime.Gosched();
-            }
-
+        if (v == "1") { 
+            // Collect some PCs from C-side, but don't symbolize.
+            runtime.SetCgoTraceback(0, @unsafe.Pointer(C.CollectCgoTraceback), null, null);
 
         }
     }
+
 }
+
+private static void Main() {
+    go_(() => cpuHogGoFunction());
+    go_(() => cpuHogCFunction());
+    runtime.Gosched();
+
+    {
+        var err__prev1 = err;
+
+        var err = pprof.StartCPUProfile(os.Stdout);
+
+        if (err != null) {
+            log.Fatal("can't start CPU profile: ", err);
+        }
+        err = err__prev1;
+
+    }
+
+    time.Sleep(200 * time.Millisecond);
+    pprof.StopCPUProfile();
+
+    {
+        var err__prev1 = err;
+
+        err = os.Stdout.Close();
+
+        if (err != null) {
+            log.Fatal("can't write CPU profile: ", err);
+        }
+        err = err__prev1;
+
+    }
+
+}
+
+private static nint salt1 = default;
+private static nint salt2 = default;
+
+private static void cpuHogGoFunction() {
+    while (true) {
+        var foo = salt1;
+        for (nint i = 0; i < 1e5F; i++) {
+            if (foo > 0) {
+                foo *= foo;
+            }
+            else
+ {
+                foo *= foo + 1;
+            }
+
+            salt2 = foo;
+
+        }
+        runtime.Gosched();
+
+    }
+
+}
+
+private static void cpuHogCFunction() { 
+    // Generates CPU profile samples including a Cgo call path.
+    while (true) {
+        C.CPUHogCFunction();
+        runtime.Gosched();
+    }
+
+}
+
+} // end main_package

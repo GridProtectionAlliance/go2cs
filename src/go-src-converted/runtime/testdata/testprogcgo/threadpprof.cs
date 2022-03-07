@@ -4,8 +4,8 @@
 
 // +build !plan9,!windows
 
-// package main -- go2cs converted at 2020 October 09 05:01:05 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\threadpprof.go
+// package main -- go2cs converted at 2022 March 06 22:26:18 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\threadpprof.go
 // Run a slow C function saving a CPU profile.
 
 /*
@@ -137,90 +137,76 @@ void runCPUHogThread(void) {
 
 
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using pprof = go.runtime.pprof_package;
 using time = go.time_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoPprofThread", CgoPprofThread);
-            register("CgoPprofThreadNoTraceback", CgoPprofThreadNoTraceback);
-        }
+namespace go;
 
-        public static void CgoPprofThread()
-        {
-            runtime.SetCgoTraceback(0L, @unsafe.Pointer(C.pprofCgoThreadTraceback), null, null);
-            pprofThread();
-        }
+public static partial class main_package {
 
-        public static void CgoPprofThreadNoTraceback()
-        {
-            pprofThread();
-        }
-
-        private static void pprofThread()
-        {
-            var (f, err) = ioutil.TempFile("", "prof");
-            if (err != null)
-            {
-                fmt.Fprintln(os.Stderr, err);
-                os.Exit(2L);
-            }
-
-            {
-                var err__prev1 = err;
-
-                var err = pprof.StartCPUProfile(f);
-
-                if (err != null)
-                {
-                    fmt.Fprintln(os.Stderr, err);
-                    os.Exit(2L);
-                }
-
-                err = err__prev1;
-
-            }
-
-
-            C.runCPUHogThread();
-
-            var t0 = time.Now();
-            while (C.getCPUHogThreadCount() < 2L && time.Since(t0) < time.Second)
-            {
-                time.Sleep(100L * time.Millisecond);
-            }
-
-
-            pprof.StopCPUProfile();
-
-            var name = f.Name();
-            {
-                var err__prev1 = err;
-
-                err = f.Close();
-
-                if (err != null)
-                {
-                    fmt.Fprintln(os.Stderr, err);
-                    os.Exit(2L);
-                }
-
-                err = err__prev1;
-
-            }
-
-
-            fmt.Println(name);
-
-        }
-    }
+private static void init() {
+    register("CgoPprofThread", CgoPprofThread);
+    register("CgoPprofThreadNoTraceback", CgoPprofThreadNoTraceback);
 }
+
+public static void CgoPprofThread() {
+    runtime.SetCgoTraceback(0, @unsafe.Pointer(C.pprofCgoThreadTraceback), null, null);
+    pprofThread();
+}
+
+public static void CgoPprofThreadNoTraceback() {
+    pprofThread();
+}
+
+private static void pprofThread() {
+    var (f, err) = os.CreateTemp("", "prof");
+    if (err != null) {
+        fmt.Fprintln(os.Stderr, err);
+        os.Exit(2);
+    }
+    {
+        var err__prev1 = err;
+
+        var err = pprof.StartCPUProfile(f);
+
+        if (err != null) {
+            fmt.Fprintln(os.Stderr, err);
+            os.Exit(2);
+        }
+        err = err__prev1;
+
+    }
+
+
+    C.runCPUHogThread();
+
+    var t0 = time.Now();
+    while (C.getCPUHogThreadCount() < 2 && time.Since(t0) < time.Second) {
+        time.Sleep(100 * time.Millisecond);
+    }
+
+    pprof.StopCPUProfile();
+
+    var name = f.Name();
+    {
+        var err__prev1 = err;
+
+        err = f.Close();
+
+        if (err != null) {
+            fmt.Fprintln(os.Stderr, err);
+            os.Exit(2);
+        }
+        err = err__prev1;
+
+    }
+
+
+    fmt.Println(name);
+
+}
+
+} // end main_package

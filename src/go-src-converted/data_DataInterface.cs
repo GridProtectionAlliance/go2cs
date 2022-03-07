@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:48 UTC
+//     Generated on 2022 March 06 23:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using sort = go.sort_package;
 using time = go.time_package;
@@ -59,7 +58,7 @@ namespace export
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,13 +84,13 @@ namespace export
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_HandleByPtr is null || !m_target_is_ptr)
                     return s_HandleByVal!(target);
 
-                return s_HandleByPtr(m_target_ptr);
+                return s_HandleByPtr(m_target_ptr!);
             }
 
             private delegate slice<slice<label.Label>> GroupsByPtr(ptr<T> value);
@@ -105,16 +104,16 @@ namespace export
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_GroupsByPtr is null || !m_target_is_ptr)
                     return s_GroupsByVal!(target);
 
-                return s_GroupsByPtr(m_target_ptr);
+                return s_GroupsByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Data()
@@ -125,12 +124,12 @@ namespace export
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Handle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HandleByPtr = extensionMethod.CreateStaticDelegate(typeof(HandleByPtr)) as HandleByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Handle");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_HandleByVal = extensionMethod.CreateStaticDelegate(typeof(HandleByVal)) as HandleByVal;
 
                 if (s_HandleByPtr is null && s_HandleByVal is null)
@@ -138,12 +137,12 @@ namespace export
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Groups");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GroupsByPtr = extensionMethod.CreateStaticDelegate(typeof(GroupsByPtr)) as GroupsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Groups");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_GroupsByVal = extensionMethod.CreateStaticDelegate(typeof(GroupsByVal)) as GroupsByVal;
 
                 if (s_GroupsByPtr is null && s_GroupsByVal is null)

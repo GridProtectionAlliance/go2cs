@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:23 UTC
+//     Generated on 2022 March 06 22:30:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
                 this.goodSuffixSkip = default;
             }
 
-            public stringFinder(@string pattern = default, array<long> badCharSkip = default, slice<long> goodSuffixSkip = default)
+            public stringFinder(@string pattern = default, array<nint> badCharSkip = default, slice<nint> goodSuffixSkip = default)
             {
                 this.pattern = pattern;
                 this.badCharSkip = badCharSkip;

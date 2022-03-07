@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:34 UTC
+//     Generated on 2022 March 06 23:31:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -39,7 +38,7 @@ namespace lsp
                 this.Lines = default;
             }
 
-            public Hunk(long FromLine = default, long ToLine = default, slice<Line> Lines = default)
+            public Hunk(nint FromLine = default, nint ToLine = default, slice<Line> Lines = default)
             {
                 this.FromLine = FromLine;
                 this.ToLine = ToLine;

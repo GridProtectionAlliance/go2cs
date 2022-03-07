@@ -2,75 +2,65 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build linux && (mips || mipsle)
 // +build linux
 // +build mips mipsle
 
-// package runtime -- go2cs converted at 2020 October 09 04:47:30 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\os_linux_mipsx.go
-
-using static go.builtin;
-
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static void archauxv(System.UIntPtr tag, System.UIntPtr val)
-        {
-        }
-
-        private static void osArchInit()
-        {
-        }
-
-        //go:nosplit
-        private static long cputicks()
-        { 
-            // Currently cputicks() is used in blocking profiler and to seed fastrand().
-            // nanotime() is a poor approximation of CPU ticks that is enough for the profiler.
-            return nanotime();
-
-        }
-
-        private static readonly long _SS_DISABLE = (long)2L;
-        private static readonly long _NSIG = (long)128L + 1L;
-        private static readonly long _SI_USER = (long)0L;
-        private static readonly long _SIG_BLOCK = (long)1L;
-        private static readonly long _SIG_UNBLOCK = (long)2L;
-        private static readonly long _SIG_SETMASK = (long)3L;
+// Original source: C:\Program Files\Go\src\runtime\os_linux_mipsx.go
 
 
-        private partial struct sigset // : array<uint>
-        {
-        }
+namespace go;
 
-        private static sigset sigset_all = new sigset(^uint32(0),^uint32(0),^uint32(0),^uint32(0));
+public static partial class runtime_package {
 
-        //go:nosplit
-        //go:nowritebarrierrec
-        private static void sigaddset(ptr<sigset> _addr_mask, long i)
-        {
-            ref sigset mask = ref _addr_mask.val;
-
-            (mask)[(i - 1L) / 32L] |= 1L << (int)(((uint32(i) - 1L) & 31L));
-        }
-
-        private static void sigdelset(ptr<sigset> _addr_mask, long i)
-        {
-            ref sigset mask = ref _addr_mask.val;
-
-            (mask)[(i - 1L) / 32L] &= 1L << (int)(((uint32(i) - 1L) & 31L));
-        }
-
-        private static void sigfillset(ptr<array<uint>> _addr_mask)
-        {
-            ref array<uint> mask = ref _addr_mask.val;
-
-            (mask)[0L] = ~uint32(0L);
-            (mask)[1L] = ~uint32(0L);
-            (mask)[2L] = ~uint32(0L);
-            (mask)[3L] = ~uint32(0L);
-
-        }
-    }
+private static void archauxv(System.UIntPtr tag, System.UIntPtr val) {
 }
+
+private static void osArchInit() {
+}
+
+//go:nosplit
+private static long cputicks() { 
+    // Currently cputicks() is used in blocking profiler and to seed fastrand().
+    // nanotime() is a poor approximation of CPU ticks that is enough for the profiler.
+    return nanotime();
+
+}
+
+private static readonly nint _SS_DISABLE = 2;
+private static readonly nint _NSIG = 128 + 1;
+private static readonly nint _SI_USER = 0;
+private static readonly nint _SIG_BLOCK = 1;
+private static readonly nint _SIG_UNBLOCK = 2;
+private static readonly nint _SIG_SETMASK = 3;
+
+
+private partial struct sigset { // : array<uint>
+}
+
+private static sigset sigset_all = new sigset(^uint32(0),^uint32(0),^uint32(0),^uint32(0));
+
+//go:nosplit
+//go:nowritebarrierrec
+private static void sigaddset(ptr<sigset> _addr_mask, nint i) {
+    ref sigset mask = ref _addr_mask.val;
+
+    (mask)[(i - 1) / 32] |= 1 << (int)(((uint32(i) - 1) & 31));
+}
+
+private static void sigdelset(ptr<sigset> _addr_mask, nint i) {
+    ref sigset mask = ref _addr_mask.val;
+
+    (mask)[(i - 1) / 32] &= 1 << (int)(((uint32(i) - 1) & 31));
+}
+
+//go:nosplit
+private static void sigfillset(ptr<array<uint>> _addr_mask) {
+    ref array<uint> mask = ref _addr_mask.val;
+
+    ((mask)[0], (mask)[1], (mask)[2], (mask)[3]) = (~uint32(0), ~uint32(0), ~uint32(0), ~uint32(0));
+}
+
+} // end runtime_package

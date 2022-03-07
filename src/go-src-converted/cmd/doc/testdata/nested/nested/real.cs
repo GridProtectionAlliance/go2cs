@@ -1,19 +1,13 @@
-// package nested -- go2cs converted at 2020 October 09 05:44:52 UTC
+// package nested -- go2cs converted at 2022 March 06 23:15:42 UTC
 // import "cmd/doc/testdata/nested/nested" ==> using nested = go.cmd.doc.testdata.nested.nested_package
-// Original source: C:\Go\src\cmd\doc\testdata\nested\nested\real.go
+// Original source: C:\Program Files\Go\src\cmd\doc\testdata\nested\nested\real.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace doc {
-namespace testdata {
-namespace nested
-{
-    public static partial class nested_package
-    {
-        public partial struct Foo
-        {
-        }
-    }
-}}}}}
+namespace go.cmd.doc.testdata.nested;
+
+public static partial class nested_package {
+
+public partial struct Foo {
+}
+
+} // end nested_package

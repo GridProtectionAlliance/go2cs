@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:05 UTC
+//     Generated on 2022 March 06 22:21:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -19,10 +21,33 @@ namespace net
     public static partial class textproto_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct MIMEHeader
+        public partial struct MIMEHeader : IMap
         {
             // Value of the MIMEHeader struct
             private readonly map<@string, slice<@string>> m_value;
+            
+            public nint Length => ((IMap)m_value).Length;
+
+            object? IMap.this[object key]
+            {
+                get => ((IMap)m_value)[key];
+                set => ((IMap)m_value)[key] = value;
+            }
+
+            public slice<@string> this[@string key]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value[key];
+            
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => m_value[key] = value;
+            }
+
+            public (slice<@string>, bool) this[@string key, bool _]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value.TryGetValue(key, out slice<@string> value) ? (value!, true) : (default!, false);
+            }
 
             public MIMEHeader(map<@string, slice<@string>> value) => m_value = value;
 

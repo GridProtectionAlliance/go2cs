@@ -2,28 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build openbsd
 // +build openbsd
 
-// package cgo -- go2cs converted at 2020 October 09 04:49:12 UTC
+// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
-// Original source: C:\Go\src\runtime\cgo\openbsd.go
+// Original source: C:\Program Files\Go\src\runtime\cgo\openbsd.go
 using _@unsafe_ = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace runtime
-{
-    public static partial class cgo_package
-    { // for go:linkname
+namespace go.runtime;
 
-        // Supply __guard_local because we don't link against the standard
-        // OpenBSD crt0.o and the libc dynamic library needs it.
+public static partial class cgo_package {
+ // for go:linkname
 
-        //go:linkname _guard_local __guard_local
-        private static System.UIntPtr _guard_local = default;
+    // Supply __guard_local because we don't link against the standard
+    // OpenBSD crt0.o and the libc dynamic library needs it.
 
-        // This is normally marked as hidden and placed in the
-        // .openbsd.randomdata section.
-        //go:cgo_export_dynamic __guard_local __guard_local
-    }
-}}
+    //go:linkname _guard_local __guard_local
+private static System.UIntPtr _guard_local = default;
+
+// This is normally marked as hidden and placed in the
+// .openbsd.randomdata section.
+//go:cgo_export_dynamic __guard_local __guard_local
+
+} // end cgo_package

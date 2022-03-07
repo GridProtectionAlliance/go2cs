@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !ppc64 && !ppc64le
 // +build !ppc64,!ppc64le
 
-// package runtime -- go2cs converted at 2020 October 09 04:48:54 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:12:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\sys_nonppc64x.go
+// Original source: C:\Program Files\Go\src\runtime\sys_nonppc64x.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static void prepGoExitFrame(System.UIntPtr sp)
-        {
-        }
-    }
+namespace go;
+
+public static partial class runtime_package {
+
+private static void prepGoExitFrame(System.UIntPtr sp) {
 }
+
+} // end runtime_package

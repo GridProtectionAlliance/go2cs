@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:28 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,10 +47,11 @@ namespace sys
                 this.Fstypename = default;
                 this.Mntonname = default;
                 this.Mntfromname = default;
+                this.Flags_ext = default;
                 this.Reserved = default;
             }
 
-            public Statfs_t(uint Bsize = default, int Iosize = default, ulong Blocks = default, ulong Bfree = default, ulong Bavail = default, ulong Files = default, ulong Ffree = default, Fsid Fsid = default, uint Owner = default, uint Type = default, uint Flags = default, uint Fssubtype = default, array<sbyte> Fstypename = default, array<sbyte> Mntonname = default, array<sbyte> Mntfromname = default, array<uint> Reserved = default)
+            public Statfs_t(uint Bsize = default, int Iosize = default, ulong Blocks = default, ulong Bfree = default, ulong Bavail = default, ulong Files = default, ulong Ffree = default, Fsid Fsid = default, uint Owner = default, uint Type = default, uint Flags = default, uint Fssubtype = default, array<byte> Fstypename = default, array<byte> Mntonname = default, array<byte> Mntfromname = default, uint Flags_ext = default, array<uint> Reserved = default)
             {
                 this.Bsize = Bsize;
                 this.Iosize = Iosize;
@@ -67,6 +68,7 @@ namespace sys
                 this.Fstypename = Fstypename;
                 this.Mntonname = Mntonname;
                 this.Mntfromname = Mntfromname;
+                this.Flags_ext = Flags_ext;
                 this.Reserved = Reserved;
             }
 
@@ -90,7 +92,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Statfs_t Statfs_t_cast(dynamic value)
         {
-            return new Statfs_t(value.Bsize, value.Iosize, value.Blocks, value.Bfree, value.Bavail, value.Files, value.Ffree, value.Fsid, value.Owner, value.Type, value.Flags, value.Fssubtype, value.Fstypename, value.Mntonname, value.Mntfromname, value.Reserved);
+            return new Statfs_t(value.Bsize, value.Iosize, value.Blocks, value.Bfree, value.Bavail, value.Files, value.Ffree, value.Fsid, value.Owner, value.Type, value.Flags, value.Fssubtype, value.Fstypename, value.Mntonname, value.Mntfromname, value.Flags_ext, value.Reserved);
         }
     }
 }}}}}}

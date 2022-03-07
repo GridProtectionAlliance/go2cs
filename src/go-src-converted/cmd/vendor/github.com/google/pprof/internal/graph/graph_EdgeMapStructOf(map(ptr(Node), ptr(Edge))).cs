@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:39 UTC
+//     Generated on 2022 March 06 23:23:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,10 +26,33 @@ namespace @internal
     public static partial class graph_package
     {
         [GeneratedCode("go2cs", "0.1.0.0")]
-        public partial struct EdgeMap
+        public partial struct EdgeMap : IMap
         {
             // Value of the EdgeMap struct
             private readonly map<ptr<Node>, ptr<Edge>> m_value;
+            
+            public nint Length => ((IMap)m_value).Length;
+
+            object? IMap.this[object key]
+            {
+                get => ((IMap)m_value)[key];
+                set => ((IMap)m_value)[key] = value;
+            }
+
+            public ptr<Edge> this[ptr<Node> key]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value[key];
+            
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                set => m_value[key] = value;
+            }
+
+            public (ptr<Edge>, bool) this[ptr<Node> key, bool _]
+            {
+                [MethodImpl(MethodImplOptions.AggressiveInlining)]
+                get => m_value.TryGetValue(key, out ptr<Edge> value) ? (value!, true) : (default!, false);
+            }
 
             public EdgeMap(map<ptr<Node>, ptr<Edge>> value) => m_value = value;
 

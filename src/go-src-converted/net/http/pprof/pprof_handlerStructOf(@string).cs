@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:59:02 UTC
+//     Generated on 2022 March 06 22:24:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace http
         {
             // Value of the handler struct
             private readonly @string m_value;
-
+            
             public handler(@string value) => m_value = value;
 
             // Enable implicit conversions between @string and handler struct

@@ -2,40 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build amd64 || 386
 // +build amd64 386
 
-// package runtime -- go2cs converted at 2020 October 09 04:48:56 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:12:10 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\sys_x86.go
+// Original source: C:\Program Files\Go\src\runtime\sys_x86.go
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        // adjust Gobuf as if it executed a call to fn with context ctxt
-        // and then did an immediate gosave.
-        private static void gostartcall(ptr<gobuf> _addr_buf, unsafe.Pointer fn, unsafe.Pointer ctxt)
-        {
-            ref gobuf buf = ref _addr_buf.val;
+namespace go;
 
-            var sp = buf.sp;
-            if (sys.RegSize > sys.PtrSize)
-            {
-                sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
+public static partial class runtime_package {
 
-                0L;
+    // adjust Gobuf as if it executed a call to fn with context ctxt
+    // and then stopped before the first instruction in fn.
+private static void gostartcall(ptr<gobuf> _addr_buf, unsafe.Pointer fn, unsafe.Pointer ctxt) {
+    ref gobuf buf = ref _addr_buf.val;
 
-            }
-            sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
+    var sp = buf.sp;
+    sp -= sys.PtrSize * (uintptr.val)(@unsafe.Pointer(sp));
 
-            buf.pc;
-            buf.sp = sp;
-            buf.pc = uintptr(fn);
-            buf.ctxt = ctxt;
+    buf.pc;
+    buf.sp = sp;
+    buf.pc = uintptr(fn);
+    buf.ctxt = ctxt;
 
-        }
-    }
 }
+
+} // end runtime_package

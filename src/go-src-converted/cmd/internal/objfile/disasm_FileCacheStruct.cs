@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:16 UTC
+//     Generated on 2022 March 06 22:31:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using src = go.cmd.@internal.src_package;
@@ -52,7 +51,7 @@ namespace @internal
                 this.maxLen = default;
             }
 
-            public FileCache(ref ptr<list.List> files = default, long maxLen = default)
+            public FileCache(ref ptr<list.List> files = default, nint maxLen = default)
             {
                 this.files = files;
                 this.maxLen = maxLen;

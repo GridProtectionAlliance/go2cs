@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:29 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -45,15 +45,15 @@ namespace sys
                 this.Ctim = default;
                 this.Size = default;
                 this.Blocks = default;
-                this.Blksize = default;
+                this._ = default;
                 this.Flags = default;
                 this.Gen = default;
                 this.Lspare = default;
-                this.Qspare1 = default;
+                this.Blksize = default;
                 this.Qspare2 = default;
             }
 
-            public Stat_t(ulong Ino = default, uint Nlink = default, uint Dev = default, ushort Mode = default, ushort _1 = default, uint Uid = default, uint Gid = default, uint Rdev = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, long Size = default, long Blocks = default, uint Blksize = default, uint Flags = default, uint Gen = default, int Lspare = default, long Qspare1 = default, long Qspare2 = default)
+            public Stat_t(ulong Ino = default, uint Nlink = default, uint Dev = default, ushort Mode = default, ushort _1 = default, uint Uid = default, uint Gid = default, uint Rdev = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, long Size = default, long Blocks = default, uint _ = default, uint Flags = default, uint Gen = default, int Lspare = default, long Blksize = default, long Qspare2 = default)
             {
                 this.Ino = Ino;
                 this.Nlink = Nlink;
@@ -68,11 +68,11 @@ namespace sys
                 this.Ctim = Ctim;
                 this.Size = Size;
                 this.Blocks = Blocks;
-                this.Blksize = Blksize;
+                this._ = _;
                 this.Flags = Flags;
                 this.Gen = Gen;
                 this.Lspare = Lspare;
-                this.Qspare1 = Qspare1;
+                this.Blksize = Blksize;
                 this.Qspare2 = Qspare2;
             }
 
@@ -96,7 +96,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Stat_t Stat_t_cast(dynamic value)
         {
-            return new Stat_t(value.Ino, value.Nlink, value.Dev, value.Mode, value._1, value.Uid, value.Gid, value.Rdev, value.Atim, value.Mtim, value.Ctim, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Lspare, value.Qspare1, value.Qspare2);
+            return new Stat_t(value.Ino, value.Nlink, value.Dev, value.Mode, value._1, value.Uid, value.Gid, value.Rdev, value.Atim, value.Mtim, value.Ctim, value.Size, value.Blocks, value._, value.Flags, value.Gen, value.Lspare, value.Blksize, value.Qspare2);
         }
     }
 }}}}}}

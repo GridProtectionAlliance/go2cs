@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:56:43 UTC
+//     Generated on 2022 March 06 23:27:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using binary = go.encoding.binary_package;
 using runtime = go.runtime_package;
 using syscall = go.syscall_package;
@@ -57,7 +56,7 @@ namespace sys
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,13 +82,13 @@ namespace sys
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_tipcAddrtypeByPtr is null || !m_target_is_ptr)
                     return s_tipcAddrtypeByVal!(target);
 
-                return s_tipcAddrtypeByPtr(m_target_ptr);
+                return s_tipcAddrtypeByPtr(m_target_ptr!);
             }
 
             private delegate array<byte> tipcAddrByPtr(ptr<T> value);
@@ -103,16 +102,16 @@ namespace sys
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_tipcAddrByPtr is null || !m_target_is_ptr)
                     return s_tipcAddrByVal!(target);
 
-                return s_tipcAddrByPtr(m_target_ptr);
+                return s_tipcAddrByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static TIPCAddr()
@@ -123,12 +122,12 @@ namespace sys
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("tipcAddrtype");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_tipcAddrtypeByPtr = extensionMethod.CreateStaticDelegate(typeof(tipcAddrtypeByPtr)) as tipcAddrtypeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("tipcAddrtype");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_tipcAddrtypeByVal = extensionMethod.CreateStaticDelegate(typeof(tipcAddrtypeByVal)) as tipcAddrtypeByVal;
 
                 if (s_tipcAddrtypeByPtr is null && s_tipcAddrtypeByVal is null)
@@ -136,12 +135,12 @@ namespace sys
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("tipcAddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_tipcAddrByPtr = extensionMethod.CreateStaticDelegate(typeof(tipcAddrByPtr)) as tipcAddrByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("tipcAddr");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_tipcAddrByVal = extensionMethod.CreateStaticDelegate(typeof(tipcAddrByVal)) as tipcAddrByVal;
 
                 if (s_tipcAddrByPtr is null && s_tipcAddrByVal is null)

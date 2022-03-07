@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:24:27 UTC
+//     Generated on 2022 March 06 22:49:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,12 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.cmd.compile.@internal.abi_package;
+using ir = go.cmd.compile.@internal.ir_package;
 using types = go.cmd.compile.@internal.types_package;
 using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
 using src = go.cmd.@internal.src_package;
+using buildcfg = go.@internal.buildcfg_package;
 using go;
 
 #nullable enable
@@ -55,7 +56,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,13 +82,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LogfByPtr is null || !m_target_is_ptr)
                     return s_LogfByVal!(target, _p0, _p0);
 
-                return s_LogfByPtr(m_target_ptr, _p0, _p0);
+                return s_LogfByPtr(m_target_ptr!, _p0, _p0);
             }
 
             private delegate bool LogByPtr(ptr<T> value);
@@ -101,13 +102,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LogByPtr is null || !m_target_is_ptr)
                     return s_LogByVal!(target);
 
-                return s_LogByPtr(m_target_ptr);
+                return s_LogByPtr(m_target_ptr!);
             }
 
             private delegate bool FatalfByPtr(ptr<T> value, src.XPos pos, @string msg, params object[] args);
@@ -121,13 +122,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FatalfByPtr is null || !m_target_is_ptr)
                     return s_FatalfByVal!(target, pos, msg, args);
 
-                return s_FatalfByPtr(m_target_ptr, pos, msg, args);
+                return s_FatalfByPtr(m_target_ptr!, pos, msg, args);
             }
 
             private delegate bool WarnlByPtr(ptr<T> value, src.XPos pos, @string fmt_, params object[] args);
@@ -141,13 +142,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_WarnlByPtr is null || !m_target_is_ptr)
                     return s_WarnlByVal!(target, pos, fmt_, args);
 
-                return s_WarnlByPtr(m_target_ptr, pos, fmt_, args);
+                return s_WarnlByPtr(m_target_ptr!, pos, fmt_, args);
             }
 
             private delegate bool Debug_checknilByPtr(ptr<T> value);
@@ -161,16 +162,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Debug_checknilByPtr is null || !m_target_is_ptr)
                     return s_Debug_checknilByVal!(target);
 
-                return s_Debug_checknilByPtr(m_target_ptr);
+                return s_Debug_checknilByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Logger()
@@ -181,12 +182,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Logf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogfByPtr = extensionMethod.CreateStaticDelegate(typeof(LogfByPtr)) as LogfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Logf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogfByVal = extensionMethod.CreateStaticDelegate(typeof(LogfByVal)) as LogfByVal;
 
                 if (s_LogfByPtr is null && s_LogfByVal is null)
@@ -194,12 +195,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Log");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogByPtr = extensionMethod.CreateStaticDelegate(typeof(LogByPtr)) as LogByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Log");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogByVal = extensionMethod.CreateStaticDelegate(typeof(LogByVal)) as LogByVal;
 
                 if (s_LogByPtr is null && s_LogByVal is null)
@@ -207,12 +208,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Fatalf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FatalfByPtr = extensionMethod.CreateStaticDelegate(typeof(FatalfByPtr)) as FatalfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Fatalf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FatalfByVal = extensionMethod.CreateStaticDelegate(typeof(FatalfByVal)) as FatalfByVal;
 
                 if (s_FatalfByPtr is null && s_FatalfByVal is null)
@@ -220,12 +221,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Warnl");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WarnlByPtr = extensionMethod.CreateStaticDelegate(typeof(WarnlByPtr)) as WarnlByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Warnl");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_WarnlByVal = extensionMethod.CreateStaticDelegate(typeof(WarnlByVal)) as WarnlByVal;
 
                 if (s_WarnlByPtr is null && s_WarnlByVal is null)
@@ -233,12 +234,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Debug_checknil");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Debug_checknilByPtr = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByPtr)) as Debug_checknilByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Debug_checknil");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Debug_checknilByVal = extensionMethod.CreateStaticDelegate(typeof(Debug_checknilByVal)) as Debug_checknilByVal;
 
                 if (s_Debug_checknilByPtr is null && s_Debug_checknilByVal is null)

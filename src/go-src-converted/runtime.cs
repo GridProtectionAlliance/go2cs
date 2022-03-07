@@ -1,50 +1,35 @@
-// package runtime -- go2cs converted at 2020 October 09 06:03:48 UTC
+// package runtime -- go2cs converted at 2022 March 06 23:33:46 UTC
 // import "golang.org/x/tools/go/ssa/interp/testdata/src/runtime" ==> using runtime = go.golang.org.x.tools.go.ssa.interp.testdata.src.runtime_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\tools\go\ssa\interp\testdata\src\runtime\runtime.go
 
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace tools {
-namespace go {
-namespace ssa {
-namespace interp {
-namespace testdata {
-namespace src
-{
-    public static partial class runtime_package
-    {
-        // An errorString represents a runtime error described by a single string.
-        private partial struct errorString // : @string
-        {
-        }
+namespace go.golang.org.x.tools.go.ssa.interp.testdata.src;
 
-        private static void RuntimeError(this errorString e)
-        {
-        }
+public static partial class runtime_package {
 
-        private static @string Error(this errorString e)
-        {
-            return "runtime error: " + string(e);
-        }
+    // An errorString represents a runtime error described by a single string.
+private partial struct errorString { // : @string
+}
 
-        public static void Breakpoint()
-;
+private static void RuntimeError(this errorString e) {
+}
 
-        public partial interface Error : error
-        {
-            void RuntimeError();
-        }
+private static @string Error(this errorString e) {
+    return "runtime error: " + string(e);
+}
 
-        public static readonly @string GOOS = (@string)"linux";
+public static void Breakpoint();
 
-        public static readonly @string GOARCH = (@string)"amd64";
+public partial interface Error {
+    void RuntimeError();
+}
+
+public static readonly @string GOOS = "linux";
+
+public static readonly @string GOARCH = "amd64";
 
 
 
-        public static void GC()
-;
-    }
-}}}}}}}}}
+public static void GC();
+
+} // end runtime_package

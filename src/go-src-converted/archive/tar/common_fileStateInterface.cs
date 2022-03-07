@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:45:16 UTC
+//     Generated on 2022 March 06 22:08:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,11 +13,10 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
+using fs = go.io.fs_package;
 using math = go.math_package;
-using os = go.os_package;
 using path = go.path_package;
 using reflect = go.reflect_package;
 using strconv = go.strconv_package;
@@ -58,7 +57,7 @@ namespace archive
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -84,13 +83,13 @@ namespace archive
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LogicalRemainingByPtr is null || !m_target_is_ptr)
                     return s_LogicalRemainingByVal!(target);
 
-                return s_LogicalRemainingByPtr(m_target_ptr);
+                return s_LogicalRemainingByPtr(m_target_ptr!);
             }
 
             private delegate long PhysicalRemainingByPtr(ptr<T> value);
@@ -104,16 +103,16 @@ namespace archive
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PhysicalRemainingByPtr is null || !m_target_is_ptr)
                     return s_PhysicalRemainingByVal!(target);
 
-                return s_PhysicalRemainingByPtr(m_target_ptr);
+                return s_PhysicalRemainingByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static fileState()
@@ -124,12 +123,12 @@ namespace archive
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("LogicalRemaining");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogicalRemainingByPtr = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByPtr)) as LogicalRemainingByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("LogicalRemaining");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LogicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(LogicalRemainingByVal)) as LogicalRemainingByVal;
 
                 if (s_LogicalRemainingByPtr is null && s_LogicalRemainingByVal is null)
@@ -137,12 +136,12 @@ namespace archive
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("PhysicalRemaining");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PhysicalRemainingByPtr = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByPtr)) as PhysicalRemainingByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("PhysicalRemaining");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PhysicalRemainingByVal = extensionMethod.CreateStaticDelegate(typeof(PhysicalRemainingByVal)) as PhysicalRemainingByVal;
 
                 if (s_PhysicalRemainingByPtr is null && s_PhysicalRemainingByVal is null)

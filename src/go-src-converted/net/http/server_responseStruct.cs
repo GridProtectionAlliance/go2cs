@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:02 UTC
+//     Generated on 2022 March 06 22:23:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -20,8 +19,8 @@ using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
@@ -78,7 +77,7 @@ namespace net
                 this.didCloseNotify = default;
             }
 
-            public response(ref ptr<conn> conn = default, ref ptr<Request> req = default, io.ReadCloser reqBody = default, context.CancelFunc cancelCtx = default, bool wroteHeader = default, bool wroteContinue = default, bool wants10KeepAlive = default, bool wantsClose = default, atomicBool canWriteContinue = default, sync.Mutex writeContinueMu = default, ref ptr<bufio.Writer> w = default, chunkWriter cw = default, Header handlerHeader = default, bool calledHeader = default, long written = default, long contentLength = default, long status = default, bool closeAfterReply = default, bool requestBodyLimitHit = default, slice<@string> trailers = default, atomicBool handlerDone = default, array<byte> dateBuf = default, array<byte> clenBuf = default, array<byte> statusBuf = default, channel<bool> closeNotifyCh = default, int didCloseNotify = default)
+            public response(ref ptr<conn> conn = default, ref ptr<Request> req = default, io.ReadCloser reqBody = default, context.CancelFunc cancelCtx = default, bool wroteHeader = default, bool wroteContinue = default, bool wants10KeepAlive = default, bool wantsClose = default, atomicBool canWriteContinue = default, sync.Mutex writeContinueMu = default, ref ptr<bufio.Writer> w = default, chunkWriter cw = default, Header handlerHeader = default, bool calledHeader = default, long written = default, long contentLength = default, nint status = default, bool closeAfterReply = default, bool requestBodyLimitHit = default, slice<@string> trailers = default, atomicBool handlerDone = default, array<byte> dateBuf = default, array<byte> clenBuf = default, array<byte> statusBuf = default, channel<bool> closeNotifyCh = default, int didCloseNotify = default)
             {
                 this.conn = conn;
                 this.req = req;

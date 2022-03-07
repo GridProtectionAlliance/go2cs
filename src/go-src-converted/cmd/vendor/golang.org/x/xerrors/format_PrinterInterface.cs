@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:07 UTC
+//     Generated on 2022 March 06 23:35:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -52,7 +52,7 @@ namespace x
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -78,13 +78,13 @@ namespace x
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PrintByPtr is null || !m_target_is_ptr)
                     return s_PrintByVal!(target, args);
 
-                return s_PrintByPtr(m_target_ptr, args);
+                return s_PrintByPtr(m_target_ptr!, args);
             }
 
             private delegate bool PrintfByPtr(ptr<T> value, @string format, params object[] args);
@@ -98,13 +98,13 @@ namespace x
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PrintfByPtr is null || !m_target_is_ptr)
                     return s_PrintfByVal!(target, format, args);
 
-                return s_PrintfByPtr(m_target_ptr, format, args);
+                return s_PrintfByPtr(m_target_ptr!, format, args);
             }
 
             private delegate bool DetailByPtr(ptr<T> value);
@@ -118,16 +118,16 @@ namespace x
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_DetailByPtr is null || !m_target_is_ptr)
                     return s_DetailByVal!(target);
 
-                return s_DetailByPtr(m_target_ptr);
+                return s_DetailByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Printer()
@@ -138,12 +138,12 @@ namespace x
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintByPtr)) as PrintByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Print");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintByVal = extensionMethod.CreateStaticDelegate(typeof(PrintByVal)) as PrintByVal;
 
                 if (s_PrintByPtr is null && s_PrintByVal is null)
@@ -151,12 +151,12 @@ namespace x
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Printf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintfByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintfByPtr)) as PrintfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Printf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PrintfByVal = extensionMethod.CreateStaticDelegate(typeof(PrintfByVal)) as PrintfByVal;
 
                 if (s_PrintfByPtr is null && s_PrintfByVal is null)
@@ -164,12 +164,12 @@ namespace x
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Detail");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DetailByPtr = extensionMethod.CreateStaticDelegate(typeof(DetailByPtr)) as DetailByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Detail");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_DetailByVal = extensionMethod.CreateStaticDelegate(typeof(DetailByVal)) as DetailByVal;
 
                 if (s_DetailByPtr is null && s_DetailByVal is null)

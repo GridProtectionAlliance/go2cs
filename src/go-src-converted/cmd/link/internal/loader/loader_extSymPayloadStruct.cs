@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:48:52 UTC
+//     Generated on 2022 March 06 23:20:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,9 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using bio = go.cmd.@internal.bio_package;
-using goobj2 = go.cmd.@internal.goobj2_package;
+using goobj = go.cmd.@internal.goobj_package;
 using obj = go.cmd.@internal.obj_package;
 using objabi = go.cmd.@internal.objabi_package;
 using sys = go.cmd.@internal.sys_package;
@@ -26,7 +25,6 @@ using log = go.log_package;
 using bits = go.math.bits_package;
 using os = go.os_package;
 using sort = go.sort_package;
-using strconv = go.strconv_package;
 using strings = go.strings_package;
 using go;
 
@@ -50,23 +48,19 @@ namespace @internal
                 this.ver = default;
                 this.kind = default;
                 this.objidx = default;
-                this.gotype = default;
                 this.relocs = default;
-                this.reltypes = default;
                 this.data = default;
                 this.auxs = default;
             }
 
-            public extSymPayload(@string name = default, long size = default, long ver = default, sym.SymKind kind = default, uint objidx = default, Sym gotype = default, slice<goobj2.Reloc> relocs = default, slice<objabi.RelocType> reltypes = default, slice<byte> data = default, slice<goobj2.Aux> auxs = default)
+            public extSymPayload(@string name = default, long size = default, nint ver = default, sym.SymKind kind = default, uint objidx = default, slice<goobj.Reloc> relocs = default, slice<byte> data = default, slice<goobj.Aux> auxs = default)
             {
                 this.name = name;
                 this.size = size;
                 this.ver = ver;
                 this.kind = kind;
                 this.objidx = objidx;
-                this.gotype = gotype;
                 this.relocs = relocs;
-                this.reltypes = reltypes;
                 this.data = data;
                 this.auxs = auxs;
             }
@@ -91,7 +85,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static extSymPayload extSymPayload_cast(dynamic value)
         {
-            return new extSymPayload(value.name, value.size, value.ver, value.kind, value.objidx, value.gotype, value.relocs, value.reltypes, value.data, value.auxs);
+            return new extSymPayload(value.name, value.size, value.ver, value.kind, value.objidx, value.relocs, value.data, value.auxs);
         }
     }
 }}}}

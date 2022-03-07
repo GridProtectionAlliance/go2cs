@@ -8,64 +8,49 @@
 // logical network interfaces and interface addresses on Solaris.
 //
 // The package supports Solaris 11 or above.
-// package lif -- go2cs converted at 2020 October 09 04:51:48 UTC
+// package lif -- go2cs converted at 2022 March 06 22:16:06 UTC
 // import "golang.org/x/net/lif" ==> using lif = go.golang.org.x.net.lif_package
 // Original source: C:\Users\ritchie\go\src\golang.org\x\net\lif\lif.go
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class lif_package
-    {
-        private partial struct endpoint
-        {
-            public long af;
-            public System.UIntPtr s;
-        }
+namespace go.golang.org.x.net;
 
-        private static error close(this ptr<endpoint> _addr_ep)
-        {
-            ref endpoint ep = ref _addr_ep.val;
+public static partial class lif_package {
 
-            return error.As(syscall.Close(int(ep.s)))!;
-        }
+private partial struct endpoint {
+    public nint af;
+    public System.UIntPtr s;
+}
 
-        private static (slice<endpoint>, error) newEndpoints(long af)
-        {
-            slice<endpoint> _p0 = default;
-            error _p0 = default!;
+private static error close(this ptr<endpoint> _addr_ep) {
+    ref endpoint ep = ref _addr_ep.val;
 
-            error lastErr = default!;
-            slice<endpoint> eps = default;
-            long afs = new slice<long>(new long[] { sysAF_INET, sysAF_INET6 });
-            if (af != sysAF_UNSPEC)
-            {
-                afs = new slice<long>(new long[] { af });
-            }
+    return error.As(syscall.Close(int(ep.s)))!;
+}
 
-            foreach (var (_, af) in afs)
-            {
-                var (s, err) = syscall.Socket(af, sysSOCK_DGRAM, 0L);
-                if (err != null)
-                {
-                    lastErr = error.As(err)!;
-                    continue;
-                }
+private static (slice<endpoint>, error) newEndpoints(nint af) {
+    slice<endpoint> _p0 = default;
+    error _p0 = default!;
 
-                eps = append(eps, new endpoint(af:af,s:uintptr(s)));
-
-            }
-            if (len(eps) == 0L)
-            {
-                return (null, error.As(lastErr)!);
-            }
-
-            return (eps, error.As(null!)!);
-
-        }
+    error lastErr = default!;
+    slice<endpoint> eps = default;
+    nint afs = new slice<nint>(new nint[] { sysAF_INET, sysAF_INET6 });
+    if (af != sysAF_UNSPEC) {
+        afs = new slice<nint>(new nint[] { af });
     }
-}}}}
+    foreach (var (_, af) in afs) {
+        var (s, err) = syscall.Socket(af, sysSOCK_DGRAM, 0);
+        if (err != null) {
+            lastErr = error.As(err)!;
+            continue;
+        }
+        eps = append(eps, new endpoint(af:af,s:uintptr(s)));
+
+    }    if (len(eps) == 0) {
+        return (null, error.As(lastErr)!);
+    }
+    return (eps, error.As(null!)!);
+
+}
+
+} // end lif_package

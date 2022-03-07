@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:47 UTC
+//     Generated on 2022 March 06 22:17:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using sync = go.sync_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace math
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,56 +75,16 @@ namespace math
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint64ByPtr is null || !m_target_is_ptr)
                     return s_Uint64ByVal!(target);
 
-                return s_Uint64ByPtr(m_target_ptr);
-            }
-
-            private delegate long Int63ByPtr(ptr<T> value);
-            private delegate long Int63ByVal(T value);
-
-            private static readonly Int63ByPtr? s_Int63ByPtr;
-            private static readonly Int63ByVal? s_Int63ByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Int63()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_Int63ByPtr is null || !m_target_is_ptr)
-                    return s_Int63ByVal!(target);
-
-                return s_Int63ByPtr(m_target_ptr);
-            }
-
-            private delegate long SeedByPtr(ptr<T> value, long seed);
-            private delegate long SeedByVal(T value, long seed);
-
-            private static readonly SeedByPtr? s_SeedByPtr;
-            private static readonly SeedByVal? s_SeedByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public long Seed(long seed)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_SeedByPtr is null || !m_target_is_ptr)
-                    return s_SeedByVal!(target, seed);
-
-                return s_SeedByPtr(m_target_ptr, seed);
+                return s_Uint64ByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Source64()
@@ -136,42 +95,16 @@ namespace math
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint64ByPtr)) as Uint64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
 
                 if (s_Uint64ByPtr is null && s_Uint64ByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Source64.Uint64 method", new Exception("Uint64"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Int63");
-
-                if (!(extensionMethod is null))
-                    s_Int63ByPtr = extensionMethod.CreateStaticDelegate(typeof(Int63ByPtr)) as Int63ByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Int63");
-
-                if (!(extensionMethod is null))
-                    s_Int63ByVal = extensionMethod.CreateStaticDelegate(typeof(Int63ByVal)) as Int63ByVal;
-
-                if (s_Int63ByPtr is null && s_Int63ByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Source64.Int63 method", new Exception("Int63"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Seed");
-
-                if (!(extensionMethod is null))
-                    s_SeedByPtr = extensionMethod.CreateStaticDelegate(typeof(SeedByPtr)) as SeedByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Seed");
-
-                if (!(extensionMethod is null))
-                    s_SeedByVal = extensionMethod.CreateStaticDelegate(typeof(SeedByVal)) as SeedByVal;
-
-                if (s_SeedByPtr is null && s_SeedByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Source64.Seed method", new Exception("Seed"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -11,38 +11,29 @@
 // meanings of bits 0-15 or wasting time and space shifting bits 16-31 for
 // devices that don't use them.
 
-// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:30 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_freebsd.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_freebsd.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Major returns the major component of a FreeBSD device number.
-        public static uint Major(ulong dev)
-        {
-            return uint32((dev >> (int)(8L)) & 0xffUL);
-        }
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        // Minor returns the minor component of a FreeBSD device number.
-        public static uint Minor(ulong dev)
-        {
-            return uint32(dev & 0xffff00ffUL);
-        }
+public static partial class unix_package {
 
-        // Mkdev returns a FreeBSD device number generated from the given major and
-        // minor components.
-        public static ulong Mkdev(uint major, uint minor)
-        {
-            return (uint64(major) << (int)(8L)) | uint64(minor);
-        }
-    }
-}}}}}}
+    // Major returns the major component of a FreeBSD device number.
+public static uint Major(ulong dev) {
+    return uint32((dev >> 8) & 0xff);
+}
+
+// Minor returns the minor component of a FreeBSD device number.
+public static uint Minor(ulong dev) {
+    return uint32(dev & 0xffff00ff);
+}
+
+// Mkdev returns a FreeBSD device number generated from the given major and
+// minor components.
+public static ulong Mkdev(uint major, uint minor) {
+    return (uint64(major) << 8) | uint64(minor);
+}
+
+} // end unix_package

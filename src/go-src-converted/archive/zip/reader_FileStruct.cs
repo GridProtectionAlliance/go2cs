@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:10 UTC
+//     Generated on 2022 March 06 22:31:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using hash = go.hash_package;
 using crc32 = go.hash.crc32_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
+using path = go.path_package;
+using sort = go.sort_package;
+using strings = go.strings_package;
+using sync = go.sync_package;
 using time = go.time_package;
 using go;
 
@@ -39,17 +43,19 @@ namespace archive
                 this.FileHeader = default;
                 this.zip = default;
                 this.zipr = default;
-                this.zipsize = default;
                 this.headerOffset = default;
+                this.zip64 = default;
+                this.descErr = default;
             }
 
-            public File(FileHeader FileHeader = default, ref ptr<Reader> zip = default, io.ReaderAt zipr = default, long zipsize = default, long headerOffset = default)
+            public File(FileHeader FileHeader = default, ref ptr<Reader> zip = default, io.ReaderAt zipr = default, long headerOffset = default, bool zip64 = default, error descErr = default)
             {
                 this.FileHeader = FileHeader;
                 this.zip = zip;
                 this.zipr = zipr;
-                this.zipsize = zipsize;
                 this.headerOffset = headerOffset;
+                this.zip64 = zip64;
+                this.descErr = descErr;
             }
 
             // Enable comparisons between nil and File struct
@@ -72,7 +78,7 @@ namespace archive
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static File File_cast(dynamic value)
         {
-            return new File(value.FileHeader, ref value.zip, value.zipr, value.zipsize, value.headerOffset);
+            return new File(value.FileHeader, ref value.zip, value.zipr, value.headerOffset, value.zip64, value.descErr);
         }
     }
 }}

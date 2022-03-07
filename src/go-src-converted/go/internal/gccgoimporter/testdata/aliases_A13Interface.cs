@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:54 UTC
+//     Generated on 2022 March 06 23:32:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,16 +76,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_mByPtr is null || !m_target_is_ptr)
                     return s_mByVal!(target);
 
-                return s_mByPtr(m_target_ptr);
+                return s_mByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static A13()
@@ -96,12 +96,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("m");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_mByPtr = extensionMethod.CreateStaticDelegate(typeof(mByPtr)) as mByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("m");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_mByVal = extensionMethod.CreateStaticDelegate(typeof(mByVal)) as mByVal;
 
                 if (s_mByPtr is null && s_mByVal is null)

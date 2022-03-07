@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:18 UTC
+//     Generated on 2022 March 06 23:18:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,15 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using zip = go.archive.zip_package;
 using bytes = go.bytes_package;
+using context = go.context_package;
+using sha256 = go.crypto.sha256_package;
+using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using sort = go.sort_package;
@@ -26,10 +28,11 @@ using strings = go.strings_package;
 using sync = go.sync_package;
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
+using fsys = go.cmd.go.@internal.fsys_package;
 using lockedfile = go.cmd.go.@internal.lockedfile_package;
 using par = go.cmd.go.@internal.par_package;
-using renameio = go.cmd.go.@internal.renameio_package;
 using robustio = go.cmd.go.@internal.robustio_package;
+using trace = go.cmd.go.@internal.trace_package;
 using module = go.golang.org.x.mod.module_package;
 using dirhash = go.golang.org.x.mod.sumdb.dirhash_package;
 using modzip = go.golang.org.x.mod.zip_package;
@@ -54,7 +57,7 @@ namespace @internal
                 this.mode = default;
             }
 
-            public pathMode(@string path = default, os.FileMode mode = default)
+            public pathMode(@string path = default, fs.FileMode mode = default)
             {
                 this.path = path;
                 this.mode = mode;

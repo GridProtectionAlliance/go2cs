@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:04:17 UTC
+//     Generated on 2022 March 06 23:34:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using ast = go.go.ast_package;
 using token = go.go.token_package;
@@ -49,7 +48,7 @@ namespace passes
                 this.level = default;
             }
 
-            public uniqueName(@string key = default, @string name = default, long level = default)
+            public uniqueName(@string key = default, @string name = default, nint level = default)
             {
                 this.key = key;
                 this.name = name;

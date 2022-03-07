@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:44:52 UTC
+//     Generated on 2022 March 06 23:15:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -50,7 +49,7 @@ namespace cmd
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,7 +75,7 @@ namespace cmd
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExportedMethodByPtr is null || !m_target_is_ptr)
@@ -85,9 +84,8 @@ namespace cmd
                     return;
                 }
 
-                s_ExportedMethodByPtr(m_target_ptr);
+                s_ExportedMethodByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void unexportedMethodByPtr(ptr<T> value);
@@ -101,7 +99,7 @@ namespace cmd
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_unexportedMethodByPtr is null || !m_target_is_ptr)
@@ -110,52 +108,11 @@ namespace cmd
                     return;
                 }
 
-                s_unexportedMethodByPtr(m_target_ptr);
+                s_unexportedMethodByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate (long, error) ReadByPtr(ptr<T> value, slice<byte> p);
-            private delegate (long, error) ReadByVal(T value, slice<byte> p);
-
-            private static readonly ReadByPtr? s_ReadByPtr;
-            private static readonly ReadByVal? s_ReadByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Read(slice<byte> p)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ReadByPtr is null || !m_target_is_ptr)
-                    return s_ReadByVal!(target, p);
-
-                return s_ReadByPtr(m_target_ptr, p);
-            }
-
-            private delegate @string ErrorByPtr(ptr<T> value);
-            private delegate @string ErrorByVal(T value);
-
-            private static readonly ErrorByPtr? s_ErrorByPtr;
-            private static readonly ErrorByVal? s_ErrorByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Error()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ErrorByPtr is null || !m_target_is_ptr)
-                    return s_ErrorByVal!(target);
-
-                return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static ExportedInterface()
@@ -166,12 +123,12 @@ namespace cmd
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ExportedMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExportedMethodByPtr = extensionMethod.CreateStaticDelegate(typeof(ExportedMethodByPtr)) as ExportedMethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ExportedMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExportedMethodByVal = extensionMethod.CreateStaticDelegate(typeof(ExportedMethodByVal)) as ExportedMethodByVal;
 
                 if (s_ExportedMethodByPtr is null && s_ExportedMethodByVal is null)
@@ -179,42 +136,16 @@ namespace cmd
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("unexportedMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_unexportedMethodByPtr = extensionMethod.CreateStaticDelegate(typeof(unexportedMethodByPtr)) as unexportedMethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("unexportedMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_unexportedMethodByVal = extensionMethod.CreateStaticDelegate(typeof(unexportedMethodByVal)) as unexportedMethodByVal;
 
                 if (s_unexportedMethodByPtr is null && s_unexportedMethodByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement ExportedInterface.unexportedMethod method", new Exception("unexportedMethod"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByPtr = extensionMethod.CreateStaticDelegate(typeof(ReadByPtr)) as ReadByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Read");
-
-                if (!(extensionMethod is null))
-                    s_ReadByVal = extensionMethod.CreateStaticDelegate(typeof(ReadByVal)) as ReadByVal;
-
-                if (s_ReadByPtr is null && s_ReadByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ExportedInterface.Read method", new Exception("Read"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-
-                if (s_ErrorByPtr is null && s_ErrorByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement ExportedInterface.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

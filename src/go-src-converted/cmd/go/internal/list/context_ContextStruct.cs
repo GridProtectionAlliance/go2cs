@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:15 UTC
+//     Generated on 2022 March 06 23:16:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using build = go.go.build_package;
 using go;
 
@@ -39,11 +38,12 @@ namespace @internal
                 this.UseAllFiles = default;
                 this.Compiler = default;
                 this.BuildTags = default;
+                this.ToolTags = default;
                 this.ReleaseTags = default;
                 this.InstallSuffix = default;
             }
 
-            public Context(@string GOARCH = default, @string GOOS = default, @string GOROOT = default, @string GOPATH = default, bool CgoEnabled = default, bool UseAllFiles = default, @string Compiler = default, slice<@string> BuildTags = default, slice<@string> ReleaseTags = default, @string InstallSuffix = default)
+            public Context(@string GOARCH = default, @string GOOS = default, @string GOROOT = default, @string GOPATH = default, bool CgoEnabled = default, bool UseAllFiles = default, @string Compiler = default, slice<@string> BuildTags = default, slice<@string> ToolTags = default, slice<@string> ReleaseTags = default, @string InstallSuffix = default)
             {
                 this.GOARCH = GOARCH;
                 this.GOOS = GOOS;
@@ -53,6 +53,7 @@ namespace @internal
                 this.UseAllFiles = UseAllFiles;
                 this.Compiler = Compiler;
                 this.BuildTags = BuildTags;
+                this.ToolTags = ToolTags;
                 this.ReleaseTags = ReleaseTags;
                 this.InstallSuffix = InstallSuffix;
             }
@@ -77,7 +78,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Context Context_cast(dynamic value)
         {
-            return new Context(value.GOARCH, value.GOOS, value.GOROOT, value.GOPATH, value.CgoEnabled, value.UseAllFiles, value.Compiler, value.BuildTags, value.ReleaseTags, value.InstallSuffix);
+            return new Context(value.GOARCH, value.GOOS, value.GOROOT, value.GOPATH, value.CgoEnabled, value.UseAllFiles, value.Compiler, value.BuildTags, value.ToolTags, value.ReleaseTags, value.InstallSuffix);
         }
     }
 }}}}

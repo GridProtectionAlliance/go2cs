@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:46 UTC
+//     Generated on 2022 March 06 22:32:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -24,7 +26,7 @@ namespace @internal
         {
             // Value of the ArchFamily struct
             private readonly byte m_value;
-
+            
             public ArchFamily(byte value) => m_value = value;
 
             // Enable implicit conversions between byte and ArchFamily struct

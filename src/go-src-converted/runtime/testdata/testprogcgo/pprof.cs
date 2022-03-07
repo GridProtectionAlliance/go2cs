@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2020 October 09 05:01:02 UTC
-// Original source: C:\Go\src\runtime\testdata\testprogcgo\pprof.go
+// package main -- go2cs converted at 2022 March 06 22:26:16 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\pprof.go
 // Run a slow C function saving a CPU profile.
 
 /*
@@ -111,78 +111,66 @@ int getCpuHogCount() {
 
 
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using runtime = go.runtime_package;
 using pprof = go.runtime.pprof_package;
 using time = go.time_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("CgoPprof", CgoPprof);
-        }
+namespace go;
 
-        public static void CgoPprof()
-        {
-            runtime.SetCgoTraceback(0L, @unsafe.Pointer(C.pprofCgoTraceback), null, null);
+public static partial class main_package {
 
-            var (f, err) = ioutil.TempFile("", "prof");
-            if (err != null)
-            {
-                fmt.Fprintln(os.Stderr, err);
-                os.Exit(2L);
-            }
-
-            {
-                var err__prev1 = err;
-
-                var err = pprof.StartCPUProfile(f);
-
-                if (err != null)
-                {
-                    fmt.Fprintln(os.Stderr, err);
-                    os.Exit(2L);
-                }
-
-                err = err__prev1;
-
-            }
-
-
-            var t0 = time.Now();
-            while (C.getCpuHogCount() < 2L && time.Since(t0) < time.Second)
-            {
-                C.cpuHog();
-            }
-
-
-            pprof.StopCPUProfile();
-
-            var name = f.Name();
-            {
-                var err__prev1 = err;
-
-                err = f.Close();
-
-                if (err != null)
-                {
-                    fmt.Fprintln(os.Stderr, err);
-                    os.Exit(2L);
-                }
-
-                err = err__prev1;
-
-            }
-
-
-            fmt.Println(name);
-
-        }
-    }
+private static void init() {
+    register("CgoPprof", CgoPprof);
 }
+
+public static void CgoPprof() {
+    runtime.SetCgoTraceback(0, @unsafe.Pointer(C.pprofCgoTraceback), null, null);
+
+    var (f, err) = os.CreateTemp("", "prof");
+    if (err != null) {
+        fmt.Fprintln(os.Stderr, err);
+        os.Exit(2);
+    }
+    {
+        var err__prev1 = err;
+
+        var err = pprof.StartCPUProfile(f);
+
+        if (err != null) {
+            fmt.Fprintln(os.Stderr, err);
+            os.Exit(2);
+        }
+        err = err__prev1;
+
+    }
+
+
+    var t0 = time.Now();
+    while (C.getCpuHogCount() < 2 && time.Since(t0) < time.Second) {
+        C.cpuHog();
+    }
+
+    pprof.StopCPUProfile();
+
+    var name = f.Name();
+    {
+        var err__prev1 = err;
+
+        err = f.Close();
+
+        if (err != null) {
+            fmt.Fprintln(os.Stderr, err);
+            os.Exit(2);
+        }
+        err = err__prev1;
+
+    }
+
+
+    fmt.Println(name);
+
+}
+
+} // end main_package

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Link, typically invoked as ``go tool link,'' reads the Go archive or object
+Link, typically invoked as ``go tool link'', reads the Go archive or object
 for a package main, along with its dependencies, and combines them
 into an executable binary.
 
@@ -126,7 +126,7 @@ Flags:
     -w
         Omit the DWARF symbol table.
 */
-// package main -- go2cs converted at 2020 October 09 05:48:10 UTC
-// Original source: C:\Go\src\cmd\link\doc.go
-    }
+// package main -- go2cs converted at 2022 March 06 23:19:48 UTC
+// Original source: C:\Program Files\Go\src\cmd\link\doc.go
 
+} // end main_package

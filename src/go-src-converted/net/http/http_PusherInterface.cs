@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:57:45 UTC
+//     Generated on 2022 March 06 22:22:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -55,7 +54,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,16 +80,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_PushByPtr is null || !m_target_is_ptr)
                     return s_PushByVal!(target, target, opts);
 
-                return s_PushByPtr(m_target_ptr, target, opts);
+                return s_PushByPtr(m_target_ptr!, target, opts);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Pusher()
@@ -101,12 +100,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByPtr = extensionMethod.CreateStaticDelegate(typeof(PushByPtr)) as PushByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Push");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_PushByVal = extensionMethod.CreateStaticDelegate(typeof(PushByVal)) as PushByVal;
 
                 if (s_PushByPtr is null && s_PushByVal is null)

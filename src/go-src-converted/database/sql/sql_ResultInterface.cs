@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:30 UTC
+//     Generated on 2022 March 06 23:35:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
@@ -61,7 +60,7 @@ namespace database
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,13 +86,13 @@ namespace database
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LastInsertIdByPtr is null || !m_target_is_ptr)
                     return s_LastInsertIdByVal!(target);
 
-                return s_LastInsertIdByPtr(m_target_ptr);
+                return s_LastInsertIdByPtr(m_target_ptr!);
             }
 
             private delegate (long, error) RowsAffectedByPtr(ptr<T> value);
@@ -107,16 +106,16 @@ namespace database
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RowsAffectedByPtr is null || !m_target_is_ptr)
                     return s_RowsAffectedByVal!(target);
 
-                return s_RowsAffectedByPtr(m_target_ptr);
+                return s_RowsAffectedByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Result()
@@ -127,12 +126,12 @@ namespace database
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("LastInsertId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LastInsertIdByPtr = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByPtr)) as LastInsertIdByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("LastInsertId");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LastInsertIdByVal = extensionMethod.CreateStaticDelegate(typeof(LastInsertIdByVal)) as LastInsertIdByVal;
 
                 if (s_LastInsertIdByPtr is null && s_LastInsertIdByVal is null)
@@ -140,12 +139,12 @@ namespace database
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RowsAffected");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RowsAffectedByPtr = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByPtr)) as RowsAffectedByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RowsAffected");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RowsAffectedByVal = extensionMethod.CreateStaticDelegate(typeof(RowsAffectedByVal)) as RowsAffectedByVal;
 
                 if (s_RowsAffectedByPtr is null && s_RowsAffectedByVal is null)

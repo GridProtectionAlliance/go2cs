@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:54 UTC
+//     Generated on 2022 March 06 23:25:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strings = go.strings_package;
 using go;
@@ -37,12 +36,14 @@ namespace ppc64
             {
                 this.Offs = default;
                 this.Bits = default;
+                this.Word = default;
             }
 
-            public BitField(byte Offs = default, byte Bits = default)
+            public BitField(byte Offs = default, byte Bits = default, byte Word = default)
             {
                 this.Offs = Offs;
                 this.Bits = Bits;
+                this.Word = Word;
             }
 
             // Enable comparisons between nil and BitField struct
@@ -65,7 +66,7 @@ namespace ppc64
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static BitField BitField_cast(dynamic value)
         {
-            return new BitField(value.Offs, value.Bits);
+            return new BitField(value.Offs, value.Bits, value.Word);
         }
     }
 }}}}}}}

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:10 UTC
+//     Generated on 2022 March 06 22:41:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using flag = go.flag_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
@@ -41,7 +40,7 @@ namespace go
                 this.result = default;
             }
 
-            public B(common common = default, long N = default, InternalBenchmark benchmark = default, long bytes = default, bool timerOn = default, BenchmarkResult result = default)
+            public B(common common = default, nint N = default, InternalBenchmark benchmark = default, long bytes = default, bool timerOn = default, BenchmarkResult result = default)
             {
                 this.common = common;
                 this.N = N;

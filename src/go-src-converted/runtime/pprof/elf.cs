@@ -2,189 +2,162 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2020 October 09 04:49:21 UTC
+// package pprof -- go2cs converted at 2022 March 06 22:14:35 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
-// Original source: C:\Go\src\runtime\pprof\elf.go
+// Original source: C:\Program Files\Go\src\runtime\pprof\elf.go
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using os = go.os_package;
-using static go.builtin;
 
-namespace go {
-namespace runtime
-{
-    public static partial class pprof_package
+namespace go.runtime;
+
+public static partial class pprof_package {
+
+private static var errBadELF = errors.New("malformed ELF binary");private static var errNoBuildID = errors.New("no NT_GNU_BUILD_ID found in ELF binary");
+
+// elfBuildID returns the GNU build ID of the named ELF binary,
+// without introducing a dependency on debug/elf and its dependencies.
+private static (@string, error) elfBuildID(@string file) => func((defer, _, _) => {
+    @string _p0 = default;
+    error _p0 = default!;
+
+    var buf = make_slice<byte>(256);
+    var (f, err) = os.Open(file);
+    if (err != null) {
+        return ("", error.As(err)!);
+    }
+    defer(f.Close());
+
     {
-        private static var errBadELF = errors.New("malformed ELF binary");        private static var errNoBuildID = errors.New("no NT_GNU_BUILD_ID found in ELF binary");
+        var (_, err) = f.ReadAt(buf[..(int)64], 0);
 
-        // elfBuildID returns the GNU build ID of the named ELF binary,
-        // without introducing a dependency on debug/elf and its dependencies.
-        private static (@string, error) elfBuildID(@string file) => func((defer, _, __) =>
+        if (err != null) {
+            return ("", error.As(err)!);
+        }
+    } 
+
+    // ELF file begins with \x7F E L F.
+    if (buf[0] != 0x7F || buf[1] != 'E' || buf[2] != 'L' || buf[3] != 'F') {
+        return ("", error.As(errBadELF)!);
+    }
+    binary.ByteOrder byteOrder = default;
+    switch (buf[5]) {
+        case 1: // little-endian
+            byteOrder = binary.LittleEndian;
+            break;
+        case 2: // big-endian
+            byteOrder = binary.BigEndian;
+            break;
+        default: 
+            return ("", error.As(errBadELF)!);
+            break;
+    }
+
+    nint shnum = default;
+    long shoff = default;    long shentsize = default;
+
+    switch (buf[4]) {
+        case 1: // 32-bit file header
+            shoff = int64(byteOrder.Uint32(buf[(int)32..]));
+            shentsize = int64(byteOrder.Uint16(buf[(int)46..]));
+            if (shentsize != 40) {
+                return ("", error.As(errBadELF)!);
+            }
+            shnum = int(byteOrder.Uint16(buf[(int)48..]));
+
+            break;
+        case 2: // 64-bit file header
+            shoff = int64(byteOrder.Uint64(buf[(int)40..]));
+            shentsize = int64(byteOrder.Uint16(buf[(int)58..]));
+            if (shentsize != 64) {
+                return ("", error.As(errBadELF)!);
+            }
+            shnum = int(byteOrder.Uint16(buf[(int)60..]));
+
+            break;
+        default: 
+            return ("", error.As(errBadELF)!);
+            break;
+    }
+
+    for (nint i = 0; i < shnum; i++) {
         {
-            @string _p0 = default;
-            error _p0 = default!;
+            (_, err) = f.ReadAt(buf[..(int)shentsize], shoff + int64(i) * shentsize);
 
-            var buf = make_slice<byte>(256L);
-            var (f, err) = os.Open(file);
-            if (err != null)
-            {
+            if (err != null) {
                 return ("", error.As(err)!);
             }
 
-            defer(f.Close());
+        }
 
+        {
+            var typ = byteOrder.Uint32(buf[(int)4..]);
+
+            if (typ != 7) { // SHT_NOTE
+                continue;
+
+            }
+
+        }
+
+        long off = default;        long size = default;
+
+        if (shentsize == 40) { 
+            // 32-bit section header
+            off = int64(byteOrder.Uint32(buf[(int)16..]));
+            size = int64(byteOrder.Uint32(buf[(int)20..]));
+
+        }
+        else
+ { 
+            // 64-bit section header
+            off = int64(byteOrder.Uint64(buf[(int)24..]));
+            size = int64(byteOrder.Uint64(buf[(int)32..]));
+
+        }
+        size += off;
+        while (off < size) {
             {
-                var (_, err) = f.ReadAt(buf[..64L], 0L);
+                (_, err) = f.ReadAt(buf[..(int)16], off);
 
-                if (err != null)
-                {
+                if (err != null) { // room for header + name GNU\x00
                     return ("", error.As(err)!);
-                } 
 
-                // ELF file begins with \x7F E L F.
+                }
 
-            } 
+            }
 
-            // ELF file begins with \x7F E L F.
-            if (buf[0L] != 0x7FUL || buf[1L] != 'E' || buf[2L] != 'L' || buf[3L] != 'F')
-            {
+            var nameSize = int(byteOrder.Uint32(buf[(int)0..]));
+            var descSize = int(byteOrder.Uint32(buf[(int)4..]));
+            var noteType = int(byteOrder.Uint32(buf[(int)8..]));
+            var descOff = off + int64(12 + (nameSize + 3) & ~3);
+            off = descOff + int64((descSize + 3) & ~3);
+            if (nameSize != 4 || noteType != 3 || buf[12] != 'G' || buf[13] != 'N' || buf[14] != 'U' || buf[15] != '\x00') { // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
+                continue;
+
+            }
+
+            if (descSize > len(buf)) {
                 return ("", error.As(errBadELF)!);
             }
 
-            binary.ByteOrder byteOrder = default;
-            switch (buf[5L])
             {
-                case 1L: // little-endian
-                    byteOrder = binary.LittleEndian;
-                    break;
-                case 2L: // big-endian
-                    byteOrder = binary.BigEndian;
-                    break;
-                default: 
-                    return ("", error.As(errBadELF)!);
-                    break;
-            }
+                (_, err) = f.ReadAt(buf[..(int)descSize], descOff);
 
-            long shnum = default;
-            long shoff = default;            long shentsize = default;
-
-            switch (buf[4L])
-            {
-                case 1L: // 32-bit file header
-                    shoff = int64(byteOrder.Uint32(buf[32L..]));
-                    shentsize = int64(byteOrder.Uint16(buf[46L..]));
-                    if (shentsize != 40L)
-                    {
-                        return ("", error.As(errBadELF)!);
-                    }
-
-                    shnum = int(byteOrder.Uint16(buf[48L..]));
-                    break;
-                case 2L: // 64-bit file header
-                    shoff = int64(byteOrder.Uint64(buf[40L..]));
-                    shentsize = int64(byteOrder.Uint16(buf[58L..]));
-                    if (shentsize != 64L)
-                    {
-                        return ("", error.As(errBadELF)!);
-                    }
-
-                    shnum = int(byteOrder.Uint16(buf[60L..]));
-                    break;
-                default: 
-                    return ("", error.As(errBadELF)!);
-                    break;
-            }
-
-            for (long i = 0L; i < shnum; i++)
-            {
-                {
-                    (_, err) = f.ReadAt(buf[..shentsize], shoff + int64(i) * shentsize);
-
-                    if (err != null)
-                    {
-                        return ("", error.As(err)!);
-                    }
-
+                if (err != null) {
+                    return ("", error.As(err)!);
                 }
-
-                {
-                    var typ = byteOrder.Uint32(buf[4L..]);
-
-                    if (typ != 7L)
-                    { // SHT_NOTE
-                        continue;
-
-                    }
-
-                }
-
-                long off = default;                long size = default;
-
-                if (shentsize == 40L)
-                { 
-                    // 32-bit section header
-                    off = int64(byteOrder.Uint32(buf[16L..]));
-                    size = int64(byteOrder.Uint32(buf[20L..]));
-
-                }
-                else
-                { 
-                    // 64-bit section header
-                    off = int64(byteOrder.Uint64(buf[24L..]));
-                    size = int64(byteOrder.Uint64(buf[32L..]));
-
-                }
-
-                size += off;
-                while (off < size)
-                {
-                    {
-                        (_, err) = f.ReadAt(buf[..16L], off);
-
-                        if (err != null)
-                        { // room for header + name GNU\x00
-                            return ("", error.As(err)!);
-
-                        }
-
-                    }
-
-                    var nameSize = int(byteOrder.Uint32(buf[0L..]));
-                    var descSize = int(byteOrder.Uint32(buf[4L..]));
-                    var noteType = int(byteOrder.Uint32(buf[8L..]));
-                    var descOff = off + int64(12L + (nameSize + 3L) & ~3L);
-                    off = descOff + int64((descSize + 3L) & ~3L);
-                    if (nameSize != 4L || noteType != 3L || buf[12L] != 'G' || buf[13L] != 'N' || buf[14L] != 'U' || buf[15L] != '\x00')
-                    { // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
-                        continue;
-
-                    }
-
-                    if (descSize > len(buf))
-                    {
-                        return ("", error.As(errBadELF)!);
-                    }
-
-                    {
-                        (_, err) = f.ReadAt(buf[..descSize], descOff);
-
-                        if (err != null)
-                        {
-                            return ("", error.As(err)!);
-                        }
-
-                    }
-
-                    return (fmt.Sprintf("%x", buf[..descSize]), error.As(null!)!);
-
-                }
-
 
             }
 
-            return ("", error.As(errNoBuildID)!);
+            return (fmt.Sprintf("%x", buf[..(int)descSize]), error.As(null!)!);
 
-        });
+        }
+
     }
-}}
+    return ("", error.As(errNoBuildID)!);
+
+});
+
+} // end pprof_package

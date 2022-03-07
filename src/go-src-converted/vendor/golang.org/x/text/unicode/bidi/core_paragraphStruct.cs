@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:08:00 UTC
+//     Generated on 2022 March 06 23:38:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using fmt = go.fmt_package;
 using log = go.log_package;
 using go;
 
@@ -43,7 +43,7 @@ namespace unicode
                 this.matchingIsolateInitiator = default;
             }
 
-            public paragraph(slice<Class> initialTypes = default, slice<bracketType> pairTypes = default, slice<int> pairValues = default, level embeddingLevel = default, slice<Class> resultTypes = default, slice<level> resultLevels = default, slice<long> matchingPDI = default, slice<long> matchingIsolateInitiator = default)
+            public paragraph(slice<Class> initialTypes = default, slice<bracketType> pairTypes = default, slice<int> pairValues = default, level embeddingLevel = default, slice<Class> resultTypes = default, slice<level> resultLevels = default, slice<nint> matchingPDI = default, slice<nint> matchingIsolateInitiator = default)
             {
                 this.initialTypes = initialTypes;
                 this.pairTypes = pairTypes;

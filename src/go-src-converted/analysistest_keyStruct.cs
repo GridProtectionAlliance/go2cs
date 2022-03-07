@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:01:20 UTC
+//     Generated on 2022 March 06 23:31:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using format = go.go.format_package;
@@ -58,7 +57,7 @@ namespace analysis
                 this.line = default;
             }
 
-            public key(@string file = default, long line = default)
+            public key(@string file = default, nint line = default)
             {
                 this.file = file;
                 this.line = line;

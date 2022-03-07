@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:25 UTC
+//     Generated on 2022 March 06 22:23:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using syntax = go.regexp.syntax_package;
 using sync = go.sync_package;
 
@@ -33,7 +32,7 @@ namespace go
                 this.pos = default;
             }
 
-            public job(uint pc = default, bool arg = default, long pos = default)
+            public job(uint pc = default, bool arg = default, nint pos = default)
             {
                 this.pc = pc;
                 this.arg = arg;

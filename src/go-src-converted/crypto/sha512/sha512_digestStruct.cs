@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:55 UTC
+//     Generated on 2022 March 06 22:17:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using crypto = go.crypto_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
@@ -39,7 +38,7 @@ namespace crypto
                 this.function = default;
             }
 
-            public digest(array<ulong> h = default, array<byte> x = default, long nx = default, ulong len = default, crypto.Hash function = default)
+            public digest(array<ulong> h = default, array<byte> x = default, nint nx = default, ulong len = default, crypto.Hash function = default)
             {
                 this.h = h;
                 this.x = x;

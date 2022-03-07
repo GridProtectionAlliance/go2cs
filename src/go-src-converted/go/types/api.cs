@@ -24,404 +24,325 @@
 //
 // For a tutorial, see https://golang.org/s/types-tutorial.
 //
-// package types -- go2cs converted at 2020 October 09 05:18:56 UTC
+// package types -- go2cs converted at 2022 March 06 22:41:18 UTC
 // import "go/types" ==> using types = go.go.types_package
-// Original source: C:\Go\src\go\types\api.go
+// Original source: C:\Program Files\Go\src\go\types\api.go
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
 using token = go.go.token_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace go
-{
-    public static partial class types_package
-    {
-        // An Error describes a type-checking error; it implements the error interface.
-        // A "soft" error is an error that still permits a valid interpretation of a
-        // package (such as "unused variable"); "hard" errors may lead to unpredictable
-        // behavior if ignored.
-        public partial struct Error
-        {
-            public ptr<token.FileSet> Fset; // file set for interpretation of Pos
-            public token.Pos Pos; // error position
-            public @string Msg; // error message
-            public bool Soft; // if set, error is "soft"
-        }
 
-        // Error returns an error string formatted as follows:
-        // filename:line:column: message
-        public static @string Error(this Error err)
-        {
-            return fmt.Sprintf("%s: %s", err.Fset.Position(err.Pos), err.Msg);
-        }
+namespace go.go;
 
-        // An Importer resolves import paths to Packages.
-        //
-        // CAUTION: This interface does not support the import of locally
-        // vendored packages. See https://golang.org/s/go15vendor.
-        // If possible, external implementations should implement ImporterFrom.
-        public partial interface Importer
-        {
-            (ptr<Package>, error) Import(@string path);
-        }
+public static partial class types_package {
 
-        // ImportMode is reserved for future use.
-        public partial struct ImportMode // : long
-        {
-        }
+    // An Error describes a type-checking error; it implements the error interface.
+    // A "soft" error is an error that still permits a valid interpretation of a
+    // package (such as "unused variable"); "hard" errors may lead to unpredictable
+    // behavior if ignored.
+public partial struct Error {
+    public ptr<token.FileSet> Fset; // file set for interpretation of Pos
+    public token.Pos Pos; // error position
+    public @string Msg; // error message
+    public bool Soft; // if set, error is "soft"
 
-        // An ImporterFrom resolves import paths to packages; it
-        // supports vendoring per https://golang.org/s/go15vendor.
-        // Use go/importer to obtain an ImporterFrom implementation.
-        public partial interface ImporterFrom : Importer
-        {
-            (ptr<Package>, error) ImportFrom(@string path, @string dir, ImportMode mode);
-        }
+// go116code is a future API, unexported as the set of error codes is large
+// and likely to change significantly during experimentation. Tools wishing
+// to preview this feature may read go116code using reflection (see
+// errorcodes_test.go), but beware that there is no guarantee of future
+// compatibility.
+    public errorCode go116code;
+    public token.Pos go116start;
+    public token.Pos go116end;
+}
 
-        // A Config specifies the configuration for type checking.
-        // The zero value for Config is a ready-to-use default configuration.
-        public partial struct Config
-        {
-            public bool IgnoreFuncBodies; // If FakeImportC is set, `import "C"` (for packages requiring Cgo)
+// Error returns an error string formatted as follows:
+// filename:line:column: message
+public static @string Error(this Error err) {
+    return fmt.Sprintf("%s: %s", err.Fset.Position(err.Pos), err.Msg);
+}
+
+// An Importer resolves import paths to Packages.
+//
+// CAUTION: This interface does not support the import of locally
+// vendored packages. See https://golang.org/s/go15vendor.
+// If possible, external implementations should implement ImporterFrom.
+public partial interface Importer {
+    (ptr<Package>, error) Import(@string path);
+}
+
+// ImportMode is reserved for future use.
+public partial struct ImportMode { // : nint
+}
+
+// An ImporterFrom resolves import paths to packages; it
+// supports vendoring per https://golang.org/s/go15vendor.
+// Use go/importer to obtain an ImporterFrom implementation.
+public partial interface ImporterFrom {
+    (ptr<Package>, error) ImportFrom(@string path, @string dir, ImportMode mode);
+}
+
+// A Config specifies the configuration for type checking.
+// The zero value for Config is a ready-to-use default configuration.
+public partial struct Config {
+    public @string goVersion; // If IgnoreFuncBodies is set, function bodies are not
+// type-checked.
+    public bool IgnoreFuncBodies; // If FakeImportC is set, `import "C"` (for packages requiring Cgo)
 // declares an empty "C" package and errors are omitted for qualified
 // identifiers referring to package C (which won't find an object).
 // This feature is intended for the standard library cmd/api tool.
 //
 // Caution: Effects may be unpredictable due to follow-on errors.
 //          Do not use casually!
-            public bool FakeImportC; // If go115UsesCgo is set, the type checker expects the
+    public bool FakeImportC; // If go115UsesCgo is set, the type checker expects the
 // _cgo_gotypes.go file generated by running cmd/cgo to be
 // provided as a package source file. Qualified identifiers
 // referring to package C will be resolved to cgo-provided
 // declarations within _cgo_gotypes.go.
 //
 // It is an error to set both FakeImportC and go115UsesCgo.
-            public bool go115UsesCgo; // If Error != nil, it is called with each error found
+    public bool go115UsesCgo; // If Error != nil, it is called with each error found
 // during type checking; err has dynamic type Error.
 // Secondary errors (for instance, to enumerate all types
 // involved in an invalid recursive type declaration) have
 // error strings that start with a '\t' character.
 // If Error == nil, type-checking stops with the first
 // error found.
-            public Action<error> Error; // An importer is used to import packages referred to from
+    public Action<error> Error; // An importer is used to import packages referred to from
 // import declarations.
 // If the installed importer implements ImporterFrom, the type
 // checker calls ImportFrom instead of Import.
 // The type checker reports an error if an importer is needed
 // but none was installed.
-            public Importer Importer; // If Sizes != nil, it provides the sizing functions for package unsafe.
+    public Importer Importer; // If Sizes != nil, it provides the sizing functions for package unsafe.
 // Otherwise SizesFor("gc", "amd64") is used instead.
-            public Sizes Sizes; // If DisableUnusedImportCheck is set, packages are not checked
+    public Sizes Sizes; // If DisableUnusedImportCheck is set, packages are not checked
 // for unused imports.
-            public bool DisableUnusedImportCheck;
-        }
+    public bool DisableUnusedImportCheck;
+}
 
-        private static void srcimporter_setUsesCgo(ptr<Config> _addr_conf)
-        {
-            ref Config conf = ref _addr_conf.val;
+private static void srcimporter_setUsesCgo(ptr<Config> _addr_conf) {
+    ref Config conf = ref _addr_conf.val;
 
-            conf.go115UsesCgo = true;
-        }
+    conf.go115UsesCgo = true;
+}
 
-        // Info holds result type information for a type-checked package.
-        // Only the information for which a map is provided is collected.
-        // If the package has type errors, the collected information may
-        // be incomplete.
-        public partial struct Info
-        {
-            public map<ast.Expr, TypeAndValue> Types; // Defs maps identifiers to the objects they define (including
-// package names, dots "." of dot-imports, and blank "_" identifiers).
-// For identifiers that do not denote objects (e.g., the package name
-// in package clauses, or symbolic variables t in t := x.(type) of
-// type switch headers), the corresponding objects are nil.
+// The Info struct is found in api_notypeparams.go and api_typeparams.go.
+
+// TypeOf returns the type of expression e, or nil if not found.
+// Precondition: the Types, Uses and Defs maps are populated.
 //
-// For an embedded field, Defs returns the field *Var it defines.
-//
-// Invariant: Defs[id] == nil || Defs[id].Pos() == id.Pos()
-            public map<ptr<ast.Ident>, Object> Defs; // Uses maps identifiers to the objects they denote.
-//
-// For an embedded field, Uses returns the *TypeName it denotes.
-//
-// Invariant: Uses[id].Pos() != id.Pos()
-            public map<ptr<ast.Ident>, Object> Uses; // Implicits maps nodes to their implicitly declared objects, if any.
-// The following node and object types may appear:
-//
-//     node               declared object
-//
-//     *ast.ImportSpec    *PkgName for imports without renames
-//     *ast.CaseClause    type-specific *Var for each type switch case clause (incl. default)
-//     *ast.Field         anonymous parameter *Var (incl. unnamed results)
-//
-            public map<ast.Node, Object> Implicits; // Selections maps selector expressions (excluding qualified identifiers)
-// to their corresponding selections.
-            public map<ptr<ast.SelectorExpr>, ptr<Selection>> Selections; // Scopes maps ast.Nodes to the scopes they define. Package scopes are not
-// associated with a specific node but with all files belonging to a package.
-// Thus, the package scope can be found in the type-checked Package object.
-// Scopes nest, with the Universe scope being the outermost scope, enclosing
-// the package scope, which contains (one or more) files scopes, which enclose
-// function scopes which in turn enclose statement and function literal scopes.
-// Note that even though package-level functions are declared in the package
-// scope, the function scopes are embedded in the file scope of the file
-// containing the function declaration.
-//
-// The following node types may appear in Scopes:
-//
-//     *ast.File
-//     *ast.FuncType
-//     *ast.BlockStmt
-//     *ast.IfStmt
-//     *ast.SwitchStmt
-//     *ast.TypeSwitchStmt
-//     *ast.CaseClause
-//     *ast.CommClause
-//     *ast.ForStmt
-//     *ast.RangeStmt
-//
-            public map<ast.Node, ptr<Scope>> Scopes; // InitOrder is the list of package-level initializers in the order in which
-// they must be executed. Initializers referring to variables related by an
-// initialization dependency appear in topological order, the others appear
-// in source order. Variables without an initialization expression do not
-// appear in this list.
-            public slice<ptr<Initializer>> InitOrder;
-        }
+private static Type TypeOf(this ptr<Info> _addr_info, ast.Expr e) {
+    ref Info info = ref _addr_info.val;
 
-        // TypeOf returns the type of expression e, or nil if not found.
-        // Precondition: the Types, Uses and Defs maps are populated.
-        //
-        private static Type TypeOf(this ptr<Info> _addr_info, ast.Expr e)
-        {
-            ref Info info = ref _addr_info.val;
+    {
+        var (t, ok) = info.Types[e];
 
-            {
-                var (t, ok) = info.Types[e];
-
-                if (ok)
-                {
-                    return t.Type;
-                }
-
-            }
-
-            {
-                ptr<ast.Ident> (id, _) = e._<ptr<ast.Ident>>();
-
-                if (id != null)
-                {
-                    {
-                        var obj = info.ObjectOf(id);
-
-                        if (obj != null)
-                        {
-                            return obj.Type();
-                        }
-
-                    }
-
-                }
-
-            }
-
-            return null;
-
-        }
-
-        // ObjectOf returns the object denoted by the specified id,
-        // or nil if not found.
-        //
-        // If id is an embedded struct field, ObjectOf returns the field (*Var)
-        // it defines, not the type (*TypeName) it uses.
-        //
-        // Precondition: the Uses and Defs maps are populated.
-        //
-        private static Object ObjectOf(this ptr<Info> _addr_info, ptr<ast.Ident> _addr_id)
-        {
-            ref Info info = ref _addr_info.val;
-            ref ast.Ident id = ref _addr_id.val;
-
-            {
-                var obj = info.Defs[id];
-
-                if (obj != null)
-                {
-                    return obj;
-                }
-
-            }
-
-            return info.Uses[id];
-
-        }
-
-        // TypeAndValue reports the type and value (for constants)
-        // of the corresponding expression.
-        public partial struct TypeAndValue
-        {
-            public operandMode mode;
-            public Type Type;
-            public constant.Value Value;
-        }
-
-        // IsVoid reports whether the corresponding expression
-        // is a function call without results.
-        public static bool IsVoid(this TypeAndValue tv)
-        {
-            return tv.mode == novalue;
-        }
-
-        // IsType reports whether the corresponding expression specifies a type.
-        public static bool IsType(this TypeAndValue tv)
-        {
-            return tv.mode == typexpr;
-        }
-
-        // IsBuiltin reports whether the corresponding expression denotes
-        // a (possibly parenthesized) built-in function.
-        public static bool IsBuiltin(this TypeAndValue tv)
-        {
-            return tv.mode == builtin;
-        }
-
-        // IsValue reports whether the corresponding expression is a value.
-        // Builtins are not considered values. Constant values have a non-
-        // nil Value.
-        public static bool IsValue(this TypeAndValue tv)
-        {
-
-            if (tv.mode == constant_ || tv.mode == variable || tv.mode == mapindex || tv.mode == value || tv.mode == commaok || tv.mode == commaerr) 
-                return true;
-                        return false;
-
-        }
-
-        // IsNil reports whether the corresponding expression denotes the
-        // predeclared value nil.
-        public static bool IsNil(this TypeAndValue tv)
-        {
-            return tv.mode == value && tv.Type == Typ[UntypedNil];
-        }
-
-        // Addressable reports whether the corresponding expression
-        // is addressable (https://golang.org/ref/spec#Address_operators).
-        public static bool Addressable(this TypeAndValue tv)
-        {
-            return tv.mode == variable;
-        }
-
-        // Assignable reports whether the corresponding expression
-        // is assignable to (provided a value of the right type).
-        public static bool Assignable(this TypeAndValue tv)
-        {
-            return tv.mode == variable || tv.mode == mapindex;
-        }
-
-        // HasOk reports whether the corresponding expression may be
-        // used on the rhs of a comma-ok assignment.
-        public static bool HasOk(this TypeAndValue tv)
-        {
-            return tv.mode == commaok || tv.mode == mapindex;
-        }
-
-        // An Initializer describes a package-level variable, or a list of variables in case
-        // of a multi-valued initialization expression, and the corresponding initialization
-        // expression.
-        public partial struct Initializer
-        {
-            public slice<ptr<Var>> Lhs; // var Lhs = Rhs
-            public ast.Expr Rhs;
-        }
-
-        private static @string String(this ptr<Initializer> _addr_init)
-        {
-            ref Initializer init = ref _addr_init.val;
-
-            ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
-            foreach (var (i, lhs) in init.Lhs)
-            {
-                if (i > 0L)
-                {
-                    buf.WriteString(", ");
-                }
-
-                buf.WriteString(lhs.Name());
-
-            }
-            buf.WriteString(" = ");
-            WriteExpr(_addr_buf, init.Rhs);
-            return buf.String();
-
-        }
-
-        // Check type-checks a package and returns the resulting package object and
-        // the first error if any. Additionally, if info != nil, Check populates each
-        // of the non-nil maps in the Info struct.
-        //
-        // The package is marked as complete if no errors occurred, otherwise it is
-        // incomplete. See Config.Error for controlling behavior in the presence of
-        // errors.
-        //
-        // The package is specified by a list of *ast.Files and corresponding
-        // file set, and the package path the package is identified with.
-        // The clean path must not be empty or dot (".").
-        private static (ptr<Package>, error) Check(this ptr<Config> _addr_conf, @string path, ptr<token.FileSet> _addr_fset, slice<ptr<ast.File>> files, ptr<Info> _addr_info)
-        {
-            ptr<Package> _p0 = default!;
-            error _p0 = default!;
-            ref Config conf = ref _addr_conf.val;
-            ref token.FileSet fset = ref _addr_fset.val;
-            ref Info info = ref _addr_info.val;
-
-            var pkg = NewPackage(path, "");
-            return (_addr_pkg!, error.As(NewChecker(conf, fset, pkg, info).Files(files))!);
-        }
-
-        // AssertableTo reports whether a value of type V can be asserted to have type T.
-        public static bool AssertableTo(ptr<Interface> _addr_V, Type T)
-        {
-            ref Interface V = ref _addr_V.val;
-
-            var (m, _) = (Checker.val)(null).assertableTo(V, T);
-            return m == null;
-        }
-
-        // AssignableTo reports whether a value of type V is assignable to a variable of type T.
-        public static bool AssignableTo(Type V, Type T)
-        {
-            operand x = new operand(mode:value,typ:V);
-            return x.assignableTo(null, T, null); // check not needed for non-constant x
-        }
-
-        // ConvertibleTo reports whether a value of type V is convertible to a value of type T.
-        public static bool ConvertibleTo(Type V, Type T)
-        {
-            operand x = new operand(mode:value,typ:V);
-            return x.convertibleTo(null, T); // check not needed for non-constant x
-        }
-
-        // Implements reports whether type V implements interface T.
-        public static bool Implements(Type V, ptr<Interface> _addr_T)
-        {
-            ref Interface T = ref _addr_T.val;
-
-            var (f, _) = MissingMethod(V, T, true);
-            return f == null;
-        }
-
-        // Identical reports whether x and y are identical types.
-        // Receivers of Signature types are ignored.
-        public static bool Identical(Type x, Type y)
-        {
-            return (Checker.val)(null).identical(x, y);
-        }
-
-        // IdenticalIgnoreTags reports whether x and y are identical types if tags are ignored.
-        // Receivers of Signature types are ignored.
-        public static bool IdenticalIgnoreTags(Type x, Type y)
-        {
-            return (Checker.val)(null).identicalIgnoreTags(x, y);
+        if (ok) {
+            return t.Type;
         }
     }
-}}
+
+    {
+        ptr<ast.Ident> (id, _) = e._<ptr<ast.Ident>>();
+
+        if (id != null) {
+            {
+                var obj = info.ObjectOf(id);
+
+                if (obj != null) {
+                    return obj.Type();
+                }
+
+            }
+
+        }
+    }
+
+    return null;
+
+}
+
+// ObjectOf returns the object denoted by the specified id,
+// or nil if not found.
+//
+// If id is an embedded struct field, ObjectOf returns the field (*Var)
+// it defines, not the type (*TypeName) it uses.
+//
+// Precondition: the Uses and Defs maps are populated.
+//
+private static Object ObjectOf(this ptr<Info> _addr_info, ptr<ast.Ident> _addr_id) {
+    ref Info info = ref _addr_info.val;
+    ref ast.Ident id = ref _addr_id.val;
+
+    {
+        var obj = info.Defs[id];
+
+        if (obj != null) {
+            return obj;
+        }
+    }
+
+    return info.Uses[id];
+
+}
+
+// TypeAndValue reports the type and value (for constants)
+// of the corresponding expression.
+public partial struct TypeAndValue {
+    public operandMode mode;
+    public Type Type;
+    public constant.Value Value;
+}
+
+// IsVoid reports whether the corresponding expression
+// is a function call without results.
+public static bool IsVoid(this TypeAndValue tv) {
+    return tv.mode == novalue;
+}
+
+// IsType reports whether the corresponding expression specifies a type.
+public static bool IsType(this TypeAndValue tv) {
+    return tv.mode == typexpr;
+}
+
+// IsBuiltin reports whether the corresponding expression denotes
+// a (possibly parenthesized) built-in function.
+public static bool IsBuiltin(this TypeAndValue tv) {
+    return tv.mode == builtin;
+}
+
+// IsValue reports whether the corresponding expression is a value.
+// Builtins are not considered values. Constant values have a non-
+// nil Value.
+public static bool IsValue(this TypeAndValue tv) {
+
+    if (tv.mode == constant_ || tv.mode == variable || tv.mode == mapindex || tv.mode == value || tv.mode == commaok || tv.mode == commaerr) 
+        return true;
+        return false;
+
+}
+
+// IsNil reports whether the corresponding expression denotes the
+// predeclared value nil.
+public static bool IsNil(this TypeAndValue tv) {
+    return tv.mode == value && tv.Type == Typ[UntypedNil];
+}
+
+// Addressable reports whether the corresponding expression
+// is addressable (https://golang.org/ref/spec#Address_operators).
+public static bool Addressable(this TypeAndValue tv) {
+    return tv.mode == variable;
+}
+
+// Assignable reports whether the corresponding expression
+// is assignable to (provided a value of the right type).
+public static bool Assignable(this TypeAndValue tv) {
+    return tv.mode == variable || tv.mode == mapindex;
+}
+
+// HasOk reports whether the corresponding expression may be
+// used on the rhs of a comma-ok assignment.
+public static bool HasOk(this TypeAndValue tv) {
+    return tv.mode == commaok || tv.mode == mapindex;
+}
+
+// _Inferred reports the _Inferred type arguments and signature
+// for a parameterized function call that uses type inference.
+private partial struct _Inferred {
+    public slice<Type> Targs;
+    public ptr<Signature> Sig;
+}
+
+// An Initializer describes a package-level variable, or a list of variables in case
+// of a multi-valued initialization expression, and the corresponding initialization
+// expression.
+public partial struct Initializer {
+    public slice<ptr<Var>> Lhs; // var Lhs = Rhs
+    public ast.Expr Rhs;
+}
+
+private static @string String(this ptr<Initializer> _addr_init) {
+    ref Initializer init = ref _addr_init.val;
+
+    ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
+    foreach (var (i, lhs) in init.Lhs) {
+        if (i > 0) {
+            buf.WriteString(", ");
+        }
+        buf.WriteString(lhs.Name());
+
+    }    buf.WriteString(" = ");
+    WriteExpr(_addr_buf, init.Rhs);
+    return buf.String();
+
+}
+
+// Check type-checks a package and returns the resulting package object and
+// the first error if any. Additionally, if info != nil, Check populates each
+// of the non-nil maps in the Info struct.
+//
+// The package is marked as complete if no errors occurred, otherwise it is
+// incomplete. See Config.Error for controlling behavior in the presence of
+// errors.
+//
+// The package is specified by a list of *ast.Files and corresponding
+// file set, and the package path the package is identified with.
+// The clean path must not be empty or dot (".").
+private static (ptr<Package>, error) Check(this ptr<Config> _addr_conf, @string path, ptr<token.FileSet> _addr_fset, slice<ptr<ast.File>> files, ptr<Info> _addr_info) {
+    ptr<Package> _p0 = default!;
+    error _p0 = default!;
+    ref Config conf = ref _addr_conf.val;
+    ref token.FileSet fset = ref _addr_fset.val;
+    ref Info info = ref _addr_info.val;
+
+    var pkg = NewPackage(path, "");
+    return (_addr_pkg!, error.As(NewChecker(conf, fset, pkg, info).Files(files))!);
+}
+
+// AssertableTo reports whether a value of type V can be asserted to have type T.
+public static bool AssertableTo(ptr<Interface> _addr_V, Type T) {
+    ref Interface V = ref _addr_V.val;
+
+    var (m, _) = (Checker.val)(null).assertableTo(V, T);
+    return m == null;
+}
+
+// AssignableTo reports whether a value of type V is assignable to a variable of type T.
+public static bool AssignableTo(Type V, Type T) {
+    operand x = new operand(mode:value,typ:V);
+    var (ok, _) = x.assignableTo(null, T, null); // check not needed for non-constant x
+    return ok;
+
+}
+
+// ConvertibleTo reports whether a value of type V is convertible to a value of type T.
+public static bool ConvertibleTo(Type V, Type T) {
+    operand x = new operand(mode:value,typ:V);
+    return x.convertibleTo(null, T, null); // check not needed for non-constant x
+}
+
+// Implements reports whether type V implements interface T.
+public static bool Implements(Type V, ptr<Interface> _addr_T) {
+    ref Interface T = ref _addr_T.val;
+
+    var (f, _) = MissingMethod(V, T, true);
+    return f == null;
+}
+
+// Identical reports whether x and y are identical types.
+// Receivers of Signature types are ignored.
+public static bool Identical(Type x, Type y) {
+    return (Checker.val)(null).identical(x, y);
+}
+
+// IdenticalIgnoreTags reports whether x and y are identical types if tags are ignored.
+// Receivers of Signature types are ignored.
+public static bool IdenticalIgnoreTags(Type x, Type y) {
+    return (Checker.val)(null).identicalIgnoreTags(x, y);
+}
+
+} // end types_package

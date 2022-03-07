@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:46:55 UTC
+//     Generated on 2022 March 06 22:09:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
 using @unsafe = go.@unsafe_package;
@@ -34,21 +33,15 @@ namespace go
                 this.bytesMarked = default;
                 this.scanWork = default;
                 this.flushedWork = default;
-                this.pauseGen = default;
-                this.putGen = default;
-                this.pauseStack = default;
             }
 
-            public gcWork(ref ptr<workbuf> wbuf1 = default, ref ptr<workbuf> wbuf2 = default, ulong bytesMarked = default, long scanWork = default, bool flushedWork = default, uint pauseGen = default, uint putGen = default, array<System.UIntPtr> pauseStack = default)
+            public gcWork(ref ptr<workbuf> wbuf1 = default, ref ptr<workbuf> wbuf2 = default, ulong bytesMarked = default, long scanWork = default, bool flushedWork = default)
             {
                 this.wbuf1 = wbuf1;
                 this.wbuf2 = wbuf2;
                 this.bytesMarked = bytesMarked;
                 this.scanWork = scanWork;
                 this.flushedWork = flushedWork;
-                this.pauseGen = pauseGen;
-                this.putGen = putGen;
-                this.pauseStack = pauseStack;
             }
 
             // Enable comparisons between nil and gcWork struct
@@ -71,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static gcWork gcWork_cast(dynamic value)
         {
-            return new gcWork(ref value.wbuf1, ref value.wbuf2, value.bytesMarked, value.scanWork, value.flushedWork, value.pauseGen, value.putGen, value.pauseStack);
+            return new gcWork(ref value.wbuf1, ref value.wbuf2, value.bytesMarked, value.scanWork, value.flushedWork);
         }
     }
 }

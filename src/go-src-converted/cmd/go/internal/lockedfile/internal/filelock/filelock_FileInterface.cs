@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:47 UTC
+//     Generated on 2022 March 06 23:16:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,8 +13,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using fs = go.io.fs_package;
 using os = go.os_package;
 using go;
 
@@ -55,7 +55,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -70,67 +70,67 @@ namespace @internal
                 m_target_is_ptr = true;
             }
 
-            private delegate (os.FileInfo, error) NameByPtr(ptr<T> value);
-            private delegate (os.FileInfo, error) NameByVal(T value);
+            private delegate (fs.FileInfo, error) NameByPtr(ptr<T> value);
+            private delegate (fs.FileInfo, error) NameByVal(T value);
 
             private static readonly NameByPtr? s_NameByPtr;
             private static readonly NameByVal? s_NameByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (os.FileInfo, error) Name()
+            public (fs.FileInfo, error) Name()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NameByPtr is null || !m_target_is_ptr)
                     return s_NameByVal!(target);
 
-                return s_NameByPtr(m_target_ptr);
+                return s_NameByPtr(m_target_ptr!);
             }
 
-            private delegate (os.FileInfo, error) FdByPtr(ptr<T> value);
-            private delegate (os.FileInfo, error) FdByVal(T value);
+            private delegate (fs.FileInfo, error) FdByPtr(ptr<T> value);
+            private delegate (fs.FileInfo, error) FdByVal(T value);
 
             private static readonly FdByPtr? s_FdByPtr;
             private static readonly FdByVal? s_FdByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (os.FileInfo, error) Fd()
+            public (fs.FileInfo, error) Fd()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_FdByPtr is null || !m_target_is_ptr)
                     return s_FdByVal!(target);
 
-                return s_FdByPtr(m_target_ptr);
+                return s_FdByPtr(m_target_ptr!);
             }
 
-            private delegate (os.FileInfo, error) StatByPtr(ptr<T> value);
-            private delegate (os.FileInfo, error) StatByVal(T value);
+            private delegate (fs.FileInfo, error) StatByPtr(ptr<T> value);
+            private delegate (fs.FileInfo, error) StatByVal(T value);
 
             private static readonly StatByPtr? s_StatByPtr;
             private static readonly StatByVal? s_StatByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (os.FileInfo, error) Stat()
+            public (fs.FileInfo, error) Stat()
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StatByPtr is null || !m_target_is_ptr)
                     return s_StatByVal!(target);
 
-                return s_StatByPtr(m_target_ptr);
+                return s_StatByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static File()
@@ -141,12 +141,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByPtr = extensionMethod.CreateStaticDelegate(typeof(NameByPtr)) as NameByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Name");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NameByVal = extensionMethod.CreateStaticDelegate(typeof(NameByVal)) as NameByVal;
 
                 if (s_NameByPtr is null && s_NameByVal is null)
@@ -154,12 +154,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Fd");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FdByPtr = extensionMethod.CreateStaticDelegate(typeof(FdByPtr)) as FdByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Fd");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_FdByVal = extensionMethod.CreateStaticDelegate(typeof(FdByVal)) as FdByVal;
 
                 if (s_FdByPtr is null && s_FdByVal is null)
@@ -167,12 +167,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByPtr = extensionMethod.CreateStaticDelegate(typeof(StatByPtr)) as StatByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stat");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StatByVal = extensionMethod.CreateStaticDelegate(typeof(StatByVal)) as StatByVal;
 
                 if (s_StatByPtr is null && s_StatByVal is null)

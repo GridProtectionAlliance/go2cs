@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:53:43 UTC
+//     Generated on 2022 March 06 22:18:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using subtleoverlap = go.crypto.@internal.subtle_package;
 using subtle = go.crypto.subtle_package;
 using binary = go.encoding.binary_package;
@@ -53,7 +52,7 @@ namespace crypto
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_NonceSizeByPtr is null || !m_target_is_ptr)
                     return s_NonceSizeByVal!(target);
 
-                return s_NonceSizeByPtr(m_target_ptr);
+                return s_NonceSizeByPtr(m_target_ptr!);
             }
 
             private delegate (slice<byte>, error) OverheadByPtr(ptr<T> value);
@@ -99,13 +98,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OverheadByPtr is null || !m_target_is_ptr)
                     return s_OverheadByVal!(target);
 
-                return s_OverheadByPtr(m_target_ptr);
+                return s_OverheadByPtr(m_target_ptr!);
             }
 
             private delegate (slice<byte>, error) SealByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData);
@@ -119,13 +118,13 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SealByPtr is null || !m_target_is_ptr)
                     return s_SealByVal!(target, dst, nonce, plaintext, additionalData);
 
-                return s_SealByPtr(m_target_ptr, dst, nonce, plaintext, additionalData);
+                return s_SealByPtr(m_target_ptr!, dst, nonce, plaintext, additionalData);
             }
 
             private delegate (slice<byte>, error) OpenByPtr(ptr<T> value, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData);
@@ -139,16 +138,16 @@ namespace crypto
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, dst, nonce, ciphertext, additionalData);
 
-                return s_OpenByPtr(m_target_ptr, dst, nonce, ciphertext, additionalData);
+                return s_OpenByPtr(m_target_ptr!, dst, nonce, ciphertext, additionalData);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static AEAD()
@@ -159,12 +158,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("NonceSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NonceSizeByPtr = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByPtr)) as NonceSizeByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("NonceSize");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_NonceSizeByVal = extensionMethod.CreateStaticDelegate(typeof(NonceSizeByVal)) as NonceSizeByVal;
 
                 if (s_NonceSizeByPtr is null && s_NonceSizeByVal is null)
@@ -172,12 +171,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Overhead");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OverheadByPtr = extensionMethod.CreateStaticDelegate(typeof(OverheadByPtr)) as OverheadByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Overhead");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OverheadByVal = extensionMethod.CreateStaticDelegate(typeof(OverheadByVal)) as OverheadByVal;
 
                 if (s_OverheadByPtr is null && s_OverheadByVal is null)
@@ -185,12 +184,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Seal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SealByPtr = extensionMethod.CreateStaticDelegate(typeof(SealByPtr)) as SealByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Seal");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SealByVal = extensionMethod.CreateStaticDelegate(typeof(SealByVal)) as SealByVal;
 
                 if (s_SealByPtr is null && s_SealByVal is null)
@@ -198,12 +197,12 @@ namespace crypto
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
                 if (s_OpenByPtr is null && s_OpenByVal is null)

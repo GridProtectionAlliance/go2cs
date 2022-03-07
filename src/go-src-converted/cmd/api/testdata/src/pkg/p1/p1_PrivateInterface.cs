@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:20:07 UTC
+//     Generated on 2022 March 06 22:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using ptwo = go.p2_package;
 using go;
 
@@ -54,7 +53,7 @@ namespace pkg
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -80,7 +79,7 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_XByPtr is null || !m_target_is_ptr)
@@ -89,9 +88,8 @@ namespace pkg
                     return;
                 }
 
-                s_XByPtr(m_target_ptr);
+                s_XByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void yByPtr(ptr<T> value);
@@ -105,7 +103,7 @@ namespace pkg
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_yByPtr is null || !m_target_is_ptr)
@@ -114,12 +112,11 @@ namespace pkg
                     return;
                 }
 
-                s_yByPtr(m_target_ptr);
+                s_yByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Private()
@@ -130,12 +127,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("X");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_XByPtr = extensionMethod.CreateStaticDelegate(typeof(XByPtr)) as XByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("X");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_XByVal = extensionMethod.CreateStaticDelegate(typeof(XByVal)) as XByVal;
 
                 if (s_XByPtr is null && s_XByVal is null)
@@ -143,12 +140,12 @@ namespace pkg
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("y");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_yByPtr = extensionMethod.CreateStaticDelegate(typeof(yByPtr)) as yByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("y");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_yByVal = extensionMethod.CreateStaticDelegate(typeof(yByVal)) as yByVal;
 
                 if (s_yByPtr is null && s_yByVal is null)

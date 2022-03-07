@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build testtag
 // +build testtag
 
-// package main -- go2cs converted at 2020 October 09 06:05:12 UTC
-// Original source: C:\Go\src\cmd\vet\testdata\tagtest\file1.go
+// package main -- go2cs converted at 2022 March 06 23:35:21 UTC
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\tagtest\file1.go
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void Main()
-        {
-            fmt.Printf("%s", 0L);
-        }
-    }
+namespace go;
+
+public static partial class main_package {
+
+private static void Main() {
+    fmt.Printf("%s", 0);
 }
+
+} // end main_package

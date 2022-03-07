@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:01:12 UTC
+//     Generated on 2022 March 06 22:26:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using @unsafe = go.@unsafe_package;
 
 #nullable enable
@@ -39,7 +38,7 @@ namespace go
                 this.Pgid = default;
             }
 
-            public SysProcAttr(@string Chroot = default, ref ptr<Credential> Credential = default, bool Ptrace = default, bool Setsid = default, bool Setpgid = default, bool Setctty = default, bool Noctty = default, long Ctty = default, bool Foreground = default, long Pgid = default)
+            public SysProcAttr(@string Chroot = default, ref ptr<Credential> Credential = default, bool Ptrace = default, bool Setsid = default, bool Setpgid = default, bool Setctty = default, bool Noctty = default, nint Ctty = default, bool Foreground = default, nint Pgid = default)
             {
                 this.Chroot = Chroot;
                 this.Credential = Credential;

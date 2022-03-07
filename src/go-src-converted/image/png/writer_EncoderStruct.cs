@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:05 UTC
+//     Generated on 2022 March 06 23:36:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using zlib = go.compress.zlib_package;
 using binary = go.encoding.binary_package;
@@ -51,7 +50,7 @@ namespace image
                 this.bw = default;
             }
 
-            public encoder(ref ptr<Encoder> enc = default, io.Writer w = default, image.Image m = default, long cb = default, error err = default, array<byte> header = default, array<byte> footer = default, array<byte> tmp = default, array<slice<byte>> cr = default, slice<byte> pr = default, ref ptr<zlib.Writer> zw = default, long zwLevel = default, ref ptr<bufio.Writer> bw = default)
+            public encoder(ref ptr<Encoder> enc = default, io.Writer w = default, image.Image m = default, nint cb = default, error err = default, array<byte> header = default, array<byte> footer = default, array<byte> tmp = default, array<slice<byte>> cr = default, slice<byte> pr = default, ref ptr<zlib.Writer> zw = default, nint zwLevel = default, ref ptr<bufio.Writer> bw = default)
             {
                 this.enc = enc;
                 this.w = w;

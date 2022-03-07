@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build cgo && !osusergo
 // +build cgo,!osusergo
 
-// package user -- go2cs converted at 2020 October 09 05:07:34 UTC
+// package user -- go2cs converted at 2022 March 06 22:14:28 UTC
 // import "os/user" ==> using user = go.os.user_package
-// Original source: C:\Go\src\os\user\getgrouplist_darwin.go
+// Original source: C:\Program Files\Go\src\os\user\getgrouplist_darwin.go
 /*
 #include <unistd.h>
 #include <sys/types.h>
@@ -46,52 +47,42 @@ static int mygetgrouplist(const char* user, gid_t group, gid_t* groups, int* ngr
 
 using fmt = go.fmt_package;
 using @unsafe = go.@unsafe_package;
-using static go.builtin;
 
-namespace go {
-namespace os
-{
-    public static partial class user_package
-    {
-        private static C.int getGroupList(ptr<C.char> _addr_name, C.gid_t userGID, ptr<C.gid_t> _addr_gids, ptr<C.int> _addr_n)
-        {
-            ref C.char name = ref _addr_name.val;
-            ref C.gid_t gids = ref _addr_gids.val;
-            ref C.int n = ref _addr_n.val;
+namespace go.os;
 
-            return C.mygetgrouplist(name, userGID, gids, n);
-        }
+public static partial class user_package {
 
-        // groupRetry retries getGroupList with an increasingly large size for n. The
-        // result is stored in gids.
-        private static error groupRetry(@string username, slice<byte> name, C.gid_t userGID, ptr<slice<C.gid_t>> _addr_gids, ptr<C.int> _addr_n)
-        {
-            ref slice<C.gid_t> gids = ref _addr_gids.val;
-            ref C.int n = ref _addr_n.val;
+private static C.int getGroupList(ptr<C.char> _addr_name, C.gid_t userGID, ptr<C.gid_t> _addr_gids, ptr<C.int> _addr_n) {
+    ref C.char name = ref _addr_name.val;
+    ref C.gid_t gids = ref _addr_gids.val;
+    ref C.int n = ref _addr_n.val;
 
-            n = C.@int(256L * 2L);
-            while (true)
-            {
-                gids = make_slice<C.gid_t>(n);
-                var rv = getGroupList(_addr_(C.@char.val)(@unsafe.Pointer(_addr_name[0L])), userGID, _addr_(gids)[0L], _addr_n);
-                if (rv >= 0L)
-                { 
-                    // n is set correctly
-                    break;
+    return C.mygetgrouplist(name, userGID, gids, n);
+}
 
-                }
+// groupRetry retries getGroupList with an increasingly large size for n. The
+// result is stored in gids.
+private static error groupRetry(@string username, slice<byte> name, C.gid_t userGID, ptr<slice<C.gid_t>> _addr_gids, ptr<C.int> _addr_n) {
+    ref slice<C.gid_t> gids = ref _addr_gids.val;
+    ref C.int n = ref _addr_n.val;
 
-                if (n > maxGroups.val)
-                {
-                    return error.As(fmt.Errorf("user: %q is a member of more than %d groups", username, maxGroups))!;
-                }
-
-                n = n * C.@int(2L).val;
-
-            }
-
-            return error.As(null!)!;
+    n = C.@int(256 * 2);
+    while (true) {
+        gids = make_slice<C.gid_t>(n);
+        var rv = getGroupList(_addr_(C.@char.val)(@unsafe.Pointer(_addr_name[0])), userGID, _addr_(gids)[0], _addr_n);
+        if (rv >= 0) { 
+            // n is set correctly
+            break;
 
         }
+        if (n > maxGroups.val) {
+            return error.As(fmt.Errorf("user: %q is a member of more than %d groups", username, maxGroups))!;
+        }
+        n = n * C.@int(2).val;
+
     }
-}}
+    return error.As(null!)!;
+
+}
+
+} // end user_package

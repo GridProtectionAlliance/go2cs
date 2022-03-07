@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:30 UTC
+//     Generated on 2022 March 06 23:33:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using ast = go.go.ast_package;
 using constant = go.go.constant_package;
@@ -59,7 +58,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -85,13 +84,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CommonByPtr is null || !m_target_is_ptr)
                     return s_CommonByVal!(target);
 
-                return s_CommonByPtr(m_target_ptr);
+                return s_CommonByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Call> ValueByPtr(ptr<T> value);
@@ -105,136 +104,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ValueByPtr is null || !m_target_is_ptr)
                     return s_ValueByVal!(target);
 
-                return s_ValueByPtr(m_target_ptr);
-            }
-
-            private delegate token.Pos StringByPtr(ptr<T> value);
-            private delegate token.Pos StringByVal(T value);
-
-            private static readonly StringByPtr? s_StringByPtr;
-            private static readonly StringByVal? s_StringByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos String()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_StringByPtr is null || !m_target_is_ptr)
-                    return s_StringByVal!(target);
-
-                return s_StringByPtr(m_target_ptr);
-            }
-
-            private delegate token.Pos ParentByPtr(ptr<T> value);
-            private delegate token.Pos ParentByVal(T value);
-
-            private static readonly ParentByPtr? s_ParentByPtr;
-            private static readonly ParentByVal? s_ParentByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos Parent()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ParentByPtr is null || !m_target_is_ptr)
-                    return s_ParentByVal!(target);
-
-                return s_ParentByPtr(m_target_ptr);
-            }
-
-            private delegate token.Pos BlockByPtr(ptr<T> value);
-            private delegate token.Pos BlockByVal(T value);
-
-            private static readonly BlockByPtr? s_BlockByPtr;
-            private static readonly BlockByVal? s_BlockByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos Block()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_BlockByPtr is null || !m_target_is_ptr)
-                    return s_BlockByVal!(target);
-
-                return s_BlockByPtr(m_target_ptr);
-            }
-
-            private delegate token.Pos setBlockByPtr(ptr<T> value, ptr<BasicBlock> _p0);
-            private delegate token.Pos setBlockByVal(T value, ptr<BasicBlock> _p0);
-
-            private static readonly setBlockByPtr? s_setBlockByPtr;
-            private static readonly setBlockByVal? s_setBlockByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos setBlock(ptr<BasicBlock> _p0)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_setBlockByPtr is null || !m_target_is_ptr)
-                    return s_setBlockByVal!(target, _p0);
-
-                return s_setBlockByPtr(m_target_ptr, _p0);
-            }
-
-            private delegate token.Pos OperandsByPtr(ptr<T> value, slice<ptr<Value>> rands);
-            private delegate token.Pos OperandsByVal(T value, slice<ptr<Value>> rands);
-
-            private static readonly OperandsByPtr? s_OperandsByPtr;
-            private static readonly OperandsByVal? s_OperandsByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos Operands(slice<ptr<Value>> rands)
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_OperandsByPtr is null || !m_target_is_ptr)
-                    return s_OperandsByVal!(target, rands);
-
-                return s_OperandsByPtr(m_target_ptr, rands);
-            }
-
-            private delegate token.Pos PosByPtr(ptr<T> value);
-            private delegate token.Pos PosByVal(T value);
-
-            private static readonly PosByPtr? s_PosByPtr;
-            private static readonly PosByVal? s_PosByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public token.Pos Pos()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_PosByPtr is null || !m_target_is_ptr)
-                    return s_PosByVal!(target);
-
-                return s_PosByPtr(m_target_ptr);
+                return s_ValueByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static CallInstruction()
@@ -245,12 +124,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommonByPtr = extensionMethod.CreateStaticDelegate(typeof(CommonByPtr)) as CommonByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Common");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommonByVal = extensionMethod.CreateStaticDelegate(typeof(CommonByVal)) as CommonByVal;
 
                 if (s_CommonByPtr is null && s_CommonByVal is null)
@@ -258,94 +137,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ValueByPtr = extensionMethod.CreateStaticDelegate(typeof(ValueByPtr)) as ValueByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Value");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ValueByVal = extensionMethod.CreateStaticDelegate(typeof(ValueByVal)) as ValueByVal;
 
                 if (s_ValueByPtr is null && s_ValueByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.Value method", new Exception("Value"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByPtr = extensionMethod.CreateStaticDelegate(typeof(StringByPtr)) as StringByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("String");
-
-                if (!(extensionMethod is null))
-                    s_StringByVal = extensionMethod.CreateStaticDelegate(typeof(StringByVal)) as StringByVal;
-
-                if (s_StringByPtr is null && s_StringByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.String method", new Exception("String"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Parent");
-
-                if (!(extensionMethod is null))
-                    s_ParentByPtr = extensionMethod.CreateStaticDelegate(typeof(ParentByPtr)) as ParentByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Parent");
-
-                if (!(extensionMethod is null))
-                    s_ParentByVal = extensionMethod.CreateStaticDelegate(typeof(ParentByVal)) as ParentByVal;
-
-                if (s_ParentByPtr is null && s_ParentByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.Parent method", new Exception("Parent"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Block");
-
-                if (!(extensionMethod is null))
-                    s_BlockByPtr = extensionMethod.CreateStaticDelegate(typeof(BlockByPtr)) as BlockByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Block");
-
-                if (!(extensionMethod is null))
-                    s_BlockByVal = extensionMethod.CreateStaticDelegate(typeof(BlockByVal)) as BlockByVal;
-
-                if (s_BlockByPtr is null && s_BlockByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.Block method", new Exception("Block"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("setBlock");
-
-                if (!(extensionMethod is null))
-                    s_setBlockByPtr = extensionMethod.CreateStaticDelegate(typeof(setBlockByPtr)) as setBlockByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("setBlock");
-
-                if (!(extensionMethod is null))
-                    s_setBlockByVal = extensionMethod.CreateStaticDelegate(typeof(setBlockByVal)) as setBlockByVal;
-
-                if (s_setBlockByPtr is null && s_setBlockByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.setBlock method", new Exception("setBlock"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Operands");
-
-                if (!(extensionMethod is null))
-                    s_OperandsByPtr = extensionMethod.CreateStaticDelegate(typeof(OperandsByPtr)) as OperandsByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Operands");
-
-                if (!(extensionMethod is null))
-                    s_OperandsByVal = extensionMethod.CreateStaticDelegate(typeof(OperandsByVal)) as OperandsByVal;
-
-                if (s_OperandsByPtr is null && s_OperandsByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.Operands method", new Exception("Operands"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Pos");
-
-                if (!(extensionMethod is null))
-                    s_PosByPtr = extensionMethod.CreateStaticDelegate(typeof(PosByPtr)) as PosByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Pos");
-
-                if (!(extensionMethod is null))
-                    s_PosByVal = extensionMethod.CreateStaticDelegate(typeof(PosByVal)) as PosByVal;
-
-                if (s_PosByPtr is null && s_PosByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement CallInstruction.Pos method", new Exception("Pos"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:06:59 UTC
+//     Generated on 2022 March 06 22:12:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using runtime = go.runtime_package;
+using sync = go.sync_package;
 using syscall = go.syscall_package;
+using @unsafe = go.@unsafe_package;
 
 #nullable enable
 
@@ -34,7 +35,7 @@ namespace go
                 this.bufp = default;
             }
 
-            public dirInfo(slice<byte> buf = default, long nbuf = default, long bufp = default)
+            public dirInfo(ref ptr<slice<byte>> buf = default, nint nbuf = default, nint bufp = default)
             {
                 this.buf = buf;
                 this.nbuf = nbuf;
@@ -61,7 +62,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static dirInfo dirInfo_cast(dynamic value)
         {
-            return new dirInfo(value.buf, value.nbuf, value.bufp);
+            return new dirInfo(ref value.buf, value.nbuf, value.bufp);
         }
     }
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:45:27 UTC
+//     Generated on 2022 March 06 22:08:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using race = go.@internal.race_package;
 using atomic = go.sync.atomic_package;
 using @unsafe = go.@unsafe_package;
@@ -50,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -76,7 +75,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LockByPtr is null || !m_target_is_ptr)
@@ -85,9 +84,8 @@ namespace go
                     return;
                 }
 
-                s_LockByPtr(m_target_ptr);
+                s_LockByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void UnlockByPtr(ptr<T> value);
@@ -101,7 +99,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_UnlockByPtr is null || !m_target_is_ptr)
@@ -110,12 +108,11 @@ namespace go
                     return;
                 }
 
-                s_UnlockByPtr(m_target_ptr);
+                s_UnlockByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Locker()
@@ -126,12 +123,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Lock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LockByPtr = extensionMethod.CreateStaticDelegate(typeof(LockByPtr)) as LockByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Lock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LockByVal = extensionMethod.CreateStaticDelegate(typeof(LockByVal)) as LockByVal;
 
                 if (s_LockByPtr is null && s_LockByVal is null)
@@ -139,12 +136,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Unlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnlockByPtr = extensionMethod.CreateStaticDelegate(typeof(UnlockByPtr)) as UnlockByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Unlock");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_UnlockByVal = extensionMethod.CreateStaticDelegate(typeof(UnlockByVal)) as UnlockByVal;
 
                 if (s_UnlockByPtr is null && s_UnlockByVal is null)

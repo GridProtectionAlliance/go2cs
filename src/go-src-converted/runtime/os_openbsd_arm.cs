@@ -2,36 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2020 October 09 04:47:33 UTC
+// package runtime -- go2cs converted at 2022 March 06 22:10:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
-// Original source: C:\Go\src\runtime\os_openbsd_arm.go
+// Original source: C:\Program Files\Go\src\runtime\os_openbsd_arm.go
 
-using static go.builtin;
 
-namespace go
-{
-    public static partial class runtime_package
-    {
-        private static void checkgoarm()
-        { 
-            // TODO(minux): FP checks like in os_linux_arm.go.
+namespace go;
 
-            // osinit not called yet, so ncpu not set: must use getncpu directly.
-            if (getncpu() > 1L && goarm < 7L)
-            {
-                print("runtime: this system has multiple CPUs and must use\n");
-                print("atomic synchronization instructions. Recompile using GOARM=7.\n");
-                exit(1L);
-            }
-        }
+public static partial class runtime_package {
 
-        //go:nosplit
-        private static long cputicks()
-        { 
-            // Currently cputicks() is used in blocking profiler and to seed runtime·fastrand().
-            // runtime·nanotime() is a poor approximation of CPU ticks that is enough for the profiler.
-            return nanotime();
+private static void checkgoarm() { 
+    // TODO(minux): FP checks like in os_linux_arm.go.
 
-        }
+    // osinit not called yet, so ncpu not set: must use getncpu directly.
+    if (getncpu() > 1 && goarm < 7) {
+        print("runtime: this system has multiple CPUs and must use\n");
+        print("atomic synchronization instructions. Recompile using GOARM=7.\n");
+        exit(1);
     }
 }
+
+//go:nosplit
+private static long cputicks() { 
+    // Currently cputicks() is used in blocking profiler and to seed runtime·fastrand().
+    // runtime·nanotime() is a poor approximation of CPU ticks that is enough for the profiler.
+    return nanotime();
+
+}
+
+} // end runtime_package

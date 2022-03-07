@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:45 UTC
+//     Generated on 2022 March 06 23:32:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using binary = go.encoding.binary_package;
 using fmt = go.fmt_package;
@@ -20,6 +20,7 @@ using constant = go.go.constant_package;
 using token = go.go.token_package;
 using types = go.go.types_package;
 using io = go.io_package;
+using big = go.math.big_package;
 using sort = go.sort_package;
 using go;
 
@@ -49,7 +50,7 @@ namespace @internal
                 this.interfaceList = default;
             }
 
-            public iimporter(@string ipath = default, long version = default, slice<byte> stringData = default, map<ulong, @string> stringCache = default, map<ulong, ptr<types.Package>> pkgCache = default, slice<byte> declData = default, map<ptr<types.Package>, map<@string, ulong>> pkgIndex = default, map<ulong, types.Type> typCache = default, fakeFileSet fake = default, slice<ptr<types.Interface>> interfaceList = default)
+            public iimporter(@string ipath = default, nint version = default, slice<byte> stringData = default, map<ulong, @string> stringCache = default, map<ulong, ptr<types.Package>> pkgCache = default, slice<byte> declData = default, map<ptr<types.Package>, map<@string, ulong>> pkgIndex = default, map<ulong, types.Type> typCache = default, fakeFileSet fake = default, slice<ptr<types.Interface>> interfaceList = default)
             {
                 this.ipath = ipath;
                 this.version = version;

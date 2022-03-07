@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:00 UTC
+//     Generated on 2022 March 06 22:31:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
 using math = go.math_package;
@@ -55,7 +54,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -81,16 +80,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ScanByPtr is null || !m_target_is_ptr)
                     return s_ScanByVal!(target, state, verb);
 
-                return s_ScanByPtr(m_target_ptr, state, verb);
+                return s_ScanByPtr(m_target_ptr!, state, verb);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Scanner()
@@ -101,12 +100,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Scan");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScanByPtr = extensionMethod.CreateStaticDelegate(typeof(ScanByPtr)) as ScanByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Scan");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ScanByVal = extensionMethod.CreateStaticDelegate(typeof(ScanByVal)) as ScanByVal;
 
                 if (s_ScanByPtr is null && s_ScanByVal is null)

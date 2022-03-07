@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:01 UTC
+//     Generated on 2022 March 06 23:24:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,12 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using ioutil = go.io.ioutil_package;
+using math = go.math_package;
 using filepath = go.path.filepath_package;
 using regexp = go.regexp_package;
 using sort = go.sort_package;

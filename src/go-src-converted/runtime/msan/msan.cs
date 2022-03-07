@@ -5,9 +5,9 @@
 // +build msan,linux
 // +build amd64 arm64
 
-// package msan -- go2cs converted at 2020 October 09 04:49:21 UTC
+// package msan -- go2cs converted at 2022 March 06 22:14:35 UTC
 // import "runtime/msan" ==> using msan = go.runtime.msan_package
-// Original source: C:\Go\src\runtime\msan\msan.go
+// Original source: C:\Program Files\Go\src\runtime\msan\msan.go
 /*
 #cgo CFLAGS: -fsanitize=memory
 #cgo LDFLAGS: -fsanitize=memory
@@ -31,5 +31,5 @@ void __msan_free_go(void *addr, uintptr_t sz) {
     __msan_poison(addr, sz);
 }
 */
-using C = go.C_package;    }
-
+using C = go.C_package;
+} // end msan_package

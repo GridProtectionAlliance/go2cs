@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:48 UTC
+//     Generated on 2022 March 06 23:17:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,11 +12,10 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using rand = go.math.rand_package;
-using os = go.os_package;
 using sync = go.sync_package;
 using syscall = go.syscall_package;
 using time = go.time_package;

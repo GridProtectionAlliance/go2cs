@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:50:02 UTC
+//     Generated on 2022 March 06 22:14:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,12 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using gzip = go.compress.gzip_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
+using os = go.os_package;
 using runtime = go.runtime_package;
 using strconv = go.strconv_package;
 using time = go.time_package;
@@ -53,7 +52,7 @@ namespace runtime
                 this.deck = default;
             }
 
-            public profileBuilder(time.Time start = default, time.Time end = default, bool havePeriod = default, long period = default, profMap m = default, io.Writer w = default, ref ptr<gzip.Writer> zw = default, protobuf pb = default, slice<@string> strings = default, map<@string, long> stringMap = default, map<System.UIntPtr, locInfo> locs = default, map<@string, long> funcs = default, slice<memMap> mem = default, pcDeck deck = default)
+            public profileBuilder(time.Time start = default, time.Time end = default, bool havePeriod = default, long period = default, profMap m = default, io.Writer w = default, ref ptr<gzip.Writer> zw = default, protobuf pb = default, slice<@string> strings = default, map<@string, nint> stringMap = default, map<System.UIntPtr, locInfo> locs = default, map<@string, nint> funcs = default, slice<memMap> mem = default, pcDeck deck = default)
             {
                 this.start = start;
                 this.end = end;

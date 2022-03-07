@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:19:38 UTC
+//     Generated on 2022 March 06 22:42:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -75,13 +75,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_AlignofByPtr is null || !m_target_is_ptr)
                     return s_AlignofByVal!(target, T);
 
-                return s_AlignofByPtr(m_target_ptr, T);
+                return s_AlignofByPtr(m_target_ptr!, T);
             }
 
             private delegate long OffsetsofByPtr(ptr<T> value, slice<ptr<Var>> fields);
@@ -95,13 +95,13 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OffsetsofByPtr is null || !m_target_is_ptr)
                     return s_OffsetsofByVal!(target, fields);
 
-                return s_OffsetsofByPtr(m_target_ptr, fields);
+                return s_OffsetsofByPtr(m_target_ptr!, fields);
             }
 
             private delegate long SizeofByPtr(ptr<T> value, Type T);
@@ -115,16 +115,16 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SizeofByPtr is null || !m_target_is_ptr)
                     return s_SizeofByVal!(target, T);
 
-                return s_SizeofByPtr(m_target_ptr, T);
+                return s_SizeofByPtr(m_target_ptr!, T);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Sizes()
@@ -135,12 +135,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Alignof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AlignofByPtr = extensionMethod.CreateStaticDelegate(typeof(AlignofByPtr)) as AlignofByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Alignof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_AlignofByVal = extensionMethod.CreateStaticDelegate(typeof(AlignofByVal)) as AlignofByVal;
 
                 if (s_AlignofByPtr is null && s_AlignofByVal is null)
@@ -148,12 +148,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Offsetsof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OffsetsofByPtr = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByPtr)) as OffsetsofByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Offsetsof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OffsetsofByVal = extensionMethod.CreateStaticDelegate(typeof(OffsetsofByVal)) as OffsetsofByVal;
 
                 if (s_OffsetsofByPtr is null && s_OffsetsofByVal is null)
@@ -161,12 +161,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Sizeof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeofByPtr = extensionMethod.CreateStaticDelegate(typeof(SizeofByPtr)) as SizeofByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Sizeof");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SizeofByVal = extensionMethod.CreateStaticDelegate(typeof(SizeofByVal)) as SizeofByVal;
 
                 if (s_SizeofByPtr is null && s_SizeofByVal is null)

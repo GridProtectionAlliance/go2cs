@@ -19,224 +19,209 @@ timing side-channels:
         return hmac.Equal(messageMAC, expectedMAC)
     }
 */
-// package hmac -- go2cs converted at 2020 October 09 04:54:34 UTC
+// package hmac -- go2cs converted at 2022 March 06 22:19:21 UTC
 // import "crypto/hmac" ==> using hmac = go.crypto.hmac_package
-// Original source: C:\Go\src\crypto\hmac\hmac.go
+// Original source: C:\Program Files\Go\src\crypto\hmac\hmac.go
 using subtle = go.crypto.subtle_package;
 using hash = go.hash_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace crypto
-{
-    public static partial class hmac_package
-    {
-        // FIPS 198-1:
-        // https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
 
-        // key is zero padded to the block size of the hash function
-        // ipad = 0x36 byte repeated for key length
-        // opad = 0x5c byte repeated for key length
-        // hmac = H([key ^ opad] H([key ^ ipad] text))
+namespace go.crypto;
 
-        // Marshalable is the combination of encoding.BinaryMarshaler and
-        // encoding.BinaryUnmarshaler. Their method definitions are repeated here to
-        // avoid a dependency on the encoding package.
-        private partial interface marshalable
-        {
-            error MarshalBinary();
-            error UnmarshalBinary(slice<byte> _p0);
-        }
+public static partial class hmac_package {
 
-        private partial struct hmac
-        {
-            public slice<byte> opad;
-            public slice<byte> ipad;
-            public hash.Hash outer; // If marshaled is true, then opad and ipad do not contain a padded
+    // FIPS 198-1:
+    // https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+    // key is zero padded to the block size of the hash function
+    // ipad = 0x36 byte repeated for key length
+    // opad = 0x5c byte repeated for key length
+    // hmac = H([key ^ opad] H([key ^ ipad] text))
+
+    // Marshalable is the combination of encoding.BinaryMarshaler and
+    // encoding.BinaryUnmarshaler. Their method definitions are repeated here to
+    // avoid a dependency on the encoding package.
+private partial interface marshalable {
+    error MarshalBinary();
+    error UnmarshalBinary(slice<byte> _p0);
+}
+
+private partial struct hmac {
+    public slice<byte> opad;
+    public slice<byte> ipad;
+    public hash.Hash outer; // If marshaled is true, then opad and ipad do not contain a padded
 // copy of the key, but rather the marshaled state of outer/inner after
 // opad/ipad has been fed into it.
-            public hash.Hash inner; // If marshaled is true, then opad and ipad do not contain a padded
+    public hash.Hash inner; // If marshaled is true, then opad and ipad do not contain a padded
 // copy of the key, but rather the marshaled state of outer/inner after
 // opad/ipad has been fed into it.
-            public bool marshaled;
-        }
+    public bool marshaled;
+}
 
-        private static slice<byte> Sum(this ptr<hmac> _addr_h, slice<byte> @in) => func((_, panic, __) =>
+private static slice<byte> Sum(this ptr<hmac> _addr_h, slice<byte> @in) => func((_, panic, _) => {
+    ref hmac h = ref _addr_h.val;
+
+    var origLen = len(in);
+    in = h.inner.Sum(in);
+
+    if (h.marshaled) {
         {
-            ref hmac h = ref _addr_h.val;
+            marshalable err = marshalable.As(h.outer._<marshalable>().UnmarshalBinary(h.opad))!;
 
-            var origLen = len(in);
-            in = h.inner.Sum(in);
-
-            if (h.marshaled)
-            {
-                {
-                    marshalable err = marshalable.As(h.outer._<marshalable>().UnmarshalBinary(h.opad))!;
-
-                    if (err != null)
-                    {
-                        panic(err);
-                    }
-
-                }
-
+            if (err != null) {
+                panic(err);
             }
-            else
-            {
-                h.outer.Reset();
-                h.outer.Write(h.opad);
-            }
-
-            h.outer.Write(in[origLen..]);
-            return h.outer.Sum(in[..origLen]);
-
-        });
-
-        private static (long, error) Write(this ptr<hmac> _addr_h, slice<byte> p)
-        {
-            long n = default;
-            error err = default!;
-            ref hmac h = ref _addr_h.val;
-
-            return h.inner.Write(p);
-        }
-
-        private static long Size(this ptr<hmac> _addr_h)
-        {
-            ref hmac h = ref _addr_h.val;
-
-            return h.outer.Size();
-        }
-        private static long BlockSize(this ptr<hmac> _addr_h)
-        {
-            ref hmac h = ref _addr_h.val;
-
-            return h.inner.BlockSize();
-        }
-
-        private static void Reset(this ptr<hmac> _addr_h) => func((_, panic, __) =>
-        {
-            ref hmac h = ref _addr_h.val;
-
-            if (h.marshaled)
-            {
-                {
-                    marshalable err = marshalable.As(h.inner._<marshalable>().UnmarshalBinary(h.ipad))!;
-
-                    if (err != null)
-                    {
-                        panic(err);
-                    }
-
-                }
-
-                return ;
-
-            }
-
-            h.inner.Reset();
-            h.inner.Write(h.ipad); 
-
-            // If the underlying hash is marshalable, we can save some time by
-            // saving a copy of the hash state now, and restoring it on future
-            // calls to Reset and Sum instead of writing ipad/opad every time.
-            //
-            // If either hash is unmarshalable for whatever reason,
-            // it's safe to bail out here.
-            marshalable (marshalableInner, innerOK) = marshalable.As(h.inner._<marshalable>())!;
-            if (!innerOK)
-            {
-                return ;
-            }
-
-            marshalable (marshalableOuter, outerOK) = marshalable.As(h.outer._<marshalable>())!;
-            if (!outerOK)
-            {
-                return ;
-            }
-
-            var (imarshal, err) = marshalableInner.MarshalBinary();
-            if (err != null)
-            {
-                return ;
-            }
-
-            h.outer.Reset();
-            h.outer.Write(h.opad);
-            var (omarshal, err) = marshalableOuter.MarshalBinary();
-            if (err != null)
-            {
-                return ;
-            } 
-
-            // Marshaling succeeded; save the marshaled state for later
-            h.ipad = imarshal;
-            h.opad = omarshal;
-            h.marshaled = true;
-
-        });
-
-        // New returns a new HMAC hash using the given hash.Hash type and key.
-        // Note that unlike other hash implementations in the standard library,
-        // the returned Hash does not implement encoding.BinaryMarshaler
-        // or encoding.BinaryUnmarshaler.
-        public static hash.Hash New(Func<hash.Hash> h, slice<byte> key)
-        {
-            ptr<hmac> hm = @new<hmac>();
-            hm.outer = h();
-            hm.inner = h();
-            var blocksize = hm.inner.BlockSize();
-            hm.ipad = make_slice<byte>(blocksize);
-            hm.opad = make_slice<byte>(blocksize);
-            if (len(key) > blocksize)
-            { 
-                // If key is too big, hash it.
-                hm.outer.Write(key);
-                key = hm.outer.Sum(null);
-
-            }
-
-            copy(hm.ipad, key);
-            copy(hm.opad, key);
-            {
-                var i__prev1 = i;
-
-                foreach (var (__i) in hm.ipad)
-                {
-                    i = __i;
-                    hm.ipad[i] ^= 0x36UL;
-                }
-
-                i = i__prev1;
-            }
-
-            {
-                var i__prev1 = i;
-
-                foreach (var (__i) in hm.opad)
-                {
-                    i = __i;
-                    hm.opad[i] ^= 0x5cUL;
-                }
-
-                i = i__prev1;
-            }
-
-            hm.inner.Write(hm.ipad);
-
-            return hm;
 
         }
 
-        // Equal compares two MACs for equality without leaking timing information.
-        public static bool Equal(slice<byte> mac1, slice<byte> mac2)
-        { 
-            // We don't have to be constant time if the lengths of the MACs are
-            // different as that suggests that a completely different hash function
-            // was used.
-            return subtle.ConstantTimeCompare(mac1, mac2) == 1L;
-
-        }
     }
-}}
+    else
+ {
+        h.outer.Reset();
+        h.outer.Write(h.opad);
+    }
+    h.outer.Write(in[(int)origLen..]);
+    return h.outer.Sum(in[..(int)origLen]);
+
+});
+
+private static (nint, error) Write(this ptr<hmac> _addr_h, slice<byte> p) {
+    nint n = default;
+    error err = default!;
+    ref hmac h = ref _addr_h.val;
+
+    return h.inner.Write(p);
+}
+
+private static nint Size(this ptr<hmac> _addr_h) {
+    ref hmac h = ref _addr_h.val;
+
+    return h.outer.Size();
+}
+private static nint BlockSize(this ptr<hmac> _addr_h) {
+    ref hmac h = ref _addr_h.val;
+
+    return h.inner.BlockSize();
+}
+
+private static void Reset(this ptr<hmac> _addr_h) => func((_, panic, _) => {
+    ref hmac h = ref _addr_h.val;
+
+    if (h.marshaled) {
+        {
+            marshalable err = marshalable.As(h.inner._<marshalable>().UnmarshalBinary(h.ipad))!;
+
+            if (err != null) {
+                panic(err);
+            }
+
+        }
+
+        return ;
+
+    }
+    h.inner.Reset();
+    h.inner.Write(h.ipad); 
+
+    // If the underlying hash is marshalable, we can save some time by
+    // saving a copy of the hash state now, and restoring it on future
+    // calls to Reset and Sum instead of writing ipad/opad every time.
+    //
+    // If either hash is unmarshalable for whatever reason,
+    // it's safe to bail out here.
+    marshalable (marshalableInner, innerOK) = marshalable.As(h.inner._<marshalable>())!;
+    if (!innerOK) {
+        return ;
+    }
+    marshalable (marshalableOuter, outerOK) = marshalable.As(h.outer._<marshalable>())!;
+    if (!outerOK) {
+        return ;
+    }
+    var (imarshal, err) = marshalableInner.MarshalBinary();
+    if (err != null) {
+        return ;
+    }
+    h.outer.Reset();
+    h.outer.Write(h.opad);
+    var (omarshal, err) = marshalableOuter.MarshalBinary();
+    if (err != null) {
+        return ;
+    }
+    h.ipad = imarshal;
+    h.opad = omarshal;
+    h.marshaled = true;
+
+});
+
+// New returns a new HMAC hash using the given hash.Hash type and key.
+// New functions like sha256.New from crypto/sha256 can be used as h.
+// h must return a new Hash every time it is called.
+// Note that unlike other hash implementations in the standard library,
+// the returned Hash does not implement encoding.BinaryMarshaler
+// or encoding.BinaryUnmarshaler.
+public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, panic, _) => {
+    ptr<hmac> hm = @new<hmac>();
+    hm.outer = h();
+    hm.inner = h();
+    var unique = true;
+    () => {
+        defer(() => { 
+            // The comparison might panic if the underlying types are not comparable.
+            _ = recover();
+
+        }());
+        if (hm.outer == hm.inner) {
+            unique = false;
+        }
+    }();
+    if (!unique) {
+        panic("crypto/hmac: hash generation function does not produce unique values");
+    }
+    var blocksize = hm.inner.BlockSize();
+    hm.ipad = make_slice<byte>(blocksize);
+    hm.opad = make_slice<byte>(blocksize);
+    if (len(key) > blocksize) { 
+        // If key is too big, hash it.
+        hm.outer.Write(key);
+        key = hm.outer.Sum(null);
+
+    }
+    copy(hm.ipad, key);
+    copy(hm.opad, key);
+    {
+        var i__prev1 = i;
+
+        foreach (var (__i) in hm.ipad) {
+            i = __i;
+            hm.ipad[i] ^= 0x36;
+        }
+        i = i__prev1;
+    }
+
+    {
+        var i__prev1 = i;
+
+        foreach (var (__i) in hm.opad) {
+            i = __i;
+            hm.opad[i] ^= 0x5c;
+        }
+        i = i__prev1;
+    }
+
+    hm.inner.Write(hm.ipad);
+
+    return hm;
+
+});
+
+// Equal compares two MACs for equality without leaking timing information.
+public static bool Equal(slice<byte> mac1, slice<byte> mac2) { 
+    // We don't have to be constant time if the lengths of the MACs are
+    // different as that suggests that a completely different hash function
+    // was used.
+    return subtle.ConstantTimeCompare(mac1, mac2) == 1;
+
+}
+
+} // end hmac_package

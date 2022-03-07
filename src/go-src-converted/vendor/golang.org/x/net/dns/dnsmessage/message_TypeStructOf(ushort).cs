@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:06:47 UTC
+//     Generated on 2022 March 06 23:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace dns
         {
             // Value of the Type struct
             private readonly ushort m_value;
-
+            
             public Type(ushort value) => m_value = value;
 
             // Enable implicit conversions between ushort and Type struct

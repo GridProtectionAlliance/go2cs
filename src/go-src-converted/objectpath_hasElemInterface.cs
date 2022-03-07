@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:36 UTC
+//     Generated on 2022 March 06 23:32:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using strconv = go.strconv_package;
 using strings = go.strings_package;
@@ -57,7 +56,7 @@ namespace types
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,16 +82,16 @@ namespace types
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ElemByPtr is null || !m_target_is_ptr)
                     return s_ElemByVal!(target);
 
-                return s_ElemByPtr(m_target_ptr);
+                return s_ElemByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static hasElem()
@@ -103,12 +102,12 @@ namespace types
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByPtr = extensionMethod.CreateStaticDelegate(typeof(ElemByPtr)) as ElemByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Elem");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ElemByVal = extensionMethod.CreateStaticDelegate(typeof(ElemByVal)) as ElemByVal;
 
                 if (s_ElemByPtr is null && s_ElemByVal is null)

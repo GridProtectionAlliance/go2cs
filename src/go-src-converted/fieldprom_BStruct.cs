@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.q = default;
             }
 
-            public B(long p = default, ref ptr<long> q = default)
+            public B(nint p = default, ref ptr<nint> q = default)
             {
                 this.p = p;
                 this.q = q;

@@ -2,36 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !386 && !amd64 && !amd64p32 && !arm64
 // +build !386,!amd64,!amd64p32,!arm64
 
-// package cpu -- go2cs converted at 2020 October 09 06:07:54 UTC
+// package cpu -- go2cs converted at 2022 March 06 23:38:19 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
-// Original source: C:\Go\src\vendor\golang.org\x\sys\cpu\cpu_linux.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu_linux.go
 
-using static go.builtin;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class cpu_package
+namespace go.vendor.golang.org.x.sys;
+
+public static partial class cpu_package {
+
+private static void archInit() {
     {
-        private static void init()
-        {
-            {
-                var err = readHWCAP();
+        var err = readHWCAP();
 
-                if (err != null)
-                {
-                    return ;
-                }
-            }
-
-            doinit();
-            Initialized = true;
-
+        if (err != null) {
+            return ;
         }
     }
-}}}}}
+
+    doinit();
+    Initialized = true;
+
+}
+
+} // end cpu_package

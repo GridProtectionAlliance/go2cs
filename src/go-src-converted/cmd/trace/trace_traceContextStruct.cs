@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:17 UTC
+//     Generated on 2022 March 06 23:23:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using traceviewer = go.cmd.@internal.traceviewer_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
 using trace = go.@internal.trace_package;
@@ -55,7 +55,7 @@ namespace go
                 this.regionID = default;
             }
 
-            public traceContext(ref ptr<traceParams> ptr<traceParams> = default, traceConsumer consumer = default, frameNode frameTree = default, long frameSeq = default, ulong arrowSeq = default, ulong gcount = default, heapStats heapStats = default, heapStats prevHeapStats = default, threadStats threadStats = default, threadStats prevThreadStats = default, array<long> gstates = default, array<long> prevGstates = default, long regionID = default)
+            public traceContext(ref ptr<traceParams> ptr<traceParams> = default, traceConsumer consumer = default, frameNode frameTree = default, nint frameSeq = default, ulong arrowSeq = default, ulong gcount = default, heapStats heapStats = default, heapStats prevHeapStats = default, threadStats threadStats = default, threadStats prevThreadStats = default, array<long> gstates = default, array<long> prevGstates = default, nint regionID = default)
             {
                 this.ptr<traceParams> = ptr<traceParams>;
                 this.consumer = consumer;

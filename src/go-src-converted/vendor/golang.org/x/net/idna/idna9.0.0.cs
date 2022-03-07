@@ -4,6 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build !go1.10
 // +build !go1.10
 
 // Package idna implements IDNA2008 using the compatibility processing
@@ -15,9 +16,9 @@
 // UTS #46 is defined in https://www.unicode.org/reports/tr46.
 // See https://unicode.org/cldr/utility/idna.jsp for a visualization of the
 // differences between these two standards.
-// package idna -- go2cs converted at 2020 October 09 06:06:56 UTC
+// package idna -- go2cs converted at 2022 March 06 23:37:18 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
-// Original source: C:\Go\src\vendor\golang.org\x\net\idna\idna9.0.0.go
+// Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\idna\idna9.0.0.go
 // import "golang.org/x/net/idna"
 
 using fmt = go.fmt_package;
@@ -26,870 +27,745 @@ using utf8 = go.unicode.utf8_package;
 
 using bidirule = go.golang.org.x.text.secure.bidirule_package;
 using norm = go.golang.org.x.text.unicode.norm_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace net
-{
-    public static partial class idna_package
-    {
-        // NOTE: Unlike common practice in Go APIs, the functions will return a
-        // sanitized domain name in case of errors. Browsers sometimes use a partially
-        // evaluated string as lookup.
-        // TODO: the current error handling is, in my opinion, the least opinionated.
-        // Other strategies are also viable, though:
-        // Option 1) Return an empty string in case of error, but allow the user to
-        //    specify explicitly which errors to ignore.
-        // Option 2) Return the partially evaluated string if it is itself a valid
-        //    string, otherwise return the empty string in case of error.
-        // Option 3) Option 1 and 2.
-        // Option 4) Always return an empty string for now and implement Option 1 as
-        //    needed, and document that the return string may not be empty in case of
-        //    error in the future.
-        // I think Option 1 is best, but it is quite opinionated.
 
-        // ToASCII is a wrapper for Punycode.ToASCII.
-        public static (@string, error) ToASCII(@string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
+namespace go.vendor.golang.org.x.net;
 
-            return Punycode.process(s, true);
+public static partial class idna_package {
+
+    // NOTE: Unlike common practice in Go APIs, the functions will return a
+    // sanitized domain name in case of errors. Browsers sometimes use a partially
+    // evaluated string as lookup.
+    // TODO: the current error handling is, in my opinion, the least opinionated.
+    // Other strategies are also viable, though:
+    // Option 1) Return an empty string in case of error, but allow the user to
+    //    specify explicitly which errors to ignore.
+    // Option 2) Return the partially evaluated string if it is itself a valid
+    //    string, otherwise return the empty string in case of error.
+    // Option 3) Option 1 and 2.
+    // Option 4) Always return an empty string for now and implement Option 1 as
+    //    needed, and document that the return string may not be empty in case of
+    //    error in the future.
+    // I think Option 1 is best, but it is quite opinionated.
+
+    // ToASCII is a wrapper for Punycode.ToASCII.
+public static (@string, error) ToASCII(@string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+
+    return Punycode.process(s, true);
+}
+
+// ToUnicode is a wrapper for Punycode.ToUnicode.
+public static (@string, error) ToUnicode(@string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+
+    return Punycode.process(s, false);
+}
+
+// An Option configures a Profile at creation time.
+public delegate void Option(ptr<options>);
+
+// Transitional sets a Profile to use the Transitional mapping as defined in UTS
+// #46. This will cause, for example, "ß" to be mapped to "ss". Using the
+// transitional mapping provides a compromise between IDNA2003 and IDNA2008
+// compatibility. It is used by most browsers when resolving domain names. This
+// option is only meaningful if combined with MapForLookup.
+public static Option Transitional(bool transitional) {
+    return o => {
+        o.transitional = true;
+    };
+
+}
+
+// VerifyDNSLength sets whether a Profile should fail if any of the IDN parts
+// are longer than allowed by the RFC.
+//
+// This option corresponds to the VerifyDnsLength flag in UTS #46.
+public static Option VerifyDNSLength(bool verify) {
+    return o => {
+        o.verifyDNSLength = verify;
+    };
+
+}
+
+// RemoveLeadingDots removes leading label separators. Leading runes that map to
+// dots, such as U+3002 IDEOGRAPHIC FULL STOP, are removed as well.
+public static Option RemoveLeadingDots(bool remove) {
+    return o => {
+        o.removeLeadingDots = remove;
+    };
+
+}
+
+// ValidateLabels sets whether to check the mandatory label validation criteria
+// as defined in Section 5.4 of RFC 5891. This includes testing for correct use
+// of hyphens ('-'), normalization, validity of runes, and the context rules.
+// In particular, ValidateLabels also sets the CheckHyphens and CheckJoiners flags
+// in UTS #46.
+public static Option ValidateLabels(bool enable) {
+    return o => { 
+        // Don't override existing mappings, but set one that at least checks
+        // normalization if it is not set.
+        if (o.mapping == null && enable) {
+            o.mapping = normalize;
         }
-
-        // ToUnicode is a wrapper for Punycode.ToUnicode.
-        public static (@string, error) ToUnicode(@string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-
-            return Punycode.process(s, false);
+        o.trie = trie;
+        o.checkJoiners = enable;
+        o.checkHyphens = enable;
+        if (enable) {
+            o.fromPuny = validateFromPunycode;
         }
-
-        // An Option configures a Profile at creation time.
-        public delegate void Option(ptr<options>);
-
-        // Transitional sets a Profile to use the Transitional mapping as defined in UTS
-        // #46. This will cause, for example, "ß" to be mapped to "ss". Using the
-        // transitional mapping provides a compromise between IDNA2003 and IDNA2008
-        // compatibility. It is used by most browsers when resolving domain names. This
-        // option is only meaningful if combined with MapForLookup.
-        public static Option Transitional(bool transitional)
-        {
-            return o =>
-            {
-                o.transitional = true;
-            };
-
+        else
+ {
+            o.fromPuny = null;
         }
+    };
 
-        // VerifyDNSLength sets whether a Profile should fail if any of the IDN parts
-        // are longer than allowed by the RFC.
-        public static Option VerifyDNSLength(bool verify)
-        {
-            return o =>
-            {
-                o.verifyDNSLength = verify;
-            };
+}
 
-        }
+// CheckHyphens sets whether to check for correct use of hyphens ('-') in
+// labels. Most web browsers do not have this option set, since labels such as
+// "r3---sn-apo3qvuoxuxbt-j5pe" are in common use.
+//
+// This option corresponds to the CheckHyphens flag in UTS #46.
+public static Option CheckHyphens(bool enable) {
+    return o => {
+        o.checkHyphens = enable;
+    };
 
-        // RemoveLeadingDots removes leading label separators. Leading runes that map to
-        // dots, such as U+3002 IDEOGRAPHIC FULL STOP, are removed as well.
-        //
-        // This is the behavior suggested by the UTS #46 and is adopted by some
-        // browsers.
-        public static Option RemoveLeadingDots(bool remove)
-        {
-            return o =>
-            {
-                o.removeLeadingDots = remove;
-            };
+}
 
-        }
+// CheckJoiners sets whether to check the ContextJ rules as defined in Appendix
+// A of RFC 5892, concerning the use of joiner runes.
+//
+// This option corresponds to the CheckJoiners flag in UTS #46.
+public static Option CheckJoiners(bool enable) {
+    return o => {
+        o.trie = trie;
+        o.checkJoiners = enable;
+    };
+}
 
-        // ValidateLabels sets whether to check the mandatory label validation criteria
-        // as defined in Section 5.4 of RFC 5891. This includes testing for correct use
-        // of hyphens ('-'), normalization, validity of runes, and the context rules.
-        public static Option ValidateLabels(bool enable)
-        {
-            return o =>
-            { 
-                // Don't override existing mappings, but set one that at least checks
-                // normalization if it is not set.
-                if (o.mapping == null && enable)
-                {
-                    o.mapping = normalize;
-                }
+// StrictDomainName limits the set of permissable ASCII characters to those
+// allowed in domain names as defined in RFC 1034 (A-Z, a-z, 0-9 and the
+// hyphen). This is set by default for MapForLookup and ValidateForRegistration,
+// but is only useful if ValidateLabels is set.
+//
+// This option is useful, for instance, for browsers that allow characters
+// outside this range, for example a '_' (U+005F LOW LINE). See
+// http://www.rfc-editor.org/std/std3.txt for more details.
+//
+// This option corresponds to the UseSTD3ASCIIRules flag in UTS #46.
+public static Option StrictDomainName(bool use) {
+    return o => {
+        o.useSTD3Rules = use;
+    };
 
-                o.trie = trie;
-                o.validateLabels = enable;
-                o.fromPuny = validateFromPunycode;
+}
 
-            };
+// NOTE: the following options pull in tables. The tables should not be linked
+// in as long as the options are not used.
 
-        }
+// BidiRule enables the Bidi rule as defined in RFC 5893. Any application
+// that relies on proper validation of labels should include this rule.
+//
+// This option corresponds to the CheckBidi flag in UTS #46.
+public static Option BidiRule() {
+    return o => {
+        o.bidirule = bidirule.ValidString;
+    };
 
-        // StrictDomainName limits the set of permissable ASCII characters to those
-        // allowed in domain names as defined in RFC 1034 (A-Z, a-z, 0-9 and the
-        // hyphen). This is set by default for MapForLookup and ValidateForRegistration.
-        //
-        // This option is useful, for instance, for browsers that allow characters
-        // outside this range, for example a '_' (U+005F LOW LINE). See
-        // http://www.rfc-editor.org/std/std3.txt for more details This option
-        // corresponds to the UseSTD3ASCIIRules option in UTS #46.
-        public static Option StrictDomainName(bool use)
-        {
-            return o =>
-            {
-                o.trie = trie;
-                o.useSTD3Rules = use;
-                o.fromPuny = validateFromPunycode;
-            };
+}
 
-        }
+// ValidateForRegistration sets validation options to verify that a given IDN is
+// properly formatted for registration as defined by Section 4 of RFC 5891.
+public static Option ValidateForRegistration() {
+    return o => {
+        o.mapping = validateRegistration;
+        StrictDomainName(true)(o);
+        ValidateLabels(true)(o);
+        VerifyDNSLength(true)(o);
+        BidiRule()(o);
+    };
+}
 
-        // NOTE: the following options pull in tables. The tables should not be linked
-        // in as long as the options are not used.
+// MapForLookup sets validation and mapping options such that a given IDN is
+// transformed for domain name lookup according to the requirements set out in
+// Section 5 of RFC 5891. The mappings follow the recommendations of RFC 5894,
+// RFC 5895 and UTS 46. It does not add the Bidi Rule. Use the BidiRule option
+// to add this check.
+//
+// The mappings include normalization and mapping case, width and other
+// compatibility mappings.
+public static Option MapForLookup() {
+    return o => {
+        o.mapping = validateAndMap;
+        StrictDomainName(true)(o);
+        ValidateLabels(true)(o);
+        RemoveLeadingDots(true)(o);
+    };
+}
 
-        // BidiRule enables the Bidi rule as defined in RFC 5893. Any application
-        // that relies on proper validation of labels should include this rule.
-        public static Option BidiRule()
-        {
-            return o =>
-            {
-                o.bidirule = bidirule.ValidString;
-            };
-
-        }
-
-        // ValidateForRegistration sets validation options to verify that a given IDN is
-        // properly formatted for registration as defined by Section 4 of RFC 5891.
-        public static Option ValidateForRegistration()
-        {
-            return o =>
-            {
-                o.mapping = validateRegistration;
-                StrictDomainName(true)(o);
-                ValidateLabels(true)(o);
-                VerifyDNSLength(true)(o);
-                BidiRule()(o);
-            };
-
-        }
-
-        // MapForLookup sets validation and mapping options such that a given IDN is
-        // transformed for domain name lookup according to the requirements set out in
-        // Section 5 of RFC 5891. The mappings follow the recommendations of RFC 5894,
-        // RFC 5895 and UTS 46. It does not add the Bidi Rule. Use the BidiRule option
-        // to add this check.
-        //
-        // The mappings include normalization and mapping case, width and other
-        // compatibility mappings.
-        public static Option MapForLookup()
-        {
-            return o =>
-            {
-                o.mapping = validateAndMap;
-                StrictDomainName(true)(o);
-                ValidateLabels(true)(o);
-                RemoveLeadingDots(true)(o);
-            };
-
-        }
-
-        private partial struct options
-        {
-            public bool transitional;
-            public bool useSTD3Rules;
-            public bool validateLabels;
-            public bool verifyDNSLength;
-            public bool removeLeadingDots;
-            public ptr<idnaTrie> trie; // fromPuny calls validation rules when converting A-labels to U-labels.
-            public Func<ptr<Profile>, @string, error> fromPuny; // mapping implements a validation and mapping step as defined in RFC 5895
+private partial struct options {
+    public bool transitional;
+    public bool useSTD3Rules;
+    public bool checkHyphens;
+    public bool checkJoiners;
+    public bool verifyDNSLength;
+    public bool removeLeadingDots;
+    public ptr<idnaTrie> trie; // fromPuny calls validation rules when converting A-labels to U-labels.
+    public Func<ptr<Profile>, @string, error> fromPuny; // mapping implements a validation and mapping step as defined in RFC 5895
 // or UTS 46, tailored to, for example, domain registration or lookup.
-            public Func<ptr<Profile>, @string, (@string, error)> mapping; // bidirule, if specified, checks whether s conforms to the Bidi Rule
+    public Func<ptr<Profile>, @string, (@string, error)> mapping; // bidirule, if specified, checks whether s conforms to the Bidi Rule
 // defined in RFC 5893.
-            public Func<@string, bool> bidirule;
-        }
+    public Func<@string, bool> bidirule;
+}
 
-        // A Profile defines the configuration of a IDNA mapper.
-        public partial struct Profile
-        {
-            public ref options options => ref options_val;
-        }
+// A Profile defines the configuration of a IDNA mapper.
+public partial struct Profile {
+    public ref options options => ref options_val;
+}
 
-        private static void apply(ptr<options> _addr_o, slice<Option> opts)
-        {
-            ref options o = ref _addr_o.val;
+private static void apply(ptr<options> _addr_o, slice<Option> opts) {
+    ref options o = ref _addr_o.val;
 
-            foreach (var (_, f) in opts)
-            {
-                f(o);
-            }
+    foreach (var (_, f) in opts) {
+        f(o);
+    }
+}
 
-        }
+// New creates a new Profile.
+//
+// With no options, the returned Profile is the most permissive and equals the
+// Punycode Profile. Options can be passed to further restrict the Profile. The
+// MapForLookup and ValidateForRegistration options set a collection of options,
+// for lookup and registration purposes respectively, which can be tailored by
+// adding more fine-grained options, where later options override earlier
+// options.
+public static ptr<Profile> New(params Option[] o) {
+    o = o.Clone();
 
-        // New creates a new Profile.
-        //
-        // With no options, the returned Profile is the most permissive and equals the
-        // Punycode Profile. Options can be passed to further restrict the Profile. The
-        // MapForLookup and ValidateForRegistration options set a collection of options,
-        // for lookup and registration purposes respectively, which can be tailored by
-        // adding more fine-grained options, where later options override earlier
-        // options.
-        public static ptr<Profile> New(params Option[] o)
-        {
-            o = o.Clone();
+    ptr<Profile> p = addr(new Profile());
+    apply(_addr_p.options, o);
+    return _addr_p!;
+}
 
-            ptr<Profile> p = addr(new Profile());
-            apply(_addr_p.options, o);
-            return _addr_p!;
-        }
+// ToASCII converts a domain or domain label to its ASCII form. For example,
+// ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
+// ToASCII("golang") is "golang". If an error is encountered it will return
+// an error and a (partially) processed result.
+private static (@string, error) ToASCII(this ptr<Profile> _addr_p, @string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
 
-        // ToASCII converts a domain or domain label to its ASCII form. For example,
-        // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
-        // ToASCII("golang") is "golang". If an error is encountered it will return
-        // an error and a (partially) processed result.
-        private static (@string, error) ToASCII(this ptr<Profile> _addr_p, @string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
+    return p.process(s, true);
+}
 
-            return p.process(s, true);
-        }
+// ToUnicode converts a domain or domain label to its Unicode form. For example,
+// ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
+// ToUnicode("golang") is "golang". If an error is encountered it will return
+// an error and a (partially) processed result.
+private static (@string, error) ToUnicode(this ptr<Profile> _addr_p, @string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
 
-        // ToUnicode converts a domain or domain label to its Unicode form. For example,
-        // ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
-        // ToUnicode("golang") is "golang". If an error is encountered it will return
-        // an error and a (partially) processed result.
-        private static (@string, error) ToUnicode(this ptr<Profile> _addr_p, @string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
+    var pp = p.val;
+    pp.transitional = false;
+    return pp.process(s, false);
+}
 
-            var pp = p.val;
-            pp.transitional = false;
-            return pp.process(s, false);
-        }
+// String reports a string with a description of the profile for debugging
+// purposes. The string format may change with different versions.
+private static @string String(this ptr<Profile> _addr_p) {
+    ref Profile p = ref _addr_p.val;
 
-        // String reports a string with a description of the profile for debugging
-        // purposes. The string format may change with different versions.
-        private static @string String(this ptr<Profile> _addr_p)
-        {
-            ref Profile p = ref _addr_p.val;
+    @string s = "";
+    if (p.transitional) {
+        s = "Transitional";
+    }
+    else
+ {
+        s = "NonTransitional";
+    }
+    if (p.useSTD3Rules) {
+        s += ":UseSTD3Rules";
+    }
+    if (p.checkHyphens) {
+        s += ":CheckHyphens";
+    }
+    if (p.checkJoiners) {
+        s += ":CheckJoiners";
+    }
+    if (p.verifyDNSLength) {
+        s += ":VerifyDNSLength";
+    }
+    return s;
 
-            @string s = "";
-            if (p.transitional)
-            {
-                s = "Transitional";
-            }
-            else
-            {
-                s = "NonTransitional";
-            }
-
-            if (p.useSTD3Rules)
-            {
-                s += ":UseSTD3Rules";
-            }
-
-            if (p.validateLabels)
-            {
-                s += ":ValidateLabels";
-            }
-
-            if (p.verifyDNSLength)
-            {
-                s += ":VerifyDNSLength";
-            }
-
-            return s;
-
-        }
+}
 
  
-        // Punycode is a Profile that does raw punycode processing with a minimum
-        // of validation.
-        public static ptr<Profile> Punycodepunycode;        public static ptr<Profile> Lookuplookup;        public static ptr<Profile> Displaydisplay;        public static ptr<Profile> Registrationregistration;        private static ptr<Profile> punycode = addr(new Profile());        private static ptr<Profile> lookup = addr(new Profile(options{transitional:true,useSTD3Rules:true,validateLabels:true,removeLeadingDots:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateAndMap,bidirule:bidirule.ValidString,}));        private static ptr<Profile> display = addr(new Profile(options{useSTD3Rules:true,validateLabels:true,removeLeadingDots:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateAndMap,bidirule:bidirule.ValidString,}));        private static ptr<Profile> registration = addr(new Profile(options{useSTD3Rules:true,validateLabels:true,verifyDNSLength:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateRegistration,bidirule:bidirule.ValidString,}));
+// Punycode is a Profile that does raw punycode processing with a minimum
+// of validation.
+public static ptr<Profile> Punycodepunycode;public static ptr<Profile> Lookuplookup;public static ptr<Profile> Displaydisplay;public static ptr<Profile> Registrationregistration;private static ptr<Profile> punycode = addr(new Profile());private static ptr<Profile> lookup = addr(new Profile(options{transitional:true,removeLeadingDots:true,useSTD3Rules:true,checkHyphens:true,checkJoiners:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateAndMap,bidirule:bidirule.ValidString,}));private static ptr<Profile> display = addr(new Profile(options{useSTD3Rules:true,removeLeadingDots:true,checkHyphens:true,checkJoiners:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateAndMap,bidirule:bidirule.ValidString,}));private static ptr<Profile> registration = addr(new Profile(options{useSTD3Rules:true,verifyDNSLength:true,checkHyphens:true,checkJoiners:true,trie:trie,fromPuny:validateFromPunycode,mapping:validateRegistration,bidirule:bidirule.ValidString,}));
 
-        private partial struct labelError
-        {
-            public @string label;
-            public @string code_;
+private partial struct labelError {
+    public @string label;
+    public @string code_;
+}
+
+private static @string code(this labelError e) {
+    return e.code_;
+}
+private static @string Error(this labelError e) {
+    return fmt.Sprintf("idna: invalid label %q", e.label);
+}
+
+private partial struct runeError { // : int
+}
+
+private static @string code(this runeError e) {
+    return "P1";
+}
+private static @string Error(this runeError e) {
+    return fmt.Sprintf("idna: disallowed rune %U", e);
+}
+
+// process implements the algorithm described in section 4 of UTS #46,
+// see https://www.unicode.org/reports/tr46.
+private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bool toASCII) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
+
+    error err = default!;
+    if (p.mapping != null) {
+        s, err = p.mapping(p, s);
+    }
+    if (p.removeLeadingDots) {
+        while (len(s) > 0 && s[0] == '.') {
+            s = s[(int)1..];
         }
 
-        private static @string code(this labelError e)
-        {
-            return e.code_;
-        }
-        private static @string Error(this labelError e)
-        {
-            return fmt.Sprintf("idna: invalid label %q", e.label);
-        }
-
-        private partial struct runeError // : int
-        {
-        }
-
-        private static @string code(this runeError e)
-        {
-            return "P1";
-        }
-        private static @string Error(this runeError e)
-        {
-            return fmt.Sprintf("idna: disallowed rune %U", e);
-        }
-
-        // process implements the algorithm described in section 4 of UTS #46,
-        // see https://www.unicode.org/reports/tr46.
-        private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bool toASCII)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
-
-            error err = default!;
-            if (p.mapping != null)
-            {
-                s, err = p.mapping(p, s);
-            } 
-            // Remove leading empty labels.
-            if (p.removeLeadingDots)
-            {
-                while (len(s) > 0L && s[0L] == '.')
-                {
-                    s = s[1L..];
-                }
-
-
-            } 
-            // It seems like we should only create this error on ToASCII, but the
-            // UTS 46 conformance tests suggests we should always check this.
-            if (err == null && p.verifyDNSLength && s == "")
-            {
+    }
+    if (err == null && p.verifyDNSLength && s == "") {
+        err = error.As(addr(new labelError(s,"A4")))!;
+    }
+    labelIter labels = new labelIter(orig:s);
+    while (!labels.done()) {
+        var label = labels.label();
+        if (label == "") { 
+            // Empty labels are not okay. The label iterator skips the last
+            // label if it is empty.
+            if (err == null && p.verifyDNSLength) {
                 err = error.As(addr(new labelError(s,"A4")))!;
+        labels.next();
             }
 
-            labelIter labels = new labelIter(orig:s);
-            while (!labels.done())
-            {
-                var label = labels.label();
-                if (label == "")
-                { 
-                    // Empty labels are not okay. The label iterator skips the last
-                    // label if it is empty.
-                    if (err == null && p.verifyDNSLength)
-                    {
-                        err = error.As(addr(new labelError(s,"A4")))!;
-                labels.next();
-                    }
-
-                    continue;
-
-                }
-
-                if (strings.HasPrefix(label, acePrefix))
-                {
-                    var (u, err2) = decode(label[len(acePrefix)..]);
-                    if (err2 != null)
-                    {
-                        if (err == null)
-                        {
-                            err = error.As(err2)!;
-                        } 
-                        // Spec says keep the old label.
-                        continue;
-
-                    }
-
-                    labels.set(u);
-                    if (err == null && p.validateLabels)
-                    {
-                        err = error.As(p.fromPuny(p, u))!;
-                    }
-
-                    if (err == null)
-                    { 
-                        // This should be called on NonTransitional, according to the
-                        // spec, but that currently does not have any effect. Use the
-                        // original profile to preserve options.
-                        err = error.As(p.validateLabel(u))!;
-
-                    }
-
-                }
-                else if (err == null)
-                {
-                    err = error.As(p.validateLabel(label))!;
-                }
-
-            }
-
-            if (toASCII)
-            {
-                labels.reset();
-
-                while (!labels.done())
-                {
-                    label = labels.label();
-                    if (!ascii(label))
-                    {
-                        var (a, err2) = encode(acePrefix, label);
-                        if (err == null)
-                        {
-                            err = error.As(err2)!;
-                    labels.next();
-                        }
-
-                        label = a;
-                        labels.set(a);
-
-                    }
-
-                    var n = len(label);
-                    if (p.verifyDNSLength && err == null && (n == 0L || n > 63L))
-                    {
-                        err = error.As(addr(new labelError(label,"A4")))!;
-                    }
-
-                }
-
-
-            }
-
-            s = labels.result();
-            if (toASCII && p.verifyDNSLength && err == null)
-            { 
-                // Compute the length of the domain name minus the root label and its dot.
-                n = len(s);
-                if (n > 0L && s[n - 1L] == '.')
-                {
-                    n--;
-                }
-
-                if (len(s) < 1L || n > 253L)
-                {
-                    err = error.As(addr(new labelError(s,"A4")))!;
-                }
-
-            }
-
-            return (s, error.As(err)!);
+            continue;
 
         }
-
-        private static (@string, error) normalize(ptr<Profile> _addr_p, @string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
-
-            return (norm.NFC.String(s), error.As(null!)!);
-        }
-
-        private static (@string, error) validateRegistration(ptr<Profile> _addr_p, @string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
-
-            if (!norm.NFC.IsNormalString(s))
-            {
-                return (s, error.As(addr(new labelError(s,"V1"))!)!);
-            }
-
-            {
-                long i = 0L;
-
-                while (i < len(s))
-                {
-                    var (v, sz) = trie.lookupString(s[i..]); 
-                    // Copy bytes not copied so far.
-
-                    // TODO: handle the NV8 defined in the Unicode idna data set to allow
-                    // for strict conformance to IDNA2008.
-                    if (p.simplify(info(v).category()) == valid || p.simplify(info(v).category()) == deviation)                     else if (p.simplify(info(v).category()) == disallowed || p.simplify(info(v).category()) == mapped || p.simplify(info(v).category()) == unknown || p.simplify(info(v).category()) == ignored) 
-                        var (r, _) = utf8.DecodeRuneInString(s[i..]);
-                        return (s, error.As(runeError(r))!);
-                                        i += sz;
-
-                }
-
-            }
-            return (s, error.As(null!)!);
-
-        }
-
-        private static (@string, error) validateAndMap(ptr<Profile> _addr_p, @string s)
-        {
-            @string _p0 = default;
-            error _p0 = default!;
-            ref Profile p = ref _addr_p.val;
-
-            error err = default!;            slice<byte> b = default;            long k = default;
-            {
-                long i = 0L;
-
-                while (i < len(s))
-                {
-                    var (v, sz) = trie.lookupString(s[i..]);
-                    var start = i;
-                    i += sz; 
-                    // Copy bytes not copied so far.
-
-                    if (p.simplify(info(v).category()) == valid) 
-                        continue;
-                    else if (p.simplify(info(v).category()) == disallowed) 
-                        if (err == null)
-                        {
-                            var (r, _) = utf8.DecodeRuneInString(s[start..]);
-                            err = error.As(runeError(r))!;
-                        }
-
-                        continue;
-                    else if (p.simplify(info(v).category()) == mapped || p.simplify(info(v).category()) == deviation) 
-                        b = append(b, s[k..start]);
-                        b = info(v).appendMapping(b, s[start..i]);
-                    else if (p.simplify(info(v).category()) == ignored) 
-                        b = append(b, s[k..start]); 
-                        // drop the rune
-                    else if (p.simplify(info(v).category()) == unknown) 
-                        b = append(b, s[k..start]);
-                        b = append(b, "\ufffd");
-                                        k = i;
-
-                }
-
-            }
-            if (k == 0L)
-            { 
-                // No changes so far.
-                s = norm.NFC.String(s);
-
-            }
-            else
-            {
-                b = append(b, s[k..]);
-                if (norm.NFC.QuickSpan(b) != len(b))
-                {
-                    b = norm.NFC.Bytes(b);
+        if (strings.HasPrefix(label, acePrefix)) {
+            var (u, err2) = decode(label[(int)len(acePrefix)..]);
+            if (err2 != null) {
+                if (err == null) {
+                    err = error.As(err2)!;
                 } 
-                // TODO: the punycode converters require strings as input.
-                s = string(b);
+                // Spec says keep the old label.
+                continue;
 
             }
 
-            return (s, error.As(err)!);
-
-        }
-
-        // A labelIter allows iterating over domain name labels.
-        private partial struct labelIter
-        {
-            public @string orig;
-            public slice<@string> slice;
-            public long curStart;
-            public long curEnd;
-            public long i;
-        }
-
-        private static void reset(this ptr<labelIter> _addr_l)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            l.curStart = 0L;
-            l.curEnd = 0L;
-            l.i = 0L;
-        }
-
-        private static bool done(this ptr<labelIter> _addr_l)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            return l.curStart >= len(l.orig);
-        }
-
-        private static @string result(this ptr<labelIter> _addr_l)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            if (l.slice != null)
-            {
-                return strings.Join(l.slice, ".");
+            labels.set(u);
+            if (err == null && p.fromPuny != null) {
+                err = error.As(p.fromPuny(p, u))!;
             }
 
-            return l.orig;
+            if (err == null) { 
+                // This should be called on NonTransitional, according to the
+                // spec, but that currently does not have any effect. Use the
+                // original profile to preserve options.
+                err = error.As(p.validateLabel(u))!;
 
-        }
-
-        private static @string label(this ptr<labelIter> _addr_l)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            if (l.slice != null)
-            {
-                return l.slice[l.i];
             }
 
-            var p = strings.IndexByte(l.orig[l.curStart..], '.');
-            l.curEnd = l.curStart + p;
-            if (p == -1L)
-            {
-                l.curEnd = len(l.orig);
-            }
-
-            return l.orig[l.curStart..l.curEnd];
-
         }
+        else if (err == null) {
+            err = error.As(p.validateLabel(label))!;
+        }
+    }
+    if (toASCII) {
+        labels.reset();
 
-        // next sets the value to the next label. It skips the last label if it is empty.
-        private static void next(this ptr<labelIter> _addr_l)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            l.i++;
-            if (l.slice != null)
-            {
-                if (l.i >= len(l.slice) || l.i == len(l.slice) - 1L && l.slice[l.i] == "")
-                {
-                    l.curStart = len(l.orig);
+        while (!labels.done()) {
+            label = labels.label();
+            if (!ascii(label)) {
+                var (a, err2) = encode(acePrefix, label);
+                if (err == null) {
+                    err = error.As(err2)!;
+            labels.next();
                 }
 
-            }
-            else
-            {
-                l.curStart = l.curEnd + 1L;
-                if (l.curStart == len(l.orig) - 1L && l.orig[l.curStart] == '.')
-                {
-                    l.curStart = len(l.orig);
-                }
+                label = a;
+                labels.set(a);
 
+            }
+
+            var n = len(label);
+            if (p.verifyDNSLength && err == null && (n == 0 || n > 63)) {
+                err = error.As(addr(new labelError(label,"A4")))!;
             }
 
         }
 
-        private static void set(this ptr<labelIter> _addr_l, @string s)
-        {
-            ref labelIter l = ref _addr_l.val;
-
-            if (l.slice == null)
-            {
-                l.slice = strings.Split(l.orig, ".");
-            }
-
-            l.slice[l.i] = s;
-
+    }
+    s = labels.result();
+    if (toASCII && p.verifyDNSLength && err == null) { 
+        // Compute the length of the domain name minus the root label and its dot.
+        n = len(s);
+        if (n > 0 && s[n - 1] == '.') {
+            n--;
         }
-
-        // acePrefix is the ASCII Compatible Encoding prefix.
-        private static readonly @string acePrefix = (@string)"xn--";
-
-
-
-        private static category simplify(this ptr<Profile> _addr_p, category cat)
-        {
-            ref Profile p = ref _addr_p.val;
-
-
-            if (cat == disallowedSTD3Mapped) 
-                if (p.useSTD3Rules)
-                {
-                    cat = disallowed;
-                }
-                else
-                {
-                    cat = mapped;
-                }
-
-            else if (cat == disallowedSTD3Valid) 
-                if (p.useSTD3Rules)
-                {
-                    cat = disallowed;
-                }
-                else
-                {
-                    cat = valid;
-                }
-
-            else if (cat == deviation) 
-                if (!p.transitional)
-                {
-                    cat = valid;
-                }
-
-            else if (cat == validNV8 || cat == validXV8) 
-                // TODO: handle V2008
-                cat = valid;
-                        return cat;
-
+        if (len(s) < 1 || n > 253) {
+            err = error.As(addr(new labelError(s,"A4")))!;
         }
+    }
+    return (s, error.As(err)!);
 
-        private static error validateFromPunycode(ptr<Profile> _addr_p, @string s)
-        {
-            ref Profile p = ref _addr_p.val;
+}
 
-            if (!norm.NFC.IsNormalString(s))
-            {
-                return error.As(addr(new labelError(s,"V1"))!)!;
-            }
+private static (@string, error) normalize(ptr<Profile> _addr_p, @string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
 
-            {
-                long i = 0L;
+    return (norm.NFC.String(s), error.As(null!)!);
+}
 
-                while (i < len(s))
-                {
-                    var (v, sz) = trie.lookupString(s[i..]);
-                    {
-                        var c = p.simplify(info(v).category());
+private static (@string, error) validateRegistration(ptr<Profile> _addr_p, @string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
 
-                        if (c != valid && c != deviation)
-                        {
-                            return error.As(addr(new labelError(s,"V6"))!)!;
-                        }
+    if (!norm.NFC.IsNormalString(s)) {
+        return (s, error.As(addr(new labelError(s,"V1"))!)!);
+    }
+    {
+        nint i = 0;
 
-                    }
+        while (i < len(s)) {
+            var (v, sz) = trie.lookupString(s[(int)i..]); 
+            // Copy bytes not copied so far.
 
-                    i += sz;
-
-                }
-
-            }
-            return error.As(null!)!;
-
-        }
-
-        private static readonly @string zwnj = (@string)"\u200c";
-        private static readonly @string zwj = (@string)"\u200d";
-
-
-        private partial struct joinState // : sbyte
-        {
-        }
-
-        private static readonly joinState stateStart = (joinState)iota;
-        private static readonly var stateVirama = 0;
-        private static readonly var stateBefore = 1;
-        private static readonly var stateBeforeVirama = 2;
-        private static readonly var stateAfter = 3;
-        private static readonly var stateFAIL = 4;
-
-
-        private static array<joinState> joinStates = new slice<array<joinState>>(InitKeyedValues<array<joinState>>((stateStart, {joiningL:stateBefore,joiningD:stateBefore,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateVirama,}), (stateVirama, {joiningL:stateBefore,joiningD:stateBefore,}), (stateBefore, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,joinZWNJ:stateAfter,joinZWJ:stateFAIL,joinVirama:stateBeforeVirama,}), (stateBeforeVirama, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,}), (stateAfter, {joiningL:stateFAIL,joiningD:stateBefore,joiningT:stateAfter,joiningR:stateStart,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateAfter,}), (stateFAIL, {0:stateFAIL,joiningL:stateFAIL,joiningD:stateFAIL,joiningT:stateFAIL,joiningR:stateFAIL,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateFAIL,})));
-
-        // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
-        // already implicitly satisfied by the overall implementation.
-        private static error validateLabel(this ptr<Profile> _addr_p, @string s)
-        {
-            ref Profile p = ref _addr_p.val;
-
-            if (s == "")
-            {
-                if (p.verifyDNSLength)
-                {
-                    return error.As(addr(new labelError(s,"A4"))!)!;
-                }
-
-                return error.As(null!)!;
-
-            }
-
-            if (p.bidirule != null && !p.bidirule(s))
-            {
-                return error.As(addr(new labelError(s,"B"))!)!;
-            }
-
-            if (!p.validateLabels)
-            {
-                return error.As(null!)!;
-            }
-
-            var trie = p.trie; // p.validateLabels is only set if trie is set.
-            if (len(s) > 4L && s[2L] == '-' && s[3L] == '-')
-            {
-                return error.As(addr(new labelError(s,"V2"))!)!;
-            }
-
-            if (s[0L] == '-' || s[len(s) - 1L] == '-')
-            {
-                return error.As(addr(new labelError(s,"V3"))!)!;
-            } 
-            // TODO: merge the use of this in the trie.
-            var (v, sz) = trie.lookupString(s);
-            var x = info(v);
-            if (x.isModifier())
-            {
-                return error.As(addr(new labelError(s,"V5"))!)!;
-            } 
-            // Quickly return in the absence of zero-width (non) joiners.
-            if (strings.Index(s, zwj) == -1L && strings.Index(s, zwnj) == -1L)
-            {
-                return error.As(null!)!;
-            }
-
-            var st = stateStart;
-            {
-                long i = 0L;
-
-                while (>>MARKER:FOREXPRESSION_LEVEL_1<<)
-                {
-                    var jt = x.joinType();
-                    if (s[i..i + sz] == zwj)
-                    {
-                        jt = joinZWJ;
-                    }
-                    else if (s[i..i + sz] == zwnj)
-                    {
-                        jt = joinZWNJ;
-                    }
-
-                    st = joinStates[st][jt];
-                    if (x.isViramaModifier())
-                    {
-                        st = joinStates[st][joinVirama];
-                    }
-
-                    i += sz;
-
-                    if (i == len(s))
-                    {
-                        break;
-                    }
-
-                    v, sz = trie.lookupString(s[i..]);
-                    x = info(v);
-
-                }
-
-            }
-            if (st == stateFAIL || st == stateAfter)
-            {
-                return error.As(addr(new labelError(s,"C"))!)!;
-            }
-
-            return error.As(null!)!;
-
-        }
-
-        private static bool ascii(@string s)
-        {
-            for (long i = 0L; i < len(s); i++)
-            {
-                if (s[i] >= utf8.RuneSelf)
-                {
-                    return false;
-                }
-
-            }
-
-            return true;
+            // TODO: handle the NV8 defined in the Unicode idna data set to allow
+            // for strict conformance to IDNA2008.
+            if (p.simplify(info(v).category()) == valid || p.simplify(info(v).category()) == deviation)             else if (p.simplify(info(v).category()) == disallowed || p.simplify(info(v).category()) == mapped || p.simplify(info(v).category()) == unknown || p.simplify(info(v).category()) == ignored) 
+                var (r, _) = utf8.DecodeRuneInString(s[(int)i..]);
+                return (s, error.As(runeError(r))!);
+                        i += sz;
 
         }
     }
-}}}}}
+    return (s, error.As(null!)!);
+
+}
+
+private static (@string, error) validateAndMap(ptr<Profile> _addr_p, @string s) {
+    @string _p0 = default;
+    error _p0 = default!;
+    ref Profile p = ref _addr_p.val;
+
+    error err = default!;    slice<byte> b = default;    nint k = default;
+    {
+        nint i = 0;
+
+        while (i < len(s)) {
+            var (v, sz) = trie.lookupString(s[(int)i..]);
+            var start = i;
+            i += sz; 
+            // Copy bytes not copied so far.
+
+            if (p.simplify(info(v).category()) == valid) 
+                continue;
+            else if (p.simplify(info(v).category()) == disallowed) 
+                if (err == null) {
+                    var (r, _) = utf8.DecodeRuneInString(s[(int)start..]);
+                    err = error.As(runeError(r))!;
+                }
+                continue;
+            else if (p.simplify(info(v).category()) == mapped || p.simplify(info(v).category()) == deviation) 
+                b = append(b, s[(int)k..(int)start]);
+                b = info(v).appendMapping(b, s[(int)start..(int)i]);
+            else if (p.simplify(info(v).category()) == ignored) 
+                b = append(b, s[(int)k..(int)start]); 
+                // drop the rune
+            else if (p.simplify(info(v).category()) == unknown) 
+                b = append(b, s[(int)k..(int)start]);
+                b = append(b, "\ufffd");
+                        k = i;
+
+        }
+    }
+    if (k == 0) { 
+        // No changes so far.
+        s = norm.NFC.String(s);
+
+    }
+    else
+ {
+        b = append(b, s[(int)k..]);
+        if (norm.NFC.QuickSpan(b) != len(b)) {
+            b = norm.NFC.Bytes(b);
+        }
+        s = string(b);
+
+    }
+    return (s, error.As(err)!);
+
+}
+
+// A labelIter allows iterating over domain name labels.
+private partial struct labelIter {
+    public @string orig;
+    public slice<@string> slice;
+    public nint curStart;
+    public nint curEnd;
+    public nint i;
+}
+
+private static void reset(this ptr<labelIter> _addr_l) {
+    ref labelIter l = ref _addr_l.val;
+
+    l.curStart = 0;
+    l.curEnd = 0;
+    l.i = 0;
+}
+
+private static bool done(this ptr<labelIter> _addr_l) {
+    ref labelIter l = ref _addr_l.val;
+
+    return l.curStart >= len(l.orig);
+}
+
+private static @string result(this ptr<labelIter> _addr_l) {
+    ref labelIter l = ref _addr_l.val;
+
+    if (l.slice != null) {
+        return strings.Join(l.slice, ".");
+    }
+    return l.orig;
+
+}
+
+private static @string label(this ptr<labelIter> _addr_l) {
+    ref labelIter l = ref _addr_l.val;
+
+    if (l.slice != null) {
+        return l.slice[l.i];
+    }
+    var p = strings.IndexByte(l.orig[(int)l.curStart..], '.');
+    l.curEnd = l.curStart + p;
+    if (p == -1) {
+        l.curEnd = len(l.orig);
+    }
+    return l.orig[(int)l.curStart..(int)l.curEnd];
+
+}
+
+// next sets the value to the next label. It skips the last label if it is empty.
+private static void next(this ptr<labelIter> _addr_l) {
+    ref labelIter l = ref _addr_l.val;
+
+    l.i++;
+    if (l.slice != null) {
+        if (l.i >= len(l.slice) || l.i == len(l.slice) - 1 && l.slice[l.i] == "") {
+            l.curStart = len(l.orig);
+        }
+    }
+    else
+ {
+        l.curStart = l.curEnd + 1;
+        if (l.curStart == len(l.orig) - 1 && l.orig[l.curStart] == '.') {
+            l.curStart = len(l.orig);
+        }
+    }
+}
+
+private static void set(this ptr<labelIter> _addr_l, @string s) {
+    ref labelIter l = ref _addr_l.val;
+
+    if (l.slice == null) {
+        l.slice = strings.Split(l.orig, ".");
+    }
+    l.slice[l.i] = s;
+
+}
+
+// acePrefix is the ASCII Compatible Encoding prefix.
+private static readonly @string acePrefix = "xn--";
+
+
+
+private static category simplify(this ptr<Profile> _addr_p, category cat) {
+    ref Profile p = ref _addr_p.val;
+
+
+    if (cat == disallowedSTD3Mapped) 
+        if (p.useSTD3Rules) {
+            cat = disallowed;
+        }
+        else
+ {
+            cat = mapped;
+        }
+    else if (cat == disallowedSTD3Valid) 
+        if (p.useSTD3Rules) {
+            cat = disallowed;
+        }
+        else
+ {
+            cat = valid;
+        }
+    else if (cat == deviation) 
+        if (!p.transitional) {
+            cat = valid;
+        }
+    else if (cat == validNV8 || cat == validXV8) 
+        // TODO: handle V2008
+        cat = valid;
+        return cat;
+
+}
+
+private static error validateFromPunycode(ptr<Profile> _addr_p, @string s) {
+    ref Profile p = ref _addr_p.val;
+
+    if (!norm.NFC.IsNormalString(s)) {
+        return error.As(addr(new labelError(s,"V1"))!)!;
+    }
+    {
+        nint i = 0;
+
+        while (i < len(s)) {
+            var (v, sz) = trie.lookupString(s[(int)i..]);
+            {
+                var c = p.simplify(info(v).category());
+
+                if (c != valid && c != deviation) {
+                    return error.As(addr(new labelError(s,"V6"))!)!;
+                }
+
+            }
+
+            i += sz;
+
+        }
+    }
+    return error.As(null!)!;
+
+}
+
+private static readonly @string zwnj = "\u200c";
+private static readonly @string zwj = "\u200d";
+
+
+private partial struct joinState { // : sbyte
+}
+
+private static readonly joinState stateStart = iota;
+private static readonly var stateVirama = 0;
+private static readonly var stateBefore = 1;
+private static readonly var stateBeforeVirama = 2;
+private static readonly var stateAfter = 3;
+private static readonly var stateFAIL = 4;
+
+
+private static array<joinState> joinStates = new slice<array<joinState>>(InitKeyedValues<array<joinState>>((stateStart, {joiningL:stateBefore,joiningD:stateBefore,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateVirama,}), (stateVirama, {joiningL:stateBefore,joiningD:stateBefore,}), (stateBefore, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,joinZWNJ:stateAfter,joinZWJ:stateFAIL,joinVirama:stateBeforeVirama,}), (stateBeforeVirama, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,}), (stateAfter, {joiningL:stateFAIL,joiningD:stateBefore,joiningT:stateAfter,joiningR:stateStart,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateAfter,}), (stateFAIL, {0:stateFAIL,joiningL:stateFAIL,joiningD:stateFAIL,joiningT:stateFAIL,joiningR:stateFAIL,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateFAIL,})));
+
+// validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
+// already implicitly satisfied by the overall implementation.
+private static error validateLabel(this ptr<Profile> _addr_p, @string s) {
+    ref Profile p = ref _addr_p.val;
+
+    if (s == "") {
+        if (p.verifyDNSLength) {
+            return error.As(addr(new labelError(s,"A4"))!)!;
+        }
+        return error.As(null!)!;
+
+    }
+    if (p.bidirule != null && !p.bidirule(s)) {
+        return error.As(addr(new labelError(s,"B"))!)!;
+    }
+    if (p.checkHyphens) {
+        if (len(s) > 4 && s[2] == '-' && s[3] == '-') {
+            return error.As(addr(new labelError(s,"V2"))!)!;
+        }
+        if (s[0] == '-' || s[len(s) - 1] == '-') {
+            return error.As(addr(new labelError(s,"V3"))!)!;
+        }
+    }
+    if (!p.checkJoiners) {
+        return error.As(null!)!;
+    }
+    var trie = p.trie; // p.checkJoiners is only set if trie is set.
+    // TODO: merge the use of this in the trie.
+    var (v, sz) = trie.lookupString(s);
+    var x = info(v);
+    if (x.isModifier()) {
+        return error.As(addr(new labelError(s,"V5"))!)!;
+    }
+    if (strings.Index(s, zwj) == -1 && strings.Index(s, zwnj) == -1) {
+        return error.As(null!)!;
+    }
+    var st = stateStart;
+    {
+        nint i = 0;
+
+        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+            var jt = x.joinType();
+            if (s[(int)i..(int)i + sz] == zwj) {
+                jt = joinZWJ;
+            }
+            else if (s[(int)i..(int)i + sz] == zwnj) {
+                jt = joinZWNJ;
+            }
+
+            st = joinStates[st][jt];
+            if (x.isViramaModifier()) {
+                st = joinStates[st][joinVirama];
+            }
+
+            i += sz;
+
+            if (i == len(s)) {
+                break;
+            }
+
+            v, sz = trie.lookupString(s[(int)i..]);
+            x = info(v);
+
+        }
+    }
+    if (st == stateFAIL || st == stateAfter) {
+        return error.As(addr(new labelError(s,"C"))!)!;
+    }
+    return error.As(null!)!;
+
+}
+
+private static bool ascii(@string s) {
+    for (nint i = 0; i < len(s); i++) {
+        if (s[i] >= utf8.RuneSelf) {
+            return false;
+        }
+    }
+    return true;
+
+}
+
+} // end idna_package

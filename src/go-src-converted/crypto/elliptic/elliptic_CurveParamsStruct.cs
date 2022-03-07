@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:52 UTC
+//     Generated on 2022 March 06 22:17:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using big = go.math.big_package;
 using sync = go.sync_package;
@@ -40,7 +39,7 @@ namespace crypto
                 this.Name = default;
             }
 
-            public CurveParams(ref ptr<big.Int> P = default, ref ptr<big.Int> N = default, ref ptr<big.Int> B = default, ref ptr<big.Int> Gx = default, ref ptr<big.Int> Gy = default, long BitSize = default, @string Name = default)
+            public CurveParams(ref ptr<big.Int> P = default, ref ptr<big.Int> N = default, ref ptr<big.Int> B = default, ref ptr<big.Int> Gx = default, ref ptr<big.Int> Gy = default, nint BitSize = default, @string Name = default)
             {
                 this.P = P;
                 this.N = N;

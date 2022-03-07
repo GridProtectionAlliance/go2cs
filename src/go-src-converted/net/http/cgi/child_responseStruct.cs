@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:19 UTC
+//     Generated on 2022 March 06 22:23:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,13 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using net = go.net_package;
 using http = go.net.http_package;
 using url = go.net.url_package;
@@ -49,7 +47,7 @@ namespace http
                 this.bufw = default;
             }
 
-            public response(ref ptr<http.Request> req = default, http.Header header = default, long code = default, bool wroteHeader = default, bool wroteCGIHeader = default, ref ptr<bufio.Writer> bufw = default)
+            public response(ref ptr<http.Request> req = default, http.Header header = default, nint code = default, bool wroteHeader = default, bool wroteCGIHeader = default, ref ptr<bufio.Writer> bufw = default)
             {
                 this.req = req;
                 this.header = header;

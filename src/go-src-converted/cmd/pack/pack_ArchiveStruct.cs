@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:52:46 UTC
+//     Generated on 2022 March 06 23:22:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,16 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using archive = go.cmd.@internal.archive_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using log = go.log_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
 
 #nullable enable
 
@@ -35,15 +32,15 @@ namespace go
             // Constructors
             public Archive(NilType _)
             {
-                this.fd = default;
+                this.a = default;
                 this.files = default;
                 this.pad = default;
                 this.matchAll = default;
             }
 
-            public Archive(ref ptr<os.File> fd = default, slice<@string> files = default, long pad = default, bool matchAll = default)
+            public Archive(ref ptr<archive.Archive> a = default, slice<@string> files = default, nint pad = default, bool matchAll = default)
             {
-                this.fd = fd;
+                this.a = a;
                 this.files = files;
                 this.pad = pad;
                 this.matchAll = matchAll;
@@ -69,7 +66,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Archive Archive_cast(dynamic value)
         {
-            return new Archive(ref value.fd, value.files, value.pad, value.matchAll);
+            return new Archive(ref value.a, value.files, value.pad, value.matchAll);
         }
     }
 }

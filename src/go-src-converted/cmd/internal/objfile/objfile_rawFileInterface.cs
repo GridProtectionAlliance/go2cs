@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:09:00 UTC
+//     Generated on 2022 March 06 22:32:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using archive = go.cmd.@internal.archive_package;
 using dwarf = go.debug.dwarf_package;
 using gosym = go.debug.gosym_package;
 using fmt = go.fmt_package;
@@ -56,7 +56,7 @@ namespace @internal
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -82,13 +82,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_symbolsByPtr is null || !m_target_is_ptr)
                     return s_symbolsByVal!(target);
 
-                return s_symbolsByPtr(m_target_ptr);
+                return s_symbolsByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<dwarf.Data>, error) pclnByPtr(ptr<T> value);
@@ -102,13 +102,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_pclnByPtr is null || !m_target_is_ptr)
                     return s_pclnByVal!(target);
 
-                return s_pclnByPtr(m_target_ptr);
+                return s_pclnByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<dwarf.Data>, error) textByPtr(ptr<T> value);
@@ -122,13 +122,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_textByPtr is null || !m_target_is_ptr)
                     return s_textByVal!(target);
 
-                return s_textByPtr(m_target_ptr);
+                return s_textByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<dwarf.Data>, error) goarchByPtr(ptr<T> value);
@@ -142,13 +142,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_goarchByPtr is null || !m_target_is_ptr)
                     return s_goarchByVal!(target);
 
-                return s_goarchByPtr(m_target_ptr);
+                return s_goarchByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<dwarf.Data>, error) loadAddressByPtr(ptr<T> value);
@@ -162,13 +162,13 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_loadAddressByPtr is null || !m_target_is_ptr)
                     return s_loadAddressByVal!(target);
 
-                return s_loadAddressByPtr(m_target_ptr);
+                return s_loadAddressByPtr(m_target_ptr!);
             }
 
             private delegate (ptr<dwarf.Data>, error) dwarfByPtr(ptr<T> value);
@@ -182,16 +182,16 @@ namespace @internal
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_dwarfByPtr is null || !m_target_is_ptr)
                     return s_dwarfByVal!(target);
 
-                return s_dwarfByPtr(m_target_ptr);
+                return s_dwarfByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static rawFile()
@@ -202,12 +202,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("symbols");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_symbolsByPtr = extensionMethod.CreateStaticDelegate(typeof(symbolsByPtr)) as symbolsByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("symbols");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_symbolsByVal = extensionMethod.CreateStaticDelegate(typeof(symbolsByVal)) as symbolsByVal;
 
                 if (s_symbolsByPtr is null && s_symbolsByVal is null)
@@ -215,12 +215,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("pcln");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_pclnByPtr = extensionMethod.CreateStaticDelegate(typeof(pclnByPtr)) as pclnByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("pcln");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_pclnByVal = extensionMethod.CreateStaticDelegate(typeof(pclnByVal)) as pclnByVal;
 
                 if (s_pclnByPtr is null && s_pclnByVal is null)
@@ -228,12 +228,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("text");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_textByPtr = extensionMethod.CreateStaticDelegate(typeof(textByPtr)) as textByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("text");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_textByVal = extensionMethod.CreateStaticDelegate(typeof(textByVal)) as textByVal;
 
                 if (s_textByPtr is null && s_textByVal is null)
@@ -241,12 +241,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("goarch");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_goarchByPtr = extensionMethod.CreateStaticDelegate(typeof(goarchByPtr)) as goarchByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("goarch");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_goarchByVal = extensionMethod.CreateStaticDelegate(typeof(goarchByVal)) as goarchByVal;
 
                 if (s_goarchByPtr is null && s_goarchByVal is null)
@@ -254,12 +254,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("loadAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_loadAddressByPtr = extensionMethod.CreateStaticDelegate(typeof(loadAddressByPtr)) as loadAddressByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("loadAddress");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_loadAddressByVal = extensionMethod.CreateStaticDelegate(typeof(loadAddressByVal)) as loadAddressByVal;
 
                 if (s_loadAddressByPtr is null && s_loadAddressByVal is null)
@@ -267,12 +267,12 @@ namespace @internal
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("dwarf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_dwarfByPtr = extensionMethod.CreateStaticDelegate(typeof(dwarfByPtr)) as dwarfByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("dwarf");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_dwarfByVal = extensionMethod.CreateStaticDelegate(typeof(dwarfByVal)) as dwarfByVal;
 
                 if (s_dwarfByPtr is null && s_dwarfByVal is null)

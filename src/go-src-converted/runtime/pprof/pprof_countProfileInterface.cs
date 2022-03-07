@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:49:54 UTC
+//     Generated on 2022 March 06 22:14:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using fmt = go.fmt_package;
@@ -60,7 +59,7 @@ namespace runtime
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -86,56 +85,56 @@ namespace runtime
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LenByPtr is null || !m_target_is_ptr)
                     return s_LenByVal!(target);
 
-                return s_LenByPtr(m_target_ptr);
+                return s_LenByPtr(m_target_ptr!);
             }
 
-            private delegate ptr<labelMap> StackByPtr(ptr<T> value, long i);
-            private delegate ptr<labelMap> StackByVal(T value, long i);
+            private delegate ptr<labelMap> StackByPtr(ptr<T> value, nint i);
+            private delegate ptr<labelMap> StackByVal(T value, nint i);
 
             private static readonly StackByPtr? s_StackByPtr;
             private static readonly StackByVal? s_StackByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<labelMap> Stack(long i)
+            public ptr<labelMap> Stack(nint i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_StackByPtr is null || !m_target_is_ptr)
                     return s_StackByVal!(target, i);
 
-                return s_StackByPtr(m_target_ptr, i);
+                return s_StackByPtr(m_target_ptr!, i);
             }
 
-            private delegate ptr<labelMap> LabelByPtr(ptr<T> value, long i);
-            private delegate ptr<labelMap> LabelByVal(T value, long i);
+            private delegate ptr<labelMap> LabelByPtr(ptr<T> value, nint i);
+            private delegate ptr<labelMap> LabelByVal(T value, nint i);
 
             private static readonly LabelByPtr? s_LabelByPtr;
             private static readonly LabelByVal? s_LabelByVal;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public ptr<labelMap> Label(long i)
+            public ptr<labelMap> Label(nint i)
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_LabelByPtr is null || !m_target_is_ptr)
                     return s_LabelByVal!(target, i);
 
-                return s_LabelByPtr(m_target_ptr, i);
+                return s_LabelByPtr(m_target_ptr!, i);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static countProfile()
@@ -146,12 +145,12 @@ namespace runtime
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByPtr = extensionMethod.CreateStaticDelegate(typeof(LenByPtr)) as LenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Len");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LenByVal = extensionMethod.CreateStaticDelegate(typeof(LenByVal)) as LenByVal;
 
                 if (s_LenByPtr is null && s_LenByVal is null)
@@ -159,12 +158,12 @@ namespace runtime
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Stack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StackByPtr = extensionMethod.CreateStaticDelegate(typeof(StackByPtr)) as StackByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Stack");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_StackByVal = extensionMethod.CreateStaticDelegate(typeof(StackByVal)) as StackByVal;
 
                 if (s_StackByPtr is null && s_StackByVal is null)
@@ -172,12 +171,12 @@ namespace runtime
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Label");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LabelByPtr = extensionMethod.CreateStaticDelegate(typeof(LabelByPtr)) as LabelByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Label");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_LabelByVal = extensionMethod.CreateStaticDelegate(typeof(LabelByVal)) as LabelByVal;
 
                 if (s_LabelByPtr is null && s_LabelByVal is null)

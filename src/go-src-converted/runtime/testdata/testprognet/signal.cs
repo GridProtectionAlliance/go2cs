@@ -8,26 +8,23 @@
 // must not import anything (like net, but also like os/signal)
 // that kicks off background goroutines during init.
 
-// package main -- go2cs converted at 2020 October 09 05:01:06 UTC
-// Original source: C:\Go\src\runtime\testdata\testprognet\signal.go
+// package main -- go2cs converted at 2022 March 06 22:26:21 UTC
+// Original source: C:\Program Files\Go\src\runtime\testdata\testprognet\signal.go
 using signal = go.os.signal_package;
 using syscall = go.syscall_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void init()
-        {
-            register("SignalIgnoreSIGTRAP", SignalIgnoreSIGTRAP);
-        }
+namespace go;
 
-        public static void SignalIgnoreSIGTRAP()
-        {
-            signal.Ignore(syscall.SIGTRAP);
-            syscall.Kill(syscall.Getpid(), syscall.SIGTRAP);
-            println("OK");
-        }
-    }
+public static partial class main_package {
+
+private static void init() {
+    register("SignalIgnoreSIGTRAP", SignalIgnoreSIGTRAP);
 }
+
+public static void SignalIgnoreSIGTRAP() {
+    signal.Ignore(syscall.SIGTRAP);
+    syscall.Kill(syscall.Getpid(), syscall.SIGTRAP);
+    println("OK");
+}
+
+} // end main_package

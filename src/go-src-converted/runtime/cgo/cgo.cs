@@ -7,9 +7,9 @@ Package cgo contains runtime support for code generated
 by the cgo tool.  See the documentation for the cgo command
 for details on using cgo.
 */
-// package cgo -- go2cs converted at 2020 October 09 04:49:12 UTC
+// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
-// Original source: C:\Go\src\runtime\cgo\cgo.go
+// Original source: C:\Program Files\Go\src\runtime\cgo\cgo.go
 /*
 
 #cgo darwin,!arm64 LDFLAGS: -lpthread
@@ -22,6 +22,7 @@ for details on using cgo.
 #cgo openbsd LDFLAGS: -lpthread
 #cgo aix LDFLAGS: -Wl,-berok
 #cgo solaris LDFLAGS: -lxnet
+#cgo illumos LDFLAGS: -lsocket
 
 // Issue 35247.
 #cgo darwin CFLAGS: -Wno-nullability-completeness
@@ -31,5 +32,5 @@ for details on using cgo.
 #cgo solaris CPPFLAGS: -D_POSIX_PTHREAD_SEMANTICS
 
 */
-using C = go.C_package;    }
-
+using C = go.C_package;
+} // end cgo_package

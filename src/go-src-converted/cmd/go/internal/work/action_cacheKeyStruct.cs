@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:45:27 UTC
+//     Generated on 2022 March 06 23:16:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,14 +12,13 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using heap = go.container.heap_package;
+using context = go.context_package;
 using elf = go.debug.elf_package;
 using json = go.encoding.json_package;
 using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
 using os = go.os_package;
 using filepath = go.path.filepath_package;
 using runtime = go.runtime_package;
@@ -30,6 +29,7 @@ using @base = go.cmd.go.@internal.@base_package;
 using cache = go.cmd.go.@internal.cache_package;
 using cfg = go.cmd.go.@internal.cfg_package;
 using load = go.cmd.go.@internal.load_package;
+using trace = go.cmd.go.@internal.trace_package;
 using buildid = go.cmd.@internal.buildid_package;
 using go;
 

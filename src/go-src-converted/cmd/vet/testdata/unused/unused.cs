@@ -4,22 +4,17 @@
 
 // This file contains tests for the unusedresult checker.
 
-// package unused -- go2cs converted at 2020 October 09 06:05:12 UTC
+// package unused -- go2cs converted at 2022 March 06 23:35:22 UTC
 // import "cmd/vet/testdata/unused" ==> using unused = go.cmd.vet.testdata.unused_package
-// Original source: C:\Go\src\cmd\vet\testdata\unused\unused.go
+// Original source: C:\Program Files\Go\src\cmd\vet\testdata\unused\unused.go
 using fmt = go.fmt_package;
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vet {
-namespace testdata
-{
-    public static partial class unused_package
-    {
-        private static void _()
-        {
-            fmt.Errorf(""); // ERROR "result of fmt.Errorf call not used"
-        }
-    }
-}}}}
+namespace go.cmd.vet.testdata;
+
+public static partial class unused_package {
+
+private static void _() {
+    fmt.Errorf(""); // ERROR "result of fmt.Errorf call not used"
+}
+
+} // end unused_package

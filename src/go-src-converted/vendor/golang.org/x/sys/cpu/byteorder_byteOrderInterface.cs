@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:07:53 UTC
+//     Generated on 2022 March 06 23:38:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using runtime = go.runtime_package;
 using go;
 
@@ -53,7 +52,7 @@ namespace sys
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -79,13 +78,13 @@ namespace sys
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint32ByPtr is null || !m_target_is_ptr)
                     return s_Uint32ByVal!(target, _p0);
 
-                return s_Uint32ByPtr(m_target_ptr, _p0);
+                return s_Uint32ByPtr(m_target_ptr!, _p0);
             }
 
             private delegate ulong Uint64ByPtr(ptr<T> value, slice<byte> _p0);
@@ -99,16 +98,16 @@ namespace sys
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_Uint64ByPtr is null || !m_target_is_ptr)
                     return s_Uint64ByVal!(target, _p0);
 
-                return s_Uint64ByPtr(m_target_ptr, _p0);
+                return s_Uint64ByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static byteOrder()
@@ -119,12 +118,12 @@ namespace sys
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint32ByPtr)) as Uint32ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint32");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint32ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint32ByVal)) as Uint32ByVal;
 
                 if (s_Uint32ByPtr is null && s_Uint32ByVal is null)
@@ -132,12 +131,12 @@ namespace sys
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByPtr = extensionMethod.CreateStaticDelegate(typeof(Uint64ByPtr)) as Uint64ByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Uint64");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_Uint64ByVal = extensionMethod.CreateStaticDelegate(typeof(Uint64ByVal)) as Uint64ByVal;
 
                 if (s_Uint64ByPtr is null && s_Uint64ByVal is null)

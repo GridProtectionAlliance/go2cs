@@ -4,8 +4,8 @@
 
 // +build generate
 
-// package windows -- go2cs converted at 2020 October 09 06:00:50 UTC
+// package windows -- go2cs converted at 2022 March 06 23:30:34 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\windows\mksyscall.go
-    }
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\mksyscall.go
 
+} // end windows_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:11 UTC
+//     Generated on 2022 March 06 23:35:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using logpkg = go.log_package;
 using math = go.math_package;
@@ -57,7 +56,7 @@ namespace testdata
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -83,7 +82,7 @@ namespace testdata
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_ExtraMethodByPtr is null || !m_target_is_ptr)
@@ -92,32 +91,11 @@ namespace testdata
                     return;
                 }
 
-                s_ExtraMethodByPtr(m_target_ptr);
+                s_ExtraMethodByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate @string ErrorByPtr(ptr<T> value);
-            private delegate @string ErrorByVal(T value);
-
-            private static readonly ErrorByPtr? s_ErrorByPtr;
-            private static readonly ErrorByVal? s_ErrorByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Error()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ErrorByPtr is null || !m_target_is_ptr)
-                    return s_ErrorByVal!(target);
-
-                return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static errorInterface()
@@ -128,29 +106,16 @@ namespace testdata
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("ExtraMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExtraMethodByPtr = extensionMethod.CreateStaticDelegate(typeof(ExtraMethodByPtr)) as ExtraMethodByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("ExtraMethod");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_ExtraMethodByVal = extensionMethod.CreateStaticDelegate(typeof(ExtraMethodByVal)) as ExtraMethodByVal;
 
                 if (s_ExtraMethodByPtr is null && s_ExtraMethodByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement errorInterface.ExtraMethod method", new Exception("ExtraMethod"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-
-                if (s_ErrorByPtr is null && s_ErrorByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement errorInterface.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

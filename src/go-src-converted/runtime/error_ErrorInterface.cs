@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:45:55 UTC
+//     Generated on 2022 March 06 22:08:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytealg = go.@internal.bytealg_package;
 
 #nullable enable
@@ -48,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -74,7 +73,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RuntimeErrorByPtr is null || !m_target_is_ptr)
@@ -83,32 +82,11 @@ namespace go
                     return;
                 }
 
-                s_RuntimeErrorByPtr(m_target_ptr);
+                s_RuntimeErrorByPtr(m_target_ptr!);
                 return;
-                
-            }
-
-            private delegate @string ErrorByPtr(ptr<T> value);
-            private delegate @string ErrorByVal(T value);
-
-            private static readonly ErrorByPtr? s_ErrorByPtr;
-            private static readonly ErrorByVal? s_ErrorByVal;
-
-            [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public @string Error()
-            {
-                T target = m_target;
-
-                if (m_target_is_ptr && !(m_target_ptr is null))
-                    target = m_target_ptr.val;
-
-                if (s_ErrorByPtr is null || !m_target_is_ptr)
-                    return s_ErrorByVal!(target);
-
-                return s_ErrorByPtr(m_target_ptr);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Error()
@@ -119,29 +97,16 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RuntimeError");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RuntimeErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByPtr)) as RuntimeErrorByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RuntimeError");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RuntimeErrorByVal = extensionMethod.CreateStaticDelegate(typeof(RuntimeErrorByVal)) as RuntimeErrorByVal;
 
                 if (s_RuntimeErrorByPtr is null && s_RuntimeErrorByVal is null)
                     throw new NotImplementedException($"{targetType.FullName} does not implement Error.RuntimeError method", new Exception("RuntimeError"));
-
-               extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
-
-                extensionMethod = targetType.GetExtensionMethod("Error");
-
-                if (!(extensionMethod is null))
-                    s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
-
-                if (s_ErrorByPtr is null && s_ErrorByVal is null)
-                    throw new NotImplementedException($"{targetType.FullName} does not implement Error.Error method", new Exception("Error"));
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]

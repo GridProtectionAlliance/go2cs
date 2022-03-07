@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:28 UTC
+//     Generated on 2022 March 06 23:35:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using driver = go.database.sql.driver_package;
 using errors = go.errors_package;
@@ -64,7 +63,7 @@ namespace database
                 this.stop = default;
             }
 
-            public DB(long waitDuration = default, driver.Connector connector = default, ulong numClosed = default, sync.Mutex mu = default, slice<ptr<driverConn>> freeConn = default, map<ulong, channel<connRequest>> connRequests = default, ulong nextRequest = default, long numOpen = default, channel<object> openerCh = default, bool closed = default, map<finalCloser, depSet> dep = default, map<ptr<driverConn>, @string> lastPut = default, long maxIdleCount = default, long maxOpen = default, time.Duration maxLifetime = default, time.Duration maxIdleTime = default, channel<object> cleanerCh = default, long waitCount = default, long maxIdleClosed = default, long maxIdleTimeClosed = default, long maxLifetimeClosed = default, Action stop = default)
+            public DB(long waitDuration = default, driver.Connector connector = default, ulong numClosed = default, sync.Mutex mu = default, slice<ptr<driverConn>> freeConn = default, map<ulong, channel<connRequest>> connRequests = default, ulong nextRequest = default, nint numOpen = default, channel<object> openerCh = default, bool closed = default, map<finalCloser, depSet> dep = default, map<ptr<driverConn>, @string> lastPut = default, nint maxIdleCount = default, nint maxOpen = default, time.Duration maxLifetime = default, time.Duration maxIdleTime = default, channel<object> cleanerCh = default, long waitCount = default, long maxIdleClosed = default, long maxIdleTimeClosed = default, long maxLifetimeClosed = default, Action stop = default)
             {
                 this.waitDuration = waitDuration;
                 this.connector = connector;

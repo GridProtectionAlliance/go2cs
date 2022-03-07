@@ -2,22 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+//go:build cgo
 // +build cgo
 
-// package testenv -- go2cs converted at 2020 October 09 06:06:11 UTC
+// package testenv -- go2cs converted at 2022 March 06 23:36:29 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
-// Original source: C:\Go\src\internal\testenv\testenv_cgo.go
+// Original source: C:\Program Files\Go\src\internal\testenv\testenv_cgo.go
 
-using static go.builtin;
 
-namespace go {
-namespace @internal
-{
-    public static partial class testenv_package
-    {
-        private static void init()
-        {
-            haveCGO = true;
-        }
-    }
-}}
+namespace go.@internal;
+
+public static partial class testenv_package {
+
+private static void init() {
+    haveCGO = true;
+}
+
+} // end testenv_package

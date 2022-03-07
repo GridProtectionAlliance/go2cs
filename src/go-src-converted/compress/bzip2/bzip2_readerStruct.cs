@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:05:14 UTC
+//     Generated on 2022 March 06 23:35:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using io = go.io_package;
 using go;
 
@@ -46,7 +45,7 @@ namespace compress
                 this.repeats = default;
             }
 
-            public reader(bitReader br = default, uint fileCRC = default, uint blockCRC = default, uint wantBlockCRC = default, bool setupDone = default, long blockSize = default, bool eof = default, array<ulong> c = default, slice<uint> tt = default, uint tPos = default, slice<uint> preRLE = default, long preRLEUsed = default, long lastByte = default, ulong byteRepeats = default, ulong repeats = default)
+            public reader(bitReader br = default, uint fileCRC = default, uint blockCRC = default, uint wantBlockCRC = default, bool setupDone = default, nint blockSize = default, bool eof = default, array<nuint> c = default, slice<uint> tt = default, uint tPos = default, slice<uint> preRLE = default, nint preRLEUsed = default, nint lastByte = default, nuint byteRepeats = default, nuint repeats = default)
             {
                 this.br = br;
                 this.fileCRC = fileCRC;

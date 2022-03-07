@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:54 UTC
+//     Generated on 2022 March 06 23:13:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using strconv = go.strconv_package;
@@ -48,7 +47,7 @@ namespace @internal
                 this.indent = default;
             }
 
-            public parser(ref ptr<PosBase> file = default, ErrorHandler errh = default, Mode mode = default, PragmaHandler pragh = default, scanner scanner = default, ref ptr<PosBase> @base = default, error first = default, long errcnt = default, Pragma pragma = default, long fnest = default, long xnest = default, slice<byte> indent = default)
+            public parser(ref ptr<PosBase> file = default, ErrorHandler errh = default, Mode mode = default, PragmaHandler pragh = default, scanner scanner = default, ref ptr<PosBase> @base = default, error first = default, nint errcnt = default, Pragma pragma = default, nint fnest = default, nint xnest = default, slice<byte> indent = default)
             {
                 this.file = file;
                 this.errh = errh;

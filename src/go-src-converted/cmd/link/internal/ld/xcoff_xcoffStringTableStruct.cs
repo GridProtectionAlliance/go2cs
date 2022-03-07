@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:50:36 UTC
+//     Generated on 2022 March 06 23:22:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,17 +12,18 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using objabi = go.cmd.@internal.objabi_package;
 using loader = go.cmd.link.@internal.loader_package;
 using sym = go.cmd.link.@internal.sym_package;
 using binary = go.encoding.binary_package;
+using fmt = go.fmt_package;
 using ioutil = go.io.ioutil_package;
 using bits = go.math.bits_package;
 using filepath = go.path.filepath_package;
 using sort = go.sort_package;
 using strings = go.strings_package;
+using sync = go.sync_package;
 using go;
 
 #nullable enable
@@ -44,7 +45,7 @@ namespace @internal
                 this.stringsLen = default;
             }
 
-            public xcoffStringTable(slice<@string> strings = default, long stringsLen = default)
+            public xcoffStringTable(slice<@string> strings = default, nint stringsLen = default)
             {
                 this.strings = strings;
                 this.stringsLen = stringsLen;

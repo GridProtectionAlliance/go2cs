@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:02:20 UTC
+//     Generated on 2022 March 06 23:32:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -27,7 +29,7 @@ namespace @internal
         {
             // Value of the A struct
             private readonly a.A m_value;
-
+            
             public A(a.A value) => m_value = value;
 
             // Enable implicit conversions between a.A and A struct

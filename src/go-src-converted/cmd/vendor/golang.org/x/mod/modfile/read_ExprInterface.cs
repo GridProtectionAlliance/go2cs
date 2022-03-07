@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:55:53 UTC
+//     Generated on 2022 March 06 23:26:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -61,7 +60,7 @@ namespace mod
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -87,13 +86,13 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_SpanByPtr is null || !m_target_is_ptr)
                     return s_SpanByVal!(target);
 
-                return s_SpanByPtr(m_target_ptr);
+                return s_SpanByPtr(m_target_ptr!);
             }
 
             private delegate ptr<Comments> CommentByPtr(ptr<T> value);
@@ -107,16 +106,16 @@ namespace mod
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_CommentByPtr is null || !m_target_is_ptr)
                     return s_CommentByVal!(target);
 
-                return s_CommentByPtr(m_target_ptr);
+                return s_CommentByPtr(m_target_ptr!);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static Expr()
@@ -127,12 +126,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Span");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SpanByPtr = extensionMethod.CreateStaticDelegate(typeof(SpanByPtr)) as SpanByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Span");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_SpanByVal = extensionMethod.CreateStaticDelegate(typeof(SpanByVal)) as SpanByVal;
 
                 if (s_SpanByPtr is null && s_SpanByVal is null)
@@ -140,12 +139,12 @@ namespace mod
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Comment");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommentByPtr = extensionMethod.CreateStaticDelegate(typeof(CommentByPtr)) as CommentByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Comment");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_CommentByVal = extensionMethod.CreateStaticDelegate(typeof(CommentByVal)) as CommentByVal;
 
                 if (s_CommentByPtr is null && s_CommentByVal is null)

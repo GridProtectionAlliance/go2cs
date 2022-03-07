@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace go
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -73,7 +73,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_fByPtr is null || !m_target_is_ptr)
@@ -82,9 +82,8 @@ namespace go
                     return;
                 }
 
-                s_fByPtr(m_target_ptr);
+                s_fByPtr(m_target_ptr!);
                 return;
-                
             }
 
             private delegate void gByPtr(ptr<T> value);
@@ -98,7 +97,7 @@ namespace go
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_gByPtr is null || !m_target_is_ptr)
@@ -107,12 +106,11 @@ namespace go
                     return;
                 }
 
-                s_gByPtr(m_target_ptr);
+                s_gByPtr(m_target_ptr!);
                 return;
-                
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static I2()
@@ -123,12 +121,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("f");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_fByPtr = extensionMethod.CreateStaticDelegate(typeof(fByPtr)) as fByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("f");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_fByVal = extensionMethod.CreateStaticDelegate(typeof(fByVal)) as fByVal;
 
                 if (s_fByPtr is null && s_fByVal is null)
@@ -136,12 +134,12 @@ namespace go
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("g");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_gByPtr = extensionMethod.CreateStaticDelegate(typeof(gByPtr)) as gByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("g");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_gByVal = extensionMethod.CreateStaticDelegate(typeof(gByVal)) as gByVal;
 
                 if (s_gByPtr is null && s_gByVal is null)

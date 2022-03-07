@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:07 UTC
+//     Generated on 2022 March 06 22:16:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using poll = go.@internal.poll_package;
 using io = go.io_package;
@@ -43,7 +42,7 @@ namespace go
                 this.wDeadline = default;
             }
 
-            public bufferedPipe(long softLimit = default, sync.Mutex mu = default, slice<byte> buf = default, bool closed = default, sync.Cond rCond = default, sync.Cond wCond = default, time.Time rDeadline = default, time.Time wDeadline = default)
+            public bufferedPipe(nint softLimit = default, sync.Mutex mu = default, slice<byte> buf = default, bool closed = default, sync.Cond rCond = default, sync.Cond wCond = default, time.Time rDeadline = default, time.Time wDeadline = default)
             {
                 this.softLimit = softLimit;
                 this.mu = mu;

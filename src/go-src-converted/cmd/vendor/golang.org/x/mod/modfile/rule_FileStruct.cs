@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:55:56 UTC
+//     Generated on 2022 March 06 23:26:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using filepath = go.path.filepath_package;
@@ -22,6 +21,7 @@ using strings = go.strings_package;
 using unicode = go.unicode_package;
 using lazyregexp = go.golang.org.x.mod.@internal.lazyregexp_package;
 using module = go.golang.org.x.mod.module_package;
+using semver = go.golang.org.x.mod.semver_package;
 using go;
 
 #nullable enable
@@ -46,16 +46,18 @@ namespace mod
                 this.Require = default;
                 this.Exclude = default;
                 this.Replace = default;
+                this.Retract = default;
                 this.Syntax = default;
             }
 
-            public File(ref ptr<Module> Module = default, ref ptr<Go> Go = default, slice<ptr<Require>> Require = default, slice<ptr<Exclude>> Exclude = default, slice<ptr<Replace>> Replace = default, ref ptr<FileSyntax> Syntax = default)
+            public File(ref ptr<Module> Module = default, ref ptr<Go> Go = default, slice<ptr<Require>> Require = default, slice<ptr<Exclude>> Exclude = default, slice<ptr<Replace>> Replace = default, slice<ptr<Retract>> Retract = default, ref ptr<FileSyntax> Syntax = default)
             {
                 this.Module = Module;
                 this.Go = Go;
                 this.Require = Require;
                 this.Exclude = Exclude;
                 this.Replace = Replace;
+                this.Retract = Retract;
                 this.Syntax = Syntax;
             }
 
@@ -79,7 +81,7 @@ namespace mod
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static File File_cast(dynamic value)
         {
-            return new File(ref value.Module, ref value.Go, value.Require, value.Exclude, value.Replace, ref value.Syntax);
+            return new File(ref value.Module, ref value.Go, value.Require, value.Exclude, value.Replace, value.Retract, ref value.Syntax);
         }
     }
 }}}}}}

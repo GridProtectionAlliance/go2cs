@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2020 October 09 05:47:19 UTC
+// package modfetch -- go2cs converted at 2022 March 06 23:18:56 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
-// Original source: C:\Go\src\cmd\go\internal\modfetch\key.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\key.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class modfetch_package
-    {
-        private static map knownGOSUMDB = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"sum.golang.org":"sum.golang.org+033de0ae+Ac4zctda0e5eza+HJyk9SxEdh+s3Ux18htTTAD8OuAn8",};
-    }
-}}}}
+namespace go.cmd.go.@internal;
+
+public static partial class modfetch_package {
+
+private static map knownGOSUMDB = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"sum.golang.org":"sum.golang.org+033de0ae+Ac4zctda0e5eza+HJyk9SxEdh+s3Ux18htTTAD8OuAn8",};
+
+} // end modfetch_package

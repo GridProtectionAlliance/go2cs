@@ -1,19 +1,16 @@
-// package main -- go2cs converted at 2020 October 09 05:50:38 UTC
-// Original source: C:\Go\src\cmd\link\testdata\testBuildFortvOS\lib.go
+// package main -- go2cs converted at 2022 March 06 23:22:35 UTC
+// Original source: C:\Program Files\Go\src\cmd\link\testdata\testBuildFortvOS\lib.go
 using C = go.C_package;
-using static go.builtin;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        //export GoFunc
-        public static void GoFunc()
-        {
-        }
+namespace go;
 
-        private static void Main()
-        {
-        }
-    }
+public static partial class main_package {
+
+    //export GoFunc
+public static void GoFunc() {
 }
+
+private static void Main() {
+}
+
+} // end main_package

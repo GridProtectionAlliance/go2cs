@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:56:20 UTC
+//     Generated on 2022 March 06 22:21:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,10 +13,10 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
+using fs = go.io.fs_package;
 using mime = go.mime_package;
 using multipart = go.mime.multipart_package;
 using textproto = go.net.textproto_package;
@@ -63,7 +63,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -89,16 +89,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_OpenByPtr is null || !m_target_is_ptr)
                     return s_OpenByVal!(target, name);
 
-                return s_OpenByPtr(m_target_ptr, name);
+                return s_OpenByPtr(m_target_ptr!, name);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static FileSystem()
@@ -109,12 +109,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByPtr = extensionMethod.CreateStaticDelegate(typeof(OpenByPtr)) as OpenByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("Open");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_OpenByVal = extensionMethod.CreateStaticDelegate(typeof(OpenByVal)) as OpenByVal;
 
                 if (s_OpenByPtr is null && s_OpenByVal is null)

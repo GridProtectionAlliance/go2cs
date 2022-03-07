@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:44 UTC
+//     Generated on 2022 March 06 22:11:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
+using abi = go.@internal.abi_package;
 using cpu = go.@internal.cpu_package;
 using atomic = go.runtime.@internal.atomic_package;
 using sys = go.runtime.@internal.sys_package;
@@ -31,13 +31,17 @@ namespace go
             public stackObjectRecord(NilType _)
             {
                 this.off = default;
-                this.typ = default;
+                this.size = default;
+                this._ptrdata = default;
+                this.gcdata = default;
             }
 
-            public stackObjectRecord(long off = default, ref ptr<_type> typ = default)
+            public stackObjectRecord(int off = default, int size = default, int _ptrdata = default, ref ptr<byte> gcdata = default)
             {
                 this.off = off;
-                this.typ = typ;
+                this.size = size;
+                this._ptrdata = _ptrdata;
+                this.gcdata = gcdata;
             }
 
             // Enable comparisons between nil and stackObjectRecord struct
@@ -60,7 +64,7 @@ namespace go
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static stackObjectRecord stackObjectRecord_cast(dynamic value)
         {
-            return new stackObjectRecord(value.off, ref value.typ);
+            return new stackObjectRecord(value.off, value.size, value._ptrdata, ref value.gcdata);
         }
     }
 }

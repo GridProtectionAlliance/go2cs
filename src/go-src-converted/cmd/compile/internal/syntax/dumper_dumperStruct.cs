@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:40:44 UTC
+//     Generated on 2022 March 06 23:13:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using reflect = go.reflect_package;
@@ -42,7 +41,7 @@ namespace @internal
                 this.line = default;
             }
 
-            public dumper(io.Writer output = default, map<Node, long> ptrmap = default, long indent = default, byte last = default, long line = default)
+            public dumper(io.Writer output = default, map<Node, nint> ptrmap = default, nint indent = default, byte last = default, nint line = default)
             {
                 this.output = output;
                 this.ptrmap = ptrmap;

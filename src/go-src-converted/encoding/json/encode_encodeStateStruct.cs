@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:06 UTC
+//     Generated on 2022 March 06 22:25:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using encoding = go.encoding_package;
 using base64 = go.encoding.base64_package;
@@ -45,7 +44,7 @@ namespace encoding
 
             public ref slice<byte> buf => ref m_BufferRef.Value.buf;
 
-            public ref long off => ref m_BufferRef.Value.off;
+            public ref nint off => ref m_BufferRef.Value.off;
 
             public ref readOp lastRead => ref m_BufferRef.Value.lastRead;
 
@@ -57,7 +56,7 @@ namespace encoding
                 this.ptrLevel = default;
             }
 
-            public encodeState(bytes.Buffer Buffer = default, array<byte> scratch = default, ulong ptrLevel = default)
+            public encodeState(bytes.Buffer Buffer = default, array<byte> scratch = default, nuint ptrLevel = default)
             {
                 this.m_BufferRef = new ptr<bytes.Buffer>(Buffer);
                 this.scratch = scratch;

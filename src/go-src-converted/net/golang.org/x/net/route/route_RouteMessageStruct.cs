@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:39 UTC
+//     Generated on 2022 March 06 22:15:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
 using os = go.os_package;
 using syscall = go.syscall_package;
@@ -45,7 +44,7 @@ namespace net
                 this.raw = default;
             }
 
-            public RouteMessage(long Version = default, long Type = default, long Flags = default, long Index = default, System.UIntPtr ID = default, long Seq = default, error Err = default, slice<Addr> Addrs = default, long extOff = default, slice<byte> raw = default)
+            public RouteMessage(nint Version = default, nint Type = default, nint Flags = default, nint Index = default, System.UIntPtr ID = default, nint Seq = default, error Err = default, slice<Addr> Addrs = default, nint extOff = default, slice<byte> raw = default)
             {
                 this.Version = Version;
                 this.Type = Type;

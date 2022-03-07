@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:53:21 UTC
+//     Generated on 2022 March 06 23:23:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,10 +12,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using elf = go.debug.elf_package;
 using macho = go.debug.macho_package;
+using pe = go.debug.pe_package;
 using binary = go.encoding.binary_package;
+using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
 using os = go.os_package;
@@ -23,6 +24,7 @@ using exec = go.os.exec_package;
 using filepath = go.path.filepath_package;
 using regexp = go.regexp_package;
 using runtime = go.runtime_package;
+using strconv = go.strconv_package;
 using strings = go.strings_package;
 using sync = go.sync_package;
 using elfexec = go.github.com.google.pprof.@internal.elfexec_package;
@@ -49,16 +51,24 @@ namespace @internal
             {
                 this.b = default;
                 this.name = default;
-                this.@base = default;
                 this.buildID = default;
+                this.baseOnce = default;
+                this.@base = default;
+                this.baseErr = default;
+                this.isData = default;
+                this.m = default;
             }
 
-            public file(ref ptr<binrep> b = default, @string name = default, ulong @base = default, @string buildID = default)
+            public file(ref ptr<binrep> b = default, @string name = default, @string buildID = default, sync.Once baseOnce = default, ulong @base = default, error baseErr = default, bool isData = default, ref ptr<elfMapping> m = default)
             {
                 this.b = b;
                 this.name = name;
-                this.@base = @base;
                 this.buildID = buildID;
+                this.baseOnce = baseOnce;
+                this.@base = @base;
+                this.baseErr = baseErr;
+                this.isData = isData;
+                this.m = m;
             }
 
             // Enable comparisons between nil and file struct
@@ -81,7 +91,7 @@ namespace @internal
         [GeneratedCode("go2cs", "0.1.0.0")]
         private static file file_cast(dynamic value)
         {
-            return new file(ref value.b, value.name, value.@base, value.buildID);
+            return new file(ref value.b, value.name, value.buildID, value.baseOnce, value.@base, value.baseErr, value.isData, ref value.m);
         }
     }
 }}}}}}}

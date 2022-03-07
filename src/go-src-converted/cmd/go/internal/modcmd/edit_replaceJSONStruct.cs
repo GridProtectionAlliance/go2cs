@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:47:52 UTC
+//     Generated on 2022 March 06 23:19:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
+using context = go.context_package;
 using json = go.encoding.json_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
@@ -23,7 +23,6 @@ using @base = go.cmd.go.@internal.@base_package;
 using lockedfile = go.cmd.go.@internal.lockedfile_package;
 using modfetch = go.cmd.go.@internal.modfetch_package;
 using modload = go.cmd.go.@internal.modload_package;
-using work = go.cmd.go.@internal.work_package;
 using modfile = go.golang.org.x.mod.modfile_package;
 using module = go.golang.org.x.mod.module_package;
 using go;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:33 UTC
+//     Generated on 2022 March 06 22:15:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,8 +12,8 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using errors = go.errors_package;
+using itoa = go.@internal.itoa_package;
 using sync = go.sync_package;
 using time = go.time_package;
 
@@ -36,7 +36,7 @@ namespace go
                 this.Flags = default;
             }
 
-            public Interface(long Index = default, long MTU = default, @string Name = default, HardwareAddr HardwareAddr = default, Flags Flags = default)
+            public Interface(nint Index = default, nint MTU = default, @string Name = default, HardwareAddr HardwareAddr = default, Flags Flags = default)
             {
                 this.Index = Index;
                 this.MTU = MTU;

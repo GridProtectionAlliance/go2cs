@@ -3,21 +3,18 @@
 // license that can be found in the LICENSE file.
 
 // Package doc implements the ``go doc'' command.
-// package doc -- go2cs converted at 2020 October 09 05:45:09 UTC
+// package doc -- go2cs converted at 2022 March 06 23:15:59 UTC
 // import "cmd/go/internal/doc" ==> using doc = go.cmd.go.@internal.doc_package
-// Original source: C:\Go\src\cmd\go\internal\doc\doc.go
+// Original source: C:\Program Files\Go\src\cmd\go\internal\doc\doc.go
 using @base = go.cmd.go.@internal.@base_package;
 using cfg = go.cmd.go.@internal.cfg_package;
-using static go.builtin;
+using context = go.context_package;
 
-namespace go {
-namespace cmd {
-namespace go {
-namespace @internal
-{
-    public static partial class doc_package
-    {
-        public static ptr<base.Command> CmdDoc = addr(new base.Command(Run:runDoc,UsageLine:"go doc [-u] [-c] [package|[package.]symbol[.methodOrField]]",CustomFlags:true,Short:"show documentation for package or symbol",Long:`
+namespace go.cmd.go.@internal;
+
+public static partial class doc_package {
+
+public static ptr<base.Command> CmdDoc = addr(new base.Command(Run:runDoc,UsageLine:"go doc [doc flags] [package|[package.]symbol[.methodOrField]]",CustomFlags:true,Short:"show documentation for package or symbol",Long:`
 Doc prints the documentation comments associated with the item identified by its
 arguments (a package, const, func, type, var, method, or struct field)
 followed by a one-line summary of each of the first-level items "under"
@@ -130,11 +127,10 @@ Flags:
 		symbols, methods, and fields.
 `,));
 
-        private static void runDoc(ptr<base.Command> _addr_cmd, slice<@string> args)
-        {
-            ref base.Command cmd = ref _addr_cmd.val;
+private static void runDoc(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
+    ref base.Command cmd = ref _addr_cmd.val;
 
-            @base.Run(cfg.BuildToolexec, @base.Tool("doc"), args);
-        }
-    }
-}}}}
+    @base.Run(cfg.BuildToolexec, @base.Tool("doc"), args);
+}
+
+} // end doc_package

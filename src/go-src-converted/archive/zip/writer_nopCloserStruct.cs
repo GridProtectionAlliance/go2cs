@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:08:13 UTC
+//     Generated on 2022 March 06 22:31:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using binary = go.encoding.binary_package;
 using errors = go.errors_package;
@@ -34,14 +33,14 @@ namespace archive
         private partial struct nopCloser
         {
             // Writer.Write function promotion
-            private delegate (long, error) WriteByVal(T value, slice<byte> p);
-            private delegate (long, error) WriteByRef(ref T value, slice<byte> p);
+            private delegate (nint, error) WriteByVal(T value, slice<byte> p);
+            private delegate (nint, error) WriteByRef(ref T value, slice<byte> p);
 
             private static readonly WriteByVal s_WriteByVal;
             private static readonly WriteByRef s_WriteByRef;
 
             [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public (long, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? Writer?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
+            public (nint, error) Write(slice<byte> p) => s_WriteByRef?.Invoke(ref this, p) ?? s_WriteByVal?.Invoke(this, p) ?? Writer?.Write(p) ?? throw new PanicException(RuntimeErrorPanic.NilPointerDereference);
             
             [DebuggerStepperBoundary]
             static nopCloser()
@@ -51,11 +50,11 @@ namespace archive
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Write");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_WriteByRef = extensionMethod.CreateStaticDelegate(typeof(WriteByRef)) as WriteByRef;
 
-                    if ((object)s_WriteByRef == null)
+                    if (s_WriteByRef is null)
                         s_WriteByVal = extensionMethod.CreateStaticDelegate(typeof(WriteByVal)) as WriteByVal;
                 }
             }

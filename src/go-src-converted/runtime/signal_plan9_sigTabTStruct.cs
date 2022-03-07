@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:48:31 UTC
+//     Generated on 2022 March 06 22:11:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
                 this.name = default;
             }
 
-            public sigTabT(long flags = default, @string name = default)
+            public sigTabT(nint flags = default, @string name = default)
             {
                 this.flags = flags;
                 this.name = name;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:58:03 UTC
+//     Generated on 2022 March 06 22:23:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bufio = go.bufio_package;
 using bytes = go.bytes_package;
 using context = go.context_package;
@@ -20,8 +19,8 @@ using tls = go.crypto.tls_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using rand = go.math.rand_package;
 using net = go.net_package;
 using textproto = go.net.textproto_package;
 using url = go.net.url_package;
@@ -85,31 +84,31 @@ namespace net
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Accept");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_AcceptByRef = extensionMethod.CreateStaticDelegate(typeof(AcceptByRef)) as AcceptByRef;
 
-                    if ((object)s_AcceptByRef == null)
+                    if (s_AcceptByRef is null)
                         s_AcceptByVal = extensionMethod.CreateStaticDelegate(typeof(AcceptByVal)) as AcceptByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Close");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_CloseByRef = extensionMethod.CreateStaticDelegate(typeof(CloseByRef)) as CloseByRef;
 
-                    if ((object)s_CloseByRef == null)
+                    if (s_CloseByRef is null)
                         s_CloseByVal = extensionMethod.CreateStaticDelegate(typeof(CloseByVal)) as CloseByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("Addr");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_AddrByRef = extensionMethod.CreateStaticDelegate(typeof(AddrByRef)) as AddrByRef;
 
-                    if ((object)s_AddrByRef == null)
+                    if (s_AddrByRef is null)
                         s_AddrByVal = extensionMethod.CreateStaticDelegate(typeof(AddrByVal)) as AddrByVal;
                 }
             }

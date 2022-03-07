@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:54 UTC
+//     Generated on 2022 March 06 22:17:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using subtle = go.crypto.@internal.subtle_package;
 using go;
 
@@ -35,7 +34,7 @@ namespace crypto
                 this.tmp = default;
             }
 
-            public cbc(Block b = default, long blockSize = default, slice<byte> iv = default, slice<byte> tmp = default)
+            public cbc(Block b = default, nint blockSize = default, slice<byte> iv = default, slice<byte> tmp = default)
             {
                 this.b = b;
                 this.blockSize = blockSize;

@@ -4,10 +4,12 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:54:46 UTC
+//     Generated on 2022 March 06 23:24:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
+using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using go;
 
@@ -28,7 +30,7 @@ namespace arm64
         {
             // Value of the Imm_dcps struct
             private readonly ushort m_value;
-
+            
             public Imm_dcps(ushort value) => m_value = value;
 
             // Enable implicit conversions between ushort and Imm_dcps struct

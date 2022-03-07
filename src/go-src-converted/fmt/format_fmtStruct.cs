@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:07:52 UTC
+//     Generated on 2022 March 06 22:31:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using strconv = go.strconv_package;
 using utf8 = go.unicode.utf8_package;
 
@@ -59,7 +58,7 @@ namespace go
                 this.intbuf = default;
             }
 
-            public fmt(ref ptr<buffer> buf = default, fmtFlags fmtFlags = default, long wid = default, long prec = default, array<byte> intbuf = default)
+            public fmt(ref ptr<buffer> buf = default, fmtFlags fmtFlags = default, nint wid = default, nint prec = default, array<byte> intbuf = default)
             {
                 this.buf = buf;
                 this.m_fmtFlagsRef = new ptr<fmtFlags>(fmtFlags);

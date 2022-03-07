@@ -14,93 +14,194 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2020 October 09 05:54:02 UTC
+// package profile -- go2cs converted at 2022 March 06 23:24:05 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
-// Original source: C:\Go\src\cmd\vendor\github.com\google\pprof\profile\prune.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\prune.go
 using fmt = go.fmt_package;
 using regexp = go.regexp_package;
 using strings = go.strings_package;
-using static go.builtin;
 using System;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace github.com {
-namespace google {
-namespace pprof
-{
-    public static partial class profile_package
-    {
-        private static @string reservedNames = new slice<@string>(new @string[] { "(anonymous namespace)", "operator()" });        private static Func<ptr<regexp.Regexp>> bracketRx = () =>
-        {
-            private static slice<@string> quotedNames = default;
-            foreach (var (_, name) in append(reservedNames, "("))
-            {
-                quotedNames = append(quotedNames, regexp.QuoteMeta(name));
-            }            return regexp.MustCompile(strings.Join(quotedNames, "|"));
 
-        }();
+namespace go.cmd.vendor.github.com.google.pprof;
 
-        // simplifyFunc does some primitive simplification of function names.
-        private static @string simplifyFunc(@string f)
-        { 
-            // Account for leading '.' on the PPC ELF v1 ABI.
-            var funcName = strings.TrimPrefix(f, "."); 
-            // Account for unsimplified names -- try  to remove the argument list by trimming
-            // starting from the first '(', but skipping reserved names that have '('.
-            foreach (var (_, ind) in bracketRx.FindAllStringSubmatchIndex(funcName, -1L))
+public static partial class profile_package {
+
+private static @string reservedNames = new slice<@string>(new @string[] { "(anonymous namespace)", "operator()" });private static Func<ptr<regexp.Regexp>> bracketRx = () => {
+    private static slice<@string> quotedNames = default;
+    foreach (var (_, name) in append(reservedNames, "(")) {
+        quotedNames = append(quotedNames, regexp.QuoteMeta(name));
+    }    return regexp.MustCompile(strings.Join(quotedNames, "|"));
+}();
+
+// simplifyFunc does some primitive simplification of function names.
+private static @string simplifyFunc(@string f) { 
+    // Account for leading '.' on the PPC ELF v1 ABI.
+    var funcName = strings.TrimPrefix(f, "."); 
+    // Account for unsimplified names -- try  to remove the argument list by trimming
+    // starting from the first '(', but skipping reserved names that have '('.
+    foreach (var (_, ind) in bracketRx.FindAllStringSubmatchIndex(funcName, -1)) {
+        var foundReserved = false;
+        foreach (var (_, res) in reservedNames) {
+            if (funcName[(int)ind[0]..(int)ind[1]] == res) {
+                foundReserved = true;
+                break;
+            }
+        }        if (!foundReserved) {
+            funcName = funcName[..(int)ind[0]];
+            break;
+        }
+    }    return funcName;
+
+}
+
+// Prune removes all nodes beneath a node matching dropRx, and not
+// matching keepRx. If the root node of a Sample matches, the sample
+// will have an empty stack.
+private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx, ptr<regexp.Regexp> _addr_keepRx) {
+    ref Profile p = ref _addr_p.val;
+    ref regexp.Regexp dropRx = ref _addr_dropRx.val;
+    ref regexp.Regexp keepRx = ref _addr_keepRx.val;
+
+    var prune = make_map<ulong, bool>();
+    var pruneBeneath = make_map<ulong, bool>();
+
+    foreach (var (_, loc) in p.Location) {
+        nint i = default;
+        for (i = len(loc.Line) - 1; i >= 0; i--) {
             {
-                var foundReserved = false;
-                foreach (var (_, res) in reservedNames)
-                {
-                    if (funcName[ind[0L]..ind[1L]] == res)
-                    {
-                        foundReserved = true;
-                        break;
+                var fn = loc.Line[i].Function;
+
+                if (fn != null && fn.Name != "") {
+                    var funcName = simplifyFunc(fn.Name);
+                    if (dropRx.MatchString(funcName)) {
+                        if (keepRx == null || !keepRx.MatchString(funcName)) {
+                            break;
+                        }
                     }
-
-                }
-                if (!foundReserved)
-                {
-                    funcName = funcName[..ind[0L]];
-                    break;
                 }
 
             }
-            return funcName;
 
         }
 
-        // Prune removes all nodes beneath a node matching dropRx, and not
-        // matching keepRx. If the root node of a Sample matches, the sample
-        // will have an empty stack.
-        private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx, ptr<regexp.Regexp> _addr_keepRx)
+        if (i >= 0) { 
+            // Found matching entry to prune.
+            pruneBeneath[loc.ID] = true; 
+
+            // Remove the matching location.
+            if (i == len(loc.Line) - 1) { 
+                // Matched the top entry: prune the whole location.
+                prune[loc.ID] = true;
+
+            }
+            else
+ {
+                loc.Line = loc.Line[(int)i + 1..];
+            }
+
+        }
+    }    foreach (var (_, sample) in p.Sample) { 
+        // Scan from the root to the leaves to find the prune location.
+        // Do not prune frames before the first user frame, to avoid
+        // pruning everything.
+        var foundUser = false;
         {
-            ref Profile p = ref _addr_p.val;
-            ref regexp.Regexp dropRx = ref _addr_dropRx.val;
-            ref regexp.Regexp keepRx = ref _addr_keepRx.val;
+            nint i__prev2 = i;
 
-            var prune = make_map<ulong, bool>();
-            var pruneBeneath = make_map<ulong, bool>();
+            for (i = len(sample.Location) - 1; i >= 0; i--) {
+                var id = sample.Location[i].ID;
+                if (!prune[id] && !pruneBeneath[id]) {
+                    foundUser = true;
+                    continue;
+                }
+                if (!foundUser) {
+                    continue;
+                }
+                if (prune[id]) {
+                    sample.Location = sample.Location[(int)i + 1..];
+                    break;
+                }
+                if (pruneBeneath[id]) {
+                    sample.Location = sample.Location[(int)i..];
+                    break;
+                }
+            }
 
-            foreach (var (_, loc) in p.Location)
+
+            i = i__prev2;
+        }
+
+    }
+}
+
+// RemoveUninteresting prunes and elides profiles using built-in
+// tables of uninteresting function names.
+private static error RemoveUninteresting(this ptr<Profile> _addr_p) {
+    ref Profile p = ref _addr_p.val;
+
+    ptr<regexp.Regexp> keep;    ptr<regexp.Regexp> drop;
+
+    error err = default!;
+
+    if (p.DropFrames != "") {
+        drop, err = regexp.Compile("^(" + p.DropFrames + ")$");
+
+        if (err != null) {
+            return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.DropFrames, err))!;
+        }
+        if (p.KeepFrames != "") {
+            keep, err = regexp.Compile("^(" + p.KeepFrames + ")$");
+
+            if (err != null) {
+                return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err))!;
+            }
+
+        }
+        p.Prune(drop, keep);
+
+    }
+    return error.As(null!)!;
+
+}
+
+// PruneFrom removes all nodes beneath the lowest node matching dropRx, not including itself.
+//
+// Please see the example below to understand this method as well as
+// the difference from Prune method.
+//
+// A sample contains Location of [A,B,C,B,D] where D is the top frame and there's no inline.
+//
+// PruneFrom(A) returns [A,B,C,B,D] because there's no node beneath A.
+// Prune(A, nil) returns [B,C,B,D] by removing A itself.
+//
+// PruneFrom(B) returns [B,C,B,D] by removing all nodes beneath the first B when scanning from the bottom.
+// Prune(B, nil) returns [D] because a matching node is found by scanning from the root.
+private static void PruneFrom(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx) {
+    ref Profile p = ref _addr_p.val;
+    ref regexp.Regexp dropRx = ref _addr_dropRx.val;
+
+    var pruneBeneath = make_map<ulong, bool>();
+
+    {
+        var loc__prev1 = loc;
+
+        foreach (var (_, __loc) in p.Location) {
+            loc = __loc;
             {
-                long i = default;
-                for (i = len(loc.Line) - 1L; i >= 0L; i--)
-                {
+                nint i__prev2 = i;
+
+                for (nint i = 0; i < len(loc.Line); i++) {
                     {
                         var fn = loc.Line[i].Function;
 
-                        if (fn != null && fn.Name != "")
-                        {
+                        if (fn != null && fn.Name != "") {
                             var funcName = simplifyFunc(fn.Name);
-                            if (dropRx.MatchString(funcName))
-                            {
-                                if (keepRx == null || !keepRx.MatchString(funcName))
-                                {
-                                    break;
-                                }
+                            if (dropRx.MatchString(funcName)) { 
+                                // Found matching entry to prune.
+                                pruneBeneath[loc.ID] = true;
+                                loc.Line = loc.Line[(int)i..];
+                                break;
 
                             }
 
@@ -111,197 +212,32 @@ namespace pprof
                 }
 
 
-                if (i >= 0L)
-                { 
-                    // Found matching entry to prune.
-                    pruneBeneath[loc.ID] = true; 
-
-                    // Remove the matching location.
-                    if (i == len(loc.Line) - 1L)
-                    { 
-                        // Matched the top entry: prune the whole location.
-                        prune[loc.ID] = true;
-
-                    }
-                    else
-                    {
-                        loc.Line = loc.Line[i + 1L..];
-                    }
-
-                }
-
-            } 
-
-            // Prune locs from each Sample
-            foreach (var (_, sample) in p.Sample)
-            { 
-                // Scan from the root to the leaves to find the prune location.
-                // Do not prune frames before the first user frame, to avoid
-                // pruning everything.
-                var foundUser = false;
-                {
-                    long i__prev2 = i;
-
-                    for (i = len(sample.Location) - 1L; i >= 0L; i--)
-                    {
-                        var id = sample.Location[i].ID;
-                        if (!prune[id] && !pruneBeneath[id])
-                        {
-                            foundUser = true;
-                            continue;
-                        }
-
-                        if (!foundUser)
-                        {
-                            continue;
-                        }
-
-                        if (prune[id])
-                        {
-                            sample.Location = sample.Location[i + 1L..];
-                            break;
-                        }
-
-                        if (pruneBeneath[id])
-                        {
-                            sample.Location = sample.Location[i..];
-                            break;
-                        }
-
-                    }
-
-
-                    i = i__prev2;
-                }
-
+                i = i__prev2;
             }
 
         }
+        loc = loc__prev1;
+    }
 
-        // RemoveUninteresting prunes and elides profiles using built-in
-        // tables of uninteresting function names.
-        private static error RemoveUninteresting(this ptr<Profile> _addr_p)
+    foreach (var (_, sample) in p.Sample) { 
+        // Scan from the bottom leaf to the root to find the prune location.
         {
-            ref Profile p = ref _addr_p.val;
+            nint i__prev2 = i;
+            var loc__prev2 = loc;
 
-            ptr<regexp.Regexp> keep;            ptr<regexp.Regexp> drop;
-
-            error err = default!;
-
-            if (p.DropFrames != "")
-            {
-                drop, err = regexp.Compile("^(" + p.DropFrames + ")$");
-
-                if (err != null)
-                {
-                    return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.DropFrames, err))!;
-                }
-
-                if (p.KeepFrames != "")
-                {
-                    keep, err = regexp.Compile("^(" + p.KeepFrames + ")$");
-
-                    if (err != null)
-                    {
-                        return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err))!;
-                    }
-
-                }
-
-                p.Prune(drop, keep);
-
-            }
-
-            return error.As(null!)!;
-
-        }
-
-        // PruneFrom removes all nodes beneath the lowest node matching dropRx, not including itself.
-        //
-        // Please see the example below to understand this method as well as
-        // the difference from Prune method.
-        //
-        // A sample contains Location of [A,B,C,B,D] where D is the top frame and there's no inline.
-        //
-        // PruneFrom(A) returns [A,B,C,B,D] because there's no node beneath A.
-        // Prune(A, nil) returns [B,C,B,D] by removing A itself.
-        //
-        // PruneFrom(B) returns [B,C,B,D] by removing all nodes beneath the first B when scanning from the bottom.
-        // Prune(B, nil) returns [D] because a matching node is found by scanning from the root.
-        private static void PruneFrom(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx)
-        {
-            ref Profile p = ref _addr_p.val;
-            ref regexp.Regexp dropRx = ref _addr_dropRx.val;
-
-            var pruneBeneath = make_map<ulong, bool>();
-
-            {
-                var loc__prev1 = loc;
-
-                foreach (var (_, __loc) in p.Location)
-                {
-                    loc = __loc;
-                    {
-                        long i__prev2 = i;
-
-                        for (long i = 0L; i < len(loc.Line); i++)
-                        {
-                            {
-                                var fn = loc.Line[i].Function;
-
-                                if (fn != null && fn.Name != "")
-                                {
-                                    var funcName = simplifyFunc(fn.Name);
-                                    if (dropRx.MatchString(funcName))
-                                    { 
-                                        // Found matching entry to prune.
-                                        pruneBeneath[loc.ID] = true;
-                                        loc.Line = loc.Line[i..];
-                                        break;
-
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-
-                        i = i__prev2;
-                    }
-
-                } 
-
-                // Prune locs from each Sample
-
-                loc = loc__prev1;
-            }
-
-            foreach (var (_, sample) in p.Sample)
-            { 
-                // Scan from the bottom leaf to the root to find the prune location.
-                {
-                    long i__prev2 = i;
-                    var loc__prev2 = loc;
-
-                    foreach (var (__i, __loc) in sample.Location)
-                    {
-                        i = __i;
-                        loc = __loc;
-                        if (pruneBeneath[loc.ID])
-                        {
-                            sample.Location = sample.Location[i..];
-                            break;
-                        }
-
-                    }
-
-                    i = i__prev2;
-                    loc = loc__prev2;
+            foreach (var (__i, __loc) in sample.Location) {
+                i = __i;
+                loc = __loc;
+                if (pruneBeneath[loc.ID]) {
+                    sample.Location = sample.Location[(int)i..];
+                    break;
                 }
             }
 
+            i = i__prev2;
+            loc = loc__prev2;
         }
     }
-}}}}}}
+}
+
+} // end profile_package

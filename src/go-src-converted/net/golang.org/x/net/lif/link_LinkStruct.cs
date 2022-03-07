@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:51:49 UTC
+//     Generated on 2022 March 06 22:16:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using @unsafe = go.@unsafe_package;
 using go;
 
@@ -39,7 +38,7 @@ namespace net
                 this.Addr = default;
             }
 
-            public Link(@string Name = default, long Index = default, long Type = default, long Flags = default, long MTU = default, slice<byte> Addr = default)
+            public Link(@string Name = default, nint Index = default, nint Type = default, nint Flags = default, nint MTU = default, slice<byte> Addr = default)
             {
                 this.Name = Name;
                 this.Index = Index;

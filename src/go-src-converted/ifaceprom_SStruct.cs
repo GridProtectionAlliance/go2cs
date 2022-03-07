@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:03:46 UTC
+//     Generated on 2022 March 06 23:33:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,21 +51,21 @@ namespace go
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("one");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_oneByRef = extensionMethod.CreateStaticDelegate(typeof(oneByRef)) as oneByRef;
 
-                    if ((object)s_oneByRef == null)
+                    if (s_oneByRef is null)
                         s_oneByVal = extensionMethod.CreateStaticDelegate(typeof(oneByVal)) as oneByVal;
                 }
                 
                 extensionMethod = targetType.GetExtensionMethodSearchingPromotions("two");
 
-                if ((object)extensionMethod != null)
+                if (extensionMethod is not null)
                 {
                     s_twoByRef = extensionMethod.CreateStaticDelegate(typeof(twoByRef)) as twoByRef;
 
-                    if ((object)s_twoByRef == null)
+                    if (s_twoByRef is null)
                         s_twoByVal = extensionMethod.CreateStaticDelegate(typeof(twoByVal)) as twoByVal;
                 }
             }

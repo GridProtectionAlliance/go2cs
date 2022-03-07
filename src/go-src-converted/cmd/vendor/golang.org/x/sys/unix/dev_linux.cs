@@ -15,46 +15,37 @@
 // backward compatible with the Linux kernel, which for some architectures uses
 // 32-bit dev_t, encoded as mmmM MMmm.
 
-// package unix -- go2cs converted at 2020 October 09 05:56:12 UTC
+// package unix -- go2cs converted at 2022 March 06 23:26:30 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
-// Original source: C:\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_linux.go
+// Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\dev_linux.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace vendor {
-namespace golang.org {
-namespace x {
-namespace sys
-{
-    public static partial class unix_package
-    {
-        // Major returns the major component of a Linux device number.
-        public static uint Major(ulong dev)
-        {
-            var major = uint32((dev & 0x00000000000fff00UL) >> (int)(8L));
-            major |= uint32((dev & 0xfffff00000000000UL) >> (int)(32L));
-            return major;
-        }
+namespace go.cmd.vendor.golang.org.x.sys;
 
-        // Minor returns the minor component of a Linux device number.
-        public static uint Minor(ulong dev)
-        {
-            var minor = uint32((dev & 0x00000000000000ffUL) >> (int)(0L));
-            minor |= uint32((dev & 0x00000ffffff00000UL) >> (int)(12L));
-            return minor;
-        }
+public static partial class unix_package {
 
-        // Mkdev returns a Linux device number generated from the given major and minor
-        // components.
-        public static ulong Mkdev(uint major, uint minor)
-        {
-            var dev = (uint64(major) & 0x00000fffUL) << (int)(8L);
-            dev |= (uint64(major) & 0xfffff000UL) << (int)(32L);
-            dev |= (uint64(minor) & 0x000000ffUL) << (int)(0L);
-            dev |= (uint64(minor) & 0xffffff00UL) << (int)(12L);
-            return dev;
-        }
-    }
-}}}}}}
+    // Major returns the major component of a Linux device number.
+public static uint Major(ulong dev) {
+    var major = uint32((dev & 0x00000000000fff00) >> 8);
+    major |= uint32((dev & 0xfffff00000000000) >> 32);
+    return major;
+}
+
+// Minor returns the minor component of a Linux device number.
+public static uint Minor(ulong dev) {
+    var minor = uint32((dev & 0x00000000000000ff) >> 0);
+    minor |= uint32((dev & 0x00000ffffff00000) >> 12);
+    return minor;
+}
+
+// Mkdev returns a Linux device number generated from the given major and minor
+// components.
+public static ulong Mkdev(uint major, uint minor) {
+    var dev = (uint64(major) & 0x00000fff) << 8;
+    dev |= (uint64(major) & 0xfffff000) << 32;
+    dev |= (uint64(minor) & 0x000000ff) << 0;
+    dev |= (uint64(minor) & 0xffffff00) << 12;
+    return dev;
+}
+
+} // end unix_package

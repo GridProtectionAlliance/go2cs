@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:28 UTC
+//     Generated on 2022 March 06 23:30:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,6 @@ namespace sys
                 this.Uid = default;
                 this.Gid = default;
                 this.Rdev = default;
-                this._ = default;
                 this.Atim = default;
                 this.Mtim = default;
                 this.Ctim = default;
@@ -53,7 +52,7 @@ namespace sys
                 this.Qspare = default;
             }
 
-            public Stat_t(int Dev = default, ushort Mode = default, ushort Nlink = default, ulong Ino = default, uint Uid = default, uint Gid = default, int Rdev = default, array<byte> _ = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, Timespec Btim = default, long Size = default, long Blocks = default, int Blksize = default, uint Flags = default, uint Gen = default, int Lspare = default, array<long> Qspare = default)
+            public Stat_t(int Dev = default, ushort Mode = default, ushort Nlink = default, ulong Ino = default, uint Uid = default, uint Gid = default, int Rdev = default, Timespec Atim = default, Timespec Mtim = default, Timespec Ctim = default, Timespec Btim = default, long Size = default, long Blocks = default, int Blksize = default, uint Flags = default, uint Gen = default, int Lspare = default, array<long> Qspare = default)
             {
                 this.Dev = Dev;
                 this.Mode = Mode;
@@ -62,7 +61,6 @@ namespace sys
                 this.Uid = Uid;
                 this.Gid = Gid;
                 this.Rdev = Rdev;
-                this._ = _;
                 this.Atim = Atim;
                 this.Mtim = Mtim;
                 this.Ctim = Ctim;
@@ -96,7 +94,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Stat_t Stat_t_cast(dynamic value)
         {
-            return new Stat_t(value.Dev, value.Mode, value.Nlink, value.Ino, value.Uid, value.Gid, value.Rdev, value._, value.Atim, value.Mtim, value.Ctim, value.Btim, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Lspare, value.Qspare);
+            return new Stat_t(value.Dev, value.Mode, value.Nlink, value.Ino, value.Uid, value.Gid, value.Rdev, value.Atim, value.Mtim, value.Ctim, value.Btim, value.Size, value.Blocks, value.Blksize, value.Flags, value.Gen, value.Lspare, value.Qspare);
         }
     }
 }}}}}}

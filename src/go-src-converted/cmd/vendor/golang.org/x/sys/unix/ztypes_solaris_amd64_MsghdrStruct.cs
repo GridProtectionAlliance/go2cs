@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 06:00:47 UTC
+//     Generated on 2022 March 06 23:30:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,23 +34,19 @@ namespace sys
             {
                 this.Name = default;
                 this.Namelen = default;
-                this._ = default;
                 this.Iov = default;
                 this.Iovlen = default;
-                this._ = default;
                 this.Accrights = default;
                 this.Accrightslen = default;
                 this._ = default;
             }
 
-            public Msghdr(ref ptr<byte> Name = default, uint Namelen = default, array<byte> _ = default, ref ptr<Iovec> Iov = default, int Iovlen = default, array<byte> _ = default, ref ptr<sbyte> Accrights = default, int Accrightslen = default, array<byte> _ = default)
+            public Msghdr(ref ptr<byte> Name = default, uint Namelen = default, ref ptr<Iovec> Iov = default, int Iovlen = default, ref ptr<sbyte> Accrights = default, int Accrightslen = default, array<byte> _ = default)
             {
                 this.Name = Name;
                 this.Namelen = Namelen;
-                this._ = _;
                 this.Iov = Iov;
                 this.Iovlen = Iovlen;
-                this._ = _;
                 this.Accrights = Accrights;
                 this.Accrightslen = Accrightslen;
                 this._ = _;
@@ -76,7 +72,7 @@ namespace sys
         [GeneratedCode("go2cs", "0.1.0.0")]
         public static Msghdr Msghdr_cast(dynamic value)
         {
-            return new Msghdr(ref value.Name, value.Namelen, value._, ref value.Iov, value.Iovlen, value._, ref value.Accrights, value.Accrightslen, value._);
+            return new Msghdr(ref value.Name, value.Namelen, ref value.Iov, value.Iovlen, ref value.Accrights, value.Accrightslen, value._);
         }
     }
 }}}}}}

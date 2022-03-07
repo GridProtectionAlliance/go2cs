@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 04:52:40 UTC
+//     Generated on 2022 March 06 22:16:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -13,15 +13,14 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using context = go.context_package;
 using tls = go.crypto.tls_package;
 using base64 = go.encoding.base64_package;
 using errors = go.errors_package;
 using fmt = go.fmt_package;
 using io = go.io_package;
-using ioutil = go.io.ioutil_package;
 using log = go.log_package;
+using ascii = go.net.http.@internal.ascii_package;
 using url = go.net.url_package;
 using reflect = go.reflect_package;
 using sort = go.sort_package;
@@ -63,7 +62,7 @@ namespace net
             {
                 get
                 {
-                    if (m_target_is_ptr && !(m_target_ptr is null))
+                    if (m_target_is_ptr && m_target_ptr is not null)
                         return ref m_target_ptr.val;
 
                     return ref m_target;
@@ -89,16 +88,16 @@ namespace net
             {
                 T target = m_target;
 
-                if (m_target_is_ptr && !(m_target_ptr is null))
+                if (m_target_is_ptr && m_target_ptr is not null)
                     target = m_target_ptr.val;
 
                 if (s_RoundTripByPtr is null || !m_target_is_ptr)
                     return s_RoundTripByVal!(target, _p0);
 
-                return s_RoundTripByPtr(m_target_ptr, _p0);
+                return s_RoundTripByPtr(m_target_ptr!, _p0);
             }
             
-            public string ToString(string? format, IFormatProvider? formatProvider) => format;
+            public string ToString(string? format, IFormatProvider? formatProvider) => format ?? GetGoTypeName(typeof(T));
 
             [DebuggerStepperBoundary]
             static RoundTripper()
@@ -109,12 +108,12 @@ namespace net
 
                extensionMethod = targetTypeByPtr.GetExtensionMethod("RoundTrip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RoundTripByPtr = extensionMethod.CreateStaticDelegate(typeof(RoundTripByPtr)) as RoundTripByPtr;
 
                 extensionMethod = targetType.GetExtensionMethod("RoundTrip");
 
-                if (!(extensionMethod is null))
+                if (extensionMethod is not null)
                     s_RoundTripByVal = extensionMethod.CreateStaticDelegate(typeof(RoundTripByVal)) as RoundTripByVal;
 
                 if (s_RoundTripByPtr is null && s_RoundTripByVal is null)

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2020 October 09 05:00:09 UTC
+//     Generated on 2022 March 06 22:25:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using static go.builtin;
 using bytes = go.bytes_package;
 using errors = go.errors_package;
 using io = go.io_package;
@@ -42,7 +41,7 @@ namespace encoding
                 this.tokenStack = default;
             }
 
-            public Decoder(io.Reader r = default, slice<byte> buf = default, decodeState d = default, long scanp = default, long scanned = default, scanner scan = default, error err = default, long tokenState = default, slice<long> tokenStack = default)
+            public Decoder(io.Reader r = default, slice<byte> buf = default, decodeState d = default, nint scanp = default, long scanned = default, scanner scan = default, error err = default, nint tokenState = default, slice<nint> tokenStack = default)
             {
                 this.r = r;
                 this.buf = buf;

@@ -1,21 +1,14 @@
-// package dep -- go2cs converted at 2020 October 09 05:20:07 UTC
+// package dep -- go2cs converted at 2022 March 06 22:43:01 UTC
 // import "cmd/api/testdata/src/issue21181/dep" ==> using dep = go.cmd.api.testdata.src.issue21181.dep_package
-// Original source: C:\Go\src\cmd\api\testdata\src\issue21181\dep\p.go
+// Original source: C:\Program Files\Go\src\cmd\api\testdata\src\issue21181\dep\p.go
 
-using static go.builtin;
 
-namespace go {
-namespace cmd {
-namespace api {
-namespace testdata {
-namespace src {
-namespace issue21181
-{
-    public static partial class dep_package
-    {
-        public partial interface Interface
-        {
-            void N(slice<byte> _p0);
-        }
-    }
-}}}}}}
+namespace go.cmd.api.testdata.src.issue21181;
+
+public static partial class dep_package {
+
+public partial interface Interface {
+    void N(slice<byte> _p0);
+}
+
+} // end dep_package
