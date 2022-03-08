@@ -3,8 +3,7 @@
 
 Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
 
-> _Code QL results temporarily removed until GitHub supports .NET 6.0_
-<!-- ![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg) -->
+![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
 
 ## News
 
@@ -107,7 +106,7 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 | -c | (Default: false) Set to target legacy compatible code, e.g., block scoped namespaces. Required for code sets prior to C# 10. |
 | -a | (Default: false) Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style. |
 | &#8209;&#8209;help | Display this help screen. |
-| &#8209;&#8209;version | Display version information. |   
+| &#8209;&#8209;version | Display version information. |
 | value 0 | Required. Go source path or file name to convert. |
 | value 1 | Target path for converted files. If not specified, all files (except for Go standard library files) will be converted to source path. |
 
