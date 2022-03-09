@@ -103,6 +103,7 @@ Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should comp
 | -m | (Default: false) Set to force update of pre-scan metadata. |
 | -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
 | -k | (Default: false) Skip check for "+build ignore" directive and attempt conversion anyway. |
+| -C | (Default: false) Set to convert CGO files, i.e., skip check for \"+build cgo\" directive or import "C" and attempt conversion anyway. |
 | -c | (Default: false) Set to target legacy compatible code, e.g., block scoped namespaces. Required for code sets prior to C# 10. |
 | -a | (Default: false) Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style. |
 | &#8209;&#8209;help | Display this help screen. |

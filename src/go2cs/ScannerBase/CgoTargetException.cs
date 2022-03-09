@@ -1,7 +1,7 @@
 ﻿//******************************************************************************************************
-//  ScannerBase_ImportDecl.cs - Gbtc
+//  CgoTargetException.cs - Gbtc
 //
-//  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2022, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,27 +16,16 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  05/03/2018 - J. Ritchie Carroll
+//  03/09/2022 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using static go2cs.Common;
+using System;
 
-namespace go2cs;
-
-public partial class ScannerBase
+namespace go2cs
 {
-    public override void EnterImportSpec(GoParser.ImportSpecContext context)
+    internal class CgoTargetException : Exception
     {
-        // Remove quotes from package name
-        CurrentImportPath = RemoveSurrounding(ToStringLiteral(context.importPath().string_().GetText()));
-
-        if (!Options.ParseCgoTargets && CurrentImportPath == "C")
-            throw new CgoTargetException();
-
-        // Add package to import queue
-        ImportQueue.Add(CurrentImportPath);
-        Imports.Add(CurrentImportPath.Replace('/', '.'));
     }
 }

@@ -133,7 +133,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
             Metadata = metadata;
     }
 
-    public virtual void Scan(bool showParseTree)
+    public virtual (bool, string) Scan(bool showParseTree)
     {
         IParseTree sourceTree = Parser.sourceFile();
 
@@ -142,7 +142,17 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
         // Walk parsed source tree to start visiting nodes
         ParseTreeWalker walker = new();
-        walker.Walk(this, sourceTree);
+
+        try
+        {
+            walker.Walk(this, sourceTree);
+        }
+        catch (CgoTargetException)
+        {
+            return (true, "Import \"C\" CGO Target");
+        }
+
+        return (true, null);
     }
 
     protected void AddWarning(ParserRuleContext context, string message)
@@ -280,12 +290,14 @@ public abstract partial class ScannerBase : GoParserBaseListener
         if (fileNeedsScan is null)
             fileNeedsScan = DefaultFileNeedsScan;
 
-        if (!options.SkipBuildIgnoreDirectiveCheck)
+        if (!options.SkipBuildIgnoreDirectiveCheck || !options.ParseCgoTargets)
         {
-            string[] source = File.ReadAllLines(fileName);
+            using StreamReader source = File.OpenText(fileName);
             bool foundIgnoreBuildDirective = false;
+            bool foundCgoBuildDirective = false;
+            string line;
 
-            foreach (string line in source)
+            while ((line = source.ReadLine()) is not null)
             {
                 // Directives must come before package definition
                 if (line.TrimStart().StartsWith("package "))
@@ -298,9 +310,15 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
                 HashSet<string> directives = new(line.Substring(index + 6).Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
 
-                if (directives.Contains("ignore"))
+                if (!options.SkipBuildIgnoreDirectiveCheck && directives.Contains("ignore"))
                 {
                     foundIgnoreBuildDirective = true;
+                    break;
+                }
+
+                if (!options.ParseCgoTargets && directives.Any(directive => directive.Contains("cgo")))
+                {
+                    foundCgoBuildDirective = true;
                     break;
                 }
             }
@@ -308,6 +326,13 @@ public abstract partial class ScannerBase : GoParserBaseListener
             if (foundIgnoreBuildDirective)
             {
                 Console.WriteLine($"Encountered \"+build ignore\" directive for \"{fileName}\", skipping scan...{Environment.NewLine}");
+                handleSkippedScan?.Invoke(options, fileName, showParseTree);
+                return;
+            }
+
+            if (foundCgoBuildDirective)
+            {
+                Console.WriteLine($"Encountered \"+build cgo\" directive for \"{fileName}\", skipping scan...{Environment.NewLine}");
                 handleSkippedScan?.Invoke(options, fileName, showParseTree);
                 return;
             }
@@ -356,7 +381,16 @@ public abstract partial class ScannerBase : GoParserBaseListener
         if (options.OverwriteExistingFiles || !File.Exists(scanner.TargetFileName))
         {
             scanner.BeforeScan();
-            scanner.Scan(showParseTree);
+
+            (bool success, string result) = scanner.Scan(showParseTree);
+
+            if (!success)
+            {
+                Console.WriteLine($"Encountered \"{result}\" for \"{fileName}\", skipping scan...{Environment.NewLine}");
+                handleSkippedScan?.Invoke(options, fileName, showParseTree);
+                return;
+            }
+
             scanner.AfterScan();
         }
         else

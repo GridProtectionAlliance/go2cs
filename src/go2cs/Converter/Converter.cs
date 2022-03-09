@@ -59,10 +59,13 @@ public partial class Converter : ScannerBase
         ImportMetadata = new(StringComparer.Ordinal);
     }
 
-    public override void Scan(bool showParseTree)
+    public override (bool, string) Scan(bool showParseTree)
     {
         // Base class walks parse tree
-        base.Scan(showParseTree);
+        (bool success, string result) = base.Scan(showParseTree);
+
+        if (!success)
+            return (false, result);
 
         if (!WroteLineFeed)
             m_targetFile.AppendLine();
@@ -88,6 +91,8 @@ public partial class Converter : ScannerBase
 
         using StreamWriter writer = File.CreateText(TargetFileName);
         writer.Write(targetFile);
+
+        return (true, null);
     }
 
     protected override void BeforeScan()

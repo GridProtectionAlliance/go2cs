@@ -40,7 +40,7 @@ namespace go2cs;
 /// A full pre-scan of source code is needed in order to properly handle promotions within
 /// interfaces and structures.
 /// </remarks>
-public partial class PreScanner :ScannerBase
+public partial class PreScanner : ScannerBase
 {
     private readonly Dictionary<string, (string targetImport, string targetUsing)> m_importAliases = new(StringComparer.Ordinal);
     private readonly Dictionary<string, InterfaceInfo> m_interfaces = new(StringComparer.Ordinal);
@@ -54,10 +54,13 @@ public partial class PreScanner :ScannerBase
         FolderMetadataFileName = GetFolderMetadataFileName(options, null, fileName);
     }
 
-    public override void Scan(bool _)
+    public override (bool, string) Scan(bool _)
     {
         // Base class walks parse tree
-        base.Scan(false);
+        (bool success, string result) = base.Scan(false);
+
+        if (!success)
+            return (false, result);
 
         FolderMetadata folderMetadata = GetFolderMetadata(Options, null, SourceFileName) ?? new FolderMetadata();
         FileMetadata fileMetadata = folderMetadata.Files.GetOrAdd(SourceFileName, new FileMetadata());
@@ -73,8 +76,8 @@ public partial class PreScanner :ScannerBase
         fileMetadata.LastUpdate = DateTime.UtcNow;
 
     #if !DEBUG
-            try
-            {
+        try
+        {
     #endif
         string directory = Path.GetDirectoryName(FolderMetadataFileName);
 
@@ -84,12 +87,14 @@ public partial class PreScanner :ScannerBase
         string serializedData = JsonSerializer.Serialize(folderMetadata, GetSerializationOptions());
         File.WriteAllText(FolderMetadataFileName, serializedData);
     #if !DEBUG
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to write metadata file \"{FolderMetadataFileName}\": {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to write metadata file \"{FolderMetadataFileName}\": {ex.Message}");
+        }
     #endif
+
+        return (true, null);
     }
 
     protected override void BeforeScan()

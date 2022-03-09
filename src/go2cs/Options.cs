@@ -39,47 +39,50 @@ public class Options
 
     private readonly Regex m_excludeExpression;
 
-    [Option('l', Required = false, Default = false, HelpText = "Set to only convert local files in source path. Default is to recursively convert all encountered \"import\" packages.")]
+    [Option('l', "local", Required = false, Default = false, HelpText = "Set to only convert local files in source path. Default is to recursively convert all encountered \"import\" packages.")]
     public bool LocalConvertOnly { get; }
 
-    [Option('o', Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing local converted files.")]
+    [Option('o', "reconvert-local", Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing local converted files.")]
     public bool OverwriteExistingFiles { get; }
 
-    [Option('i', Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing files from imported packages.")]
+    [Option('i', "reconvert-imports", Required = false, Default = false, HelpText = "Set to overwrite, i.e., reconvert, any existing files from imported packages.")]
     public bool OverwriteExistingPackages { get; }
 
-    [Option('h', Required = false, Default = false, HelpText = "Set to exclude header conversion comments which include original source file path and conversion time.")]
+    [Option('h', "exclude-header", Required = false, Default = false, HelpText = "Set to exclude header conversion comments which include original source file path and conversion time.")]
     public bool ExcludeHeaderComments { get; }
 
-    [Option('t', Required = false, Default = false, HelpText = "Set to show syntax tree of parsed source file.")]
+    [Option('t', "show-parse-tree", Required = false, Default = false, HelpText = "Set to show syntax tree of parsed source file.")]
     public bool ShowParseTree { get; }
 
-    [Option('e', Required = false, Default = DefaultExcludeFiles, HelpText = "Regular expression to exclude certain files from conversion, e.g., \"^.+_test\\.go$\". Defaults to exclude none.")]
+    [Option('e', "exclude", Required = false, Default = DefaultExcludeFiles, HelpText = "Regular expression to exclude certain files from conversion, e.g., \"^.+_test\\.go$\". Defaults to exclude none.")]
     public string ExcludeFiles { get; }
 
     // Default is false since it is desirable to be able to download a pre-converted set of standard library files
-    [Option('s', Required = false, Default = false, HelpText = "Set to convert needed packages from Go standard library files found in \"%GOROOT%\\src\".")]
+    [Option('s', "convert-stdlib", Required = false, Default = false, HelpText = "Set to convert needed packages from Go standard library files found in \"%GOROOT%\\src\".")]
     public bool ConvertStandardLibrary { get; }
 
-    [Option('r', Required = false, Default = false, HelpText = "Set to recursively convert source files in subdirectories when a Go source path is specified.")]
+    [Option('r', "recursive", Required = false, Default = false, HelpText = "Set to recursively convert source files in subdirectories when a Go source path is specified.")]
     public bool RecurseSubdirectories { get; }
 
-    [Option('m', Required = false, Default = false, HelpText = "Set to force update of pre-scan metadata.")]
+    [Option('m', "update-metadata", Required = false, Default = false, HelpText = "Set to force update of pre-scan metadata.")]
     public bool ForceMetadataUpdate { get; }
 
-    [Option('u', Required = false, Default = false, HelpText = "Set to only update pre-scan metadata and skip conversion operations.")]
+    [Option('u', "skip-convert", Required = false, Default = false, HelpText = "Set to only update pre-scan metadata and skip conversion operations.")]
     public bool OnlyUpdateMetadata { get; }
 
-    [Option('g', Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
+    [Option('g', "stdlib-path", Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
     public string TargetGoSrcPath { get; }
 
-    [Option('k', Required = false, Default = false, HelpText = "Skip check for \"+build ignore\" directive and attempt conversion anyway.")]
+    [Option('k', "skip-ignore-directive-check", Required = false, Default = false, HelpText = "Skip check for \"+build ignore\" directive and attempt conversion anyway.")]
     public bool SkipBuildIgnoreDirectiveCheck { get; }
 
-    [Option('c', Required = false, Default = false, HelpText = "Set to target legacy compatible code, e.g., block scoped namespaces and per-file static \"go.builtin\" using. Required for code sets prior to C# 10.")]
+    [Option('C', "cgo", Required = false, Default = false, HelpText = "Set to convert CGO files, i.e., skip check for \"+build cgo\" directive or import \"C\" and attempt conversion anyway.")]
+    public bool ParseCgoTargets { get; }
+
+    [Option('c', "compatible", Required = false, Default = false, HelpText = "Set to target legacy compatible code, e.g., block scoped namespaces and per-file static \"go.builtin\" using. Required for code sets prior to C# 10.")]
     public bool WriteLegacyCompatibleCode { get; }
 
-    [Option('a', Required = false, Default = false, HelpText = "Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style.")]
+    [Option('a', "ansi-braces", Required = false, Default = false, HelpText = "Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style.")]
     public bool UseAnsiBraceStyle { get; }
 
     [Value(0, Required = true, HelpText = "Go source path or file name to convert.")]
@@ -107,6 +110,7 @@ public class Options
         bool onlyUpdateMetadata,
         string targetGoSrcPath,
         bool skipBuildIgnoreDirectiveCheck,
+        bool parseCgoTargets,
         bool writeLegacyCompatibleCode,
         bool useAnsiBraceStyle,
         string sourcePath,
@@ -132,6 +136,7 @@ public class Options
         OnlyUpdateMetadata = onlyUpdateMetadata;
         TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
         SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
+        ParseCgoTargets = parseCgoTargets;
         WriteLegacyCompatibleCode = writeLegacyCompatibleCode;
         UseAnsiBraceStyle = useAnsiBraceStyle;
         SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
@@ -158,6 +163,7 @@ public class Options
             options.OnlyUpdateMetadata,
             options.TargetGoSrcPath, 
             options.SkipBuildIgnoreDirectiveCheck,
+            options.ParseCgoTargets,
             options.WriteLegacyCompatibleCode,
             options.UseAnsiBraceStyle,
             sourcePath, 
