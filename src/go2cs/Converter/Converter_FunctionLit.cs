@@ -94,18 +94,18 @@ public partial class Converter
 
                 if (index > -1)
                 {
-                    string parameters = lambdaExpression.Substring(0, index).Trim();
+                    string parameters = lambdaExpression[..index].Trim();
 
-                    lambdaExpression = lambdaExpression.Substring(index + startBlock.Length).Trim();
+                    lambdaExpression = lambdaExpression[(index + startBlock.Length)..].Trim();
 
                     if (lambdaExpression.StartsWith("return ", StringComparison.Ordinal))
-                        lambdaExpression = lambdaExpression.Substring(7).Trim();
+                        lambdaExpression = lambdaExpression[7..].Trim();
 
                     if (lambdaExpression.EndsWith("}", StringComparison.Ordinal))
-                        lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
+                        lambdaExpression = lambdaExpression[..^1].Trim();
 
                     if (lambdaExpression.EndsWith(";", StringComparison.Ordinal))
-                        lambdaExpression = lambdaExpression.Substring(0, lambdaExpression.Length - 1).Trim();
+                        lambdaExpression = lambdaExpression[..^1].Trim();
 
                     lambdaExpression = $"{parameters} {lambdaExpression}";
                 }

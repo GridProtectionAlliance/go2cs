@@ -37,7 +37,7 @@ public partial class PreScanner
         bool useStatic = alternateName is null && context.ChildCount > 1 && context.GetChild(0).GetText().Equals(".");
 
         int lastSlash = CurrentImportPath.LastIndexOf('/');
-        string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath.Substring(lastSlash + 1) : CurrentImportPath);
+        string packageName = SanitizedIdentifier(lastSlash > -1 ? CurrentImportPath[(lastSlash + 1)..] : CurrentImportPath);
 
         string targetUsing = $"{RootNamespace}.{string.Join(".", CurrentImportPath.Split('/').Select(SanitizedIdentifier))}{ClassSuffix}";
 

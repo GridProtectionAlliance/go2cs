@@ -48,10 +48,10 @@ public partial class ScannerBase
             PackageImport = PackageImport.Replace(GoPath, string.Empty);
 
             while (PackageImport.StartsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.StartsWith(Path.AltDirectorySeparatorChar.ToString()))
-                PackageImport = PackageImport.Substring(1);
+                PackageImport = PackageImport[1..];
 
             while (PackageImport.EndsWith(Path.DirectorySeparatorChar.ToString()) || PackageImport.EndsWith(Path.AltDirectorySeparatorChar.ToString()))
-                PackageImport = PackageImport.Substring(0, PackageImport.Length - 1);
+                PackageImport = PackageImport[..^1];
 
             int lastSlash;
 
@@ -61,18 +61,18 @@ public partial class ScannerBase
                 lastSlash = PackageImport.LastIndexOf('\\');
 
                 if (lastSlash > -1)
-                    PackageImport = $"{PackageImport.Substring(lastSlash + 1)}";
+                    PackageImport = $"{PackageImport[(lastSlash + 1)..]}";
             }
 
             PackageImport = $"{PackageImport.Replace('\\', '/')}";
 
             lastSlash = PackageImport.LastIndexOf('/');
-            string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport.Substring(lastSlash + 1) : PackageImport);
+            string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport[(lastSlash + 1)..] : PackageImport);
 
             if (!package.Equals(Package))
             {
                 AddWarning(context, $"Defined package clause \"{Package}\" does not match file path \"{SourceFileName}\"");
-                PackageImport = lastSlash > -1 ? $"{PackageImport.Substring(0, lastSlash)}.{Package}" : Package;
+                PackageImport = lastSlash > -1 ? $"{PackageImport[..lastSlash]}.{Package}" : Package;
             }
         }
     }

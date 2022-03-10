@@ -375,7 +375,7 @@ public partial class ScannerBase
         string primitiveType = ConvertToFullCSTypeName(type);
 
         if (primitiveType.StartsWith("go."))
-            return primitiveType.Substring(3);
+            return primitiveType[3..];
 
         return primitiveType;
     }

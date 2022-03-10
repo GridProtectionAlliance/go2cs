@@ -36,7 +36,7 @@ namespace go2cs
 
         public DependencyCounter()
         {
-            m_dependencyCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+            m_dependencyCounts = new(StringComparer.Ordinal);
         }
 
         public int Count => m_dependencyCounts.Count;

@@ -29,6 +29,6 @@ namespace go2cs.Metadata
     [Serializable]
     public class FolderMetadata
     {
-        public Dictionary<string, FileMetadata> Files = new Dictionary<string, FileMetadata>(StringComparer.Ordinal);
+        public Dictionary<string, FileMetadata> Files = new(StringComparer.Ordinal);
     }
 }

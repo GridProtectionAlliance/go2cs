@@ -25,9 +25,9 @@ using System;
 
 namespace go2cs;
 
-class Program
+internal class Program
 {
-    static int Main(string[] args)
+    private static int Main(string[] args)
     {
         DateTime startTime = DateTime.UtcNow;
         Arguments arguments = Arguments.Parse(args);
@@ -62,29 +62,29 @@ class Program
 
     private static int RunConversion(Options options)
     {
-        int exitCode = 0;
-
     #if !DEBUG
-            try
-            {
+        try
+        {
     #endif
+
         Common.RestoreResources(options.TargetGoSrcPath);
         PreScanner.Scan(options);
         Converter.Convert(options);
+
     #if !DEBUG
-            }
-            catch (TypeInitializationException ex)
-            {
-                Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.InnerException?.Message ?? ex.Message}");
-                exitCode = 2;
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.Message}");
-                exitCode = 3;
-            }
+        }
+        catch (TypeInitializationException ex)
+        {
+            Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.InnerException?.Message ?? ex.Message}");
+            return 2;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"{Environment.NewLine}Error: {ex.Message}");
+            return 3;
+        }
     #endif
 
-        return exitCode;
+        return 0;
     }
 }

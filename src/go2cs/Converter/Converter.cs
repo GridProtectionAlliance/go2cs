@@ -146,8 +146,8 @@ public partial class Converter : ScannerBase
     private static void WriteProjectFiles(Options options)
     {
     #if !DEBUG
-            try
-            {
+        try
+        {
     #endif
         // Map of package names to list of package path and file names
         Dictionary<string, List<(string path, string[] fileNames)>> groupedPackageData;
@@ -161,11 +161,11 @@ public partial class Converter : ScannerBase
         if (options.ConvertStandardLibrary && options.RecurseSubdirectories && AddPathSuffix(options.SourcePath).Equals(GoPath))
             ProcessStandardLibraryPackages(options, groupedPackageData);
     #if !DEBUG
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to write project files: {ex.Message}");
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to write project files: {ex.Message}");
+        }
     #endif
     }
 
@@ -258,7 +258,7 @@ public partial class Converter : ScannerBase
         }
     }
 
-    private string GetPackageNamespace(string packageImport)
+    private static string GetPackageNamespace(string packageImport)
     {
         string[] paths = packageImport.Split('/').Select(SanitizedIdentifier).ToArray();
         return $"{RootNamespace}.{string.Join(".", paths)}{ClassSuffix}";

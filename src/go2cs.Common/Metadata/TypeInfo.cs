@@ -57,9 +57,8 @@ namespace go2cs.Metadata
         public bool IsByRefPointer;
         public bool IsConst;
 
-        public virtual TypeInfo Clone()
-        {
-            return new TypeInfo
+        public virtual TypeInfo Clone() =>
+            new()
             {
                 Name = Name,
                 TypeName = TypeName,
@@ -69,47 +68,51 @@ namespace go2cs.Metadata
                 IsByRefPointer = IsByRefPointer,
                 IsConst = IsConst
             };
-        }
 
-        public static readonly TypeInfo ObjectType = new TypeInfo
-        {
-            Name = "object",
-            TypeName = "object",
-            FullTypeName = "System.Object",
-            TypeClass = TypeClass.Simple
-        };
+        public static readonly TypeInfo ObjectType =
+            new()
+            {
+                Name = "object",
+                TypeName = "object",
+                FullTypeName = "System.Object",
+                TypeClass = TypeClass.Simple
+            };
 
-        public static readonly TypeInfo VoidType = new TypeInfo
-        {
-            Name = "void",
-            TypeName = "void",
-            FullTypeName = "void",
-            TypeClass = TypeClass.Simple
-        };
+        public static readonly TypeInfo VoidType =
+            new()
+            {
+                Name = "void",
+                TypeName = "void",
+                FullTypeName = "void",
+                TypeClass = TypeClass.Simple
+            };
 
-        public static readonly TypeInfo VarType = new TypeInfo
-        {
-            Name = "var",
-            TypeName = "var",
-            FullTypeName = "var",
-            TypeClass = TypeClass.Simple
-        };
+        public static readonly TypeInfo VarType =
+            new()
+            {
+                Name = "var",
+                TypeName = "var",
+                FullTypeName = "var",
+                TypeClass = TypeClass.Simple
+            };
 
-        public static readonly TypeInfo DynamicType = new TypeInfo
-        {
-            Name = "dynamic",
-            TypeName = "dynamic",
-            FullTypeName = "System.Dynamic.DynamicObject",
-            TypeClass = TypeClass.Simple
-        };
+        public static readonly TypeInfo DynamicType =
+            new()
+            {
+                Name = "dynamic",
+                TypeName = "dynamic",
+                FullTypeName = "System.Dynamic.DynamicObject",
+                TypeClass = TypeClass.Simple
+            };
 
-        public static readonly TypeInfo EmptyInterfaceType = new TypeInfo
-        {
-            Name = "object",
-            TypeName = "object",
-            FullTypeName = "System.Object",
-            TypeClass = TypeClass.Simple
-        };
+        public static readonly TypeInfo EmptyInterfaceType =
+            new()
+            {
+                Name = "object",
+                TypeName = "object",
+                FullTypeName = "System.Object",
+                TypeClass = TypeClass.Simple
+            };
     }
 
     [Serializable]
@@ -118,9 +121,8 @@ namespace go2cs.Metadata
     {
         public TypeInfo TargetTypeInfo;
 
-        public override TypeInfo Clone()
-        {
-            return new PointerTypeInfo
+        public override TypeInfo Clone() =>
+            new PointerTypeInfo
             {
                 Name = Name,
                 TypeName = $"ptr<{TypeName}>",
@@ -131,7 +133,6 @@ namespace go2cs.Metadata
                 IsConst = IsConst,
                 TargetTypeInfo = TargetTypeInfo
             };
-        }
     }
 
     [Serializable]
@@ -141,9 +142,8 @@ namespace go2cs.Metadata
         public TypeInfo TargetTypeInfo;
         public ExpressionInfo Length;
 
-        public override TypeInfo Clone()
-        {
-            return new ArrayTypeInfo
+        public override TypeInfo Clone() =>
+            new ArrayTypeInfo
             {
                 Name = Name,
                 TypeName = $"array<{TypeName}>",
@@ -155,7 +155,6 @@ namespace go2cs.Metadata
                 TargetTypeInfo = TargetTypeInfo,
                 Length = Length
             };
-        }
     }
 
     [Serializable]
@@ -165,9 +164,8 @@ namespace go2cs.Metadata
         public TypeInfo KeyTypeInfo;
         public TypeInfo ElementTypeInfo;
 
-        public override TypeInfo Clone()
-        {
-            return new MapTypeInfo
+        public override TypeInfo Clone() =>
+            new MapTypeInfo
             {
                 Name = Name,
                 TypeName = TypeName,
@@ -179,6 +177,5 @@ namespace go2cs.Metadata
                 KeyTypeInfo = KeyTypeInfo,
                 ElementTypeInfo = ElementTypeInfo
             };
-        }
     }
 }

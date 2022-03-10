@@ -106,7 +106,7 @@ public partial class Converter
         if (!m_lastImportSpecComment.Equals(m_lastEolImportSpecComment))
         {
             if (m_lastImportSpecComment.StartsWith(m_lastEolImportSpecComment))
-                m_lastImportSpecComment = m_lastImportSpecComment.Substring(m_lastEolImportSpecComment.Length);
+                m_lastImportSpecComment = m_lastImportSpecComment[m_lastEolImportSpecComment.Length..];
         }
 
         if (!string.IsNullOrEmpty(m_lastEolImportSpecComment))

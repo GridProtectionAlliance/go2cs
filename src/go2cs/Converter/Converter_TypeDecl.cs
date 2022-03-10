@@ -239,13 +239,13 @@ public partial class Converter
                 }
                 else if (signature.StartsWith("Action<", StringComparison.Ordinal))
                 {
-                    signature = RemoveSurrounding(signature.Substring(6), "<", ">");
+                    signature = RemoveSurrounding(signature[6..], "<", ">");
                     m_targetFile.Append($"{Spacing()}public delegate void {identifier}({signature});");
                     m_targetFile.Append(CheckForCommentsRight(context));
                 }
                 else if (signature.StartsWith("Func<", StringComparison.Ordinal))
                 {
-                    signature = RemoveSurrounding(signature.Substring(4), "<", ">");
+                    signature = RemoveSurrounding(signature[4..], "<", ">");
                     string[] parts = signature.Split(',');
 
                     if (parts.Length > 0)

@@ -8,13 +8,13 @@
     <AssemblyName>go2cs</AssemblyName>
     <ApplicationIcon>..\gocore\go2cs.ico</ApplicationIcon>
     <PackageId>go2cs</PackageId>
-    <Authors>Grid Protection Alliance</Authors>
+    <Authors>J. Ritchie Carroll</Authors>
     <Company>Grid Protection Alliance</Company>
     <Product>go2cs</Product>
     <PackageDescription>GoLang to C# Code Converter</PackageDescription>
     <Description>GoLang to C# Code Converter</Description>
-    <Copyright>Copyright © 2020</Copyright>
-    <Version>0.1.0</Version>
+    <Copyright>Copyright © 2022</Copyright>
+    <Version>0.1.2</Version>
     <DefineConstants>TRACE;DOTNETCORE;NET35PLUS;NET40PLUS;NET45PLUS</DefineConstants>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

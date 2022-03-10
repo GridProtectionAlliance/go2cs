@@ -32,24 +32,21 @@ namespace go2cs.Metadata
         public ParameterInfo[] Parameters;
         public ParameterInfo[] Result;
 
-        public string GenerateParameterNameList() => string.Join(", ", Parameters.Select(parameter => parameter.Name));
+        public string GenerateParameterNameList() =>
+            string.Join(", ", Parameters.Select(parameter => parameter.Name));
 
-        public string GenerateParameterTypeList() => string.Join(", ", Parameters.Select(parameter => parameter.Type.TypeName));
+        public string GenerateParameterTypeList() =>
+            string.Join(", ", Parameters.Select(parameter => parameter.Type.TypeName));
 
-        public string GenerateParametersSignature()
-        {
-            return string.Join(", ", Parameters.Select(parameter => $"{(parameter.IsVariadic ? "params " : "")}{parameter.Type.TypeName} {parameter.Name}"));
-        }
+        public string GenerateParametersSignature() => 
+            string.Join(", ", Parameters.Select(parameter => $"{(parameter.IsVariadic ? "params " : string.Empty)}{parameter.Type.TypeName} {parameter.Name}"));
 
-        public string GenerateResultSignature()
-        {
-            if (Result.Length == 0)
-                return "void";
-
-            if (Result.Length > 1)
-                return $"({string.Join(", ", Result.Select(parameter => parameter.Type.TypeName))})";
-
-            return Result[0].Type.TypeName;
-        }
+        public string GenerateResultSignature() =>
+            Result.Length switch
+            {
+                0   => "void",
+                > 1 => $"({string.Join(", ", Result.Select(parameter => parameter.Type.TypeName))})",
+                _   => Result[0].Type.TypeName
+            };
     }
 }

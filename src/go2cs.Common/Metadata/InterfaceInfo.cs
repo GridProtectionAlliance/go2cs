@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+// ReSharper disable InconsistentNaming
 namespace go2cs.Metadata
 {
     [Serializable]
@@ -33,30 +34,21 @@ namespace go2cs.Metadata
         public string Name;
         public FunctionSignature[] Methods;
 
-        public IEnumerable<FunctionSignature> GetLocalMethods()
-        {
-            return Methods.Where(method => !method.IsPromoted);
-        }
+        public IEnumerable<FunctionSignature> GetLocalMethods() => 
+            Methods.Where(method => !method.IsPromoted);
 
-        public IEnumerable<FunctionSignature> GetInheritedInterfaces()
-        {
-            return Methods.Where(method => method.IsPromoted);
-        }
+        public IEnumerable<FunctionSignature> GetInheritedInterfaces() => 
+            Methods.Where(method => method.IsPromoted);
 
-        public IEnumerable<string> GetInheritedInterfaceNames()
-        {
-            return GetInheritedInterfaces().Select(method => method.Signature.Result[0].Type.TypeName);
-        }
+        public IEnumerable<string> GetInheritedInterfaceNames() => 
+            GetInheritedInterfaces().Select(method => method.Signature.Result[0].Type.TypeName);
 
-        public string GenerateInheritedInterfaceList()
-        {
-            return string.Join(", ", GetInheritedInterfaceNames());
-        }
+        public string GenerateInheritedInterfaceList() => 
+            string.Join(", ", GetInheritedInterfaceNames());
 
-        public static InterfaceInfo error()
-        {
-            // Built-in error interface is a special case, this is currently the only built-in interface
-            return new InterfaceInfo
+        // Built-in error interface is a special case, this is currently the only built-in interface
+        public static InterfaceInfo error() =>
+            new()
             {
                 Name = "error",
                 Methods = new[]
@@ -64,15 +56,15 @@ namespace go2cs.Metadata
                     new FunctionSignature
                     {
                         Name = "Error",
-                        Signature = new Signature
+                        Signature = new()
                         {
                             Parameters = Array.Empty<ParameterInfo>(),
                             Result = new[]
                             {
                                 new ParameterInfo
                                 {
-                                    Name = "",
-                                    Type = new TypeInfo
+                                    Name = string.Empty,
+                                    Type = new()
                                     {
                                         Name = "string",
                                         TypeName = "@string",
@@ -85,6 +77,5 @@ namespace go2cs.Metadata
                     }
                 }
             };
-        }
     }
 }

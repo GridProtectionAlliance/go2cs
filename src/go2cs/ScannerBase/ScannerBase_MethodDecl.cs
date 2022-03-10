@@ -43,7 +43,7 @@ public partial class ScannerBase
 
             // Receiver does not need to handle pointer-to-pointer look ups
             if (receiverTypeName.StartsWith("*"))
-                receiverTypeName = $"ptr<{receiverTypeName.Substring(1)}>";
+                receiverTypeName = $"ptr<{receiverTypeName[1..]}>";
         }
         else
         {

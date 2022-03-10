@@ -140,7 +140,7 @@ public partial class ScannerBase
             char lastChar = line[^1];
 
             if (char.IsWhiteSpace(lastChar) && lastChar != '\r' && lastChar != '\n')
-                line = line.Substring(0, line.Length - 1);
+                line = line[..^1];
             else
                 break;
         }
@@ -177,12 +177,12 @@ public partial class ScannerBase
         int index = line.LastIndexOf("\r\n", StringComparison.Ordinal);
 
         if (index > -1 && index == line.Length - 2)
-            return line.Substring(0, index);
+            return line[..index];
 
         index = line.LastIndexOf('\n');
 
         if (index > -1 && index == line.Length - 1)
-            line = line.Substring(0, index);
+            line = line[..index];
 
         return line;
     }
@@ -195,12 +195,12 @@ public partial class ScannerBase
         int index = line.IndexOf("\r\n", StringComparison.Ordinal);
 
         if (index == 0)
-            return line.Substring(2);
+            return line[2..];
 
         index = line.IndexOf('\n');
 
         if (index == 0)
-            line = line.Substring(1);
+            line = line[1..];
 
         return line;
     }
@@ -328,7 +328,7 @@ public partial class ScannerBase
             for (int i = 0; i < workLines.Length; i++)
             {
                 if (workLines[i].Length > commonIndex)
-                    workLines[i] = workLines[i].Substring(commonIndex);
+                    workLines[i] = workLines[i][commonIndex..];
             }
         }
 

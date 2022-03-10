@@ -145,12 +145,12 @@ public partial class Converter
         int index = trimmedLine.IndexOf("\r\n\r\n", StringComparison.Ordinal);
 
         if (index == 0)
-            return trimmedLine.Substring(2);
+            return trimmedLine[2..];
 
         index = trimmedLine.IndexOf("\n\n", StringComparison.Ordinal);
 
         if (index == 0)
-            return trimmedLine.Substring(1);
+            return trimmedLine[1..];
 
         return line;
     }
@@ -162,12 +162,12 @@ public partial class Converter
         int index = trimmedLine.LastIndexOf("\r\n\r\n", StringComparison.Ordinal);
 
         if (index == trimmedLine.Length - 4)
-            return trimmedLine.Substring(0, trimmedLine.Length - 2);
+            return trimmedLine[..^2];
 
         index = trimmedLine.LastIndexOf("\n\n", StringComparison.Ordinal);
 
         if (index == trimmedLine.Length - 2)
-            return trimmedLine.Substring(0, trimmedLine.Length - 1);
+            return trimmedLine[..^1];
 
         return line;
     }

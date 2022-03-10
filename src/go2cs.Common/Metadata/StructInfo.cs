@@ -33,14 +33,10 @@ namespace go2cs.Metadata
         public string Name;
         public FieldInfo[] Fields;
 
-        public IEnumerable<FieldInfo> GetLocalFields()
-        {
-            return Fields.Where(field => !field.IsPromoted);
-        }
+        public IEnumerable<FieldInfo> GetLocalFields() => 
+            Fields.Where(field => !field.IsPromoted);
 
-        public IEnumerable<FieldInfo> GetAnonymousFields()
-        {
-            return Fields.Where(field => field.IsPromoted);
-        }
+        public IEnumerable<FieldInfo> GetAnonymousFields() => 
+            Fields.Where(field => field.IsPromoted);
     }
 }

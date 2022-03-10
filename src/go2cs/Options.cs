@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable InconsistentNaming
 
 using CommandLine;
 using CommandLine.Text;
@@ -73,17 +74,23 @@ public class Options
     [Option('g', "stdlib-path", Required = false, Default = DefaultTargetGoSrcPath, HelpText = "Target path for converted Go standard library source files.")]
     public string TargetGoSrcPath { get; }
 
-    [Option('k', "skip-ignore-directive-check", Required = false, Default = false, HelpText = "Skip check for \"+build ignore\" directive and attempt conversion anyway.")]
-    public bool SkipBuildIgnoreDirectiveCheck { get; }
-
-    [Option('C', "cgo", Required = false, Default = false, HelpText = "Set to convert CGO files, i.e., skip check for \"+build cgo\" directive or import \"C\" and attempt conversion anyway.")]
-    public bool ParseCgoTargets { get; }
-
     [Option('c', "compatible", Required = false, Default = false, HelpText = "Set to target legacy compatible code, e.g., block scoped namespaces and per-file static \"go.builtin\" using. Required for code sets prior to C# 10.")]
     public bool WriteLegacyCompatibleCode { get; }
 
     [Option('a', "ansi-braces", Required = false, Default = false, HelpText = "Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style.")]
     public bool UseAnsiBraceStyle { get; }
+
+    [Option('k', "skip-ignore-directive-check", Required = false, Default = false, HelpText = "Set to skip check for \"+build ignore\" directive and attempt conversion anyway.")]
+    public bool SkipBuildIgnoreDirectiveCheck { get; }
+
+    [Option('C', "cgo", Required = false, Default = false, HelpText = "Set to convert CGO files, i.e., skip check for \"+build cgo\" directive or import \"C\" and attempt conversion anyway.")]
+    public bool ParseCgoTargets { get; }
+
+    [Option('O', "goos", Required = false, Default = false, HelpText = "Set to convert Go OS targeted files, i.e., skip check for OS target file name suffixes and attempt conversion anyway.")]
+    public bool ParseGoOSTargets { get; }
+
+    [Option('A', "goarch", Required = false, Default = false, HelpText = "Set to convert Go architecture targeted files, i.e., skip check for architecture target file name suffixes and attempt conversion anyway.")]
+    public bool ParseGoArchTargets { get; }
 
     [Value(0, Required = true, HelpText = "Go source path or file name to convert.")]
     public string SourcePath { get; }
@@ -98,21 +105,23 @@ public class Options
     public string RootTargetPath { get; }
 
     public Options(
-        bool localConvertOnly,
-        bool overwriteExistingFiles,
-        bool overwriteExistingPackages,
-        bool excludeHeaderComments,
-        bool showParseTree,
-        string excludeFiles,
-        bool convertStandardLibrary,
-        bool recurseSubdirectories,
-        bool forceMetadataUpdate,
-        bool onlyUpdateMetadata,
-        string targetGoSrcPath,
-        bool skipBuildIgnoreDirectiveCheck,
-        bool parseCgoTargets,
-        bool writeLegacyCompatibleCode,
-        bool useAnsiBraceStyle,
+        /* l */ bool localConvertOnly,
+        /* o */ bool overwriteExistingFiles,
+        /* i */ bool overwriteExistingPackages,
+        /* h */ bool excludeHeaderComments,
+        /* t */ bool showParseTree,
+        /* e */ string excludeFiles,
+        /* s */ bool convertStandardLibrary,
+        /* r */ bool recurseSubdirectories,
+        /* m */ bool forceMetadataUpdate,
+        /* u */ bool onlyUpdateMetadata,
+        /* g */ string targetGoSrcPath,
+        /* c */ bool writeLegacyCompatibleCode,
+        /* a */ bool useAnsiBraceStyle,
+        /* k */ bool skipBuildIgnoreDirectiveCheck,
+        /* C */ bool parseCgoTargets,
+        /* O */ bool parseGoOSTargets,
+        /* A */ bool parseGoArchTargets,
         string sourcePath,
         string targetPath,
         string rootSourcePath,
@@ -124,21 +133,23 @@ public class Options
         if (string.IsNullOrEmpty(targetGoSrcPath))
             targetGoSrcPath = DefaultTargetGoSrcPath;
 
-        LocalConvertOnly = localConvertOnly;
-        OverwriteExistingFiles = overwriteExistingFiles;
-        OverwriteExistingPackages = overwriteExistingPackages;
-        ExcludeHeaderComments = excludeHeaderComments;
-        ShowParseTree = showParseTree;
-        ExcludeFiles = excludeFiles;
-        ConvertStandardLibrary = convertStandardLibrary;
-        RecurseSubdirectories = recurseSubdirectories;
-        ForceMetadataUpdate = forceMetadataUpdate;
-        OnlyUpdateMetadata = onlyUpdateMetadata;
-        TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
-        SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
-        ParseCgoTargets = parseCgoTargets;
-        WriteLegacyCompatibleCode = writeLegacyCompatibleCode;
-        UseAnsiBraceStyle = useAnsiBraceStyle;
+        /* l */ LocalConvertOnly = localConvertOnly;
+        /* o */ OverwriteExistingFiles = overwriteExistingFiles;
+        /* i */ OverwriteExistingPackages = overwriteExistingPackages;
+        /* h */ ExcludeHeaderComments = excludeHeaderComments;
+        /* t */ ShowParseTree = showParseTree;
+        /* e */ ExcludeFiles = excludeFiles;
+        /* s */ ConvertStandardLibrary = convertStandardLibrary;
+        /* r */ RecurseSubdirectories = recurseSubdirectories;
+        /* m */ ForceMetadataUpdate = forceMetadataUpdate;
+        /* u */ OnlyUpdateMetadata = onlyUpdateMetadata;
+        /* g */ TargetGoSrcPath = AddPathSuffix(Path.GetFullPath(Environment.ExpandEnvironmentVariables(targetGoSrcPath)));
+        /* c */ WriteLegacyCompatibleCode = writeLegacyCompatibleCode;
+        /* a */ UseAnsiBraceStyle = useAnsiBraceStyle;
+        /* k */ SkipBuildIgnoreDirectiveCheck = skipBuildIgnoreDirectiveCheck;
+        /* C */ ParseCgoTargets = parseCgoTargets;
+        /* O */ ParseGoOSTargets = parseGoOSTargets;
+        /* A */ ParseGoArchTargets = parseGoArchTargets;
         SourcePath = sourcePath is null ? null : Environment.ExpandEnvironmentVariables(sourcePath);
         TargetPath = targetPath is null ? null : Environment.ExpandEnvironmentVariables(targetPath);
         RootSourcePath = rootSourcePath ?? SourcePath ?? string.Empty;
@@ -151,21 +162,23 @@ public class Options
 
     public static Options Clone(Options options, bool overwriteExistingFiles, string sourcePath, string targetPath) => 
         new(
-            options.LocalConvertOnly,
-            overwriteExistingFiles,
-            options.OverwriteExistingPackages,
-            options.ExcludeHeaderComments,
-            options.ShowParseTree, 
-            options.ExcludeFiles,
-            options.ConvertStandardLibrary,
-            options.RecurseSubdirectories,
-            options.ForceMetadataUpdate,
-            options.OnlyUpdateMetadata,
-            options.TargetGoSrcPath, 
-            options.SkipBuildIgnoreDirectiveCheck,
-            options.ParseCgoTargets,
-            options.WriteLegacyCompatibleCode,
-            options.UseAnsiBraceStyle,
+            /* l */ options.LocalConvertOnly,
+            /* o */ overwriteExistingFiles,
+            /* i */ options.OverwriteExistingPackages,
+            /* h */ options.ExcludeHeaderComments,
+            /* t */ options.ShowParseTree,
+            /* e */ options.ExcludeFiles,
+            /* s */ options.ConvertStandardLibrary,
+            /* r */ options.RecurseSubdirectories,
+            /* m */ options.ForceMetadataUpdate,
+            /* u */ options.OnlyUpdateMetadata,
+            /* g */ options.TargetGoSrcPath,
+            /* c */ options.WriteLegacyCompatibleCode,
+            /* a */ options.UseAnsiBraceStyle,
+            /* k */ options.SkipBuildIgnoreDirectiveCheck,
+            /* C */ options.ParseCgoTargets,
+            /* O */ options.ParseGoOSTargets,
+            /* A */ options.ParseGoArchTargets,
             sourcePath, 
             targetPath,
             options.RootSourcePath,

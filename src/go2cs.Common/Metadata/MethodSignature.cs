@@ -55,7 +55,8 @@ namespace go2cs.Metadata
             return Generate(Name, parameters);
         }
 
-        public IEnumerable<string> GetReceiverParameterTypeNames() => new[] { ReceiverParameters?.Length > 0 ? ReceiverParameters[0].Type.TypeName : "object" };
+        public IEnumerable<string> GetReceiverParameterTypeNames() =>
+            new[] { ReceiverParameters?.Length > 0 ? ReceiverParameters[0].Type.TypeName : "object" };
 
         public string GenerateReceiverParametersSignature() =>
             $"this {string.Join(", ", ReceiverParameters.Select(parameter => $"{parameter.Type.TypeName} {parameter.Name}"))}";

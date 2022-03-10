@@ -34,9 +34,8 @@ namespace go2cs.Metadata
         public string Comments;
         public bool IsPromoted;
 
-        public FieldInfo Clone()
-        {
-            return new FieldInfo
+        public FieldInfo Clone() =>
+            new()
             {
                 Name = Name,
                 Type = Type.Clone(),
@@ -44,6 +43,5 @@ namespace go2cs.Metadata
                 Comments = Comments,
                 IsPromoted = IsPromoted
             };
-        }
     }
 }

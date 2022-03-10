@@ -259,7 +259,7 @@ public partial class Converter
                         statement = statement.Trim();
 
                         if (statement.EndsWith(";", StringComparison.Ordinal))
-                            statement = statement.Substring(0, statement.Length - 1);
+                            statement = statement[..^1];
                     }
                     else
                     {
@@ -297,7 +297,7 @@ public partial class Converter
                         statement = statement.Trim();
 
                         if (statement.EndsWith(";", StringComparison.Ordinal))
-                            statement = statement.Substring(0, statement.Length - 1);
+                            statement = statement[..^1];
                     }
                     else
                     {

@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 // ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
 
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -251,7 +252,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
             string filePath = Path.GetDirectoryName(sourcePath) ?? string.Empty;
 
             if (filePath.StartsWith(GoRoot, StringComparison.OrdinalIgnoreCase))
-                ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath.Substring(GoRoot.Length))), sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
+                ScanFile(Options.Clone(options, options.OverwriteExistingFiles, sourcePath, Path.Combine(options.TargetGoSrcPath, filePath[GoRoot.Length..])), sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
             else
                 ScanFile(options, sourcePath, showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
         }
@@ -273,7 +274,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
                     string targetDirectory = options.TargetPath;
 
                     if (!string.IsNullOrEmpty(targetDirectory))
-                        targetDirectory = Path.Combine(targetDirectory, RemovePathPrefix(subDirectory.Substring(sourcePath.Length)));
+                        targetDirectory = Path.Combine(targetDirectory, RemovePathPrefix(subDirectory[sourcePath.Length..]));
 
                     Scan(Options.Clone(options, options.OverwriteExistingPackages, subDirectory, targetDirectory), showParseTree, createNewScanner, fileNeedsScan, handleSkippedScan);
                 }
@@ -289,6 +290,20 @@ public abstract partial class ScannerBase : GoParserBaseListener
     {
         if (fileNeedsScan is null)
             fileNeedsScan = DefaultFileNeedsScan;
+
+        if (!options.ParseGoOSTargets && IsGoOSTarget(fileName, out string suffix))
+        {
+            Console.WriteLine($"Encountered \"{suffix}\" OS target for \"{fileName}\", skipping scan...{Environment.NewLine}");
+            handleSkippedScan?.Invoke(options, fileName, showParseTree);
+            return;
+        }
+
+        if (!options.ParseGoArchTargets && IsGoArchTarget(fileName, out suffix))
+        {
+            Console.WriteLine($"Encountered \"{suffix}\" architecture target for \"{fileName}\", skipping scan...{Environment.NewLine}");
+            handleSkippedScan?.Invoke(options, fileName, showParseTree);
+            return;
+        }
 
         if (!options.SkipBuildIgnoreDirectiveCheck || !options.ParseCgoTargets)
         {
@@ -308,7 +323,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
                 int index = line.IndexOf("+build", StringComparison.Ordinal);
 
-                HashSet<string> directives = new(line.Substring(index + 6).Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
+                HashSet<string> directives = new(line[(index + 6)..].Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
 
                 if (!options.SkipBuildIgnoreDirectiveCheck && directives.Contains("ignore"))
                 {
@@ -361,18 +376,18 @@ public abstract partial class ScannerBase : GoParserBaseListener
         ScannerBase scanner;
 
     #if !DEBUG
-            try
-            {
+        try
+        {
     #endif
         scanner = createNewScanner(tokenStream, parser, options, fileName);
     #if !DEBUG
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                TotalSkippedFiles++;
-                return;
-            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            TotalSkippedFiles++;
+            return;
+        }
     #endif
 
         parser.RemoveErrorListeners();
@@ -488,11 +503,11 @@ public abstract partial class ScannerBase : GoParserBaseListener
         else
             targetFilePath = options.TargetPath;
 
-        string targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath.Substring(rootTargetPath.Length)));
-        string sourceSubDirectory = sourceFilePath.StartsWith(rootSourcePath) ? RemovePathSuffix(RemovePathPrefix(sourceFilePath.Substring(rootSourcePath.Length))) : string.Empty;
+        string targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath[rootTargetPath.Length..]));
+        string sourceSubDirectory = sourceFilePath.StartsWith(rootSourcePath) ? RemovePathSuffix(RemovePathPrefix(sourceFilePath[rootSourcePath.Length..])) : string.Empty;
 
         if (!targetSubDirectory.Equals(sourceSubDirectory))
-            targetFilePath = Path.Combine(targetFilePath, sourceSubDirectory);
+            targetFilePath = Path.Combine(targetFilePath, sourceSubDirectory!);
 
         targetFilePath = AddPathSuffix(targetFilePath);
         targetFileName = Path.Combine(targetFilePath, targetFileName);
@@ -520,20 +535,20 @@ public abstract partial class ScannerBase : GoParserBaseListener
         FolderMetadata folderMetadata;
 
     #if !DEBUG
-            try
-            {
+        try
+        {
     #endif
         string serializedData = File.ReadAllText(folderMetadataFileName);
         folderMetadata = JsonSerializer.Deserialize<FolderMetadata>(serializedData, GetSerializationOptions());
     #if !DEBUG
-            }
-            catch (Exception ex)
-            {
-                folderMetadata = null;
+        }
+        catch (Exception ex)
+        {
+            folderMetadata = null;
 
-                if (!folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase))
-                    Console.WriteLine($"Failed to load folder metadata from \"{folderMetadataFileName}\": {ex.Message}");
-            }
+            if (!folderMetadataFileName.Equals(s_currentFolderMetadataFileName, StringComparison.OrdinalIgnoreCase))
+                Console.WriteLine($"Failed to load folder metadata from \"{folderMetadataFileName}\": {ex.Message}");
+        }
     #endif
 
         s_currentFolderMetadataFileName = folderMetadataFileName;
@@ -566,7 +581,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
     protected static FolderMetadata LoadImportMetadata(Options options, string targetImport, out string warning)
     {
         int lastSlash = targetImport.LastIndexOf('/');
-        string packageName = lastSlash > -1 ? targetImport.Substring(lastSlash + 1) : targetImport;
+        string packageName = lastSlash > -1 ? targetImport[(lastSlash + 1)..] : targetImport;
         string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
         string go2csPath = Path.Combine(GoPath, "go2cs");
         string goRootImport = Path.Combine(GoRoot, importPath);
@@ -602,7 +617,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
         int lastDotIndex = identifier.LastIndexOf('.');
 
         if (lastDotIndex > 0)
-            identifier = identifier.Substring(lastDotIndex + 1);
+            identifier = identifier[(lastDotIndex + 1)..];
 
         return SanitizedIdentifier(identifier);
     }
@@ -680,7 +695,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
     protected static string GetAbsolutePath(string filePath)
     {
         if (!Path.IsPathRooted(filePath))
-            filePath = Path.Combine(GoPath, filePath);
+            filePath = Path.Combine(GoPath, filePath!);
 
         return Path.GetFullPath(filePath);
     }

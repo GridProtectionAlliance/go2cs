@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -45,6 +46,8 @@ namespace go2cs
 
         public static readonly Assembly EntryAssembly;
         private static readonly HashSet<string> s_keywords;
+        private static readonly HashSet<string> s_goOSList;
+        private static readonly HashSet<string> s_goArchList;
         private static readonly CodeDomProvider s_provider;
         private static readonly CodeGeneratorOptions s_generatorOptions;
         private static readonly char[] s_dirVolChars;
@@ -54,7 +57,7 @@ namespace go2cs
         {
             EntryAssembly = Assembly.GetEntryAssembly();
 
-            s_keywords = new HashSet<string>(new[]
+            s_keywords = new(new[]
             {
                 // The following are all valid C# keywords, if encountered in Go code they should be escaped
                 "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
@@ -70,15 +73,55 @@ namespace go2cs
             },
             StringComparer.Ordinal);
 
+            // List of past, present, and future known GOOS and GOARCH values, these are used for go/build filename matching
+            s_goOSList = new(new[]
+            {
+                "aix", "android", "darwin", "dragonfly", "freebsd", "hurd", "illumos", "ios", "js", "linux", "nacl",
+                "netbsd", "openbsd", "plan9", "solaris", "windows", "zos"
+            },
+            StringComparer.Ordinal);
+
+            s_goArchList = new(new[]
+            {
+                "386", "amd64", "amd64p32", "arm", "armbe", "arm64", "arm64be", "ppc64", "ppc64le", "loong64", "mips",
+                "mipsle", "mips64", "mips64le", "mips64p32", "mips64p32le", "ppc", "riscv", "riscv64", "s390", "s390x",
+                "sparc", "sparc64", "wasm"
+            },
+            StringComparer.Ordinal);
+
             s_provider = CodeDomProvider.CreateProvider("CSharp");
-            s_generatorOptions = new CodeGeneratorOptions { IndentString = "    " };
+            s_generatorOptions = new() { IndentString = "    " };
             s_dirVolChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, Path.VolumeSeparatorChar };
-            s_findOctals = new Regex(@"\\[0-7]{3}", RegexOptions.Compiled);
+            s_findOctals = new(@"\\[0-7]{3}", RegexOptions.Compiled);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsGoOSTarget(string filePath, out string suffix) => 
+            IsTargetSuffix(filePath, s_goOSList.Contains, out suffix);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsGoArchTarget(string filePath, out string suffix) =>
+            IsTargetSuffix(filePath, s_goArchList.Contains, out suffix);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsTargetSuffix(string filePath, Func<string, bool> contains, out string suffix)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            int luIndex = fileName.LastIndexOf('_');
+
+            if (luIndex != -1)
+            {
+                suffix = null;
+                return false;
+            }
+
+            suffix = fileName[(luIndex + 1)..];
+            return contains(suffix);
         }
 
         public static void RestoreResources(string targetPath)
         {
-            string prefix = $"{RootNamespace}.";
+            const string prefix = $"{RootNamespace}.";
 
             targetPath = AddPathSuffix(targetPath);
 
@@ -89,7 +132,7 @@ namespace go2cs
                 if (resourceStream is null)
                     continue;
                 
-                string targetFileName = Path.Combine(targetPath, name.Substring(prefix.Length));
+                string targetFileName = Path.Combine(targetPath, name[prefix.Length..]);
                 bool restoreFile = true;
 
                 if (File.Exists(targetFileName))
@@ -101,8 +144,10 @@ namespace go2cs
 
                 if (!restoreFile)
                     continue;
-                
+
                 byte[] buffer = new byte[resourceStream.Length];
+
+                // ReSharper disable once MustUseReturnValue
                 resourceStream.Read(buffer, 0, (int)resourceStream.Length);
 
                 string directory = Path.GetDirectoryName(targetFileName);
@@ -115,24 +160,28 @@ namespace go2cs
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetMD5HashFromFile(string fileName)
         {
             using FileStream stream = File.OpenRead(fileName);
             return GetMD5HashFromStream(stream);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetMD5HashFromString(string source)
         {
-            using MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(source));
+            using MemoryStream stream = new(Encoding.UTF8.GetBytes(source));
             return GetMD5HashFromStream(stream);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetMD5HashFromStream(Stream stream)
         {
             using MD5 md5 = MD5.Create();
             return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string AddPathSuffix(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
@@ -150,11 +199,12 @@ namespace go2cs
             return filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemovePathSuffix(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                filePath = "";
+                filePath = string.Empty;
             }
             else
             {
@@ -162,7 +212,7 @@ namespace go2cs
 
                 while ((suffixChar == Path.DirectorySeparatorChar || suffixChar == Path.AltDirectorySeparatorChar) && filePath.Length > 0)
                 {
-                    filePath = filePath.Substring(0, filePath.Length - 1);
+                    filePath = filePath[..^1];
 
                     if (filePath.Length > 0)
                         suffixChar = filePath[^1];
@@ -172,11 +222,12 @@ namespace go2cs
             return filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemovePathPrefix(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                filePath = "";
+                filePath = string.Empty;
             }
             else
             {
@@ -184,7 +235,7 @@ namespace go2cs
 
                 while ((prefixChar == Path.DirectorySeparatorChar || prefixChar == Path.AltDirectorySeparatorChar) && filePath.Length > 0)
                 {
-                    filePath = filePath.Substring(1);
+                    filePath = filePath[1..];
 
                     if (filePath.Length > 0)
                         prefixChar = filePath[0];
@@ -194,17 +245,19 @@ namespace go2cs
             return filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetValidPathName(string filePath, int limit = 100)
         {
             if (filePath.Length > limit)
             {
                 string hash = GetMD5HashFromString(filePath);
-                return $"{filePath.Substring(0, limit - hash.Length)}{hash}";
+                return $"{filePath[..(limit - hash.Length)]}{hash}";
             }
 
             return filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetDirectoryName(string filePath)
         {
             // Test for case where valid path does not end in directory separator, Path.GetDirectoryName assumes
@@ -213,6 +266,7 @@ namespace go2cs
             return Directory.Exists(directoryName) ? directoryName : AddPathSuffix(Path.GetDirectoryName(filePath) ?? filePath);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetLastDirectoryName(string filePath)
         {
             if (filePath is null)
@@ -225,32 +279,38 @@ namespace go2cs
 
             // Keep going through the file path until all directory separator characters are removed
             while ((index = filePath.IndexOfAny(s_dirVolChars)) > -1)
-                filePath = filePath.Substring(index + 1);
+                filePath = filePath[(index + 1)..];
 
             return filePath;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool PathHasFiles(string filePath, string searchPattern) =>
             Directory.Exists(filePath) && Directory.EnumerateFiles(filePath, searchPattern, SearchOption.TopDirectoryOnly).Any();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemoveInvalidCharacters(string fileName) =>
             fileName.Replace('<', '(').Replace('>', ')');
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetRelativePath(string fileName, string targetPath) =>
             new DirectoryInfo(targetPath).GetRelativePathTo(new FileInfo(fileName));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetRelativePathFrom(this FileSystemInfo to, FileSystemInfo from) =>
             from.GetRelativePathTo(to);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string GetRelativePathTo(this FileSystemInfo from, FileSystemInfo to)
         {
-            string getPath(FileSystemInfo fsi) => fsi is not DirectoryInfo d ? fsi.FullName : AddPathSuffix(d.FullName);
+            static string getPath(FileSystemInfo fsi) =>
+                fsi is not DirectoryInfo d ? fsi.FullName : AddPathSuffix(d.FullName);
 
             string fromPath = getPath(from);
             string toPath = getPath(to);
 
-            Uri fromUri = new Uri(fromPath);
-            Uri toUri = new Uri(toPath);
+            Uri fromUri = new(fromPath);
+            Uri toUri = new(toPath);
 
             Uri relativeUri = fromUri.MakeRelativeUri(toUri);
             string relativePath = Uri.UnescapeDataString(relativeUri.ToString());
@@ -258,6 +318,7 @@ namespace go2cs
             return relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string RemoveSurrounding(string source, string left = "\"", string right = "\"")
         {
             if (string.IsNullOrEmpty(source))
@@ -266,12 +327,16 @@ namespace go2cs
             if (!source.StartsWith(left) || !source.EndsWith(right))
                 return source;
 
-            return source.Length > left.Length + right.Length ? source.Substring(left.Length, source.Length - (left.Length + right.Length)) : "";
+            return source.Length > left.Length + right.Length ?
+                source.Substring(left.Length, source.Length - (left.Length + right.Length)) :
+                string.Empty;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string SanitizedIdentifier(string identifier) =>
             s_keywords.Contains(identifier) ? $"@{identifier}" : identifier;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToStringLiteral(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -280,12 +345,13 @@ namespace go2cs
             if (!input.StartsWith("`"))
                 return input;
 
-            using StringWriter writer = new StringWriter();
+            using StringWriter writer = new();
             s_provider.GenerateCodeFromExpression(new CodePrimitiveExpression(RemoveSurrounding(input, "`", "`")), writer, s_generatorOptions);
             return writer.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ReplaceOctalBytes(string input) =>
-            s_findOctals.Replace(input, match => new string(new[] { Convert.ToChar(Convert.ToUInt16(match.Value.Substring(1), 8)) }));
+            s_findOctals.Replace(input, match => new(new[] { Convert.ToChar(Convert.ToUInt16(match.Value[1..], 8)) }));
     }
 }
