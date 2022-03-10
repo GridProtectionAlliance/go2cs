@@ -109,7 +109,7 @@ namespace go2cs
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             int luIndex = fileName.LastIndexOf('_');
 
-            if (luIndex != -1)
+            if (luIndex == -1)
             {
                 suffix = null;
                 return false;
