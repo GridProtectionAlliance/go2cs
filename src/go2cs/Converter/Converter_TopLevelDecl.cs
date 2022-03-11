@@ -38,9 +38,12 @@ public partial class Converter
             StringBuilder lineBreaks = new();
 
             if (!EndsWithDuplicateLineFeed(m_targetFile.ToString()))
-                lineBreaks.AppendLine(Environment.NewLine);
-            else if (!EndsWithLineFeed(m_targetFile.ToString()))
-                lineBreaks.AppendLine();
+            {
+                if (EndsWithLineFeed(m_targetFile.ToString()))
+                    lineBreaks.AppendLine();
+                else
+                    lineBreaks.AppendLine(Environment.NewLine);
+            }
 
             // Mark end of using statements so that other usings and type aliases can be added later
             m_targetFile.Append(UsingsMarker);
@@ -57,11 +60,16 @@ public partial class Converter
 
             // Write any initial declaration comments post any final EOL comments in Converter_ImportDecl visit 
             if (!string.IsNullOrEmpty(initialDeclComments) && initialDeclComments != m_lastImportDeclComment)
+            {
                 m_targetFile.Append(initialDeclComments);
+            }
             else if (!EndsWithDuplicateLineFeed(m_targetFile.ToString()))
-                m_targetFile.AppendLine(Environment.NewLine);
-            else if (!EndsWithLineFeed(m_targetFile.ToString()))
-                m_targetFile.AppendLine();
+            {
+                if (EndsWithLineFeed(m_targetFile.ToString()))
+                    m_targetFile.AppendLine();
+                else
+                    m_targetFile.AppendLine(Environment.NewLine);
+            }
         }
     }
 

@@ -207,7 +207,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public static @string Default { get; } = new @string("");
 
-#region [ Operators ]
+    #region [ Operators ]
 
     // Enable implicit conversions between string and @string struct
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -287,9 +287,9 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
 
-#endregion
+    #endregion
 
-#region [ Interface Implementations ]
+    #region [ Interface Implementations ]
 
     object ICloneable.Clone() => Clone();
 
@@ -389,5 +389,5 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-#endregion
+    #endregion
 }
