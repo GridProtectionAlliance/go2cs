@@ -1,29 +1,4 @@
-﻿//******************************************************************************************************
-//  errors_package.cs - Gbtc
-//
-//  Copyright © 2020, Grid Protection Alliance.  All Rights Reserved.
-//
-//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  06/30/2020 - J. Ritchie Carroll
-//       Generated original version of source code.
-//
-//******************************************************************************************************
-
-namespace go;
-
-// Copyright 2011 The Go Authors. All rights reserved.
+﻿// Copyright 2011 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -52,46 +27,56 @@ namespace go;
 // second. It reports whether it finds a match. It should be used in preference to
 // simple equality checks:
 //
-//    if errors.Is(err, os.ErrExist)
+//    if errors.Is(err, fs.ErrExist)
 //
 // is preferable to
 //
-//    if err == os.ErrExist
+//    if err == fs.ErrExist
 //
-// because the former will succeed if err wraps os.ErrExist.
+// because the former will succeed if err wraps fs.ErrExist.
 //
 // As unwraps its first argument sequentially looking for an error that can be
 // assigned to its second argument, which must be a pointer. If it succeeds, it
 // performs the assignment and returns true. Otherwise, it returns false. The form
 //
-//    var perr *os.PathError
+//    var perr *fs.PathError
 //    if errors.As(err, &perr) {
 //        fmt.Println(perr.Path)
 //    }
 //
 // is preferable to
 //
-//    if perr, ok := err.(*os.PathError); ok {
+//    if perr, ok := err.(*fs.PathError); ok {
 //        fmt.Println(perr.Path)
 //    }
 //
-// because the former will succeed if err wraps an *os.PathError.
-public static partial class errors_package
+// because the former will succeed if err wraps an *fs.PathError.
+
+// package errors -- go2cs converted at 2022 March 11 17:47:49 UTC
+// import "errors" ==> using errors = go.errors_package
+// Original source: C:\Program Files\Go\src\errors\errors.go
+namespace go;
+
+public static partial class errors_package {
+
+// New returns an error that formats as the given text.
+// Each call to New returns a distinct error value even if the text is identical.
+public static error New(@string text)
 {
-    // New returns an error that formats as the given text.
-    // Each call to New returns a distinct error value even if the text is identical.
-    public static error New(@string text)
-    {
-        return error.As(new errorString(text))!;
-    }
-
-    // errorString is a trivial implementation of error.
-    private partial struct errorString {
-        public @string s;
-    }
-
-    private static @string Error(this ptr<errorString> _addr_e) {
-        ref errorString e = ref _addr_e.val;
-        return e.s;
-    }
+    return error.As(addr(new errorString(text))!)!;
 }
+
+// errorString is a trivial implementation of error.
+private partial struct errorString
+{
+    public @string s;
+}
+
+private static @string Error(this ptr<errorString> _addr_e)
+{
+    ref errorString e = ref _addr_e.val;
+
+    return e.s;
+}
+
+} // end errors_package
