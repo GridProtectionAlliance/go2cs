@@ -18,6 +18,9 @@ private static void Main() {
             case nint t:
                 fmt.Printf("I'm an int, specifically type %T\n", t);
                 break;
+            case int t: /* Matches int literals */
+                fmt.Printf("I'm an int, specifically type %T\n", t);
+                break;
             case long t:
                 fmt.Printf("I'm an int, specifically type %T\n", t);
                 break;

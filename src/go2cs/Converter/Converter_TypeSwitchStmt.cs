@@ -141,6 +141,10 @@ public partial class Converter
                             caseTypeExpressions.Append($"{caseExpression}null:");
                         else
                             caseTypeExpressions.Append($"{caseExpression}{typeName} {identifier}:");
+
+                        // Also add native int for C# literal matching
+                        if (typeName.Equals("nint", StringComparison.Ordinal))
+                            caseTypeExpressions.Append($"{Environment.NewLine}{caseBlock}{Environment.NewLine}{Spacing()}case int {identifier}: /* Matches int literals */");
                     }
                     else
                     {
