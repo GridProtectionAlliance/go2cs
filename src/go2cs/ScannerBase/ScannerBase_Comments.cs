@@ -130,6 +130,13 @@ public partial class ScannerBase
         return comments.ToString();
     }
 
+    protected bool StartsWithLineFeed(string line) => 
+        !string.IsNullOrEmpty(line) && line.StartsWith(Environment.NewLine);
+
+
+    protected bool EndsWithDuplicateLineFeed(string line) =>
+        EndsWithLineFeed(line) && EndsWithLineFeed(line[..^Environment.NewLine.Length]);
+
     protected bool EndsWithLineFeed(string line)
     {
         if (string.IsNullOrEmpty(line))

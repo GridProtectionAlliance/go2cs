@@ -1,8 +1,8 @@
-using fmt = go.fmt_package;
-using static go.builtin;
-
 namespace go
 {
+using fmt = fmt_package;
+using static builtin;
+
 public static partial class main_package {
 
 public partial interface Animal

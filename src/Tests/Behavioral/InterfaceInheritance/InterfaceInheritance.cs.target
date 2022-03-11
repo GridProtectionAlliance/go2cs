@@ -1,6 +1,6 @@
-using fmt = go.fmt_package;
-
 namespace go;
+
+using fmt = fmt_package;
 
 public static partial class main_package {
 

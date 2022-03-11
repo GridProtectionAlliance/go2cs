@@ -40,6 +40,12 @@
     <Reference Include="golib">
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>
+    <Reference Include="a">
+      <HintPath>$(GOPATH)\src\go2cs\a\$(OutDir)a_package.dll</HintPath>
+    </Reference>
+    <Reference Include="b">
+      <HintPath>$(GOPATH)\src\go2cs\b\$(OutDir)b_package.dll</HintPath>
+    </Reference>
     <Reference Include="fmt">
       <HintPath>$(GOPATH)\src\go2cs\fmt\$(OutDir)fmt_package.dll</HintPath>
     </Reference>
@@ -57,6 +63,12 @@
     </Reference>
     <Reference Include="tabwriter">
       <HintPath>$(GOPATH)\src\go2cs.text\tabwriter\$(OutDir)tabwriter_package.dll</HintPath>
+    </Reference>
+    <Reference Include="time">
+      <HintPath>$(GOPATH)\src\go2cs\time\$(OutDir)time_package.dll</HintPath>
+    </Reference>
+    <Reference Include="sync">
+      <HintPath>$(GOPATH)\src\go2cs\sync\$(OutDir)sync_package.dll</HintPath>
     </Reference>
   </ItemGroup>
 

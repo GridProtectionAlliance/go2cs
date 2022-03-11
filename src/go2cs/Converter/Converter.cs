@@ -81,9 +81,17 @@ public partial class Converter : ScannerBase
         // Find usings marker
         int index = targetFile.IndexOf(UsingsMarker, StringComparison.Ordinal);
 
+        string fixedUsing(string targetUsing)
+        {
+            if (targetUsing.Equals($"static {RootNamespace}.builtin"))
+                targetUsing = "static builtin";
+
+            return targetUsing;
+        }
+
         // Insert required usings
         if (index > -1 && RequiredUsings.Count > 0)
-            targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, RequiredUsings.Select(usingType => $"using {usingType};"))}{Environment.NewLine}");
+            targetFile = targetFile.Insert(index, $"{Environment.NewLine}{string.Join(Environment.NewLine, RequiredUsings.Select(usingType => $"using {fixedUsing(usingType)};"))}");
 
         // Remove code markers
         targetFile = targetFile.Replace(UsingsMarker, string.Empty);

@@ -29,72 +29,39 @@ namespace go2cs;
 public partial class Converter
 {
     private bool m_firstTopLevelDeclaration = true;
-    private string m_namespaceHeader;
-    private string m_namespaceFooter;
-    private string m_namespaceHeaderLegacy;
-    private string m_namespaceFooterLegacy;
 
     // TopLevelDecl is visited once per each encountered Declaration, FunctionDecl or MethodDecl
     public override void EnterTopLevelDecl(GoParser.TopLevelDeclContext context)
     {
         if (m_firstTopLevelDeclaration)
         {
-            // Begin namespaces
-            StringBuilder namespaceHeader = new();
+            StringBuilder lineBreaks = new();
 
-            for (int i = 0; i < PackageNamespaces.Length; i++)
-            {
-                namespaceHeader.Append($"namespace {PackageNamespaces[i]}");
-                namespaceHeader.Append(i == PackageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : $" {{{Environment.NewLine}");
-            }
-
-            m_namespaceHeaderLegacy = namespaceHeader.ToString();
-            m_namespaceFooterLegacy = new('}', PackageNamespaces.Length);
-
-            if (Options.WriteLegacyCompatibleCode)
-            {
-                m_namespaceHeader = m_namespaceHeaderLegacy;
-                m_namespaceFooter = m_namespaceFooterLegacy;
-            }
-            else
-            {
-                namespaceHeader = new($"{Environment.NewLine}namespace ");
-
-                for (int i = 0; i < PackageNamespaces.Length; i++)
-                {
-                    if (i > 0)
-                        namespaceHeader.Append('.');
-
-                    namespaceHeader.Append($"{PackageNamespaces[i]}");
-                }
-
-                namespaceHeader.AppendLine(";");
-
-                m_namespaceHeader = namespaceHeader.ToString();
-                m_namespaceFooter = string.Empty;
-            }
+            if (!EndsWithDuplicateLineFeed(m_targetFile.ToString()))
+                lineBreaks.AppendLine(Environment.NewLine);
+            else if (!EndsWithLineFeed(m_targetFile.ToString()))
+                lineBreaks.AppendLine();
 
             // Mark end of using statements so that other usings and type aliases can be added later
-            m_targetFile.AppendLine(UsingsMarker);
-
-            m_targetFile.AppendLine(m_namespaceHeader);
+            m_targetFile.Append(UsingsMarker);
+            
+            m_targetFile.Append(lineBreaks);
 
             // Begin class
-            m_targetFile.AppendLine($"public static {UnsafeMarker}partial class {Package}{ClassSuffix} {{");
+            m_targetFile.Append($"public static {UnsafeMarker}partial class {Package}{ClassSuffix} {{");
+
+            // End class and namespace braces occur as a last step in Convert() method
 
             // Check for comments before initial declaration
-            string initialDeclComments = CheckForCommentsLeft(context, 1);
+            string initialDeclComments = CheckForCommentsLeft(context);
 
             // Write any initial declaration comments post any final EOL comments in Converter_ImportDecl visit 
-            if (!initialDeclComments.Equals(m_lastEolImportSpecComment))
-            {
-                if (initialDeclComments.StartsWith(m_lastEolImportSpecComment))
-                    initialDeclComments = initialDeclComments[m_lastEolImportSpecComment.Length..];
-
-                m_targetFile.Append(RemoveFirstDuplicateLineFeed(RemoveLastDuplicateLineFeed(initialDeclComments)));
-            }
-
-            // End class and namespace "}" occur as a last step in Convert() method
+            if (!string.IsNullOrEmpty(initialDeclComments) && initialDeclComments != m_lastImportDeclComment)
+                m_targetFile.Append(initialDeclComments);
+            else if (!EndsWithDuplicateLineFeed(m_targetFile.ToString()))
+                m_targetFile.AppendLine(Environment.NewLine);
+            else if (!EndsWithLineFeed(m_targetFile.ToString()))
+                m_targetFile.AppendLine();
         }
     }
 

@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using static go2cs.Common;
 
 namespace go2cs;
@@ -37,6 +38,10 @@ public partial class Converter
     public string[] PackageNamespaces { get; private set; }
 
     private string m_packageLevelComments;
+    private string m_namespaceHeader;
+    private string m_namespaceFooter;
+    private string m_namespaceHeaderLegacy;
+    private string m_namespaceFooterLegacy;
 
     public override void EnterPackageClause(GoParser.PackageClauseContext context)
     {
@@ -44,7 +49,7 @@ public partial class Converter
 
         // Go package clause is the first keyword encountered - cache details that
         // will be written out after imports. C# import statements (i.e., usings)
-        // typically occur before namespace and class definitions
+        // must occur before class definitions.
         string[] paths = PackageImport.Split('/').Select(SanitizedIdentifier).ToArray();
         string packageNamespace = $"{RootNamespace}.{string.Join(".", paths)}";
 
@@ -55,8 +60,7 @@ public partial class Converter
         AddFileToPackage(Package, TargetFileName, PackageNamespace);
 
         // Define namespaces
-        List<string> packageNamespaces = new()
-        { RootNamespace };
+        List<string> packageNamespaces = new() { RootNamespace };
 
         if (paths.Length > 1)
         {
@@ -78,6 +82,9 @@ public partial class Converter
 
             if (!EndsWithLineFeed(headerLevelComments))
                 m_targetFile.AppendLine();
+
+            if (!Options.ExcludeHeaderComments && !EndsWithDuplicateLineFeed(m_targetFile.ToString()))
+                m_targetFile.AppendLine();
         }
 
         if (!Options.ExcludeHeaderComments)
@@ -89,6 +96,43 @@ public partial class Converter
 
             m_targetFile.AppendLine($"// Original source: {SourceFileName}");
         }
+
+        // Begin namespaces
+        StringBuilder namespaceHeader = new();
+
+        for (int i = 0; i < PackageNamespaces.Length; i++)
+        {
+            namespaceHeader.Append($"namespace {PackageNamespaces[i]}");
+            namespaceHeader.Append(i == PackageNamespaces.Length - 1 ? $"{Environment.NewLine}{{" : $" {{{Environment.NewLine}");
+        }
+
+        m_namespaceHeaderLegacy = namespaceHeader.ToString();
+        m_namespaceFooterLegacy = new('}', PackageNamespaces.Length);
+
+        if (Options.WriteLegacyCompatibleCode)
+        {
+            m_namespaceHeader = m_namespaceHeaderLegacy;
+            m_namespaceFooter = m_namespaceFooterLegacy;
+        }
+        else
+        {
+            namespaceHeader = new("namespace ");
+
+            for (int i = 0; i < PackageNamespaces.Length; i++)
+            {
+                if (i > 0)
+                    namespaceHeader.Append('.');
+
+                namespaceHeader.Append($"{PackageNamespaces[i]}");
+            }
+
+            namespaceHeader.AppendLine(";");
+
+            m_namespaceHeader = namespaceHeader.ToString();
+            m_namespaceFooter = string.Empty;
+        }
+
+        m_targetFile.Append(m_namespaceHeader);
 
         // Add commonly required using statements
         if (Options.WriteLegacyCompatibleCode)

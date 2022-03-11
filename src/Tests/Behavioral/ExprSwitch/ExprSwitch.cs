@@ -1,10 +1,10 @@
 // _Switch statements_ express conditionals across many
 // branches.
 
-using fmt = go.fmt_package;
-using time = go.time_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using time = time_package;
 
 public static partial class main_package {
 

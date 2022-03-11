@@ -1,9 +1,9 @@
-using fmt = go.fmt_package;
-using static go.builtin;
-using System;
-
 namespace go
 {
+using fmt = fmt_package;
+using static builtin;
+using System;
+
 public static partial class main_package {
 
 public delegate @string Stringy();
